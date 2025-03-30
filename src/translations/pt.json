@@ -1,4 +1,3 @@
-
 {
   "nav": {
     "home": "Início",
@@ -11,10 +10,10 @@
   "hero": {
     "title": "Transforme a sua jornada de",
     "titleHighlight": "Fitness",
-    "subtitle": "Personal Trainer & Triatleta baseado no Porto, Portugal. Especializado em treino de resistência, condicionamento físico e otimização de performance.",
-    "startButton": "Comece a sua Jornada",
+    "subtitle": "Personal Trainer & Triatleta vivendo no Porto, Portugal. Especializado em treino de resistência, condicionamento físico e otimização de performance.",
+    "startButton": "Comece agora",
     "learnButton": "Saiba Mais",
-    "achievementShelf": "Prateleira de Conquistas",
+    "achievementShelf": "Minhas Conquistas",
     "ironmanTitle": "Finalizador de Ironman 70.3",
     "ironmanDescription": "1.9 km natação | 90 km bicicleta | 21.1 km corrida",
     "records": {

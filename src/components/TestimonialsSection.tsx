@@ -1,13 +1,13 @@
 
-import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { useState } from 'react';
 
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      name: "Maria Santos",
-      role: "Marathon Runner",
-      image: "https://randomuser.me/api/portraits/women/45.jpg",
+      name: "Murillo Welsi",
+      role: "Triathlete",
+      image: "/lovable-uploads/murillo.png",
       text: "Working with Edgar transformed my running performance. I shaved 15 minutes off my marathon time and improved my overall technique. His approach is scientific yet approachable.",
       stars: 5
     },
@@ -52,41 +52,41 @@ const TestimonialsSection = () => {
           <div className="relative bg-white rounded-xl shadow-md p-8 md:p-12">
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <div className="w-32 h-32 rounded-full overflow-hidden flex-shrink-0 border-4 border-brand-blue">
-                <img 
-                  src={testimonials[currentIndex].image} 
-                  alt={testimonials[currentIndex].name} 
+                <img
+                  src={testimonials[currentIndex].image}
+                  alt={testimonials[currentIndex].name}
                   className="w-full h-full object-cover"
                 />
               </div>
-              
+
               <div className="flex-1">
                 <div className="flex mb-3">
                   {[...Array(testimonials[currentIndex].stars)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                
+
                 <p className="text-gray-700 italic mb-6">
                   "{testimonials[currentIndex].text}"
                 </p>
-                
+
                 <div>
                   <h4 className="font-bold text-lg">{testimonials[currentIndex].name}</h4>
                   <p className="text-brand-blue">{testimonials[currentIndex].role}</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-center mt-8 gap-4">
-              <button 
+              <button
                 onClick={prevTestimonial}
                 className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                 aria-label="Previous testimonial"
               >
                 <ChevronLeft className="h-6 w-6 text-brand-dark" />
               </button>
-              
-              <button 
+
+              <button
                 onClick={nextTestimonial}
                 className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                 aria-label="Next testimonial"

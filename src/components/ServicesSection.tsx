@@ -1,6 +1,5 @@
-
-import { Dumbbell, Heart, Timer, Trophy } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dumbbell, Heart, Timer, Trophy } from 'lucide-react';
 
 const ServicesSection = () => {
   const services = [
@@ -65,10 +64,10 @@ const ServicesSection = () => {
                 </a>
               </div>
             </div>
-            <div className="hidden lg:block relative min-h-[300px]">
-              <img 
-                src="/lovable-uploads/c2022b01-82d4-4894-b5f3-eba98aebfd4e.png" 
-                alt="Edgar Zanin with running group in Porto" 
+            <div className="hidden lg:block relative min-h-[600px] flex items-center justify-center">
+              <img
+                src="/lovable-uploads/c2022b01-82d4-4894-b5f3-eba98aebfd4e.png"
+                alt="Edgar Zanin with running group in Porto"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>

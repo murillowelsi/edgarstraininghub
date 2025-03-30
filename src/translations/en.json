@@ -1,4 +1,3 @@
-
 {
   "nav": {
     "home": "Home",
@@ -10,11 +9,11 @@
   },
   "hero": {
     "title": "Transform Your",
-    "titleHighlight": "Fitness",
+    "titleHighlight": "Fitness Journey",
     "subtitle": "Personal Trainer & Triathlete based in Porto, Portugal. Specializing in endurance training, strength conditioning, and performance optimization.",
-    "startButton": "Start Your Journey",
+    "startButton": "Start Now",
     "learnButton": "Learn More",
-    "achievementShelf": "Achievement Shelf",
+    "achievementShelf": "My Achievements",
     "ironmanTitle": "Ironman 70.3 Finisher",
     "ironmanDescription": "1.9 km swim | 90 km bike | 21.1 km run",
     "records": {
