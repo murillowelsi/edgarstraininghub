@@ -67,8 +67,8 @@ const ServicesSection = () => {
             </div>
             <div className="hidden lg:block relative min-h-[300px]">
               <img 
-                src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" 
-                alt="Personal Training Session" 
+                src="/lovable-uploads/c2022b01-82d4-4894-b5f3-eba98aebfd4e.png" 
+                alt="Edgar Zanin with running group in Porto" 
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
