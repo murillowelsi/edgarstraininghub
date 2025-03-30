@@ -1,0 +1,138 @@
+
+{
+  "nav": {
+    "home": "Início",
+    "about": "Sobre",
+    "services": "Serviços",
+    "achievements": "Conquistas",
+    "contact": "Contacto",
+    "getStarted": "Começar"
+  },
+  "hero": {
+    "title": "Transforme a sua jornada de",
+    "titleHighlight": "Fitness",
+    "subtitle": "Personal Trainer & Triatleta baseado no Porto, Portugal. Especializado em treino de resistência, condicionamento físico e otimização de performance.",
+    "startButton": "Comece a sua Jornada",
+    "learnButton": "Saiba Mais",
+    "achievementShelf": "Prateleira de Conquistas",
+    "ironmanTitle": "Finalizador de Ironman 70.3",
+    "ironmanDescription": "1.9 km natação | 90 km bicicleta | 21.1 km corrida",
+    "records": {
+      "5k": "5K PB",
+      "10k": "10K PB",
+      "halfMarathon": "Meia Maratona",
+      "marathon": "Maratona"
+    }
+  },
+  "about": {
+    "title": "Sobre",
+    "titleHighlight": "Mim",
+    "name": "Edgar Alan Zanin",
+    "profession": "Personal Trainer & Triatleta",
+    "bio1": "Baseado na bela cidade costeira do Porto, Portugal, dediquei a minha vida ao fitness, desportos de resistência e a ajudar outros a alcançar o seu potencial máximo de performance. Como personal trainer certificado e triatleta experiente, trago conhecimento profissional e experiência prática para os meus programas de treino.",
+    "bio2": "A minha jornada começou com uma paixão pela corrida, que evoluiu para corridas competitivas e eventualmente levou-me a completar o desafiante Ironman 70.3. Eu compreendo a dedicação, disciplina e força mental necessárias para ultrapassar os seus limites e alcançar objetivos aparentemente impossíveis.",
+    "stats": {
+      "certified": "Certificado",
+      "certifiedDesc": "Formação profissional",
+      "clients": "100+ Clientes",
+      "clientsDesc": "Histórias de sucesso",
+      "experience": "7+ Anos",
+      "experienceDesc": "De experiência"
+    }
+  },
+  "services": {
+    "title": "Meus",
+    "titleHighlight": "Serviços",
+    "subtitle": "Treinamento abrangente de fitness e performance adaptado aos seus objetivos e necessidades individuais.",
+    "strength": {
+      "title": "Treino de Força",
+      "description": "Programas de força personalizados para todos os níveis de fitness, focando na forma correta e princípios de sobrecarga progressiva."
+    },
+    "endurance": {
+      "title": "Coaching de Resistência",
+      "description": "Treino especializado para corredores, ciclistas e triatletas que buscam melhorar a resistência e o desempenho em corridas."
+    },
+    "hiit": {
+      "title": "HIIT e Condicionamento",
+      "description": "Sessões de treino intervalado de alta intensidade desenhadas para maximizar a queima de calorias e melhorar a aptidão cardiovascular."
+    },
+    "race": {
+      "title": "Preparação para Corridas",
+      "description": "Planos de treino abrangentes para corridas futuras, desde 5K até eventos de maratona e triatlo."
+    },
+    "cta": {
+      "title": "Pronto para Transformar seu Condicionamento Físico?",
+      "description": "Ofereço treinos personalizados 1-a-1 tanto presencialmente no Porto quanto online para clientes em todo o mundo. Cada programa é especialmente desenvolvido para se adequar aos seus objetivos específicos, nível de condicionamento físico e agenda.",
+      "button": "Entre em Contacto"
+    }
+  },
+  "achievements": {
+    "title": "Minhas",
+    "titleHighlight": "Conquistas",
+    "subtitle": "Recordes pessoais e conquistas competitivas que demonstram minha dedicação ao fitness e aos esportes de resistência.",
+    "major": {
+      "title": "Principais Realizações",
+      "ironman": {
+        "title": "Finalizador de Ironman 70.3",
+        "description": "Completei o desafiador triatlo de meia distância Ironman, consistindo em 1.9 km de natação, 90 km de bicicleta e 21.1 km de corrida."
+      },
+      "marathon": {
+        "title": "Maratona Sub-3 Horas",
+        "description": "Terminei uma maratona completa em menos de 3 horas (2:56:09), uma conquista que me coloca no percentil superior de corredores de maratona em todo o mundo."
+      },
+      "podiums": {
+        "title": "Múltiplos Pódios",
+        "description": "Alcancei numerosos top-3 em eventos de corrida locais e regionais em várias distâncias."
+      }
+    },
+    "personalBests": {
+      "title": "Melhores Marcas Pessoais em Corrida",
+      "quote": "Cada recorde pessoal representa incontáveis horas de treinamento, disciplina e determinação. Eu trago essa mesma dedicação para ajudar meus clientes a atingirem seus objetivos de fitness."
+    }
+  },
+  "testimonials": {
+    "title": "Depoimentos de",
+    "titleHighlight": "Clientes",
+    "subtitle": "Veja o que alguns dos meus clientes têm a dizer sobre a experiência de treino."
+  },
+  "contact": {
+    "title": "Entre em",
+    "titleHighlight": "Contacto",
+    "subtitle": "Pronto para começar sua jornada fitness? Entre em contacto para agendar uma consulta ou saber mais sobre os meus serviços.",
+    "info": {
+      "title": "Informações de Contacto",
+      "phone": "Telefone",
+      "email": "Email",
+      "location": "Localização",
+      "locationDesc": "Disponível para treino presencial no Porto e treino online em todo o mundo"
+    },
+    "hours": {
+      "title": "Horários de Treino",
+      "weekdays": "Dias de Semana",
+      "weekdaysHours": "6:00 - 20:00",
+      "weekends": "Fins de Semana",
+      "weekendsHours": "8:00 - 14:00"
+    },
+    "form": {
+      "title": "Envie-me uma Mensagem",
+      "name": "Seu Nome",
+      "namePlaceholder": "João Silva",
+      "email": "Endereço de Email",
+      "emailPlaceholder": "joao@exemplo.com",
+      "message": "Mensagem",
+      "messagePlaceholder": "Estou interessado em personal training...",
+      "send": "Enviar Mensagem",
+      "success": "Mensagem Enviada!",
+      "successDescription": "Obrigado por entrar em contacto. Responderei em breve."
+    }
+  },
+  "footer": {
+    "description": "Personal Trainer & Triatleta baseado no Porto, Portugal, especializado em treino de resistência e otimização de desempenho.",
+    "quickLinks": "Links Rápidos",
+    "services": "Serviços",
+    "getInTouch": "Entre em Contacto",
+    "rights": "Todos os direitos reservados.",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço"
+  }
+}

@@ -1,0 +1,138 @@
+
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "achievements": "Achievements",
+    "contact": "Contact",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "title": "Transform Your",
+    "titleHighlight": "Fitness",
+    "subtitle": "Personal Trainer & Triathlete based in Porto, Portugal. Specializing in endurance training, strength conditioning, and performance optimization.",
+    "startButton": "Start Your Journey",
+    "learnButton": "Learn More",
+    "achievementShelf": "Achievement Shelf",
+    "ironmanTitle": "Ironman 70.3 Finisher",
+    "ironmanDescription": "1.9 km swim | 90 km bike | 21.1 km run",
+    "records": {
+      "5k": "5K PB",
+      "10k": "10K PB",
+      "halfMarathon": "Half Marathon",
+      "marathon": "Marathon"
+    }
+  },
+  "about": {
+    "title": "About",
+    "titleHighlight": "Me",
+    "name": "Edgar Alan Zanin",
+    "profession": "Personal Trainer & Triathlete",
+    "bio1": "Based in the beautiful coastal city of Porto, Portugal, I've dedicated my life to fitness, endurance sports, and helping others achieve their peak performance potential. As a certified personal trainer and experienced triathlete, I bring both professional knowledge and practical experience to my training programs.",
+    "bio2": "My journey began with a passion for running, which evolved into competitive racing and eventually led me to complete the challenging Ironman 70.3. I understand the dedication, discipline, and mental fortitude required to push your limits and achieve seemingly impossible goals.",
+    "stats": {
+      "certified": "Certified",
+      "certifiedDesc": "Professional training",
+      "clients": "100+ Clients",
+      "clientsDesc": "Success stories",
+      "experience": "7+ Years",
+      "experienceDesc": "Experience"
+    }
+  },
+  "services": {
+    "title": "My",
+    "titleHighlight": "Services",
+    "subtitle": "Comprehensive fitness and performance coaching tailored to your individual goals and needs.",
+    "strength": {
+      "title": "Strength Training",
+      "description": "Customized strength programs for all fitness levels, focusing on proper form and progressive overload principles."
+    },
+    "endurance": {
+      "title": "Endurance Coaching",
+      "description": "Specialized training for runners, cyclists, and triathletes looking to improve stamina and race performance."
+    },
+    "hiit": {
+      "title": "HIIT & Conditioning",
+      "description": "High-intensity interval training sessions designed to maximize calorie burn and improve cardiovascular fitness."
+    },
+    "race": {
+      "title": "Race Preparation",
+      "description": "Comprehensive training plans for upcoming races, from 5K to marathon and triathlon events."
+    },
+    "cta": {
+      "title": "Ready to Transform Your Fitness?",
+      "description": "I offer personalized 1-on-1 training sessions both in-person in Porto and online for clients worldwide. Every program is custom-designed to fit your specific goals, fitness level, and schedule.",
+      "button": "Get in Touch"
+    }
+  },
+  "achievements": {
+    "title": "My",
+    "titleHighlight": "Achievements",
+    "subtitle": "Personal records and competitive achievements that demonstrate my dedication to fitness and endurance sports.",
+    "major": {
+      "title": "Major Accomplishments",
+      "ironman": {
+        "title": "Ironman 70.3 Finisher",
+        "description": "Completed the challenging half Ironman distance triathlon, consisting of a 1.9 km swim, 90 km bike ride, and 21.1 km run."
+      },
+      "marathon": {
+        "title": "Sub-3 Hour Marathon",
+        "description": "Finished a full marathon in under 3 hours (2:56:09), an achievement that puts me in the top percentile of marathon runners worldwide."
+      },
+      "podiums": {
+        "title": "Multiple Podium Finishes",
+        "description": "Achieved numerous top-3 finishes in local and regional running events across various distances."
+      }
+    },
+    "personalBests": {
+      "title": "Running Personal Bests",
+      "quote": "Every personal best represents countless hours of training, discipline, and determination. I bring this same dedication to helping my clients achieve their fitness goals."
+    }
+  },
+  "testimonials": {
+    "title": "Client",
+    "titleHighlight": "Testimonials",
+    "subtitle": "Here's what some of my clients have to say about their training experience."
+  },
+  "contact": {
+    "title": "Get in",
+    "titleHighlight": "Touch",
+    "subtitle": "Ready to start your fitness journey? Reach out to schedule a consultation or learn more about my services.",
+    "info": {
+      "title": "Contact Information",
+      "phone": "Phone",
+      "email": "Email",
+      "location": "Location",
+      "locationDesc": "Available for in-person training in Porto and online training worldwide"
+    },
+    "hours": {
+      "title": "Training Hours",
+      "weekdays": "Weekdays",
+      "weekdaysHours": "6:00 AM - 8:00 PM",
+      "weekends": "Weekends",
+      "weekendsHours": "8:00 AM - 2:00 PM"
+    },
+    "form": {
+      "title": "Send Me a Message",
+      "name": "Your Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "message": "Message",
+      "messagePlaceholder": "I'm interested in personal training...",
+      "send": "Send Message",
+      "success": "Message Sent!",
+      "successDescription": "Thank you for reaching out. I'll get back to you soon."
+    }
+  },
+  "footer": {
+    "description": "Personal Trainer & Triathlete based in Porto, Portugal, specializing in endurance training and performance optimization.",
+    "quickLinks": "Quick Links",
+    "services": "Services",
+    "getInTouch": "Get in Touch",
+    "rights": "All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  }
+}
