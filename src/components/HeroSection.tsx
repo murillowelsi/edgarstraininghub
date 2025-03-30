@@ -1,5 +1,5 @@
 
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Medal, Clock, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const HeroSection = () => {
@@ -28,26 +28,50 @@ const HeroSection = () => {
           </div>
           
           <div className="relative hidden lg:block">
-            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md ml-auto animate-slide-up" style={{ animationDelay: '0.4s' }}>
-              <h3 className="text-xl font-bold text-brand-dark mb-4">Ironman 70.3 Finisher</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-brand-blue">🏃‍♂️</span>
-                  <span className="font-medium">5 km – 19:16</span>
+            <div className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-lg shadow-xl max-w-md ml-auto animate-slide-up relative" style={{ animationDelay: '0.4s' }}>
+              {/* Achievement Trophy Section */}
+              <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
+                <Trophy className="h-10 w-10 text-brand-orange bg-white rounded-full p-2 shadow-md" />
+              </div>
+              
+              <h3 className="text-xl font-bold text-brand-dark mb-4 text-center pt-4">Achievement Shelf</h3>
+              
+              {/* Wooden Shelf Effect */}
+              <div className="bg-gradient-to-r from-amber-700 to-amber-900 h-3 w-full rounded-t-md mb-2"></div>
+              
+              <div className="space-y-4">
+                {/* Ironman Achievement */}
+                <div className="bg-white rounded-lg p-4 shadow-md border-l-4 border-brand-orange flex items-start">
+                  <Medal className="text-brand-orange h-8 w-8 mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-brand-dark">Ironman 70.3 Finisher</h4>
+                    <p className="text-sm text-gray-600">1.9 km swim | 90 km bike | 21.1 km run</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-brand-blue">🏃‍♂️</span>
-                  <span className="font-medium">10 km – 36:31</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-brand-blue">🏃‍♂️</span>
-                  <span className="font-medium">Half Marathon – 1:20:00</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-brand-blue">🏃‍♂️</span>
-                  <span className="font-medium">Marathon – 2:56:09</span>
+                
+                {/* Running PBs */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
+                    <p className="text-xs text-gray-500 mb-1">5K PB</p>
+                    <p className="font-bold text-lg text-brand-blue">19:16</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
+                    <p className="text-xs text-gray-500 mb-1">10K PB</p>
+                    <p className="font-bold text-lg text-brand-blue">36:31</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
+                    <p className="text-xs text-gray-500 mb-1">Half Marathon</p>
+                    <p className="font-bold text-lg text-brand-blue">1:20:00</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
+                    <p className="text-xs text-gray-500 mb-1">Marathon</p>
+                    <p className="font-bold text-lg text-brand-blue">2:56:09</p>
+                  </div>
                 </div>
               </div>
+              
+              {/* Wooden Shelf Effect Bottom */}
+              <div className="bg-gradient-to-r from-amber-800 to-amber-950 h-4 w-full rounded-b-md mt-4 shadow-inner"></div>
             </div>
           </div>
         </div>
