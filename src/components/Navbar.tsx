@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -17,7 +17,7 @@ const Navbar = () => {
     <nav className="bg-white/90 backdrop-blur-sm fixed w-full z-50 shadow-sm">
       <div className="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
         <div className="text-brand-blue font-display font-bold text-2xl">Edgar Zanin</div>
-        
+
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
           <a href="#home" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.home}</a>
@@ -28,7 +28,7 @@ const Navbar = () => {
           <Button className="bg-brand-blue hover:bg-blue-600 text-white font-medium">{t.nav.getStarted}</Button>
           <LanguageSwitcher />
         </div>
-        
+
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center">
           <LanguageSwitcher />
@@ -37,7 +37,7 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white py-4 px-4 shadow-lg animate-fade-in">

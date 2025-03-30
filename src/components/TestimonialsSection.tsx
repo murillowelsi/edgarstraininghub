@@ -1,8 +1,9 @@
-
+import { useLanguage } from '@/contexts/LanguageContext';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useState } from 'react';
 
 const TestimonialsSection = () => {
+  const { t } = useLanguage();
   const testimonials = [
     {
       name: "Murillo Welsi",
@@ -41,10 +42,10 @@ const TestimonialsSection = () => {
     <section className="section bg-gray-50">
       <div className="container mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Client <span className="text-brand-blue">Testimonials</span></h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t.testimonials.title} <span className="text-brand-blue">{t.testimonials.titleHighlight}</span></h2>
           <div className="h-1 w-20 bg-brand-orange mx-auto mb-6"></div>
           <p className="max-w-2xl mx-auto text-gray-700">
-            Here's what some of my clients have to say about their training experience.
+            {t.testimonials.subtitle}
           </p>
         </div>
 
