@@ -10,7 +10,10 @@ const HeroSection = () => {
       id="home"
       className="relative min-h-screen flex items-center bg-gradient-to-r from-gray-100 to-blue-50 overflow-hidden pt-20"
     >
-      <div className="absolute inset-0 z-0 bg-[url('public/lovable-uploads/bg-1.png')] bg-cover bg-center opacity-10"></div>
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-10"
+        style={{ backgroundImage: "url('/lovable-uploads/bg-1.png')" }}
+      ></div>
 
       <div className="container mx-auto px-4 md:px-6 z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
