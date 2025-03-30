@@ -1,5 +1,5 @@
 
-import { Dumbbell, Heart, Stopwatch, Trophy } from 'lucide-react';
+import { Dumbbell, Heart, Timer, Trophy } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ServicesSection = () => {
@@ -15,7 +15,7 @@ const ServicesSection = () => {
       description: "Specialized training for runners, cyclists, and triathletes looking to improve stamina and race performance."
     },
     {
-      icon: <Stopwatch className="h-12 w-12 text-brand-blue" />,
+      icon: <Timer className="h-12 w-12 text-brand-blue" />,
       title: "HIIT & Conditioning",
       description: "High-intensity interval training sessions designed to maximize calorie burn and improve cardiovascular fitness."
     },
