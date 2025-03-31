@@ -42,9 +42,10 @@ const ContactSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t.contact.info.whatsapp || "WhatsApp"}</h4>
-                <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="inline-block">
-                  <Button variant="outline" size="icon" className="bg-green-600 hover:bg-green-700 mt-1 h-10 w-10 rounded-full">
-                    <MessageSquare className="h-5 w-5 text-white" />
+                <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 font-medium flex items-center mt-1 gap-2">
+                  <span>Chat now</span>
+                  <Button variant="outline" size="icon" className="bg-green-600 hover:bg-green-700 h-8 w-8 rounded-full p-1.5">
+                    <MessageSquare className="h-full w-full text-white" />
                   </Button>
                 </a>
               </div>
