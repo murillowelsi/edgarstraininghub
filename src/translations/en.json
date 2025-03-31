@@ -1,3 +1,4 @@
+
 {
   "nav": {
     "home": "Home",
@@ -101,6 +102,7 @@
     "info": {
       "title": "Contact Information",
       "phone": "Phone",
+      "whatsapp": "WhatsApp",
       "email": "Email",
       "location": "Location",
       "locationDesc": "Available for in-person training in Porto and online training worldwide"
@@ -108,9 +110,9 @@
     "hours": {
       "title": "Training Hours",
       "weekdays": "Weekdays",
-      "weekdaysHours": "6:00 AM - 8:00 PM",
+      "weekendsHours": "8:00 AM - 2:00 PM",
       "weekends": "Weekends",
-      "weekendsHours": "8:00 AM - 2:00 PM"
+      "weekdaysHours": "6:00 AM - 8:00 PM"
     },
     "form": {
       "title": "Send Me a Message",

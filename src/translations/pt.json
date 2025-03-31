@@ -1,3 +1,4 @@
+
 {
   "nav": {
     "home": "Início",
@@ -101,6 +102,7 @@
     "info": {
       "title": "Informações de Contacto",
       "phone": "Telefone",
+      "whatsapp": "WhatsApp",
       "email": "Email",
       "location": "Localização",
       "locationDesc": "Disponível para treino presencial no Porto e treino online em todo o mundo"
