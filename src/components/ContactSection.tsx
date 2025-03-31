@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,33 +5,36 @@ import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Mail, MapPin, Phone, Send, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
-
 const ContactSection = () => {
-  const { toast } = useToast();
-  const { t, language } = useLanguage();
+  const {
+    toast
+  } = useToast();
+  const {
+    t,
+    language
+  } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: ''
   });
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    const {
+      name,
+      value
+    } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-
     toast({
       title: t.contact.form.success,
-      description: t.contact.form.successDescription,
+      description: t.contact.form.successDescription
     });
-
     setFormData({
       name: '',
       email: '',
@@ -43,16 +45,11 @@ const ContactSection = () => {
   // WhatsApp pre-filled message based on language
   const getWhatsAppLink = () => {
     const phone = "+351123456789"; // Replace with the actual phone number
-    
-    const message = language === 'pt' 
-      ? "Olá! Estou interessado(a) em saber mais sobre os seus serviços de personal training."
-      : "Hello! I'm interested in learning more about your personal training services.";
-    
+
+    const message = language === 'pt' ? "Olá! Estou interessado(a) em saber mais sobre os seus serviços de personal training." : "Hello! I'm interested in learning more about your personal training services.";
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   };
-
-  return (
-    <section id="contact" className="section bg-white">
+  return <section id="contact" className="section bg-white">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{t.contact.title} <span className="text-brand-blue">{t.contact.titleHighlight}</span></h2>
@@ -72,7 +69,7 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-lg">{t.contact.info.phone}</h4>
-                  <p className="text-gray-700">+351 123 456 789</p>
+                  <p className="text-gray-700">+351 910783561</p>
                 </div>
               </div>
               <div className="flex items-start">
@@ -81,12 +78,7 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-lg">{t.contact.info.whatsapp || "WhatsApp"}</h4>
-                  <a 
-                    href={getWhatsAppLink()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block"
-                  >
+                  <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="inline-block">
                     <Button className="bg-green-600 hover:bg-green-700 mt-1">
                       <MessageSquare className="h-4 w-4 mr-2" />
                       {language === 'pt' ? 'Enviar Mensagem' : 'Send Message'}
@@ -127,40 +119,15 @@ const ContactSection = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">{t.contact.form.name}</label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  placeholder={t.contact.form.namePlaceholder}
-                  className="w-full"
-                />
+                <Input id="name" name="name" value={formData.name} onChange={handleChange} required placeholder={t.contact.form.namePlaceholder} className="w-full" />
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">{t.contact.form.email}</label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  placeholder={t.contact.form.emailPlaceholder}
-                  className="w-full"
-                />
+                <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder={t.contact.form.emailPlaceholder} className="w-full" />
               </div>
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">{t.contact.form.message}</label>
-                <Textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  placeholder={t.contact.form.messagePlaceholder}
-                  className="w-full min-h-[150px]"
-                />
+                <Textarea id="message" name="message" value={formData.message} onChange={handleChange} required placeholder={t.contact.form.messagePlaceholder} className="w-full min-h-[150px]" />
               </div>
               <Button type="submit" className="w-full bg-brand-blue hover:bg-blue-600">
                 <Send className="h-4 w-4 mr-2" />
@@ -170,8 +137,6 @@ const ContactSection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default ContactSection;
