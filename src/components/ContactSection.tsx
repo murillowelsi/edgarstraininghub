@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -5,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Mail, MapPin, Phone, Send, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
+
 const ContactSection = () => {
   const {
     toast
@@ -44,11 +46,21 @@ const ContactSection = () => {
 
   // WhatsApp pre-filled message based on language
   const getWhatsAppLink = () => {
-    const phone = "+351123456789"; // Replace with the actual phone number
+    const phone = "+351962869476"; // Updated phone number
 
     const message = language === 'pt' ? "Olá! Estou interessado(a) em saber mais sobre os seus serviços de personal training." : "Hello! I'm interested in learning more about your personal training services.";
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   };
+  
+  // Email link
+  const getEmailLink = () => {
+    const email = "murillo.welsi@gmail.com";
+    const subject = language === 'pt' ? "Informações sobre Personal Training" : "Information about Personal Training";
+    const body = language === 'pt' ? "Olá, gostaria de obter mais informações sobre os seus serviços de personal training." : "Hello, I would like to get more information about your personal training services.";
+    
+    return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+  
   return <section id="contact" className="section bg-white">
       <div className="container mx-auto">
         <div className="text-center mb-16">
@@ -69,7 +81,7 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-lg">{t.contact.info.phone}</h4>
-                  <p className="text-gray-700">+351 910783561</p>
+                  <p className="text-gray-700">+351 962 869 476</p>
                 </div>
               </div>
               <div className="flex items-start">
@@ -79,9 +91,21 @@ const ContactSection = () => {
                 <div>
                   <h4 className="font-bold text-lg">{t.contact.info.whatsapp || "WhatsApp"}</h4>
                   <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="inline-block">
-                    <Button className="bg-green-600 hover:bg-green-700 mt-1">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      {language === 'pt' ? 'Enviar Mensagem' : 'Send Message'}
+                    <Button variant="outline" size="icon" className="bg-green-600 hover:bg-green-700 mt-1 h-10 w-10 rounded-full">
+                      <MessageSquare className="h-5 w-5 text-white" />
+                    </Button>
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <div className="bg-brand-blue bg-opacity-10 p-3 rounded-full mr-4">
+                  <Mail className="h-6 w-6 text-brand-blue" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg">{t.contact.info.email || "Email"}</h4>
+                  <a href={getEmailLink()} className="inline-block">
+                    <Button variant="outline" size="icon" className="bg-blue-500 hover:bg-blue-600 mt-1 h-10 w-10 rounded-full">
+                      <Mail className="h-5 w-5 text-white" />
                     </Button>
                   </a>
                 </div>
