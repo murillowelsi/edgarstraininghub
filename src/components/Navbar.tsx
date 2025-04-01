@@ -1,5 +1,4 @@
 
-import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,15 +10,6 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-  };
-
-  // WhatsApp pre-filled message based on language
-  const getWhatsAppLink = () => {
-    const phone = "+351962869476";
-    const message = language === 'pt' 
-      ? "Olá! Estou interessado(a) em saber mais sobre os seus serviços de personal training."
-      : "Hello! I'm interested in learning more about your personal training services.";
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   };
 
   return (
@@ -34,13 +24,6 @@ const Navbar = () => {
           <a href="#services" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.services}</a>
           <a href="#achievements" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.achievements}</a>
           <a href="#contact" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.contact}</a>
-          <a href="/gallery" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">Gallery</a>
-          <Button 
-            className="bg-brand-blue hover:bg-blue-600 text-white font-medium"
-            onClick={() => window.open(getWhatsAppLink(), '_blank')}
-          >
-            {t.nav.getStarted}
-          </Button>
           <LanguageSwitcher />
         </div>
 
@@ -62,13 +45,6 @@ const Navbar = () => {
             <a href="#services" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.services}</a>
             <a href="#achievements" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.achievements}</a>
             <a href="#contact" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.contact}</a>
-            <a href="/gallery" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">Gallery</a>
-            <Button 
-              className="bg-brand-blue hover:bg-blue-600 text-white font-medium mt-2"
-              onClick={() => window.open(getWhatsAppLink(), '_blank')}
-            >
-              {t.nav.getStarted}
-            </Button>
           </div>
         </div>
       )}
