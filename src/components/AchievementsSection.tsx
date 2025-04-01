@@ -1,29 +1,30 @@
+
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Clock, Medal, TrendingUp, Trophy } from "lucide-react";
+import { Activity, Award, BarChart, Clock, Medal, TrendingUp, Trophy } from "lucide-react";
 
 const AchievementsSection = () => {
   const { t } = useLanguage();
 
   const runningPBs = [
     {
-      distance: t.achievements.personalBests.title,
+      distance: "5K",
       time: "19:16",
-      icon: <TrendingUp className="h-6 w-6 text-brand-orange" />,
+      icon: <Clock className="h-6 w-6 text-brand-orange" />,
     },
     {
-      distance: t.achievements.personalBests.title,
+      distance: "10K",
       time: "36:31",
-      icon: <TrendingUp className="h-6 w-6 text-brand-orange" />,
+      icon: <Activity className="h-6 w-6 text-brand-orange" />,
     },
     {
-      distance: t.achievements.personalBests.title,
+      distance: "Half Marathon",
       time: "1:20:00",
-      icon: <TrendingUp className="h-6 w-6 text-brand-orange" />,
+      icon: <Award className="h-6 w-6 text-brand-orange" />,
     },
     {
-      distance: t.achievements.personalBests.title,
+      distance: "Marathon",
       time: "2:56:09",
-      icon: <TrendingUp className="h-6 w-6 text-brand-orange" />,
+      icon: <Trophy className="h-6 w-6 text-brand-orange" />,
     },
   ];
 
@@ -82,7 +83,7 @@ const AchievementsSection = () => {
 
           <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
             <div className="flex items-center mb-6">
-              <TrendingUp className="h-8 w-8 text-brand-blue mr-4" />
+              <BarChart className="h-8 w-8 text-brand-blue mr-4" />
               <h3 className="text-2xl font-bold">{t.achievements.personalBests.title}</h3>
             </div>
 
