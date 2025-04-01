@@ -3,7 +3,16 @@ import { ArrowDown, Medal, Trophy } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 
 const HeroSection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // WhatsApp pre-filled message based on language
+  const getWhatsAppLink = () => {
+    const phone = "+351962869476";
+    const message = language === 'pt' 
+      ? "Olá! Estou interessado(a) em saber mais sobre os seus serviços de personal training."
+      : "Hello! I'm interested in learning more about your personal training services.";
+    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  };
 
   return (
     <section
@@ -32,7 +41,10 @@ const HeroSection = () => {
               {t.hero.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-brand-blue hover:bg-blue-600 text-white font-medium text-lg py-6 px-8">
+              <Button 
+                className="bg-brand-blue hover:bg-blue-600 text-white font-medium text-lg py-6 px-8"
+                onClick={() => window.open(getWhatsAppLink(), '_blank')}
+              >
                 {t.hero.startButton}
               </Button>
               <Button
@@ -49,7 +61,6 @@ const HeroSection = () => {
               className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-lg shadow-xl max-w-md ml-auto animate-slide-up relative"
               style={{ animationDelay: "0.4s" }}
             >
-              {/* Achievement Trophy Section */}
               <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
                 <Trophy className="h-10 w-10 text-brand-orange bg-white rounded-full p-2 shadow-md" />
               </div>
@@ -59,7 +70,6 @@ const HeroSection = () => {
               </h3>
 
               <div className="space-y-4">
-                {/* Ironman Achievement */}
                 <div className="bg-white rounded-lg p-4 shadow-md border-l-4 border-brand-orange flex items-start">
                   <Medal className="text-brand-orange h-8 w-8 mr-3 flex-shrink-0" />
                   <div>
@@ -72,7 +82,6 @@ const HeroSection = () => {
                   </div>
                 </div>
 
-                {/* Running PBs */}
                 <div className="grid grid-cols-2 gap-2">
                   <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
                     <p className="text-xs text-gray-500 mb-1">
