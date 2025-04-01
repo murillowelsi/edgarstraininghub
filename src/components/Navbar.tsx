@@ -4,6 +4,7 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,6 +26,7 @@ const Navbar = () => {
           <a href="#services" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.services}</a>
           <a href="#achievements" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.achievements}</a>
           <a href="#contact" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.contact}</a>
+          <Link to="/gallery" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">Gallery</Link>
           <Button className="bg-brand-blue hover:bg-blue-600 text-white font-medium">{t.nav.getStarted}</Button>
           <LanguageSwitcher />
         </div>
@@ -47,6 +49,7 @@ const Navbar = () => {
             <a href="#services" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.services}</a>
             <a href="#achievements" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.achievements}</a>
             <a href="#contact" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.contact}</a>
+            <Link to="/gallery" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">Gallery</Link>
             <Button className="bg-brand-blue hover:bg-blue-600 text-white font-medium mt-2">{t.nav.getStarted}</Button>
           </div>
         </div>
