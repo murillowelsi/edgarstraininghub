@@ -88,66 +88,34 @@ const AboutSection = () => {
         </div>
 
         <div className="mt-16 animate-fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="card-modern p-8 text-center">
-              <h3 className="text-2xl font-bold mb-6 text-foreground">
-                {t.about.youtube}
-              </h3>
-              <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src="https://www.youtube.com/embed/Uck70oAWWhk"
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                ></iframe>
-              </div>
-              <p className="mt-4 text-muted-foreground">
-                Check out more videos on my{" "}
-                <a
-                  href="https://www.youtube.com/@edgarzanin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  YouTube channel
-                </a>
-                .
-              </p>
+          <div className="card-modern p-8 text-center max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold mb-6 text-foreground">
+              {t.about.youtube}
+            </h3>
+            <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/Uck70oAWWhk"
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              ></iframe>
             </div>
-            <div className="card-modern p-8 text-center">
-              <h3 className="text-2xl font-bold mb-6 text-foreground">
-                Instagram
-              </h3>
-              <div className="w-3/4 mx-auto">
-                <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
-                  <iframe
-                    src="https://www.instagram.com/p/DQrOLopjYz5/embed"
-                    width="100%"
-                    height="100%"
-                    frameBorder={0}
-                    scrolling="no"
-                    allowTransparency={true}
-                    className="w-full h-full"
-                  ></iframe>
-                </div>
-              </div>
-              <p className="mt-4 text-muted-foreground">
-                Follow me on{" "}
-                <a
-                  href="https://www.instagram.com/edgarzanin/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Instagram
-                </a>{" "}
-                for more updates and photos.
-              </p>
-            </div>
+            <p className="mt-4 text-muted-foreground">
+              Check out more videos on my{" "}
+              <a
+                href="https://www.youtube.com/@edgarzanin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                YouTube channel
+              </a>
+              .
+            </p>
           </div>
         </div>
       </div>
