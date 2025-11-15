@@ -9,22 +9,22 @@ const AchievementsSection = () => {
     {
       distance: "5K",
       time: "19:16",
-      icon: <Clock className="h-6 w-6 text-brand-orange" />,
+      icon: <Clock className="h-6 w-6 text-secondary" />,
     },
     {
       distance: "10K",
       time: "36:31",
-      icon: <Activity className="h-6 w-6 text-brand-orange" />,
+      icon: <Activity className="h-6 w-6 text-secondary" />,
     },
     {
       distance: "Half Marathon",
       time: "1:20:00",
-      icon: <Award className="h-6 w-6 text-brand-orange" />,
+      icon: <Award className="h-6 w-6 text-secondary" />,
     },
     {
       distance: "Marathon",
       time: "2:56:09",
-      icon: <Trophy className="h-6 w-6 text-brand-orange" />,
+      icon: <Trophy className="h-6 w-6 text-secondary" />,
     },
   ];
 
@@ -33,9 +33,9 @@ const AchievementsSection = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {t.achievements.title} <span className="text-brand-blue">{t.achievements.titleHighlight}</span>
+            {t.achievements.title} <span className="text-primary">{t.achievements.titleHighlight}</span>
           </h2>
-          <div className="h-1 w-20 bg-brand-orange mx-auto mb-6"></div>
+          <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
           <p className="max-w-2xl mx-auto text-gray-700">
             {t.achievements.subtitle}
           </p>
@@ -44,13 +44,23 @@ const AchievementsSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
             <div className="flex items-center mb-6">
-              <Medal className="h-8 w-8 text-brand-blue mr-4" />
+              <Medal className="h-8 w-8 text-primary mr-4" />
               <h3 className="text-2xl font-bold">{t.achievements.major.title}</h3>
             </div>
 
             <div className="space-y-6">
               <div className="flex items-start">
-                <Trophy className="h-6 w-6 text-brand-blue mr-4 mt-1" />
+                <Trophy className="h-6 w-6 text-primary mr-4 mt-1" />
+                <div>
+                  <h4 className="text-xl font-bold">{t.achievements.major.fullIronman.title}</h4>
+                  <p className="text-gray-700">
+                    {t.achievements.major.fullIronman.description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <Trophy className="h-6 w-6 text-primary mr-4 mt-1" />
                 <div>
                   <h4 className="text-xl font-bold">{t.achievements.major.ironman.title}</h4>
                   <p className="text-gray-700">
@@ -60,7 +70,7 @@ const AchievementsSection = () => {
               </div>
 
               <div className="flex items-start">
-                <Clock className="h-6 w-6 text-brand-blue mr-4 mt-1" />
+                <Clock className="h-6 w-6 text-primary mr-4 mt-1" />
                 <div>
                   <h4 className="text-xl font-bold">{t.achievements.major.marathon.title}</h4>
                   <p className="text-gray-700">
@@ -70,7 +80,7 @@ const AchievementsSection = () => {
               </div>
 
               <div className="flex items-start">
-                <Medal className="h-6 w-6 text-brand-blue mr-4 mt-1" />
+                <Medal className="h-6 w-6 text-primary mr-4 mt-1" />
                 <div>
                   <h4 className="text-xl font-bold">{t.achievements.major.podiums.title}</h4>
                   <p className="text-gray-700">
@@ -83,7 +93,7 @@ const AchievementsSection = () => {
 
           <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
             <div className="flex items-center mb-6">
-              <BarChart className="h-8 w-8 text-brand-blue mr-4" />
+              <BarChart className="h-8 w-8 text-primary mr-4" />
               <h3 className="text-2xl font-bold">{t.achievements.personalBests.title}</h3>
             </div>
 
@@ -97,14 +107,14 @@ const AchievementsSection = () => {
                     <h4 className="font-bold text-lg">{pb.distance}</h4>
                     {pb.icon}
                   </div>
-                  <p className="text-3xl font-display font-bold text-brand-blue">
+                  <p className="text-3xl font-display font-bold text-primary">
                     {pb.time}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 p-6 bg-brand-blue bg-opacity-10 rounded-lg border border-brand-blue border-opacity-20">
+            <div className="mt-6 p-6 bg-primary/10 rounded-lg border border-primary/20">
               <p className="text-gray-700 italic">
                 {t.achievements.personalBests.quote}
               </p>

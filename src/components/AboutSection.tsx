@@ -9,7 +9,7 @@ const AboutSection = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            {t.about.title} <span className="gradient-text">{t.about.titleHighlight}</span>
+            {t.about.title} <span className="text-primary">{t.about.titleHighlight}</span>
           </h2>
           <div className="h-1.5 w-24 mx-auto rounded-full" style={{ background: 'var(--gradient-secondary)' }}></div>
         </div>
@@ -24,7 +24,7 @@ const AboutSection = () => {
               />
             </div>
             <div className="absolute -bottom-6 -right-6 card-modern p-6 hidden md:block animate-float">
-              <p className="font-display font-bold text-3xl gradient-text">{t.about.stats.experience}</p>
+              <p className="font-display font-bold text-3xl text-primary">{t.about.stats.experience}</p>
             </div>
           </div>
 
@@ -32,7 +32,7 @@ const AboutSection = () => {
             <h3 className="text-3xl md:text-4xl font-bold text-foreground">
               {t.about.name}
             </h3>
-            <h4 className="text-2xl gradient-text font-semibold">
+            <h4 className="text-2xl text-primary font-semibold">
               {t.about.profession}
             </h4>
             <p className="text-muted-foreground leading-relaxed text-lg">

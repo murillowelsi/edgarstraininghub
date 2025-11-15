@@ -72,6 +72,10 @@
     "subtitle": "Recordes pessoais e conquistas competitivas que demonstram minha dedicação ao fitness e aos esportes de resistência.",
     "major": {
       "title": "Principais Realizações",
+      "fullIronman": {
+        "title": "Finalizador de Ironman Completo",
+        "description": "Completei o desafio máximo de resistência - um triatlo Ironman completo consistindo em 3.8 km de natação, 180 km de bicicleta e uma maratona completa de 42.2 km de corrida."
+      },
       "ironman": {
         "title": "Finalizador de Ironman 70.3",
         "description": "Completei o desafiador triatlo de meia distância Ironman, consistindo em 1.9 km de natação, 90 km de bicicleta e 21.1 km de corrida."
