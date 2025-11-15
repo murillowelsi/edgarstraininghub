@@ -72,6 +72,10 @@
     "subtitle": "Personal records and competitive achievements that demonstrate my dedication to fitness and endurance sports.",
     "major": {
       "title": "Major Accomplishments",
+      "fullIronman": {
+        "title": "Full Ironman Finisher",
+        "description": "Completed the ultimate endurance challenge - a full Ironman triathlon consisting of a 3.8 km swim, 180 km bike ride, and a full 42.2 km marathon run."
+      },
       "ironman": {
         "title": "Ironman 70.3 Finisher",
         "description": "Completed the challenging half Ironman distance triathlon, consisting of a 1.9 km swim, 90 km bike ride, and 21.1 km run."

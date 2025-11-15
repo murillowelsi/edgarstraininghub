@@ -42,8 +42,8 @@ const TestimonialsSection = () => {
     <section className="section bg-gray-50">
       <div className="container mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t.testimonials.title} <span className="text-brand-blue">{t.testimonials.titleHighlight}</span></h2>
-          <div className="h-1 w-20 bg-brand-orange mx-auto mb-6"></div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t.testimonials.title} <span className="text-primary">{t.testimonials.titleHighlight}</span></h2>
+          <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
           <p className="max-w-2xl mx-auto text-gray-700">
             {t.testimonials.subtitle}
           </p>
@@ -52,7 +52,7 @@ const TestimonialsSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="relative bg-white rounded-xl shadow-md p-8 md:p-12">
             <div className="flex flex-col md:flex-row gap-8 items-center">
-              <div className="w-32 h-32 rounded-full overflow-hidden flex-shrink-0 border-4 border-brand-blue">
+              <div className="w-32 h-32 rounded-full overflow-hidden flex-shrink-0 border-4 border-primary">
                 <img
                   src={testimonials[currentIndex].image}
                   alt={testimonials[currentIndex].name}
@@ -73,7 +73,7 @@ const TestimonialsSection = () => {
 
                 <div>
                   <h4 className="font-bold text-lg">{testimonials[currentIndex].name}</h4>
-                  <p className="text-brand-blue">{testimonials[currentIndex].role}</p>
+                  <p className="text-primary">{testimonials[currentIndex].role}</p>
                 </div>
               </div>
             </div>

@@ -36,7 +36,7 @@ const HeroSection = () => {
           >
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
               {t.hero.title}{" "}
-              <span className="gradient-text">{t.hero.titleHighlight}</span>{" "}
+              <span className="text-primary">{t.hero.titleHighlight}</span>{" "}
               <span className="block mt-2 text-4xl md:text-5xl lg:text-6xl">
                 {t.hero.title.includes("Transform Your")
                   ? "with Edgar Zanin"
@@ -92,25 +92,25 @@ const HeroSection = () => {
                     <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records["5k"]}
                     </p>
-                    <p className="font-bold text-2xl gradient-text">19:16</p>
+                    <p className="font-bold text-2xl text-primary">19:16</p>
                   </div>
                   <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
                     <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records["10k"]}
                     </p>
-                    <p className="font-bold text-2xl gradient-text">36:31</p>
+                    <p className="font-bold text-2xl text-primary">36:31</p>
                   </div>
                   <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
                     <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records.halfMarathon}
                     </p>
-                    <p className="font-bold text-2xl gradient-text">1:20:00</p>
+                    <p className="font-bold text-2xl text-primary">1:20:00</p>
                   </div>
                   <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
                     <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records.marathon}
                     </p>
-                    <p className="font-bold text-2xl gradient-text">2:56:09</p>
+                    <p className="font-bold text-2xl text-primary">2:56:09</p>
                   </div>
                 </div>
               </div>
