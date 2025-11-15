@@ -13,24 +13,39 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/90 backdrop-blur-sm fixed w-full z-50 shadow-sm">
-      <div className="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
-        <div className="text-brand-blue font-display font-bold text-2xl">Edgar Zanin</div>
+    <nav className="bg-background/80 backdrop-blur-lg fixed w-full z-50 border-b border-border/50">
+      <div className="container mx-auto px-4 md:px-6 py-5 flex justify-between items-center">
+        <div className="gradient-text font-display font-bold text-2xl">Edgar Zanin</div>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
-          <a href="#home" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.home}</a>
-          <a href="#about" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.about}</a>
-          <a href="#services" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.services}</a>
-          <a href="#achievements" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.achievements}</a>
-          <a href="#contact" className="font-medium text-gray-700 hover:text-brand-blue transition-colors">{t.nav.contact}</a>
+          <a href="#home" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+            {t.nav.home}
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="#about" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+            {t.nav.about}
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="#services" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+            {t.nav.services}
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="#achievements" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+            {t.nav.achievements}
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="#contact" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+            {t.nav.contact}
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
           <LanguageSwitcher />
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center">
           <LanguageSwitcher />
-          <button onClick={toggleMenu} className="text-gray-700 ml-4">
+          <button onClick={toggleMenu} className="text-foreground ml-4 hover:text-primary transition-colors">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -38,13 +53,13 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white py-4 px-4 shadow-lg animate-fade-in">
+        <div className="md:hidden bg-background/95 backdrop-blur-lg py-6 px-4 shadow-xl animate-fade-in border-t border-border/50">
           <div className="flex flex-col space-y-4">
-            <a href="#home" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.home}</a>
-            <a href="#about" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.about}</a>
-            <a href="#services" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.services}</a>
-            <a href="#achievements" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.achievements}</a>
-            <a href="#contact" className="font-medium text-gray-700 hover:text-brand-blue transition-colors py-2 border-b">{t.nav.contact}</a>
+            <a href="#home" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.home}</a>
+            <a href="#about" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.about}</a>
+            <a href="#services" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.services}</a>
+            <a href="#achievements" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.achievements}</a>
+            <a href="#contact" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.contact}</a>
           </div>
         </div>
       )}

@@ -5,56 +5,58 @@ const AboutSection = () => {
   const { t } = useLanguage(); // Use the translation hook
 
   return (
-    <section id="about" className="section bg-white">
+    <section id="about" className="section-modern bg-background">
       <div className="container mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t.about.title} <span className="text-brand-blue">{t.about.titleHighlight}</span></h2>
-          <div className="h-1 w-20 bg-brand-orange mx-auto"></div>
+        <div className="text-center mb-16 animate-fade-in">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            {t.about.title} <span className="gradient-text">{t.about.titleHighlight}</span>
+          </h2>
+          <div className="h-1.5 w-24 mx-auto rounded-full" style={{ background: 'var(--gradient-secondary)' }}></div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="relative">
-            <div className="rounded-lg overflow-hidden shadow-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="relative animate-slide-in-left">
+            <div className="rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500">
               <img
                 src="/lovable-uploads/ba2184b9-65d7-4393-87da-9d1999bc5169.png"
                 alt="Edgar Zanin - Personal Trainer"
                 className="w-full h-auto object-cover"
               />
             </div>
-            <div className="absolute -bottom-5 -right-5 bg-white p-4 rounded-lg shadow-lg hidden md:block">
-              <p className="font-display font-bold text-2xl text-brand-blue">{t.about.stats.experience}</p>
+            <div className="absolute -bottom-6 -right-6 card-modern p-6 hidden md:block animate-float">
+              <p className="font-display font-bold text-3xl gradient-text">{t.about.stats.experience}</p>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-2xl md:text-3xl font-bold text-brand-dark">
+          <div className="space-y-6 animate-slide-in-right">
+            <h3 className="text-3xl md:text-4xl font-bold text-foreground">
               {t.about.name}
             </h3>
-            <h4 className="text-xl text-brand-blue font-medium">
+            <h4 className="text-2xl gradient-text font-semibold">
               {t.about.profession}
             </h4>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed text-lg">
               {t.about.bio1}
             </p>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed text-lg">
               {t.about.bio2}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-              <div className="bg-gray-50 p-4 rounded-lg text-center">
-                <Award className="mx-auto text-brand-blue mb-2" size={32} />
-                <h5 className="font-bold">{t.about.stats.certified}</h5>
-                <p className="text-sm text-gray-600">{t.about.stats.certifiedDesc}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6">
+              <div className="card-modern p-6 text-center bg-gradient-to-br from-primary/5 to-transparent">
+                <Award className="mx-auto text-primary mb-3 animate-float" size={36} />
+                <h5 className="font-bold text-lg">{t.about.stats.certified}</h5>
+                <p className="text-sm text-muted-foreground mt-1">{t.about.stats.certifiedDesc}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg text-center">
-                <Users className="mx-auto text-brand-blue mb-2" size={32} />
-                <h5 className="font-bold">{t.about.stats.clients}</h5>
-                <p className="text-sm text-gray-600">{t.about.stats.clientsDesc}</p>
+              <div className="card-modern p-6 text-center bg-gradient-to-br from-primary/5 to-transparent">
+                <Users className="mx-auto text-primary mb-3 animate-float" size={36} style={{ animationDelay: '0.3s' }} />
+                <h5 className="font-bold text-lg">{t.about.stats.clients}</h5>
+                <p className="text-sm text-muted-foreground mt-1">{t.about.stats.clientsDesc}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg text-center">
-                <Clock className="mx-auto text-brand-blue mb-2" size={32} />
-                <h5 className="font-bold">{t.about.stats.experience}</h5>
-                <p className="text-sm text-gray-600">{t.about.stats.experienceDesc}</p>
+              <div className="card-modern p-6 text-center bg-gradient-to-br from-primary/5 to-transparent">
+                <Clock className="mx-auto text-primary mb-3 animate-float" size={36} style={{ animationDelay: '0.6s' }} />
+                <h5 className="font-bold text-lg">{t.about.stats.experience}</h5>
+                <p className="text-sm text-muted-foreground mt-1">{t.about.stats.experienceDesc}</p>
               </div>
             </div>
           </div>

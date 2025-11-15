@@ -17,95 +17,100 @@ const HeroSection = () => {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center bg-gradient-to-r from-gray-100 to-blue-50 overflow-hidden pt-20"
+      className="relative min-h-screen flex items-center overflow-hidden pt-20"
+      style={{ background: 'var(--gradient-hero)' }}
     >
       <div
-        className="absolute inset-0 z-0 bg-cover bg-center opacity-10"
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-5"
         style={{ backgroundImage: "url('/lovable-uploads/bg-1.png')" }}
       ></div>
 
+      {/* Animated gradient orbs */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float"></div>
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
+
       <div className="container mx-auto px-4 md:px-6 z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div
-            className="space-y-6 animate-fade-in"
-            style={{ animationDelay: "0.2s" }}
+            className="space-y-8 animate-slide-in-left"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-brand-dark leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
               {t.hero.title}{" "}
-              <span className="text-brand-blue">{t.hero.titleHighlight}</span>{" "}
-              {t.hero.title.includes("Transform Your")
-                ? "with Edgar Zanin"
-                : "com Edgar Zanin"}
+              <span className="gradient-text">{t.hero.titleHighlight}</span>{" "}
+              <span className="block mt-2 text-4xl md:text-5xl lg:text-6xl">
+                {t.hero.title.includes("Transform Your")
+                  ? "with Edgar Zanin"
+                  : "com Edgar Zanin"}
+              </span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-700 max-w-xl">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-xl leading-relaxed">
               {t.hero.subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button 
-                className="bg-brand-blue hover:bg-blue-600 text-white font-medium text-lg py-6 px-8"
+                size="lg"
+                className="btn-primary text-lg py-7 px-10 shadow-lg hover:shadow-xl"
                 onClick={() => window.open(getWhatsAppLink(), '_blank')}
               >
                 {t.hero.startButton}
               </Button>
               <Button
+                size="lg"
                 variant="outline"
-                className="border-brand-blue text-brand-blue hover:bg-blue-50 font-medium text-lg py-6 px-8"
+                className="border-2 border-primary text-primary hover:bg-accent font-semibold text-lg py-7 px-10 rounded-xl transition-all duration-300"
               >
                 {t.hero.learnButton}
               </Button>
             </div>
           </div>
 
-          <div className="relative hidden lg:block">
-            <div
-              className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-lg shadow-xl max-w-md ml-auto animate-slide-up relative"
-              style={{ animationDelay: "0.4s" }}
-            >
-              <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
-                <Trophy className="h-10 w-10 text-brand-orange bg-white rounded-full p-2 shadow-md" />
+          <div className="relative hidden lg:block animate-slide-in-right">
+            <div className="card-modern p-8 max-w-md ml-auto relative backdrop-blur-xl bg-card/80">
+              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-br from-secondary to-secondary/80 p-3 rounded-2xl shadow-lg animate-float">
+                <Trophy className="h-10 w-10 text-white" />
               </div>
 
-              <h3 className="text-xl font-bold text-brand-dark mb-4 text-center pt-4">
+              <h3 className="text-2xl font-bold text-foreground mb-6 text-center pt-4">
                 {t.hero.achievementShelf}
               </h3>
 
-              <div className="space-y-4">
-                <div className="bg-white rounded-lg p-4 shadow-md border-l-4 border-brand-orange flex items-start">
-                  <Medal className="text-brand-orange h-8 w-8 mr-3 flex-shrink-0" />
+              <div className="space-y-5">
+                <div className="card-modern p-5 bg-gradient-to-br from-secondary/10 to-transparent border-l-4 border-secondary flex items-start">
+                  <Medal className="text-secondary h-9 w-9 mr-4 flex-shrink-0 animate-glow" />
                   <div>
-                    <h4 className="font-bold text-brand-dark">
+                    <h4 className="font-bold text-foreground text-lg">
                       {t.hero.ironmanTitle}
                     </h4>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {t.hero.ironmanDescription}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
-                    <p className="text-xs text-gray-500 mb-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
+                    <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records["5k"]}
                     </p>
-                    <p className="font-bold text-lg text-brand-blue">19:16</p>
+                    <p className="font-bold text-2xl gradient-text">19:16</p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
-                    <p className="text-xs text-gray-500 mb-1">
+                  <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
+                    <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records["10k"]}
                     </p>
-                    <p className="font-bold text-lg text-brand-blue">36:31</p>
+                    <p className="font-bold text-2xl gradient-text">36:31</p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
-                    <p className="text-xs text-gray-500 mb-1">
+                  <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
+                    <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records.halfMarathon}
                     </p>
-                    <p className="font-bold text-lg text-brand-blue">1:20:00</p>
+                    <p className="font-bold text-2xl gradient-text">1:20:00</p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 shadow-md border-t-2 border-brand-blue">
-                    <p className="text-xs text-gray-500 mb-1">
+                  <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
+                    <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records.marathon}
                     </p>
-                    <p className="font-bold text-lg text-brand-blue">2:56:09</p>
+                    <p className="font-bold text-2xl gradient-text">2:56:09</p>
                   </div>
                 </div>
               </div>
@@ -114,9 +119,9 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <a href="#about" className="text-brand-blue">
-          <ArrowDown size={32} />
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
+        <a href="#about" className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors">
+          <ArrowDown className="text-primary" size={28} />
         </a>
       </div>
     </section>
