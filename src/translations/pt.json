@@ -30,16 +30,17 @@
     "titleHighlight": "Mim",
     "name": "Edgar Alan Zanin",
     "profession": "Personal Trainer & Triatleta",
-    "bio1": "Baseado na bela cidade costeira do Porto, Portugal, dediquei a minha vida ao fitness, desportos de resistência e a ajudar outros a alcançar o seu potencial máximo de performance. Como personal trainer certificado e triatleta experiente, trago conhecimento profissional e experiência prática para os meus programas de treino.",
-    "bio2": "A minha jornada começou com uma paixão pela corrida, que evoluiu para corridas competitivas e eventualmente levou-me a completar o desafiante Ironman 70.3. Eu compreendo a dedicação, disciplina e força mental necessárias para ultrapassar os seus limites e alcançar objetivos aparentemente impossíveis.",
+    "bio1": "Vivo na linda cidade do Porto, e dedico o meu dia a dia ao fitness, aos desportos de resistência e a ajudar outras pessoas a atingirem a melhor versão de si mesmas. Como personal trainer certificado e triatleta, junto conhecimento técnico com muita experiência prática nos meus treinos.",
+    "bio2": "A minha jornada começou com uma paixão pela corrida, que rapidamente evoluiu para provas competitivas e, mais tarde, levou-me a completar o desafiador Ironman 70.3 — e, também um Ironman Full. Sei bem o nível de dedicação, disciplina e força mental que é preciso para ultrapassar limites e alcançar objetivos que, à primeira vista, parecem impossíveis.",
     "stats": {
       "certified": "Certificado",
       "certifiedDesc": "Formação profissional",
       "clients": "100+ Clientes",
       "clientsDesc": "Histórias de sucesso",
-      "experience": "7+ Anos",
+      "experience": "8+ Anos",
       "experienceDesc": "De experiência"
-    }
+    },
+    "youtube": "Último Vídeo do YouTube"
   },
   "services": {
     "title": "Meus",

@@ -1,5 +1,5 @@
-import { useLanguage } from '@/contexts/LanguageContext';
-import { Award, Clock, Users } from 'lucide-react';
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Award, Clock, Users } from "lucide-react";
 
 const AboutSection = () => {
   const { t } = useLanguage(); // Use the translation hook
@@ -9,9 +9,13 @@ const AboutSection = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            {t.about.title} <span className="text-primary">{t.about.titleHighlight}</span>
+            {t.about.title}{" "}
+            <span className="text-primary">{t.about.titleHighlight}</span>
           </h2>
-          <div className="h-1.5 w-24 mx-auto rounded-full" style={{ background: 'var(--gradient-secondary)' }}></div>
+          <div
+            className="h-1.5 w-24 mx-auto rounded-full"
+            style={{ background: "var(--gradient-secondary)" }}
+          ></div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -24,7 +28,9 @@ const AboutSection = () => {
               />
             </div>
             <div className="absolute -bottom-6 -right-6 card-modern p-6 hidden md:block animate-float">
-              <p className="font-display font-bold text-3xl text-primary">{t.about.stats.experience}</p>
+              <p className="font-display font-bold text-3xl text-primary">
+                {t.about.stats.experience}
+              </p>
             </div>
           </div>
 
@@ -44,20 +50,103 @@ const AboutSection = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6">
               <div className="card-modern p-6 text-center bg-gradient-to-br from-primary/5 to-transparent">
-                <Award className="mx-auto text-primary mb-3 animate-float" size={36} />
+                <Award
+                  className="mx-auto text-primary mb-3 animate-float"
+                  size={36}
+                />
                 <h5 className="font-bold text-lg">{t.about.stats.certified}</h5>
-                <p className="text-sm text-muted-foreground mt-1">{t.about.stats.certifiedDesc}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t.about.stats.certifiedDesc}
+                </p>
               </div>
               <div className="card-modern p-6 text-center bg-gradient-to-br from-primary/5 to-transparent">
-                <Users className="mx-auto text-primary mb-3 animate-float" size={36} style={{ animationDelay: '0.3s' }} />
+                <Users
+                  className="mx-auto text-primary mb-3 animate-float"
+                  size={36}
+                  style={{ animationDelay: "0.3s" }}
+                />
                 <h5 className="font-bold text-lg">{t.about.stats.clients}</h5>
-                <p className="text-sm text-muted-foreground mt-1">{t.about.stats.clientsDesc}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t.about.stats.clientsDesc}
+                </p>
               </div>
               <div className="card-modern p-6 text-center bg-gradient-to-br from-primary/5 to-transparent">
-                <Clock className="mx-auto text-primary mb-3 animate-float" size={36} style={{ animationDelay: '0.6s' }} />
-                <h5 className="font-bold text-lg">{t.about.stats.experience}</h5>
-                <p className="text-sm text-muted-foreground mt-1">{t.about.stats.experienceDesc}</p>
+                <Clock
+                  className="mx-auto text-primary mb-3 animate-float"
+                  size={36}
+                  style={{ animationDelay: "0.6s" }}
+                />
+                <h5 className="font-bold text-lg">
+                  {t.about.stats.experience}
+                </h5>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t.about.stats.experienceDesc}
+                </p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-16 animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="card-modern p-8 text-center">
+              <h3 className="text-2xl font-bold mb-6 text-foreground">
+                {t.about.youtube}
+              </h3>
+              <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/Uck70oAWWhk"
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <p className="mt-4 text-muted-foreground">
+                Check out more videos on my{" "}
+                <a
+                  href="https://www.youtube.com/@edgarzanin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  YouTube channel
+                </a>
+                .
+              </p>
+            </div>
+            <div className="card-modern p-8 text-center">
+              <h3 className="text-2xl font-bold mb-6 text-foreground">
+                Instagram
+              </h3>
+              <div className="w-3/4 mx-auto">
+                <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
+                  <iframe
+                    src="https://www.instagram.com/p/DQrOLopjYz5/embed"
+                    width="100%"
+                    height="100%"
+                    frameBorder={0}
+                    scrolling="no"
+                    allowTransparency={true}
+                    className="w-full h-full"
+                  ></iframe>
+                </div>
+              </div>
+              <p className="mt-4 text-muted-foreground">
+                Follow me on{" "}
+                <a
+                  href="https://www.instagram.com/edgarzanin/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Instagram
+                </a>{" "}
+                for more updates and photos.
+              </p>
             </div>
           </div>
         </div>
