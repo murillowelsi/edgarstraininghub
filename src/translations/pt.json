@@ -1,4 +1,3 @@
-
 {
   "nav": {
     "home": "Início",
@@ -15,8 +14,10 @@
     "startButton": "Comece agora",
     "learnButton": "Saiba Mais",
     "achievementShelf": "Minhas Conquistas",
-    "ironmanTitle": "Finalizador de Ironman 70.3",
-    "ironmanDescription": "1.9 km natação | 90 km bicicleta | 21.1 km corrida",
+    "ironmanTitle": "Ironman 70.3 Finisher",
+    "ironmanDescription": "1.9 km 🏊🏻 | 90 km 🚴🏻 | 21.1 km 🏃🏻",
+    "fullIronmanTitle": "Ironman Finisher",
+    "fullIronmanDescription": "3.8 km 🏊🏻 | 180 km 🚴🏻 | 42.2 km 🏃🏻",
     "records": {
       "5k": "5K PB",
       "10k": "10K PB",

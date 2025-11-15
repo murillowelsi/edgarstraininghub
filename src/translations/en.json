@@ -1,4 +1,3 @@
-
 {
   "nav": {
     "home": "Home",
@@ -16,7 +15,9 @@
     "learnButton": "Learn More",
     "achievementShelf": "My Achievements",
     "ironmanTitle": "Ironman 70.3 Finisher",
-    "ironmanDescription": "1.9 km swim | 90 km bike | 21.1 km run",
+    "ironmanDescription": "1.9 km 🏊🏻 | 90 km 🚴🏻 | 21.1 km 🏃🏻",
+    "fullIronmanTitle": "Ironman Finisher",
+    "fullIronmanDescription": "3.8 km 🏊🏻 | 180 km 🚴🏻 | 42.2 km 🏃🏻",
     "records": {
       "5k": "5K PB",
       "10k": "10K PB",

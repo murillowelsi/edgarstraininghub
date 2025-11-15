@@ -1,6 +1,5 @@
-
-import { useLanguage } from '@/contexts/LanguageContext';
-import { Activity, Award, BarChart, Clock, Medal, TrendingUp, Trophy } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Activity, Award, BarChart, Clock, Medal, Trophy } from "lucide-react";
 
 const AchievementsSection = () => {
   const { t } = useLanguage();
@@ -33,7 +32,10 @@ const AchievementsSection = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {t.achievements.title} <span className="text-primary">{t.achievements.titleHighlight}</span>
+            {t.achievements.title}{" "}
+            <span className="text-primary">
+              {t.achievements.titleHighlight}
+            </span>
           </h2>
           <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
           <p className="max-w-2xl mx-auto text-gray-700">
@@ -45,14 +47,18 @@ const AchievementsSection = () => {
           <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
             <div className="flex items-center mb-6">
               <Medal className="h-8 w-8 text-primary mr-4" />
-              <h3 className="text-2xl font-bold">{t.achievements.major.title}</h3>
+              <h3 className="text-2xl font-bold">
+                {t.achievements.major.title}
+              </h3>
             </div>
 
             <div className="space-y-6">
               <div className="flex items-start">
                 <Trophy className="h-6 w-6 text-primary mr-4 mt-1" />
                 <div>
-                  <h4 className="text-xl font-bold">{t.achievements.major.fullIronman.title}</h4>
+                  <h4 className="text-xl font-bold">
+                    {t.achievements.major.fullIronman.title}
+                  </h4>
                   <p className="text-gray-700">
                     {t.achievements.major.fullIronman.description}
                   </p>
@@ -62,7 +68,9 @@ const AchievementsSection = () => {
               <div className="flex items-start">
                 <Trophy className="h-6 w-6 text-primary mr-4 mt-1" />
                 <div>
-                  <h4 className="text-xl font-bold">{t.achievements.major.ironman.title}</h4>
+                  <h4 className="text-xl font-bold">
+                    {t.achievements.major.ironman.title}
+                  </h4>
                   <p className="text-gray-700">
                     {t.achievements.major.ironman.description}
                   </p>
@@ -72,7 +80,9 @@ const AchievementsSection = () => {
               <div className="flex items-start">
                 <Clock className="h-6 w-6 text-primary mr-4 mt-1" />
                 <div>
-                  <h4 className="text-xl font-bold">{t.achievements.major.marathon.title}</h4>
+                  <h4 className="text-xl font-bold">
+                    {t.achievements.major.marathon.title}
+                  </h4>
                   <p className="text-gray-700">
                     {t.achievements.major.marathon.description}
                   </p>
@@ -82,7 +92,9 @@ const AchievementsSection = () => {
               <div className="flex items-start">
                 <Medal className="h-6 w-6 text-primary mr-4 mt-1" />
                 <div>
-                  <h4 className="text-xl font-bold">{t.achievements.major.podiums.title}</h4>
+                  <h4 className="text-xl font-bold">
+                    {t.achievements.major.podiums.title}
+                  </h4>
                   <p className="text-gray-700">
                     {t.achievements.major.podiums.description}
                   </p>
@@ -94,7 +106,9 @@ const AchievementsSection = () => {
           <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
             <div className="flex items-center mb-6">
               <BarChart className="h-8 w-8 text-primary mr-4" />
-              <h3 className="text-2xl font-bold">{t.achievements.personalBests.title}</h3>
+              <h3 className="text-2xl font-bold">
+                {t.achievements.personalBests.title}
+              </h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
