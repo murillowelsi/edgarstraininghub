@@ -10,11 +10,11 @@
   "hero": {
     "title": "Transform Your",
     "titleHighlight": "Fitness Journey",
-    "subtitle": "Personal Trainer & Triathlete based in Porto, Portugal. Specializing in endurance training, strength conditioning, and performance optimization.",
+    "subtitle": "What’s your goal? Finish your first race? Smash a personal record? I’ll be by your side to ensure you not only reach it, but surpass it. From the first step to high performance, my support is the fuel for your evolution.",
     "startButton": "Start Now",
     "learnButton": "Learn More",
     "achievementShelf": "My Achievements",
-    "ironmanTitle": "Ironman 70.3 Finisher",
+    "ironmanTitle": "70.3 Finisher",
     "ironmanDescription": "1.9 km 🏊🏻 | 90 km 🚴🏻 | 21.1 km 🏃🏻",
     "fullIronmanTitle": "Ironman Finisher",
     "fullIronmanDescription": "3.8 km 🏊🏻 | 180 km 🚴🏻 | 42.2 km 🏃🏻",
@@ -30,14 +30,14 @@
     "titleHighlight": "Me",
     "name": "Edgar Alan Zanin",
     "profession": "Personal Trainer & Triathlete",
-    "bio1": "I live in the beautiful city of Porto, and I dedicate my everyday life to fitness, endurance sports, and helping others reach the best version of themselves. As a certified personal trainer and triathlete, I combine technical knowledge with plenty of hands-on experience in my training programs.",
-    "bio2": "My journey began with a passion for running, which quickly grew into competitive races and eventually led me to complete the challenging Ironman 70.3 — and also an Ironman Full. I truly understand the level of dedication, discipline, and mental strength needed to push your limits and achieve goals that at first may seem impossible.",
+    "bio1": "From Triathlete to Personal Trainer, I live and breathe sport in the heart of Porto. My passion for running quickly led me into the world of endurance races, starting with completing a challenging Ironman 70.3 and an Ironman Full.",
+    "bio2": "This journey gave me practical experience and technical knowledge to know what it takes to achieve goals that today may seem unattainable. My commitment? Combining the discipline of an Ironman with fitness science so you can reach your best physical and mental shape.",
     "stats": {
       "certified": "Certified",
       "certifiedDesc": "Professional training",
       "clients": "100+ Clients",
       "clientsDesc": "Success stories",
-      "experience": "7+ Years",
+      "experience": "8+ Years",
       "experienceDesc": "Experience"
     },
     "youtube": "Latest YouTube Video"
