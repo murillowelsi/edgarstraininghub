@@ -15,10 +15,10 @@ const Navbar = () => {
   return (
     <nav className="bg-background/80 backdrop-blur-lg fixed w-full z-50 border-b border-border/50">
       <div className="container mx-auto px-4 md:px-6 py-5 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-primary font-display font-extrabold text-3xl tracking-tighter">EZ</span>
-            <div className="text-foreground font-display font-bold text-xl hidden sm:block">Edgar Zanin</div>
-          </div>
+          <a href="#home" className="flex items-baseline font-display font-bold text-xl tracking-tight hover:opacity-90 transition-opacity">
+            <span className="text-primary text-3xl mr-[1px]">E</span>dgar 
+            <span className="text-primary text-3xl ml-1 mr-[1px]">Z</span>anin
+          </a>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
