@@ -29,8 +29,8 @@
     "title": "About",
     "titleHighlight": "Me",
     "name": "Edgar Alan Zanin",
-    "profession": "Personal Trainer & Triathlete",
-    "bio1": "From Triathlete to Personal Trainer, I live and breathe sport in the heart of Porto. My passion for running quickly led me into the world of endurance races, starting with completing a challenging Ironman 70.3 and an Ironman Full.",
+    "profession": "Fitness Trainer & Triathlete",
+    "bio1": "From Triathlete to Fitness Trainer, I live and breathe sport in the heart of Porto. My passion for running quickly led me into the world of endurance races, starting with completing a challenging Ironman 70.3 and an Ironman Full.",
     "bio2": "This journey gave me practical experience and technical knowledge to know what it takes to achieve goals that today may seem unattainable. My commitment? Combining the discipline of an Ironman with fitness science so you can reach your best physical and mental shape.",
     "stats": {
       "certified": "Certified",
@@ -134,7 +134,7 @@
     }
   },
   "footer": {
-    "description": "Personal Trainer & Triathlete based in Porto, Portugal, specializing in endurance training and performance optimization.",
+    "description": "Fitness Trainer & Triathlete based in Porto, Portugal, specializing in endurance training and performance optimization.",
     "quickLinks": "Quick Links",
     "services": "Services",
     "getInTouch": "Get in Touch",

@@ -15,7 +15,10 @@ const Navbar = () => {
   return (
     <nav className="bg-background/80 backdrop-blur-lg fixed w-full z-50 border-b border-border/50">
       <div className="container mx-auto px-4 md:px-6 py-5 flex justify-between items-center">
-        <div className="text-primary font-display font-bold text-2xl">Edgar Zanin</div>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="EZ Logo" className="h-8 w-8 object-contain" />
+          <div className="text-primary font-display font-bold text-2xl">Edgar Zanin</div>
+        </div>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
