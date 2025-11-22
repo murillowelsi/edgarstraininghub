@@ -23,7 +23,7 @@ const HeroSection = () => {
       style={{ background: "var(--gradient-hero)" }}
     >
       <div
-        className="absolute inset-0 z-0 bg-cover bg-center opacity-5"
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-20"
         style={{ backgroundImage: "url('/lovable-uploads/bg-1.png')" }}
       ></div>
 
