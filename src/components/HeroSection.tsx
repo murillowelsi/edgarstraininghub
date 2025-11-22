@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { ArrowDown, Medal } from "lucide-react";
-import { useLanguage } from "../contexts/LanguageContext";
 import edgarImage from "@/assets/edgar-ironman.png";
+import { Button } from "@/components/ui/button";
+import { ArrowDown } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const HeroSection = () => {
   const { t, language } = useLanguage();
@@ -19,11 +19,11 @@ const HeroSection = () => {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center overflow-hidden pt-20"
+      className="relative h-[95vh] flex items-center overflow-hidden pt-20"
       style={{ background: "var(--gradient-hero)" }}
     >
       <div
-        className="absolute inset-0 z-0 bg-cover bg-center opacity-20"
+        className="absolute inset-0 z-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: "url('/lovable-uploads/bg-1.png')" }}
       ></div>
 
@@ -67,11 +67,11 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <div className="relative animate-slide-in-right flex items-end justify-end -mr-4 md:-mr-6">
+          <div className="relative animate-slide-in-right hidden lg:flex items-end justify-end -mr-4 md:-mr-6 mt-32">
             <img
               src={edgarImage}
               alt="Edgar Zanin - Ironman Athlete"
-              className="w-full h-[700px] md:h-[850px] lg:h-[1000px] object-cover object-top"
+              className="w-full h-[600px] md:h-[700px] lg:h-[850px] object-cover object-top opacity-4"
             />
           </div>
         </div>
