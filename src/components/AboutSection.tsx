@@ -1,8 +1,10 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLatestYouTubeVideo } from "@/hooks/useLatestYouTubeVideo";
 import { Award, Clock, Users } from "lucide-react";
 
 const AboutSection = () => {
   const { t } = useLanguage(); // Use the translation hook
+  const { video, loading } = useLatestYouTubeVideo();
 
   return (
     <section id="about" className="section-modern bg-background">
@@ -93,16 +95,26 @@ const AboutSection = () => {
               {t.about.youtube}
             </h3>
             <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/Uck70oAWWhk"
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-              ></iframe>
+              {loading ? (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <p className="text-muted-foreground">Loading latest video...</p>
+                </div>
+              ) : video?.videoId ? (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${video.videoId}`}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <p className="text-red-500">Failed to load video. Check console for details.</p>
+                </div>
+              )}
             </div>
             <p className="mt-4 text-muted-foreground">
               Check out more videos on my{" "}
