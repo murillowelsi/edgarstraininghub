@@ -67,11 +67,11 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <div className="relative animate-slide-in-right flex items-center justify-center">
+          <div className="relative animate-slide-in-right flex items-end justify-end -mr-4 md:-mr-6">
             <img
               src={edgarImage}
               alt="Edgar Zanin - Ironman Athlete"
-              className="w-full h-auto max-h-[800px] object-contain"
+              className="w-full h-[600px] md:h-[700px] lg:h-[850px] object-cover object-top"
             />
           </div>
         </div>
