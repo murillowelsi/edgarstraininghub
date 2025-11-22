@@ -67,14 +67,12 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <div className="relative animate-slide-in-right">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-              <img
-                src={edgarImage}
-                alt="Edgar Zanin - Ironman Athlete"
-                className="w-full h-auto object-cover"
-              />
-            </div>
+          <div className="relative animate-slide-in-right flex items-center justify-center">
+            <img
+              src={edgarImage}
+              alt="Edgar Zanin - Ironman Athlete"
+              className="w-full h-auto max-h-[800px] object-contain"
+            />
           </div>
         </div>
       </div>
