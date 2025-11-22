@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown, Medal } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
+import edgarImage from "@/assets/edgar-ironman.png";
 
 const HeroSection = () => {
   const { t, language } = useLanguage();
@@ -66,6 +67,15 @@ const HeroSection = () => {
             </div>
           </div>
 
+          <div className="relative animate-slide-in-right">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              <img
+                src={edgarImage}
+                alt="Edgar Zanin - Ironman Athlete"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
