@@ -103,35 +103,61 @@ const AchievementsSection = () => {
             </div>
           </div>
 
-          <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
-            <div className="flex items-center mb-6">
-              <BarChart className="h-8 w-8 text-primary mr-4" />
-              <h3 className="text-2xl font-bold">
-                {t.achievements.personalBests.title}
-              </h3>
-            </div>
+          <div className="card-modern p-8 backdrop-blur-xl bg-card/80">
+            <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
+              {t.hero.achievementShelf}
+            </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {runningPBs.map((pb, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-6 rounded-lg shadow-sm border border-gray-100"
-                >
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-bold text-lg">{pb.distance}</h4>
-                    {pb.icon}
-                  </div>
-                  <p className="text-3xl font-display font-bold text-primary">
-                    {pb.time}
+            <div className="space-y-5">
+              <div className="card-modern p-5 bg-gradient-to-br from-green-500/10 to-transparent border-l-4 border-green-500 flex items-start">
+                <Medal className="text-green-500 h-9 w-9 mr-4 flex-shrink-0 animate-glow" />
+                <div>
+                  <h4 className="font-bold text-foreground text-lg">
+                    {t.hero.ironmanTitle}
+                  </h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t.hero.ironmanDescription}
                   </p>
                 </div>
-              ))}
-            </div>
+              </div>
+              <div className="card-modern p-5 bg-gradient-to-br from-green-500/10 to-transparent border-l-4 border-green-500 flex items-start">
+                <Medal className="text-green-500 h-9 w-9 mr-4 flex-shrink-0 animate-glow" />
+                <div>
+                  <h4 className="font-bold text-foreground text-lg">
+                    {t.hero.fullIronmanTitle}
+                  </h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t.hero.fullIronmanDescription}
+                  </p>
+                </div>
+              </div>
 
-            <div className="mt-6 p-6 bg-primary/10 rounded-lg border border-primary/20">
-              <p className="text-gray-700 italic">
-                {t.achievements.personalBests.quote}
-              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">
+                    {t.hero.records["5k"]}
+                  </p>
+                  <p className="font-bold text-2xl text-primary">19:16</p>
+                </div>
+                <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">
+                    {t.hero.records["10k"]}
+                  </p>
+                  <p className="font-bold text-2xl text-primary">36:31</p>
+                </div>
+                <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">
+                    {t.hero.records.halfMarathon}
+                  </p>
+                  <p className="font-bold text-2xl text-primary">1:20:00</p>
+                </div>
+                <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">
+                    {t.hero.records.marathon}
+                  </p>
+                  <p className="font-bold text-2xl text-primary">2:56:09</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
