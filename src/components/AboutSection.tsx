@@ -88,7 +88,7 @@ const AboutSection = () => {
         </div>
 
         <div className="mt-16 animate-fade-in">
-          <div className="card-modern p-8 text-center max-w-2xl mx-auto">
+          <div className="card-modern p-8 text-center max-w-4xl mx-auto">
             <h3 className="text-2xl font-bold mb-6 text-foreground">
               {t.about.youtube}
             </h3>

@@ -1,6 +1,5 @@
 import edgarImage from "@/assets/edgar-ironman.png";
 import { Button } from "@/components/ui/button";
-import { ArrowDown } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 
 const HeroSection = () => {
@@ -39,12 +38,7 @@ const HeroSection = () => {
           <div className="space-y-8 animate-slide-in-left">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight">
               {t.hero.title}{" "}
-              <span className="text-primary">{t.hero.titleHighlight}</span>{" "}
-              <span className="block mt-2 text-4xl md:text-5xl lg:text-6xl">
-                {t.hero.title.includes("Transform Your")
-                  ? "with Edgar Zanin"
-                  : "com Edgar Zanin"}
-              </span>
+              <span className="text-primary">{t.hero.titleHighlight}</span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-xl leading-relaxed">
               {t.hero.subtitle}
@@ -61,30 +55,25 @@ const HeroSection = () => {
                 size="lg"
                 variant="outline"
                 className="border-2 border-primary text-primary hover:bg-accent font-semibold text-lg py-7 px-10 rounded-xl transition-all duration-300"
+                onClick={() => {
+                  document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
                 {t.hero.learnButton}
               </Button>
             </div>
           </div>
 
-          <div className="relative animate-slide-in-right hidden lg:flex items-end justify-end -mr-4 md:-mr-6 mt-32">
+          <div className="absolute right-0 top-0 animate-slide-in-right hidden lg:flex items-end justify-end w-[55%] mt-20">
             <img
               src={edgarImage}
               alt="Edgar Zanin - Ironman Athlete"
-              className="w-full h-[600px] md:h-[700px] lg:h-[850px] object-cover object-top opacity-4"
+              className="w-full h-[650px] md:h-[750px] lg:h-[900px] object-cover object-top opacity-4"
             />
           </div>
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
-        <a
-          href="#about"
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
-        >
-          <ArrowDown className="text-primary" size={28} />
-        </a>
-      </div>
     </section>
   );
 };
