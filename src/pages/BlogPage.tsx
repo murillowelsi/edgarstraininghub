@@ -10,26 +10,31 @@ const BlogPage = () => {
   const blogArticles = [
     {
       id: "strengthForRunners",
+      slug: "dicas-de-forca-para-corredores",
       data: t.blog.articles.strengthForRunners,
       image: "/lovable-uploads/bg-1.png"
     },
     {
       id: "triathletesMobility",
+      slug: "mobilidade-para-triatletas",
       data: t.blog.articles.triathletesMobility,
       image: "/lovable-uploads/murillo.png"
     },
     {
       id: "injuryPrevention",
+      slug: "como-evitar-lesoes",
       data: t.blog.articles.injuryPrevention,
       image: "/lovable-uploads/ba2184b9-65d7-4393-87da-9d1999bc5169.png"
     },
     {
       id: "cyclingPower",
+      slug: "como-aumentar-potencia-no-pedal",
       data: t.blog.articles.cyclingPower,
       image: "/lovable-uploads/c2022b01-82d4-4894-b5f3-eba98aebfd4e.png"
     },
     {
       id: "swimmingProgress",
+      slug: "como-evoluir-na-natacao",
       data: t.blog.articles.swimmingProgress,
       image: "/lovable-uploads/bg-1.png"
     }
@@ -77,6 +82,7 @@ const BlogPage = () => {
                     category={article.data.category}
                     readTime={article.data.readTime}
                     image={article.image}
+                    slug={article.slug}
                   />
                 </div>
               ))}

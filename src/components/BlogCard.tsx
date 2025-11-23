@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 
 interface BlogCardProps {
   title: string;
@@ -10,10 +11,12 @@ interface BlogCardProps {
   category: string;
   readTime: string;
   image?: string;
+  slug: string;
 }
 
-const BlogCard = ({ title, excerpt, category, readTime, image }: BlogCardProps) => {
+const BlogCard = ({ title, excerpt, category, readTime, image, slug }: BlogCardProps) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
@@ -44,7 +47,11 @@ const BlogCard = ({ title, excerpt, category, readTime, image }: BlogCardProps) 
         <CardDescription className="mb-4 line-clamp-3">
           {excerpt}
         </CardDescription>
-        <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+        <Button 
+          variant="outline" 
+          className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+          onClick={() => navigate(`/blog/${slug}`)}
+        >
           {t.blog.readMore}
         </Button>
       </CardContent>
