@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { addDoc, collection, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -15,6 +16,15 @@ const ArticleEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      ['link', 'clean']
+    ],
+  };
   
   const [formData, setFormData] = useState({
     slug: '',
@@ -112,7 +122,7 @@ const ArticleEditor = () => {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Portuguese Content */}
           <Card>
             <CardContent className="pt-6 space-y-4">
@@ -122,7 +132,7 @@ const ArticleEditor = () => {
                 <Input name="title_pt" value={formData.title_pt} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
-                <Label>Excerpt</Label>
+                <Label>Short Description</Label>
                 <Textarea name="excerpt_pt" value={formData.excerpt_pt} onChange={handleChange} rows={3} />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -136,8 +146,14 @@ const ArticleEditor = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Content (Markdown)</Label>
-                <Textarea name="content_pt" value={formData.content_pt} onChange={handleChange} rows={10} required />
+                <Label>Content</Label>
+                <ReactQuill 
+                  theme="snow"
+                  value={formData.content_pt} 
+                  onChange={(value) => handleContentChange('content_pt', value)}
+                  modules={modules}
+                  className="mb-12 min-h-[200px]"
+                />
               </div>
             </CardContent>
           </Card>
@@ -151,7 +167,7 @@ const ArticleEditor = () => {
                 <Input name="title_en" value={formData.title_en} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
-                <Label>Excerpt</Label>
+                <Label>Short Description</Label>
                 <Textarea name="excerpt_en" value={formData.excerpt_en} onChange={handleChange} rows={3} />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -165,8 +181,14 @@ const ArticleEditor = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Content (Markdown)</Label>
-                <Textarea name="content_en" value={formData.content_en} onChange={handleChange} rows={10} required />
+                <Label>Content</Label>
+                <ReactQuill 
+                  theme="snow"
+                  value={formData.content_en} 
+                  onChange={(value) => handleContentChange('content_en', value)}
+                  modules={modules}
+                  className="mb-12 min-h-[200px]"
+                />
               </div>
             </CardContent>
           </Card>
