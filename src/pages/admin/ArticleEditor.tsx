@@ -86,8 +86,10 @@ const ArticleEditor = () => {
         // Remove "min" from read time fields for editing
         const processedData = {
           ...data,
-          read_time_pt: data.read_time_pt?.replace(/\s*min\s*$/i, "").trim() || "",
-          read_time_en: data.read_time_en?.replace(/\s*min\s*$/i, "").trim() || "",
+          read_time_pt:
+            data.read_time_pt?.replace(/\s*min\s*$/i, "").trim() || "",
+          read_time_en:
+            data.read_time_en?.replace(/\s*min\s*$/i, "").trim() || "",
         };
         setFormData(processedData);
       }
@@ -131,12 +133,14 @@ const ArticleEditor = () => {
 
       const articleData = {
         ...formData,
-        read_time_pt: formData.read_time_pt && formData.read_time_pt.trim()
-          ? `${formData.read_time_pt.trim()} min`
-          : "",
-        read_time_en: formData.read_time_en && formData.read_time_en.trim()
-          ? `${formData.read_time_en.trim()} min`
-          : "",
+        read_time_pt:
+          formData.read_time_pt && formData.read_time_pt.trim()
+            ? `${formData.read_time_pt.trim()} min`
+            : "",
+        read_time_en:
+          formData.read_time_en && formData.read_time_en.trim()
+            ? `${formData.read_time_en.trim()} min`
+            : "",
         author: {
           uid: user.uid,
           name: authorName,

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { FileText, LogOut, Users } from 'lucide-react';
+import { Dumbbell, FileText, LibraryBig, LogOut, Users } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUserRole } from '../hooks/useUserRole';
 import { auth } from '../lib/firebase';
@@ -8,7 +8,7 @@ import { auth } from '../lib/firebase';
 const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isAthlete } = useUserRole();
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -20,23 +20,39 @@ const AdminSidebar = () => {
       title: 'Users',
       icon: Users,
       href: '/admin/users',
+      show: isAdmin,
+    },
+    {
+      title: 'Exercises',
+      icon: LibraryBig,
+      href: '/admin/exercises',
+      show: isAdmin,
     },
     {
       title: 'Articles',
       icon: FileText,
       href: '/admin/articles',
+      show: !isAthlete, // Show for admins, editors, authors
+    },
+    {
+      title: 'My Workout',
+      icon: Dumbbell,
+      href: '/athlete/dashboard',
+      show: isAthlete,
     },
   ];
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-background">
       <div className="flex h-16 items-center border-b px-6">
-        <h2 className="text-lg font-bold">Admin Panel</h2>
+        <h2 className="text-lg font-bold">
+          {isAthlete ? 'Athlete Area' : 'Admin Panel'}
+        </h2>
       </div>
       
       <nav className="flex-1 space-y-1 p-4">
         {navItems
-          .filter(item => item.title !== 'Users' || isAdmin)
+          .filter(item => item.show)
           .map((item) => {
           const Icon = item.icon;
           // Highlight Users for both /admin/users and /admin/dashboard

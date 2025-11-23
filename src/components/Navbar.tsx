@@ -1,4 +1,5 @@
-import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LogIn, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -57,6 +58,14 @@ const Navbar = () => {
             {t.nav.contact}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </Link>
+          
+          <Link to="/login">
+            <Button variant="ghost" className="font-semibold text-muted-foreground hover:text-primary">
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
+            </Button>
+          </Link>
+
           <LanguageSwitcher />
         </div>
 
@@ -99,6 +108,13 @@ const Navbar = () => {
               className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
             >
               {t.nav.contact}
+            </Link>
+            <Link
+              to="/login"
+              className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
             </Link>
           </div>
         </div>

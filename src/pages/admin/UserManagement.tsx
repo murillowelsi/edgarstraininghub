@@ -1,4 +1,3 @@
-import AdminSidebar from '@/components/AdminSidebar';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -29,7 +28,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { initializeApp } from 'firebase/app';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
-import { Pencil, Trash2, UserPlus } from 'lucide-react';
+import { Dumbbell, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -187,149 +186,155 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="flex h-screen">
-      <AdminSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto py-10 px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">User Management</h1>
-            <div className="flex gap-4">
-              <Button onClick={() => {
-                setEditingUser(null);
-                setFormData({ name: '', email: '', password: '', role: 'author' });
-                setShowCreateForm(!showCreateForm);
-              }}>
+    <div className="container mx-auto py-10 px-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold">User Management</h1>
+        <div className="flex gap-4">
+          <Button onClick={() => {
+            setEditingUser(null);
+            setFormData({ name: '', email: '', password: '', role: 'author' });
+            setShowCreateForm(!showCreateForm);
+          }}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            {showCreateForm ? 'Cancel' : 'New User'}
+          </Button>
+        </div>
+      </div>
+
+      <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-2xl">{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
+            <DialogDescription className="text-base">
+              {editingUser 
+                ? 'Update user information. Email cannot be changed for security reasons.'
+                : 'Add a new user to the system. They will be able to log in and create articles.'}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="john@example.com"
+                disabled={!!editingUser}
+                required={!editingUser}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password {editingUser && '(leave blank to keep current)'}</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder={editingUser ? "Leave blank to keep current" : "Min. 6 characters"}
+                required={!editingUser}
+                minLength={6}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select value={formData.role} onValueChange={handleRoleChange} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="author">Author</SelectItem>
+                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="athlete">Athlete</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="md:col-span-2 flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={creating}>
                 <UserPlus className="mr-2 h-4 w-4" />
-                {showCreateForm ? 'Cancel' : 'New User'}
+                {creating ? (editingUser ? 'Updating...' : 'Creating...') : (editingUser ? 'Update User' : 'Create User')}
               </Button>
             </div>
-          </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-          <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-              <DialogHeader className="space-y-3">
-                <DialogTitle className="text-2xl">{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
-                <DialogDescription className="text-base">
-                  {editingUser 
-                    ? 'Update user information. Email cannot be changed for security reasons.'
-                    : 'Add a new user to the system. They will be able to log in and create articles.'}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="john@example.com"
-                    disabled={!!editingUser}
-                    required={!editingUser}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password {editingUser && '(leave blank to keep current)'}</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder={editingUser ? "Leave blank to keep current" : "Min. 6 characters"}
-                    required={!editingUser}
-                    minLength={6}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={formData.role} onValueChange={handleRoleChange} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="author">Author</SelectItem>
-                      <SelectItem value="editor">Editor</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="md:col-span-2 flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={creating}>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    {creating ? (editingUser ? 'Updating...' : 'Creating...') : (editingUser ? 'Update User' : 'Create User')}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          <div className="bg-card rounded-lg border shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+      <div className="bg-card rounded-lg border shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8">Loading...</TableCell>
+              </TableRow>
+            ) : users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8">No users found.</TableCell>
+              </TableRow>
+            ) : (
+              users.map((user) => (
+                <TableRow key={user.uid}>
+                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      {user.role === 'athlete' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => navigate(`/admin/users/${user.uid}/workouts`)}
+                          title="Manage Workouts"
+                        >
+                          <Dumbbell className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleEdit(user)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleDelete(user.uid, user.name)}
+                        disabled={user.uid === currentUser?.uid}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">Loading...</TableCell>
-                  </TableRow>
-                ) : users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">No users found.</TableCell>
-                  </TableRow>
-                ) : (
-                  users.map((user) => (
-                    <TableRow key={user.uid}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.role}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleEdit(user)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleDelete(user.uid, user.name)}
-                            disabled={user.uid === currentUser?.uid}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

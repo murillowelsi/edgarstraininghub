@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { auth } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,9 +19,19 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check user role
+      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      const role = userDoc.exists() ? userDoc.data().role : 'author';
+
       toast.success('Logged in successfully');
-      navigate('/admin/dashboard');
+      
+      if (role === 'athlete') {
+        navigate('/athlete/dashboard');
+      } else {
+        navigate('/admin/dashboard');
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       
@@ -47,7 +58,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
+          <CardTitle className="text-2xl text-center">Portal Login</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">

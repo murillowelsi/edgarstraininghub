@@ -14,8 +14,14 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ArticleEditor from "./pages/admin/ArticleEditor";
 import Dashboard from "./pages/admin/Dashboard";
+import ExerciseLibrary from "./pages/admin/ExerciseLibrary";
 import Login from "./pages/admin/Login";
 import UserManagement from "./pages/admin/UserManagement";
+import UserWorkouts from "./pages/admin/UserWorkouts";
+import AdminLayout from "./components/AdminLayout";
+import AthleteLayout from "./components/AthleteLayout";
+import AthleteDashboard from "./pages/athlete/AthleteDashboard";
+import WorkoutDetail from "./pages/athlete/WorkoutDetail";
 
 const queryClient = new QueryClient();
 
@@ -37,50 +43,33 @@ const App = () => (
               {/* Admin Routes */}
               <Route
                 path="/admin"
-                element={<Navigate to="/admin/login" replace />}
-              />
-              <Route path="/admin/login" element={<Login />} />
-              <Route
-                path="/admin/dashboard"
                 element={
                   <ProtectedRoute>
-                    <UserManagement />
+                    <AdminLayout />
                   </ProtectedRoute>
                 }
-              />
+              >
+                <Route path="login" element={<Login />} />
+                <Route path="articles" element={<Dashboard />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="exercises" element={<ExerciseLibrary />} />
+                <Route path="editor" element={<ArticleEditor />} />
+                <Route path="editor/:id" element={<ArticleEditor />} />
+                <Route path="users/:userId/workouts" element={<UserWorkouts />} />
+              </Route>
               <Route
-                path="/admin/editor"
+                path="/athlete"
                 element={
                   <ProtectedRoute>
-                    <ArticleEditor />
+                    <AthleteLayout />
                   </ProtectedRoute>
                 }
-              />
-              <Route
-                path="/admin/editor/:id"
-                element={
-                  <ProtectedRoute>
-                    <ArticleEditor />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/articles"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/users"
-                element={
-                  <ProtectedRoute>
-                    <UserManagement />
-                  </ProtectedRoute>
-                }
-              />
+              >
+                <Route path="dashboard" element={<AthleteDashboard />} />
+                <Route path="workout/:workoutId" element={<WorkoutDetail />} />
+              </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="/login" element={<Login />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

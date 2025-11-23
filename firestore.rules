@@ -51,6 +51,24 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
         request.auth.uid != userId;
     }
+
+    // Exercises collection
+    match /exercises/{exercise} {
+      // Authenticated users can read exercises
+      allow read: if request.auth != null;
+      // Only Admins can manage exercises
+      allow write: if isAdmin();
+    }
+
+    // Workouts collection
+    match /workouts/{workout} {
+      // Athletes can read their own workouts, Admins can read all
+      allow read: if request.auth != null && (
+        resource.data.athleteId == request.auth.uid || isAdmin()
+      );
+      // Only Admins can manage workouts
+      allow write: if isAdmin();
+    }
     
     // Default deny for other collections
     match /{document=**} {
