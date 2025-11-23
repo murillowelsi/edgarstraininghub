@@ -4,6 +4,7 @@
     "about": "Sobre",
     "services": "Serviços",
     "achievements": "Conquistas",
+    "blog": "Blog",
     "contact": "Contacto",
     "getStarted": "Começar"
   },
@@ -141,5 +142,44 @@
     "rights": "Todos os direitos reservados.",
     "privacy": "Política de Privacidade",
     "terms": "Termos de Serviço"
+  },
+  "blog": {
+    "title": "Blog &",
+    "titleHighlight": "Conteúdo",
+    "subtitle": "Dicas, estratégias e conhecimento para otimizar seu treino e performance atlética.",
+    "readMore": "Ler Artigo",
+    "backToBlog": "← Voltar ao Blog",
+    "articles": {
+      "strengthForRunners": {
+        "title": "Dicas de Força para Corredores",
+        "excerpt": "Descubra como o treino de força pode melhorar sua velocidade, resistência e prevenir lesões comuns na corrida.",
+        "category": "Força",
+        "readTime": "5 min"
+      },
+      "triathletesMobility": {
+        "title": "Mobilidade para Triatletas",
+        "excerpt": "Exercícios essenciais de mobilidade para melhorar sua performance nas três modalidades do triatlo.",
+        "category": "Mobilidade",
+        "readTime": "6 min"
+      },
+      "injuryPrevention": {
+        "title": "Como Evitar Lesões",
+        "excerpt": "Estratégias comprovadas para prevenir lesões e manter consistência no seu treino ao longo do ano.",
+        "category": "Prevenção",
+        "readTime": "7 min"
+      },
+      "cyclingPower": {
+        "title": "Como Aumentar Potência no Pedal",
+        "excerpt": "Técnicas e treinos específicos para desenvolver mais força e eficiência no ciclismo.",
+        "category": "Ciclismo",
+        "readTime": "6 min"
+      },
+      "swimmingProgress": {
+        "title": "Como Evoluir na Natação",
+        "excerpt": "Dicas práticas para melhorar técnica, eficiência e velocidade na água, independente do seu nível.",
+        "category": "Natação",
+        "readTime": "5 min"
+      }
+    }
   }
 }
