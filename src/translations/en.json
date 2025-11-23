@@ -33,12 +33,13 @@
     "profession": "Fitness Trainer & Triathlete",
     "bio1": "From Triathlete to Fitness Trainer, I live and breathe sport in the heart of Porto. My passion for running quickly led me into the world of endurance races, starting with completing a challenging Ironman 70.3 and an Ironman Full.",
     "bio2": "This journey gave me practical experience and technical knowledge to know what it takes to achieve goals that today may seem unattainable. My commitment? Combining the discipline of an Ironman with fitness science so you can reach your best physical and mental shape.",
+    "certificationHighlight": "Edgar Zanin is a Level 3 certified Personal Trainer by YMCA Awards (United Kingdom), with in-depth training in anatomy, physiology, nutrition, safety, and exercise programming.",
     "stats": {
       "certified": "Certified",
       "certifiedDesc": "Professional training",
-      "clients": "100+ Clients",
+      "clients": "50+ Clients",
       "clientsDesc": "Success stories",
-      "experience": "8+ Years",
+      "experience": "7+ Years",
       "experienceDesc": "Experience"
     },
     "youtube": "Latest YouTube Video"
@@ -143,43 +144,109 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service"
   },
+  "youtube": {
+    "title": "Videos &",
+    "titleHighlight": "Content",
+    "subtitle": "Follow my workouts, tips and motivation on my YouTube channel"
+  },
   "blog": {
     "title": "Blog &",
-    "titleHighlight": "Content",
-    "subtitle": "Tips, strategies and knowledge to optimize your training and athletic performance.",
-    "readMore": "Read Article",
-    "backToBlog": "Back to Blog",
-    "articles": {
-      "strengthForRunners": {
-        "title": "Strength Tips for Runners",
-        "excerpt": "Discover how strength training can improve your speed, endurance and prevent common running injuries.",
-        "category": "Strength",
-        "readTime": "5 min"
+    "titleHighlight": "Articles",
+    "subtitle": "Practical training tips, nutrition and athletic performance based on my experience as a triathlete and personal trainer",
+    "readMore": "Read More"
+  },
+  "pricing": {
+    "title": "Plans &",
+    "titleHighlight": "Pricing",
+    "subtitle": "Choose the perfect plan for your fitness goals",
+    "pricePlaceholder": "Price on request",
+    "plans": {
+      "basic": {
+        "name": "Basic Plan",
+        "features": [
+          "1 session per week",
+          "Complete initial assessment",
+          "Customized workout plan",
+          "WhatsApp follow-up",
+          "Basic nutrition tips"
+        ]
       },
-      "triathletesMobility": {
-        "title": "Mobility for Triathletes",
-        "excerpt": "Essential mobility exercises to improve your performance in all three triathlon disciplines.",
-        "category": "Mobility",
-        "readTime": "6 min"
+      "standard": {
+        "name": "Standard Plan",
+        "features": [
+          "2 sessions per week",
+          "Complete initial assessment",
+          "Customized workout plan",
+          "WhatsApp follow-up",
+          "Basic nutrition plan",
+          "Weekly workout adjustments"
+        ],
+        "popular": true
       },
-      "injuryPrevention": {
-        "title": "How to Avoid Injuries",
-        "excerpt": "Proven strategies to prevent injuries and maintain training consistency throughout the year.",
-        "category": "Prevention",
-        "readTime": "7 min"
-      },
-      "cyclingPower": {
-        "title": "How to Increase Cycling Power",
-        "excerpt": "Specific techniques and workouts to develop more strength and efficiency in cycling.",
-        "category": "Cycling",
-        "readTime": "6 min"
-      },
-      "swimmingProgress": {
-        "title": "How to Progress in Swimming",
-        "excerpt": "Practical tips to improve technique, efficiency and speed in the water, regardless of your level.",
-        "category": "Swimming",
-        "readTime": "5 min"
+      "premium": {
+        "name": "Premium Plan",
+        "features": [
+          "3 sessions per week",
+          "Complete initial assessment",
+          "Customized workout plan",
+          "Advanced nutrition plan",
+          "24/7 follow-up",
+          "Monthly check-in sessions",
+          "Supplementation guidance"
+        ]
       }
+    },
+    "cta": "Get Started Now"
+  },
+  "certifications": {
+    "title": "Certifications",
+    "subtitle": "& Professional Qualifications",
+    "text": "I am a Personal Trainer certified by YMCA Awards, one of the most recognized institutions in the United Kingdom. I hold a Level 3 qualification in Personal Training, with complete training in anatomy, physiology, nutrition, exercise prescription, and student follow-up.",
+    "items": [
+      "YMCA Level 3 Diploma in Personal Training",
+      "Certification in Anatomy and Physiology of Exercise",
+      "Planning and Instruction of Gym Exercise",
+      "Nutrition applied to physical activity",
+      "Safety and well-being in the fitness environment"
+    ],
+    "badges": {
+      "ymca": "YMCA Awards Certified Level 3 Trainer",
+      "ofqual": "Ofqual Regulated Qualification"
+    }
+  },
+  "contact": {
+    "title": "Get in",
+    "titleHighlight": "Touch",
+    "subtitle": "Let's talk about your fitness goals. I'm here to help you achieve your best results.",
+    "info": {
+      "title": "Contact Information",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "location": "Location",
+      "locationDesc": "I serve clients throughout Porto and also offer personalized online training"
+    },
+    "hours": {
+      "title": "Business Hours",
+      "weekdays": "Weekdays",
+      "weekends": "Weekends"
+    },
+    "phoneCard": {
+      "available": "Available for calls"
+    },
+    "whatsappCard": {
+      "description": "Instant chat and quick scheduling",
+      "button": "Start Conversation"
+    },
+    "locationCard": {
+      "description": "In-person and online training"
+    },
+    "weekdaysText": "Monday to Friday",
+    "weekendsText": "Saturday and Sunday",
+    "cta": {
+      "title": "Ready to start your fitness journey?",
+      "description": "Schedule your free assessment and let's create a personalized plan for your goals.",
+      "button": "Schedule Free Assessment",
+      "plansButton": "View Plans"
     }
   }
 }

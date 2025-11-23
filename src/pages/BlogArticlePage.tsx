@@ -21,18 +21,18 @@ const BlogArticlePage = () => {
   useEffect(() => {
     const fetchArticle = async () => {
       if (!slug) return;
-      
+
       try {
         const q = query(collection(db, "articles"), where("slug", "==", slug));
         const querySnapshot = await getDocs(q);
-        
+
         if (!querySnapshot.empty) {
           const docData = querySnapshot.docs[0].data();
           setArticle(docData);
         } else {
           // Fallback to hardcoded articles if not found in DB (optional, or just redirect)
           // For now, let's just redirect if not found in DB
-           navigate('/blog');
+          navigate("/blog");
         }
       } catch (error) {
         console.error("Error fetching article:", error);
@@ -45,7 +45,11 @@ const BlogArticlePage = () => {
   }, [slug, navigate]);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   if (!article) {
@@ -53,29 +57,38 @@ const BlogArticlePage = () => {
   }
 
   const currentLangContent = {
-    title: language === 'pt' ? article.title_pt : article.title_en,
-    content: language === 'pt' ? article.content_pt : article.content_en,
+    title: language === "pt" ? article.title_pt : article.title_en,
+    content: language === "pt" ? article.content_pt : article.content_en,
     image: article.image_url,
-    category: language === 'pt' ? (article.category_pt || "Treino") : (article.category_en || "Training"),
-    readTime: language === 'pt' ? (article.read_time_pt || "5 min") : (article.read_time_en || "5 min")
+    category:
+      language === "pt"
+        ? article.category_pt || "Treino"
+        : article.category_en || "Training",
+    readTime:
+      language === "pt"
+        ? article.read_time_pt || "5 min"
+        : article.read_time_en || "5 min",
   };
 
   return (
     <>
       <Helmet>
         <title>{currentLangContent.title} - Edgar Zanin</title>
-        <meta name="description" content={currentLangContent.content.substring(0, 160)} />
+        <meta
+          name="description"
+          content={currentLangContent.content.substring(0, 160)}
+        />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
 
-      <div className="min-h-screen">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
-        
-        <main className="pt-24 pb-16">
+
+        <main className="flex-1 pt-24 pb-16">
           <article className="container mx-auto px-4 md:px-6 max-w-4xl">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/blog')}
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/blog")}
               className="mb-6"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -83,7 +96,7 @@ const BlogArticlePage = () => {
             </Button>
 
             {currentLangContent.image && (
-              <img 
+              <img
                 src={currentLangContent.image}
                 alt={currentLangContent.title}
                 className="w-full h-[400px] object-cover rounded-lg mb-8"
@@ -110,7 +123,7 @@ const BlogArticlePage = () => {
               </p>
             )}
 
-            <div 
+            <div
               className="prose prose-lg max-w-none prose-headings:font-display prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground"
               dangerouslySetInnerHTML={{ __html: currentLangContent.content }}
             />
@@ -120,9 +133,10 @@ const BlogArticlePage = () => {
                 Quer Levar Seu Treino ao Próximo Nível?
               </h3>
               <p className="text-muted-foreground mb-6">
-                Entre em contato para treino personalizado focado nos seus objetivos específicos.
+                Entre em contato para treino personalizado focado nos seus
+                objetivos específicos.
               </p>
-              <Button size="lg" onClick={() => navigate('/#contact')}>
+              <Button size="lg" onClick={() => navigate("/#contact")}>
                 Agende uma Consulta
               </Button>
             </div>

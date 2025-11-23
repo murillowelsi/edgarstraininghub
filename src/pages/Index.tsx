@@ -1,23 +1,20 @@
-
-import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import AboutSection from "@/components/AboutSection";
-import ServicesSection from "@/components/ServicesSection";
-import AchievementsSection from "@/components/AchievementsSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
-import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
+import HeroSection from "@/components/HeroSection";
+import Navbar from "@/components/Navbar";
+import PricingSection from "@/components/PricingSection";
+import ServicesSection from "@/components/ServicesSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import YouTubeSection from "@/components/YouTubeSection";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
       <HeroSection />
-      <AboutSection />
       <ServicesSection />
-      <AchievementsSection />
+      <PricingSection />
+      <YouTubeSection />
       <TestimonialsSection />
-      <ContactSection />
       <Footer />
     </div>
   );

@@ -17,11 +17,14 @@ const BlogPage = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const q = query(collection(db, "articles"), orderBy("published_at", "desc"));
+        const q = query(
+          collection(db, "articles"),
+          orderBy("published_at", "desc")
+        );
         const querySnapshot = await getDocs(q);
-        const fetchedArticles = querySnapshot.docs.map(doc => ({
+        const fetchedArticles = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setArticles(fetchedArticles);
       } catch (error: any) {
@@ -38,19 +41,24 @@ const BlogPage = () => {
   return (
     <>
       <Helmet>
-        <title>Blog - Edgar Zanin | Dicas de Treino e Performance Atlética</title>
-        <meta 
-          name="description" 
-          content="Artigos sobre treino de força, mobilidade, prevenção de lesões, ciclismo e natação. Dicas práticas de um Ironman Finisher e Personal Trainer profissional." 
+        <title>
+          Blog - Edgar Zanin | Dicas de Treino e Performance Atlética
+        </title>
+        <meta
+          name="description"
+          content="Artigos sobre treino de força, mobilidade, prevenção de lesões, ciclismo e natação. Dicas práticas de um Ironman Finisher e Personal Trainer profissional."
         />
-        <meta name="keywords" content="treino força corredores, mobilidade triatletas, prevenção lesões, potência ciclismo, natação técnica, performance atlética" />
+        <meta
+          name="keywords"
+          content="treino força corredores, mobilidade triatletas, prevenção lesões, potência ciclismo, natação técnica, performance atlética"
+        />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
 
-      <div className="min-h-screen">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
-        
-        <main className="pt-24 pb-16">
+
+        <main className="flex-1 pt-24 pb-16">
           <section className="container mx-auto px-4 md:px-6">
             {/* Hero Section */}
             <div className="text-center mb-16 animate-fade-in">
@@ -66,23 +74,43 @@ const BlogPage = () => {
             {/* Blog Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {loading ? (
-                <div className="col-span-full text-center py-12">Loading articles...</div>
+                <div className="col-span-full text-center py-12">
+                  Loading articles...
+                </div>
               ) : error ? (
-                <div className="col-span-full text-center py-12 text-destructive">Error: {error}</div>
+                <div className="col-span-full text-center py-12 text-destructive">
+                  Error: {error}
+                </div>
               ) : articles.length === 0 ? (
-                <div className="col-span-full text-center py-12 text-muted-foreground">No articles found.</div>
+                <div className="col-span-full text-center py-12 text-muted-foreground">
+                  No articles found.
+                </div>
               ) : (
                 articles.map((article, index) => (
-                  <div 
+                  <div
                     key={article.id}
                     className="animate-fade-in"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <BlogCard
-                      title={language === 'pt' ? article.title_pt : article.title_en}
-                      excerpt={language === 'pt' ? article.excerpt_pt : article.excerpt_en}
-                      category={language === 'pt' ? (article.category_pt || "Treino") : (article.category_en || "Training")}
-                      readTime={language === 'pt' ? (article.read_time_pt || "5 min") : (article.read_time_en || "5 min")}
+                      title={
+                        language === "pt" ? article.title_pt : article.title_en
+                      }
+                      excerpt={
+                        language === "pt"
+                          ? article.excerpt_pt
+                          : article.excerpt_en
+                      }
+                      category={
+                        language === "pt"
+                          ? article.category_pt || "Treino"
+                          : article.category_en || "Training"
+                      }
+                      readTime={
+                        language === "pt"
+                          ? article.read_time_pt || "5 min"
+                          : article.read_time_en || "5 min"
+                      }
                       image={article.image_url || "/lovable-uploads/bg-1.png"}
                       slug={article.slug}
                       author={article.author?.name}
@@ -94,16 +122,20 @@ const BlogPage = () => {
 
             {/* SEO Content Section */}
             <article className="mt-16 prose prose-lg max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-6">Por que Treino de Qualidade Importa?</h2>
+              <h2 className="text-3xl font-bold mb-6">
+                Por que Treino de Qualidade Importa?
+              </h2>
               <p className="text-muted-foreground">
-                Como Triatleta e Personal Trainer, compartilho conhecimento prático 
-                baseado em anos de experiência no alto rendimento esportivo. Cada artigo é criado para 
-                fornecer insights acionáveis que você pode aplicar imediatamente no seu treino.
+                Como Triatleta e Personal Trainer, compartilho conhecimento
+                prático baseado em anos de experiência no alto rendimento
+                esportivo. Cada artigo é criado para fornecer insights
+                acionáveis que você pode aplicar imediatamente no seu treino.
               </p>
               <p className="text-muted-foreground mt-4">
-                Seja você um corredor buscando melhorar performance, um triatleta em preparação para 
-                sua próxima prova, ou alguém que quer treinar com mais segurança e eficiência, este 
-                conteúdo foi desenvolvido pensando em você.
+                Seja você um corredor buscando melhorar performance, um
+                triatleta em preparação para sua próxima prova, ou alguém que
+                quer treinar com mais segurança e eficiência, este conteúdo foi
+                desenvolvido pensando em você.
               </p>
             </article>
           </section>

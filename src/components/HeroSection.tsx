@@ -56,7 +56,9 @@ const HeroSection = () => {
                 variant="outline"
                 className="border-2 border-primary text-primary hover:bg-accent font-semibold text-lg py-7 px-10 rounded-xl transition-all duration-300"
                 onClick={() => {
-                  document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+                  document
+                    .getElementById("services")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
                 {t.hero.learnButton}
@@ -64,16 +66,15 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <div className="absolute right-0 top-0 animate-slide-in-right hidden lg:flex items-end justify-end w-[55%] mt-20">
+          <div className="absolute right-0 bottom-0 animate-slide-in-right hidden lg:flex items-end justify-end w-[50%] xl:w-[45%]">
             <img
               src={edgarImage}
               alt="Edgar Zanin - Ironman Athlete"
-              className="w-full h-[650px] md:h-[750px] lg:h-[900px] object-cover object-top opacity-4"
+              className="w-full h-[80vh] lg:h-[85vh] xl:h-[85vh] max-h-[1200px] object-contain object-bottom opacity-60"
             />
           </div>
         </div>
       </div>
-
     </section>
   );
 };

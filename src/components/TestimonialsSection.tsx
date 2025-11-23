@@ -12,20 +12,6 @@ const TestimonialsSection = () => {
       text: "Working with Edgar transformed my running performance. I shaved 15 minutes off my marathon time and improved my overall technique. His approach is scientific yet approachable.",
       stars: 5
     },
-    {
-      name: "João Oliveira",
-      role: "Fitness Enthusiast",
-      image: "https://randomuser.me/api/portraits/men/32.jpg",
-      text: "After struggling with inconsistent training for years, Edgar helped me establish a sustainable routine that fits my busy schedule. I've seen amazing progress in just 3 months.",
-      stars: 5
-    },
-    {
-      name: "Ana Costa",
-      role: "Triathlon Beginner",
-      image: "https://randomuser.me/api/portraits/women/68.jpg",
-      text: "As someone new to triathlons, I needed guidance across all three disciplines. Edgar's expertise helped me complete my first sprint triathlon with confidence.",
-      stars: 5
-    }
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);

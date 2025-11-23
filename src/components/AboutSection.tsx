@@ -49,6 +49,9 @@ const AboutSection = () => {
             <p className="text-muted-foreground leading-relaxed text-lg">
               {t.about.bio2}
             </p>
+            <p className="text-primary font-semibold leading-relaxed text-lg mt-4">
+              {t.about.certificationHighlight}
+            </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6">
               <div className="card-modern p-6 text-center bg-gradient-to-br from-primary/5 to-transparent">
@@ -97,7 +100,9 @@ const AboutSection = () => {
             <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
               {loading ? (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <p className="text-muted-foreground">Loading latest video...</p>
+                  <p className="text-muted-foreground">
+                    Loading latest video...
+                  </p>
                 </div>
               ) : video?.videoId ? (
                 <iframe
@@ -112,7 +117,9 @@ const AboutSection = () => {
                 ></iframe>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <p className="text-red-500">Failed to load video. Check console for details.</p>
+                  <p className="text-red-500">
+                    Failed to load video. Check console for details.
+                  </p>
                 </div>
               )}
             </div>

@@ -33,12 +33,13 @@
     "profession": "Treinador de Fitness & Triatleta",
     "bio1": "De Triatleta a Treinador de Fitness, vivo e respiro desporto no coração do Porto. A minha paixão pela corrida levou-me rapidamente ao universo das provas de resistência, começando pela conclusão de um desafiador Ironman 70.3 e um Ironman Full.",
     "bio2": "Essa trajetória deu-me a experiência prática e o conhecimento técnico para saber o que é preciso para alcançar objetivos que, hoje, parecem inatingíveis. O meu compromisso? Juntar a disciplina de um Ironman à ciência do fitness para que você possa atingir a sua melhor forma física e mental.",
+    "certificationHighlight": "Edgar Zanin é Personal Trainer nível 3 certificado pela YMCA Awards (Reino Unido), com formação aprofundada em anatomia, fisiologia, nutrição, segurança e programação de exercícios.",
     "stats": {
       "certified": "Certificado",
       "certifiedDesc": "Formação profissional",
-      "clients": "100+ Clientes",
+      "clients": "50+ Clientes",
       "clientsDesc": "Histórias de sucesso",
-      "experience": "8+ Anos",
+      "experience": "7+ Anos",
       "experienceDesc": "De experiência"
     },
     "youtube": "Último Vídeo do YouTube"
@@ -102,38 +103,6 @@
     "titleHighlight": "Clientes",
     "subtitle": "Veja o que alguns dos meus clientes têm a dizer sobre a experiência de treino."
   },
-  "contact": {
-    "title": "Entre em",
-    "titleHighlight": "Contacto",
-    "subtitle": "Pronto para começar sua jornada fitness? Entre em contacto para agendar uma consulta ou saber mais sobre os meus serviços.",
-    "info": {
-      "title": "Informações de Contacto",
-      "phone": "Telefone",
-      "whatsapp": "WhatsApp",
-      "email": "Email",
-      "location": "Localização",
-      "locationDesc": "Disponível para treino presencial no Porto e treino online em todo o mundo"
-    },
-    "hours": {
-      "title": "Horários de Treino",
-      "weekdays": "Dias de Semana",
-      "weekdaysHours": "6:00 - 20:00",
-      "weekends": "Fins de Semana",
-      "weekendsHours": "8:00 - 14:00"
-    },
-    "form": {
-      "title": "Envie-me uma Mensagem",
-      "name": "Seu Nome",
-      "namePlaceholder": "João Silva",
-      "email": "Endereço de Email",
-      "emailPlaceholder": "joao@exemplo.com",
-      "message": "Mensagem",
-      "messagePlaceholder": "Estou interessado em personal training...",
-      "send": "Enviar Mensagem",
-      "success": "Mensagem Enviada!",
-      "successDescription": "Obrigado por entrar em contacto. Responderei em breve."
-    }
-  },
   "footer": {
     "description": "Personal Trainer & Triatleta baseado no Porto, Portugal, especializado em treino de resistência e otimização de desempenho.",
     "quickLinks": "Links Rápidos",
@@ -143,43 +112,109 @@
     "privacy": "Política de Privacidade",
     "terms": "Termos de Serviço"
   },
+  "youtube": {
+    "title": "Vídeos &",
+    "titleHighlight": "Conteúdo",
+    "subtitle": "Acompanhe meus treinos, dicas e motivação no meu canal do YouTube"
+  },
   "blog": {
     "title": "Blog &",
-    "titleHighlight": "Conteúdo",
-    "subtitle": "Dicas, estratégias e conhecimento para otimizar seu treino e performance atlética.",
-    "readMore": "Ler Artigo",
-    "backToBlog": "Voltar ao Blog",
-    "articles": {
-      "strengthForRunners": {
-        "title": "Dicas de Força para Corredores",
-        "excerpt": "Descubra como o treino de força pode melhorar sua velocidade, resistência e prevenir lesões comuns na corrida.",
-        "category": "Força",
-        "readTime": "5 min"
+    "titleHighlight": "Artigos",
+    "subtitle": "Dicas práticas de treino, nutrição e performance atlética baseadas na minha experiência como triatleta e personal trainer",
+    "readMore": "Ler Mais"
+  },
+  "pricing": {
+    "title": "Planos &",
+    "titleHighlight": "Preços",
+    "subtitle": "Escolha o plano ideal para seus objetivos fitness",
+    "pricePlaceholder": "Preço a consultar",
+    "plans": {
+      "basic": {
+        "name": "Plano Básico",
+        "features": [
+          "1 sessão por semana",
+          "Avaliação inicial completa",
+          "Plano de treino personalizado",
+          "Acompanhamento por WhatsApp",
+          "Dicas de nutrição básica"
+        ]
       },
-      "triathletesMobility": {
-        "title": "Mobilidade para Triatletas",
-        "excerpt": "Exercícios essenciais de mobilidade para melhorar sua performance nas três modalidades do triatlo.",
-        "category": "Mobilidade",
-        "readTime": "6 min"
+      "standard": {
+        "name": "Plano Standard",
+        "features": [
+          "2 sessões por semana",
+          "Avaliação inicial completa",
+          "Plano de treino personalizado",
+          "Acompanhamento por WhatsApp",
+          "Plano nutricional básico",
+          "Ajustes semanais no treino"
+        ],
+        "popular": true
       },
-      "injuryPrevention": {
-        "title": "Como Evitar Lesões",
-        "excerpt": "Estratégias comprovadas para prevenir lesões e manter consistência no seu treino ao longo do ano.",
-        "category": "Prevenção",
-        "readTime": "7 min"
-      },
-      "cyclingPower": {
-        "title": "Como Aumentar Potência no Pedal",
-        "excerpt": "Técnicas e treinos específicos para desenvolver mais força e eficiência no ciclismo.",
-        "category": "Ciclismo",
-        "readTime": "6 min"
-      },
-      "swimmingProgress": {
-        "title": "Como Evoluir na Natação",
-        "excerpt": "Dicas práticas para melhorar técnica, eficiência e velocidade na água, independente do seu nível.",
-        "category": "Natação",
-        "readTime": "5 min"
+      "premium": {
+        "name": "Plano Premium",
+        "features": [
+          "3 sessões por semana",
+          "Avaliação inicial completa",
+          "Plano de treino personalizado",
+          "Plano nutricional avançado",
+          "Acompanhamento 24/7",
+          "Sessões de acompanhamento mensal",
+          "Suplementação guidance"
+        ]
       }
+    },
+    "cta": "Começar Agora"
+  },
+  "certifications": {
+    "title": "Certificações",
+    "subtitle": "& Qualificações Profissionais",
+    "text": "Sou um Personal Trainer certificado pela YMCA Awards, uma das instituições mais reconhecidas no Reino Unido. Possuo qualificação de Nível 3 em Personal Training, com formação completa em anatomia, fisiologia, nutrição, prescrição de exercícios e acompanhamento de alunos.",
+    "items": [
+      "Diploma YMCA Level 3 em Personal Training",
+      "Certificação em Anatomia e Fisiologia do Exercício",
+      "Planejamento e Instrução de Exercício em Ginásio",
+      "Nutrição aplicada à atividade física",
+      "Segurança e bem-estar no ambiente fitness"
+    ],
+    "badges": {
+      "ymca": "YMCA Awards Certified Level 3 Trainer",
+      "ofqual": "Ofqual Regulated Qualification"
+    }
+  },
+  "contact": {
+    "title": "Entre em",
+    "titleHighlight": "Contacto",
+    "subtitle": "Vamos conversar sobre seus objetivos fitness. Estou aqui para ajudar você a alcançar seus melhores resultados.",
+    "info": {
+      "title": "Informações de Contacto",
+      "phone": "Telefone",
+      "whatsapp": "WhatsApp",
+      "location": "Localização",
+      "locationDesc": "Atendo clientes em todo o Porto e também ofereço treinos online personalizados"
+    },
+    "hours": {
+      "title": "Horário de Funcionamento",
+      "weekdays": "Dias Úteis",
+      "weekends": "Fins de Semana"
+    },
+    "phoneCard": {
+      "available": "Disponível para chamadas"
+    },
+    "whatsappCard": {
+      "description": "Chat instantâneo e agendamento rápido",
+      "button": "Iniciar Conversa"
+    },
+    "locationCard": {
+      "description": "Treinos presenciais e online"
+    },
+    "weekdaysText": "Segunda a Sexta",
+    "weekendsText": "Sábado e Domingo",
+    "cta": {
+      "title": "Pronto para começar sua jornada fitness?",
+      "description": "Agende sua avaliação gratuita e vamos criar um plano personalizado para seus objetivos.",
+      "button": "Agendar Avaliação Gratuita",
+      "plansButton": "Ver Planos"
     }
   }
 }
