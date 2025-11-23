@@ -433,7 +433,7 @@ const WorkoutEditor = () => {
     }
   };
 
-  // Drag and drop handlers
+  // Drag and drop handlers with improved drop zone detection
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", index.toString());
@@ -446,10 +446,20 @@ const WorkoutEditor = () => {
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
+    
+    // Determine if we should drop above or below based on mouse position
+    const target = e.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    const isAbove = e.clientY < midpoint;
+    
+    // Store the drop position info
+    setDragOverIndex(index);
+    target.setAttribute('data-drop-position', isAbove ? 'above' : 'below');
   };
 
   const handleDragEnter = (e: React.DragEvent, index: number) => {
@@ -459,34 +469,56 @@ const WorkoutEditor = () => {
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
+    const target = e.currentTarget as HTMLElement;
+    target.removeAttribute('data-drop-position');
     setDragOverIndex(null);
   };
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    const target = e.currentTarget as HTMLElement;
+    const dropPosition = target.getAttribute('data-drop-position');
+    target.removeAttribute('data-drop-position');
     setDragOverIndex(null);
 
     const dragIndex = parseInt(e.dataTransfer.getData("text/plain"));
 
-    if (isNaN(dragIndex) || dragIndex === dropIndex) return;
+    if (isNaN(dragIndex)) return;
+
+    // Calculate the actual drop index based on position
+    let actualDropIndex = dropIndex;
+    
+    // If dropping below, increment the index
+    if (dropPosition === 'below') {
+      actualDropIndex = dropIndex + 1;
+    }
+    
+    // Adjust if dragging from above
+    if (dragIndex < actualDropIndex) {
+      actualDropIndex--;
+    }
+    
+    // Don't do anything if dropping in the same position
+    if (dragIndex === actualDropIndex) return;
 
     const newStages = [...stages];
     const [draggedItem] = newStages.splice(dragIndex, 1);
-    newStages.splice(dropIndex, 0, draggedItem);
+    newStages.splice(actualDropIndex, 0, draggedItem);
     setStages(newStages);
 
     // Update expanded index if needed
     if (expandedStageIndex === dragIndex) {
-      setExpandedStageIndex(dropIndex);
+      setExpandedStageIndex(actualDropIndex);
     } else if (
       dragIndex < expandedStageIndex &&
-      dropIndex >= expandedStageIndex
+      actualDropIndex >= expandedStageIndex
     ) {
       setExpandedStageIndex(expandedStageIndex - 1);
     } else if (
       dragIndex > expandedStageIndex &&
-      dropIndex <= expandedStageIndex
+      actualDropIndex <= expandedStageIndex
     ) {
       setExpandedStageIndex(expandedStageIndex + 1);
     }
@@ -793,7 +825,7 @@ const WorkoutEditor = () => {
                         }
                         handleDragStart(e, index);
                       }}
-                      onDragOver={handleDragOver}
+                      onDragOver={(e) => handleDragOver(e, index)}
                       onDragEnter={(e) => handleDragEnter(e, index)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, index)}
@@ -1054,7 +1086,7 @@ const WorkoutEditor = () => {
                       }
                       handleDragStart(e, index);
                     }}
-                    onDragOver={handleDragOver}
+                    onDragOver={(e) => handleDragOver(e, index)}
                     onDragEnter={(e) => handleDragEnter(e, index)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, index)}
