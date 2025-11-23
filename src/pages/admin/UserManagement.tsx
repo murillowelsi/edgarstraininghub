@@ -24,11 +24,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { initializeApp } from 'firebase/app';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
-import { UserPlus } from 'lucide-react';
+import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
+import { Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -44,6 +45,7 @@ interface User {
 
 const UserManagement = () => {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,6 +107,28 @@ const UserManagement = () => {
     setShowCreateForm(true);
   };
 
+  const handleDelete = async (userId: string, userName: string) => {
+    // Prevent self-deletion
+    if (currentUser && userId === currentUser.uid) {
+      toast.error('You cannot delete your own account');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      // Delete user document from Firestore
+      await deleteDoc(doc(db, 'users', userId));
+      toast.success('User deleted from Firestore');
+      fetchUsers();
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast.error(`Failed to delete user: ${error.message}`);
+    }
+  };
+
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreating(true);
@@ -148,14 +172,15 @@ const UserManagement = () => {
       }
 
       setFormData({ name: '', email: '', password: '', role: 'author' });
-      setShowCreateForm(false);
       setEditingUser(null);
+      setShowCreateForm(false); // Close modal on success
       fetchUsers();
     } catch (error: any) {
       console.error("Error creating user:", error);
       toast.error(`Failed to create user: ${error.message}`);
-      // Clear form on error too
+      // Clear form on error but keep modal open
       setFormData({ name: '', email: '', password: '', role: 'author' });
+      setEditingUser(null);
     } finally {
       setCreating(false);
     }
@@ -181,16 +206,16 @@ const UserManagement = () => {
           </div>
 
           <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
-                <DialogDescription>
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader className="space-y-3">
+                <DialogTitle className="text-2xl">{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
+                <DialogDescription className="text-base">
                   {editingUser 
                     ? 'Update user information. Email cannot be changed for security reasons.'
                     : 'Add a new user to the system. They will be able to log in and create articles.'}
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -280,13 +305,23 @@ const UserManagement = () => {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.role}</TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEdit(user)}
-                        >
-                          Edit
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleEdit(user)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDelete(user.uid, user.name)}
+                            disabled={user.uid === currentUser?.uid}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

@@ -21,9 +21,23 @@ const Login = () => {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Logged in successfully');
       navigate('/admin/dashboard');
-    } catch (error) {
-      toast.error('Failed to login. Check your credentials.');
-      console.error(error);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      
+      // Provide specific error messages
+      if (error.code === 'auth/user-not-found') {
+        toast.error('No account found with this email');
+      } else if (error.code === 'auth/wrong-password') {
+        toast.error('Incorrect password');
+      } else if (error.code === 'auth/invalid-email') {
+        toast.error('Invalid email format');
+      } else if (error.code === 'auth/too-many-requests') {
+        toast.error('Too many failed attempts. Please try again later');
+      } else if (error.code === 'auth/invalid-credential') {
+        toast.error('Invalid email or password');
+      } else {
+        toast.error(`Login failed: ${error.message || 'Unknown error'}`);
+      }
     } finally {
       setLoading(false);
     }

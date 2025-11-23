@@ -46,8 +46,10 @@ service cloud.firestore {
       allow create, update: if request.auth != null &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
       
-      // Nobody can delete users (for safety)
-      allow delete: if false;
+      // Admins can delete users, but not themselves
+      allow delete: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
+        request.auth.uid != userId;
     }
     
     // Default deny for other collections
