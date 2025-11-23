@@ -153,7 +153,13 @@
     "title": "Blog &",
     "titleHighlight": "Articles",
     "subtitle": "Practical training tips, nutrition and athletic performance based on my experience as a triathlete and personal trainer",
-    "readMore": "Read More"
+    "readMore": "Read More",
+    "backToBlog": "Back to Blog",
+    "articleCta": {
+      "title": "Ready to Take Your Training to the Next Level?",
+      "description": "Get in touch for personalized training focused on your specific goals.",
+      "button": "Schedule a Consultation"
+    }
   },
   "pricing": {
     "title": "Plans &",

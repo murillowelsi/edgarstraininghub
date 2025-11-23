@@ -130,14 +130,13 @@ const BlogArticlePage = () => {
 
             <div className="mt-16 p-8 bg-primary/5 rounded-lg border border-primary/10">
               <h3 className="text-2xl font-display font-bold mb-4">
-                Quer Levar Seu Treino ao Próximo Nível?
+                {t.blog.articleCta.title}
               </h3>
               <p className="text-muted-foreground mb-6">
-                Entre em contato para treino personalizado focado nos seus
-                objetivos específicos.
+                {t.blog.articleCta.description}
               </p>
               <Button size="lg" onClick={() => navigate("/#contact")}>
-                Agende uma Consulta
+                {t.blog.articleCta.button}
               </Button>
             </div>
           </article>
