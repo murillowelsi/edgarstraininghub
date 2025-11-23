@@ -100,9 +100,15 @@ const BlogArticlePage = () => {
               </div>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-display font-bold mb-8">
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
               {currentLangContent.title}
             </h1>
+
+            {article.author?.name && (
+              <p className="text-lg text-muted-foreground mb-8">
+                By {article.author.name}
+              </p>
+            )}
 
             <div 
               className="prose prose-lg max-w-none prose-headings:font-display prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground"

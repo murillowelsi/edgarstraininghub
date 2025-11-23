@@ -1,3 +1,4 @@
+import AdminSidebar from '@/components/AdminSidebar';
 import { Button } from '@/components/ui/button';
 import {
     Table,
@@ -8,7 +9,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
-import { LogOut, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -64,61 +65,63 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Blog Dashboard</h1>
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" /> Logout
-          </Button>
-          <Link to="/admin/editor">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> New Article
-            </Button>
-          </Link>
-        </div>
-      </div>
+    <div className="flex h-screen">
+      <AdminSidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto py-10 px-4">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">Blog Dashboard</h1>
+            <div className="flex gap-4">
+              <Link to="/admin/editor">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" /> New Article
+                </Button>
+              </Link>
+            </div>
+          </div>
 
-      <div className="bg-card rounded-lg border shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title (PT)</TableHead>
-              <TableHead>Title (EN)</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center py-8">Loading...</TableCell>
-              </TableRow>
-            ) : articles.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center py-8">No articles found.</TableCell>
-              </TableRow>
-            ) : (
-              articles.map((article) => (
-                <TableRow key={article.id}>
-                  <TableCell className="font-medium">{article.title_pt}</TableCell>
-                  <TableCell>{article.title_en}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Link to={`/admin/editor/${article.id}`}>
-                        <Button variant="ghost" size="icon">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(article.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="bg-card rounded-lg border shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title (PT)</TableHead>
+                  <TableHead>Title (EN)</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-8">Loading...</TableCell>
+                  </TableRow>
+                ) : articles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-8">No articles found.</TableCell>
+                  </TableRow>
+                ) : (
+                  articles.map((article) => (
+                    <TableRow key={article.id}>
+                      <TableCell className="font-medium">{article.title_pt}</TableCell>
+                      <TableCell>{article.title_en}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Link to={`/admin/editor/${article.id}`}>
+                            <Button variant="ghost" size="icon">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(article.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
     </div>
   );

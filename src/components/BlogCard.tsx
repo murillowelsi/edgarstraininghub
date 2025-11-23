@@ -1,8 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface BlogCardProps {
@@ -12,9 +12,10 @@ interface BlogCardProps {
   readTime: string;
   image?: string;
   slug: string;
+  author?: string;
 }
 
-const BlogCard = ({ title, excerpt, category, readTime, image, slug }: BlogCardProps) => {
+const BlogCard = ({ title, excerpt, category, readTime, image, slug, author }: BlogCardProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
@@ -47,6 +48,9 @@ const BlogCard = ({ title, excerpt, category, readTime, image, slug }: BlogCardP
         <CardDescription className="mb-4 line-clamp-3">
           {excerpt}
         </CardDescription>
+        {author && (
+          <p className="text-sm text-muted-foreground mb-4">By {author}</p>
+        )}
         <Button 
           variant="outline" 
           className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"

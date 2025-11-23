@@ -10,12 +10,13 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { db } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
 
 const ArticleEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [authorName, setAuthorName] = useState('');
 
   const modules = {
     toolbar: [
@@ -45,7 +46,24 @@ const ArticleEditor = () => {
     if (id) {
       fetchArticle(id);
     }
+    fetchAuthorProfile();
   }, [id]);
+
+  const fetchAuthorProfile = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          setAuthorName(userDoc.data().name || user.email || 'Unknown');
+        } else {
+          setAuthorName(user.email || 'Unknown');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching author profile:', error);
+    }
+  };
 
   const fetchArticle = async (articleId: string) => {
     try {
@@ -72,8 +90,18 @@ const ArticleEditor = () => {
     setLoading(true);
 
     try {
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error('You must be logged in to save articles');
+        return;
+      }
+
       const articleData = {
         ...formData,
+        author: {
+          uid: user.uid,
+          name: authorName
+        },
         updated_at: serverTimestamp(),
       };
 

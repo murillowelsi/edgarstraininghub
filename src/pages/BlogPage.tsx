@@ -85,6 +85,7 @@ const BlogPage = () => {
                       readTime={language === 'pt' ? (article.read_time_pt || "5 min") : (article.read_time_en || "5 min")}
                       image={article.image_url || "/lovable-uploads/bg-1.png"}
                       slug={article.slug}
+                      author={article.author?.name}
                     />
                   </div>
                 ))
