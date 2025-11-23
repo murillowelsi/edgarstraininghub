@@ -131,8 +131,12 @@ const ArticleEditor = () => {
 
       const articleData = {
         ...formData,
-        read_time_pt: formData.read_time_pt ? `${formData.read_time_pt} min` : "",
-        read_time_en: formData.read_time_en ? `${formData.read_time_en} min` : "",
+        read_time_pt: formData.read_time_pt
+          ? `${formData.read_time_pt} min`
+          : "",
+        read_time_en: formData.read_time_en
+          ? `${formData.read_time_en} min`
+          : "",
         author: {
           uid: user.uid,
           name: authorName,
@@ -242,7 +246,9 @@ const ArticleEditor = () => {
                       <Input
                         name="read_time_pt"
                         value={formData.read_time_pt}
-                        onChange={(e) => handleReadTimeChange("read_time_pt", e.target.value)}
+                        onChange={(e) =>
+                          handleReadTimeChange("read_time_pt", e.target.value)
+                        }
                         placeholder="e.g. 5"
                         type="number"
                         min="1"
@@ -301,7 +307,9 @@ const ArticleEditor = () => {
                       <Input
                         name="read_time_en"
                         value={formData.read_time_en}
-                        onChange={(e) => handleReadTimeChange("read_time_en", e.target.value)}
+                        onChange={(e) =>
+                          handleReadTimeChange("read_time_en", e.target.value)
+                        }
                         placeholder="e.g. 5"
                         type="number"
                         min="1"
