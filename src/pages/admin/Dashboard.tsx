@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -7,14 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserRole } from '@/hooks/useUserRole';
-import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { auth, db } from '../../lib/firebase';
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { auth, db } from "../../lib/firebase";
 
 interface Article {
   id: string;
@@ -40,22 +40,22 @@ const Dashboard = () => {
 
   const fetchArticles = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'articles'));
-      const fetchedArticles = querySnapshot.docs.map(doc => ({
+      const querySnapshot = await getDocs(collection(db, "articles"));
+      const fetchedArticles = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Article[];
-      
+
       // Filter articles based on role
       let filteredArticles = fetchedArticles;
       if (isAuthor && user) {
         // Authors only see their own articles
         filteredArticles = fetchedArticles.filter(
-          article => article.author?.uid === user.uid
+          (article) => article.author?.uid === user.uid
         );
       }
       // Editors and Admins see all articles
-      
+
       setArticles(filteredArticles);
     } catch (error) {
       console.error("Error fetching articles:", error);
@@ -66,20 +66,21 @@ const Dashboard = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this article?')) return;
-    
+    if (!window.confirm("Are you sure you want to delete this article?"))
+      return;
+
     try {
-      await deleteDoc(doc(db, 'articles', id));
-      toast.success('Article deleted');
+      await deleteDoc(doc(db, "articles", id));
+      toast.success("Article deleted");
       fetchArticles();
     } catch (error) {
-      toast.error('Failed to delete article');
+      toast.error("Failed to delete article");
     }
   };
 
   const handleLogout = async () => {
     await auth.signOut();
-    navigate('/admin/login');
+    navigate("/admin/login");
   };
 
   return (
@@ -107,16 +108,22 @@ const Dashboard = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-8">Loading...</TableCell>
+                <TableCell colSpan={3} className="text-center py-8">
+                  Loading...
+                </TableCell>
               </TableRow>
             ) : articles.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-8">No articles found.</TableCell>
+                <TableCell colSpan={3} className="text-center py-8">
+                  No articles found.
+                </TableCell>
               </TableRow>
             ) : (
               articles.map((article) => (
                 <TableRow key={article.id}>
-                  <TableCell className="font-medium">{article.title_pt}</TableCell>
+                  <TableCell className="font-medium">
+                    {article.title_pt}
+                  </TableCell>
                   <TableCell>{article.title_en}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -126,7 +133,11 @@ const Dashboard = () => {
                         </Button>
                       </Link>
                       {(isEditor || isAdmin) && (
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(article.id)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(article.id)}
+                        >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       )}

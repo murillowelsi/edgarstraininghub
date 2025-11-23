@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -23,16 +23,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserRole } from '@/hooks/useUserRole';
-import { initializeApp } from 'firebase/app';
-import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
-import { Dumbbell, Pencil, Trash2, UserPlus } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { db } from '../../lib/firebase';
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { initializeApp } from "firebase/app";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  setDoc,
+} from "firebase/firestore";
+import { Dumbbell, Pencil, Trash2, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { db } from "../../lib/firebase";
 
 interface User {
   uid: string;
@@ -53,17 +59,17 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'author'
+    name: "",
+    email: "",
+    password: "",
+    role: "author",
   });
 
   // Redirect non-admins
   useEffect(() => {
     if (!roleLoading && !isAdmin) {
-      toast.error('Access denied. Admin privileges required.');
-      navigate('/admin/articles');
+      toast.error("Access denied. Admin privileges required.");
+      navigate("/admin/articles");
     }
   }, [isAdmin, roleLoading, navigate]);
 
@@ -73,10 +79,10 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'users'));
-      const fetchedUsers = querySnapshot.docs.map(doc => ({
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const fetchedUsers = querySnapshot.docs.map((doc) => ({
         uid: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as User[];
       setUsers(fetchedUsers);
     } catch (error) {
@@ -88,11 +94,11 @@ const UserManagement = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleRoleChange = (value: string) => {
-    setFormData(prev => ({ ...prev, role: value }));
+    setFormData((prev) => ({ ...prev, role: value }));
   };
 
   const handleEdit = (user: User) => {
@@ -100,8 +106,8 @@ const UserManagement = () => {
     setFormData({
       name: user.name,
       email: user.email,
-      password: '', // Don't pre-fill password for security
-      role: user.role
+      password: "", // Don't pre-fill password for security
+      role: user.role,
     });
     setShowCreateForm(true);
   };
@@ -109,21 +115,25 @@ const UserManagement = () => {
   const handleDelete = async (userId: string, userName: string) => {
     // Prevent self-deletion
     if (currentUser && userId === currentUser.uid) {
-      toast.error('You cannot delete your own account');
+      toast.error("You cannot delete your own account");
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete user "${userName}"? This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
     try {
       // Delete user document from Firestore
-      await deleteDoc(doc(db, 'users', userId));
-      toast.success('User deleted from Firestore');
+      await deleteDoc(doc(db, "users", userId));
+      toast.success("User deleted from Firestore");
       fetchUsers();
     } catch (error: any) {
-      console.error('Error deleting user:', error);
+      console.error("Error deleting user:", error);
       toast.error(`Failed to delete user: ${error.message}`);
     }
   };
@@ -135,42 +145,49 @@ const UserManagement = () => {
     try {
       if (editingUser) {
         // Update existing user
-        await setDoc(doc(db, 'users', editingUser.uid), {
-          name: formData.name,
-          role: formData.role,
-          email: formData.email,
-          updatedAt: new Date()
-        }, { merge: true });
+        await setDoc(
+          doc(db, "users", editingUser.uid),
+          {
+            name: formData.name,
+            role: formData.role,
+            email: formData.email,
+            updatedAt: new Date(),
+          },
+          { merge: true }
+        );
 
-        toast.success('User updated successfully');
+        toast.success("User updated successfully");
       } else {
         // Create new user
-        const secondaryApp = initializeApp({
-          apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-        }, 'Secondary');
+        const secondaryApp = initializeApp(
+          {
+            apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+            authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+            projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+          },
+          "Secondary"
+        );
 
         const secondaryAuth = getAuth(secondaryApp);
-        
+
         const userCredential = await createUserWithEmailAndPassword(
           secondaryAuth,
           formData.email,
           formData.password
         );
 
-        await setDoc(doc(db, 'users', userCredential.user.uid), {
+        await setDoc(doc(db, "users", userCredential.user.uid), {
           name: formData.name,
           email: formData.email,
           role: formData.role,
-          createdAt: new Date()
+          createdAt: new Date(),
         });
 
         await secondaryAuth.signOut();
-        toast.success('User created successfully');
+        toast.success("User created successfully");
       }
 
-      setFormData({ name: '', email: '', password: '', role: 'author' });
+      setFormData({ name: "", email: "", password: "", role: "author" });
       setEditingUser(null);
       setShowCreateForm(false); // Close modal on success
       fetchUsers();
@@ -178,7 +195,7 @@ const UserManagement = () => {
       console.error("Error creating user:", error);
       toast.error(`Failed to create user: ${error.message}`);
       // Clear form on error but keep modal open
-      setFormData({ name: '', email: '', password: '', role: 'author' });
+      setFormData({ name: "", email: "", password: "", role: "author" });
       setEditingUser(null);
     } finally {
       setCreating(false);
@@ -190,13 +207,20 @@ const UserManagement = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold">User Management</h1>
         <div className="flex gap-4">
-          <Button onClick={() => {
-            setEditingUser(null);
-            setFormData({ name: '', email: '', password: '', role: 'author' });
-            setShowCreateForm(!showCreateForm);
-          }}>
+          <Button
+            onClick={() => {
+              setEditingUser(null);
+              setFormData({
+                name: "",
+                email: "",
+                password: "",
+                role: "author",
+              });
+              setShowCreateForm(!showCreateForm);
+            }}
+          >
             <UserPlus className="mr-2 h-4 w-4" />
-            {showCreateForm ? 'Cancel' : 'New User'}
+            {showCreateForm ? "Cancel" : "New User"}
           </Button>
         </div>
       </div>
@@ -204,14 +228,19 @@ const UserManagement = () => {
       <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader className="space-y-3">
-            <DialogTitle className="text-2xl">{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
+            <DialogTitle className="text-2xl">
+              {editingUser ? "Edit User" : "Create New User"}
+            </DialogTitle>
             <DialogDescription className="text-base">
-              {editingUser 
-                ? 'Update user information. Email cannot be changed for security reasons.'
-                : 'Add a new user to the system. They will be able to log in and create articles.'}
+              {editingUser
+                ? "Update user information. Email cannot be changed for security reasons."
+                : "Add a new user to the system. They will be able to log in and create articles."}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <form
+            onSubmit={handleCreateUser}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
+          >
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -237,21 +266,31 @@ const UserManagement = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password {editingUser && '(leave blank to keep current)'}</Label>
+              <Label htmlFor="password">
+                Password {editingUser && "(leave blank to keep current)"}
+              </Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder={editingUser ? "Leave blank to keep current" : "Min. 6 characters"}
+                placeholder={
+                  editingUser
+                    ? "Leave blank to keep current"
+                    : "Min. 6 characters"
+                }
                 required={!editingUser}
                 minLength={6}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
-              <Select value={formData.role} onValueChange={handleRoleChange} required>
+              <Select
+                value={formData.role}
+                onValueChange={handleRoleChange}
+                required
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
@@ -264,12 +303,22 @@ const UserManagement = () => {
               </Select>
             </div>
             <div className="md:col-span-2 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreateForm(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={creating}>
                 <UserPlus className="mr-2 h-4 w-4" />
-                {creating ? (editingUser ? 'Updating...' : 'Creating...') : (editingUser ? 'Update User' : 'Create User')}
+                {creating
+                  ? editingUser
+                    ? "Updating..."
+                    : "Creating..."
+                  : editingUser
+                  ? "Update User"
+                  : "Create User"}
               </Button>
             </div>
           </form>
@@ -289,11 +338,15 @@ const UserManagement = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8">Loading...</TableCell>
+                <TableCell colSpan={4} className="text-center py-8">
+                  Loading...
+                </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8">No users found.</TableCell>
+                <TableCell colSpan={4} className="text-center py-8">
+                  No users found.
+                </TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
@@ -303,25 +356,27 @@ const UserManagement = () => {
                   <TableCell>{user.role}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      {user.role === 'athlete' && (
+                      {user.role === "athlete" && (
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => navigate(`/admin/users/${user.uid}/workouts`)}
+                          onClick={() =>
+                            navigate(`/admin/users/${user.uid}/workouts`)
+                          }
                           title="Manage Workouts"
                         >
                           <Dumbbell className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={() => handleEdit(user)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(user.uid, user.name)}
                         disabled={user.uid === currentUser?.uid}

@@ -1,15 +1,15 @@
-import AdminSidebar from '@/components/AdminSidebar';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import AdminSidebar from "@/components/AdminSidebar";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
 
 const AthleteLayout = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen">
       {/* Desktop Sidebar - Always visible */}
       <div className="hidden md:flex">
         <AdminSidebar />

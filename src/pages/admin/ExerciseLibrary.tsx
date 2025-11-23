@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -15,12 +15,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from '@/components/ui/textarea';
-import { addDoc, collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { db } from '../../lib/firebase';
+import { Textarea } from "@/components/ui/textarea";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  setDoc,
+} from "firebase/firestore";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { db } from "../../lib/firebase";
 
 interface Exercise {
   id: string;
@@ -29,8 +36,8 @@ interface Exercise {
   defaultReps: string;
 }
 
-import { useUserRole } from '@/hooks/useUserRole';
-import { useNavigate } from 'react-router-dom';
+import { useUserRole } from "@/hooks/useUserRole";
+import { useNavigate } from "react-router-dom";
 
 // ...
 
@@ -44,16 +51,16 @@ const ExerciseLibrary = () => {
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    defaultReps: ''
+    name: "",
+    description: "",
+    defaultReps: "",
   });
   // ...
 
   useEffect(() => {
     if (!roleLoading && !isAdmin) {
-      toast.error('Access denied. Admin privileges required.');
-      navigate('/admin/dashboard');
+      toast.error("Access denied. Admin privileges required.");
+      navigate("/admin/dashboard");
     }
   }, [isAdmin, roleLoading, navigate]);
 
@@ -63,12 +70,12 @@ const ExerciseLibrary = () => {
 
   const fetchExercises = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'exercises'));
-      const fetchedExercises = querySnapshot.docs.map(doc => ({
+      const querySnapshot = await getDocs(collection(db, "exercises"));
+      const fetchedExercises = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Exercise[];
-      
+
       // Sort alphabetically
       fetchedExercises.sort((a, b) => a.name.localeCompare(b.name));
       setExercises(fetchedExercises);
@@ -86,25 +93,29 @@ const ExerciseLibrary = () => {
 
     try {
       if (editingExercise) {
-        await setDoc(doc(db, 'exercises', editingExercise.id), {
-          ...formData,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-        toast.success('Exercise updated');
+        await setDoc(
+          doc(db, "exercises", editingExercise.id),
+          {
+            ...formData,
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+        toast.success("Exercise updated");
       } else {
-        await addDoc(collection(db, 'exercises'), {
+        await addDoc(collection(db, "exercises"), {
           ...formData,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         });
-        toast.success('Exercise created');
+        toast.success("Exercise created");
       }
 
       setShowDialog(false);
       setEditingExercise(null);
-      setFormData({ name: '', description: '', defaultReps: '' });
+      setFormData({ name: "", description: "", defaultReps: "" });
       fetchExercises();
     } catch (error: any) {
-      console.error('Error saving exercise:', error);
+      console.error("Error saving exercise:", error);
       toast.error(`Failed to save exercise: ${error.message}`);
     } finally {
       setSaving(false);
@@ -116,21 +127,21 @@ const ExerciseLibrary = () => {
     setFormData({
       name: exercise.name,
       description: exercise.description,
-      defaultReps: exercise.defaultReps
+      defaultReps: exercise.defaultReps,
     });
     setShowDialog(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this exercise?')) return;
+    if (!confirm("Are you sure you want to delete this exercise?")) return;
 
     try {
-      await deleteDoc(doc(db, 'exercises', id));
-      toast.success('Exercise deleted');
+      await deleteDoc(doc(db, "exercises", id));
+      toast.success("Exercise deleted");
       fetchExercises();
     } catch (error) {
-      console.error('Error deleting exercise:', error);
-      toast.error('Failed to delete exercise');
+      console.error("Error deleting exercise:", error);
+      toast.error("Failed to delete exercise");
     }
   };
 
@@ -139,11 +150,13 @@ const ExerciseLibrary = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold">Exercise Library</h1>
-          <Button onClick={() => {
-            setEditingExercise(null);
-            setFormData({ name: '', description: '', defaultReps: '' });
-            setShowDialog(true);
-          }}>
+          <Button
+            onClick={() => {
+              setEditingExercise(null);
+              setFormData({ name: "", description: "", defaultReps: "" });
+              setShowDialog(true);
+            }}
+          >
             <Plus className="mr-2 h-4 w-4" /> New Exercise
           </Button>
         </div>
@@ -161,29 +174,37 @@ const ExerciseLibrary = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">Loading...</TableCell>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    Loading...
+                  </TableCell>
                 </TableRow>
               ) : exercises.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">No exercises found.</TableCell>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    No exercises found.
+                  </TableCell>
                 </TableRow>
               ) : (
                 exercises.map((exercise) => (
                   <TableRow key={exercise.id}>
-                    <TableCell className="font-medium">{exercise.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {exercise.name}
+                    </TableCell>
                     <TableCell>{exercise.defaultReps}</TableCell>
-                    <TableCell className="max-w-md truncate">{exercise.description}</TableCell>
+                    <TableCell className="max-w-md truncate">
+                      {exercise.description}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="icon"
                           onClick={() => handleEdit(exercise)}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="icon"
                           onClick={() => handleDelete(exercise.id)}
                         >
@@ -201,7 +222,9 @@ const ExerciseLibrary = () => {
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingExercise ? 'Edit Exercise' : 'New Exercise'}</DialogTitle>
+              <DialogTitle>
+                {editingExercise ? "Edit Exercise" : "New Exercise"}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -209,7 +232,9 @@ const ExerciseLibrary = () => {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   placeholder="e.g. Bench Press"
                   required
                 />
@@ -219,7 +244,12 @@ const ExerciseLibrary = () => {
                 <Input
                   id="defaultReps"
                   value={formData.defaultReps}
-                  onChange={(e) => setFormData(prev => ({ ...prev, defaultReps: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      defaultReps: e.target.value,
+                    }))
+                  }
                   placeholder="e.g. 3x10"
                 />
               </div>
@@ -228,17 +258,26 @@ const ExerciseLibrary = () => {
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                   placeholder="Instructions on how to perform the exercise..."
                   rows={4}
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowDialog(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Exercise'}
+                  {saving ? "Saving..." : "Save Exercise"}
                 </Button>
               </div>
             </form>
