@@ -1,44 +1,36 @@
-import { useLanguage } from "@/contexts/LanguageContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import BlogCard from "@/components/BlogCard";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 
 const BlogPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const blogArticles = [
-    {
-      id: "strengthForRunners",
-      slug: "dicas-de-forca-para-corredores",
-      data: t.blog.articles.strengthForRunners,
-      image: "/lovable-uploads/bg-1.png"
-    },
-    {
-      id: "triathletesMobility",
-      slug: "mobilidade-para-triatletas",
-      data: t.blog.articles.triathletesMobility,
-      image: "/lovable-uploads/murillo.png"
-    },
-    {
-      id: "injuryPrevention",
-      slug: "como-evitar-lesoes",
-      data: t.blog.articles.injuryPrevention,
-      image: "/lovable-uploads/ba2184b9-65d7-4393-87da-9d1999bc5169.png"
-    },
-    {
-      id: "cyclingPower",
-      slug: "como-aumentar-potencia-no-pedal",
-      data: t.blog.articles.cyclingPower,
-      image: "/lovable-uploads/c2022b01-82d4-4894-b5f3-eba98aebfd4e.png"
-    },
-    {
-      id: "swimmingProgress",
-      slug: "como-evoluir-na-natacao",
-      data: t.blog.articles.swimmingProgress,
-      image: "/lovable-uploads/bg-1.png"
-    }
-  ];
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const q = query(collection(db, "articles"), orderBy("published_at", "desc"));
+        const querySnapshot = await getDocs(q);
+        const fetchedArticles = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setArticles(fetchedArticles);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
 
   return (
     <>
@@ -70,29 +62,35 @@ const BlogPage = () => {
 
             {/* Blog Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogArticles.map((article, index) => (
-                <div 
-                  key={article.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <BlogCard
-                    title={article.data.title}
-                    excerpt={article.data.excerpt}
-                    category={article.data.category}
-                    readTime={article.data.readTime}
-                    image={article.image}
-                    slug={article.slug}
-                  />
-                </div>
-              ))}
+              {loading ? (
+                <div className="col-span-full text-center py-12">Loading articles...</div>
+              ) : articles.length === 0 ? (
+                <div className="col-span-full text-center py-12 text-muted-foreground">No articles found.</div>
+              ) : (
+                articles.map((article, index) => (
+                  <div 
+                    key={article.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <BlogCard
+                      title={language === 'pt' ? article.title_pt : article.title_en}
+                      excerpt={language === 'pt' ? article.excerpt_pt : article.excerpt_en}
+                      category={language === 'pt' ? (article.category_pt || "Treino") : (article.category_en || "Training")}
+                      readTime={language === 'pt' ? (article.read_time_pt || "5 min") : (article.read_time_en || "5 min")}
+                      image={article.image_url || "/lovable-uploads/bg-1.png"}
+                      slug={article.slug}
+                    />
+                  </div>
+                ))
+              )}
             </div>
 
             {/* SEO Content Section */}
             <article className="mt-16 prose prose-lg max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold mb-6">Por que Treino de Qualidade Importa?</h2>
               <p className="text-muted-foreground">
-                Como Ironman Finisher e Personal Trainer certificado, compartilho conhecimento prático 
+                Como Triatleta e Personal Trainer, compartilho conhecimento prático 
                 baseado em anos de experiência no alto rendimento esportivo. Cada artigo é criado para 
                 fornecer insights acionáveis que você pode aplicar imediatamente no seu treino.
               </p>
