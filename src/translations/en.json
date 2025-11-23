@@ -4,6 +4,7 @@
     "about": "About",
     "services": "Services",
     "achievements": "Achievements",
+    "blog": "Blog",
     "contact": "Contact",
     "getStarted": "Get Started"
   },
@@ -141,5 +142,44 @@
     "rights": "All rights reserved.",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service"
+  },
+  "blog": {
+    "title": "Blog &",
+    "titleHighlight": "Content",
+    "subtitle": "Tips, strategies and knowledge to optimize your training and athletic performance.",
+    "readMore": "Read Article",
+    "backToBlog": "← Back to Blog",
+    "articles": {
+      "strengthForRunners": {
+        "title": "Strength Tips for Runners",
+        "excerpt": "Discover how strength training can improve your speed, endurance and prevent common running injuries.",
+        "category": "Strength",
+        "readTime": "5 min"
+      },
+      "triathletesMobility": {
+        "title": "Mobility for Triathletes",
+        "excerpt": "Essential mobility exercises to improve your performance in all three triathlon disciplines.",
+        "category": "Mobility",
+        "readTime": "6 min"
+      },
+      "injuryPrevention": {
+        "title": "How to Avoid Injuries",
+        "excerpt": "Proven strategies to prevent injuries and maintain training consistency throughout the year.",
+        "category": "Prevention",
+        "readTime": "7 min"
+      },
+      "cyclingPower": {
+        "title": "How to Increase Cycling Power",
+        "excerpt": "Specific techniques and workouts to develop more strength and efficiency in cycling.",
+        "category": "Cycling",
+        "readTime": "6 min"
+      },
+      "swimmingProgress": {
+        "title": "How to Progress in Swimming",
+        "excerpt": "Practical tips to improve technique, efficiency and speed in the water, regardless of your level.",
+        "category": "Swimming",
+        "readTime": "5 min"
+      }
+    }
   }
 }
