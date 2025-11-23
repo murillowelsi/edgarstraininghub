@@ -22,23 +22,27 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
-          <a href="#home" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+          <a href="/#home" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
             {t.nav.home}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </a>
-          <a href="#about" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+          <a href="/#about" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
             {t.nav.about}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </a>
-          <a href="#services" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+          <a href="/#services" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
             {t.nav.services}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </a>
-          <a href="#achievements" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+          <a href="/#achievements" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
             {t.nav.achievements}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </a>
-          <a href="#contact" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+          <a href="/blog" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
+            {t.nav.blog}
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/#contact" className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group">
             {t.nav.contact}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </a>
@@ -58,11 +62,12 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-background/95 backdrop-blur-lg py-6 px-4 shadow-xl animate-fade-in border-t border-border/50">
           <div className="flex flex-col space-y-4">
-            <a href="#home" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.home}</a>
-            <a href="#about" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.about}</a>
-            <a href="#services" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.services}</a>
-            <a href="#achievements" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.achievements}</a>
-            <a href="#contact" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.contact}</a>
+            <a href="/#home" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.home}</a>
+            <a href="/#about" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.about}</a>
+            <a href="/#services" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.services}</a>
+            <a href="/#achievements" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.achievements}</a>
+            <a href="/blog" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.blog}</a>
+            <a href="/#contact" className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50">{t.nav.contact}</a>
           </div>
         </div>
       )}
