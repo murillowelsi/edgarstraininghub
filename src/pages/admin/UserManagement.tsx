@@ -119,7 +119,9 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error: any) {
       console.error("Error creating user:", error);
-      toast.error(`Error: ${error.message}`);
+      toast.error(`Failed to create user: ${error.message}`);
+      // Clear form on error too
+      setFormData({ name: '', email: '', password: '', role: 'author' });
     } finally {
       setCreating(false);
     }
