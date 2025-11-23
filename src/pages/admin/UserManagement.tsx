@@ -24,11 +24,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUserRole } from '@/hooks/useUserRole';
 import { initializeApp } from 'firebase/app';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
 import { UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { db } from '../../lib/firebase';
 
@@ -41,10 +43,13 @@ interface User {
 }
 
 const UserManagement = () => {
+  const navigate = useNavigate();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -52,6 +57,14 @@ const UserManagement = () => {
     password: '',
     role: 'author'
   });
+
+  // Redirect non-admins
+  useEffect(() => {
+    if (!roleLoading && !isAdmin) {
+      toast.error('Access denied. Admin privileges required.');
+      navigate('/admin/articles');
+    }
+  }, [isAdmin, roleLoading, navigate]);
 
   useEffect(() => {
     fetchUsers();
@@ -81,41 +94,62 @@ const UserManagement = () => {
     setFormData(prev => ({ ...prev, role: value }));
   };
 
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name,
+      email: user.email,
+      password: '', // Don't pre-fill password for security
+      role: user.role
+    });
+    setShowCreateForm(true);
+  };
+
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreating(true);
 
     try {
-      // Create a secondary Firebase app instance to avoid signing out the current admin
-      const secondaryApp = initializeApp({
-        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-      }, 'Secondary');
+      if (editingUser) {
+        // Update existing user
+        await setDoc(doc(db, 'users', editingUser.uid), {
+          name: formData.name,
+          role: formData.role,
+          email: formData.email,
+          updatedAt: new Date()
+        }, { merge: true });
 
-      const secondaryAuth = getAuth(secondaryApp);
-      
-      // Create the user
-      const userCredential = await createUserWithEmailAndPassword(
-        secondaryAuth,
-        formData.email,
-        formData.password
-      );
+        toast.success('User updated successfully');
+      } else {
+        // Create new user
+        const secondaryApp = initializeApp({
+          apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+        }, 'Secondary');
 
-      // Save user profile to Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        name: formData.name,
-        email: formData.email,
-        role: formData.role,
-        createdAt: new Date()
-      });
+        const secondaryAuth = getAuth(secondaryApp);
+        
+        const userCredential = await createUserWithEmailAndPassword(
+          secondaryAuth,
+          formData.email,
+          formData.password
+        );
 
-      // Sign out from secondary auth
-      await secondaryAuth.signOut();
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          name: formData.name,
+          email: formData.email,
+          role: formData.role,
+          createdAt: new Date()
+        });
 
-      toast.success('User created successfully');
+        await secondaryAuth.signOut();
+        toast.success('User created successfully');
+      }
+
       setFormData({ name: '', email: '', password: '', role: 'author' });
       setShowCreateForm(false);
+      setEditingUser(null);
       fetchUsers();
     } catch (error: any) {
       console.error("Error creating user:", error);
@@ -135,7 +169,11 @@ const UserManagement = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">User Management</h1>
             <div className="flex gap-4">
-              <Button onClick={() => setShowCreateForm(!showCreateForm)}>
+              <Button onClick={() => {
+                setEditingUser(null);
+                setFormData({ name: '', email: '', password: '', role: 'author' });
+                setShowCreateForm(!showCreateForm);
+              }}>
                 <UserPlus className="mr-2 h-4 w-4" />
                 {showCreateForm ? 'Cancel' : 'New User'}
               </Button>
@@ -145,9 +183,11 @@ const UserManagement = () => {
           <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
-                <DialogTitle>Create New User</DialogTitle>
+                <DialogTitle>{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
                 <DialogDescription>
-                  Add a new user to the system. They will be able to log in and create articles.
+                  {editingUser 
+                    ? 'Update user information. Email cannot be changed for security reasons.'
+                    : 'Add a new user to the system. They will be able to log in and create articles.'}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -171,19 +211,20 @@ const UserManagement = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="john@example.com"
-                    required
+                    disabled={!!editingUser}
+                    required={!editingUser}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Password {editingUser && '(leave blank to keep current)'}</Label>
                   <Input
                     id="password"
                     name="password"
                     type="password"
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="Min. 6 characters"
-                    required
+                    placeholder={editingUser ? "Leave blank to keep current" : "Min. 6 characters"}
+                    required={!editingUser}
                     minLength={6}
                   />
                 </div>
@@ -206,7 +247,7 @@ const UserManagement = () => {
                   </Button>
                   <Button type="submit" disabled={creating}>
                     <UserPlus className="mr-2 h-4 w-4" />
-                    {creating ? 'Creating...' : 'Create User'}
+                    {creating ? (editingUser ? 'Updating...' : 'Creating...') : (editingUser ? 'Update User' : 'Create User')}
                   </Button>
                 </div>
               </form>
@@ -220,16 +261,17 @@ const UserManagement = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-8">Loading...</TableCell>
+                    <TableCell colSpan={4} className="text-center py-8">Loading...</TableCell>
                   </TableRow>
                 ) : users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-8">No users found.</TableCell>
+                    <TableCell colSpan={4} className="text-center py-8">No users found.</TableCell>
                   </TableRow>
                 ) : (
                   users.map((user) => (
@@ -237,6 +279,15 @@ const UserManagement = () => {
                       <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.role}</TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEdit(user)}
+                        >
+                          Edit
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

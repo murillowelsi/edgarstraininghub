@@ -2,11 +2,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { FileText, LogOut, Users } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useUserRole } from '../hooks/useUserRole';
 import { auth } from '../lib/firebase';
 
 const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAdmin } = useUserRole();
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -33,7 +35,9 @@ const AdminSidebar = () => {
       </div>
       
       <nav className="flex-1 space-y-1 p-4">
-        {navItems.map((item) => {
+        {navItems
+          .filter(item => item.title !== 'Users' || isAdmin)
+          .map((item) => {
           const Icon = item.icon;
           // Highlight Users for both /admin/users and /admin/dashboard
           const isActive = location.pathname === item.href || 

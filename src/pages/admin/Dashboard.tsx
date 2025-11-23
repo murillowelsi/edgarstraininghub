@@ -1,13 +1,15 @@
 import AdminSidebar from '@/components/AdminSidebar';
 import { Button } from '@/components/ui/button';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -20,12 +22,18 @@ interface Article {
   title_pt: string;
   title_en: string;
   published_at: any;
+  author?: {
+    uid: string;
+    name: string;
+  };
 }
 
 const Dashboard = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isAdmin, isEditor, isAuthor } = useUserRole();
 
   useEffect(() => {
     fetchArticles();
@@ -38,7 +46,18 @@ const Dashboard = () => {
         id: doc.id,
         ...doc.data()
       })) as Article[];
-      setArticles(fetchedArticles);
+      
+      // Filter articles based on role
+      let filteredArticles = fetchedArticles;
+      if (isAuthor && user) {
+        // Authors only see their own articles
+        filteredArticles = fetchedArticles.filter(
+          article => article.author?.uid === user.uid
+        );
+      }
+      // Editors and Admins see all articles
+      
+      setArticles(filteredArticles);
     } catch (error) {
       console.error("Error fetching articles:", error);
       toast.error("Failed to load articles");
@@ -110,9 +129,11 @@ const Dashboard = () => {
                               <Pencil className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(article.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          {(isEditor || isAdmin) && (
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(article.id)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
