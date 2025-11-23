@@ -26,6 +26,14 @@ interface Exercise {
   details: string;
 }
 
+interface LibraryExercise {
+  id: string;
+  name: string;
+  defaultReps: string;
+  description: string;
+  youtubeUrl?: string;
+}
+
 interface Stage {
   name?: string;
   exerciseName?: string;
@@ -41,6 +49,9 @@ interface Stage {
   repeat?: number;
   stroke?: string;
   equipment?: string[];
+  youtubeUrl?: string;
+  libraryExerciseId?: string;
+  childStages?: Stage[];
 }
 
 interface Workout {
@@ -53,6 +64,9 @@ interface Workout {
   swimmingType?: string;
   cyclingType?: string;
   runningType?: string;
+  pace?: string;
+  avgSpeed?: string;
+  terrain?: string;
 }
 
 const MOCK_WORKOUT: Workout = {
@@ -95,9 +109,14 @@ const AthleteDashboard = () => {
     new Date()
   );
   const [stageDetailsOpen, setStageDetailsOpen] = useState(false);
-  const [selectedStage, setSelectedStage] = useState<any>(null);
+  const [selectedStage, setSelectedStage] = useState<Stage | Exercise | null>(
+    null
+  );
   const [selectedStageIndex, setSelectedStageIndex] = useState<number>(-1);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
+  const [libraryExercises, setLibraryExercises] = useState<LibraryExercise[]>(
+    []
+  );
 
   // Get dates that have workouts
   const workoutDates = allWorkouts.map((workout) => new Date(workout.date));
@@ -120,6 +139,13 @@ const AthleteDashboard = () => {
     return colors[type] || "border-l-4 border-l-gray-300 bg-muted/20";
   };
 
+  const getYouTubeVideoId = (url: string) => {
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
   // Helper function to get workout items (exercises or stages)
   const getWorkoutItems = (workout: Workout) => {
     if (workout.stages && workout.stages.length > 0) {
@@ -137,95 +163,197 @@ const AthleteDashboard = () => {
   };
 
   // Helper function to render workout item
-  const renderWorkoutItem = (item: any, index: number, workout: Workout) => {
-    // Check if it's a stage (new format) or exercise (old format)
-    const isStage = item.type !== undefined;
+  const renderWorkoutItem = (
+    item: Stage | Exercise,
+    index: number,
+    workout: Workout
+  ) => {
+    const isStage = 'type' in item;
+    
+    // Portuguese translations for stage types
+    const getTypeLabel = (type: string) => {
+      const labels: Record<string, string> = {
+        warmup: "Aquecimento",
+        work: "Exercício",
+        cardio: "Corrida",
+        recovery: "Recuperação",
+        rest: "Descanso",
+        cooldown: "Desaquecimento",
+        other: "Outros"
+      };
+      return labels[type] || type;
+    };
+
+    // Get border color based on type
+    const getTypeBorderColor = (type: string) => {
+      const colors: Record<string, string> = {
+        warmup: "border-l-orange-500",
+        work: "border-l-blue-500",
+        cardio: "border-l-red-500",
+        recovery: "border-l-green-500",
+        rest: "border-l-gray-500",
+        cooldown: "border-l-purple-500",
+        other: "border-l-yellow-500"
+      };
+      return colors[type] || "border-l-gray-300";
+    };
 
     if (isStage) {
-      // Stage format
       const stage = item as Stage;
-      const itemName = stage.exerciseName || stage.name || `Stage ${index + 1}`;
-      let itemDetails = "";
 
-      if (workout?.type === "strength") {
-        const parts = [];
-        if (stage.sets) parts.push(`${stage.sets} sets`);
-        if (stage.reps) parts.push(`${stage.reps} reps`);
-        if (stage.weight) parts.push(stage.weight);
-        itemDetails = parts.join(", ");
-      } else if (workout?.type === "swimming") {
-        const parts = [];
-        if (stage.stroke) parts.push(stage.stroke);
-        if (workout.swimmingType === "pool") parts.push("Pool");
-        if (workout.swimmingType === "open-water") parts.push("Open Water");
-        if (stage.distance)
-          parts.push(`${stage.distance} ${stage.distanceUnit || "m"}`);
-        if (stage.duration) parts.push(stage.duration);
-        if (stage.intensity) parts.push(stage.intensity);
-        itemDetails = parts.join(", ");
-      } else if (workout?.type === "cycling") {
-        const parts = [];
-        if (workout.cyclingType === "indoor") parts.push("Indoor");
-        if (workout.cyclingType === "outdoor") parts.push("Outdoor");
-        if (stage.distance)
-          parts.push(`${stage.distance} ${stage.distanceUnit || "km"}`);
-        if (stage.duration) parts.push(stage.duration);
-        if (stage.intensity) parts.push(stage.intensity);
-        itemDetails = parts.join(", ");
-      } else if (workout?.type === "running") {
-        const parts = [];
-        if (workout.runningType === "indoor") parts.push("Indoor");
-        if (workout.runningType === "outdoor") parts.push("Outdoor");
-        if (stage.distance)
-          parts.push(`${stage.distance} ${stage.distanceUnit || "km"}`);
-        if (stage.duration) parts.push(stage.duration);
-        if (stage.intensity) parts.push(stage.intensity);
-        itemDetails = parts.join(", ");
-      } else {
-        const parts = [];
-        if (stage.distance)
-          parts.push(`${stage.distance} ${stage.distanceUnit || "km"}`);
-        if (stage.duration) parts.push(stage.duration);
-        if (stage.intensity) parts.push(stage.intensity);
-        itemDetails = parts.join(", ");
+      // Handle Repetition Block
+      if (stage.type === 'repetition') {
+        return (
+          <div key={index} className="space-y-2 bg-muted/10 rounded-lg p-4 border border-border/50">
+             <div className="flex items-center gap-2 mb-2">
+               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold">
+                 {stage.repeat}x
+               </span>
+               <h4 className="font-semibold text-sm text-foreground/80">Repetir {stage.repeat} Vezes</h4>
+             </div>
+             <div className="space-y-4 pl-4 border-l-2 border-primary/20">
+               {stage.childStages?.map((child, childIndex) => 
+                 renderWorkoutItem(child, childIndex, workout)
+               )}
+             </div>
+          </div>
+        );
       }
 
+      const itemName = stage.exerciseName || stage.name || `Stage ${index + 1}`;
+      const typeLabel = getTypeLabel(stage.type);
+      const borderColor = getTypeBorderColor(stage.type);
+
       return (
-        <div
-          key={index}
-          className={`flex flex-col sm:flex-row gap-4 p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors cursor-pointer ${getStageTypeColor(
-            stage.type
-          )}`}
-          onClick={() => {
-            setSelectedStage(item);
-            setSelectedStageIndex(index);
-            setSelectedWorkout(workout);
-            setStageDetailsOpen(true);
-          }}
-        >
-          <div className="flex-none flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
-            {index + 1}
-          </div>
-          <div className="flex-1 space-y-1">
-            <h3 className="font-semibold text-lg">{itemName}</h3>
-            <p className="text-sm text-muted-foreground">
-              {stage.notes || itemDetails || `Type: ${stage.type}`}
-            </p>
-          </div>
-          <div className="flex-none flex items-center">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-secondary text-secondary-foreground capitalize">
-              {stage.type}
-            </span>
+        <div key={index} className="space-y-2">
+          {/* Repeat Header */}
+          {stage.repeat && stage.repeat > 1 && (
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80 px-1">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-xs">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 12" /></svg>
+              </span>
+              {stage.repeat} Vezes
+            </div>
+          )}
+
+          <div
+            className={`bg-card rounded-lg border shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer group`}
+            onClick={() => {
+              setSelectedStage(item);
+              setSelectedStageIndex(index);
+              setSelectedWorkout(workout);
+              setStageDetailsOpen(true);
+            }}
+          >
+            <div className={`flex flex-col sm:flex-row border-l-[6px] ${borderColor}`}>
+              {/* Main Content */}
+              <div className="flex-1 p-4 sm:p-5 space-y-4">
+                {/* Header: Type and Name */}
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 block">
+                      {typeLabel}
+                    </span>
+                    <h3 className="font-bold text-lg sm:text-xl text-foreground group-hover:text-primary transition-colors">
+                      {itemName}
+                    </h3>
+                  </div>
+                  {/* Edit/View Icon hint */}
+                  <div className="text-muted-foreground/30 group-hover:text-primary/50 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                  </div>
+                </div>
+
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8">
+                  {/* Strength Metrics */}
+                  {workout?.type === "strength" && (
+                    <>
+                      {stage.sets && (
+                        <div>
+                          <div className="text-xl sm:text-2xl font-bold text-foreground">{stage.sets}</div>
+                          <div className="text-xs text-muted-foreground font-medium uppercase">Sets</div>
+                        </div>
+                      )}
+                      {stage.reps && (
+                        <div>
+                          <div className="text-xl sm:text-2xl font-bold text-foreground">{stage.reps}</div>
+                          <div className="text-xs text-muted-foreground font-medium uppercase">Reps</div>
+                        </div>
+                      )}
+                      {stage.weight && (
+                        <div>
+                          <div className="text-xl sm:text-2xl font-bold text-foreground">{stage.weight}</div>
+                          <div className="text-xs text-muted-foreground font-medium uppercase">Carga</div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Cardio Metrics (Run, Swim, Bike) */}
+                  {workout?.type !== "strength" && (
+                    <>
+                      {stage.distance && (
+                        <div>
+                          <div className="text-xl sm:text-2xl font-bold text-foreground">
+                            {stage.distance} <span className="text-sm font-normal text-muted-foreground">{stage.distanceUnit || (workout?.type === "swimming" ? "m" : "km")}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground font-medium uppercase">Distância</div>
+                        </div>
+                      )}
+                      {stage.duration && (
+                        <div>
+                          <div className="text-xl sm:text-2xl font-bold text-foreground">{stage.duration}</div>
+                          <div className="text-xs text-muted-foreground font-medium uppercase">Tempo</div>
+                        </div>
+                      )}
+                      {stage.intensity && (
+                        <div>
+                          <div className="text-lg sm:text-xl font-bold text-foreground">{stage.intensity}</div>
+                          <div className="text-xs text-muted-foreground font-medium uppercase">Intensidade</div>
+                        </div>
+                      )}
+                      {stage.stroke && (
+                        <div>
+                          <div className="text-lg sm:text-xl font-bold text-foreground capitalize">{stage.stroke}</div>
+                          <div className="text-xs text-muted-foreground font-medium uppercase">Estilo</div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Footer: Notes or Description */}
+                {(stage.notes || stage.equipment) && (
+                  <div className="pt-3 border-t border-border/50 mt-2">
+                     {stage.notes && (
+                      <p className="text-sm text-muted-foreground">
+                        {stage.notes}
+                      </p>
+                     )}
+                     {stage.equipment && stage.equipment.length > 0 && (
+                       <div className="flex gap-2 mt-2 flex-wrap">
+                         {stage.equipment.map((eq, i) => (
+                           <span key={i} className="text-xs bg-secondary/50 px-2 py-1 rounded text-secondary-foreground">
+                             {eq}
+                           </span>
+                         ))}
+                       </div>
+                     )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       );
     } else {
-      // Exercise format (legacy)
+      // Legacy Exercise Format
       const exercise = item as Exercise;
       return (
         <div
           key={index}
-          className="flex flex-col sm:flex-row gap-4 p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors cursor-pointer"
+          className="bg-card rounded-lg border shadow-sm p-4 hover:shadow-md transition-all cursor-pointer group"
           onClick={() => {
             setSelectedStage(item);
             setSelectedStageIndex(index);
@@ -233,18 +361,13 @@ const AthleteDashboard = () => {
             setStageDetailsOpen(true);
           }}
         >
-          <div className="flex-none flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
-            {index + 1}
-          </div>
-          <div className="flex-1 space-y-1">
-            <h3 className="font-semibold text-lg">{exercise.name}</h3>
-            <p className="text-sm text-muted-foreground">{exercise.details}</p>
-          </div>
-          <div className="flex-none flex items-center">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-secondary text-secondary-foreground">
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{exercise.name}</h3>
+            <span className="bg-secondary text-secondary-foreground text-xs font-semibold px-2 py-1 rounded">
               {exercise.reps}
             </span>
           </div>
+          <p className="text-sm text-muted-foreground">{exercise.details}</p>
         </div>
       );
     }
@@ -271,6 +394,14 @@ const AthleteDashboard = () => {
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         );
         setAllWorkouts(fetchedWorkouts);
+
+        // Fetch library exercises
+        const exercisesSnapshot = await getDocs(collection(db, "exercises"));
+        const fetchedLibraryExercises = exercisesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as LibraryExercise[];
+        setLibraryExercises(fetchedLibraryExercises);
 
         // Find today's workouts
         const today = new Date().toISOString().split("T")[0];
@@ -373,46 +504,9 @@ const AthleteDashboard = () => {
                         Workout Details
                       </h3>
                       <div className="space-y-3 text-sm">
-                        {getWorkoutItems(workoutItem).map((item, index) => {
-                          const isStage = item.type !== undefined;
-                          if (!isStage) return null; // Skip exercises for summary
-                          const stage = item as Stage;
-                          const stageName =
-                            stage.name || stage.type || `Stage ${index + 1}`;
-                          const details = [];
-                          if (stage.duration) details.push(`${stage.duration}`);
-                          // Add pace if available, perhaps from workout.pace or calculate
-                          const pace = (workoutItem as any).pace;
-                          if (pace && stage.duration && stage.distance) {
-                            // Calculate pace range or something, but for now just show pace
-                            details.push(`@ ${pace} min/km`);
-                          } else if (pace) {
-                            details.push(`@ ${pace} min/km`);
-                          }
-                          const detailLine = details.join(" ");
-                          return (
-                            <div key={index} className="space-y-1">
-                              <div className="font-medium capitalize">
-                                {stageName}
-                              </div>
-                              {detailLine && (
-                                <div className="text-muted-foreground">
-                                  {detailLine}
-                                </div>
-                              )}
-                              {stage.intensity && (
-                                <div className="text-muted-foreground">
-                                  {stage.intensity}
-                                </div>
-                              )}
-                              {stage.repeat && stage.repeat > 1 && (
-                                <div className="text-muted-foreground">
-                                  Repeat {stage.repeat} times
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
+                        {getWorkoutItems(workoutItem).map((item, index) =>
+                          renderWorkoutItem(item, index, workoutItem)
+                        )}
                       </div>
                     </div>
                   </AccordionContent>
@@ -534,101 +628,9 @@ const AthleteDashboard = () => {
 
                       <div className="flex-1 overflow-y-auto px-6 min-h-0">
                         <div className="space-y-2 pb-4">
-                          {getWorkoutItems(dayWorkout).map((item, index) => {
-                            const isStage = item.type !== undefined;
-                            const itemName = isStage
-                              ? item.exerciseName ||
-                                item.name ||
-                                `Stage ${index + 1}`
-                              : item.name;
-                            const itemDetails = isStage
-                              ? dayWorkout.type === "strength"
-                                ? `${item.sets || ""} ${item.reps || ""} ${
-                                    item.weight || ""
-                                  }`.trim()
-                                : dayWorkout.type === "swimming"
-                                ? `${item.stroke || ""} ${
-                                    dayWorkout.swimmingType === "pool"
-                                      ? "Pool"
-                                      : dayWorkout.swimmingType === "open-water"
-                                      ? "Open Water"
-                                      : ""
-                                  } ${item.distance || ""} ${
-                                    item.distanceUnit || ""
-                                  } ${item.duration || ""} ${
-                                    item.intensity || ""
-                                  }`.trim()
-                                : dayWorkout.type === "cycling"
-                                ? `${
-                                    dayWorkout.cyclingType === "indoor"
-                                      ? "Indoor"
-                                      : dayWorkout.cyclingType === "outdoor"
-                                      ? "Outdoor"
-                                      : ""
-                                  } ${item.distance || ""} ${
-                                    item.distanceUnit || ""
-                                  } ${item.duration || ""} ${
-                                    item.intensity || ""
-                                  }`.trim()
-                                : dayWorkout.type === "running"
-                                ? `${
-                                    dayWorkout.runningType === "indoor"
-                                      ? "Indoor"
-                                      : dayWorkout.runningType === "outdoor"
-                                      ? "Outdoor"
-                                      : ""
-                                  } ${item.distance || ""} ${
-                                    item.distanceUnit || ""
-                                  } ${item.duration || ""} ${
-                                    item.intensity || ""
-                                  }`.trim()
-                                : `${item.distance || ""} ${
-                                    item.distanceUnit || ""
-                                  } ${item.duration || ""} ${
-                                    item.intensity || ""
-                                  }`.trim()
-                              : item.reps;
-
-                            return (
-                              <div
-                                key={index}
-                                className={`bg-background rounded-lg p-4 border border-border/50 hover:border-primary/30 transition-colors cursor-pointer ${
-                                  isStage ? getStageTypeColor(item.type) : ""
-                                }`}
-                                onClick={() => {
-                                  setSelectedStage(item);
-                                  setSelectedStageIndex(index);
-                                  setStageDetailsOpen(true);
-                                }}
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className="flex-none w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-                                    {index + 1}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h5 className="font-semibold text-sm mb-1">
-                                      {itemName}
-                                    </h5>
-                                    {itemDetails && (
-                                      <p className="text-xs text-muted-foreground mb-2">
-                                        <span className="font-medium">
-                                          {dayWorkout.type === "strength"
-                                            ? "Sets/Reps:"
-                                            : "Details:"}
-                                        </span>{" "}
-                                        {itemDetails}
-                                      </p>
-                                    )}
-                                    {(isStage ? item.notes : item.details) && (
-                                      <p className="text-xs text-muted-foreground">
-                                        {isStage ? item.notes : item.details}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
+                          {getWorkoutItems(dayWorkout).map((item, index) =>
+                            renderWorkoutItem(item, index, dayWorkout)
+                          )}
                         </div>
                       </div>
 
@@ -660,12 +662,12 @@ const AthleteDashboard = () => {
                 {selectedStageIndex + 1}
               </div>
               <div>
-                <span className="text-lg">
-                  {selectedStage?.exerciseName ||
+                <span className="font-semibold text-lg">
+                  {(selectedStage && 'exerciseName' in selectedStage && selectedStage.exerciseName) ||
                     selectedStage?.name ||
                     `Stage ${selectedStageIndex + 1}`}
                 </span>
-                {selectedStage?.type && (
+                {selectedStage && 'type' in selectedStage && selectedStage.type && (
                   <div className="flex items-center gap-2 mt-1">
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground capitalize">
                       {selectedStage.type}
@@ -681,7 +683,7 @@ const AthleteDashboard = () => {
               {/* Stage Details */}
               <div
                 className={`p-4 rounded-lg border ${
-                  selectedStage.type
+                  'type' in selectedStage && selectedStage.type
                     ? getStageTypeColor(selectedStage.type)
                     : "bg-muted/20"
                 }`}
@@ -690,7 +692,7 @@ const AthleteDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedWorkout?.type === "strength" ? (
                     <>
-                      {selectedStage.sets && (
+                      {'sets' in selectedStage && selectedStage.sets && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Sets:
@@ -706,7 +708,7 @@ const AthleteDashboard = () => {
                           <p className="text-sm">{selectedStage.reps}</p>
                         </div>
                       )}
-                      {selectedStage.weight && (
+                      {'weight' in selectedStage && selectedStage.weight && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Weight:
@@ -717,18 +719,18 @@ const AthleteDashboard = () => {
                     </>
                   ) : selectedWorkout?.type === "swimming" ? (
                     <>
-                      {selectedStage.distance && (
+                      {'distance' in selectedStage && selectedStage.distance && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Distance:
                           </span>
                           <p className="text-sm">
                             {selectedStage.distance}{" "}
-                            {selectedStage.distanceUnit || "m"}
+                            {'distanceUnit' in selectedStage && selectedStage.distanceUnit ? selectedStage.distanceUnit : "m"}
                           </p>
                         </div>
                       )}
-                      {selectedStage.duration && (
+                      {'duration' in selectedStage && selectedStage.duration && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Duration:
@@ -736,7 +738,7 @@ const AthleteDashboard = () => {
                           <p className="text-sm">{selectedStage.duration}</p>
                         </div>
                       )}
-                      {selectedStage.intensity && (
+                      {'intensity' in selectedStage && selectedStage.intensity && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Intensity:
@@ -745,7 +747,7 @@ const AthleteDashboard = () => {
                         </div>
                       )}
                       {/* Swimming-specific fields */}
-                      {selectedStage.stroke && (
+                      {'stroke' in selectedStage && selectedStage.stroke && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Stroke:
@@ -753,7 +755,7 @@ const AthleteDashboard = () => {
                           <p className="text-sm">{selectedStage.stroke}</p>
                         </div>
                       )}
-                      {selectedStage.swimmingType && (
+                      {selectedWorkout?.swimmingType && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Swimming Type:
@@ -767,15 +769,16 @@ const AthleteDashboard = () => {
                           </p>
                         </div>
                       )}
-                      {(workout as any).pace && (
+                      {selectedWorkout?.pace && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Pace:
                           </span>
-                          <p className="text-sm">{(workout as any).pace}</p>
+                          <p className="text-sm">{selectedWorkout.pace}</p>
                         </div>
                       )}
-                      {selectedStage.equipment &&
+                      {'equipment' in selectedStage &&
+                        selectedStage.equipment &&
                         selectedStage.equipment.length > 0 && (
                           <div>
                             <span className="text-sm font-medium text-muted-foreground">
@@ -789,18 +792,18 @@ const AthleteDashboard = () => {
                     </>
                   ) : selectedWorkout?.type === "cycling" ? (
                     <>
-                      {selectedStage.distance && (
+                      {'distance' in selectedStage && selectedStage.distance && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Distance:
                           </span>
                           <p className="text-sm">
                             {selectedStage.distance}{" "}
-                            {selectedStage.distanceUnit || "km"}
+                            {'distanceUnit' in selectedStage && selectedStage.distanceUnit ? selectedStage.distanceUnit : "km"}
                           </p>
                         </div>
                       )}
-                      {selectedStage.duration && (
+                      {'duration' in selectedStage && selectedStage.duration && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Duration:
@@ -808,7 +811,7 @@ const AthleteDashboard = () => {
                           <p className="text-sm">{selectedStage.duration}</p>
                         </div>
                       )}
-                      {selectedStage.intensity && (
+                      {'intensity' in selectedStage && selectedStage.intensity && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Intensity:
@@ -816,44 +819,43 @@ const AthleteDashboard = () => {
                           <p className="text-sm">{selectedStage.intensity}</p>
                         </div>
                       )}
-                      {/* Cycling-specific fields */}
                       {selectedWorkout?.cyclingType && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Cycling Type:
                           </span>
                           <p className="text-sm">
-                            {workout.cyclingType === "indoor"
+                            {selectedWorkout.cyclingType === "indoor"
                               ? "Indoor Cycling"
-                              : workout.cyclingType === "outdoor"
+                              : selectedWorkout.cyclingType === "outdoor"
                               ? "Outdoor Cycling"
                               : ""}
                           </p>
                         </div>
                       )}
-                      {(workout as any).avgSpeed && (
+                      {selectedWorkout?.avgSpeed && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Avg Speed:
                           </span>
-                          <p className="text-sm">{(workout as any).avgSpeed}</p>
+                          <p className="text-sm">{selectedWorkout.avgSpeed}</p>
                         </div>
                       )}
                     </>
                   ) : selectedWorkout?.type === "running" ? (
                     <>
-                      {selectedStage.distance && (
+                      {'distance' in selectedStage && selectedStage.distance && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Distance:
                           </span>
                           <p className="text-sm">
                             {selectedStage.distance}{" "}
-                            {selectedStage.distanceUnit || "km"}
+                            {'distanceUnit' in selectedStage && selectedStage.distanceUnit ? selectedStage.distanceUnit : "km"}
                           </p>
                         </div>
                       )}
-                      {selectedStage.duration && (
+                      {'duration' in selectedStage && selectedStage.duration && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Duration:
@@ -861,7 +863,7 @@ const AthleteDashboard = () => {
                           <p className="text-sm">{selectedStage.duration}</p>
                         </div>
                       )}
-                      {selectedStage.intensity && (
+                      {'intensity' in selectedStage && selectedStage.intensity && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Intensity:
@@ -876,45 +878,45 @@ const AthleteDashboard = () => {
                             Running Type:
                           </span>
                           <p className="text-sm">
-                            {workout.runningType === "indoor"
+                            {selectedWorkout.runningType === "indoor"
                               ? "Indoor Running"
-                              : workout.runningType === "outdoor"
+                              : selectedWorkout.runningType === "outdoor"
                               ? "Outdoor Running"
                               : ""}
                           </p>
                         </div>
                       )}
-                      {(workout as any).pace && (
+                      {selectedWorkout?.pace && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Pace:
                           </span>
-                          <p className="text-sm">{(workout as any).pace}</p>
+                          <p className="text-sm">{selectedWorkout.pace}</p>
                         </div>
                       )}
-                      {(workout as any).terrain && (
+                      {selectedWorkout?.terrain && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Terrain:
                           </span>
-                          <p className="text-sm">{(workout as any).terrain}</p>
+                          <p className="text-sm">{selectedWorkout.terrain}</p>
                         </div>
                       )}
                     </>
                   ) : (
                     <>
-                      {selectedStage.distance && (
+                      {'distance' in selectedStage && selectedStage.distance && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Distance:
                           </span>
                           <p className="text-sm">
                             {selectedStage.distance}{" "}
-                            {selectedStage.distanceUnit || "km"}
+                            {'distanceUnit' in selectedStage && selectedStage.distanceUnit ? selectedStage.distanceUnit : "km"}
                           </p>
                         </div>
                       )}
-                      {selectedStage.duration && (
+                      {'duration' in selectedStage && selectedStage.duration && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Duration:
@@ -922,7 +924,7 @@ const AthleteDashboard = () => {
                           <p className="text-sm">{selectedStage.duration}</p>
                         </div>
                       )}
-                      {selectedStage.intensity && (
+                      {'intensity' in selectedStage && selectedStage.intensity && (
                         <div>
                           <span className="text-sm font-medium text-muted-foreground">
                             Intensity:
@@ -932,7 +934,7 @@ const AthleteDashboard = () => {
                       )}
                     </>
                   )}
-                  {selectedStage.repeat && selectedStage.repeat > 1 && (
+                  {'repeat' in selectedStage && selectedStage.repeat && selectedStage.repeat > 1 && (
                     <div>
                       <span className="text-sm font-medium text-muted-foreground">
                         Repeat:
@@ -944,17 +946,17 @@ const AthleteDashboard = () => {
               </div>
 
               {/* Notes */}
-              {(selectedStage.notes || selectedStage.details) && (
+              {(( 'notes' in selectedStage && selectedStage.notes) || ('details' in selectedStage && selectedStage.details)) && (
                 <div className="bg-muted/20 p-4 rounded-lg border">
                   <h3 className="font-semibold text-base mb-2">Notes</h3>
                   <p className="text-sm text-muted-foreground">
-                    {selectedStage.notes || selectedStage.details}
+                    {('notes' in selectedStage && selectedStage.notes) || ('details' in selectedStage && selectedStage.details)}
                   </p>
                 </div>
               )}
 
               {/* Stage Type Description */}
-              {selectedStage.type && (
+              {'type' in selectedStage && selectedStage.type && (
                 <div className="bg-muted/20 p-4 rounded-lg border">
                   <h3 className="font-semibold text-base mb-2">Stage Type</h3>
                   <p className="text-sm text-muted-foreground capitalize">

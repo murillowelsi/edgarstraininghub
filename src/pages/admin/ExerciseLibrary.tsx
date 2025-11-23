@@ -34,6 +34,7 @@ interface Exercise {
   name: string;
   description: string;
   defaultReps: string;
+  youtubeUrl?: string;
 }
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -54,6 +55,7 @@ const ExerciseLibrary = () => {
     name: "",
     description: "",
     defaultReps: "",
+    youtubeUrl: "",
   });
   // ...
 
@@ -112,11 +114,20 @@ const ExerciseLibrary = () => {
 
       setShowDialog(false);
       setEditingExercise(null);
-      setFormData({ name: "", description: "", defaultReps: "" });
+      setFormData({
+        name: "",
+        description: "",
+        defaultReps: "",
+        youtubeUrl: "",
+      });
       fetchExercises();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving exercise:", error);
-      toast.error(`Failed to save exercise: ${error.message}`);
+      toast.error(
+        `Failed to save exercise: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     } finally {
       setSaving(false);
     }
@@ -128,6 +139,7 @@ const ExerciseLibrary = () => {
       name: exercise.name,
       description: exercise.description,
       defaultReps: exercise.defaultReps,
+      youtubeUrl: exercise.youtubeUrl || "",
     });
     setShowDialog(true);
   };
@@ -149,11 +161,22 @@ const ExerciseLibrary = () => {
     <div className="container mx-auto py-10 px-4">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold">Exercise Library</h1>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Exercise Library</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage exercises and add YouTube tutorial videos. Click "New
+              Exercise" or edit an existing exercise to add videos.
+            </p>
+          </div>
           <Button
             onClick={() => {
               setEditingExercise(null);
-              setFormData({ name: "", description: "", defaultReps: "" });
+              setFormData({
+                name: "",
+                description: "",
+                defaultReps: "",
+                youtubeUrl: "",
+              });
               setShowDialog(true);
             }}
           >
@@ -168,19 +191,20 @@ const ExerciseLibrary = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Default Reps</TableHead>
                 <TableHead>Description</TableHead>
+                <TableHead>YouTube</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
+                  <TableCell colSpan={5} className="text-center py-8">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : exercises.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
+                  <TableCell colSpan={5} className="text-center py-8">
                     No exercises found.
                   </TableCell>
                 </TableRow>
@@ -193,6 +217,24 @@ const ExerciseLibrary = () => {
                     <TableCell>{exercise.defaultReps}</TableCell>
                     <TableCell className="max-w-md truncate">
                       {exercise.description}
+                    </TableCell>
+                    <TableCell>
+                      {exercise.youtubeUrl ? (
+                        <div className="flex items-center gap-1 text-green-600">
+                          <svg
+                            className="h-4 w-4"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                          </svg>
+                          <span className="text-xs">Video</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          No video
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -220,7 +262,7 @@ const ExerciseLibrary = () => {
         </div>
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingExercise ? "Edit Exercise" : "New Exercise"}
@@ -268,7 +310,25 @@ const ExerciseLibrary = () => {
                   rows={4}
                 />
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="space-y-2">
+                <Label htmlFor="youtubeUrl">YouTube Video URL (Optional)</Label>
+                <Input
+                  id="youtubeUrl"
+                  type="url"
+                  value={formData.youtubeUrl}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      youtubeUrl: e.target.value,
+                    }))
+                  }
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <p className="text-xs text-muted-foreground">
+                  Add a YouTube video tutorial for this exercise
+                </p>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
                 <Button
                   type="button"
                   variant="outline"

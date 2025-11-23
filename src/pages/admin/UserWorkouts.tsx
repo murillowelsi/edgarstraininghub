@@ -9,7 +9,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Trash2, Youtube } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -19,6 +19,14 @@ interface Exercise {
   name: string;
   reps: string;
   details: string;
+}
+
+interface LibraryExercise {
+  id: string;
+  name: string;
+  defaultReps: string;
+  description: string;
+  youtubeUrl?: string;
 }
 
 interface WorkoutStage {
@@ -42,6 +50,8 @@ interface WorkoutStage {
   equipment?: string[];
   // Library exercise ID for tracking selected exercises
   libraryExerciseId?: string;
+  youtubeUrl?: string;
+  childStages?: WorkoutStage[];
 }
 
 interface Workout {
@@ -74,6 +84,9 @@ const UserWorkouts = () => {
   const [athleteName, setAthleteName] = useState("");
   const [loading, setLoading] = useState(true);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [libraryExercises, setLibraryExercises] = useState<LibraryExercise[]>(
+    []
+  );
 
   const getStageTypeColor = (type: string) => {
     switch (type) {
@@ -90,6 +103,13 @@ const UserWorkouts = () => {
     }
   };
 
+  const getYouTubeVideoId = (url: string) => {
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (!userId) return;
@@ -101,7 +121,30 @@ const UserWorkouts = () => {
           setAthleteName(userDoc.data().name);
         }
 
-        await fetchWorkouts();
+        // Fetch library exercises
+        const exercisesSnapshot = await getDocs(collection(db, "exercises"));
+        const fetchedLibraryExercises = exercisesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as LibraryExercise[];
+        setLibraryExercises(fetchedLibraryExercises);
+
+        // Fetch workouts
+        const q = query(
+          collection(db, "workouts"),
+          where("athleteId", "==", userId)
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedWorkouts = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Workout[];
+
+        // Sort by date desc
+        fetchedWorkouts.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        setWorkouts(fetchedWorkouts);
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Failed to load data");
@@ -113,32 +156,29 @@ const UserWorkouts = () => {
     fetchData();
   }, [userId]);
 
-  const fetchWorkouts = async () => {
-    if (!userId) return;
-    const q = query(
-      collection(db, "workouts"),
-      where("athleteId", "==", userId)
-    );
-    const querySnapshot = await getDocs(q);
-    const fetchedWorkouts = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Workout[];
-
-    // Sort by date desc
-    fetchedWorkouts.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-    setWorkouts(fetchedWorkouts);
-  };
-
   const handleDeleteWorkout = async (workoutId: string) => {
     if (!confirm("Are you sure you want to delete this workout?")) return;
 
     try {
       await deleteDoc(doc(db, "workouts", workoutId));
       toast.success("Workout deleted");
-      fetchWorkouts();
+
+      // Refresh workouts after deletion
+      const q = query(
+        collection(db, "workouts"),
+        where("athleteId", "==", userId)
+      );
+      const querySnapshot = await getDocs(q);
+      const fetchedWorkouts = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Workout[];
+
+      // Sort by date desc
+      fetchedWorkouts.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      setWorkouts(fetchedWorkouts);
     } catch (error) {
       console.error("Error deleting workout:", error);
       toast.error("Failed to delete workout");
@@ -229,7 +269,27 @@ const UserWorkouts = () => {
 
                     {workout.stages && workout.stages.length > 0 ? (
                       <div className="text-sm space-y-2 mt-2">
-                        {workout.stages.map((stage, idx) => (
+                        {workout.stages.map((stage, idx) => {
+                          if (stage.type === 'repetition') {
+                             return (
+                               <div key={idx} className="rounded-md border p-3 bg-muted/20 my-2">
+                                 <div className="font-semibold text-sm mb-2">Repetir {stage.repeat}x</div>
+                                 <div className="pl-4 border-l-2 border-primary/20 space-y-2">
+                                   {stage.childStages?.map((child, cIdx) => (
+                                      <div key={cIdx} className={`rounded-md pl-2 py-1 ${getStageTypeColor(child.type)}`}>
+                                         <span className="font-medium text-sm">{child.name || child.exerciseName || `Stage ${cIdx + 1}`}</span>
+                                         <span className="text-xs text-muted-foreground ml-2">
+                                            {child.distance ? `${child.distance}${child.distanceUnit}` : ''}
+                                            {child.duration ? `${child.duration}` : ''}
+                                            {child.sets ? `${child.sets}x${child.reps}` : ''}
+                                         </span>
+                                      </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             );
+                          }
+                          return (
                           <div
                             key={idx}
                             className={`rounded-md pl-3 pr-2 py-2 ${getStageTypeColor(
@@ -280,10 +340,45 @@ const UserWorkouts = () => {
                                     </>
                                   )}
                                 </div>
+                                {/* YouTube Video */}
+                                {stage.libraryExerciseId &&
+                                  (() => {
+                                    const exercise = libraryExercises.find(
+                                      (ex) => ex.id === stage.libraryExerciseId
+                                    );
+                                    const videoId = exercise?.youtubeUrl
+                                      ? getYouTubeVideoId(exercise.youtubeUrl)
+                                      : null;
+                                    return videoId ? (
+                                      <div className="mt-3">
+                                        <div className="aspect-video w-full max-w-sm mx-auto rounded-lg overflow-hidden border">
+                                          <iframe
+                                            src={`https://www.youtube.com/embed/${videoId}`}
+                                            title={`${exercise?.name} tutorial`}
+                                            className="w-full h-full"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                          />
+                                        </div>
+                                        <div className="mt-1 text-center">
+                                          <a
+                                            href={exercise.youtubeUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 hover:underline"
+                                          >
+                                            <Youtube className="h-3 w-3" />
+                                            Open on YouTube
+                                          </a>
+                                        </div>
+                                      </div>
+                                    ) : null;
+                                  })()}
                               </div>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                         {workout.notes && (
                           <p className="text-muted-foreground mt-2 italic text-xs">
                             {workout.notes}

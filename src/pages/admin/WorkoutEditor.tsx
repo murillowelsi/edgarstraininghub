@@ -65,6 +65,10 @@ interface WorkoutStage {
   equipment?: string[];
   // Library exercise ID for tracking selected exercises
   libraryExerciseId?: string;
+  // YouTube URL for demonstration
+  youtubeUrl?: string;
+  // Nested stages for repetition blocks
+  childStages?: WorkoutStage[];
 }
 
 interface LibraryExercise {
@@ -72,6 +76,7 @@ interface LibraryExercise {
   name: string;
   defaultReps: string;
   description: string;
+  youtubeUrl?: string;
 }
 
 interface Workout {
@@ -128,6 +133,7 @@ const WorkoutEditor = () => {
       stroke: "",
       equipment: [],
       libraryExerciseId: "",
+      youtubeUrl: "",
     },
   ]);
   const [workoutNotes, setWorkoutNotes] = useState("");
@@ -219,6 +225,7 @@ const WorkoutEditor = () => {
           ...stage,
           equipment: stage.equipment || [], // Ensure equipment is always an array
           libraryExerciseId: found ? found.id : stage.libraryExerciseId || "",
+          youtubeUrl: stage.youtubeUrl || (found ? found.youtubeUrl : "") || "",
         };
       })
     );
@@ -261,23 +268,39 @@ const WorkoutEditor = () => {
 
   // Stage management functions
   const handleAddStage = () => {
-    const newStages = [
-      ...stages,
-      {
-        name: "",
-        type: "work",
-        duration: "",
-        distance: "",
-        distanceUnit: "km",
-        intensity: "",
-        notes: "",
-        stroke: "",
-        equipment: [],
-        libraryExerciseId: "",
-      },
-    ];
-    setStages(newStages);
-    setExpandedStageIndex(newStages.length - 1); // Expand the new stage
+    const newStage: WorkoutStage = {
+      name: "",
+      type: "work",
+      duration: "",
+      distance: "",
+      intensity: "",
+      notes: "",
+      youtubeUrl: "",
+      childStages: [],
+    };
+    setStages([...stages, newStage]);
+    setExpandedStageIndex(stages.length);
+  };
+
+  const handleAddRepetitionBlock = () => {
+    const newBlock: WorkoutStage = {
+      name: "Repetition Block",
+      type: "repetition",
+      repeat: 2,
+      childStages: [
+        {
+          name: "",
+          type: "work",
+          duration: "",
+          distance: "",
+          intensity: "",
+          notes: "",
+          youtubeUrl: "",
+        },
+      ],
+    };
+    setStages([...stages, newBlock]);
+    setExpandedStageIndex(stages.length);
   };
 
   const handleRemoveStage = (index: number) => {
@@ -288,11 +311,60 @@ const WorkoutEditor = () => {
   const handleStageChange = (
     index: number,
     field: keyof WorkoutStage,
-    value: string | number
+    value: any
   ) => {
     const newStages = [...stages];
     newStages[index] = { ...newStages[index], [field]: value };
     setStages(newStages);
+  };
+
+  const handleChildStageChange = (
+    parentIndex: number,
+    childIndex: number,
+    field: keyof WorkoutStage,
+    value: any
+  ) => {
+    const newStages = [...stages];
+    const parentStage = newStages[parentIndex];
+    if (parentStage.childStages) {
+      const newChildStages = [...parentStage.childStages];
+      newChildStages[childIndex] = { ...newChildStages[childIndex], [field]: value };
+      newStages[parentIndex] = { ...parentStage, childStages: newChildStages };
+      setStages(newStages);
+    }
+  };
+
+  const handleAddChildStage = (parentIndex: number) => {
+    const newStages = [...stages];
+    const parentStage = newStages[parentIndex];
+    if (parentStage.childStages) {
+      const newChildStage: WorkoutStage = {
+        name: "",
+        type: "work",
+        duration: "",
+        distance: "",
+        intensity: "",
+        notes: "",
+        youtubeUrl: "",
+      };
+      newStages[parentIndex] = {
+        ...parentStage,
+        childStages: [...parentStage.childStages, newChildStage],
+      };
+      setStages(newStages);
+    }
+  };
+
+  const handleRemoveChildStage = (parentIndex: number, childIndex: number) => {
+    const newStages = [...stages];
+    const parentStage = newStages[parentIndex];
+    if (parentStage.childStages) {
+      const newChildStages = parentStage.childStages.filter(
+        (_, i) => i !== childIndex
+      );
+      newStages[parentIndex] = { ...parentStage, childStages: newChildStages };
+      setStages(newStages);
+    }
   };
 
   // Handle equipment selection/deselection
@@ -526,6 +598,7 @@ const WorkoutEditor = () => {
         stroke: "",
         equipment: [],
         libraryExerciseId: "",
+        youtubeUrl: "",
       },
     ]);
     setWorkoutNotes("");
@@ -682,6 +755,14 @@ const WorkoutEditor = () => {
                     <Plus className="mr-2 h-4 w-4" /> Add{" "}
                     {workoutType === "strength" ? "Exercise" : "Stage"}
                   </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddRepetitionBlock}
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Add Loop
+                  </Button>
                 </div>
               </div>
 
@@ -690,6 +771,267 @@ const WorkoutEditor = () => {
                 const isDragOver = dragOverIndex === index;
                 const stageName =
                   stage.exerciseName || stage.name || `Stage ${index + 1}`;
+
+                if (stage.type === "repetition") {
+                  return (
+                    <div
+                      key={index}
+                      className={`border rounded-lg relative transition-all bg-muted/10 ${
+                        isDragOver ? "ring-2 ring-primary scale-105" : ""
+                      }`}
+                      draggable={true}
+                      onDragStart={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (
+                          target.closest("button") ||
+                          target.closest("input") ||
+                          target.closest("select") ||
+                          target.closest("textarea")
+                        ) {
+                          e.preventDefault();
+                          return;
+                        }
+                        handleDragStart(e, index);
+                      }}
+                      onDragOver={handleDragOver}
+                      onDragEnter={(e) => handleDragEnter(e, index)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, index)}
+                    >
+                      {/* Drag Handle */}
+                      <div
+                        className="absolute top-3 left-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground z-10"
+                        title="Drag to reorder"
+                      >
+                        <GripVertical className="h-5 w-5" />
+                      </div>
+
+                      {/* Delete Button */}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-6 w-6 text-destructive z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveStage(index);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+
+                      {/* Repetition Header */}
+                      <div className="p-3 pl-10 pr-12 border-b bg-muted/20 rounded-t-lg flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm">Repetir</span>
+                          <Input
+                            type="number"
+                            min="1"
+                            className="w-16 h-8 bg-background"
+                            value={stage.repeat || 1}
+                            onChange={(e) =>
+                              handleStageChange(
+                                index,
+                                "repeat",
+                                parseInt(e.target.value) || 1
+                              )
+                            }
+                          />
+                          <span className="font-semibold text-sm">Vezes</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          (Loop de exercícios)
+                        </div>
+                      </div>
+
+                      {/* Child Stages */}
+                      <div className="p-4 space-y-3">
+                        {stage.childStages?.map((child, childIndex) => (
+                          <div
+                            key={childIndex}
+                            className={`border rounded-lg p-3 relative bg-card ${getStageTypeColor(
+                              child.type
+                            )}`}
+                          >
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute top-2 right-2 h-6 w-6 text-destructive"
+                              onClick={() =>
+                                handleRemoveChildStage(index, childIndex)
+                              }
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+
+                            <div className="grid gap-3 pr-8">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Tipo</Label>
+                                  <Select
+                                    value={child.type}
+                                    onValueChange={(value) =>
+                                      handleChildStageChange(
+                                        index,
+                                        childIndex,
+                                        "type",
+                                        value
+                                      )
+                                    }
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="warmup">
+                                        Aquecimento
+                                      </SelectItem>
+                                      <SelectItem value="work">
+                                        Exercício
+                                      </SelectItem>
+                                      <SelectItem value="cardio">
+                                        Corrida
+                                      </SelectItem>
+                                      <SelectItem value="recovery">
+                                        Recuperação
+                                      </SelectItem>
+                                      <SelectItem value="rest">
+                                        Descanso
+                                      </SelectItem>
+                                      <SelectItem value="cooldown">
+                                        Desaquecimento
+                                      </SelectItem>
+                                      <SelectItem value="other">
+                                        Outros
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Nome</Label>
+                                  <Input
+                                    className="h-8"
+                                    placeholder="Nome da etapa"
+                                    value={child.name || child.exerciseName || ""}
+                                    onChange={(e) =>
+                                      handleChildStageChange(
+                                        index,
+                                        childIndex,
+                                        "name",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Distância</Label>
+                                  <div className="flex gap-1">
+                                    <Input
+                                      className="h-8"
+                                      placeholder="0"
+                                      value={child.distance || ""}
+                                      onChange={(e) =>
+                                        handleChildStageChange(
+                                          index,
+                                          childIndex,
+                                          "distance",
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                    <Select
+                                      value={child.distanceUnit || "km"}
+                                      onValueChange={(value) =>
+                                        handleChildStageChange(
+                                          index,
+                                          childIndex,
+                                          "distanceUnit",
+                                          value
+                                        )
+                                      }
+                                    >
+                                      <SelectTrigger className="h-8 w-16 px-1">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="km">km</SelectItem>
+                                        <SelectItem value="m">m</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Duração</Label>
+                                  <Input
+                                    className="h-8"
+                                    placeholder="Tempo"
+                                    value={child.duration || ""}
+                                    onChange={(e) =>
+                                      handleChildStageChange(
+                                        index,
+                                        childIndex,
+                                        "duration",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Intensidade</Label>
+                                  <Input
+                                    className="h-8"
+                                    placeholder="Zona/Ritmo"
+                                    value={child.intensity || ""}
+                                    onChange={(e) =>
+                                      handleChildStageChange(
+                                        index,
+                                        childIndex,
+                                        "intensity",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-1">
+                                <Label className="text-xs">YouTube URL</Label>
+                                <Input
+                                  className="h-8"
+                                  placeholder="https://youtube.com/..."
+                                  value={child.youtubeUrl || ""}
+                                  onChange={(e) =>
+                                    handleChildStageChange(
+                                      index,
+                                      childIndex,
+                                      "youtubeUrl",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full border-dashed"
+                          onClick={() => handleAddChildStage(index)}
+                        >
+                          <Plus className="mr-2 h-4 w-4" /> Adicionar Etapa ao
+                          Loop
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                }
 
                 return (
                   <div
@@ -1182,6 +1524,21 @@ const WorkoutEditor = () => {
                                     workoutType === "strength"
                                       ? "notes"
                                       : "intensity",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <Label className="text-xs">YouTube URL</Label>
+                              <Input
+                                placeholder="https://youtube.com/watch?v=..."
+                                value={stage.youtubeUrl || ""}
+                                onChange={(e) =>
+                                  handleStageChange(
+                                    index,
+                                    "youtubeUrl",
                                     e.target.value
                                   )
                                 }

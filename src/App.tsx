@@ -51,7 +51,10 @@ const App = () => (
                 }
               >
                 <Route path="login" element={<Login />} />
-                <Route path="dashboard" element={<Navigate to="/admin/users" replace />} />
+                <Route
+                  path="dashboard"
+                  element={<Navigate to="/admin/users" replace />}
+                />
                 <Route path="articles" element={<Dashboard />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="exercises" element={<ExerciseLibrary />} />
