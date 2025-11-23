@@ -12,6 +12,8 @@ const BlogPage = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -22,8 +24,9 @@ const BlogPage = () => {
           ...doc.data()
         }));
         setArticles(fetchedArticles);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching articles:", error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -64,6 +67,8 @@ const BlogPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {loading ? (
                 <div className="col-span-full text-center py-12">Loading articles...</div>
+              ) : error ? (
+                <div className="col-span-full text-center py-12 text-destructive">Error: {error}</div>
               ) : articles.length === 0 ? (
                 <div className="col-span-full text-center py-12 text-muted-foreground">No articles found.</div>
               ) : (
