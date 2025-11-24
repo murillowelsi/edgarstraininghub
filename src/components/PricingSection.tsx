@@ -66,7 +66,7 @@ const PricingSection = () => {
                   {plan.name}
                 </h3>
                 <div className="text-3xl font-bold text-primary mb-2">
-                  {t.pricing.pricePlaceholder || "Preço a consultar"}
+                  {plan.price || "Preço a consultar"}
                 </div>
               </div>
 

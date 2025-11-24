@@ -9,7 +9,7 @@ const TestimonialsSection = () => {
       name: "Murillo Welsi",
       role: "Triathlete",
       image: "/lovable-uploads/murillo.png",
-      text: "Working with Edgar transformed my running performance. I shaved 15 minutes off my marathon time and improved my overall technique. His approach is scientific yet approachable.",
+      text: t.testimonials.murilloWelsi.text,
       stars: 5
     },
   ];

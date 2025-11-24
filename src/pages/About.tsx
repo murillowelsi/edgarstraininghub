@@ -1,14 +1,6 @@
 import CertificationBadge from "@/components/CertificationBadge";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Award, CheckCircle, Clock, Medal, Trophy, Users } from "lucide-react";
 
@@ -301,7 +293,7 @@ const About = () => {
             ))}
           </div>
 
-          <div className="animate-fade-in">
+          {/* <div className="animate-fade-in">
             <h3 className="text-2xl font-bold mb-8 text-center text-foreground">
               Certificados
             </h3>
@@ -338,7 +330,7 @@ const About = () => {
               <CarouselPrevious />
               <CarouselNext />
             </Carousel>
-          </div>
+          </div> */}
         </div>
       </section>
 

@@ -101,7 +101,10 @@
   "testimonials": {
     "title": "Depoimentos de",
     "titleHighlight": "Clientes",
-    "subtitle": "Veja o que alguns dos meus clientes têm a dizer sobre a experiência de treino."
+    "subtitle": "Veja o que alguns dos meus clientes têm a dizer sobre a experiência de treino.",
+    "murilloWelsi": {
+      "text": "Os treinos de fortalecimento com o Edgar ajudaram-me a reduzir dores e evitar pequenas lesões. Sinto-me mais estável e a correr melhor no dia a dia."
+    }
   },
   "footer": {
     "description": "Personal Trainer & Triatleta baseado no Porto, Portugal, especializado em treino de resistência e otimização de desempenho.",
@@ -132,41 +135,36 @@
   "pricing": {
     "title": "Planos &",
     "titleHighlight": "Preços",
-    "subtitle": "Escolha o plano ideal para seus objetivos fitness",
-    "pricePlaceholder": "Preço a consultar",
+    "subtitle": "Escolha o plano ideal para seus objetivos",
+    "pricePlaceholder": "30€",
     "plans": {
       "basic": {
         "name": "Plano Básico",
+        "price": "30€",
         "features": [
-          "1 sessão por semana",
-          "Avaliação inicial completa",
           "Plano de treino personalizado",
-          "Acompanhamento por WhatsApp",
-          "Dicas de nutrição básica"
+          "Acompanhamento por WhatsApp"
         ]
       },
       "standard": {
         "name": "Plano Standard",
+        "price": "40€",
         "features": [
-          "2 sessões por semana",
           "Avaliação inicial completa",
           "Plano de treino personalizado",
-          "Acompanhamento por WhatsApp",
-          "Plano nutricional básico",
-          "Ajustes semanais no treino"
+          "Acompanhamento por WhatsApp"
         ],
         "popular": true
       },
       "premium": {
         "name": "Plano Premium",
+        "price": "50€",
         "features": [
-          "3 sessões por semana",
           "Avaliação inicial completa",
           "Plano de treino personalizado",
-          "Plano nutricional avançado",
-          "Acompanhamento 24/7",
-          "Sessões de acompanhamento mensal",
-          "Suplementação guidance"
+          "Acompanhamento por WhatsApp",
+          "1 sessão 1:1 por mês",
+          "1 videochamada por mês"
         ]
       }
     },
@@ -196,13 +194,16 @@
       "title": "Informações de Contacto",
       "phone": "Telefone",
       "whatsapp": "WhatsApp",
+      "email": "Email",
       "location": "Localização",
       "locationDesc": "Atendo clientes em todo o Porto e também ofereço treinos online personalizados"
     },
     "hours": {
       "title": "Horário de Funcionamento",
       "weekdays": "Dias Úteis",
-      "weekends": "Fins de Semana"
+      "weekdaysHours": "6:00 - 20:00",
+      "weekends": "Fins de Semana",
+      "weekendsHours": "8:00 - 14:00"
     },
     "phoneCard": {
       "available": "Disponível para chamadas"
@@ -216,6 +217,18 @@
     },
     "weekdaysText": "Segunda a Sexta",
     "weekendsText": "Sábado e Domingo",
+    "form": {
+      "title": "Envie-me uma Mensagem",
+      "name": "Seu Nome",
+      "namePlaceholder": "João Silva",
+      "email": "Endereço de Email",
+      "emailPlaceholder": "joao@exemplo.com",
+      "message": "Mensagem",
+      "messagePlaceholder": "Estou interessado em treino personalizado...",
+      "send": "Enviar Mensagem",
+      "success": "Mensagem Enviada!",
+      "successDescription": "Obrigado por entrar em contacto. Responderei em breve."
+    },
     "cta": {
       "title": "Pronto para começar sua jornada fitness?",
       "description": "Agende sua avaliação gratuita e vamos criar um plano personalizado para seus objetivos.",

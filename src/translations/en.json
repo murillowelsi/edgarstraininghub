@@ -101,38 +101,9 @@
   "testimonials": {
     "title": "Client",
     "titleHighlight": "Testimonials",
-    "subtitle": "Here's what some of my clients have to say about their training experience."
-  },
-  "contact": {
-    "title": "Get in",
-    "titleHighlight": "Touch",
-    "subtitle": "Ready to start your fitness journey? Reach out to schedule a consultation or learn more about my services.",
-    "info": {
-      "title": "Contact Information",
-      "phone": "Phone",
-      "whatsapp": "WhatsApp",
-      "email": "Email",
-      "location": "Location",
-      "locationDesc": "Available for in-person training in Porto and online training worldwide"
-    },
-    "hours": {
-      "title": "Training Hours",
-      "weekdays": "Weekdays",
-      "weekendsHours": "8:00 AM - 2:00 PM",
-      "weekends": "Weekends",
-      "weekdaysHours": "6:00 AM - 8:00 PM"
-    },
-    "form": {
-      "title": "Send Me a Message",
-      "name": "Your Name",
-      "namePlaceholder": "John Doe",
-      "email": "Email Address",
-      "emailPlaceholder": "john@example.com",
-      "message": "Message",
-      "messagePlaceholder": "I'm interested in personal training...",
-      "send": "Send Message",
-      "success": "Message Sent!",
-      "successDescription": "Thank you for reaching out. I'll get back to you soon."
+    "subtitle": "Here's what some of my clients have to say about their training experience.",
+    "murilloWelsi": {
+      "text": "Strength sessions with Edgar helped me reduce discomfort and avoid small injuries. I feel more stable and running has become smoother."
     }
   },
   "footer": {
@@ -169,36 +140,31 @@
     "plans": {
       "basic": {
         "name": "Basic Plan",
+        "price": "30€",
         "features": [
-          "1 session per week",
-          "Complete initial assessment",
-          "Customized workout plan",
-          "WhatsApp follow-up",
-          "Basic nutrition tips"
+          "Personalized training plan",
+          "WhatsApp follow-up"
         ]
       },
       "standard": {
         "name": "Standard Plan",
+        "price": "40€",
         "features": [
-          "2 sessions per week",
           "Complete initial assessment",
-          "Customized workout plan",
-          "WhatsApp follow-up",
-          "Basic nutrition plan",
-          "Weekly workout adjustments"
+          "Personalized training plan",
+          "WhatsApp follow-up"
         ],
         "popular": true
       },
       "premium": {
         "name": "Premium Plan",
+        "price": "50€",
         "features": [
-          "3 sessions per week",
           "Complete initial assessment",
-          "Customized workout plan",
-          "Advanced nutrition plan",
-          "24/7 follow-up",
-          "Monthly check-in sessions",
-          "Supplementation guidance"
+          "Personalized training plan",
+          "WhatsApp follow-up",
+          "1 session 1:1 per month",
+          "1 video call per month"
         ]
       }
     },
@@ -209,10 +175,8 @@
     "subtitle": "& Professional Qualifications",
     "text": "I am a Personal Trainer certified by YMCA Awards, one of the most recognized institutions in the United Kingdom. I hold a Level 3 qualification in Personal Training, with complete training in anatomy, physiology, nutrition, exercise prescription, and student follow-up.",
     "items": [
-      "YMCA Level 3 Diploma in Personal Training",
       "Certification in Anatomy and Physiology of Exercise",
       "Planning and Instruction of Gym Exercise",
-      "Nutrition applied to physical activity",
       "Safety and well-being in the fitness environment"
     ],
     "badges": {
@@ -228,13 +192,16 @@
       "title": "Contact Information",
       "phone": "Phone",
       "whatsapp": "WhatsApp",
+      "email": "Email",
       "location": "Location",
       "locationDesc": "I serve clients throughout Porto and also offer personalized online training"
     },
     "hours": {
       "title": "Business Hours",
       "weekdays": "Weekdays",
-      "weekends": "Weekends"
+      "weekdaysHours": "6:00 AM - 8:00 PM",
+      "weekends": "Weekends",
+      "weekendsHours": "8:00 AM - 2:00 PM"
     },
     "phoneCard": {
       "available": "Available for calls"
@@ -248,6 +215,18 @@
     },
     "weekdaysText": "Monday to Friday",
     "weekendsText": "Saturday and Sunday",
+    "form": {
+      "title": "Send Me a Message",
+      "name": "Your Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "message": "Message",
+      "messagePlaceholder": "I'm interested in personal training...",
+      "send": "Send Message",
+      "success": "Message Sent!",
+      "successDescription": "Thank you for reaching out. I'll get back to you soon."
+    },
     "cta": {
       "title": "Ready to start your fitness journey?",
       "description": "Schedule your free assessment and let's create a personalized plan for your goals.",
