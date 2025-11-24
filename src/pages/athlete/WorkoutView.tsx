@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, PlusSquare, MoreVertical, PlayCircle, XCircle, Info } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Switch } from '@/components/ui/switch'; // Assuming you have a Switch component
+import { Clock, Info, MoreVertical, Pause, Play, PlusCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
-// Custom Icon for the Hand
 const HandIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M18.7 15.3a2.4 2.4 0 0 0 .7-1.7V7.8a2.4 2.4 0 0 0-1.2-2.1 2.4 2.4 0 0 0-2.6.3l-2 2.3-2-2.3a2.4 2.4 0 0 0-2.6-.3 2.4 2.4 0 0 0-1.2 2.1v5.8a2.4 2.4 0 0 0 .7 1.7l5.3 5.3a1 1 0 0 0 1.4 0l5.3-5.3z" />
@@ -12,10 +11,41 @@ const HandIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 const WorkoutView: React.FC<{ workout: any, onBack: () => void }> = ({ workout, onBack }) => {
   const { t } = useLanguage();
+  const [exerciseTimers, setExerciseTimers] = useState<{ [key: number]: number }>({});
+  const [runningExercises, setRunningExercises] = useState<Set<number>>(new Set());
   const [activeTimerId, setActiveTimerId] = useState<string | null>(null);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
+  // Default countdown duration in seconds (60 minutes = 3600 seconds)
+  const DEFAULT_COUNTDOWN_DURATION = 3600;
+
+  // Exercise timers effect - countdown
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setExerciseTimers(prev => {
+        const updated = { ...prev };
+        runningExercises.forEach(exIndex => {
+          const currentTime = updated[exIndex] || 0;
+          if (currentTime > 0) {
+            updated[exIndex] = currentTime - 1;
+          } else {
+            // Timer reached zero, stop this exercise
+            setRunningExercises(prevRunning => {
+              const newRunning = new Set(prevRunning);
+              newRunning.delete(exIndex);
+              return newRunning;
+            });
+          }
+        });
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [runningExercises]);
+
+  // Individual set timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isTimerRunning && timerSeconds > 0) {
@@ -31,13 +61,31 @@ const WorkoutView: React.FC<{ workout: any, onBack: () => void }> = ({ workout, 
     };
   }, [isTimerRunning, timerSeconds]);
 
+  const handleExerciseTimerToggle = (exIndex: number) => {
+    setRunningExercises(prev => {
+      const updated = new Set(prev);
+      if (updated.has(exIndex)) {
+        // Pause the timer
+        updated.delete(exIndex);
+      } else {
+        // Start the timer - initialize with default duration if not set
+        updated.add(exIndex);
+        setExerciseTimers(prevTimers => ({
+          ...prevTimers,
+          [exIndex]: prevTimers[exIndex] || DEFAULT_COUNTDOWN_DURATION
+        }));
+      }
+      return updated;
+    });
+  };
+
   const handleTimerToggle = (timerId: string, duration: number) => {
     if (activeTimerId === timerId) {
       setIsTimerRunning(false);
       setActiveTimerId(null);
       setTimerSeconds(0);
     } else {
-      setTimerSeconds(duration);
+      setTimerSeconds(duration || 30);
       setActiveTimerId(timerId);
       setIsTimerRunning(true);
     }
@@ -51,130 +99,211 @@ const WorkoutView: React.FC<{ workout: any, onBack: () => void }> = ({ workout, 
   
   const currentWorkout = workout || { name: 'Workout', instructions: '', exercises: [] };
 
-  const renderSet = (set: any, exIndex: number, setIndex: number) => {
-    const timerId = `${exIndex}-${setIndex}`;
-    const isThisTimerActive = activeTimerId === timerId;
-
-    if (set.type === 'rest') {
+  const renderTimerButton = (timerId: string, duration: number, label?: string) => {
+      const isActive = activeTimerId === timerId;
       return (
-        <div key={setIndex} className="flex items-center gap-4 py-3 border-b border-border/60 last:border-b-0">
-            <div className="w-10 h-10 bg-amber-400 rounded-full flex items-center justify-center flex-shrink-0">
-                <HandIcon className="w-6 h-6 text-black" />
-            </div>
-            <div className="flex-1">
-                <p className="font-semibold">Rest for {set.duration}s</p>
-            </div>
-            <button onClick={() => handleTimerToggle(timerId, set.duration)} className={`flex items-center gap-2 text-sm font-bold rounded-full px-4 py-2 transition-all ${isThisTimerActive ? 'text-red-500' : 'text-primary'}`}>
-                {isThisTimerActive ? (
-                    <><XCircle className="w-5 h-5" /><span>STOP</span></>
-                ) : (
-                    <><PlayCircle className="w-5 h-5" /><span>START</span></>
-                )}
-            </button>
-        </div>
-      );
-    }
-
-    const isDurationSet = set.type === 'duration';
-
-    return (
-        <div key={setIndex} className="py-3 border-b border-border/60 last:border-b-0">
-            <div className="flex items-center gap-4">
-                <p className="font-bold text-muted-foreground w-10 text-center">SET {setIndex + 1}</p>
-                <div className="flex-1">
-                    {isDurationSet ? (
-                        <p className="font-semibold">Go for {set.duration}sec</p>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <input type="number" placeholder="reps" className="w-20 p-2 text-center border rounded-md bg-input" defaultValue={set.reps}/>
-                            <span className="text-muted-foreground">x</span>
-                            <input type="number" placeholder="kg" className="w-20 p-2 text-center border rounded-md bg-input" defaultValue={set.weight} />
-                        </div>
-                    )}
-                </div>
-                {isDurationSet && (
-                     <button onClick={() => handleTimerToggle(timerId, set.duration)} className={`flex items-center gap-2 text-sm font-bold rounded-full px-4 py-2 transition-all ${isThisTimerActive ? 'text-red-500' : 'text-primary'}`}>
-                        {isThisTimerActive ? (
-                            <><XCircle className="w-5 h-5" /><span>STOP</span></>
-                        ) : (
-                            <><PlayCircle className="w-5 h-5" /><span>START</span></>
-                        )}
-                    </button>
-                )}
-                 {!isDurationSet && set.weight && <span className="text-muted-foreground text-sm pr-4">{set.reps} x - {set.weight}kg</span>}
-            </div>
-            {isDurationSet && (
-                 <div className="flex items-center gap-2 mt-3 ml-14">
-                    <input type="number" placeholder="reps" className="w-20 p-2 text-center border rounded-md bg-input"/>
-                    <span className="text-muted-foreground">x</span>
-                    <input type="number" placeholder="kg" className="w-20 p-2 text-center border rounded-md bg-input"/>
-                </div>
+          <button 
+            onClick={() => handleTimerToggle(timerId, duration)}
+            className={`flex items-center justify-center gap-1.5 px-3 h-9 rounded-full text-sm font-medium transition-all min-w-[80px]
+                ${isActive 
+                    ? 'bg-blue-500 text-white shadow-sm' 
+                    : 'bg-white border border-gray-200 text-blue-500 hover:border-blue-300'
+                }`}
+          >
+            {isActive ? (
+                <>
+                    <Clock className="w-4 h-4" />
+                    <span>{formatTime(timerSeconds)}</span>
+                </>
+            ) : (
+                <>
+                    <Clock className="w-4 h-4" />
+                    <span>{label || `${duration}s`}</span>
+                </>
             )}
-        </div>
-    );
-  }
+          </button>
+      );
+  };
 
   return (
-    <div className="bg-background min-h-screen text-foreground">
-      <header className="fixed top-0 left-0 right-0 bg-background z-20 p-4 flex items-center justify-between h-16 border-b border-border">
-        <button onClick={onBack} className="font-semibold text-primary-light">Cancel</button>
-        <div className="flex-1 flex justify-center items-center">
-            {isTimerRunning ? (
-                <span className="text-2xl font-mono tracking-tighter">{formatTime(timerSeconds)}</span>
-            ) : (
-                <div className="flex items-center gap-6">
-                    <Clock className="w-6 h-6 text-muted-foreground" />
-                    <PlusSquare className="w-6 h-6 text-muted-foreground" />
-                    <MoreVertical className="w-6 h-6 text-muted-foreground" />
-                </div>
-            )}
-        </div>
-        <button className="font-semibold text-primary-light">Save</button>
+    <div className="bg-gray-50 min-h-screen pb-20">
+      {/* Main Header */}
+      <header className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200">
+        <button onClick={onBack} className="text-base font-normal text-gray-900">Cancel</button>
+        <button className="text-base font-semibold text-gray-900">Save</button>
       </header>
 
-      <main className="pt-16 pb-20">
-        <div className="p-4 space-y-4">
-            <p className="text-muted-foreground text-center text-sm">Follow each exercise and rest period from top to bottom.</p>
-            
-            {currentWorkout.instructions && (
-                <div className="bg-card p-3 rounded-lg">
-                    <h3 className="font-semibold text-sm mb-1">Instructions</h3>
-                    <p className="text-muted-foreground text-sm whitespace-pre-wrap">{currentWorkout.instructions}</p>
-                </div>
-            )}
-
-            <div className="flex items-center justify-between bg-card p-3 rounded-lg">
-                <div className="flex items-center gap-2">
-                    <label htmlFor="auto-fill" className="font-semibold text-sm">Auto fill stats</label>
-                    <Info className="w-4 h-4 text-muted-foreground" />
-                </div>
-                <Switch id="auto-fill" />
-            </div>
+      <main className="px-4 py-6 space-y-6">
+        {/* Workout Info */}
+        <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{currentWorkout.name}</h1>
+            <p className="text-gray-600 text-sm leading-relaxed">
+                {currentWorkout.instructions || "No instructions provided."}
+            </p>
         </div>
 
-        <div className="space-y-4">
-          {currentWorkout.exercises?.map((exercise, exIndex) => (
-            <div key={exIndex} className="bg-card rounded-lg mx-2">
-              <div className="p-4 flex items-start gap-4">
-                <img src={exercise.imageUrl || '/public/lovable-uploads/murillo.png'} alt={exercise.name} className="w-16 h-16 object-cover rounded-lg bg-muted"/>
-                <div className="flex-1">
-                    <h4 className="font-semibold text-base leading-tight">{exercise.name}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">{exercise.details}</p>
-                </div>
-                <button className="text-muted-foreground">
-                    <MoreVertical className="h-5 w-5" />
-                </button>
-              </div>
-              
-              <div className="px-4">
-                  {exercise.sets?.map((set, setIndex) => renderSet(set, exIndex, setIndex))}
-              </div>
-
-              <div className="p-4">
-                 <button className="text-sm font-semibold text-primary">+ ADD NEW SET</button>
-              </div>
+        {/* Auto Fill Toggle */}
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <span className="text-base font-normal text-gray-900">Auto fill stats</span>
+                <Info className="w-4 h-4 text-blue-500" />
             </div>
-          ))}
+            <Switch />
+        </div>
+
+        {/* Exercises List */}
+        <div className="space-y-6">
+            {currentWorkout.exercises?.map((exercise: any, exIndex: number) => {
+                // Check if any set has a duration property or is of type duration
+                const hasDurationSets = exercise.sets?.some((s: any) => s.duration || s.type === 'duration');
+                const isExerciseRunning = runningExercises.has(exIndex);
+                const exerciseTime = exerciseTimers[exIndex] || 0;
+                
+                const gridCols = hasDurationSets 
+                    ? "grid-cols-[32px_1fr_85px_80px_80px]" 
+                    : "grid-cols-[32px_1fr_80px_80px]";
+                
+                return (
+                    <div key={exIndex} className="space-y-4">
+                        {/* Exercise Header with Timer */}
+                        <div className="flex items-start justify-between">
+                            <div className="flex gap-3 flex-1">
+                                <img 
+                                    src={exercise.imageUrl || '/public/lovable-uploads/murillo.png'} 
+                                    alt={exercise.name} 
+                                    className="w-20 h-20 rounded-lg object-cover bg-gray-200"
+                                />
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-base text-gray-900">{exercise.name}</h3>
+                                    <p className="text-sm text-gray-500 mt-0.5">{exercise.details || `${exercise.sets?.length} sets`}</p>
+                                    
+                                    {/* Timer Display */}
+                                    {isExerciseRunning && (
+                                        <div className="mt-2 inline-flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-full">
+                                            <Clock className="w-4 h-4" />
+                                            <span className="text-sm font-mono font-medium">
+                                                {formatTime(exerciseTime)}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Play/Pause Button */}
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    onClick={() => handleExerciseTimerToggle(exIndex)}
+                                    className={`p-1.5 rounded-full transition-all ${
+                                        isExerciseRunning 
+                                            ? 'bg-primary text-primary-foreground shadow-md hover:opacity-90' 
+                                            : 'bg-white border border-gray-300 text-gray-700 hover:border-primary hover:text-primary'
+                                    }`}
+                                >
+                                    {isExerciseRunning ? (
+                                        <Pause className="w-4 h-4" />
+                                    ) : (
+                                        <Play className="w-4 h-4" />
+                                    )}
+                                </button>
+                                <button className="p-1">
+                                    <MoreVertical className="w-5 h-5 text-gray-600" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Rest Row */}
+                        {hasDurationSets && (
+                            <div className="flex items-center justify-between py-2">
+                                <div className="flex items-center gap-2 text-blue-500">
+                                    <HandIcon className="w-5 h-5" />
+                                    <span className="text-sm font-normal">Rest between each set</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-blue-500" />
+                                    <span className="text-sm font-medium text-blue-500">30s</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Sets Table */}
+                        <div className="w-full">
+                            <div className={`grid ${gridCols} gap-2 mb-3 items-center`}>
+                                <div className="text-xs font-semibold text-gray-900">Set</div>
+                                <div className="text-xs font-semibold text-gray-900">Previous</div>
+                                {hasDurationSets && <div className="text-xs font-semibold text-gray-900 text-center">Time</div>}
+                                <div className="text-xs font-semibold text-gray-900 text-center">Reps</div>
+                                <div className="text-xs font-semibold text-gray-900 text-center">Kg</div>
+                            </div>
+
+                            <div className="space-y-2.5">
+                                {(exercise.sets && exercise.sets.length > 0) ? (
+                                    exercise.sets.map((set: any, setIndex: number) => {
+                                        if (set.type === 'rest') return null;
+                                        
+                                        const timerId = `${exIndex}-${setIndex}`;
+                                        const showTimer = hasDurationSets;
+                                        
+                                        return (
+                                            <div key={setIndex} className={`grid ${gridCols} gap-2 items-center`}>
+                                                <div className="font-medium text-gray-900">{setIndex + 1}</div>
+                                                <div className="text-sm text-gray-600 truncate">
+                                                    {set.previous || `${set.reps || 0} x - kg`}
+                                                </div>
+                                                
+                                                {showTimer && (
+                                                    <div className="flex justify-center">
+                                                        {(set.duration || set.type === 'duration') ? (
+                                                            renderTimerButton(timerId, set.duration || 30)
+                                                        ) : (
+                                                            <div className="w-[85px]"></div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full h-12 border border-gray-200 rounded-xl text-center bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white transition-all text-gray-900 text-base"
+                                                    placeholder=""
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full h-12 border border-gray-200 rounded-xl text-center bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white transition-all text-gray-900 text-base"
+                                                    placeholder=""
+                                                />
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    // Fallback: Show at least one row if no sets defined
+                                    <div className={`grid ${gridCols} gap-2 items-center`}>
+                                        <div className="font-medium text-gray-900">1</div>
+                                        <div className="text-sm text-gray-600 truncate">-</div>
+                                        
+                                        {hasDurationSets && <div className="w-[85px]"></div>}
+
+                                        <input 
+                                            type="text" 
+                                            className="w-full h-12 border border-gray-200 rounded-xl text-center bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white transition-all text-gray-900 text-base"
+                                            placeholder=""
+                                        />
+                                        <input 
+                                            type="text" 
+                                            className="w-full h-12 border border-gray-200 rounded-xl text-center bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white transition-all text-gray-900 text-base"
+                                            placeholder=""
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Add Set Button */}
+                        <button className="flex items-center gap-2 text-blue-500 font-normal text-base mt-3">
+                            <PlusCircle className="w-5 h-5" />
+                            Add new set
+                        </button>
+                    </div>
+                );
+            })}
         </div>
       </main>
     </div>

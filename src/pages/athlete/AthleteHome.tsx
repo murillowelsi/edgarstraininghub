@@ -91,15 +91,6 @@ const AthleteHome = ({ onSelectWorkout }) => {
   // Mock activities data
   const activities = [
     {
-      id: 1,
-      title: "Track water",
-      subtitle: "0 ml",
-      category: "Nutrition",
-      categoryColor: "bg-red-100 text-red-600",
-      completed: false,
-      icon: "⭕",
-    },
-    {
       id: 2,
       title: "Treino A",
       subtitle: "Completed. ⏱ 6/10 📋 1",
@@ -130,7 +121,37 @@ const AthleteHome = ({ onSelectWorkout }) => {
         duration: "41 minutes",
         equipment: ["Body Weight", "Mat"],
         instructions: "Complete all exercises with proper form",
-        exercises: [],
+        exercises: [
+          {
+            name: "EZ Alongamento dinâmico",
+            details: "1 set x 5 repetições cada lado",
+            imageUrl: "/lovable-uploads/murillo.png",
+            sets: [
+              { reps: 5, previous: "15 x - kg" }
+            ]
+          },
+          {
+            name: "Skipping",
+            details: "3 sets x 30sec",
+            imageUrl: "/lovable-uploads/murillo.png",
+            sets: [
+              { duration: 30, previous: "1 x - kg", type: "duration" },
+              { duration: 30, previous: "1 x - kg", type: "duration" },
+              { duration: 30, previous: "1 x - kg", type: "duration" }
+            ]
+          },
+          {
+            name: "Supino Reto",
+            details: "4 sets x 12 reps",
+            imageUrl: "/lovable-uploads/murillo.png",
+            sets: [
+              { reps: 12, previous: "60 x 12 kg" },
+              { reps: 12, previous: "60 x 12 kg" },
+              { reps: 12, previous: "60 x 12 kg" },
+              { reps: 12, previous: "60 x 12 kg" }
+            ]
+          }
+        ],
       };
       onSelectWorkout(workoutDetails);
     }
