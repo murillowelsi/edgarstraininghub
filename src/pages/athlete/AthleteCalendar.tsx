@@ -90,35 +90,64 @@ const AthleteCalendar = () => {
 
         return (
             <div key={dayKey} className="mb-6">
-                <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-lg text-foreground">{dayName}</h3>
-                    <span className="text-sm text-muted-foreground">{displayDate}</span>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-lg text-gray-900">{dayName}</h3>
+                    <span className="text-sm text-gray-500">{displayDate}</span>
                 </div>
                 {dayWorkouts.length > 0 ? (
                     dayWorkouts.map((workout) => {
                         const details = [workout.distance, workout.time].filter(Boolean).join(' . ');
                         return (
-                            <div key={workout.id} className="bg-card rounded-lg p-3 mb-2 flex items-center justify-between shadow-sm">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex-shrink-0">
+                            <div key={workout.id} className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative mb-3">
+                                <div className="flex items-start gap-4">
+                                    {/* Status Icon */}
+                                    <div
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                            workout.completed
+                                                ? "bg-blue-500 text-white"
+                                                : "border-2 border-red-400 text-red-400"
+                                        }`}
+                                    >
                                         {workout.completed ? (
-                                            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white">✓</div>
+                                            <svg
+                                                className="w-6 h-6"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
                                         ) : (
-                                            <div className="w-6 h-6 rounded-full border-2 border-muted-foreground"></div>
+                                            <div className="w-5 h-5 rounded-full border-2 border-current" />
                                         )}
                                     </div>
-                                    <div>
-                                        <h4 className="font-semibold text-foreground">{workout.type}</h4>
-                                        <p className="text-sm text-muted-foreground">{details}</p>
+
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-gray-900 font-semibold text-base">
+                                            {workout.type}
+                                        </h4>
+                                        <p className="text-gray-500 text-sm mt-0.5">
+                                            {details}
+                                        </p>
+                                    </div>
+
+                                    {/* Workout Icon */}
+                                    <div className="flex-shrink-0">
+                                        {renderWorkoutIcon(workout.type)}
                                     </div>
                                 </div>
-                                {renderWorkoutIcon(workout.type)}
                             </div>
                         );
                     })
                 ) : (
-                    <div className="text-center py-3 border-b border-border text-sm text-muted-foreground">
-                        {t.athlete.calendar.noWorkouts}
+                    <div className="bg-white rounded-2xl p-4 shadow-sm text-center">
+                        <p className="text-gray-500 text-sm">{t.athlete.calendar.noWorkouts}</p>
                     </div>
                 )}
             </div>
@@ -133,16 +162,15 @@ const AthleteCalendar = () => {
 
 
     return (
-        <div className="bg-background min-h-full pb-32">
-            <header className="fixed top-0 left-0 right-0 bg-primary/95 backdrop-blur-sm z-10">
-                <div className="max-w-md mx-auto h-14 flex items-center justify-between px-4">
-                    <h1 className="text-lg font-bold text-primary-foreground">{t.athlete.calendar.title}</h1>
-                </div>
+        <div className="min-h-screen bg-gray-50 pb-20">
+            {/* Header */}
+            <header className="bg-white px-6 py-4 flex items-center justify-center">
+                <h1 className="text-xl font-semibold text-gray-900">{t.athlete.calendar.title}</h1>
             </header>
 
-            <div className="pt-20 px-4 max-w-md mx-auto">
+            <div className="px-6 py-4 max-w-md mx-auto">
                  {loading ? (
-                    <div className="text-center py-8">{t.athlete.loadingProgram}</div>
+                    <div className="text-center py-12 text-gray-500">{t.athlete.loadingProgram}</div>
                 ) : (
                     days.map(day => renderDay(day))
                 )}

@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Calendar, Home, Dumbbell, MoreHorizontal } from "lucide-react";
-import ProgramView from "./ProgramView";
-import AthleteCalendar from "./AthleteCalendar";
-import WorkoutFlow from "./WorkoutFlow";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Calendar, Dumbbell, Home } from "lucide-react";
+import { useState } from "react";
+import AthleteCalendar from "./AthleteCalendar";
+import AthleteHome from "./AthleteHome";
+import WorkoutFlow from "./WorkoutFlow";
+import WorkoutsView from "./WorkoutsView";
 
 const AthleteDashboard = () => {
   const [activeTab, setActiveTab] = useState("program");
@@ -18,11 +19,13 @@ const AthleteDashboard = () => {
 
     switch (activeTab) {
       case "program":
-        return <ProgramView onSelectWorkout={setSelectedWorkout} />;
+        return <AthleteHome onSelectWorkout={setSelectedWorkout} />;
       case "calendar":
         return <AthleteCalendar />;
+      case "workouts":
+        return <WorkoutsView onSelectWorkout={setSelectedWorkout} />;
       default:
-        return <ProgramView onSelectWorkout={setSelectedWorkout} />;
+        return <AthleteHome onSelectWorkout={setSelectedWorkout} />;
     }
   };
 
@@ -62,15 +65,7 @@ const AthleteDashboard = () => {
               <Dumbbell className="h-6 w-6" />
               <span className="text-xs font-medium">{t.athlete.workouts}</span>
             </button>
-            <button
-              onClick={() => setActiveTab("more")}
-              className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
-                activeTab === "more" ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <MoreHorizontal className="h-6 w-6" />
-              <span className="text-xs font-medium">{t.athlete.more}</span>
-            </button>
+
           </div>
         </nav>
       )}

@@ -267,7 +267,15 @@
       "addWorkout": "Adicionar Treino",
       "noWorkouts": "Nenhum treino para este dia.",
       "sync": "Sincronizar",
-      "weekdays": ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+      "weekdays": [
+        "Domingo",
+        "Segunda",
+        "Terça",
+        "Quarta",
+        "Quinta",
+        "Sexta",
+        "Sábado"
+      ]
     }
   }
 }
