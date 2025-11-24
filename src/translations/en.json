@@ -11,7 +11,7 @@
   "hero": {
     "title": "Become a Stronger, Faster Athlete with",
     "titleHighlight": "Edgar Zanin",
-    "subtitle": "From the first step to high performance. Personalized support to ensure you not only reach your goals, but surpass them.",
+    "subtitle": "From the first step to high performance. Personalized coaching to ensure you not only get there, but surpass your goals.",
     "startButton": "Start Now",
     "learnButton": "Learn More",
     "achievementShelf": "My Achievements",
@@ -30,31 +30,31 @@
     "title": "About",
     "titleHighlight": "Me",
     "name": "Edgar Alan Zanin",
-    "profession": "Fitness Trainer & Triathlete",
-    "bio1": "From Triathlete to Fitness Trainer, I live and breathe sport in the heart of Porto. My passion for running quickly led me into the world of endurance races, starting with completing a challenging Ironman 70.3 and an Ironman Full.",
-    "bio2": "This journey gave me practical experience and technical knowledge to know what it takes to achieve goals that today may seem unattainable. My commitment? Combining the discipline of an Ironman with fitness science so you can reach your best physical and mental shape.",
-    "certificationHighlight": "Edgar Zanin is a Level 3 certified Personal Trainer by YMCA Awards (United Kingdom), with in-depth training in anatomy, physiology, nutrition, safety, and exercise programming.",
+    "profession": "Fitness Coach & Triathlete",
+    "bio1": "From Triathlete to Fitness Coach, I live and breathe sports in the heart of Porto. My passion for running quickly led me to the world of endurance racing, starting with completing a challenging Ironman 70.3 and a Full Ironman.",
+    "bio2": "This journey has given me the practical experience and technical knowledge to know what it takes to achieve goals that, today, may seem unattainable. My commitment? To combine the discipline of an Ironman with the science of fitness so that you can achieve your best physical and mental shape.",
+    "certificationHighlight": "Edgar Zanin is a Level 3 Personal Trainer certified by YMCA Awards (UK), with in-depth training in anatomy, physiology, nutrition, safety, and exercise programming.",
     "stats": {
       "certified": "Certified",
       "certifiedDesc": "Professional training",
       "clients": "50+ Clients",
       "clientsDesc": "Success stories",
       "experience": "7+ Years",
-      "experienceDesc": "Experience"
+      "experienceDesc": "Of experience"
     },
     "youtube": "Latest YouTube Video"
   },
   "services": {
     "title": "My",
     "titleHighlight": "Services",
-    "subtitle": "Comprehensive fitness and performance coaching tailored to your individual goals and needs.",
+    "subtitle": "Comprehensive fitness and performance training tailored to your individual goals and needs.",
     "strength": {
       "title": "Strength Training",
       "description": "Customized strength programs for all fitness levels, focusing on proper form and progressive overload principles."
     },
     "endurance": {
       "title": "Endurance Coaching",
-      "description": "Specialized training for runners, cyclists, and triathletes looking to improve stamina and race performance."
+      "description": "Specialized training for runners, cyclists, and triathletes looking to improve endurance and race performance."
     },
     "hiit": {
       "title": "HIIT & Conditioning",
@@ -62,52 +62,52 @@
     },
     "race": {
       "title": "Race Preparation",
-      "description": "Comprehensive training plans for upcoming races, from 5K to marathon and triathlon events."
+      "description": "Comprehensive training plans for upcoming races, from 5Ks to marathon and triathlon events."
     },
     "cta": {
       "title": "Ready to Transform Your Fitness?",
-      "description": "I offer personalized 1-on-1 training sessions both in-person in Porto and online for clients worldwide. Every program is custom-designed to fit your specific goals, fitness level, and schedule.",
+      "description": "I offer personalized 1-on-1 training both in-person in Porto and online for clients worldwide. Each program is specially designed to fit your specific goals, fitness level, and schedule.",
       "button": "Get in Touch"
     }
   },
   "achievements": {
     "title": "My",
     "titleHighlight": "Achievements",
-    "subtitle": "Personal records and competitive achievements that demonstrate my dedication to fitness and endurance sports.",
+    "subtitle": "Personal records and competitive accomplishments that demonstrate my dedication to fitness and endurance sports.",
     "major": {
       "title": "Major Accomplishments",
       "fullIronman": {
         "title": "Full Ironman Finisher",
-        "description": "Completed the ultimate endurance challenge - a full Ironman triathlon consisting of a 3.8 km swim, 180 km bike ride, and a full 42.2 km marathon run."
+        "description": "Completed the ultimate endurance challenge - a full Ironman triathlon consisting of a 3.8 km swim, 180 km bike, and a full 42.2 km marathon run."
       },
       "ironman": {
         "title": "Ironman 70.3 Finisher",
-        "description": "Completed the challenging half Ironman distance triathlon, consisting of a 1.9 km swim, 90 km bike ride, and 21.1 km run."
+        "description": "Completed the challenging half-distance Ironman triathlon, consisting of a 1.9 km swim, 90 km bike, and 21.1 km run."
       },
       "marathon": {
         "title": "Sub-3 Hour Marathon",
-        "description": "Finished a full marathon in under 3 hours (2:56:09), an achievement that puts me in the top percentile of marathon runners worldwide."
+        "description": "Finished a full marathon in under 3 hours (2:56:09), an achievement that places me in the top percentile of marathon runners worldwide."
       },
       "podiums": {
-        "title": "Multiple Podium Finishes",
+        "title": "Multiple Podiums",
         "description": "Achieved numerous top-3 finishes in local and regional running events across various distances."
       }
     },
     "personalBests": {
-      "title": "Running Personal Bests",
-      "quote": "Every personal best represents countless hours of training, discipline, and determination. I bring this same dedication to helping my clients achieve their fitness goals."
+      "title": "Personal Best Racing Times",
+      "quote": "Each personal record represents countless hours of training, discipline, and determination. I bring this same dedication to helping my clients achieve their fitness goals."
     }
   },
   "testimonials": {
     "title": "Client",
     "titleHighlight": "Testimonials",
-    "subtitle": "Here's what some of my clients have to say about their training experience.",
+    "subtitle": "See what some of my clients have to say about their training experience.",
     "murilloWelsi": {
-      "text": "Strength sessions with Edgar helped me reduce discomfort and avoid small injuries. I feel more stable and running has become smoother."
+      "text": "The strength training with Edgar has helped me reduce pain and avoid minor injuries. I feel more stable and am running better day-to-day."
     }
   },
   "footer": {
-    "description": "Fitness Trainer & Triathlete based in Porto, Portugal, specializing in endurance training and performance optimization.",
+    "description": "Personal Trainer & Triathlete based in Porto, Portugal, specializing in endurance coaching and performance optimization.",
     "quickLinks": "Quick Links",
     "services": "Services",
     "getInTouch": "Get in Touch",
@@ -118,65 +118,67 @@
   "youtube": {
     "title": "Videos &",
     "titleHighlight": "Content",
-    "subtitle": "Follow my workouts, tips and motivation on my YouTube channel"
+    "subtitle": "Follow my training, tips, and motivation on my YouTube channel"
   },
   "blog": {
     "title": "Blog &",
     "titleHighlight": "Articles",
-    "subtitle": "Practical training tips, nutrition and athletic performance based on my experience as a triathlete and personal trainer",
+    "subtitle": "Practical tips on training, nutrition, and athletic performance based on my experience as a triathlete and personal trainer",
     "readMore": "Read More",
     "backToBlog": "Back to Blog",
     "articleCta": {
-      "title": "Ready to Take Your Training to the Next Level?",
-      "description": "Get in touch for personalized training focused on your specific goals.",
+      "title": "Want to Take Your Training to the Next Level?",
+      "description": "Get in touch for personalized coaching focused on your specific goals.",
       "button": "Schedule a Consultation"
     }
   },
   "pricing": {
     "title": "Plans &",
     "titleHighlight": "Pricing",
-    "subtitle": "Choose the perfect plan for your fitness goals",
-    "pricePlaceholder": "Price on request",
+    "subtitle": "Choose the ideal plan for your goals",
+    "pricePlaceholder": "€30",
     "plans": {
       "basic": {
         "name": "Basic Plan",
-        "price": "30€",
+        "price": "€30",
         "features": [
           "Personalized training plan",
-          "WhatsApp follow-up"
+          "WhatsApp support"
         ]
       },
       "standard": {
         "name": "Standard Plan",
-        "price": "40€",
+        "price": "€40",
         "features": [
           "Complete initial assessment",
           "Personalized training plan",
-          "WhatsApp follow-up"
+          "WhatsApp support"
         ],
         "popular": true
       },
       "premium": {
         "name": "Premium Plan",
-        "price": "50€",
+        "price": "€50",
         "features": [
           "Complete initial assessment",
           "Personalized training plan",
-          "WhatsApp follow-up",
-          "1 session 1:1 per month",
+          "WhatsApp support",
+          "1 one-on-one session per month",
           "1 video call per month"
         ]
       }
     },
-    "cta": "Get Started Now"
+    "cta": "Get Started"
   },
   "certifications": {
     "title": "Certifications",
     "subtitle": "& Professional Qualifications",
-    "text": "I am a Personal Trainer certified by YMCA Awards, one of the most recognized institutions in the United Kingdom. I hold a Level 3 qualification in Personal Training, with complete training in anatomy, physiology, nutrition, exercise prescription, and student follow-up.",
+    "text": "I am a YMCA Awards certified Personal Trainer, one of the most recognized institutions in the UK. I hold a Level 3 qualification in Personal Training, with complete training in anatomy, physiology, nutrition, exercise prescription, and client monitoring.",
     "items": [
-      "Certification in Anatomy and Physiology of Exercise",
-      "Planning and Instruction of Gym Exercise",
+      "YMCA Level 3 Diploma in Personal Training",
+      "Certification in Anatomy and Physiology for Exercise",
+      "Planning and Instructing Gym-Based Exercise",
+      "Nutrition applied to physical activity",
       "Safety and well-being in the fitness environment"
     ],
     "badges": {
@@ -197,7 +199,7 @@
       "locationDesc": "I serve clients throughout Porto and also offer personalized online training"
     },
     "hours": {
-      "title": "Business Hours",
+      "title": "Operating Hours",
       "weekdays": "Weekdays",
       "weekdaysHours": "6:00 AM - 8:00 PM",
       "weekends": "Weekends",
@@ -222,16 +224,50 @@
       "email": "Email Address",
       "emailPlaceholder": "john@example.com",
       "message": "Message",
-      "messagePlaceholder": "I'm interested in personal training...",
+      "messagePlaceholder": "I'm interested in personalized training...",
       "send": "Send Message",
       "success": "Message Sent!",
-      "successDescription": "Thank you for reaching out. I'll get back to you soon."
+      "successDescription": "Thank you for getting in touch. I will respond shortly."
     },
     "cta": {
       "title": "Ready to start your fitness journey?",
       "description": "Schedule your free assessment and let's create a personalized plan for your goals.",
       "button": "Schedule Free Assessment",
       "plansButton": "View Plans"
+    }
+  },
+  "athlete": {
+    "program": "Program",
+    "schedule": "Schedule",
+    "workouts": "Workouts",
+    "more": "More",
+    "main": "MAIN",
+    "loadingProgram": "Loading program...",
+    "filter": "Filter",
+    "estimatedTime": "est. duration {time}",
+    "exerciseCount": "{count} exercises",
+    "workout": "Workout",
+    "equipment": "Equipment:",
+    "instructions": "Instructions:",
+    "startNow": "START NOW",
+    "start": "Start",
+    "todaysWorkout": "Today's Workout",
+    "noWorkoutToday": "No workout scheduled for today.",
+    "back": "Back",
+    "cancel": "Cancel",
+    "pause": "Pause",
+    "resume": "Resume",
+    "finishWorkout": "Finish Workout",
+    "nextExercise": "Next Exercise",
+    "calendar": {
+      "title": "Calendar",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "completed": "Completed",
+      "addWorkout": "Add Workout",
+      "noWorkouts": "No workouts for this day.",
+      "sync": "Sync",
+      "weekdays": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     }
   }
 }

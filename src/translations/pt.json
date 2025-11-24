@@ -128,7 +128,7 @@
     "backToBlog": "Voltar ao Blog",
     "articleCta": {
       "title": "Quer Levar Seu Treino ao Próximo Nível?",
-      "description": "Entre em contato para treino personalizado focado nos seus objetivos específicos.",
+      "description": "Entre em contato para treino personalizado focado nos seus específicos.",
       "button": "Agende uma Consulta"
     }
   },
@@ -234,6 +234,40 @@
       "description": "Agende sua avaliação gratuita e vamos criar um plano personalizado para seus objetivos.",
       "button": "Agendar Avaliação Gratuita",
       "plansButton": "Ver Planos"
+    }
+  },
+  "athlete": {
+    "program": "Programa",
+    "schedule": "Agenda",
+    "workouts": "Treinos",
+    "more": "Mais",
+    "main": "PRINCIPAL",
+    "loadingProgram": "Carregando programa...",
+    "filter": "Filtrar",
+    "estimatedTime": "duração est. {time}",
+    "exerciseCount": "{count} exercícios",
+    "workout": "Treino",
+    "equipment": "Equipamento:",
+    "instructions": "Instruções:",
+    "startNow": "COMEÇAR AGORA",
+    "start": "Iniciar",
+    "todaysWorkout": "Treino de Hoje",
+    "noWorkoutToday": "Nenhum treino agendado para hoje.",
+    "back": "Voltar",
+    "cancel": "Cancelar",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "finishWorkout": "Finalizar Treino",
+    "nextExercise": "Próximo Exercício",
+    "calendar": {
+      "title": "Calendário",
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "completed": "Concluído",
+      "addWorkout": "Adicionar Treino",
+      "noWorkouts": "Nenhum treino para este dia.",
+      "sync": "Sincronizar",
+      "weekdays": ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
     }
   }
 }

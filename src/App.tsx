@@ -23,7 +23,6 @@ import UserManagement from "./pages/admin/UserManagement";
 import UserWorkouts from "./pages/admin/UserWorkouts";
 import WorkoutEditor from "./pages/admin/WorkoutEditor";
 import AthleteDashboard from "./pages/athlete/AthleteDashboard";
-import WorkoutDetail from "./pages/athlete/WorkoutDetail";
 
 const queryClient = new QueryClient();
 
@@ -84,7 +83,6 @@ const App = () => (
                 }
               >
                 <Route path="dashboard" element={<AthleteDashboard />} />
-                <Route path="workout/:workoutId" element={<WorkoutDetail />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="/login" element={<Login />} />

@@ -1,641 +1,124 @@
-import { Button } from "@/components/ui/button";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import { doc, getDoc } from "firebase/firestore";
-import { ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { db } from "../../lib/firebase";
 
-interface Exercise {
-  name: string;
-  reps: string;
-  details: string;
-}
+import React from 'react';
+import { X, Calendar, List, Hand, Weight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface Stage {
-  name?: string;
-  exerciseName?: string;
-  type: string;
-  sets?: string;
-  reps?: string;
-  weight?: string;
-  duration?: string;
-  distance?: string;
-  distanceUnit?: string;
-  intensity?: string;
-  notes?: string;
-  repeat?: number;
-  stroke?: string;
-  equipment?: string[];
-}
+// Custom Icon for Mat, as it's not in Lucide
+const MatIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <title>Mat</title>
+    <path d="M4 6h16v12H4z" />
+    <path d="M4 11h16" />
+  </svg>
+);
 
-interface Workout {
-  id: string;
-  date: string;
-  exercises?: Exercise[];
-  stages?: Stage[];
-  type?: string;
-  notes?: string;
-  athleteId?: string;
-  swimmingType?: string;
-  cyclingType?: string;
-  runningType?: string;
-}
 
-const WorkoutDetail = () => {
-  const { workoutId } = useParams();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [workout, setWorkout] = useState<Workout | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Helper function to get stage type color
-  const getStageTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      warmup:
-        "border-l-4 border-l-orange-500 bg-orange-50 dark:bg-orange-950/20",
-      work: "border-l-4 border-l-blue-500 bg-blue-50 dark:bg-blue-950/20",
-      cardio: "border-l-4 border-l-red-500 bg-red-50 dark:bg-red-950/20",
-      recovery:
-        "border-l-4 border-l-green-500 bg-green-50 dark:bg-green-950/20",
-      rest: "border-l-4 border-l-gray-500 bg-gray-50 dark:bg-gray-950/20",
-      cooldown:
-        "border-l-4 border-l-purple-500 bg-purple-50 dark:bg-purple-950/20",
-      other:
-        "border-l-4 border-l-yellow-500 bg-yellow-50 dark:bg-yellow-950/20",
-    };
-    return colors[type] || "border-l-4 border-l-gray-300 bg-muted/20";
-  };
-
-  // Helper function to get workout items (exercises or stages)
-  const getWorkoutItems = (workout: Workout) => {
-    if (workout.stages && workout.stages.length > 0) {
-      return workout.stages;
-    }
-    if (workout.exercises && workout.exercises.length > 0) {
-      return workout.exercises;
-    }
-    return [];
-  };
-
-  // Helper function to get item count
-  const getWorkoutItemCount = (workout: Workout) => {
-    return getWorkoutItems(workout).length;
-  };
-
-  useEffect(() => {
-    const fetchWorkout = async () => {
-      if (!workoutId || !user) return;
-
-      try {
-        const workoutDoc = await getDoc(doc(db, "workouts", workoutId));
-        if (workoutDoc.exists()) {
-          const workoutData = {
-            id: workoutDoc.id,
-            ...workoutDoc.data(),
-          } as Workout;
-          // Verify the workout belongs to the current user
-          if (workoutData.athleteId === user.uid) {
-            setWorkout(workoutData);
-          } else {
-            navigate("/athlete/dashboard");
-          }
-        } else {
-          navigate("/athlete/dashboard");
-        }
-      } catch (error) {
-        console.error("Error fetching workout:", error);
-        navigate("/athlete/dashboard");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWorkout();
-  }, [workoutId, user, navigate]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading workout...</p>
-        </div>
-      </div>
-    );
-  }
+const WorkoutDetail: React.FC<{ workout: any, onStart: () => void, onBack: () => void }> = ({ workout, onStart, onBack }) => {
+  const { t } = useLanguage();
 
   if (!workout) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">Workout not found</p>
-          <Button onClick={() => navigate("/athlete/dashboard")}>
-            Back to Dashboard
-          </Button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
+  const getEquipmentIcon = (name: string) => {
+    const lowerCaseName = name.toLowerCase();
+    if (lowerCaseName.includes('body')) {
+      return <Weight className="w-8 h-8 text-muted-foreground" />;
+    }
+    if (lowerCaseName.includes('mat')) {
+      return <MatIcon className="w-8 h-8 text-muted-foreground" />;
+    }
+    // Default icon
+    return <Weight className="w-8 h-8 text-muted-foreground" />;
+  };
+
   return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/athlete/dashboard")}
-          className="mb-6"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
-        </Button>
+    <div className="bg-background text-foreground flex flex-col h-full">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 bg-primary text-primary-foreground z-10">
+         <div className="max-w-md mx-auto flex items-center justify-between p-4 h-14">
+            <button onClick={onBack}>
+                <X className="w-6 h-6" />
+            </button>
+            <button className="flex items-center gap-2 text-sm font-semibold">
+                <Calendar className="w-5 h-5" />
+                <span>{t.athlete.schedule}</span>
+            </button>
+         </div>
+      </header>
+      
+      {/* Spacer for fixed header */}
+      <div className="h-14" />
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">
-            {new Date(workout.date).toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </h1>
-          <p className="text-muted-foreground">
-            {getWorkoutItemCount(workout)} exercises scheduled
-          </p>
-        </div>
-
-        <div className="bg-card rounded-lg border shadow-sm">
-          <CardHeader>
-            <CardTitle>Workout Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-8">
-            {/* Workout Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-muted/20 p-4 rounded-lg border">
-                <h3 className="font-semibold text-base mb-2">Workout Type</h3>
-                <p className="text-sm text-muted-foreground capitalize">
-                  {workout.type === "strength"
-                    ? "Strength Training"
-                    : workout.type}
-                </p>
-              </div>
-              <div className="bg-muted/20 p-4 rounded-lg border">
-                <h3 className="font-semibold text-base mb-2">Total Stages</h3>
-                <p className="text-sm text-muted-foreground">
-                  {getWorkoutItemCount(workout)}{" "}
-                  {getWorkoutItemCount(workout) === 1 ? "stage" : "stages"}
-                </p>
-              </div>
-              <div className="bg-muted/20 p-4 rounded-lg border">
-                <h3 className="font-semibold text-base mb-2">Date</h3>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(workout.date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
+      {/* Main Content */}
+      <main className="flex-grow overflow-y-auto pb-32 px-4">
+        <div className="max-w-md mx-auto">
+            {/* Workout Title */}
+            <div className="flex items-center gap-4 pt-6">
+            <div className="w-5 h-5 rounded-full border-2 border-primary" />
+            <h1 className="text-2xl font-bold">{workout.name}</h1>
             </div>
 
-            {/* Sport-Specific Details */}
-            {workout.type !== "strength" && (
-              <div className="bg-muted/20 p-6 rounded-lg border">
-                <h3 className="font-semibold text-lg mb-4">
-                  {workout.type === "swimming" && "Swimming Details"}
-                  {workout.type === "cycling" && "Cycling Details"}
-                  {workout.type === "running" && "Running Details"}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {workout.type === "swimming" && workout.swimmingType && (
-                    <div className="bg-background/50 p-3 rounded border">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Swimming Type
-                      </span>
-                      <p className="text-sm font-semibold mt-1">
-                        {workout.swimmingType === "pool"
-                          ? "Pool Swimming"
-                          : "Open Water Swimming"}
-                      </p>
-                    </div>
-                  )}
-                  {workout.type === "cycling" && workout.cyclingType && (
-                    <div className="bg-background/50 p-3 rounded border">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Cycling Type
-                      </span>
-                      <p className="text-sm font-semibold mt-1">
-                        {workout.cyclingType === "indoor"
-                          ? "Indoor Cycling"
-                          : "Outdoor Cycling"}
-                      </p>
-                    </div>
-                  )}
-                  {workout.type === "running" && workout.runningType && (
-                    <div className="bg-background/50 p-3 rounded border">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Running Type
-                      </span>
-                      <p className="text-sm font-semibold mt-1">
-                        {workout.runningType === "indoor"
-                          ? "Indoor Running"
-                          : "Outdoor Running"}
-                      </p>
-                    </div>
-                  )}
-                  {/* Additional sport-specific details from stages */}
-                  {getWorkoutItems(workout).some(
-                    (item) => "type" in item && (item as Stage).stroke
-                  ) && (
-                    <div className="bg-background/50 p-3 rounded border">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Stroke Types Used
-                      </span>
-                      <p className="text-sm font-semibold mt-1">
-                        {Array.from(
-                          new Set(
-                            getWorkoutItems(workout)
-                              .filter((item) => "type" in item)
-                              .map((item) => (item as Stage).stroke)
-                              .filter(Boolean)
-                          )
-                        ).join(", ")}
-                      </p>
-                    </div>
-                  )}
-                  {getWorkoutItems(workout).some(
-                    (item) =>
-                      "type" in item && (item as Stage).equipment?.length
-                  ) && (
-                    <div className="bg-background/50 p-3 rounded border">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Equipment Needed
-                      </span>
-                      <p className="text-sm font-semibold mt-1">
-                        {Array.from(
-                          new Set(
-                            getWorkoutItems(workout)
-                              .filter((item) => "type" in item)
-                              .flatMap(
-                                (item) => (item as Stage).equipment || []
-                              )
-                              .filter(Boolean)
-                          )
-                        ).join(", ")}
-                      </p>
-                    </div>
-                  )}
+            {/* Meta Info */}
+            <div className="space-y-1 text-muted-foreground mt-4 ml-9">
+                <div className="flex items-center gap-2 text-sm">
+                    <List className="w-4 h-4" />
+                    <span>{workout.type || 'Regular'}</span>
                 </div>
-              </div>
-            )}
-
-            {/* Detailed Stages */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Stage Breakdown</h3>
-              {getWorkoutItems(workout).map((item, index) => {
-                const isStage = "type" in item;
-                const stage = item as Stage;
-                const exercise = item as Exercise;
-
-                return (
-                  <div
-                    key={index}
-                    className={`p-6 rounded-lg border ${
-                      isStage ? getStageTypeColor(stage.type) : "bg-muted/20"
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-none flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-lg">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 space-y-4">
-                        <div>
-                          <h4 className="font-semibold text-lg">
-                            {isStage
-                              ? stage.exerciseName ||
-                                stage.name ||
-                                `Stage ${index + 1}`
-                              : exercise.name}
-                          </h4>
-                          {isStage && stage.type && (
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-secondary text-secondary-foreground capitalize">
-                                {stage.type}
-                              </span>
-                              {stage.repeat && stage.repeat > 1 && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
-                                  {stage.repeat}x
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Stage Details Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                          {isStage ? (
-                            workout.type === "strength" ? (
-                              <>
-                                {stage.sets && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Sets
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.sets}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.reps && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Reps
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.reps}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.weight && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Weight
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.weight}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.equipment &&
-                                  stage.equipment.length > 0 && (
-                                    <div className="bg-background/50 p-3 rounded border">
-                                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                        Equipment
-                                      </span>
-                                      <p className="text-sm font-semibold mt-1">
-                                        {stage.equipment.join(", ")}
-                                      </p>
-                                    </div>
-                                  )}
-                              </>
-                            ) : workout.type === "swimming" ? (
-                              <>
-                                {stage.distance && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Distance
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.distance}{" "}
-                                      {stage.distanceUnit || "m"}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.duration && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Duration
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.duration}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.intensity && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Intensity
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.intensity}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.stroke && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Stroke Type
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.stroke}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.equipment &&
-                                  stage.equipment.length > 0 && (
-                                    <div className="bg-background/50 p-3 rounded border">
-                                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                        Equipment
-                                      </span>
-                                      <p className="text-sm font-semibold mt-1">
-                                        {stage.equipment.join(", ")}
-                                      </p>
-                                    </div>
-                                  )}
-                              </>
-                            ) : workout.type === "cycling" ? (
-                              <>
-                                {stage.distance && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Distance
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.distance}{" "}
-                                      {stage.distanceUnit || "km"}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.duration && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Duration
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.duration}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.intensity && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Intensity
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.intensity}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.equipment &&
-                                  stage.equipment.length > 0 && (
-                                    <div className="bg-background/50 p-3 rounded border">
-                                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                        Equipment
-                                      </span>
-                                      <p className="text-sm font-semibold mt-1">
-                                        {stage.equipment.join(", ")}
-                                      </p>
-                                    </div>
-                                  )}
-                              </>
-                            ) : workout.type === "running" ? (
-                              <>
-                                {stage.distance && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Distance
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.distance}{" "}
-                                      {stage.distanceUnit || "km"}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.duration && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Duration
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.duration}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.intensity && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Intensity
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.intensity}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.equipment &&
-                                  stage.equipment.length > 0 && (
-                                    <div className="bg-background/50 p-3 rounded border">
-                                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                        Equipment
-                                      </span>
-                                      <p className="text-sm font-semibold mt-1">
-                                        {stage.equipment.join(", ")}
-                                      </p>
-                                    </div>
-                                  )}
-                              </>
-                            ) : (
-                              <>
-                                {stage.distance && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Distance
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.distance}{" "}
-                                      {stage.distanceUnit || "km"}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.duration && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Duration
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.duration}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.intensity && (
-                                  <div className="bg-background/50 p-3 rounded border">
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                      Intensity
-                                    </span>
-                                    <p className="text-sm font-semibold mt-1">
-                                      {stage.intensity}
-                                    </p>
-                                  </div>
-                                )}
-                                {stage.equipment &&
-                                  stage.equipment.length > 0 && (
-                                    <div className="bg-background/50 p-3 rounded border">
-                                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                        Equipment
-                                      </span>
-                                      <p className="text-sm font-semibold mt-1">
-                                        {stage.equipment.join(", ")}
-                                      </p>
-                                    </div>
-                                  )}
-                              </>
-                            )
-                          ) : (
-                            <div className="bg-background/50 p-3 rounded border md:col-span-2">
-                              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                Reps
-                              </span>
-                              <p className="text-sm font-semibold mt-1">
-                                {exercise.reps}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Notes */}
-                        {(isStage ? stage.notes : exercise.details) && (
-                          <div className="bg-background/30 p-4 rounded border">
-                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                              Notes
-                            </span>
-                            <p className="text-sm mt-2">
-                              {isStage ? stage.notes : exercise.details}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Stage Type Description */}
-                        {isStage && stage.type && (
-                          <div className="bg-background/30 p-4 rounded border">
-                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                              Stage Purpose
-                            </span>
-                            <p className="text-sm mt-2 capitalize">
-                              {stage.type === "warmup" &&
-                                "Aquecimento - Prepare your body for the main workout"}
-                              {stage.type === "work" &&
-                                "Exercícios - Main working phase of the workout"}
-                              {stage.type === "cardio" &&
-                                "Corrida - Cardiovascular training phase"}
-                              {stage.type === "recovery" &&
-                                "Recuperação - Active recovery between intense efforts"}
-                              {stage.type === "rest" &&
-                                "Descanso - Rest or recovery period"}
-                              {stage.type === "cooldown" &&
-                                "Desaquecimento - Cool down and recovery phase"}
-                              {stage.type === "other" &&
-                                "Outros - Additional or miscellaneous activities"}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                <p className="text-sm">Duration: est. {workout.duration}</p>
+            </div>
+            
+            {/* Equipment */}
+            <div className="mt-8">
+            <h2 className="text-base font-semibold mb-3 uppercase tracking-wide">{t.athlete.equipment.replace(':', '')}</h2>
+            <div className="flex gap-8">
+                {workout.equipment?.map((item, index) => (
+                <div key={index} className="flex flex-col items-center gap-1.5">
+                    {getEquipmentIcon(item)}
+                    <span className="text-xs text-muted-foreground">{item}</span>
+                </div>
+                )) || <p className="text-muted-foreground">None</p>}
+            </div>
+            </div>
+            
+            {/* Instructions */}
+            <div className="mt-8">
+            <h2 className="text-base font-semibold mb-2 uppercase tracking-wide">{t.athlete.instructions.replace(':', '')}</h2>
+            <p className="text-muted-foreground whitespace-pre-wrap text-sm">{workout.instructions}</p>
             </div>
 
-            {/* Workout Notes */}
-            {workout.notes && (
-              <div className="bg-muted/20 p-6 rounded-lg border">
-                <h3 className="font-semibold text-lg mb-3">Workout Notes</h3>
-                <p className="text-sm text-muted-foreground">{workout.notes}</p>
-              </div>
-            )}
-          </CardContent>
+            {/* Exercises */}
+            <div className="mt-8 space-y-3">
+                {workout.exercises?.map((exercise, index) => (
+                    <div key={index} className="flex items-center gap-4 py-3 border-b border-border/80 last:border-b-0">
+                        <img src={exercise.imageUrl || '/public/lovable-uploads/murillo.png'} alt={exercise.name} className="w-16 h-16 object-cover rounded-lg" />
+                        <div className="flex-1">
+                            <p className="font-semibold text-foreground leading-snug">{exercise.name}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{exercise.details}</p>
+                            {exercise.rest && (
+                            <div className="flex items-center gap-1.5 mt-1.5 text-sm text-amber-500">
+                                <Hand className="w-3.5 h-3.5" />
+                                <span>{exercise.rest}</span>
+                            </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
-      </div>
+      </main>
+      
+      {/* Floating Start Button */}
+      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-10">
+        <div className="max-w-md mx-auto">
+            <button 
+                onClick={onStart} 
+                className="w-full bg-primary text-primary-foreground py-3.5 rounded-full font-bold text-lg shadow-lg hover:bg-primary/90 transition-all uppercase"
+            >
+                {t.athlete.startNow}
+            </button>
+        </div>
+      </footer>
     </div>
   );
 };
