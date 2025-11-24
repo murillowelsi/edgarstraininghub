@@ -96,15 +96,6 @@ const PricingSection = () => {
             </div>
           ))}
         </div>
-
-        <div className="text-center mt-12">
-          <p className="text-gray-600 mb-4">
-            Todos os planos incluem avaliação inicial gratuita
-          </p>
-          <p className="text-sm text-gray-500">
-            Preços sujeitos a alterações. Consulte disponibilidade.
-          </p>
-        </div>
       </div>
     </section>
   );
