@@ -12,7 +12,7 @@ const AdminSidebar = () => {
 
   const handleLogout = async () => {
     await auth.signOut();
-    navigate('/admin/login');
+    navigate('/');
   };
 
   const navItems = [
