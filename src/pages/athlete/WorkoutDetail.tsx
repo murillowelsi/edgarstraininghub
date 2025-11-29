@@ -1,6 +1,14 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Activity, Bike, Calendar, Clock, Dumbbell, Waves, X } from "lucide-react";
+import {
+  Activity,
+  Bike,
+  Calendar,
+  Clock,
+  Dumbbell,
+  Waves,
+  X,
+} from "lucide-react";
 import React, { useState } from "react";
 import ExerciseDetail from "./ExerciseDetail";
 

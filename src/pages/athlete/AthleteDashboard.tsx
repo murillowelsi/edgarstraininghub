@@ -14,14 +14,19 @@ const AthleteDashboard = () => {
   const renderContent = () => {
     if (selectedWorkout) {
       // Pass the selected workout to the WorkoutFlow component
-      return <WorkoutFlow workout={selectedWorkout} onBackToDashboard={() => setSelectedWorkout(null)} />;
+      return (
+        <WorkoutFlow
+          workout={selectedWorkout}
+          onBackToDashboard={() => setSelectedWorkout(null)}
+        />
+      );
     }
 
     switch (activeTab) {
       case "program":
         return <AthleteHome onSelectWorkout={setSelectedWorkout} />;
       case "calendar":
-        return <AthleteCalendar />;
+        return <AthleteCalendar onSelectWorkout={setSelectedWorkout} />;
       case "workouts":
         return <WorkoutsView onSelectWorkout={setSelectedWorkout} />;
       default:
@@ -31,9 +36,7 @@ const AthleteDashboard = () => {
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
-      <main className="flex-1 overflow-y-auto">
-        {renderContent()}
-      </main>
+      <main className="flex-1 overflow-y-auto">{renderContent()}</main>
 
       {!selectedWorkout && (
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg">
@@ -41,7 +44,9 @@ const AthleteDashboard = () => {
             <button
               onClick={() => setActiveTab("program")}
               className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
-                activeTab === "program" ? "text-primary" : "text-muted-foreground"
+                activeTab === "program"
+                  ? "text-primary"
+                  : "text-muted-foreground"
               }`}
             >
               <Home className="h-6 w-6" />
@@ -50,7 +55,9 @@ const AthleteDashboard = () => {
             <button
               onClick={() => setActiveTab("calendar")}
               className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
-                activeTab === "calendar" ? "text-primary" : "text-muted-foreground"
+                activeTab === "calendar"
+                  ? "text-primary"
+                  : "text-muted-foreground"
               }`}
             >
               <Calendar className="h-6 w-6" />
@@ -59,13 +66,14 @@ const AthleteDashboard = () => {
             <button
               onClick={() => setActiveTab("workouts")}
               className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
-                activeTab === "workouts" ? "text-primary" : "text-muted-foreground"
+                activeTab === "workouts"
+                  ? "text-primary"
+                  : "text-muted-foreground"
               }`}
             >
               <Dumbbell className="h-6 w-6" />
               <span className="text-xs font-medium">{t.athlete.workouts}</span>
             </button>
-
           </div>
         </nav>
       )}

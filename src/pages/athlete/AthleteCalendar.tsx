@@ -1,9 +1,9 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Activity, Dumbbell, Waves } from "lucide-react";
+import { Activity, ChevronRight, Dumbbell, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const AthleteCalendar = () => {
+const AthleteCalendar = ({ onSelectWorkout }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [workouts, setWorkouts] = useState({});
@@ -100,11 +100,41 @@ const AthleteCalendar = () => {
     }
   };
 
+  const handleWorkoutClick = (workout, date) => {
+    // Convert mock workout data to the format expected by WorkoutFlow
+    const workoutDetails = {
+      id: workout.id,
+      name: workout.type,
+      type: workout.type.toLowerCase(),
+      duration: workout.time || "30 minutes",
+      equipment:
+        workout.type.toLowerCase() === "swimming" ? ["Pool"] : ["Body Weight"],
+      instructions: `Complete your ${workout.type.toLowerCase()} workout`,
+      exercises: [
+        {
+          name: workout.type,
+          details: workout.distance
+            ? `${workout.distance} in ${workout.time}`
+            : workout.time,
+          imageUrl: "/lovable-uploads/murillo.png",
+          sets: [
+            {
+              reps: 1,
+              previous: workout.distance || workout.time,
+            },
+          ],
+        },
+      ],
+    };
+
+    onSelectWorkout(workoutDetails);
+  };
+
   const renderDay = (date) => {
     const dayKey = date.toISOString().split("T")[0];
     const dayWorkouts = workouts[dayKey] || [];
     const dayName = t.athlete.calendar.weekdays[date.getDay()];
-    const dateString = date.toLocaleDateString("en-US", {
+    const dateString = date.toLocaleDateString("pt-BR", {
       day: "numeric",
       month: "short",
     });
@@ -131,6 +161,7 @@ const AthleteCalendar = () => {
             return (
               <div
                 key={workout.id}
+                onClick={() => handleWorkoutClick(workout, dayKey)}
                 className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative mb-3"
               >
                 <div className="flex items-start gap-4">
@@ -173,6 +204,9 @@ const AthleteCalendar = () => {
                   <div className="flex-shrink-0">
                     {renderWorkoutIcon(workout.type)}
                   </div>
+
+                  {/* Arrow */}
+                  <ChevronRight className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
                 </div>
               </div>
             );

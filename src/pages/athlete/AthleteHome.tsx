@@ -303,7 +303,7 @@ const AthleteHome = ({ onSelectWorkout }) => {
       <div className="bg-white px-6 py-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-gray-900 font-semibold">
-            {selectedDate.toLocaleDateString("en-US", {
+            {selectedDate.toLocaleDateString("pt-BR", {
               month: "long",
               day: "numeric",
             })}
