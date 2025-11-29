@@ -382,7 +382,7 @@ const AthleteHome = ({ onSelectWorkout }) => {
                   {(() => {
                     const IconComponent = getWorkoutIcon(activity.workoutType);
                     return (
-                      <IconComponent className="w-5 h-5 text-yellow-500" />
+                      <IconComponent className={`w-5 h-5 ${activity.completed ? 'text-white' : 'text-yellow-500'}`} />
                     );
                   })()}
                 </div>

@@ -197,19 +197,11 @@ const WorkoutView: React.FC<{ workout: any; onBack: () => void }> = ({
           Cancel
         </button>
         <div className="flex gap-2">
-          {currentWorkout.completed && (
-            <button
-              onClick={handleUncompleteWorkout}
-              className="text-base font-normal text-orange-600 hover:text-orange-700"
-            >
-              Mark Incomplete
-            </button>
-          )}
           <button
             onClick={handleCompleteWorkout}
             className="text-base font-semibold text-gray-900"
           >
-            {currentWorkout.completed ? "Save Changes" : "Complete Workout"}
+            {currentWorkout.completed ? "Save" : "Complete Workout"}
           </button>
         </div>
       </header>

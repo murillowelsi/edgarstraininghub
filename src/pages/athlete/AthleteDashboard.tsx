@@ -30,6 +30,10 @@ const AthleteDashboard = () => {
         <WorkoutFlow
           workout={selectedWorkout}
           onBackToDashboard={() => setSelectedWorkout(null)}
+          onGoToCalendar={() => {
+            setSelectedWorkout(null);
+            handleTabChange("calendar");
+          }}
         />
       );
     }

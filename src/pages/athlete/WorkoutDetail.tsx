@@ -71,7 +71,8 @@ const WorkoutDetail: React.FC<{
   workout: any;
   onStart: () => void;
   onBack: () => void;
-}> = ({ workout, onStart, onBack }) => {
+  onGoToCalendar?: () => void;
+}> = ({ workout, onStart, onBack, onGoToCalendar }) => {
   const { t } = useLanguage();
   const { user } = useAuth();
   const [selectedExercise, setSelectedExercise] = useState<any>(null);
@@ -118,6 +119,14 @@ const WorkoutDetail: React.FC<{
     return <Dumbbell className="w-10 h-10 text-yellow-500" />;
   };
 
+  // Format date as "24 Nov 2025"
+  const formatDate = (date: Date) => {
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
   return (
     <div className="bg-white text-gray-900 flex flex-col h-screen">
       {/* Header */}
@@ -128,7 +137,18 @@ const WorkoutDetail: React.FC<{
         >
           <X className="w-6 h-6 text-yellow-500" />
         </button>
-        <button className="p-2 -mr-2 hover:bg-gray-100 rounded-full transition-colors">
+        
+        {/* Date in center */}
+        <div className="flex-1 text-center">
+          <span className="text-base font-semibold text-gray-900">
+            {formatDate(new Date())}
+          </span>
+        </div>
+        
+        <button 
+          onClick={onGoToCalendar}
+          className="p-2 -mr-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
           <Calendar className="w-6 h-6 text-yellow-500" />
         </button>
       </header>

@@ -5,7 +5,8 @@ import WorkoutView from "./WorkoutView";
 const WorkoutFlow: React.FC<{
   workout: any;
   onBackToDashboard: () => void;
-}> = ({ workout, onBackToDashboard }) => {
+  onGoToCalendar?: () => void;
+}> = ({ workout, onBackToDashboard, onGoToCalendar }) => {
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
 
   const handleStartWorkout = () => {
@@ -26,6 +27,7 @@ const WorkoutFlow: React.FC<{
       workout={workout}
       onStart={handleStartWorkout}
       onBack={onBackToDashboard}
+      onGoToCalendar={onGoToCalendar}
     />
   );
 };
