@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   collection,
   deleteDoc,
   doc,
@@ -9,7 +16,17 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { ArrowLeft, Pencil, Plus, Trash2, Youtube } from "lucide-react";
+import {
+  Activity,
+  ArrowLeft,
+  Bike,
+  Dumbbell,
+  Pencil,
+  Plus,
+  Trash2,
+  Waves,
+  Youtube,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -59,6 +76,7 @@ interface Workout {
   id: string;
   date: string;
   type: "strength" | "swimming" | "cycling" | "running";
+  name?: string;
   exercises?: Exercise[];
   stages?: WorkoutStage[];
   // Legacy fields (kept for backwards compatibility)
@@ -88,6 +106,7 @@ const UserWorkouts = () => {
   const [libraryExercises, setLibraryExercises] = useState<LibraryExercise[]>(
     []
   );
+  const [workoutTypeModalOpen, setWorkoutTypeModalOpen] = useState(false);
 
   const getStageTypeColor = (type: string) => {
     switch (type) {
@@ -237,11 +256,7 @@ const UserWorkouts = () => {
               )}
             </div>
           </div>
-          <Button
-            onClick={() => {
-              navigate(`/admin/users/${userId}/workouts/new`);
-            }}
-          >
+          <Button onClick={() => setWorkoutTypeModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> New Workout
           </Button>
         </div>
@@ -279,7 +294,7 @@ const UserWorkouts = () => {
                         size="icon"
                         onClick={() => handleDeleteWorkout(workout.id)}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-yellow-500 hover:text-red-500" />
                       </Button>
                     </div>
                     <div className="flex items-center gap-2 mb-6">
@@ -292,9 +307,10 @@ const UserWorkouts = () => {
                         })}
                       </div>
                       <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary capitalize">
-                        {workout.type === "strength"
-                          ? "Strength Training"
-                          : workout.type}
+                        {workout.name ||
+                          (workout.type === "strength"
+                            ? "Strength Training"
+                            : workout.type)}
                       </span>
                     </div>
 
@@ -458,6 +474,79 @@ const UserWorkouts = () => {
           </CardContent>
         </div>
       </div>
+
+      {/* Workout Type Selection Modal */}
+      <Dialog
+        open={workoutTypeModalOpen}
+        onOpenChange={setWorkoutTypeModalOpen}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Select Workout Type</DialogTitle>
+            <DialogDescription>
+              Choose the type of workout you want to create for {athleteName}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-4">
+            <Button
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => {
+                setWorkoutTypeModalOpen(false);
+                navigate(`/admin/users/${userId}/workouts/new?type=swimming`);
+              }}
+            >
+              <Waves className="h-6 w-6 text-primary" />
+              <div className="font-semibold">Swimming</div>
+              <div className="text-xs text-muted-foreground text-center">
+                Aquatic training
+              </div>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => {
+                setWorkoutTypeModalOpen(false);
+                navigate(`/admin/users/${userId}/workouts/new?type=cycling`);
+              }}
+            >
+              <Bike className="h-6 w-6 text-primary" />
+              <div className="font-semibold">Cycling</div>
+              <div className="text-xs text-muted-foreground text-center">
+                Bike training
+              </div>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => {
+                setWorkoutTypeModalOpen(false);
+                navigate(`/admin/users/${userId}/workouts/new?type=running`);
+              }}
+            >
+              <Activity className="h-6 w-6 text-primary" />
+              <div className="font-semibold">Running</div>
+              <div className="text-xs text-muted-foreground text-center">
+                Running training
+              </div>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => {
+                setWorkoutTypeModalOpen(false);
+                navigate(`/admin/users/${userId}/workouts/new?type=strength`);
+              }}
+            >
+              <Dumbbell className="h-6 w-6 text-primary" />
+              <div className="font-semibold">Strength Training</div>
+              <div className="text-xs text-muted-foreground text-center">
+                Strength and hypertrophy training
+              </div>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

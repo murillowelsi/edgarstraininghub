@@ -250,7 +250,7 @@ const ExerciseLibrary = () => {
                           size="icon"
                           onClick={() => handleDelete(exercise.id)}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-4 w-4 text-yellow-500 hover:text-red-500" />
                         </Button>
                       </div>
                     </TableCell>

@@ -34,7 +34,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { db } from "../../lib/firebase";
 
@@ -83,6 +83,7 @@ interface Workout {
   id: string;
   date: string;
   type: "strength" | "swimming" | "cycling" | "running";
+  name?: string;
   exercises?: Exercise[];
   stages?: WorkoutStage[];
   // Legacy fields (kept for backwards compatibility)
@@ -106,6 +107,7 @@ interface Workout {
 const WorkoutEditor = () => {
   const { userId, workoutId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [athleteName, setAthleteName] = useState("");
   const [loading, setLoading] = useState(true);
   const [libraryExercises, setLibraryExercises] = useState<LibraryExercise[]>(
@@ -116,7 +118,8 @@ const WorkoutEditor = () => {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [workoutType, setWorkoutType] = useState<
     "strength" | "swimming" | "cycling" | "running"
-  >("strength");
+  >((searchParams.get("type") as any) || "strength");
+  const [workoutName, setWorkoutName] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([
     { name: "", reps: "", details: "" },
   ]);
@@ -129,6 +132,7 @@ const WorkoutEditor = () => {
   );
   const [expandedStageIndex, setExpandedStageIndex] = useState<number>(0);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [expandedChildStages, setExpandedChildStages] = useState<{ [key: string]: boolean }>({});
   const [saving, setSaving] = useState(false);
   // Swimming type for the entire workout
   const [swimmingType, setSwimmingType] = useState<string>("");
@@ -167,6 +171,9 @@ const WorkoutEditor = () => {
             } as Workout;
             loadWorkoutData(workout);
           }
+        } else {
+          // New workout - set default name
+          setWorkoutName(getDefaultWorkoutName(workoutType));
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -177,12 +184,13 @@ const WorkoutEditor = () => {
     };
 
     fetchData();
-  }, [userId, workoutId]);
+  }, [userId, workoutId, workoutType]);
 
   const loadWorkoutData = (workout: Workout) => {
     setDate(workout.date);
     setSelectedDate(new Date(workout.date));
     setWorkoutType(workout.type);
+    setWorkoutName(workout.name || getDefaultWorkoutName(workout.type));
     setSwimmingType(workout.swimmingType || "");
     setCyclingType(workout.cyclingType || "");
     setRunningType(workout.runningType || "");
@@ -265,7 +273,6 @@ const WorkoutEditor = () => {
       childStages: [],
     };
     setStages([...stages, newStage]);
-    setExpandedStageIndex(stages.length);
   };
 
   const handleAddRepetitionBlock = () => {
@@ -273,20 +280,9 @@ const WorkoutEditor = () => {
       name: "Repetition Block",
       type: "repetition",
       repeat: 2,
-      childStages: [
-        {
-          name: "",
-          type: "work",
-          duration: "",
-          distance: "",
-          intensity: "",
-          notes: "",
-          youtubeUrl: "",
-        },
-      ],
+      childStages: [],
     };
     setStages([...stages, newBlock]);
-    setExpandedStageIndex(stages.length);
   };
 
   const handleRemoveStage = (index: number) => {
@@ -356,6 +352,11 @@ const WorkoutEditor = () => {
     }
   };
 
+  const toggleChildExpanded = (parentIndex: number, childIndex: number) => {
+    const key = `${parentIndex}-${childIndex}`;
+    setExpandedChildStages(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   // Handle equipment selection/deselection
   const handleEquipmentChange = (
     stageIndex: number,
@@ -423,9 +424,9 @@ const WorkoutEditor = () => {
   };
 
   // Drag and drop handlers with improved drop zone detection
-  const handleDragStart = (e: React.DragEvent, index: number) => {
+  const handleDragStart = (e: React.DragEvent, dragId: string | number) => {
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", index.toString());
+    e.dataTransfer.setData("text/plain", dragId.toString());
     // Optional: set a custom drag image
     if (e.currentTarget instanceof HTMLElement) {
       const dragImage = e.currentTarget.closest(".border.rounded-lg");
@@ -440,15 +441,17 @@ const WorkoutEditor = () => {
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
 
-    // Determine if we should drop above or below based on mouse position
-    const target = e.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const midpoint = rect.top + rect.height / 2;
-    const isAbove = e.clientY < midpoint;
+    if (index !== -1) {
+      // Determine if we should drop above or below based on mouse position
+      const target = e.currentTarget as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      const isAbove = e.clientY < midpoint;
 
-    // Store the drop position info
-    setDragOverIndex(index);
-    target.setAttribute("data-drop-position", isAbove ? "above" : "below");
+      // Store the drop position info
+      setDragOverIndex(index);
+      target.setAttribute("data-drop-position", isAbove ? "above" : "below");
+    }
   };
 
   const handleDragEnter = (e: React.DragEvent, index: number) => {
@@ -463,7 +466,7 @@ const WorkoutEditor = () => {
     setDragOverIndex(null);
   };
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = (e: React.DragEvent, dropIndex: number, type: 'main' | 'repetition' = 'main') => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -472,44 +475,108 @@ const WorkoutEditor = () => {
     target.removeAttribute("data-drop-position");
     setDragOverIndex(null);
 
-    const dragIndex = parseInt(e.dataTransfer.getData("text/plain"));
+    const dragId = e.dataTransfer.getData("text/plain");
 
-    if (isNaN(dragIndex)) return;
+    if (type === 'main' && dropIndex === -1) {
+      // Add to end of main stages
+      if (dragId.startsWith('child-')) {
+        const [_, parentIndexStr, childIndexStr] = dragId.split('-');
+        const parentIndex = parseInt(parentIndexStr);
+        const childIndex = parseInt(childIndexStr);
+        const draggedStage = stages[parentIndex].childStages![childIndex];
+        const newStages = [...stages];
+        newStages[parentIndex].childStages!.splice(childIndex, 1);
+        newStages.push(draggedStage);
+        setStages(newStages);
+      } else {
+        const dragIndex = parseInt(dragId);
+        const newStages = [...stages];
+        const draggedStage = newStages[dragIndex];
+        newStages.splice(dragIndex, 1);
+        newStages.push(draggedStage);
+        setStages(newStages);
+      }
+    } else if (dragId.startsWith('child-')) {
+      const [_, parentIndexStr, childIndexStr] = dragId.split('-');
+      const parentIndex = parseInt(parentIndexStr);
+      const childIndex = parseInt(childIndexStr);
+      const draggedStage = stages[parentIndex].childStages![childIndex];
 
-    // Calculate the actual drop index based on position
-    let actualDropIndex = dropIndex;
+      if (type === 'main') {
+        // Move from childStages to main stages at dropIndex
+        const newStages = [...stages];
+        // Remove from childStages
+        newStages[parentIndex].childStages!.splice(childIndex, 1);
+        // Insert into main stages at dropIndex
+        let actualDropIndex = dropIndex;
+        if (dropPosition === "below") {
+          actualDropIndex = dropIndex + 1;
+        }
+        // Adjust if dragging from above (but since it's from child, no adjustment needed)
+        newStages.splice(actualDropIndex, 0, draggedStage);
+        setStages(newStages);
+      } else if (type === 'repetition' && dropIndex !== parentIndex) {
+        // Move from one repetition to another
+        const newStages = [...stages];
+        // Remove from source
+        const dragged = newStages[parentIndex].childStages!.splice(childIndex, 1)[0];
+        // Add to destination
+        if (!newStages[dropIndex].childStages) newStages[dropIndex].childStages = [];
+        newStages[dropIndex].childStages!.push(dragged);
+        setStages(newStages);
+      }
+    } else {
+      const dragIndex = parseInt(dragId);
+      if (isNaN(dragIndex)) return;
 
-    // If dropping below, increment the index
-    if (dropPosition === "below") {
-      actualDropIndex = dropIndex + 1;
-    }
+      if (type === 'main') {
+        // Original reordering logic
+        let actualDropIndex = dropIndex;
+        if (dropPosition === "below") {
+          actualDropIndex = dropIndex + 1;
+        }
+        if (dragIndex < actualDropIndex) {
+          actualDropIndex--;
+        }
+        if (dragIndex === actualDropIndex) return;
 
-    // Adjust if dragging from above
-    if (dragIndex < actualDropIndex) {
-      actualDropIndex--;
-    }
-
-    // Don't do anything if dropping in the same position
-    if (dragIndex === actualDropIndex) return;
-
-    const newStages = [...stages];
-    const [draggedItem] = newStages.splice(dragIndex, 1);
-    newStages.splice(actualDropIndex, 0, draggedItem);
-    setStages(newStages);
-
-    // Update expanded index if needed
-    if (expandedStageIndex === dragIndex) {
-      setExpandedStageIndex(actualDropIndex);
-    } else if (
-      dragIndex < expandedStageIndex &&
-      actualDropIndex >= expandedStageIndex
-    ) {
-      setExpandedStageIndex(expandedStageIndex - 1);
-    } else if (
-      dragIndex > expandedStageIndex &&
-      actualDropIndex <= expandedStageIndex
-    ) {
-      setExpandedStageIndex(expandedStageIndex + 1);
+        if (stages[dropIndex].type === 'repetition') {
+          // Add to childStages instead of reordering
+          const newStages = [...stages];
+          const draggedStage = newStages[dragIndex];
+          newStages.splice(dragIndex, 1);
+          if (!newStages[dropIndex].childStages) newStages[dropIndex].childStages = [];
+          newStages[dropIndex].childStages!.push(draggedStage);
+          setStages(newStages);
+        } else {
+          const newStages = [...stages];
+          const [draggedItem] = newStages.splice(dragIndex, 1);
+          newStages.splice(actualDropIndex, 0, draggedItem);
+          setStages(newStages);
+          // Update expanded index if needed
+          if (expandedStageIndex === dragIndex) {
+            setExpandedStageIndex(actualDropIndex);
+          } else if (dragIndex < expandedStageIndex && actualDropIndex >= expandedStageIndex) {
+            setExpandedStageIndex(expandedStageIndex - 1);
+          } else if (dragIndex > expandedStageIndex && actualDropIndex <= expandedStageIndex) {
+            setExpandedStageIndex(expandedStageIndex + 1);
+          }
+        }
+      } else if (type === 'repetition') {
+        // Move from main to repetition
+        const newStages = [...stages];
+        const draggedStage = newStages[dragIndex];
+        newStages.splice(dragIndex, 1);
+        if (!newStages[dropIndex].childStages) newStages[dropIndex].childStages = [];
+        newStages[dropIndex].childStages!.push(draggedStage);
+        setStages(newStages);
+        // Update expanded index if needed
+        if (expandedStageIndex === dragIndex) {
+          setExpandedStageIndex(-1);
+        } else if (dragIndex < expandedStageIndex) {
+          setExpandedStageIndex(expandedStageIndex - 1);
+        }
+      }
     }
   };
 
@@ -531,28 +598,45 @@ const WorkoutEditor = () => {
     return colors[type] || "border-l-4 border-l-gray-300 bg-muted/20";
   };
 
+  const getDefaultWorkoutName = (type: string) => {
+    switch (type) {
+      case "strength":
+        return "Strength Training Workout";
+      case "swimming":
+        return "Swimming Workout";
+      case "cycling":
+        return "Cycling Workout";
+      case "running":
+        return "Running Workout";
+      default:
+        return "Workout";
+    }
+  };
+
   const handleSaveWorkout = async () => {
     if (!userId) return;
 
-    // Validate - at least one stage required
-    if (stages.length === 0) {
+    // Validate - at least one stage required only for new workouts
+    if (!workoutId && stages.length === 0) {
       toast.error("Please add at least one stage/exercise");
       return;
     }
 
-    // Check if all stages have either a name or exerciseName
-    const hasEmptyStages = stages.some((s) => {
-      if (workoutType === "strength") {
-        // For strength training, work stages don't require exerciseName, others do
-        return s.type !== "work" && s.type !== "rest" && !s.exerciseName;
-      } else {
-        // For other workout types, all stages need a name
-        return !s.name;
+    // Check if all stages have either a name or exerciseName (only if there are stages)
+    if (stages.length > 0) {
+      const hasEmptyStages = stages.some((s) => {
+        if (workoutType === "strength") {
+          // For strength training, work stages don't require exerciseName, others do
+          return s.type !== "work" && s.type !== "rest" && !s.exerciseName;
+        } else {
+          // For other workout types, all stages need a name
+          return !s.name;
+        }
+      });
+      if (hasEmptyStages) {
+        toast.error("Please provide a name for all stages/exercises");
+        return;
       }
-    });
-    if (hasEmptyStages) {
-      toast.error("Please provide a name for all stages/exercises");
-      return;
     }
 
     setSaving(true);
@@ -561,6 +645,7 @@ const WorkoutEditor = () => {
         athleteId: userId,
         date,
         type: workoutType,
+        name: workoutName,
         stages: stages,
         notes: workoutNotes,
         updatedAt: new Date().toISOString(),
@@ -601,6 +686,7 @@ const WorkoutEditor = () => {
 
   const resetForm = () => {
     setWorkoutType("strength");
+    setWorkoutName(getDefaultWorkoutName("strength"));
     setSwimmingType("");
     setCyclingType("");
     setRunningType("");
@@ -696,6 +782,15 @@ const WorkoutEditor = () => {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label>Workout Name</Label>
+              <Input
+                placeholder="Enter workout name"
+                value={workoutName}
+                onChange={(e) => setWorkoutName(e.target.value)}
+              />
+            </div>
+
             {/* Swimming Type Selection - only for swimming workouts */}
             {workoutType === "swimming" && (
               <div className="space-y-2">
@@ -747,7 +842,12 @@ const WorkoutEditor = () => {
             )}
 
             {/* All Workout Types - Unified Stage-based Fields */}
-            <div className="space-y-4">
+            <div className="space-y-4"
+              onDrop={(e) => handleDrop(e, -1, 'main')}
+              onDragOver={(e) => handleDragOver(e, -1)}
+              onDragEnter={(e) => handleDragEnter(e, -1)}
+              onDragLeave={handleDragLeave}
+            >
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">
                   {workoutType === "strength" ? "Exercises" : "Stages"}
@@ -818,7 +918,7 @@ const WorkoutEditor = () => {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute top-2 right-2 h-6 w-6 text-destructive z-10"
+                        className="absolute top-2 right-2 h-6 w-6 text-yellow-500 hover:text-red-500 z-10"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveStage(index);
@@ -847,24 +947,53 @@ const WorkoutEditor = () => {
                           <span className="font-semibold text-sm">Vezes</span>
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          (Loop de exercícios)
+                          (Exercise Loop)
                         </div>
                       </div>
 
                       {/* Child Stages */}
-                      <div className="p-4 space-y-3">
+                      <div className="p-4 space-y-3"
+                        onDrop={(e) => handleDrop(e, index, 'repetition')}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragEnter={(e) => handleDragEnter(e, index)}
+                        onDragLeave={handleDragLeave}
+                      >
                         {stage.childStages?.map((child, childIndex) => (
                           <div
                             key={childIndex}
-                            className={`border rounded-lg p-3 relative bg-card ${getStageTypeColor(
+                            className={`border rounded-lg relative transition-all ${getStageTypeColor(
                               child.type
                             )}`}
+                            draggable={true}
+                            onDragStart={(e) => {
+                              const target = e.target as HTMLElement;
+                              if (
+                                target.closest("button") ||
+                                target.closest("input") ||
+                                target.closest("select") ||
+                                target.closest("textarea")
+                              ) {
+                                e.preventDefault();
+                                return;
+                              }
+                              e.stopPropagation();
+                              handleDragStart(e, `child-${index}-${childIndex}`);
+                            }}
                           >
+                            {/* Drag Handle */}
+                            <div
+                              className="absolute top-2 left-2 p-1 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground hover:bg-muted rounded z-10"
+                              title="Drag to reorder"
+                            >
+                              <GripVertical className="h-4 w-4" />
+                            </div>
+
+                            {/* Delete Button */}
                             <Button
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="absolute top-2 right-2 h-6 w-6 text-destructive"
+                              className="absolute top-2 right-2 h-6 w-6 text-yellow-500 hover:text-red-500 z-10"
                               onClick={() =>
                                 handleRemoveChildStage(index, childIndex)
                               }
@@ -872,170 +1001,201 @@ const WorkoutEditor = () => {
                               <Trash2 className="h-3 w-3" />
                             </Button>
 
-                            <div className="grid gap-3 pr-8">
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Tipo</Label>
-                                  <Select
-                                    value={child.type}
-                                    onValueChange={(value) =>
-                                      handleChildStageChange(
-                                        index,
-                                        childIndex,
-                                        "type",
-                                        value
-                                      )
-                                    }
-                                  >
-                                    <SelectTrigger className="h-8">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="warmup">
-                                        Aquecimento
-                                      </SelectItem>
-                                      <SelectItem value="work">
-                                        Exercício
-                                      </SelectItem>
-                                      <SelectItem value="cardio">
-                                        Corrida
-                                      </SelectItem>
-                                      <SelectItem value="recovery">
-                                        Recuperação
-                                      </SelectItem>
-                                      <SelectItem value="rest">
-                                        Descanso
-                                      </SelectItem>
-                                      <SelectItem value="cooldown">
-                                        Desaquecimento
-                                      </SelectItem>
-                                      <SelectItem value="other">
-                                        Outros
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
+                            {/* Collapsible Header */}
+                            <div
+                              className="flex items-center justify-between p-3 pl-10 pr-12 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-t-lg"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleChildExpanded(index, childIndex);
+                              }}
+                              onDragStart={(e) => {
+                                e.stopPropagation();
+                                handleDragStart(e, `child-${index}-${childIndex}`);
+                              }}
+                            >
+                              <div className="flex items-center gap-3 flex-1">
+                                <ChevronDown
+                                  className={`h-4 w-4 transition-transform ${
+                                    expandedChildStages[`${index}-${childIndex}`] || false
+                                      ? "transform rotate-180"
+                                      : ""
+                                  }`}
+                                />
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-sm">
+                                    {child.exerciseName || child.name || `Stage ${childIndex + 1}`}
+                                  </span>
                                 </div>
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Nome</Label>
-                                  <Input
-                                    className="h-8"
-                                    placeholder="Nome da etapa"
-                                    value={
-                                      child.name || child.exerciseName || ""
-                                    }
-                                    onChange={(e) =>
-                                      handleChildStageChange(
-                                        index,
-                                        childIndex,
-                                        "name",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </div>
+                                <span className="text-xs text-muted-foreground capitalize">
+                                  ({child.type})
+                                </span>
                               </div>
+                            </div>
 
-                              <div className="grid grid-cols-3 gap-3">
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Distância</Label>
-                                  <div className="flex gap-1">
+                            {/* Expandable Content */}
+                            {(expandedChildStages[`${index}-${childIndex}`] || false) && (
+                              <div className="p-4 pt-2 space-y-3">
+                                <div className="grid gap-3 pr-8 ml-8">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                      <Label className="text-xs">Tipo</Label>
+                                      <Select
+                                        value={child.type}
+                                        onValueChange={(value) =>
+                                          handleChildStageChange(
+                                            index,
+                                            childIndex,
+                                            "type",
+                                            value
+                                          )
+                                        }
+                                      >
+                                        <SelectTrigger className="h-8">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="warmup">
+                                            Warmup
+                                          </SelectItem>
+                                          <SelectItem value="work">
+                                            Exercise
+                                          </SelectItem>
+                                          <SelectItem value="cardio">
+                                            Cardio
+                                          </SelectItem>
+                                          <SelectItem value="recovery">
+                                            Recovery
+                                          </SelectItem>
+                                          <SelectItem value="rest">Rest</SelectItem>
+                                          <SelectItem value="cooldown">
+                                            Cooldown
+                                          </SelectItem>
+                                          <SelectItem value="other">
+                                            Other
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-xs">Nome</Label>
+                                      <Input
+                                        className="h-8"
+                                        placeholder="Stage name"
+                                        value={
+                                          child.name || child.exerciseName || ""
+                                        }
+                                        onChange={(e) =>
+                                          handleChildStageChange(
+                                            index,
+                                            childIndex,
+                                            "name",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-3 gap-3">
+                                    <div className="space-y-1">
+                                      <Label className="text-xs">Distância</Label>
+                                      <div className="flex gap-1">
+                                        <Input
+                                          className="h-8"
+                                          placeholder="0"
+                                          value={child.distance || ""}
+                                          onChange={(e) =>
+                                            handleChildStageChange(
+                                              index,
+                                              childIndex,
+                                              "distance",
+                                              e.target.value
+                                            )
+                                          }
+                                        />
+                                        <Select
+                                          value={child.distanceUnit || "km"}
+                                          onValueChange={(value) =>
+                                            handleChildStageChange(
+                                              index,
+                                              childIndex,
+                                              "distanceUnit",
+                                              value
+                                            )
+                                          }
+                                        >
+                                          <SelectTrigger className="h-8 w-16 px-1">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="km">km</SelectItem>
+                                            <SelectItem value="m">m</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-xs">Duração</Label>
+                                      <Input
+                                        className="h-8"
+                                        placeholder="Tempo"
+                                        value={child.duration || ""}
+                                        onChange={(e) =>
+                                          handleChildStageChange(
+                                            index,
+                                            childIndex,
+                                            "duration",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-xs">Intensidade</Label>
+                                      <Input
+                                        className="h-8"
+                                        placeholder="Zona/Ritmo"
+                                        value={child.intensity || ""}
+                                        onChange={(e) =>
+                                          handleChildStageChange(
+                                            index,
+                                            childIndex,
+                                            "intensity",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">YouTube URL</Label>
                                     <Input
                                       className="h-8"
-                                      placeholder="0"
-                                      value={child.distance || ""}
+                                      placeholder="https://youtube.com/..."
+                                      value={child.youtubeUrl || ""}
                                       onChange={(e) =>
                                         handleChildStageChange(
                                           index,
                                           childIndex,
-                                          "distance",
+                                          "youtubeUrl",
                                           e.target.value
                                         )
                                       }
                                     />
-                                    <Select
-                                      value={child.distanceUnit || "km"}
-                                      onValueChange={(value) =>
-                                        handleChildStageChange(
-                                          index,
-                                          childIndex,
-                                          "distanceUnit",
-                                          value
-                                        )
-                                      }
-                                    >
-                                      <SelectTrigger className="h-8 w-16 px-1">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="km">km</SelectItem>
-                                        <SelectItem value="m">m</SelectItem>
-                                      </SelectContent>
-                                    </Select>
                                   </div>
                                 </div>
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Duração</Label>
-                                  <Input
-                                    className="h-8"
-                                    placeholder="Tempo"
-                                    value={child.duration || ""}
-                                    onChange={(e) =>
-                                      handleChildStageChange(
-                                        index,
-                                        childIndex,
-                                        "duration",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </div>
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Intensidade</Label>
-                                  <Input
-                                    className="h-8"
-                                    placeholder="Zona/Ritmo"
-                                    value={child.intensity || ""}
-                                    onChange={(e) =>
-                                      handleChildStageChange(
-                                        index,
-                                        childIndex,
-                                        "intensity",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </div>
                               </div>
-
-                              <div className="space-y-1">
-                                <Label className="text-xs">YouTube URL</Label>
-                                <Input
-                                  className="h-8"
-                                  placeholder="https://youtube.com/..."
-                                  value={child.youtubeUrl || ""}
-                                  onChange={(e) =>
-                                    handleChildStageChange(
-                                      index,
-                                      childIndex,
-                                      "youtubeUrl",
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </div>
-                            </div>
+                            )}
                           </div>
-                        ))}
-
-                        <Button
+                        ))}                        <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           className="w-full border-dashed"
                           onClick={() => handleAddChildStage(index)}
                         >
-                          <Plus className="mr-2 h-4 w-4" /> Adicionar Etapa ao
-                          Loop
+                          <Plus className="mr-2 h-4 w-4" /> Add Stage to Loop
                         </Button>
                       </div>
                     </div>
@@ -1077,20 +1237,18 @@ const WorkoutEditor = () => {
                     </div>
 
                     {/* Delete Button */}
-                    {stages.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-2 right-2 h-6 w-6 text-destructive z-10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveStage(index);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6 text-yellow-500 hover:text-red-500 z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveStage(index);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
 
                     {/* Collapsible Header */}
                     <div
@@ -1160,27 +1318,13 @@ const WorkoutEditor = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="warmup">
-                                Aquecimento (Warmup)
-                              </SelectItem>
-                              <SelectItem value="work">
-                                Exercícios (Work)
-                              </SelectItem>
-                              <SelectItem value="cardio">
-                                Corrida (Cardio)
-                              </SelectItem>
-                              <SelectItem value="recovery">
-                                Recuperação (Recovery)
-                              </SelectItem>
-                              <SelectItem value="rest">
-                                Descanso (Rest)
-                              </SelectItem>
-                              <SelectItem value="cooldown">
-                                Desaquecimento (Cooldown)
-                              </SelectItem>
-                              <SelectItem value="other">
-                                Outros (Other)
-                              </SelectItem>
+                              <SelectItem value="warmup">Warmup</SelectItem>
+                              <SelectItem value="work">Work</SelectItem>
+                              <SelectItem value="cardio">Cardio</SelectItem>
+                              <SelectItem value="recovery">Recovery</SelectItem>
+                              <SelectItem value="rest">Rest</SelectItem>
+                              <SelectItem value="cooldown">Cooldown</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

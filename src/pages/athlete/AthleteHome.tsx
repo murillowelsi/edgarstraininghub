@@ -151,6 +151,7 @@ const AthleteHome = ({ onSelectWorkout }) => {
 
   // Helper function to get workout title
   const getWorkoutTitle = (workout) => {
+    if (workout.name) return workout.name;
     if (workout.type === "strength") return "Strength Training";
     if (workout.type === "swimming") return "Swimming";
     if (workout.type === "cycling") return "Cycling";
