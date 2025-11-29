@@ -13,6 +13,7 @@ import { ArrowLeft, Pencil, Plus, Trash2, Youtube } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import Swal from "sweetalert2";
 import { db } from "../../lib/firebase";
 
 interface Exercise {
@@ -157,11 +158,41 @@ const UserWorkouts = () => {
   }, [userId]);
 
   const handleDeleteWorkout = async (workoutId: string) => {
-    if (!confirm("Are you sure you want to delete this workout?")) return;
+    const result = await Swal.fire({
+      title: "Tem certeza?",
+      text: "Esta ação não pode ser desfeita. O treino será excluído permanentemente.",
+      icon: "warning",
+      iconColor: "hsl(48 96% 45%)",
+      showCancelButton: true,
+      confirmButtonColor: "hsl(0 84% 60%)",
+      cancelButtonColor: "hsl(210 40% 96%)",
+      confirmButtonText: "Sim, excluir",
+      cancelButtonText: "Cancelar",
+      background: "hsl(var(--card))",
+      color: "hsl(var(--card-foreground))",
+      customClass: {
+        popup: "rounded-xl shadow-xl border border-border/50",
+        title: "font-display font-bold text-lg",
+        htmlContainer: "text-sm text-muted-foreground",
+        confirmButton:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 px-6 py-3 rounded-lg font-semibold transition-all duration-300",
+        cancelButton:
+          "bg-muted text-muted-foreground hover:bg-muted/80 px-6 py-3 rounded-lg font-semibold transition-all duration-300 border border-border",
+        actions: "gap-3",
+      },
+      showClass: {
+        popup: "animate-scale-in",
+      },
+      hideClass: {
+        popup: "animate-fade-out",
+      },
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await deleteDoc(doc(db, "workouts", workoutId));
-      toast.success("Workout deleted");
+      toast.success("Treino excluído com sucesso");
 
       // Refresh workouts after deletion
       const q = query(
@@ -181,7 +212,7 @@ const UserWorkouts = () => {
       setWorkouts(fetchedWorkouts);
     } catch (error) {
       console.error("Error deleting workout:", error);
-      toast.error("Failed to delete workout");
+      toast.error("Falha ao excluir treino");
     }
   };
 
@@ -270,113 +301,135 @@ const UserWorkouts = () => {
                     {workout.stages && workout.stages.length > 0 ? (
                       <div className="text-sm space-y-2 mt-2">
                         {workout.stages.map((stage, idx) => {
-                          if (stage.type === 'repetition') {
-                             return (
-                               <div key={idx} className="rounded-md border p-3 bg-muted/20 my-2">
-                                 <div className="font-semibold text-sm mb-2">Repetir {stage.repeat}x</div>
-                                 <div className="pl-4 border-l-2 border-primary/20 space-y-2">
-                                   {stage.childStages?.map((child, cIdx) => (
-                                      <div key={cIdx} className={`rounded-md pl-2 py-1 ${getStageTypeColor(child.type)}`}>
-                                         <span className="font-medium text-sm">{child.name || child.exerciseName || `Stage ${cIdx + 1}`}</span>
-                                         <span className="text-xs text-muted-foreground ml-2">
-                                            {child.distance ? `${child.distance}${child.distanceUnit}` : ''}
-                                            {child.duration ? `${child.duration}` : ''}
-                                            {child.sets ? `${child.sets}x${child.reps}` : ''}
-                                         </span>
-                                      </div>
-                                   ))}
-                                 </div>
-                               </div>
-                             );
+                          if (stage.type === "repetition") {
+                            return (
+                              <div
+                                key={idx}
+                                className="rounded-md border p-3 bg-muted/20 my-2"
+                              >
+                                <div className="font-semibold text-sm mb-2">
+                                  Repetir {stage.repeat}x
+                                </div>
+                                <div className="pl-4 border-l-2 border-primary/20 space-y-2">
+                                  {stage.childStages?.map((child, cIdx) => (
+                                    <div
+                                      key={cIdx}
+                                      className={`rounded-md pl-2 py-1 ${getStageTypeColor(
+                                        child.type
+                                      )}`}
+                                    >
+                                      <span className="font-medium text-sm">
+                                        {child.name ||
+                                          child.exerciseName ||
+                                          `Stage ${cIdx + 1}`}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground ml-2">
+                                        {child.distance
+                                          ? `${child.distance}${child.distanceUnit}`
+                                          : ""}
+                                        {child.duration
+                                          ? `${child.duration}`
+                                          : ""}
+                                        {child.sets
+                                          ? `${child.sets}x${child.reps}`
+                                          : ""}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
                           }
                           return (
-                          <div
-                            key={idx}
-                            className={`rounded-md pl-3 pr-2 py-2 ${getStageTypeColor(
-                              stage.type
-                            )}`}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <p className="font-medium text-sm">
-                                  {stage.exerciseName ||
-                                    stage.name ||
-                                    `Stage ${idx + 1}`}
-                                  {stage.repeat && stage.repeat > 1 && (
-                                    <span className="ml-2 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">
-                                      {stage.repeat}x
+                            <div
+                              key={idx}
+                              className={`rounded-md pl-3 pr-2 py-2 ${getStageTypeColor(
+                                stage.type
+                              )}`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className="font-medium text-sm">
+                                    {stage.exerciseName ||
+                                      stage.name ||
+                                      `Stage ${idx + 1}`}
+                                    {stage.repeat && stage.repeat > 1 && (
+                                      <span className="ml-2 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">
+                                        {stage.repeat}x
+                                      </span>
+                                    )}
+                                  </p>
+                                  <div className="text-xs text-muted-foreground mt-1 space-x-3">
+                                    <span className="capitalize">
+                                      {stage.type}
                                     </span>
-                                  )}
-                                </p>
-                                <div className="text-xs text-muted-foreground mt-1 space-x-3">
-                                  <span className="capitalize">
-                                    {stage.type}
-                                  </span>
-                                  {workout.type === "strength" ? (
-                                    <>
-                                      {stage.sets && (
-                                        <span>{stage.sets} sets</span>
-                                      )}
-                                      {stage.reps && (
-                                        <span>{stage.reps} reps</span>
-                                      )}
-                                      {stage.weight && (
-                                        <span>{stage.weight}</span>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <>
-                                      {stage.distance && (
-                                        <span>
-                                          {stage.distance} {stage.distanceUnit}
-                                        </span>
-                                      )}
-                                      {stage.duration && (
-                                        <span>{stage.duration}</span>
-                                      )}
-                                      {stage.intensity && (
-                                        <span>{stage.intensity}</span>
-                                      )}
-                                    </>
-                                  )}
+                                    {workout.type === "strength" ? (
+                                      <>
+                                        {stage.sets && (
+                                          <span>{stage.sets} sets</span>
+                                        )}
+                                        {stage.reps && (
+                                          <span>{stage.reps} reps</span>
+                                        )}
+                                        {stage.weight && (
+                                          <span>{stage.weight}</span>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <>
+                                        {stage.distance && (
+                                          <span>
+                                            {stage.distance}{" "}
+                                            {stage.distanceUnit}
+                                          </span>
+                                        )}
+                                        {stage.duration && (
+                                          <span>{stage.duration}</span>
+                                        )}
+                                        {stage.intensity && (
+                                          <span>{stage.intensity}</span>
+                                        )}
+                                      </>
+                                    )}
+                                  </div>
+                                  {/* YouTube Video */}
+                                  {stage.libraryExerciseId &&
+                                    (() => {
+                                      const exercise = libraryExercises.find(
+                                        (ex) =>
+                                          ex.id === stage.libraryExerciseId
+                                      );
+                                      const videoId = exercise?.youtubeUrl
+                                        ? getYouTubeVideoId(exercise.youtubeUrl)
+                                        : null;
+                                      return videoId ? (
+                                        <div className="mt-3">
+                                          <div className="aspect-video w-full max-w-sm mx-auto rounded-lg overflow-hidden border">
+                                            <iframe
+                                              src={`https://www.youtube.com/embed/${videoId}`}
+                                              title={`${exercise?.name} tutorial`}
+                                              className="w-full h-full"
+                                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                              allowFullScreen
+                                            />
+                                          </div>
+                                          <div className="mt-1 text-center">
+                                            <a
+                                              href={exercise.youtubeUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 hover:underline"
+                                            >
+                                              <Youtube className="h-3 w-3" />
+                                              Open on YouTube
+                                            </a>
+                                          </div>
+                                        </div>
+                                      ) : null;
+                                    })()}
                                 </div>
-                                {/* YouTube Video */}
-                                {stage.libraryExerciseId &&
-                                  (() => {
-                                    const exercise = libraryExercises.find(
-                                      (ex) => ex.id === stage.libraryExerciseId
-                                    );
-                                    const videoId = exercise?.youtubeUrl
-                                      ? getYouTubeVideoId(exercise.youtubeUrl)
-                                      : null;
-                                    return videoId ? (
-                                      <div className="mt-3">
-                                        <div className="aspect-video w-full max-w-sm mx-auto rounded-lg overflow-hidden border">
-                                          <iframe
-                                            src={`https://www.youtube.com/embed/${videoId}`}
-                                            title={`${exercise?.name} tutorial`}
-                                            className="w-full h-full"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                          />
-                                        </div>
-                                        <div className="mt-1 text-center">
-                                          <a
-                                            href={exercise.youtubeUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 hover:underline"
-                                          >
-                                            <Youtube className="h-3 w-3" />
-                                            Open on YouTube
-                                          </a>
-                                        </div>
-                                      </div>
-                                    ) : null;
-                                  })()}
                               </div>
                             </div>
-                          </div>
                           );
                         })}
                         {workout.notes && (

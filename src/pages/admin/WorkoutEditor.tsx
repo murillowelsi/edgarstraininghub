@@ -121,21 +121,7 @@ const WorkoutEditor = () => {
     { name: "", reps: "", details: "" },
   ]);
   // Stages for swimming, cycling, running
-  const [stages, setStages] = useState<WorkoutStage[]>([
-    {
-      name: "",
-      type: "warmup",
-      duration: "",
-      distance: "",
-      distanceUnit: "km",
-      intensity: "",
-      notes: "",
-      stroke: "",
-      equipment: [],
-      libraryExerciseId: "",
-      youtubeUrl: "",
-    },
-  ]);
+  const [stages, setStages] = useState<WorkoutStage[]>([]);
   const [workoutNotes, setWorkoutNotes] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
@@ -328,7 +314,10 @@ const WorkoutEditor = () => {
     const parentStage = newStages[parentIndex];
     if (parentStage.childStages) {
       const newChildStages = [...parentStage.childStages];
-      newChildStages[childIndex] = { ...newChildStages[childIndex], [field]: value };
+      newChildStages[childIndex] = {
+        ...newChildStages[childIndex],
+        [field]: value,
+      };
       newStages[parentIndex] = { ...parentStage, childStages: newChildStages };
       setStages(newStages);
     }
@@ -450,16 +439,16 @@ const WorkoutEditor = () => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
-    
+
     // Determine if we should drop above or below based on mouse position
     const target = e.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     const midpoint = rect.top + rect.height / 2;
     const isAbove = e.clientY < midpoint;
-    
+
     // Store the drop position info
     setDragOverIndex(index);
-    target.setAttribute('data-drop-position', isAbove ? 'above' : 'below');
+    target.setAttribute("data-drop-position", isAbove ? "above" : "below");
   };
 
   const handleDragEnter = (e: React.DragEvent, index: number) => {
@@ -470,17 +459,17 @@ const WorkoutEditor = () => {
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     const target = e.currentTarget as HTMLElement;
-    target.removeAttribute('data-drop-position');
+    target.removeAttribute("data-drop-position");
     setDragOverIndex(null);
   };
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const target = e.currentTarget as HTMLElement;
-    const dropPosition = target.getAttribute('data-drop-position');
-    target.removeAttribute('data-drop-position');
+    const dropPosition = target.getAttribute("data-drop-position");
+    target.removeAttribute("data-drop-position");
     setDragOverIndex(null);
 
     const dragIndex = parseInt(e.dataTransfer.getData("text/plain"));
@@ -489,17 +478,17 @@ const WorkoutEditor = () => {
 
     // Calculate the actual drop index based on position
     let actualDropIndex = dropIndex;
-    
+
     // If dropping below, increment the index
-    if (dropPosition === 'below') {
+    if (dropPosition === "below") {
       actualDropIndex = dropIndex + 1;
     }
-    
+
     // Adjust if dragging from above
     if (dragIndex < actualDropIndex) {
       actualDropIndex--;
     }
-    
+
     // Don't do anything if dropping in the same position
     if (dragIndex === actualDropIndex) return;
 
@@ -545,7 +534,7 @@ const WorkoutEditor = () => {
   const handleSaveWorkout = async () => {
     if (!userId) return;
 
-    // Validate - at least one stage required with a name
+    // Validate - at least one stage required
     if (stages.length === 0) {
       toast.error("Please add at least one stage/exercise");
       return;
@@ -618,21 +607,7 @@ const WorkoutEditor = () => {
     setExercises([{ name: "", reps: "", details: "" }]);
     setDate(new Date().toISOString().split("T")[0]);
     setSelectedDate(new Date());
-    setStages([
-      {
-        name: "",
-        type: "warmup",
-        duration: "",
-        distance: "",
-        distanceUnit: "km",
-        intensity: "",
-        notes: "",
-        stroke: "",
-        equipment: [],
-        libraryExerciseId: "",
-        youtubeUrl: "",
-      },
-    ]);
+    setStages([]);
     setWorkoutNotes("");
   };
 
@@ -945,7 +920,9 @@ const WorkoutEditor = () => {
                                   <Input
                                     className="h-8"
                                     placeholder="Nome da etapa"
-                                    value={child.name || child.exerciseName || ""}
+                                    value={
+                                      child.name || child.exerciseName || ""
+                                    }
                                     onChange={(e) =>
                                       handleChildStageChange(
                                         index,
@@ -1029,7 +1006,7 @@ const WorkoutEditor = () => {
                                   />
                                 </div>
                               </div>
-                              
+
                               <div className="space-y-1">
                                 <Label className="text-xs">YouTube URL</Label>
                                 <Input
@@ -1626,10 +1603,15 @@ const WorkoutEditor = () => {
                   if (date) {
                     setSelectedDate(date);
                     setDate(date.toISOString().split("T")[0]);
-                    setCalendarOpen(false);
                   }
                 }}
+                onDayClick={() => {
+                  // Close dialog when any day is clicked (including already selected)
+                  setCalendarOpen(false);
+                }}
                 className="rounded-md border"
+                fromDate={new Date(1900, 0, 1)}
+                toDate={new Date(2100, 11, 31)}
               />
               <p className="text-xs text-muted-foreground text-center">
                 Choose the date for this workout
