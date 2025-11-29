@@ -1,79 +1,106 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { Activity, ChevronRight, Dumbbell, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
+import { db } from "../../lib/firebase";
+
+interface WorkoutStage {
+  name: string;
+  type: string;
+  duration?: string;
+  distance?: string;
+  distanceUnit?: string;
+  intensity?: string;
+  notes?: string;
+  exerciseName?: string;
+  sets?: string;
+  reps?: string;
+  weight?: string;
+  repeat?: number;
+  equipment?: string[];
+  libraryExerciseId?: string;
+  youtubeUrl?: string;
+  childStages?: WorkoutStage[];
+}
+
+interface Workout {
+  id: string;
+  date: string;
+  type: "strength" | "swimming" | "cycling" | "running";
+  exercises?: any[];
+  stages?: WorkoutStage[];
+  distance?: string;
+  duration?: string;
+  stroke?: string;
+  route?: string;
+  elevation?: string;
+  avgSpeed?: string;
+  pace?: string;
+  terrain?: string;
+  notes?: string;
+  swimmingType?: string;
+  cyclingType?: string;
+  runningType?: string;
+}
 
 const AthleteCalendar = ({ onSelectWorkout }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [workouts, setWorkouts] = useState({});
   const [loading, setLoading] = useState(true);
+  const [numberOfDays, setNumberOfDays] = useState(14);
 
   useEffect(() => {
     const fetchWorkouts = async () => {
       if (!user) return;
       setLoading(true);
       try {
-        // Mock data based on the user's screenshot
-        const mockWorkouts = {
-          "2025-11-18": [
-            {
-              id: "w1",
-              type: "Running",
-              completed: true,
-              distance: "5.3 km",
-              time: "29m 59s",
-            },
-            {
-              id: "w2",
-              type: "Swimming",
-              completed: true,
-              distance: "2000 m",
-              time: "41m 54s",
-            },
-          ],
-          "2025-11-19": [
-            { id: "w3", type: "General", completed: true, time: "1h 1m 57s" },
-          ],
-          "2025-11-20": [
-            {
-              id: "w4",
-              type: "Running",
-              completed: true,
-              distance: "6.97 km",
-              time: "40m 2s",
-            },
-            {
-              id: "w5",
-              type: "Swimming",
-              completed: true,
-              distance: "1200 m",
-              time: "24 minutes",
-            },
-          ],
-          "2025-11-22": [
-            {
-              id: "w6",
-              type: "Running",
-              completed: true,
-              distance: "10.01 km",
-              time: "57 minutes",
-            },
-          ],
-          "2025-11-23": [
-            { id: "w7", type: "General", completed: false, time: "45 minutes" },
-          ],
-        };
+        const q = query(
+          collection(db, "workouts"),
+          where("athleteId", "==", user.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedWorkouts = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Workout[];
 
         // Group workouts by date
         const grouped = {};
-        Object.keys(mockWorkouts).forEach((date) => {
-          const d = new Date(date);
-          const dayKey = d.toISOString().split("T")[0];
+        fetchedWorkouts.forEach((workout) => {
+          const date = new Date(workout.date);
+          const dayKey = date.toISOString().split("T")[0];
           if (!grouped[dayKey]) {
             grouped[dayKey] = [];
           }
-          grouped[dayKey].push(...mockWorkouts[date]);
+          // Map to the format expected by the component
+          const mappedWorkout = {
+            id: workout.id,
+            type: workout.type,
+            completed: false, // Assume not completed for now
+            distance: null,
+            time: null,
+          };
+
+          // Extract distance and time from stages if available
+          if (workout.stages && workout.stages.length > 0) {
+            const mainStage =
+              workout.stages.find((s) => s.type === "main") ||
+              workout.stages[0];
+            if (mainStage.distance) {
+              mappedWorkout.distance = `${mainStage.distance} ${
+                mainStage.distanceUnit || "km"
+              }`;
+            }
+            if (mainStage.duration) {
+              mappedWorkout.time = mainStage.duration;
+            }
+          } else if (workout.duration) {
+            mappedWorkout.time = workout.duration;
+          }
+
+          grouped[dayKey].push(mappedWorkout);
         });
 
         setWorkouts(grouped);
@@ -87,13 +114,33 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
     fetchWorkouts();
   }, [user]);
 
+  useEffect(() => {
+    const scrollContainer = document.querySelector('main');
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        setNumberOfDays((prev) => prev + 7);
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   const renderWorkoutIcon = (type) => {
     switch (type.toLowerCase()) {
       case "running":
         return <Activity className="w-6 h-6 text-yellow-500" />;
       case "swimming":
         return <Waves className="w-6 h-6 text-yellow-500" />;
-      case "general":
+      case "cycling":
+        return <Activity className="w-6 h-6 text-yellow-500" />; // Or use a bike icon if available
+      case "strength":
         return <Dumbbell className="w-6 h-6 text-yellow-500" />;
       default:
         return <Dumbbell className="w-6 h-6 text-yellow-500" />;
@@ -147,8 +194,8 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
     if (isToday) displayDate = t.athlete.calendar.today;
     if (isYesterday) displayDate = t.athlete.calendar.yesterday;
 
-    return (
-      <div key={dayKey} className="mb-6">
+  return (
+    <div key={dayKey} className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-lg text-gray-900">{dayName}</h3>
           <span className="text-sm text-gray-500">{displayDate}</span>
@@ -222,14 +269,14 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
     );
   };
 
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(2025, 10, 17); // Start from Nov 17, 2025
+  const days = Array.from({ length: numberOfDays }, (_, i) => {
+    const date = new Date();
     date.setDate(date.getDate() + i);
     return date;
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="bg-gray-50 pb-20">
       {/* Header */}
       <header className="bg-white px-6 py-4 flex items-center justify-center">
         <h1 className="text-xl font-semibold text-gray-900">

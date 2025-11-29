@@ -1,6 +1,6 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Calendar, Dumbbell, Home } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AthleteCalendar from "./AthleteCalendar";
 import AthleteHome from "./AthleteHome";
 import WorkoutFlow from "./WorkoutFlow";
@@ -10,6 +10,18 @@ const AthleteDashboard = () => {
   const [activeTab, setActiveTab] = useState("program");
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const savedTab = localStorage.getItem("athleteActiveTab");
+    if (savedTab) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    localStorage.setItem("athleteActiveTab", tab);
+  };
 
   const renderContent = () => {
     if (selectedWorkout) {
@@ -42,7 +54,7 @@ const AthleteDashboard = () => {
         <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg">
           <div className="flex justify-around items-center h-16 max-w-md mx-auto">
             <button
-              onClick={() => setActiveTab("program")}
+              onClick={() => handleTabChange("program")}
               className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
                 activeTab === "program"
                   ? "text-primary"
@@ -53,7 +65,7 @@ const AthleteDashboard = () => {
               <span className="text-xs font-medium">{t.athlete.program}</span>
             </button>
             <button
-              onClick={() => setActiveTab("calendar")}
+              onClick={() => handleTabChange("calendar")}
               className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
                 activeTab === "calendar"
                   ? "text-primary"
@@ -64,7 +76,7 @@ const AthleteDashboard = () => {
               <span className="text-xs font-medium">{t.athlete.schedule}</span>
             </button>
             <button
-              onClick={() => setActiveTab("workouts")}
+              onClick={() => handleTabChange("workouts")}
               className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
                 activeTab === "workouts"
                   ? "text-primary"
