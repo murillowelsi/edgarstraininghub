@@ -58,8 +58,23 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { db } from "../../lib/firebase";
 
-// Helper function to get default stage name based on type
-function getDefaultStageName(type: string): string {
+// Helper function to get default stage name based on type and workout type
+function getDefaultStageName(
+  stageType: string,
+  workoutType?: "strength" | "swimming" | "cycling" | "running"
+): string {
+  // For "work" type, use activity-specific names
+  if (stageType === "work" && workoutType) {
+    const workNames: Record<string, string> = {
+      strength: "Exercise",
+      swimming: "Swim",
+      cycling: "Ride",
+      running: "Run",
+    };
+    return workNames[workoutType] || "Work";
+  }
+
+  // For other types, use generic names
   const stageNames: Record<string, string> = {
     warmup: "Warmup",
     work: "Work",
@@ -69,7 +84,7 @@ function getDefaultStageName(type: string): string {
     cooldown: "Cooldown",
     other: "Other",
   };
-  return stageNames[type] || "Stage";
+  return stageNames[stageType] || "Stage";
 }
 
 // Componente para itens ordenáveis (stages principais)
@@ -433,7 +448,7 @@ const WorkoutEditor = () => {
   // Stage management functions
   const handleAddStage = () => {
     const newStage: WorkoutStage = {
-      name: getDefaultStageName("work"),
+      name: getDefaultStageName("work", workoutType),
       type: "work",
       duration: "",
       distance: "",
@@ -467,17 +482,29 @@ const WorkoutEditor = () => {
   ) => {
     const newStages = [...stages];
     const currentStage = newStages[index];
-    
+
     // If changing the type, also update the name if it's still a default name
     if (field === "type") {
-      const defaultNames = ["Warmup", "Work", "Cardio", "Recovery", "Rest", "Cooldown", "Other"];
+      const defaultNames = [
+        "Warmup",
+        "Work",
+        "Cardio",
+        "Recovery",
+        "Rest",
+        "Cooldown",
+        "Other",
+        "Exercise",
+        "Swim",
+        "Ride",
+        "Run",
+      ];
       const isDefaultName = defaultNames.includes(currentStage.name || "");
-      
+
       if (isDefaultName || !currentStage.name) {
-        newStages[index] = { 
-          ...currentStage, 
+        newStages[index] = {
+          ...currentStage,
           type: value,
-          name: getDefaultStageName(value)
+          name: getDefaultStageName(value, workoutType),
         };
       } else {
         newStages[index] = { ...currentStage, [field]: value };
@@ -485,7 +512,7 @@ const WorkoutEditor = () => {
     } else {
       newStages[index] = { ...newStages[index], [field]: value };
     }
-    
+
     setStages(newStages);
   };
 
@@ -500,17 +527,29 @@ const WorkoutEditor = () => {
     if (parentStage.childStages) {
       const newChildStages = [...parentStage.childStages];
       const currentChild = newChildStages[childIndex];
-      
+
       // If changing the type, also update the name if it's still a default name
       if (field === "type") {
-        const defaultNames = ["Warmup", "Work", "Cardio", "Recovery", "Rest", "Cooldown", "Other"];
+        const defaultNames = [
+          "Warmup",
+          "Work",
+          "Cardio",
+          "Recovery",
+          "Rest",
+          "Cooldown",
+          "Other",
+          "Exercise",
+          "Swim",
+          "Ride",
+          "Run",
+        ];
         const isDefaultName = defaultNames.includes(currentChild.name || "");
-        
+
         if (isDefaultName || !currentChild.name) {
           newChildStages[childIndex] = {
             ...currentChild,
             type: value,
-            name: getDefaultStageName(value)
+            name: getDefaultStageName(value, workoutType),
           };
         } else {
           newChildStages[childIndex] = {
@@ -524,7 +563,7 @@ const WorkoutEditor = () => {
           [field]: value,
         };
       }
-      
+
       newStages[parentIndex] = { ...parentStage, childStages: newChildStages };
       setStages(newStages);
     }
@@ -535,7 +574,7 @@ const WorkoutEditor = () => {
     const parentStage = newStages[parentIndex];
     if (parentStage.childStages) {
       const newChildStage: WorkoutStage = {
-        name: getDefaultStageName("work"),
+        name: getDefaultStageName("work", workoutType),
         type: "work",
         duration: "",
         distance: "",
@@ -1012,6 +1051,11 @@ const WorkoutEditor = () => {
                   value={workoutType}
                   onValueChange={(value: any) => {
                     setWorkoutType(value);
+                    // Clear all stages when changing workout type
+                    setStages([]);
+                    // Reset expanded states
+                    setExpandedStageIndex(-1);
+                    setExpandedChildStages({});
                     // Reset types when changing workout type
                     if (value !== "swimming") {
                       setSwimmingType("");
@@ -1022,6 +1066,8 @@ const WorkoutEditor = () => {
                     if (value !== "running") {
                       setRunningType("");
                     }
+                    // Update workout name to default for new type
+                    setWorkoutName(getDefaultWorkoutName(value));
                   }}
                 >
                   <SelectTrigger>
@@ -1132,7 +1178,9 @@ const WorkoutEditor = () => {
 
                 <div
                   ref={setMainNodeRef}
-                  className={`space-y-2 ${isMainOver ? "bg-muted/50 p-2 rounded" : ""}`}
+                  className={`space-y-2 ${
+                    isMainOver ? "bg-muted/50 p-2 rounded" : ""
+                  }`}
                 >
                   <SortableContext
                     items={stages.map((_, index) => `stage-${index}`)}
@@ -1208,7 +1256,7 @@ const WorkoutEditor = () => {
                                     >
                                       {/* Collapsible Header */}
                                       <div
-                                        className="flex items-center justify-between p-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-t-lg"
+                                        className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-t-lg"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           toggleChildExpanded(
@@ -1217,27 +1265,60 @@ const WorkoutEditor = () => {
                                           );
                                         }}
                                       >
-                                        <div className="flex items-center gap-3 flex-1">
-                                          <ChevronDown
-                                            className={`h-4 w-4 transition-transform ${
-                                              expandedChildStages[
-                                                `${index}-${childIndex}`
-                                              ] || false
-                                                ? "transform rotate-180"
-                                                : ""
-                                            }`}
-                                          />
-                                          <div className="flex items-center gap-2">
-                                            <span className="font-medium text-sm">
-                                              {child.exerciseName ||
-                                                child.name ||
-                                                `Stage ${childIndex + 1}`}
-                                            </span>
+                                        {/* Title Row */}
+                                        <div className="flex items-center justify-between p-3 pb-2">
+                                          <div className="flex items-center gap-3 flex-1">
+                                            <ChevronDown
+                                              className={`h-4 w-4 transition-transform ${
+                                                expandedChildStages[
+                                                  `${index}-${childIndex}`
+                                                ] || false
+                                                  ? "transform rotate-180"
+                                                  : ""
+                                              }`}
+                                            />
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-medium text-sm">
+                                                {child.exerciseName ||
+                                                  child.name ||
+                                                  `Stage ${childIndex + 1}`}
+                                              </span>
+                                            </div>
                                           </div>
-                                          <span className="text-xs text-muted-foreground capitalize">
-                                            ({child.type})
-                                          </span>
                                         </div>
+
+                                        {/* Info Row - Only show when collapsed and has data */}
+                                        {!(
+                                          expandedChildStages[
+                                            `${index}-${childIndex}`
+                                          ] || false
+                                        ) &&
+                                          (child.distance ||
+                                            child.duration) && (
+                                            <div className="px-3 pb-3 pt-0 flex gap-6 text-sm">
+                                              {child.distance && (
+                                                <div>
+                                                  <div className="font-semibold">
+                                                    {child.distance}{" "}
+                                                    {child.distanceUnit || "km"}
+                                                  </div>
+                                                  <div className="text-xs text-muted-foreground">
+                                                    Distância total
+                                                  </div>
+                                                </div>
+                                              )}
+                                              {child.duration && (
+                                                <div>
+                                                  <div className="font-semibold">
+                                                    {child.duration}
+                                                  </div>
+                                                  <div className="text-xs text-muted-foreground">
+                                                    Tempo estimado
+                                                  </div>
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
                                       </div>
 
                                       {/* Expandable Content */}
@@ -1399,24 +1480,27 @@ const WorkoutEditor = () => {
                                               </div>
                                             </div>
 
-                                            <div className="space-y-1">
-                                              <Label className="text-xs">
-                                                YouTube URL
-                                              </Label>
-                                              <Input
-                                                className="h-8"
-                                                placeholder="https://youtube.com/..."
-                                                value={child.youtubeUrl || ""}
-                                                onChange={(e) =>
-                                                  handleChildStageChange(
-                                                    index,
-                                                    childIndex,
-                                                    "youtubeUrl",
-                                                    e.target.value
-                                                  )
-                                                }
-                                              />
-                                            </div>
+                                            {/* YouTube URL - Only for strength */}
+                                            {workoutType === "strength" && (
+                                              <div className="space-y-1">
+                                                <Label className="text-xs">
+                                                  YouTube URL
+                                                </Label>
+                                                <Input
+                                                  className="h-8"
+                                                  placeholder="https://youtube.com/..."
+                                                  value={child.youtubeUrl || ""}
+                                                  onChange={(e) =>
+                                                    handleChildStageChange(
+                                                      index,
+                                                      childIndex,
+                                                      "youtubeUrl",
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                />
+                                              </div>
+                                            )}
                                           </div>
                                         </div>
                                       )}
@@ -1452,32 +1536,60 @@ const WorkoutEditor = () => {
                           >
                             {/* Collapsible Header */}
                             <div
-                              className="flex items-center justify-between p-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-t-lg"
+                              className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-t-lg"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setExpandedStageIndex(isExpanded ? -1 : index);
                               }}
                             >
-                              <div className="flex items-center gap-3 flex-1">
-                                <ChevronDown
-                                  className={`h-4 w-4 transition-transform ${
-                                    isExpanded ? "transform rotate-180" : ""
-                                  }`}
-                                />
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm">
-                                    {stageName}
-                                  </span>
-                                  {stage.repeat && stage.repeat > 1 && (
-                                    <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">
-                                      {stage.repeat}x
+                              {/* Title Row */}
+                              <div className="flex items-center justify-between p-3 pb-2">
+                                <div className="flex items-center gap-3 flex-1">
+                                  <ChevronDown
+                                    className={`h-4 w-4 transition-transform ${
+                                      isExpanded ? "transform rotate-180" : ""
+                                    }`}
+                                  />
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-sm">
+                                      {stageName}
                                     </span>
-                                  )}
+                                    {stage.repeat && stage.repeat > 1 && (
+                                      <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">
+                                        {stage.repeat}x
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="text-xs text-muted-foreground capitalize">
-                                  ({stage.type})
-                                </span>
                               </div>
+
+                              {/* Info Row - Only show when collapsed and has data */}
+                              {!isExpanded &&
+                                (stage.distance || stage.duration) && (
+                                  <div className="px-3 pb-3 pt-0 flex gap-6 text-sm">
+                                    {stage.distance && (
+                                      <div>
+                                        <div className="font-semibold">
+                                          {stage.distance}{" "}
+                                          {stage.distanceUnit || "km"}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                          Distância total
+                                        </div>
+                                      </div>
+                                    )}
+                                    {stage.duration && (
+                                      <div>
+                                        <div className="font-semibold">
+                                          {stage.duration}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                          Tempo estimado
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                             </div>
 
                             {/* Expandable Content */}
@@ -1712,7 +1824,6 @@ const WorkoutEditor = () => {
                                         )}
                                       </div>
                                     </div>
-
                                     {workoutType === "strength" ? (
                                       <>
                                         <div className="grid grid-cols-3 gap-3">
@@ -1832,7 +1943,6 @@ const WorkoutEditor = () => {
                                         </div>
                                       </div>
                                     )}
-
                                     {/* Swimming-specific fields */}
                                     {workoutType === "swimming" && (
                                       <div className="space-y-1">
@@ -1875,44 +1985,47 @@ const WorkoutEditor = () => {
                                         </Select>
                                       </div>
                                     )}
-
-                                    {/* Equipment Type */}
-                                    <div className="space-y-2">
-                                      <Label className="text-xs">
-                                        Equipment
-                                      </Label>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        {getEquipmentOptions(workoutType).map(
-                                          (option) => (
-                                            <div
-                                              key={option.value}
-                                              className="flex items-center space-x-2"
-                                            >
-                                              <Checkbox
-                                                id={`equipment-${index}-${option.value}`}
-                                                checked={(
-                                                  stage.equipment || []
-                                                ).includes(option.value)}
-                                                onCheckedChange={(checked) =>
-                                                  handleEquipmentChange(
-                                                    index,
-                                                    option.value,
-                                                    checked as boolean
-                                                  )
-                                                }
-                                              />
-                                              <Label
-                                                htmlFor={`equipment-${index}-${option.value}`}
-                                                className="text-xs font-normal cursor-pointer"
+                                    \n\n{" "}
+                                    {/* Equipment Type - Only for strength and swimming */}
+                                    \n{" "}
+                                    {(workoutType === "strength" ||
+                                      workoutType === "swimming") && (
+                                      <div className="space-y-2">
+                                        <Label className="text-xs">
+                                          Equipment
+                                        </Label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          {getEquipmentOptions(workoutType).map(
+                                            (option) => (
+                                              <div
+                                                key={option.value}
+                                                className="flex items-center space-x-2"
                                               >
-                                                {option.label}
-                                              </Label>
-                                            </div>
-                                          )
-                                        )}
+                                                <Checkbox
+                                                  id={`equipment-${index}-${option.value}`}
+                                                  checked={(
+                                                    stage.equipment || []
+                                                  ).includes(option.value)}
+                                                  onCheckedChange={(checked) =>
+                                                    handleEquipmentChange(
+                                                      index,
+                                                      option.value,
+                                                      checked as boolean
+                                                    )
+                                                  }
+                                                />
+                                                <Label
+                                                  htmlFor={`equipment-${index}-${option.value}`}
+                                                  className="text-xs font-normal cursor-pointer"
+                                                >
+                                                  {option.label}
+                                                </Label>
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
-
+                                    )}
                                     <div className="space-y-1">
                                       <Label className="text-xs">
                                         {workoutType === "strength"
@@ -1937,23 +2050,25 @@ const WorkoutEditor = () => {
                                         }
                                       />
                                     </div>
-
-                                    <div className="space-y-1">
-                                      <Label className="text-xs">
-                                        YouTube URL
-                                      </Label>
-                                      <Input
-                                        placeholder="https://youtube.com/watch?v=..."
-                                        value={stage.youtubeUrl || ""}
-                                        onChange={(e) =>
-                                          handleStageChange(
-                                            index,
-                                            "youtubeUrl",
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-                                    </div>
+                                    {/* YouTube URL - Only for strength */}
+                                    {workoutType === "strength" && (
+                                      <div className="space-y-1">
+                                        <Label className="text-xs">
+                                          YouTube URL
+                                        </Label>
+                                        <Input
+                                          placeholder="https://youtube.com/watch?v=..."
+                                          value={stage.youtubeUrl || ""}
+                                          onChange={(e) =>
+                                            handleStageChange(
+                                              index,
+                                              "youtubeUrl",
+                                              e.target.value
+                                            )
+                                          }
+                                        />
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>
