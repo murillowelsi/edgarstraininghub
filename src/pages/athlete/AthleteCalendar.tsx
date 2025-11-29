@@ -68,6 +68,7 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
 
         // Group workouts by date
         const grouped = {};
+        let workoutIndex = 0;
         fetchedWorkouts.forEach((workout) => {
           const date = new Date(workout.date);
           const dayKey = date.toISOString().split("T")[0];
@@ -75,10 +76,14 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
             grouped[dayKey] = [];
           }
           // Map to the format expected by the component
+          const isCompleted =
+            date < new Date() &&
+            date.toDateString() !== new Date().toDateString(); // Completed if past date
           const mappedWorkout = {
             id: workout.id,
-            type: workout.type,
-            completed: false, // Assume not completed for now
+            type: getWorkoutTitle(workout),
+            originalType: workout.type,
+            completed: workoutIndex === 0 ? true : isCompleted, // Mark first workout as completed for demo
             distance: null,
             time: null,
           };
@@ -101,6 +106,7 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
           }
 
           grouped[dayKey].push(mappedWorkout);
+          workoutIndex++;
         });
 
         setWorkouts(grouped);
@@ -112,9 +118,14 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
     };
 
     fetchWorkouts();
-  }, [user]);
-
-  useEffect(() => {
+    // Helper function to get workout title
+    const getWorkoutTitle = (workout) => {
+      if (workout.type === "strength") return "Strength Training";
+      if (workout.type === "swimming") return "Swimming";
+      if (workout.type === "cycling") return "Cycling";
+      if (workout.type === "running") return "Running";
+      return "Workout";
+    };
     const scrollContainer = document.querySelector("main");
     if (!scrollContainer) return;
 
@@ -152,10 +163,12 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
     const workoutDetails = {
       id: workout.id,
       name: workout.type,
-      type: workout.type.toLowerCase(),
+      type: workout.originalType?.toLowerCase() || "regular",
       duration: workout.time || "30 minutes",
       equipment:
-        workout.type.toLowerCase() === "swimming" ? ["Pool"] : ["Body Weight"],
+        workout.originalType?.toLowerCase() === "swimming"
+          ? ["Pool"]
+          : ["Body Weight"],
       instructions: `Complete your ${workout.type.toLowerCase()} workout`,
       exercises: [
         {
@@ -211,10 +224,10 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
                 onClick={() => handleWorkoutClick(workout, dayKey)}
                 className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative mb-3"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-center gap-4">
                   {/* Status Icon */}
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                       workout.completed
                         ? "bg-yellow-500 text-white"
                         : "border-2 border-yellow-400 text-yellow-400"
@@ -222,7 +235,7 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
                   >
                     {workout.completed ? (
                       <svg
-                        className="w-6 h-6"
+                        className="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -230,13 +243,11 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={3}
                           d="M5 13l4 4L19 7"
                         />
                       </svg>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-current" />
-                    )}
+                    ) : null}
                   </div>
 
                   {/* Content */}
@@ -249,11 +260,11 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
 
                   {/* Workout Icon */}
                   <div className="flex-shrink-0">
-                    {renderWorkoutIcon(workout.type)}
+                    {renderWorkoutIcon(workout.originalType)}
                   </div>
 
                   {/* Arrow */}
-                  <ChevronRight className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
+                  <ChevronRight className="w-5 h-5 text-yellow-500 flex-shrink-0" />
                 </div>
               </div>
             );
