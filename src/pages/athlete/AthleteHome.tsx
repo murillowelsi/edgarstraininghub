@@ -1,6 +1,15 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Calendar as CalendarIcon, ChevronRight } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  Activity,
+  Bike,
+  Calendar as CalendarIcon,
+  ChevronRight,
+  Dumbbell,
+  Waves,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const AthleteHome = ({ onSelectWorkout }) => {
@@ -50,14 +59,14 @@ const AthleteHome = ({ onSelectWorkout }) => {
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
-    
+
     // Load more dates when scrolling near the edges
     if (scrollLeft < 200) {
       // Scrolling left - load earlier dates
-      setDateRange(prev => ({ start: prev.start - 30, end: prev.end }));
+      setDateRange((prev) => ({ start: prev.start - 30, end: prev.end }));
     } else if (scrollLeft + clientWidth > scrollWidth - 200) {
       // Scrolling right - load later dates
-      setDateRange(prev => ({ start: prev.start, end: prev.end + 30 }));
+      setDateRange((prev) => ({ start: prev.start, end: prev.end + 30 }));
     }
   };
 
@@ -67,10 +76,11 @@ const AthleteHome = ({ onSelectWorkout }) => {
     if (!container) return;
 
     // Find today's index and scroll to it
-    const todayIndex = dates.findIndex(date => isToday(date));
+    const todayIndex = dates.findIndex((date) => isToday(date));
     if (todayIndex !== -1) {
       const buttonWidth = 64; // w-14 = 56px + gap
-      const scrollPosition = todayIndex * buttonWidth - (container.clientWidth / 2) + (buttonWidth / 2);
+      const scrollPosition =
+        todayIndex * buttonWidth - container.clientWidth / 2 + buttonWidth / 2;
       container.scrollLeft = scrollPosition;
     }
   }, []);
@@ -79,82 +89,201 @@ const AthleteHome = ({ onSelectWorkout }) => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const todayIndex = dates.findIndex(date => isToday(date));
+    const todayIndex = dates.findIndex((date) => isToday(date));
     if (todayIndex !== -1) {
       const buttonWidth = 64;
-      const scrollPosition = todayIndex * buttonWidth - (container.clientWidth / 2) + (buttonWidth / 2);
-      container.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+      const scrollPosition =
+        todayIndex * buttonWidth - container.clientWidth / 2 + buttonWidth / 2;
+      container.scrollTo({ left: scrollPosition, behavior: "smooth" });
     }
     setSelectedDate(today);
   };
 
-  // Mock activities data
-  const activities = [
-    {
-      id: 2,
-      title: "Treino A",
-      subtitle: "Completed. ⏱ 6/10 📋 1",
-      category: "Workout",
-      categoryColor: "bg-blue-100 text-blue-600",
-      completed: true,
-      icon: "✓",
-    },
-    {
-      id: 3,
-      title: "General",
-      subtitle: "Completed. ⏱ 30m 46s",
-      category: "Activity",
-      categoryColor: "bg-green-100 text-green-600",
-      completed: true,
-      icon: "✓",
-      hasImage: true,
-    },
-  ];
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch workouts for the selected date
+  useEffect(() => {
+    const fetchWorkouts = async () => {
+      if (!user?.uid) return;
+
+      setLoading(true);
+      try {
+        // Format the selected date to match the date format in Firestore (YYYY-MM-DD)
+        const dateStr = selectedDate.toISOString().split("T")[0];
+
+        // Query workouts for this user and date
+        const q = query(
+          collection(db, "workouts"),
+          where("athleteId", "==", user.uid),
+          where("date", "==", dateStr)
+        );
+
+        const querySnapshot = await getDocs(q);
+        const fetchedWorkouts = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          // Convert workout to activity format
+          return {
+            id: doc.id,
+            title: getWorkoutTitle(data),
+            subtitle: getWorkoutSubtitle(data),
+            category: "Workout",
+            categoryColor: "bg-blue-100 text-blue-600",
+            completed: data.completed || false,
+            icon: "✓",
+            workoutType: data.type || "strength",
+            workoutData: { id: doc.id, ...data },
+          };
+        });
+
+        setActivities(fetchedWorkouts);
+      } catch (error) {
+        console.error("Error fetching workouts:", error);
+        setActivities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkouts();
+  }, [selectedDate, user?.uid]);
+
+  // Helper function to get workout title
+  const getWorkoutTitle = (workout) => {
+    if (workout.type === "strength") return "Strength Training";
+    if (workout.type === "swimming") return "Swimming";
+    if (workout.type === "cycling") return "Cycling";
+    if (workout.type === "running") return "Running";
+    return "Workout";
+  };
+
+  // Helper function to get workout icon
+  const getWorkoutIcon = (workoutType) => {
+    switch (workoutType) {
+      case "strength":
+        return Dumbbell;
+      case "swimming":
+        return Waves;
+      case "cycling":
+        return Bike;
+      case "running":
+        return Activity;
+      default:
+        return Dumbbell;
+    }
+  };
+
+  // Helper function to get workout subtitle
+  const getWorkoutSubtitle = (workout) => {
+    const parts = [];
+
+    if (workout.completed) {
+      parts.push("Completed");
+    } else {
+      parts.push("Scheduled");
+    }
+
+    // Add stage/exercise count
+    if (workout.stages && workout.stages.length > 0) {
+      parts.push(`📋 ${workout.stages.length}`);
+    } else if (workout.exercises && workout.exercises.length > 0) {
+      parts.push(`📋 ${workout.exercises.length}`);
+    }
+
+    // Add duration if available
+    if (workout.duration) {
+      parts.push(`⏱ ${workout.duration}`);
+    }
+
+    return parts.join(". ");
+  };
 
   const handleActivityClick = (activity) => {
-    if (activity.category === "Workout") {
-      // Navigate to workout details
-      const workoutDetails = {
-        id: "workout-1",
-        name: activity.title,
-        type: "Regular",
-        duration: "41 minutes",
-        equipment: ["Body Weight", "Mat"],
-        instructions: "Complete all exercises with proper form",
-        exercises: [
-          {
-            name: "EZ Alongamento dinâmico",
-            details: "1 set x 5 repetições cada lado",
-            imageUrl: "/lovable-uploads/murillo.png",
-            sets: [
-              { reps: 5, previous: "15 x - kg" }
-            ]
-          },
-          {
-            name: "Skipping",
-            details: "3 sets x 30sec",
-            imageUrl: "/lovable-uploads/murillo.png",
-            sets: [
-              { duration: 30, previous: "1 x - kg", type: "duration" },
-              { duration: 30, previous: "1 x - kg", type: "duration" },
-              { duration: 30, previous: "1 x - kg", type: "duration" }
-            ]
-          },
-          {
-            name: "Supino Reto",
-            details: "4 sets x 12 reps",
-            imageUrl: "/lovable-uploads/murillo.png",
-            sets: [
-              { reps: 12, previous: "60 x 12 kg" },
-              { reps: 12, previous: "60 x 12 kg" },
-              { reps: 12, previous: "60 x 12 kg" },
-              { reps: 12, previous: "60 x 12 kg" }
-            ]
+    if (activity.category === "Workout" && activity.workoutData) {
+      const workout = activity.workoutData;
+
+      // Convert workout stages to exercises format for WorkoutView
+      const exercises =
+        workout.stages?.map((stage) => {
+          // Build sets array based on stage type
+          let sets = [];
+
+          if (stage.sets && stage.reps) {
+            // Strength training with sets and reps
+            const numSets = parseInt(stage.sets) || 1;
+            for (let i = 0; i < numSets; i++) {
+              sets.push({
+                reps: parseInt(stage.reps) || 0,
+                previous: stage.weight
+                  ? `${stage.weight} x ${stage.reps}`
+                  : `${stage.reps} x - kg`,
+              });
+            }
+          } else if (stage.duration) {
+            // Duration-based exercise
+            const repeat = stage.repeat || 1;
+            for (let i = 0; i < repeat; i++) {
+              sets.push({
+                duration: parseInt(stage.duration) || 30,
+                type: "duration",
+                previous: `${stage.duration}`,
+              });
+            }
+          } else {
+            // Default single set
+            sets.push({
+              reps: parseInt(stage.reps) || 0,
+              previous: "-",
+            });
           }
-        ],
+
+          return {
+            name: stage.exerciseName || stage.name || "Exercise",
+            details: buildExerciseDetails(stage),
+            imageUrl: "/lovable-uploads/murillo.png",
+            sets: sets,
+          };
+        }) || [];
+
+      // Collect unique equipment from all stages
+      const equipment = [
+        ...new Set(workout.stages?.flatMap((s) => s.equipment || []) || []),
+      ];
+
+      const workoutDetails = {
+        id: workout.id,
+        name: activity.title,
+        type: workout.type || "Regular",
+        duration: workout.duration || "",
+        equipment: equipment,
+        instructions:
+          workout.notes || "Complete all exercises with proper form",
+        exercises: exercises,
       };
+
       onSelectWorkout(workoutDetails);
     }
+  };
+
+  // Helper to build exercise details string
+  const buildExerciseDetails = (stage) => {
+    const parts = [];
+
+    if (stage.sets && stage.reps) {
+      parts.push(`${stage.sets} sets x ${stage.reps} reps`);
+    } else if (stage.duration) {
+      const repeat = stage.repeat || 1;
+      parts.push(`${repeat} sets x ${stage.duration}`);
+    } else if (stage.distance) {
+      parts.push(`${stage.distance}${stage.distanceUnit || "m"}`);
+    }
+
+    if (stage.intensity) {
+      parts.push(stage.intensity);
+    }
+
+    return parts.join(" · ") || "1 set";
   };
 
   return (
@@ -180,20 +309,20 @@ const AthleteHome = ({ onSelectWorkout }) => {
             })}
           </h3>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={scrollToToday}
               className="text-primary font-semibold text-sm hover:underline"
             >
               Today
             </button>
             <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-              <CalendarIcon className="w-5 h-5 text-gray-600" />
+              <CalendarIcon className="w-5 h-5 text-yellow-500" />
             </button>
           </div>
         </div>
 
         {/* Infinite Scroll Calendar */}
-        <div 
+        <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
           className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide"
@@ -219,77 +348,81 @@ const AthleteHome = ({ onSelectWorkout }) => {
 
       {/* Activities List */}
       <div className="px-6 py-4 space-y-3">
-        {activities.map((activity) => (
-          <div
-            key={activity.id}
-            onClick={() => handleActivityClick(activity)}
-            className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative"
-          >
-            <div className="flex items-start gap-4">
-              {/* Status Icon */}
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  activity.completed
-                    ? "bg-blue-500 text-white"
-                    : "border-2 border-red-400 text-red-400"
-                }`}
-              >
-                {activity.completed ? (
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">Loading workouts...</div>
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="bg-white rounded-2xl p-8 text-center">
+            <p className="text-gray-500 text-base">
+              No workouts scheduled for this date
+            </p>
+            <p className="text-gray-400 text-sm mt-2">
+              Select a different date or check back later
+            </p>
+          </div>
+        ) : (
+          activities.map((activity) => (
+            <div
+              key={activity.id}
+              onClick={() => handleActivityClick(activity)}
+              className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative"
+            >
+              <div className="flex items-start gap-4">
+                {/* Status Icon */}
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    activity.completed
+                      ? "bg-yellow-500 text-white"
+                      : "border-2 border-yellow-400 text-yellow-400"
+                  }`}
+                >
+                  {(() => {
+                    const IconComponent = getWorkoutIcon(activity.workoutType);
+                    return (
+                      <IconComponent className="w-5 h-5 text-yellow-500" />
+                    );
+                  })()}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-gray-900 font-semibold text-base">
+                    {activity.title}
+                  </h4>
+                  <p className="text-gray-500 text-sm mt-0.5">
+                    {activity.subtitle}
+                  </p>
+                  <span
+                    className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${activity.categoryColor}`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
-                  <div className="w-5 h-5 rounded-full border-2 border-current" />
+                    {activity.category}
+                  </span>
+                </div>
+
+                {/* Arrow */}
+                <ChevronRight className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
+
+                {/* Profile Image for Activity */}
+                {activity.hasImage && (
+                  <div className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 overflow-hidden border-2 border-white">
+                    {user?.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white font-bold text-sm">
+                        {userName.charAt(0)}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <h4 className="text-gray-900 font-semibold text-base">
-                  {activity.title}
-                </h4>
-                <p className="text-gray-500 text-sm mt-0.5">
-                  {activity.subtitle}
-                </p>
-                <span
-                  className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${activity.categoryColor}`}
-                >
-                  {activity.category}
-                </span>
-              </div>
-
-              {/* Arrow */}
-              <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
-
-              {/* Profile Image for Activity */}
-              {activity.hasImage && (
-                <div className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 overflow-hidden border-2 border-white">
-                  {user?.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-sm">
-                      {userName.charAt(0)}
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
