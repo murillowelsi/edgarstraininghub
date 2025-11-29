@@ -132,7 +132,9 @@ const WorkoutEditor = () => {
   );
   const [expandedStageIndex, setExpandedStageIndex] = useState<number>(0);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [expandedChildStages, setExpandedChildStages] = useState<{ [key: string]: boolean }>({});
+  const [expandedChildStages, setExpandedChildStages] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [saving, setSaving] = useState(false);
   // Swimming type for the entire workout
   const [swimmingType, setSwimmingType] = useState<string>("");
@@ -354,7 +356,7 @@ const WorkoutEditor = () => {
 
   const toggleChildExpanded = (parentIndex: number, childIndex: number) => {
     const key = `${parentIndex}-${childIndex}`;
-    setExpandedChildStages(prev => ({ ...prev, [key]: !prev[key] }));
+    setExpandedChildStages((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   // Handle equipment selection/deselection
@@ -466,7 +468,11 @@ const WorkoutEditor = () => {
     setDragOverIndex(null);
   };
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number, type: 'main' | 'repetition' = 'main') => {
+  const handleDrop = (
+    e: React.DragEvent,
+    dropIndex: number,
+    type: "main" | "repetition" = "main"
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -477,10 +483,10 @@ const WorkoutEditor = () => {
 
     const dragId = e.dataTransfer.getData("text/plain");
 
-    if (type === 'main' && dropIndex === -1) {
+    if (type === "main" && dropIndex === -1) {
       // Add to end of main stages
-      if (dragId.startsWith('child-')) {
-        const [_, parentIndexStr, childIndexStr] = dragId.split('-');
+      if (dragId.startsWith("child-")) {
+        const [_, parentIndexStr, childIndexStr] = dragId.split("-");
         const parentIndex = parseInt(parentIndexStr);
         const childIndex = parseInt(childIndexStr);
         const draggedStage = stages[parentIndex].childStages![childIndex];
@@ -496,13 +502,13 @@ const WorkoutEditor = () => {
         newStages.push(draggedStage);
         setStages(newStages);
       }
-    } else if (dragId.startsWith('child-')) {
-      const [_, parentIndexStr, childIndexStr] = dragId.split('-');
+    } else if (dragId.startsWith("child-")) {
+      const [_, parentIndexStr, childIndexStr] = dragId.split("-");
       const parentIndex = parseInt(parentIndexStr);
       const childIndex = parseInt(childIndexStr);
       const draggedStage = stages[parentIndex].childStages![childIndex];
 
-      if (type === 'main') {
+      if (type === "main") {
         // Move from childStages to main stages at dropIndex
         const newStages = [...stages];
         // Remove from childStages
@@ -515,13 +521,17 @@ const WorkoutEditor = () => {
         // Adjust if dragging from above (but since it's from child, no adjustment needed)
         newStages.splice(actualDropIndex, 0, draggedStage);
         setStages(newStages);
-      } else if (type === 'repetition' && dropIndex !== parentIndex) {
+      } else if (type === "repetition" && dropIndex !== parentIndex) {
         // Move from one repetition to another
         const newStages = [...stages];
         // Remove from source
-        const dragged = newStages[parentIndex].childStages!.splice(childIndex, 1)[0];
+        const dragged = newStages[parentIndex].childStages!.splice(
+          childIndex,
+          1
+        )[0];
         // Add to destination
-        if (!newStages[dropIndex].childStages) newStages[dropIndex].childStages = [];
+        if (!newStages[dropIndex].childStages)
+          newStages[dropIndex].childStages = [];
         newStages[dropIndex].childStages!.push(dragged);
         setStages(newStages);
       }
@@ -529,7 +539,7 @@ const WorkoutEditor = () => {
       const dragIndex = parseInt(dragId);
       if (isNaN(dragIndex)) return;
 
-      if (type === 'main') {
+      if (type === "main") {
         // Original reordering logic
         let actualDropIndex = dropIndex;
         if (dropPosition === "below") {
@@ -540,12 +550,13 @@ const WorkoutEditor = () => {
         }
         if (dragIndex === actualDropIndex) return;
 
-        if (stages[dropIndex].type === 'repetition') {
+        if (stages[dropIndex].type === "repetition") {
           // Add to childStages instead of reordering
           const newStages = [...stages];
           const draggedStage = newStages[dragIndex];
           newStages.splice(dragIndex, 1);
-          if (!newStages[dropIndex].childStages) newStages[dropIndex].childStages = [];
+          if (!newStages[dropIndex].childStages)
+            newStages[dropIndex].childStages = [];
           newStages[dropIndex].childStages!.push(draggedStage);
           setStages(newStages);
         } else {
@@ -556,18 +567,25 @@ const WorkoutEditor = () => {
           // Update expanded index if needed
           if (expandedStageIndex === dragIndex) {
             setExpandedStageIndex(actualDropIndex);
-          } else if (dragIndex < expandedStageIndex && actualDropIndex >= expandedStageIndex) {
+          } else if (
+            dragIndex < expandedStageIndex &&
+            actualDropIndex >= expandedStageIndex
+          ) {
             setExpandedStageIndex(expandedStageIndex - 1);
-          } else if (dragIndex > expandedStageIndex && actualDropIndex <= expandedStageIndex) {
+          } else if (
+            dragIndex > expandedStageIndex &&
+            actualDropIndex <= expandedStageIndex
+          ) {
             setExpandedStageIndex(expandedStageIndex + 1);
           }
         }
-      } else if (type === 'repetition') {
+      } else if (type === "repetition") {
         // Move from main to repetition
         const newStages = [...stages];
         const draggedStage = newStages[dragIndex];
         newStages.splice(dragIndex, 1);
-        if (!newStages[dropIndex].childStages) newStages[dropIndex].childStages = [];
+        if (!newStages[dropIndex].childStages)
+          newStages[dropIndex].childStages = [];
         newStages[dropIndex].childStages!.push(draggedStage);
         setStages(newStages);
         // Update expanded index if needed
@@ -842,8 +860,9 @@ const WorkoutEditor = () => {
             )}
 
             {/* All Workout Types - Unified Stage-based Fields */}
-            <div className="space-y-4"
-              onDrop={(e) => handleDrop(e, -1, 'main')}
+            <div
+              className="space-y-4"
+              onDrop={(e) => handleDrop(e, -1, "main")}
               onDragOver={(e) => handleDragOver(e, -1)}
               onDragEnter={(e) => handleDragEnter(e, -1)}
               onDragLeave={handleDragLeave}
@@ -952,8 +971,9 @@ const WorkoutEditor = () => {
                       </div>
 
                       {/* Child Stages */}
-                      <div className="p-4 space-y-3"
-                        onDrop={(e) => handleDrop(e, index, 'repetition')}
+                      <div
+                        className="p-4 space-y-3"
+                        onDrop={(e) => handleDrop(e, index, "repetition")}
                         onDragOver={(e) => handleDragOver(e, index)}
                         onDragEnter={(e) => handleDragEnter(e, index)}
                         onDragLeave={handleDragLeave}
@@ -977,7 +997,10 @@ const WorkoutEditor = () => {
                                 return;
                               }
                               e.stopPropagation();
-                              handleDragStart(e, `child-${index}-${childIndex}`);
+                              handleDragStart(
+                                e,
+                                `child-${index}-${childIndex}`
+                              );
                             }}
                           >
                             {/* Drag Handle */}
@@ -1010,20 +1033,27 @@ const WorkoutEditor = () => {
                               }}
                               onDragStart={(e) => {
                                 e.stopPropagation();
-                                handleDragStart(e, `child-${index}-${childIndex}`);
+                                handleDragStart(
+                                  e,
+                                  `child-${index}-${childIndex}`
+                                );
                               }}
                             >
                               <div className="flex items-center gap-3 flex-1">
                                 <ChevronDown
                                   className={`h-4 w-4 transition-transform ${
-                                    expandedChildStages[`${index}-${childIndex}`] || false
+                                    expandedChildStages[
+                                      `${index}-${childIndex}`
+                                    ] || false
                                       ? "transform rotate-180"
                                       : ""
                                   }`}
                                 />
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium text-sm">
-                                    {child.exerciseName || child.name || `Stage ${childIndex + 1}`}
+                                    {child.exerciseName ||
+                                      child.name ||
+                                      `Stage ${childIndex + 1}`}
                                   </span>
                                 </div>
                                 <span className="text-xs text-muted-foreground capitalize">
@@ -1033,7 +1063,8 @@ const WorkoutEditor = () => {
                             </div>
 
                             {/* Expandable Content */}
-                            {(expandedChildStages[`${index}-${childIndex}`] || false) && (
+                            {(expandedChildStages[`${index}-${childIndex}`] ||
+                              false) && (
                               <div className="p-4 pt-2 space-y-3">
                                 <div className="grid gap-3 pr-8 ml-8">
                                   <div className="grid grid-cols-2 gap-3">
@@ -1066,7 +1097,9 @@ const WorkoutEditor = () => {
                                           <SelectItem value="recovery">
                                             Recovery
                                           </SelectItem>
-                                          <SelectItem value="rest">Rest</SelectItem>
+                                          <SelectItem value="rest">
+                                            Rest
+                                          </SelectItem>
                                           <SelectItem value="cooldown">
                                             Cooldown
                                           </SelectItem>
@@ -1098,7 +1131,9 @@ const WorkoutEditor = () => {
 
                                   <div className="grid grid-cols-3 gap-3">
                                     <div className="space-y-1">
-                                      <Label className="text-xs">Distância</Label>
+                                      <Label className="text-xs">
+                                        Distância
+                                      </Label>
                                       <div className="flex gap-1">
                                         <Input
                                           className="h-8"
@@ -1128,7 +1163,9 @@ const WorkoutEditor = () => {
                                             <SelectValue />
                                           </SelectTrigger>
                                           <SelectContent>
-                                            <SelectItem value="km">km</SelectItem>
+                                            <SelectItem value="km">
+                                              km
+                                            </SelectItem>
                                             <SelectItem value="m">m</SelectItem>
                                           </SelectContent>
                                         </Select>
@@ -1151,7 +1188,9 @@ const WorkoutEditor = () => {
                                       />
                                     </div>
                                     <div className="space-y-1">
-                                      <Label className="text-xs">Intensidade</Label>
+                                      <Label className="text-xs">
+                                        Intensidade
+                                      </Label>
                                       <Input
                                         className="h-8"
                                         placeholder="Zona/Ritmo"
@@ -1169,7 +1208,9 @@ const WorkoutEditor = () => {
                                   </div>
 
                                   <div className="space-y-1">
-                                    <Label className="text-xs">YouTube URL</Label>
+                                    <Label className="text-xs">
+                                      YouTube URL
+                                    </Label>
                                     <Input
                                       className="h-8"
                                       placeholder="https://youtube.com/..."
@@ -1188,7 +1229,8 @@ const WorkoutEditor = () => {
                               </div>
                             )}
                           </div>
-                        ))}                        <Button
+                        ))}{" "}
+                        <Button
                           type="button"
                           variant="outline"
                           size="sm"
