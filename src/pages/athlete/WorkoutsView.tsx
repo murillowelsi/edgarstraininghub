@@ -1,9 +1,23 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
-import { Activity, Bike, ChevronRight, Dumbbell, Waves, Undo2 } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import {
+  Activity,
+  Bike,
+  ChevronRight,
+  Dumbbell,
+  Undo2,
+  Waves,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 const WorkoutsView = ({ onSelectWorkout }) => {
   const { user } = useAuth();
@@ -52,9 +66,27 @@ const WorkoutsView = ({ onSelectWorkout }) => {
         const querySnapshot = await getDocs(q);
         const fetchedWorkouts = querySnapshot.docs.map((doc) => {
           const data = doc.data();
+
+          // Get workout name with better fallback logic
+          const getWorkoutName = (data) => {
+            // Try different name fields that might exist
+            if (data.workoutName) return data.workoutName;
+            if (data.title) return data.title;
+            if (data.name && data.name !== "Workout") return data.name;
+
+            // Fallback to type-based names like in AthleteHome
+            if (data.type === "strength") return "Strength Training";
+            if (data.type === "swimming") return "Swimming";
+            if (data.type === "cycling") return "Cycling";
+            if (data.type === "running") return "Running";
+
+            // Last resort
+            return `Workout ${doc.id.slice(-4)}`;
+          };
+
           return {
             id: doc.id,
-            name: data.name || "Workout",
+            name: getWorkoutName(data),
             estimatedTime: data.duration || "30 minutes",
             exerciseCount: data.stages?.length || data.exercises?.length || 0,
             imageUrl: "/lovable-uploads/murillo.png",
@@ -184,23 +216,20 @@ const WorkoutsView = ({ onSelectWorkout }) => {
       await updateDoc(doc(db, "workouts", workoutId), {
         completed: false,
       });
-      
+
       // Update local state
-      setWorkouts(prevWorkouts => 
-        prevWorkouts.map(workout => 
-          workout.id === workoutId 
-            ? { ...workout, completed: false }
-            : workout
+      setWorkouts((prevWorkouts) =>
+        prevWorkouts.map((workout) =>
+          workout.id === workoutId ? { ...workout, completed: false } : workout
         )
       );
-      
+
       // Hide the swipe action
-      setSwipedCards(prev => {
+      setSwipedCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(workoutId);
         return newSet;
       });
-      
     } catch (error) {
       console.error("Error marking workout as incomplete:", error);
       alert("Failed to mark workout as incomplete");
@@ -227,7 +256,10 @@ const WorkoutsView = ({ onSelectWorkout }) => {
 
     // Only allow horizontal swipe if it's more horizontal than vertical
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-      e.currentTarget.style.transform = `translateX(${Math.max(deltaX, -80)}px)`;
+      e.currentTarget.style.transform = `translateX(${Math.max(
+        deltaX,
+        -80
+      )}px)`;
     }
   };
 
@@ -239,13 +271,13 @@ const WorkoutsView = ({ onSelectWorkout }) => {
     const deltaX = touch.clientX - startX;
 
     // Reset transform
-    e.currentTarget.style.transform = '';
+    e.currentTarget.style.transform = "";
 
     // If swiped left enough, show the action
     if (deltaX < -50) {
-      setSwipedCards(prev => new Set([...prev, workoutId]));
+      setSwipedCards((prev) => new Set([...prev, workoutId]));
     } else {
-      setSwipedCards(prev => {
+      setSwipedCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(workoutId);
         return newSet;
@@ -259,14 +291,14 @@ const WorkoutsView = ({ onSelectWorkout }) => {
     e.stopPropagation();
     e.currentTarget.dataset.startX = e.clientX;
     e.currentTarget.dataset.startY = e.clientY;
-    e.currentTarget.dataset.isDragging = 'true';
+    e.currentTarget.dataset.isDragging = "true";
   };
 
   const handleMouseMove = (e, workoutId, isCompleted) => {
     if (!isCompleted) return;
     e.stopPropagation();
-    if (e.currentTarget.dataset.isDragging !== 'true') return;
-    
+    if (e.currentTarget.dataset.isDragging !== "true") return;
+
     const startX = parseFloat(e.currentTarget.dataset.startX);
     const startY = parseFloat(e.currentTarget.dataset.startY);
     const deltaX = e.clientX - startX;
@@ -274,25 +306,28 @@ const WorkoutsView = ({ onSelectWorkout }) => {
 
     // Only allow horizontal swipe if it's more horizontal than vertical
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-      e.currentTarget.style.transform = `translateX(${Math.max(deltaX, -80)}px)`;
+      e.currentTarget.style.transform = `translateX(${Math.max(
+        deltaX,
+        -80
+      )}px)`;
     }
   };
 
   const handleMouseUp = (e, workoutId, isCompleted) => {
     if (!isCompleted) return;
     e.stopPropagation();
-    e.currentTarget.dataset.isDragging = 'false';
+    e.currentTarget.dataset.isDragging = "false";
     const startX = parseFloat(e.currentTarget.dataset.startX);
     const deltaX = e.clientX - startX;
 
     // Reset transform
-    e.currentTarget.style.transform = '';
+    e.currentTarget.style.transform = "";
 
     // If swiped left enough, show the action
     if (deltaX < -50) {
-      setSwipedCards(prev => new Set([...prev, workoutId]));
+      setSwipedCards((prev) => new Set([...prev, workoutId]));
     } else {
-      setSwipedCards(prev => {
+      setSwipedCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(workoutId);
         return newSet;
@@ -323,10 +358,7 @@ const WorkoutsView = ({ onSelectWorkout }) => {
         ) : (
           <div className="space-y-3">
             {workouts.map((workout) => (
-              <div
-                key={workout.id}
-                className="relative overflow-hidden"
-              >
+              <div key={workout.id} className="relative overflow-hidden">
                 {/* Swipe Action (only visible when swiped) */}
                 {swipedCards.has(workout.id) && workout.completed && (
                   <div className="absolute right-0 top-0 bottom-0 w-20 bg-yellow-600 rounded-r-2xl flex items-center justify-center z-10">
@@ -346,20 +378,38 @@ const WorkoutsView = ({ onSelectWorkout }) => {
                 {/* Main Card */}
                 <div
                   onClick={() => handleWorkoutClick(workout)}
-                  onTouchStart={(e) => handleTouchStart(e, workout.id, workout.completed)}
-                  onTouchMove={(e) => handleTouchMove(e, workout.id, workout.completed)}
-                  onTouchEnd={(e) => handleTouchEnd(e, workout.id, workout.completed)}
-                  onMouseDown={(e) => handleMouseDown(e, workout.id, workout.completed)}
-                  onMouseMove={(e) => handleMouseMove(e, workout.id, workout.completed)}
-                  onMouseUp={(e) => handleMouseUp(e, workout.id, workout.completed)}
+                  onTouchStart={(e) =>
+                    handleTouchStart(e, workout.id, workout.completed)
+                  }
+                  onTouchMove={(e) =>
+                    handleTouchMove(e, workout.id, workout.completed)
+                  }
+                  onTouchEnd={(e) =>
+                    handleTouchEnd(e, workout.id, workout.completed)
+                  }
+                  onMouseDown={(e) =>
+                    handleMouseDown(e, workout.id, workout.completed)
+                  }
+                  onMouseMove={(e) =>
+                    handleMouseMove(e, workout.id, workout.completed)
+                  }
+                  onMouseUp={(e) =>
+                    handleMouseUp(e, workout.id, workout.completed)
+                  }
                   onMouseLeave={(e) => {
-                    e.currentTarget.dataset.isDragging = 'false';
-                    e.currentTarget.style.transform = '';
+                    e.currentTarget.dataset.isDragging = "false";
+                    e.currentTarget.style.transform = "";
                   }}
                   className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative ${
-                    swipedCards.has(workout.id) ? 'transform translate-x-[-80px] scale-105' : ''
+                    swipedCards.has(workout.id)
+                      ? "transform translate-x-[-80px] scale-105"
+                      : ""
                   }`}
-                  style={{ transition: swipedCards.has(workout.id) ? 'transform 0.3s ease-out' : 'all 0.2s ease' }}
+                  style={{
+                    transition: swipedCards.has(workout.id)
+                      ? "transform 0.3s ease-out"
+                      : "all 0.2s ease",
+                  }}
                 >
                   <div className="flex items-start gap-4">
                     {/* Status Icon */}
