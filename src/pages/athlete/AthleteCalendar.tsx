@@ -42,6 +42,7 @@ interface Workout {
   swimmingType?: string;
   cyclingType?: string;
   runningType?: string;
+  completed?: boolean;
 }
 
 const AthleteCalendar = ({ onSelectWorkout }) => {
@@ -83,9 +84,10 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
             id: workout.id,
             type: getWorkoutTitle(workout),
             originalType: workout.type,
-            completed: workoutIndex === 0 ? true : isCompleted, // Mark first workout as completed for demo
+            completed: workout.completed || isCompleted, // Use database field or date logic
             distance: null,
             time: null,
+            stages: workout.stages || [], // Include stages from original workout
           };
 
           // Extract distance and time from stages if available
@@ -185,6 +187,9 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
           ],
         },
       ],
+      // Include stages from the workout data
+      stages: workout.stages || [],
+      completed: workout.completed || false,
     };
 
     onSelectWorkout(workoutDetails);

@@ -260,6 +260,8 @@ const AthleteHome = ({ onSelectWorkout }) => {
         instructions:
           workout.notes || "Complete all exercises with proper form",
         exercises: exercises,
+        stages: workout.stages || [], // Include the original stages data
+        completed: workout.completed || false,
       };
 
       onSelectWorkout(workoutDetails);

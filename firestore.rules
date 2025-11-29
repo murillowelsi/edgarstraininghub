@@ -66,8 +66,12 @@ service cloud.firestore {
       allow read: if request.auth != null && (
         resource.data.athleteId == request.auth.uid || isAdmin()
       );
-      // Only Admins can manage workouts
-      allow write: if isAdmin();
+      // Athletes can update their own workouts (e.g., mark as completed), Admins can manage all
+      allow update: if request.auth != null && (
+        resource.data.athleteId == request.auth.uid || isAdmin()
+      );
+      // Only Admins can create and delete workouts
+      allow create, delete: if isAdmin();
     }
     
     // Default deny for other collections

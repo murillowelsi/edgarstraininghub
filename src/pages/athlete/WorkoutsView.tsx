@@ -1,9 +1,9 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { Activity, Bike, ChevronRight, Dumbbell, Waves } from "lucide-react";
-import { useEffect, useState } from "react";
+import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
+import { Activity, Bike, ChevronRight, Dumbbell, Waves, Undo2 } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 
 const WorkoutsView = ({ onSelectWorkout }) => {
   const { user } = useAuth();
@@ -30,6 +30,7 @@ const WorkoutsView = ({ onSelectWorkout }) => {
 
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [swipedCards, setSwipedCards] = useState(new Set()); // Track which cards are swiped
 
   // Fetch workouts for today
   useEffect(() => {
@@ -137,6 +138,8 @@ const WorkoutsView = ({ onSelectWorkout }) => {
         instructions:
           workoutData.notes || "Complete all exercises with proper form",
         exercises: exercises,
+        stages: workoutData.stages || [], // Include the original stages data
+        completed: workoutData.completed || false,
       };
 
       onSelectWorkout(workoutDetails);
@@ -175,6 +178,128 @@ const WorkoutsView = ({ onSelectWorkout }) => {
     return parts.join(" · ") || "1 set";
   };
 
+  // Function to mark workout as incomplete
+  const handleMarkIncomplete = async (workoutId) => {
+    try {
+      await updateDoc(doc(db, "workouts", workoutId), {
+        completed: false,
+      });
+      
+      // Update local state
+      setWorkouts(prevWorkouts => 
+        prevWorkouts.map(workout => 
+          workout.id === workoutId 
+            ? { ...workout, completed: false }
+            : workout
+        )
+      );
+      
+      // Hide the swipe action
+      setSwipedCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(workoutId);
+        return newSet;
+      });
+      
+    } catch (error) {
+      console.error("Error marking workout as incomplete:", error);
+      alert("Failed to mark workout as incomplete");
+    }
+  };
+
+  // Swipe handling functions
+  const handleTouchStart = (e, workoutId, isCompleted) => {
+    if (!isCompleted) return;
+    e.stopPropagation();
+    const touch = e.touches[0];
+    e.currentTarget.dataset.startX = touch.clientX;
+    e.currentTarget.dataset.startY = touch.clientY;
+  };
+
+  const handleTouchMove = (e, workoutId, isCompleted) => {
+    if (!isCompleted) return;
+    e.stopPropagation();
+    const touch = e.touches[0];
+    const startX = parseFloat(e.currentTarget.dataset.startX);
+    const startY = parseFloat(e.currentTarget.dataset.startY);
+    const deltaX = touch.clientX - startX;
+    const deltaY = touch.clientY - startY;
+
+    // Only allow horizontal swipe if it's more horizontal than vertical
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      e.currentTarget.style.transform = `translateX(${Math.max(deltaX, -80)}px)`;
+    }
+  };
+
+  const handleTouchEnd = (e, workoutId, isCompleted) => {
+    if (!isCompleted) return;
+    e.stopPropagation();
+    const touch = e.changedTouches[0];
+    const startX = parseFloat(e.currentTarget.dataset.startX);
+    const deltaX = touch.clientX - startX;
+
+    // Reset transform
+    e.currentTarget.style.transform = '';
+
+    // If swiped left enough, show the action
+    if (deltaX < -50) {
+      setSwipedCards(prev => new Set([...prev, workoutId]));
+    } else {
+      setSwipedCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(workoutId);
+        return newSet;
+      });
+    }
+  };
+
+  // Mouse events for desktop
+  const handleMouseDown = (e, workoutId, isCompleted) => {
+    if (!isCompleted) return;
+    e.stopPropagation();
+    e.currentTarget.dataset.startX = e.clientX;
+    e.currentTarget.dataset.startY = e.clientY;
+    e.currentTarget.dataset.isDragging = 'true';
+  };
+
+  const handleMouseMove = (e, workoutId, isCompleted) => {
+    if (!isCompleted) return;
+    e.stopPropagation();
+    if (e.currentTarget.dataset.isDragging !== 'true') return;
+    
+    const startX = parseFloat(e.currentTarget.dataset.startX);
+    const startY = parseFloat(e.currentTarget.dataset.startY);
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+
+    // Only allow horizontal swipe if it's more horizontal than vertical
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      e.currentTarget.style.transform = `translateX(${Math.max(deltaX, -80)}px)`;
+    }
+  };
+
+  const handleMouseUp = (e, workoutId, isCompleted) => {
+    if (!isCompleted) return;
+    e.stopPropagation();
+    e.currentTarget.dataset.isDragging = 'false';
+    const startX = parseFloat(e.currentTarget.dataset.startX);
+    const deltaX = e.clientX - startX;
+
+    // Reset transform
+    e.currentTarget.style.transform = '';
+
+    // If swiped left enough, show the action
+    if (deltaX < -50) {
+      setSwipedCards(prev => new Set([...prev, workoutId]));
+    } else {
+      setSwipedCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(workoutId);
+        return newSet;
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16 flex flex-col">
       {/* Header */}
@@ -200,52 +325,86 @@ const WorkoutsView = ({ onSelectWorkout }) => {
             {workouts.map((workout) => (
               <div
                 key={workout.id}
-                onClick={() => handleWorkoutClick(workout)}
-                className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative"
+                className="relative overflow-hidden"
               >
-                <div className="flex items-start gap-4">
-                  {/* Status Icon */}
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      workout.completed
-                        ? "bg-yellow-500 text-white"
-                        : "border-2 border-yellow-400 text-yellow-400"
-                    }`}
-                  >
-                    {(() => {
-                      const IconComponent = getWorkoutIcon(
-                        workout.workoutData?.type || "strength"
-                      );
-                      return <IconComponent className="w-5 h-5" />;
-                    })()}
+                {/* Swipe Action (only visible when swiped) */}
+                {swipedCards.has(workout.id) && workout.completed && (
+                  <div className="absolute right-0 top-0 bottom-0 w-20 bg-yellow-600 rounded-r-2xl flex items-center justify-center z-10">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkIncomplete(workout.id);
+                      }}
+                      className="flex flex-col items-center gap-1 text-white"
+                    >
+                      <Undo2 className="w-5 h-5" />
+                      <span className="text-xs font-medium">Undo</span>
+                    </button>
                   </div>
+                )}
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-gray-900 font-semibold text-base">
-                      {workout.name}
-                    </h4>
-                    <p className="text-gray-500 text-sm mt-0.5">
-                      est. {workout.estimatedTime} · {workout.exerciseCount}{" "}
-                      exercises
-                      {workout.date &&
-                        ` · ${new Date(workout.date).toLocaleDateString(
-                          "pt-BR"
-                        )}`}
-                    </p>
-                    <span
-                      className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                {/* Main Card */}
+                <div
+                  onClick={() => handleWorkoutClick(workout)}
+                  onTouchStart={(e) => handleTouchStart(e, workout.id, workout.completed)}
+                  onTouchMove={(e) => handleTouchMove(e, workout.id, workout.completed)}
+                  onTouchEnd={(e) => handleTouchEnd(e, workout.id, workout.completed)}
+                  onMouseDown={(e) => handleMouseDown(e, workout.id, workout.completed)}
+                  onMouseMove={(e) => handleMouseMove(e, workout.id, workout.completed)}
+                  onMouseUp={(e) => handleMouseUp(e, workout.id, workout.completed)}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.dataset.isDragging = 'false';
+                    e.currentTarget.style.transform = '';
+                  }}
+                  className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative ${
+                    swipedCards.has(workout.id) ? 'transform translate-x-[-80px] scale-105' : ''
+                  }`}
+                  style={{ transition: swipedCards.has(workout.id) ? 'transform 0.3s ease-out' : 'all 0.2s ease' }}
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Status Icon */}
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                         workout.completed
-                          ? "bg-green-100 text-green-600"
-                          : "bg-blue-100 text-blue-600"
+                          ? "bg-yellow-500 text-white"
+                          : "border-2 border-yellow-400 text-yellow-400"
                       }`}
                     >
-                      {workout.completed ? "Completed" : "Available"}
-                    </span>
-                  </div>
+                      {(() => {
+                        const IconComponent = getWorkoutIcon(
+                          workout.workoutData?.type || "strength"
+                        );
+                        return <IconComponent className="w-5 h-5" />;
+                      })()}
+                    </div>
 
-                  {/* Arrow */}
-                  <ChevronRight className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-gray-900 font-semibold text-base">
+                        {workout.name}
+                      </h4>
+                      <p className="text-gray-500 text-sm mt-0.5">
+                        est. {workout.estimatedTime} · {workout.exerciseCount}{" "}
+                        exercises
+                        {workout.date &&
+                          ` · ${new Date(workout.date).toLocaleDateString(
+                            "pt-BR"
+                          )}`}
+                      </p>
+                      <span
+                        className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                          workout.completed
+                            ? "bg-green-100 text-green-600"
+                            : "bg-blue-100 text-blue-600"
+                        }`}
+                      >
+                        {workout.completed ? "Completed" : "Available"}
+                      </span>
+                    </div>
+
+                    {/* Arrow */}
+                    <ChevronRight className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
+                  </div>
                 </div>
               </div>
             ))}
