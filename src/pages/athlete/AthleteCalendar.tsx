@@ -115,7 +115,7 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
   }, [user]);
 
   useEffect(() => {
-    const scrollContainer = document.querySelector('main');
+    const scrollContainer = document.querySelector("main");
     if (!scrollContainer) return;
 
     const handleScroll = () => {
@@ -125,10 +125,10 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
       }
     };
 
-    scrollContainer.addEventListener('scroll', handleScroll);
+    scrollContainer.addEventListener("scroll", handleScroll);
 
     return () => {
-      scrollContainer.removeEventListener('scroll', handleScroll);
+      scrollContainer.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -194,8 +194,8 @@ const AthleteCalendar = ({ onSelectWorkout }) => {
     if (isToday) displayDate = t.athlete.calendar.today;
     if (isYesterday) displayDate = t.athlete.calendar.yesterday;
 
-  return (
-    <div key={dayKey} className="mb-6">
+    return (
+      <div key={dayKey} className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-lg text-gray-900">{dayName}</h3>
           <span className="text-sm text-gray-500">{displayDate}</span>
