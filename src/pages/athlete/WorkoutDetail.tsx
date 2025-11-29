@@ -122,7 +122,7 @@ const WorkoutDetail: React.FC<{
   // Format date as "24 Nov 2025"
   const formatDate = (date: Date) => {
     const day = date.getDate();
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    const month = date.toLocaleDateString("en-US", { month: "short" });
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
   };
@@ -137,15 +137,15 @@ const WorkoutDetail: React.FC<{
         >
           <X className="w-6 h-6 text-yellow-500" />
         </button>
-        
+
         {/* Date in center */}
         <div className="flex-1 text-center">
           <span className="text-base font-semibold text-gray-900">
             {formatDate(new Date())}
           </span>
         </div>
-        
-        <button 
+
+        <button
           onClick={onGoToCalendar}
           className="p-2 -mr-2 hover:bg-gray-100 rounded-full transition-colors"
         >
