@@ -23,7 +23,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex-1 md:pb-20">
+      <div className="flex-1 md:pb-24">
 
       {/* Hero Section */}
       <section className="section-modern bg-background pt-32">

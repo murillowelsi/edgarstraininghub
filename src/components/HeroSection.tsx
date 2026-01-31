@@ -18,7 +18,7 @@ const HeroSection = () => {
   return (
     <section
       id="home"
-      className="relative h-[95vh] flex items-center overflow-hidden pt-20"
+      className="relative h-[95vh] flex items-center overflow-hidden pt-20 bg-background"
       style={{ background: "var(--gradient-hero)" }}
     >
       <div

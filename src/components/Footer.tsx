@@ -17,13 +17,13 @@ const Footer = () => {
   );
 
   return (
-    <footer className="bg-brand-dark text-white py-2 md:py-4 mt-auto md:mt-0 md:fixed md:bottom-0 md:left-0 md:right-0 md:z-30">
+    <footer className="bg-brand-dark md:bg-card text-white py-2 md:py-6 mt-auto md:mt-0 md:fixed md:bottom-0 md:left-0 md:right-0 md:z-30">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-6">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-6 max-w-6xl mx-auto">
           {/* Brand */}
-          <h3 className="text-base md:text-xl font-bold text-white">Edgar Zanin</h3>
+          <h3 className="text-base md:text-xl font-bold text-white md:absolute md:left-4">Edgar Zanin</h3>
 
-          {/* Social Links */}
+          {/* Social Links - Centered */}
           <div className="flex gap-3 md:gap-4">
             <a
               href="https://wa.me/351962869476"
@@ -66,7 +66,7 @@ const Footer = () => {
           </div>
 
           {/* Copyright */}
-          <p className="text-gray-400 text-xs md:text-sm">
+          <p className="text-gray-400 text-xs md:text-sm md:absolute md:right-4">
             &copy; {currentYear} Edgar Zanin. All rights reserved.
           </p>
         </div>
