@@ -19,6 +19,8 @@ import AdminPostForm from "./pages/admin/PostForm";
 import AdminPosts from "./pages/admin/Posts";
 import AdminUserForm from "./pages/admin/UserForm";
 import AdminUsers from "./pages/admin/Users";
+import AdminWorkoutEditor from "./pages/admin/WorkoutEditor";
+import AdminWorkouts from "./pages/admin/Workouts";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +89,30 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAdmin>
                       <AdminUserForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/workouts"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminWorkouts />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/workouts/new"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminWorkoutEditor />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/workouts/:id/edit"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminWorkoutEditor />
                     </ProtectedRoute>
                   }
                 />

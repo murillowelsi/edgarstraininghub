@@ -28,6 +28,11 @@ service cloud.firestore {
       allow create, update, delete: if isEditor();
     }
 
+    // Workouts collection: admins can CRUD
+    match /workouts/{workoutId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;

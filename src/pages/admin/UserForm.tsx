@@ -16,9 +16,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import { createUser, getUserById, updateUser } from "@/services/usersService";
 import type { UserFormData, UserRole } from "@/types/user";
-import { Check, Loader2, X } from "lucide-react";
+import { Check, Loader2, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -31,6 +32,13 @@ const AdminUserForm = () => {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("adminSidebarCollapsed");
+      return stored === "true";
+    }
+    return false;
+  });
   const [formData, setFormData] = useState<UserFormData>({
     email: "",
     displayName: "",
@@ -43,6 +51,17 @@ const AdminUserForm = () => {
       loadUser(id);
     }
   }, [id, isEditing]);
+
+  // Listen to sidebar collapse state changes
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const stored = localStorage.getItem("adminSidebarCollapsed");
+      setSidebarCollapsed(stored === "true");
+    };
+    checkSidebarState();
+    const interval = setInterval(checkSidebarState, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadUser = async (userId: string) => {
     try {
@@ -155,9 +174,8 @@ const AdminUserForm = () => {
 
   return (
     <AdminLayout>
-      <div className="flex flex-col h-full">
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto p-4 md:p-8">
+      <div className="h-full overflow-y-auto pb-24">
+        <div className="p-6 md:p-8">
           <div className="max-w-2xl mx-auto">
             <Card>
               <CardHeader>
@@ -274,37 +292,49 @@ const AdminUserForm = () => {
         </div>
 
         {/* Floating Action Buttons */}
-        <div className="fixed bottom-4 right-4 md:left-20 md:right-4 flex gap-3 justify-end z-20">
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            onClick={handleCancel}
-            disabled={saving}
-            className="bg-card shadow-lg hover:shadow-xl"
-          >
-            <X className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Cancel</span>
-          </Button>
-          <Button
-            type="submit"
-            size="lg"
-            onClick={handleSubmit}
-            disabled={saving}
-            className="shadow-lg hover:shadow-xl"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 md:mr-2 animate-spin" />
-                <span className="hidden md:inline">Saving...</span>
-              </>
-            ) : (
-              <>
-                <Check className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">{isEditing ? "Update" : "Create"}</span>
-              </>
-            )}
-          </Button>
+        <div className={cn(
+          "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t shadow-lg transition-all duration-300",
+          sidebarCollapsed ? "md:left-20" : "md:left-64"
+        )}>
+          <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={saving}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={saving}
+              className="gap-2"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  {isEditing ? (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Update User
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Create User
+                    </>
+                  )}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </AdminLayout>

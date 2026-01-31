@@ -1,4 +1,11 @@
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -255,325 +262,339 @@ const AdminPostForm = () => {
   return (
     <AdminLayout>
       <div className="h-full overflow-y-auto pb-24">
-        <div className="p-6 md:p-12">
-          <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-6 md:space-y-8">
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                placeholder="Enter post title"
-                value={formData.title}
-                onChange={handleTitleChange}
-                className="text-lg"
-                disabled={saving}
-              />
-            </div>
-
-            {/* Slug */}
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">/blog/</span>
-                <Input
-                  id="slug"
-                  placeholder="post-url-slug"
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, slug: e.target.value }))
-                  }
-                  disabled={saving}
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                URL-friendly identifier for this post
-              </p>
-            </div>
-
-            {/* Excerpt */}
-            <div className="space-y-2">
-              <Label htmlFor="excerpt">Excerpt</Label>
-              <Textarea
-                id="excerpt"
-                placeholder="Brief summary of the post (displayed in blog listings)"
-                value={formData.excerpt}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
-                }
-                rows={3}
-                disabled={saving}
-              />
-            </div>
-
-            {/* Featured Image */}
-            <div className="space-y-2">
-              <Label>Featured Image</Label>
-              <div className="space-y-3">
-                {!formData.featuredImage ? (
-                  <div
-                    className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.classList.add('border-primary', 'bg-primary/5');
-                    }}
-                    onDragLeave={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
-                    }}
-                    onDrop={async (e) => {
-                      e.preventDefault();
-                      e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
-                      const file = e.dataTransfer.files?.[0];
-                      if (file && file.type.startsWith('image/')) {
-                        setUploadingImage(true);
-                        try {
-                          const imageUrl = await uploadImageToCloudinary(file);
-                          setFormData((prev) => ({ ...prev, featuredImage: imageUrl }));
-                          toast({
-                            title: "Image uploaded",
-                            description: "Featured image has been uploaded successfully.",
-                          });
-                        } catch (error) {
-                          console.error('Error uploading image:', error);
-                          toast({
-                            title: "Upload failed",
-                            description: "Failed to upload image. Please try again.",
-                            variant: "destructive",
-                          });
-                        } finally {
-                          setUploadingImage(false);
-                        }
-                      } else {
-                        toast({
-                          title: "Invalid file",
-                          description: "Please upload an image file.",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                    onClick={() => document.getElementById('featuredImageInput')?.click()}
-                  >
-                    <input
-                      id="featuredImageInput"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setUploadingImage(true);
-                          try {
-                            const imageUrl = await uploadImageToCloudinary(file);
-                            setFormData((prev) => ({ ...prev, featuredImage: imageUrl }));
-                            toast({
-                              title: "Image uploaded",
-                              description: "Featured image has been uploaded successfully.",
-                            });
-                          } catch (error) {
-                            console.error('Error uploading image:', error);
-                            toast({
-                              title: "Upload failed",
-                              description: "Failed to upload image. Please try again.",
-                              variant: "destructive",
-                            });
-                          } finally {
-                            setUploadingImage(false);
-                          }
-                        }
-                      }}
-                      disabled={saving || uploadingImage}
-                    />
-                    {uploadingImage ? (
-                      <div className="flex flex-col items-center gap-3">
-                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                        <p className="text-sm text-muted-foreground">Uploading image...</p>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="rounded-full bg-primary/10 p-4">
-                          <Upload className="h-8 w-8 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Drop your image here or click to browse</p>
-                          <p className="text-xs text-muted-foreground mt-1">Recommended: 1200x630px</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="relative inline-block">
-                    <img
-                      src={formData.featuredImage}
-                      alt="Featured image preview"
-                      className="max-w-full rounded-lg border"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => setFormData((prev) => ({ ...prev, featuredImage: "" }))}
+        <div className="p-6 md:p-8">
+          <div className="max-w-5xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>{isEditing ? "Edit Post" : "Create New Post"}</CardTitle>
+                <CardDescription>
+                  {isEditing
+                    ? "Update your blog post content and settings."
+                    : "Write and publish a new blog post."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+                  {/* Title */}
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      placeholder="Enter post title"
+                      value={formData.title}
+                      onChange={handleTitleChange}
+                      className="text-lg"
                       disabled={saving}
-                    >
-                      <X className="h-4 w-4" />
-                      Remove
-                    </Button>
+                    />
                   </div>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Image displayed in blog cards
-              </p>
-            </div>
 
-            {/* Content */}
-            <div className="space-y-2">
-              <Label>Content</Label>
-              <div className="border rounded-lg overflow-hidden bg-card h-[500px]">
-                <ReactQuill
-                  theme="snow"
-                  value={formData.content}
-                  onChange={(content) =>
-                    setFormData((prev) => ({ ...prev, content }))
-                  }
-                  modules={quillModules}
-                  placeholder="Write your post content here..."
-                  className="h-full"
-                />
-              </div>
-            </div>
+                  {/* Slug */}
+                  <div className="space-y-2">
+                    <Label htmlFor="slug">Slug</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">/blog/</span>
+                      <Input
+                        id="slug"
+                        placeholder="post-url-slug"
+                        value={formData.slug}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, slug: e.target.value }))
+                        }
+                        disabled={saving}
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      URL-friendly identifier for this post
+                    </p>
+                  </div>
 
-            {/* Published */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="published"
-                checked={formData.published}
-                onCheckedChange={(checked) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    published: checked === true,
-                  }))
-                }
-                disabled={saving}
-              />
-              <Label htmlFor="published" className="cursor-pointer">
-                Publish this post (visible on public blog)
-              </Label>
-            </div>
-          </form>
+                  {/* Excerpt */}
+                  <div className="space-y-2">
+                    <Label htmlFor="excerpt">Excerpt</Label>
+                    <Textarea
+                      id="excerpt"
+                      placeholder="Brief summary of the post (displayed in blog listings)"
+                      value={formData.excerpt}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
+                      }
+                      rows={3}
+                      disabled={saving}
+                    />
+                  </div>
 
-          {/* Floating Action Buttons */}
-          <div className={cn(
-            "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t shadow-lg transition-all duration-300",
-            sidebarCollapsed ? "md:left-20" : "md:left-64"
-          )}>
-            <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-end gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/admin/posts")}
-                disabled={saving}
-                className="gap-2"
-              >
-                <X className="h-4 w-4" />
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSubmit}
-                disabled={saving}
-                className="gap-2"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    {isEditing ? (
-                      <>
-                        <Save className="h-4 w-4" />
-                        Update Post
-                      </>
-                    ) : (
-                      <>
-                        <Check className="h-4 w-4" />
-                        Create Post
-                      </>
-                    )}
-                  </>
-                )}
-              </Button>
-            </div>
+                  {/* Featured Image */}
+                  <div className="space-y-2">
+                    <Label>Featured Image</Label>
+                    <div className="space-y-3">
+                      {!formData.featuredImage ? (
+                        <div
+                          className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.add('border-primary', 'bg-primary/5');
+                          }}
+                          onDragLeave={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
+                          }}
+                          onDrop={async (e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
+                            const file = e.dataTransfer.files?.[0];
+                            if (file && file.type.startsWith('image/')) {
+                              setUploadingImage(true);
+                              try {
+                                const imageUrl = await uploadImageToCloudinary(file);
+                                setFormData((prev) => ({ ...prev, featuredImage: imageUrl }));
+                                toast({
+                                  title: "Image uploaded",
+                                  description: "Featured image has been uploaded successfully.",
+                                });
+                              } catch (error) {
+                                console.error('Error uploading image:', error);
+                                toast({
+                                  title: "Upload failed",
+                                  description: "Failed to upload image. Please try again.",
+                                  variant: "destructive",
+                                });
+                              } finally {
+                                setUploadingImage(false);
+                              }
+                            } else {
+                              toast({
+                                title: "Invalid file",
+                                description: "Please upload an image file.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          onClick={() => document.getElementById('featuredImageInput')?.click()}
+                        >
+                          <input
+                            id="featuredImageInput"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setUploadingImage(true);
+                                try {
+                                  const imageUrl = await uploadImageToCloudinary(file);
+                                  setFormData((prev) => ({ ...prev, featuredImage: imageUrl }));
+                                  toast({
+                                    title: "Image uploaded",
+                                    description: "Featured image has been uploaded successfully.",
+                                  });
+                                } catch (error) {
+                                  console.error('Error uploading image:', error);
+                                  toast({
+                                    title: "Upload failed",
+                                    description: "Failed to upload image. Please try again.",
+                                    variant: "destructive",
+                                  });
+                                } finally {
+                                  setUploadingImage(false);
+                                }
+                              }
+                            }}
+                            disabled={saving || uploadingImage}
+                          />
+                          {uploadingImage ? (
+                            <div className="flex flex-col items-center gap-3">
+                              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                              <p className="text-sm text-muted-foreground">Uploading image...</p>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="rounded-full bg-primary/10 p-4">
+                                <Upload className="h-8 w-8 text-primary" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">Drop your image here or click to browse</p>
+                                <p className="text-xs text-muted-foreground mt-1">Recommended: 1200x630px</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="relative inline-block">
+                          <img
+                            src={formData.featuredImage}
+                            alt="Featured image preview"
+                            className="max-w-full rounded-lg border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => setFormData((prev) => ({ ...prev, featuredImage: "" }))}
+                            disabled={saving}
+                          >
+                            <X className="h-4 w-4" />
+                            Remove
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Image displayed in blog cards
+                    </p>
+                  </div>
+
+                  {/* Content */}
+                  <div className="space-y-2">
+                    <Label>Content</Label>
+                    <div className="border rounded-lg overflow-hidden bg-card h-[500px]">
+                      <ReactQuill
+                        theme="snow"
+                        value={formData.content}
+                        onChange={(content) =>
+                          setFormData((prev) => ({ ...prev, content }))
+                        }
+                        modules={quillModules}
+                        placeholder="Write your post content here..."
+                        className="h-full"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Published */}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="published"
+                      checked={formData.published}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          published: checked === true,
+                        }))
+                      }
+                      disabled={saving}
+                    />
+                    <Label htmlFor="published" className="cursor-pointer">
+                      Publish this post (visible on public blog)
+                    </Label>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
           </div>
-
-          {/* Custom styles for Quill editor */}
-          <style>{`
-          .ql-container {
-            font-size: 16px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-          }
-          .ql-editor {
-            height: 100%;
-            overflow-y: auto;
-          }
-          .ql-editor ul,
-          .ql-editor ol {
-            padding-left: 1.5em;
-          }
-          .ql-editor ul {
-            list-style-type: disc;
-          }
-          .ql-editor ol {
-            list-style-type: decimal;
-          }
-          .ql-editor li {
-            padding-left: 0.5em;
-          }
-          .ql-editor hr {
-            border: none;
-            border-top: 2px solid hsl(var(--border));
-            margin: 1.5em 0;
-          }
-          button.ql-divider::after {
-            content: '—';
-            font-size: 18px;
-            font-weight: bold;
-          }
-          .dark .ql-toolbar {
-            border-color: hsl(var(--border));
-            background: hsl(var(--muted));
-          }
-          .dark .ql-container {
-            border-color: hsl(var(--border));
-          }
-          .dark .ql-editor {
-            color: hsl(var(--foreground));
-          }
-          .dark .ql-editor.ql-blank::before {
-            color: hsl(var(--muted-foreground));
-          }
-          .dark .ql-stroke {
-            stroke: hsl(var(--foreground));
-          }
-          .dark .ql-fill {
-            fill: hsl(var(--foreground));
-          }
-          .dark .ql-picker-label {
-            color: hsl(var(--foreground));
-          }
-          .dark .ql-picker-options {
-            background: hsl(var(--card));
-            border-color: hsl(var(--border));
-          }
-          .dark .ql-picker-item {
-            color: hsl(var(--foreground));
-          }
-        `}</style>
         </div>
+
+        {/* Floating Action Buttons */}
+        <div className={cn(
+          "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t shadow-lg transition-all duration-300",
+          sidebarCollapsed ? "md:left-20" : "md:left-64"
+        )}>
+          <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/admin/posts")}
+              disabled={saving}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={saving}
+              className="gap-2"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  {isEditing ? (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Update Post
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Create Post
+                    </>
+                  )}
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Custom styles for Quill editor */}
+        <style>{`
+        .ql-container {
+          font-size: 16px;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+        .ql-editor {
+          height: 100%;
+          overflow-y: auto;
+        }
+        .ql-editor ul,
+        .ql-editor ol {
+          padding-left: 1.5em;
+        }
+        .ql-editor ul {
+          list-style-type: disc;
+        }
+        .ql-editor ol {
+          list-style-type: decimal;
+        }
+        .ql-editor li {
+          padding-left: 0.5em;
+        }
+        .ql-editor hr {
+          border: none;
+          border-top: 2px solid hsl(var(--border));
+          margin: 1.5em 0;
+        }
+        button.ql-divider::after {
+          content: '—';
+          font-size: 18px;
+          font-weight: bold;
+        }
+        .dark .ql-toolbar {
+          border-color: hsl(var(--border));
+          background: hsl(var(--muted));
+        }
+        .dark .ql-container {
+          border-color: hsl(var(--border));
+        }
+        .dark .ql-editor {
+          color: hsl(var(--foreground));
+        }
+        .dark .ql-editor.ql-blank::before {
+          color: hsl(var(--muted-foreground));
+        }
+        .dark .ql-stroke {
+          stroke: hsl(var(--foreground));
+        }
+        .dark .ql-fill {
+          fill: hsl(var(--foreground));
+        }
+        .dark .ql-picker-label {
+          color: hsl(var(--foreground));
+        }
+        .dark .ql-picker-options {
+          background: hsl(var(--card));
+          border-color: hsl(var(--border));
+        }
+        .dark .ql-picker-item {
+          color: hsl(var(--foreground));
+        }
+        `}</style>
       </div>
     </AdminLayout>
   );

@@ -28,7 +28,7 @@ const Contact = () => {
       {/* Hero Section */}
       <section className="section-modern bg-background pt-32">
         <div className="container mx-auto">
-          <div className="text-center mb-16 animate-fade-in">
+          <div className="text-center animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               {t.contact?.title || "Entre em"}{" "}
               <span className="text-primary">
@@ -48,7 +48,7 @@ const Contact = () => {
       </section>
 
       {/* Contact Info Cards */}
-      <section className="section bg-background">
+      <section className="pb-16 md:pb-24 bg-background">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {/* Phone Card */}
