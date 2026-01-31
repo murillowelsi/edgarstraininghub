@@ -1,150 +1,173 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { ArrowLeft, Clock } from "lucide-react";
-import { Helmet } from "react-helmet";
-import { useNavigate, useParams } from "react-router-dom";
-
-import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getPostBySlug } from "@/services/postsService";
+import type { Post } from "@/types/post";
+import { format } from "date-fns";
+import { ArrowLeft, Calendar, User } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
 const BlogArticlePage = () => {
-  const { slug } = useParams();
-  const { t, language } = useLanguage();
-  const navigate = useNavigate();
-  const [article, setArticle] = useState<any | null>(null);
+  const { slug } = useParams<{ slug: string }>();
+  const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    const fetchArticle = async () => {
-      if (!slug) return;
+    if (slug) {
+      loadPost(slug);
+    }
+  }, [slug]);
 
-      try {
-        const q = query(collection(db, "articles"), where("slug", "==", slug));
-        const querySnapshot = await getDocs(q);
+  const loadPost = async (postSlug: string) => {
+    setLoading(true);
+    setNotFound(false);
 
-        if (!querySnapshot.empty) {
-          const docData = querySnapshot.docs[0].data();
-          setArticle(docData);
-        } else {
-          // Fallback to hardcoded articles if not found in DB (optional, or just redirect)
-          // For now, let's just redirect if not found in DB
-          navigate("/blog");
-        }
-      } catch (error) {
-        console.error("Error fetching article:", error);
-      } finally {
-        setLoading(false);
+    try {
+      const fetchedPost = await getPostBySlug(postSlug);
+      if (!fetchedPost) {
+        setNotFound(true);
+      } else {
+        setPost(fetchedPost);
       }
-    };
+    } catch (error) {
+      console.error("Error loading post:", error);
+      setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchArticle();
-  }, [slug, navigate]);
-
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-24 pb-16">
+          <article className="container mx-auto px-4 max-w-3xl">
+            <Skeleton className="h-8 w-32 mb-8" />
+            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="h-12 w-3/4 mb-8" />
+            <div className="flex gap-4 mb-8">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-5 w-24" />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-5/6" />
+            </div>
+          </article>
+        </main>
+        <Footer />
       </div>
     );
   }
 
-  if (!article) {
-    return null;
-  }
-
-  const currentLangContent = {
-    title: language === "pt" ? article.title_pt : article.title_en,
-    content: language === "pt" ? article.content_pt : article.content_en,
-    image: article.image_url,
-    category:
-      language === "pt"
-        ? article.category_pt || "Treino"
-        : article.category_en || "Training",
-    readTime:
-      language === "pt"
-        ? article.read_time_pt || "5 min"
-        : article.read_time_en || "5 min",
-  };
-
-  return (
-    <>
-      <Helmet>
-        <title>{currentLangContent.title} - Edgar Zanin</title>
-        <meta
-          name="description"
-          content={currentLangContent.content.substring(0, 160)}
-        />
-        <link rel="canonical" href={window.location.href} />
-      </Helmet>
-
+  // 404 state
+  if (notFound) {
+    return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-
-        <main className="flex-1 pt-24 pb-16">
-          <article className="container mx-auto px-4 md:px-6 max-w-4xl">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/blog")}
-              className="mb-6"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t.blog.backToBlog}
-            </Button>
-
-            {currentLangContent.image && (
-              <img
-                src={currentLangContent.image}
-                alt={currentLangContent.title}
-                className="w-full h-[400px] object-cover rounded-lg mb-8"
-              />
-            )}
-
-            <div className="flex items-center gap-3 mb-6">
-              <Badge variant="secondary" className="font-semibold text-base">
-                {currentLangContent.category}
-              </Badge>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Clock className="w-4 h-4" />
-                <span>{currentLangContent.readTime}</span>
-              </div>
-            </div>
-
-            <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-              {currentLangContent.title}
-            </h1>
-
-            {article.author?.name && (
-              <p className="text-lg text-muted-foreground mb-8">
-                By {article.author.name}
-              </p>
-            )}
-
-            <div
-              className="prose prose-lg max-w-none prose-headings:font-display prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground"
-              dangerouslySetInnerHTML={{ __html: currentLangContent.content }}
-            />
-
-            <div className="mt-16 p-8 bg-primary/5 rounded-lg border border-primary/10">
-              <h3 className="text-2xl font-display font-bold mb-4">
-                {t.blog.articleCta.title}
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                {t.blog.articleCta.description}
-              </p>
-              <Button size="lg" onClick={() => navigate("/#contact")}>
-                {t.blog.articleCta.button}
+        <main className="flex-1 pt-24 pb-16 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
+            <h2 className="text-2xl font-bold mb-4">Post Not Found</h2>
+            <p className="text-muted-foreground mb-8 max-w-md">
+              The article you're looking for doesn't exist or has been removed.
+            </p>
+            <Link to="/blog">
+              <Button>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Blog
               </Button>
-            </div>
-          </article>
+            </Link>
+          </div>
         </main>
-
         <Footer />
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+
+      <main className="flex-1 pt-24 pb-16">
+        <article className="container mx-auto px-4 max-w-3xl">
+          {/* Back link */}
+          <Link
+            to="/blog"
+            className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors mb-8"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Blog
+          </Link>
+
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+            {post?.title}
+          </h1>
+
+          {/* Meta info */}
+          <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-8 pb-8 border-b">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <time dateTime={post?.createdAt.toISOString()}>
+                {post && format(post.createdAt, "MMMM d, yyyy")}
+              </time>
+            </div>
+            {post?.authorName && (
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>{post.authorName}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div
+            className="prose prose-lg dark:prose-invert max-w-none
+              prose-headings:font-bold
+              prose-h1:text-3xl prose-h1:mb-6
+              prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
+              prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
+              prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-4
+              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-foreground
+              prose-ul:my-4 prose-ol:my-4
+              prose-li:text-muted-foreground
+              prose-blockquote:border-l-primary prose-blockquote:bg-muted/50 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r
+              prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+              prose-pre:bg-muted prose-pre:border
+              prose-img:rounded-lg prose-img:shadow-md"
+            dangerouslySetInnerHTML={{ __html: post?.content || "" }}
+          />
+
+          {/* CTA Section */}
+          <div className="mt-16 p-8 rounded-xl bg-muted text-center">
+            <h3 className="text-2xl font-bold mb-4">
+              Want to Take Your Training to the Next Level?
+            </h3>
+            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+              Get in touch for personalized coaching focused on your specific
+              goals.
+            </p>
+            <Link to="/contact">
+              <Button size="lg" className="btn-primary">
+                Schedule a Consultation
+              </Button>
+            </Link>
+          </div>
+        </article>
+      </main>
+
+      <Footer />
+    </div>
   );
 };
 

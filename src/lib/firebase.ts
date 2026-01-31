@@ -1,4 +1,4 @@
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, type Analytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -18,4 +18,11 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const analytics = getAnalytics(app);
+
+// Analytics is optional - may be blocked by ad blockers
+export let analytics: Analytics | null = null;
+try {
+  analytics = getAnalytics(app);
+} catch (e) {
+  console.warn("Analytics blocked or unavailable");
+}

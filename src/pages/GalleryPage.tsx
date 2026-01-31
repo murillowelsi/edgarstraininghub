@@ -16,7 +16,7 @@ const GalleryPage = () => {
               Training Group <span className="text-brand-blue">Gallery</span>
             </h1>
             <div className="h-1 w-20 bg-brand-orange mx-auto mb-6"></div>
-            <p className="max-w-2xl mx-auto text-gray-700">
+            <p className="max-w-2xl mx-auto text-muted-foreground">
               Check out photos from our amazing training sessions and events
             </p>
           </div>

@@ -1,13 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { LogIn, Menu, X } from "lucide-react";
+import { LogIn, Menu, Moon, Sun, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useTheme } from "../contexts/ThemeContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -48,7 +49,7 @@ const Navbar = () => {
             to="/blog"
             className="font-semibold text-muted-foreground hover:text-primary transition-colors relative group"
           >
-            {t.nav.blog}
+            Blog
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </Link>
           <Link
@@ -58,23 +59,52 @@ const Navbar = () => {
             {t.nav.contact}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </Link>
-          
-          <Link to="/login">
-            <Button variant="ghost" className="font-semibold text-muted-foreground hover:text-primary">
-              <LogIn className="mr-2 h-4 w-4" />
-              Login
-            </Button>
-          </Link>
 
-          <LanguageSwitcher />
+          {/* Utility buttons group */}
+          <div className="flex items-center gap-1 pl-4 border-l border-border">
+            <LanguageSwitcher />
+
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+
+            <Link
+              to="/admin/login"
+              className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+              aria-label="Admin login"
+            >
+              <LogIn size={18} />
+            </Link>
+          </div>
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center">
+        <div className="md:hidden flex items-center gap-1">
           <LanguageSwitcher />
+
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
+
+          <Link
+            to="/admin/login"
+            className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+            aria-label="Admin login"
+          >
+            <LogIn size={18} />
+          </Link>
+
           <button
             onClick={toggleMenu}
-            className="text-foreground ml-4 hover:text-primary transition-colors"
+            className="p-2 text-foreground hover:text-primary transition-colors"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -101,7 +131,7 @@ const Navbar = () => {
               to="/blog"
               className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
             >
-              {t.nav.blog}
+              Blog
             </Link>
             <Link
               to="/contact"
@@ -110,10 +140,10 @@ const Navbar = () => {
               {t.nav.contact}
             </Link>
             <Link
-              to="/login"
-              className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center"
+              to="/admin/login"
+              className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
             >
-              <LogIn className="mr-2 h-4 w-4" />
+              <LogIn size={18} />
               Login
             </Link>
           </div>

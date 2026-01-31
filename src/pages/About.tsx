@@ -122,7 +122,7 @@ const About = () => {
         </div>
       </section>
 
-      <section className="section bg-white">
+      <section className="section bg-background">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -132,13 +132,13 @@ const About = () => {
               </span>
             </h2>
             <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
-            <p className="max-w-2xl mx-auto text-gray-700">
+            <p className="max-w-2xl mx-auto text-muted-foreground">
               {t.achievements.subtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
+            <div className="bg-muted p-8 rounded-xl shadow-sm">
               <div className="flex items-center mb-6">
                 <Medal className="h-8 w-8 text-primary mr-4" />
                 <h3 className="text-2xl font-bold">
@@ -153,7 +153,7 @@ const About = () => {
                     <h4 className="text-xl font-bold">
                       {t.achievements.major.fullIronman.title}
                     </h4>
-                    <p className="text-gray-700">
+                    <p className="text-muted-foreground">
                       {t.achievements.major.fullIronman.description}
                     </p>
                   </div>
@@ -165,7 +165,7 @@ const About = () => {
                     <h4 className="text-xl font-bold">
                       {t.achievements.major.ironman.title}
                     </h4>
-                    <p className="text-gray-700">
+                    <p className="text-muted-foreground">
                       {t.achievements.major.ironman.description}
                     </p>
                   </div>
@@ -177,7 +177,7 @@ const About = () => {
                     <h4 className="text-xl font-bold">
                       {t.achievements.major.marathon.title}
                     </h4>
-                    <p className="text-gray-700">
+                    <p className="text-muted-foreground">
                       {t.achievements.major.marathon.description}
                     </p>
                   </div>
@@ -189,7 +189,7 @@ const About = () => {
                     <h4 className="text-xl font-bold">
                       {t.achievements.major.podiums.title}
                     </h4>
-                    <p className="text-gray-700">
+                    <p className="text-muted-foreground">
                       {t.achievements.major.podiums.description}
                     </p>
                   </div>

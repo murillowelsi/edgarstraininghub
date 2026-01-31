@@ -25,18 +25,18 @@ const TestimonialsSection = () => {
   };
 
   return (
-    <section className="section bg-gray-50">
+    <section className="section bg-muted">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{t.testimonials.title} <span className="text-primary">{t.testimonials.titleHighlight}</span></h2>
           <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
-          <p className="max-w-2xl mx-auto text-gray-700">
+          <p className="max-w-2xl mx-auto text-muted-foreground">
             {t.testimonials.subtitle}
           </p>
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="relative bg-white rounded-xl shadow-md p-8 md:p-12">
+          <div className="relative bg-card rounded-xl shadow-md p-8 md:p-12">
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <div className="w-32 h-32 rounded-full overflow-hidden flex-shrink-0 border-4 border-primary">
                 <img
@@ -53,7 +53,7 @@ const TestimonialsSection = () => {
                   ))}
                 </div>
 
-                <p className="text-gray-700 italic mb-6">
+                <p className="text-muted-foreground italic mb-6">
                   "{testimonials[currentIndex].text}"
                 </p>
 
@@ -67,7 +67,7 @@ const TestimonialsSection = () => {
             <div className="flex justify-center mt-8 gap-4">
               <button
                 onClick={prevTestimonial}
-                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
                 aria-label="Previous testimonial"
               >
                 <ChevronLeft className="h-6 w-6 text-brand-dark" />
@@ -75,7 +75,7 @@ const TestimonialsSection = () => {
 
               <button
                 onClick={nextTestimonial}
-                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
                 aria-label="Next testimonial"
               >
                 <ChevronRight className="h-6 w-6 text-brand-dark" />

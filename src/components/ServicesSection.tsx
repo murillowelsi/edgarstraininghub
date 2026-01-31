@@ -36,7 +36,7 @@ const ServicesSection = () => {
   ];
 
   return (
-    <section id="services" className="section bg-gray-50">
+    <section id="services" className="section bg-muted">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -44,7 +44,7 @@ const ServicesSection = () => {
             <span className="text-primary">{t.services.titleHighlight}</span>
           </h2>
           <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
-          <p className="max-w-2xl mx-auto text-gray-700">
+          <p className="max-w-2xl mx-auto text-muted-foreground">
             {t.services.subtitle}
           </p>
         </div>
@@ -53,7 +53,7 @@ const ServicesSection = () => {
           {services.map((service, index) => (
             <Card
               key={index}
-              className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+              className="border border-border shadow-sm hover:shadow-md transition-shadow"
             >
               <CardHeader className="text-center pt-6">
                 <div className="mx-auto mb-4">{service.icon}</div>
@@ -62,7 +62,7 @@ const ServicesSection = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-center text-gray-700">
+                <CardDescription className="text-center text-muted-foreground">
                   {service.description}
                 </CardDescription>
               </CardContent>
@@ -90,7 +90,7 @@ const ServicesSection = () => {
               <div>
                 <a
                   href="#contact"
-                  className="inline-block px-6 py-3 bg-white text-primary font-bold rounded-md hover:bg-gray-100 transition-colors"
+                  className="inline-block px-6 py-3 bg-background text-primary font-bold rounded-md hover:bg-background/90 transition-colors"
                 >
                   {t.services.cta.button}
                 </a>

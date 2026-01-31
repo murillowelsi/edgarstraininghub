@@ -4,7 +4,6 @@
     "about": "About",
     "services": "Services",
     "achievements": "Achievements",
-    "blog": "Blog",
     "contact": "Contact",
     "getStarted": "Get Started"
   },
@@ -120,18 +119,6 @@
     "titleHighlight": "Content",
     "subtitle": "Follow my training, tips, and motivation on my YouTube channel"
   },
-  "blog": {
-    "title": "Blog &",
-    "titleHighlight": "Articles",
-    "subtitle": "Practical tips on training, nutrition, and athletic performance based on my experience as a triathlete and personal trainer",
-    "readMore": "Read More",
-    "backToBlog": "Back to Blog",
-    "articleCta": {
-      "title": "Want to Take Your Training to the Next Level?",
-      "description": "Get in touch for personalized coaching focused on your specific goals.",
-      "button": "Schedule a Consultation"
-    }
-  },
   "pricing": {
     "title": "Plans &",
     "titleHighlight": "Pricing",
@@ -234,40 +221,6 @@
       "description": "Schedule your free assessment and let's create a personalized plan for your goals.",
       "button": "Schedule Free Assessment",
       "plansButton": "View Plans"
-    }
-  },
-  "athlete": {
-    "program": "Program",
-    "schedule": "Schedule",
-    "workouts": "Workouts",
-    "more": "More",
-    "main": "MAIN",
-    "loadingProgram": "Loading program...",
-    "filter": "Filter",
-    "estimatedTime": "est. duration {time}",
-    "exerciseCount": "{count} exercises",
-    "workout": "Workout",
-    "equipment": "Equipment:",
-    "instructions": "Instructions:",
-    "startNow": "START NOW",
-    "start": "Start",
-    "todaysWorkout": "Today's Workout",
-    "noWorkoutToday": "No workout scheduled for today.",
-    "back": "Back",
-    "cancel": "Cancel",
-    "pause": "Pause",
-    "resume": "Resume",
-    "finishWorkout": "Finish Workout",
-    "nextExercise": "Next Exercise",
-    "calendar": {
-      "title": "Calendar",
-      "today": "Today",
-      "yesterday": "Yesterday",
-      "completed": "Completed",
-      "addWorkout": "Add Workout",
-      "noWorkouts": "No workouts for this day.",
-      "sync": "Sync",
-      "weekdays": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     }
   }
 }

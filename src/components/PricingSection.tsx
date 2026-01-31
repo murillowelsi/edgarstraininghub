@@ -29,7 +29,7 @@ const PricingSection = () => {
   ];
 
   return (
-    <section id="pricing" className="section bg-gray-50">
+    <section id="pricing" className="section bg-muted">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -37,7 +37,7 @@ const PricingSection = () => {
             <span className="text-primary">{t.pricing.titleHighlight}</span>
           </h2>
           <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
-          <p className="max-w-2xl mx-auto text-gray-700">
+          <p className="max-w-2xl mx-auto text-muted-foreground">
             {t.pricing.subtitle}
           </p>
         </div>
@@ -46,10 +46,10 @@ const PricingSection = () => {
           {plans.map((plan, index) => (
             <div
               key={plan.key}
-              className={`relative bg-white rounded-xl shadow-lg p-8 flex flex-col h-full ${
+              className={`relative bg-card rounded-xl shadow-lg p-8 flex flex-col h-full ${
                 plan.popular
                   ? "border-2 border-primary transform scale-105"
-                  : "border border-gray-200"
+                  : "border border-border"
               }`}
             >
               {plan.popular && (
@@ -62,7 +62,7 @@ const PricingSection = () => {
               )}
 
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                <h3 className="text-2xl font-bold text-foreground mb-2">
                   {plan.name}
                 </h3>
                 <div className="text-3xl font-bold text-primary mb-2">
@@ -74,7 +74,7 @@ const PricingSection = () => {
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start">
                     <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -84,7 +84,7 @@ const PricingSection = () => {
                   className={`w-full h-12 text-white font-semibold ${
                     plan.popular
                       ? "bg-primary hover:bg-primary/90"
-                      : "bg-gray-900 hover:bg-gray-800"
+                      : "bg-foreground hover:bg-foreground/90"
                   }`}
                   onClick={() => {
                     navigate("/contact");

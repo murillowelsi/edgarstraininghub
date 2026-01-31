@@ -6,7 +6,7 @@ const YouTubeSection = () => {
   const { video, loading } = useLatestYouTubeVideo();
 
   return (
-    <section id="youtube" className="section bg-gray-50">
+    <section id="youtube" className="section bg-muted">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -14,7 +14,7 @@ const YouTubeSection = () => {
             <span className="text-primary">{t.youtube.titleHighlight}</span>
           </h2>
           <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
-          <p className="max-w-2xl mx-auto text-gray-700">
+          <p className="max-w-2xl mx-auto text-muted-foreground">
             {t.youtube.subtitle}
           </p>
         </div>

@@ -89,10 +89,10 @@ const PhotoGallery = () => {
       </div>
       
       {photos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center bg-gray-50 rounded-xl p-10 text-center">
-          <Image className="h-16 w-16 text-gray-400 mb-4" />
-          <h3 className="text-xl font-medium text-gray-700 mb-2">No photos yet</h3>
-          <p className="text-gray-500 mb-6 max-w-md">
+        <div className="flex flex-col items-center justify-center bg-muted rounded-xl p-10 text-center">
+          <Image className="h-16 w-16 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-medium text-foreground mb-2">No photos yet</h3>
+          <p className="text-muted-foreground mb-6 max-w-md">
             Upload photos of your training sessions to showcase your group's activities
           </p>
           <Button onClick={triggerFileInput} variant="outline">

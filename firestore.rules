@@ -1,80 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function to get user role
-    function getUserRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-    }
-    
-    // Helper function to check if user is admin
-    function isAdmin() {
-      return request.auth != null && getUserRole() == 'admin';
-    }
-    
-    // Helper function to check if user is editor or admin
-    function isEditorOrAdmin() {
-      return request.auth != null && (getUserRole() == 'editor' || getUserRole() == 'admin');
-    }
-    
-    // Articles collection
-    match /articles/{article} {
-      // Anyone can read articles (public)
-      allow read: if true;
-      
-      // Any authenticated user can create articles
-      allow create: if request.auth != null;
-      
-      // Authors can only update their own articles
-      // Editors and Admins can update any article
-      allow update: if request.auth != null && 
-        (resource.data.author.uid == request.auth.uid || isEditorOrAdmin());
-      
-      // Only Editors and Admins can delete articles
-      allow delete: if isEditorOrAdmin();
-    }
-    
-    // Users collection
+    // TEMPORARY: Allow all writes to users collection
     match /users/{userId} {
-      // Users can always read their own profile (needed for role check)
-      // Admins can read all profiles
-      allow read: if request.auth != null && 
-        (request.auth.uid == userId || 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
-      
-      // Only Admins can create or update user profiles
-      allow create, update: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-      
-      // Admins can delete users, but not themselves
-      allow delete: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' &&
-        request.auth.uid != userId;
+      allow read, write: if true;
     }
 
-    // Exercises collection
-    match /exercises/{exercise} {
-      // Authenticated users can read exercises
-      allow read: if request.auth != null;
-      // Only Admins can manage exercises
-      allow write: if isAdmin();
+    match /posts/{postId} {
+      allow read, write: if true;
     }
 
-    // Workouts collection
-    match /workouts/{workout} {
-      // Athletes can read their own workouts, Admins can read all
-      allow read: if request.auth != null && (
-        resource.data.athleteId == request.auth.uid || isAdmin()
-      );
-      // Athletes can update their own workouts (e.g., mark as completed), Admins can manage all
-      allow update: if request.auth != null && (
-        resource.data.athleteId == request.auth.uid || isAdmin()
-      );
-      // Only Admins can create and delete workouts
-      allow create, delete: if isAdmin();
-    }
-    
-    // Default deny for other collections
     match /{document=**} {
       allow read, write: if false;
     }

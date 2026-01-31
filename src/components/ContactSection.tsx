@@ -14,12 +14,12 @@ const ContactSection = () => {
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   };
   
-  return <section id="contact" className="section bg-white">
+  return <section id="contact" className="section bg-background">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{t.contact.title} <span className="text-primary">{t.contact.titleHighlight}</span></h2>
           <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
-          <p className="max-w-2xl mx-auto text-gray-700">
+          <p className="max-w-2xl mx-auto text-muted-foreground">
             {t.contact.subtitle}
           </p>
         </div>
@@ -33,7 +33,7 @@ const ContactSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t.contact.info.phone}</h4>
-                <p className="text-gray-700">+351 962 869 476</p>
+                <p className="text-muted-foreground">+351 962 869 476</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -56,22 +56,22 @@ const ContactSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t.contact.info.location}</h4>
-                <p className="text-gray-700">Porto, Portugal</p>
-                <p className="text-gray-600 text-sm mt-1">{t.contact.info.locationDesc}</p>
+                <p className="text-muted-foreground">Porto, Portugal</p>
+                <p className="text-muted-foreground text-sm mt-1">{t.contact.info.locationDesc}</p>
               </div>
             </div>
           </div>
           <div className="mt-8">
             <h3 className="text-xl font-bold mb-4">{t.contact.hours.title}</h3>
-            <div className="bg-gray-50 p-6 rounded-lg">
+            <div className="bg-muted p-6 rounded-lg">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="font-medium">{t.contact.hours.weekdays}</h4>
-                  <p className="text-gray-700">6:00 AM - 8:00 PM</p>
+                  <p className="text-muted-foreground">6:00 AM - 8:00 PM</p>
                 </div>
                 <div>
                   <h4 className="font-medium">{t.contact.hours.weekends}</h4>
-                  <p className="text-gray-700">8:00 AM - 2:00 PM</p>
+                  <p className="text-muted-foreground">8:00 AM - 2:00 PM</p>
                 </div>
               </div>
             </div>

@@ -2,95 +2,76 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import AdminLayout from "./components/AdminLayout";
-import AthleteLayout from "./components/AthleteLayout";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import About from "./pages/About";
 import BlogArticlePage from "./pages/BlogArticlePage";
 import BlogPage from "./pages/BlogPage";
 import Contact from "./pages/Contact";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import ArticleEditor from "./pages/admin/ArticleEditor";
-import Dashboard from "./pages/admin/Dashboard";
-import ExerciseLibrary from "./pages/admin/ExerciseLibrary";
-import Login from "./pages/admin/Login";
-import UserManagement from "./pages/admin/UserManagement";
-import UserWorkouts from "./pages/admin/UserWorkouts";
-import WorkoutEditor from "./pages/admin/WorkoutEditor";
-import AthleteDashboard from "./pages/athlete/AthleteDashboard";
+import AdminLogin from "./pages/admin/Login";
+import AdminPostForm from "./pages/admin/PostForm";
+import AdminPosts from "./pages/admin/Posts";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <LanguageProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/blog/:slug" element={<BlogArticlePage />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ScrollToTop />
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/blog/:slug" element={<BlogArticlePage />} />
 
-              {/* Admin Routes */}
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute>
-                    <AdminLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="login" element={<Login />} />
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route
-                  path="dashboard"
-                  element={<Navigate to="/admin/users" replace />}
-                />
-                <Route path="articles" element={<Dashboard />} />
-                <Route path="users" element={<UserManagement />} />
-                <Route path="exercises" element={<ExerciseLibrary />} />
-                <Route path="editor" element={<ArticleEditor />} />
-                <Route path="editor/:id" element={<ArticleEditor />} />
-                <Route
-                  path="users/:userId/workouts"
-                  element={<UserWorkouts />}
+                  path="/admin/posts"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminPosts />
+                    </ProtectedRoute>
+                  }
                 />
                 <Route
-                  path="users/:userId/workouts/new"
-                  element={<WorkoutEditor />}
+                  path="/admin/posts/new"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminPostForm />
+                    </ProtectedRoute>
+                  }
                 />
                 <Route
-                  path="users/:userId/workouts/edit/:workoutId"
-                  element={<WorkoutEditor />}
+                  path="/admin/posts/:id/edit"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminPostForm />
+                    </ProtectedRoute>
+                  }
                 />
-              </Route>
-              <Route
-                path="/athlete"
-                element={
-                  <ProtectedRoute>
-                    <AthleteLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="dashboard" element={<AthleteDashboard />} />
-              </Route>
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="/login" element={<Login />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </LanguageProvider>
-      </AuthProvider>
+
+                {/* Catch-all 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </LanguageProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
