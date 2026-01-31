@@ -11,13 +11,22 @@ import {
   updatePost,
 } from "@/services/postsService";
 import type { PostFormData } from "@/types/post";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
-import { useEffect, useState } from "react";
-import ReactQuill from "react-quill";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import { ArrowLeft, Loader2, Minus, Save, X, Check } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
+
+// Custom horizontal rule blot
+const BlockEmbed = Quill.import('blots/block/embed');
+class DividerBlot extends BlockEmbed {
+  static blotName = 'divider';
+  static tagName = 'hr';
+}
+Quill.register(DividerBlot);
 
 const AdminPostForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,16 +46,68 @@ const AdminPostForm = () => {
   });
 
   // Rich text editor modules configuration
-  const quillModules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["blockquote", "code-block"],
-      ["link", "image"],
-      ["clean"],
-    ],
-  };
+  const quillModules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["blockquote", "code-block"],
+        ["link", "image"],
+        ["divider"],
+        ["clean"],
+      ],
+      handlers: {
+        image: function() {
+          const input = document.createElement('input');
+          input.setAttribute('type', 'file');
+          input.setAttribute('accept', 'image/*');
+          input.click();
+
+          input.onchange = async () => {
+            const file = input.files?.[0];
+            if (file) {
+              const quill = (this as any).quill;
+              const range = quill.getSelection();
+              
+              // Show loading state
+              quill.enable(false);
+              
+              try {
+                const imageUrl = await uploadImageToCloudinary(file);
+                quill.insertEmbed(range.index, 'image', imageUrl);
+                quill.setSelection(range.index + 1);
+                
+                toast({
+                  title: "Image uploaded",
+                  description: "Your image has been successfully uploaded.",
+                });
+              } catch (error) {
+                console.error('Error uploading image:', error);
+                toast({
+                  title: "Upload failed",
+                  description: "Failed to upload image. Please try again.",
+                  variant: "destructive",
+                });
+              } finally {
+                quill.enable(true);
+              }
+            }
+          };
+        },
+        divider: function() {
+          const quill = (this as any).quill;
+          if (quill) {
+            const range = quill.getSelection();
+            if (range) {
+              quill.insertEmbed(range.index, 'divider', true, 'user');
+              quill.setSelection(range.index + 1, 0);
+            }
+          }
+        },
+      },
+    },
+  }), [toast]);
 
   useEffect(() => {
     if (isEditing && id) {
@@ -166,36 +227,8 @@ const AdminPostForm = () => {
 
   return (
     <AdminLayout>
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <header className="border-b bg-card sticky top-0 z-10 px-4 md:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h1 className="text-lg sm:text-xl font-bold">
-            {isEditing ? "Edit Post" : "New Post"}
-          </h1>
-          <div className="flex gap-2">
-            <Link to="/admin/posts">
-              <Button variant="outline" disabled={saving}>
-                Cancel
-              </Button>
-            </Link>
-            <Button onClick={handleSubmit} disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  {isEditing ? "Update" : "Create"}
-                </>
-              )}
-            </Button>
-          </div>
-        </header>
-
-        {/* Form */}
-        <div className="flex-1 overflow-auto p-6 md:p-12">
+      <div className="h-full overflow-y-auto pb-24">
+        <div className="p-6 md:p-12">
           <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-6 md:space-y-8">
             {/* Title */}
             <div className="space-y-2">
@@ -248,7 +281,7 @@ const AdminPostForm = () => {
             {/* Content */}
             <div className="space-y-2">
               <Label>Content</Label>
-              <div className="border rounded-lg overflow-hidden bg-card">
+              <div className="border rounded-lg overflow-hidden bg-card h-[500px]">
                 <ReactQuill
                   theme="snow"
                   value={formData.content}
@@ -257,7 +290,7 @@ const AdminPostForm = () => {
                   }
                   modules={quillModules}
                   placeholder="Write your post content here..."
-                  className="min-h-[400px]"
+                  className="h-full"
                 />
               </div>
             </div>
@@ -280,16 +313,84 @@ const AdminPostForm = () => {
               </Label>
             </div>
           </form>
-        </div>
 
-        {/* Custom styles for Quill editor */}
-        <style>{`
+          {/* Floating Action Buttons */}
+          <div className="fixed bottom-0 left-0 md:left-64 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t shadow-lg">
+            <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/admin/posts")}
+                disabled={saving}
+                className="gap-2"
+              >
+                <X className="h-4 w-4" />
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={saving}
+                className="gap-2"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    {isEditing ? (
+                      <>
+                        <Save className="h-4 w-4" />
+                        Update Post
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Create Post
+                      </>
+                    )}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Custom styles for Quill editor */}
+          <style>{`
           .ql-container {
             font-size: 16px;
-            min-height: 350px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
           }
           .ql-editor {
-            min-height: 350px;
+            height: 100%;
+            overflow-y: auto;
+          }
+          .ql-editor ul,
+          .ql-editor ol {
+            padding-left: 1.5em;
+          }
+          .ql-editor ul {
+            list-style-type: disc;
+          }
+          .ql-editor ol {
+            list-style-type: decimal;
+          }
+          .ql-editor li {
+            padding-left: 0.5em;
+          }
+          .ql-editor hr {
+            border: none;
+            border-top: 2px solid hsl(var(--border));
+            margin: 1.5em 0;
+          }
+          button.ql-divider::after {
+            content: '—';
+            font-size: 18px;
+            font-weight: bold;
           }
           .dark .ql-toolbar {
             border-color: hsl(var(--border));
@@ -321,6 +422,7 @@ const AdminPostForm = () => {
             color: hsl(var(--foreground));
           }
         `}</style>
+        </div>
       </div>
     </AdminLayout>
   );

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { auth } from "../lib/firebase";
+import Navbar from "./Navbar";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -71,13 +72,18 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   );
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
-      {/* Mobile Header */}
-      <div className="md:hidden border-b bg-card p-4 flex items-center justify-between sticky top-0 z-20">
-        <h1 className="text-lg font-bold">Admin Panel</h1>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="pt-[73px] flex min-h-[calc(100vh-73px)]">
+        {/* Mobile Sidebar Trigger */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button 
+              size="icon"
+              className="fixed bottom-4 left-4 z-30 md:hidden shadow-lg"
+              aria-label="Open admin menu"
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
@@ -87,17 +93,17 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </div>
           </SheetContent>
         </Sheet>
+
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:flex w-64 border-r bg-card flex-col sticky top-[73px] h-[calc(100vh-73px)]">
+          <SidebarContent />
+        </aside>
+
+        {/* Main content */}
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
       </div>
-
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 border-r bg-card flex-col">
-        <SidebarContent />
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
     </div>
   );
 };

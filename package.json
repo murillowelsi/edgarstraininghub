@@ -48,6 +48,7 @@
     "baseline-browser-mapping": "^2.9.19",
     "caniuse-lite": "^1.0.30001766",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "country-flag-icons": "^1.6.12",
