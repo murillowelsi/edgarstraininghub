@@ -7,8 +7,8 @@ const Footer = () => {
   const WhatsAppIcon = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
+      width="100%"
+      height="100%"
       viewBox="0 0 24 24"
       fill="currentColor"
     >
@@ -17,7 +17,7 @@ const Footer = () => {
   );
 
   return (
-    <footer className="bg-brand-dark md:bg-card text-white py-2 md:py-6 mt-auto md:mt-0 md:fixed md:bottom-0 md:left-0 md:right-0 md:z-30">
+    <footer className="bg-card text-white py-2 md:py-6 fixed bottom-0 left-0 right-0 z-30">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-6 max-w-6xl mx-auto">
           {/* Brand */}
@@ -32,7 +32,7 @@ const Footer = () => {
               className="text-gray-300 hover:text-green-500 transition-colors"
               aria-label="WhatsApp"
             >
-              <div className="w-4 h-4 md:w-5 md:h-5">
+              <div className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
                 <WhatsAppIcon />
               </div>
             </a>

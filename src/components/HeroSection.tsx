@@ -18,7 +18,7 @@ const HeroSection = () => {
   return (
     <section
       id="home"
-      className="relative h-[70vh] md:h-[85vh] lg:h-[95vh] flex items-center overflow-hidden pt-16 md:pt-20 bg-background"
+      className="relative min-h-[calc(100vh-80px)] md:h-[85vh] lg:h-[95vh] flex items-center justify-center overflow-hidden pt-20 pb-12 md:pt-20 md:pb-0 bg-background"
       style={{ background: "var(--gradient-hero)" }}
     >
       <div
@@ -34,19 +34,19 @@ const HeroSection = () => {
       ></div>
 
       <div className="container mx-auto px-4 md:px-6 z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
-          <div className="space-y-4 md:space-y-8 animate-slide-in-left">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center max-w-7xl mx-auto">
+          <div className="space-y-5 md:space-y-8 animate-slide-in-left text-center md:text-left">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
               {t.hero.title}{" "}
               <span className="text-primary">{t.hero.titleHighlight}</span>
             </h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-xl leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-xl leading-relaxed mx-auto md:mx-0">
               {t.hero.subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 md:pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 md:pt-4 justify-center md:justify-start">
               <Button
                 size="lg"
-                className="btn-primary text-base md:text-lg py-6 md:py-7 px-8 md:px-10 shadow-lg hover:shadow-xl"
+                className="btn-primary text-base md:text-lg py-5 md:py-7 px-8 md:px-10 shadow-lg hover:shadow-xl w-full sm:w-auto"
                 onClick={() => window.open(getWhatsAppLink(), "_blank")}
               >
                 {t.hero.startButton}
@@ -54,7 +54,7 @@ const HeroSection = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-primary text-primary hover:bg-accent font-semibold text-base md:text-lg py-6 md:py-7 px-8 md:px-10 rounded-xl transition-all duration-300"
+                className="border-2 border-primary text-primary hover:bg-accent font-semibold text-base md:text-lg py-5 md:py-7 px-8 md:px-10 rounded-xl transition-all duration-300 w-full sm:w-auto"
                 onClick={() => {
                   document
                     .getElementById("services")
