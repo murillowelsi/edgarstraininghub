@@ -1,4 +1,11 @@
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,9 +18,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { createUser, getUserById, updateUser } from "@/services/usersService";
 import type { UserFormData, UserRole } from "@/types/user";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 
 const AdminUserForm = () => {
@@ -132,6 +139,10 @@ const AdminUserForm = () => {
     }
   };
 
+  const handleCancel = () => {
+    navigate("/admin/users");
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -145,133 +156,155 @@ const AdminUserForm = () => {
   return (
     <AdminLayout>
       <div className="flex flex-col h-full">
-        {/* Header */}
-        <header className="border-b bg-card sticky top-0 z-10 px-4 md:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/admin/users">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Back</span>
-              </Button>
-            </Link>
-            <h1 className="text-lg sm:text-xl font-bold">
-              {isEditing ? "Edit User" : "New User"}
-            </h1>
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto p-4 md:p-8">
+          <div className="max-w-2xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>{isEditing ? "Edit User" : "Create New User"}</CardTitle>
+                <CardDescription>
+                  {isEditing
+                    ? "Update user information and role."
+                    : "Add a new user to the system with email and password."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Display Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="displayName">
+                      Display Name <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="displayName"
+                      placeholder="John Doe"
+                      value={formData.displayName}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, displayName: e.target.value }))
+                      }
+                      disabled={saving}
+                      required
+                    />
+                  </div>
+
+                  {/* Email - only for new users */}
+                  {!isEditing && (
+                    <div className="space-y-2">
+                      <Label htmlFor="email">
+                        Email <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="john@example.com"
+                        value={formData.email}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, email: e.target.value }))
+                        }
+                        disabled={saving}
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {/* Password - only for new users */}
+                  {!isEditing && (
+                    <div className="space-y-2">
+                      <Label htmlFor="password">
+                        Password <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Minimum 6 characters"
+                        value={formData.password}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, password: e.target.value }))
+                        }
+                        disabled={saving}
+                        minLength={6}
+                        required
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Must be at least 6 characters long.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Role */}
+                  <div className="space-y-2">
+                    <Label htmlFor="role">
+                      Role <span className="text-destructive">*</span>
+                    </Label>
+                    <Select
+                      value={formData.role}
+                      onValueChange={(value: UserRole) =>
+                        setFormData((prev) => ({ ...prev, role: value }))
+                      }
+                      disabled={saving}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="editor">Editor</SelectItem>
+                        <SelectItem value="athlete">Athlete</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground">
+                      {formData.role === "admin" && "Full access to manage users and posts"}
+                      {formData.role === "editor" && "Can create and edit blog posts"}
+                      {formData.role === "athlete" && "Access to athlete dashboard"}
+                    </p>
+                  </div>
+
+                  {isEditing && (
+                    <div className="rounded-lg bg-muted p-4">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Note:</strong> Email and password cannot be changed here. Contact
+                        the system administrator for those changes.
+                      </p>
+                    </div>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
           </div>
-          <Button onClick={handleSubmit} disabled={saving} className="w-full sm:w-auto">
+        </div>
+
+        {/* Floating Action Buttons */}
+        <div className="fixed bottom-4 right-4 md:left-20 md:right-4 flex gap-3 justify-end z-20">
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={handleCancel}
+            disabled={saving}
+            className="bg-card shadow-lg hover:shadow-xl"
+          >
+            <X className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Cancel</span>
+          </Button>
+          <Button
+            type="submit"
+            size="lg"
+            onClick={handleSubmit}
+            disabled={saving}
+            className="shadow-lg hover:shadow-xl"
+          >
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                <Loader2 className="h-4 w-4 md:mr-2 animate-spin" />
+                <span className="hidden md:inline">Saving...</span>
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
-                {isEditing ? "Update" : "Create"}
+                <Check className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">{isEditing ? "Update" : "Create"}</span>
               </>
             )}
           </Button>
-        </header>
-
-        {/* Form */}
-        <div className="flex-1 overflow-auto p-4 md:p-8">
-          <form onSubmit={handleSubmit} className="max-w-xl space-y-6">
-            {/* Display Name */}
-            <div className="space-y-2">
-              <Label htmlFor="displayName">Display Name</Label>
-              <Input
-                id="displayName"
-                placeholder="John Doe"
-                value={formData.displayName}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, displayName: e.target.value }))
-                }
-                disabled={saving}
-              />
-            </div>
-
-            {/* Email - only for new users */}
-            {!isEditing && (
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, email: e.target.value }))
-                  }
-                  disabled={saving}
-                />
-              </div>
-            )}
-
-            {/* Password - only for new users */}
-            {!isEditing && (
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Minimum 6 characters"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, password: e.target.value }))
-                  }
-                  disabled={saving}
-                />
-              </div>
-            )}
-
-            {/* Role */}
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value: UserRole) =>
-                  setFormData((prev) => ({ ...prev, role: value }))
-                }
-                disabled={saving}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">
-                    <div className="flex flex-col">
-                      <span className="font-medium">Admin</span>
-                      <span className="text-xs text-muted-foreground">
-                        Full access to manage users and posts
-                      </span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="editor">
-                    <div className="flex flex-col">
-                      <span className="font-medium">Editor</span>
-                      <span className="text-xs text-muted-foreground">
-                        Can create and edit blog posts
-                      </span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="athlete">
-                    <div className="flex flex-col">
-                      <span className="font-medium">Athlete</span>
-                      <span className="text-xs text-muted-foreground">
-                        Access to athlete dashboard
-                      </span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {isEditing && (
-              <p className="text-sm text-muted-foreground">
-                Note: Email and password cannot be changed here. Contact the system administrator for those changes.
-              </p>
-            )}
-          </form>
         </div>
       </div>
     </AdminLayout>

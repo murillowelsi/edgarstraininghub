@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import {
   collection,
   deleteDoc,
@@ -17,14 +17,31 @@ import type { User, UserDocument, UserFormData } from "../types/user";
 const USERS_COLLECTION = "users";
 
 // Helper to convert Firestore document to User
-const docToUser = (id: string, data: UserDocument): User => ({
-  id,
-  email: data.email,
-  displayName: data.displayName,
-  role: data.role,
-  createdAt: data.createdAt?.toDate() || new Date(),
-  updatedAt: data.updatedAt?.toDate() || new Date(),
-});
+const docToUser = async (id: string, data: UserDocument): Promise<User> => {
+  let email = data.email;
+  
+  // If email is not in Firestore, try to get it from Firebase Auth
+  if (!email) {
+    try {
+      const authInstance = getAuth();
+      const authUser = authInstance.currentUser;
+      if (authUser && authUser.uid === id) {
+        email = authUser.email || "";
+      }
+    } catch (error) {
+      console.error("Error fetching email from Auth:", error);
+    }
+  }
+  
+  return {
+    id,
+    email: email || "",
+    displayName: data.displayName,
+    role: data.role,
+    createdAt: data.createdAt?.toDate() || new Date(),
+    updatedAt: data.updatedAt?.toDate() || new Date(),
+  };
+};
 
 // Get all users
 export const getAllUsers = async (): Promise<User[]> => {
@@ -33,8 +50,8 @@ export const getAllUsers = async (): Promise<User[]> => {
     orderBy("createdAt", "desc")
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) =>
-    docToUser(doc.id, doc.data() as UserDocument)
+  return Promise.all(
+    snapshot.docs.map((doc) => docToUser(doc.id, doc.data() as UserDocument))
   );
 };
 
@@ -45,7 +62,7 @@ export const getUserById = async (id: string): Promise<User | null> => {
 
   if (!snapshot.exists()) return null;
 
-  return docToUser(snapshot.id, snapshot.data() as UserDocument);
+  return await docToUser(snapshot.id, snapshot.data() as UserDocument);
 };
 
 // Create new user (creates both Auth user and Firestore document)
