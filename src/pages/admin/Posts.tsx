@@ -94,10 +94,7 @@ const AdminPosts = () => {
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No posts yet.</p>
-            <Link to="/admin/posts/new">
-              <Button>Create your first post</Button>
-            </Link>
+            <p className="text-muted-foreground">No posts yet.</p>
           </div>
         ) : (
           <div className="rounded-lg border bg-card overflow-x-auto">
