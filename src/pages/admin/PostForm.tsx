@@ -12,7 +12,7 @@ import {
 } from "@/services/postsService";
 import type { PostFormData } from "@/types/post";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
-import { ArrowLeft, Loader2, Minus, Save, X, Check } from "lucide-react";
+import { ArrowLeft, Loader2, Minus, Save, X, Check, Upload, Image as ImageIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -37,11 +37,13 @@ const AdminPostForm = () => {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState<PostFormData>({
     title: "",
     slug: "",
     content: "",
     excerpt: "",
+    featuredImage: "",
     published: false,
   });
 
@@ -132,6 +134,7 @@ const AdminPostForm = () => {
         slug: post.slug,
         content: post.content,
         excerpt: post.excerpt,
+        featuredImage: post.featuredImage || "",
         published: post.published,
       });
     } catch (error) {
@@ -276,6 +279,127 @@ const AdminPostForm = () => {
                 rows={3}
                 disabled={saving}
               />
+            </div>
+
+            {/* Featured Image */}
+            <div className="space-y-2">
+              <Label>Featured Image</Label>
+              <div className="space-y-3">
+                {!formData.featuredImage ? (
+                  <div
+                    className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.add('border-primary', 'bg-primary/5');
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
+                    }}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
+                      const file = e.dataTransfer.files?.[0];
+                      if (file && file.type.startsWith('image/')) {
+                        setUploadingImage(true);
+                        try {
+                          const imageUrl = await uploadImageToCloudinary(file);
+                          setFormData((prev) => ({ ...prev, featuredImage: imageUrl }));
+                          toast({
+                            title: "Image uploaded",
+                            description: "Featured image has been uploaded successfully.",
+                          });
+                        } catch (error) {
+                          console.error('Error uploading image:', error);
+                          toast({
+                            title: "Upload failed",
+                            description: "Failed to upload image. Please try again.",
+                            variant: "destructive",
+                          });
+                        } finally {
+                          setUploadingImage(false);
+                        }
+                      } else {
+                        toast({
+                          title: "Invalid file",
+                          description: "Please upload an image file.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    onClick={() => document.getElementById('featuredImageInput')?.click()}
+                  >
+                    <input
+                      id="featuredImageInput"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setUploadingImage(true);
+                          try {
+                            const imageUrl = await uploadImageToCloudinary(file);
+                            setFormData((prev) => ({ ...prev, featuredImage: imageUrl }));
+                            toast({
+                              title: "Image uploaded",
+                              description: "Featured image has been uploaded successfully.",
+                            });
+                          } catch (error) {
+                            console.error('Error uploading image:', error);
+                            toast({
+                              title: "Upload failed",
+                              description: "Failed to upload image. Please try again.",
+                              variant: "destructive",
+                            });
+                          } finally {
+                            setUploadingImage(false);
+                          }
+                        }
+                      }}
+                      disabled={saving || uploadingImage}
+                    />
+                    {uploadingImage ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                        <p className="text-sm text-muted-foreground">Uploading image...</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="rounded-full bg-primary/10 p-4">
+                          <Upload className="h-8 w-8 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Drop your image here or click to browse</p>
+                          <p className="text-xs text-muted-foreground mt-1">Recommended: 1200x630px</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative inline-block">
+                    <img
+                      src={formData.featuredImage}
+                      alt="Featured image preview"
+                      className="max-w-full rounded-lg border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => setFormData((prev) => ({ ...prev, featuredImage: "" }))}
+                      disabled={saving}
+                    >
+                      <X className="h-4 w-4" />
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Image displayed in blog cards
+              </p>
             </div>
 
             {/* Content */}

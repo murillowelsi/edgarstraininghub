@@ -27,6 +27,7 @@ const docToPost = (id: string, data: PostDocument): Post => ({
   slug: data.slug,
   content: data.content,
   excerpt: data.excerpt,
+  featuredImage: data.featuredImage,
   published: data.published,
   authorId: data.authorId,
   authorName: data.authorName,
@@ -157,6 +158,7 @@ export const createPost = async (
     slug,
     content: data.content,
     excerpt: data.excerpt,
+    featuredImage: data.featuredImage || "",
     published: data.published,
     authorId,
     authorName,
@@ -185,6 +187,7 @@ export const updatePost = async (
     slug,
     content: data.content,
     excerpt: data.excerpt,
+    featuredImage: data.featuredImage || "",
     published: data.published,
     updatedAt: serverTimestamp(),
   });

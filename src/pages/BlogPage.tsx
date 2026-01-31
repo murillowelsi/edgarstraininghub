@@ -101,6 +101,17 @@ const BlogPage = () => {
                 {posts.map((post) => (
                   <Link key={post.id} to={`/blog/${post.slug}`}>
                     <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow duration-300 group">
+                      {post.featuredImage && (
+                        <CardHeader className="p-0">
+                          <div className="aspect-video overflow-hidden">
+                            <img
+                              src={post.featuredImage}
+                              alt={post.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                        </CardHeader>
+                      )}
                       <CardContent className="p-6 flex flex-col h-full">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                           <Calendar className="h-4 w-4" />

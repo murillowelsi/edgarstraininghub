@@ -5,6 +5,7 @@ export interface Post {
   slug: string;
   content: string; // HTML content from rich text editor
   excerpt: string;
+  featuredImage?: string; // URL of the featured image
   published: boolean;
   authorId: string;
   authorName: string;
@@ -18,6 +19,7 @@ export interface PostFormData {
   slug: string;
   content: string;
   excerpt: string;
+  featuredImage?: string;
   published: boolean;
 }
 
@@ -27,6 +29,7 @@ export interface PostDocument {
   slug: string;
   content: string;
   excerpt: string;
+  featuredImage?: string;
   published: boolean;
   authorId: string;
   authorName: string;
