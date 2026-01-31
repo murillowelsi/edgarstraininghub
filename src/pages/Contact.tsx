@@ -21,8 +21,9 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
+      <div className="flex-1 md:pb-20">
 
       {/* Hero Section */}
       <section className="section-modern bg-background pt-32">
@@ -190,6 +191,7 @@ const Contact = () => {
           </div>
         </div>
       </section>
+      </div>
 
       <Footer />
     </div>

@@ -26,8 +26,9 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
+      <div className="flex-1 md:pb-20">
       <section className="section-modern bg-background pt-32">
         <div className="container mx-auto">
           <div className="text-center mb-16 animate-fade-in">
@@ -333,6 +334,7 @@ const About = () => {
           </div> */}
         </div>
       </section>
+      </div>
 
       <Footer />
     </div>

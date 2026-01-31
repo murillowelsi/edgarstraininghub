@@ -8,13 +8,15 @@ import YouTubeSection from "@/components/YouTubeSection";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <HeroSection />
-      <ServicesSection />
-      <PricingSection />
-      <YouTubeSection />
-      <TestimonialsSection />
+      <div className="flex-1 md:pb-20">
+        <HeroSection />
+        <ServicesSection />
+        <PricingSection />
+        <YouTubeSection />
+        <TestimonialsSection />
+      </div>
       <Footer />
     </div>
   );

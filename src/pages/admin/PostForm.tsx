@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import {
   createPost,
   generateSlug,
@@ -38,6 +39,13 @@ const AdminPostForm = () => {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("adminSidebarCollapsed");
+      return stored === "true";
+    }
+    return false;
+  });
   const [formData, setFormData] = useState<PostFormData>({
     title: "",
     slug: "",
@@ -116,6 +124,22 @@ const AdminPostForm = () => {
       loadPost(id);
     }
   }, [id, isEditing]);
+
+  // Listen to sidebar collapse state changes
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const stored = localStorage.getItem("adminSidebarCollapsed");
+      setSidebarCollapsed(stored === "true");
+    };
+    
+    // Check immediately
+    checkSidebarState();
+    
+    // Check periodically for changes
+    const interval = setInterval(checkSidebarState, 100);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const loadPost = async (postId: string) => {
     try {
@@ -439,7 +463,10 @@ const AdminPostForm = () => {
           </form>
 
           {/* Floating Action Buttons */}
-          <div className="fixed bottom-0 left-0 md:left-64 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t shadow-lg">
+          <div className={cn(
+            "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t shadow-lg transition-all duration-300",
+            sidebarCollapsed ? "md:left-20" : "md:left-64"
+          )}>
             <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-end gap-3">
               <Button
                 type="button"

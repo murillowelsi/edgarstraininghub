@@ -46,7 +46,7 @@ const BlogArticlePage = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 pt-24 pb-16">
+        <main className="flex-1 pt-24 pb-20">
           <article className="container mx-auto px-4 max-w-3xl">
             <Skeleton className="h-8 w-32 mb-8" />
             <Skeleton className="h-12 w-full mb-4" />
@@ -74,7 +74,7 @@ const BlogArticlePage = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 pt-24 pb-16 flex items-center justify-center">
+        <main className="flex-1 pt-24 pb-20 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
             <h2 className="text-2xl font-bold mb-4">Post Not Found</h2>
