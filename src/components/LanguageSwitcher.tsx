@@ -1,27 +1,26 @@
 
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
 
 const LanguageSwitcher = () => {
   const { language, changeLanguage } = useLanguage();
   
   return (
-    <div className="flex space-x-2">
-      <Button 
-        variant={language === 'pt' ? 'default' : 'outline'}
-        onClick={() => changeLanguage('pt')}
-        className="px-2 py-1 h-auto text-xs"
-      >
-        PT
-      </Button>
-      <Button 
-        variant={language === 'en' ? 'default' : 'outline'}
+    <div className="flex space-x-3">
+      <button 
         onClick={() => changeLanguage('en')}
-        className="px-2 py-1 h-auto text-xs"
+        className="text-2xl cursor-pointer hover:scale-125 transition-transform"
+        title="English"
       >
-        EN
-      </Button>
+        🇬🇧
+      </button>
+      <button 
+        onClick={() => changeLanguage('pt')}
+        className="text-2xl cursor-pointer hover:scale-125 transition-transform"
+        title="Português"
+      >
+        🇵🇹
+      </button>
     </div>
   );
 };

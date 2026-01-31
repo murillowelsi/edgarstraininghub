@@ -20,10 +20,10 @@ const translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  // Get language from localStorage or default to Portuguese
+  // Get language from localStorage or default to English
   const [language, setLanguage] = useState<LanguageType>(() => {
     const savedLanguage = localStorage.getItem('language') as LanguageType;
-    return savedLanguage && ['pt', 'en'].includes(savedLanguage) ? savedLanguage : 'pt';
+    return savedLanguage && ['pt', 'en'].includes(savedLanguage) ? savedLanguage : 'en';
   });
 
   // Save language preference to localStorage

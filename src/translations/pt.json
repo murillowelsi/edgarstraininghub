@@ -140,7 +140,7 @@
     "plans": {
       "basic": {
         "name": "Plano Básico",
-        "price": "30€",
+        "price": "40£",
         "features": [
           "Plano de treino personalizado",
           "Acompanhamento por WhatsApp"
@@ -148,7 +148,7 @@
       },
       "standard": {
         "name": "Plano Standard",
-        "price": "40€",
+        "price": "60£",
         "features": [
           "Avaliação inicial completa",
           "Plano de treino personalizado",
@@ -158,7 +158,7 @@
       },
       "premium": {
         "name": "Plano Premium",
-        "price": "50€",
+        "price": "80£",
         "features": [
           "Avaliação inicial completa",
           "Plano de treino personalizado",

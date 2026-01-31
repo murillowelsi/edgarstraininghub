@@ -140,7 +140,7 @@
     "plans": {
       "basic": {
         "name": "Basic Plan",
-        "price": "€30",
+        "price": "£40",
         "features": [
           "Personalized training plan",
           "WhatsApp support"
@@ -148,7 +148,7 @@
       },
       "standard": {
         "name": "Standard Plan",
-        "price": "€40",
+        "price": "£60",
         "features": [
           "Complete initial assessment",
           "Personalized training plan",
@@ -158,7 +158,7 @@
       },
       "premium": {
         "name": "Premium Plan",
-        "price": "€50",
+        "price": "£80",
         "features": [
           "Complete initial assessment",
           "Personalized training plan",
