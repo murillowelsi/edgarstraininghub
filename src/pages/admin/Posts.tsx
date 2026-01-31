@@ -23,18 +23,15 @@ import { useToast } from "@/hooks/use-toast";
 import { deletePost, getAllPosts } from "@/services/postsService";
 import type { Post } from "@/types/post";
 import { format } from "date-fns";
-import { Edit, Loader2, LogOut, Plus, Trash2 } from "lucide-react";
+import { Edit, Loader2, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import { auth } from "../../lib/firebase";
+import { Link } from "react-router-dom";
+import AdminLayout from "../../components/AdminLayout";
 
 const AdminPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -78,38 +75,11 @@ const AdminPosts = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await auth.signOut();
-    navigate("/admin/login");
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Blog Admin</h1>
-            <p className="text-sm text-muted-foreground">
-              Logged in as {user?.email}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="outline">View Site</Button>
-            </Link>
-            <Button variant="ghost" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+    <AdminLayout>
+      <div className="p-8">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-semibold">All Posts</h2>
+          <h1 className="text-2xl font-bold">Posts</h1>
           <Link to="/admin/posts/new">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -211,8 +181,8 @@ const AdminPosts = () => {
             </Table>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

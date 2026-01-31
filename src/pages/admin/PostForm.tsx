@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
 
 const AdminPostForm = () => {
@@ -155,17 +156,19 @@ const AdminPostForm = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+    <AdminLayout>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <header className="border-b bg-card sticky top-0 z-10 px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/admin/posts">
               <Button variant="ghost" size="sm">
@@ -190,137 +193,137 @@ const AdminPostForm = () => {
               </>
             )}
           </Button>
-        </div>
-      </header>
+        </header>
 
-      {/* Form */}
-      <main className="container mx-auto px-4 py-8">
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">
-          {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              placeholder="Enter post title"
-              value={formData.title}
-              onChange={handleTitleChange}
-              className="text-lg"
-              disabled={saving}
-            />
-          </div>
-
-          {/* Slug */}
-          <div className="space-y-2">
-            <Label htmlFor="slug">Slug</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">/blog/</span>
+        {/* Form */}
+        <div className="flex-1 overflow-auto p-8">
+          <form onSubmit={handleSubmit} className="max-w-4xl space-y-8">
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
               <Input
-                id="slug"
-                placeholder="post-url-slug"
-                value={formData.slug}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, slug: e.target.value }))
-                }
+                id="title"
+                placeholder="Enter post title"
+                value={formData.title}
+                onChange={handleTitleChange}
+                className="text-lg"
                 disabled={saving}
               />
             </div>
-            <p className="text-sm text-muted-foreground">
-              URL-friendly identifier for this post
-            </p>
-          </div>
 
-          {/* Excerpt */}
-          <div className="space-y-2">
-            <Label htmlFor="excerpt">Excerpt</Label>
-            <Textarea
-              id="excerpt"
-              placeholder="Brief summary of the post (displayed in blog listings)"
-              value={formData.excerpt}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
-              }
-              rows={3}
-              disabled={saving}
-            />
-          </div>
+            {/* Slug */}
+            <div className="space-y-2">
+              <Label htmlFor="slug">Slug</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">/blog/</span>
+                <Input
+                  id="slug"
+                  placeholder="post-url-slug"
+                  value={formData.slug}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, slug: e.target.value }))
+                  }
+                  disabled={saving}
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                URL-friendly identifier for this post
+              </p>
+            </div>
 
-          {/* Content */}
-          <div className="space-y-2">
-            <Label>Content</Label>
-            <div className="border rounded-lg overflow-hidden bg-card">
-              <ReactQuill
-                theme="snow"
-                value={formData.content}
-                onChange={(content) =>
-                  setFormData((prev) => ({ ...prev, content }))
+            {/* Excerpt */}
+            <div className="space-y-2">
+              <Label htmlFor="excerpt">Excerpt</Label>
+              <Textarea
+                id="excerpt"
+                placeholder="Brief summary of the post (displayed in blog listings)"
+                value={formData.excerpt}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
                 }
-                modules={quillModules}
-                placeholder="Write your post content here..."
-                className="min-h-[400px]"
+                rows={3}
+                disabled={saving}
               />
             </div>
-          </div>
 
-          {/* Published */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="published"
-              checked={formData.published}
-              onCheckedChange={(checked) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  published: checked === true,
-                }))
-              }
-              disabled={saving}
-            />
-            <Label htmlFor="published" className="cursor-pointer">
-              Publish this post (visible on public blog)
-            </Label>
-          </div>
-        </form>
-      </main>
+            {/* Content */}
+            <div className="space-y-2">
+              <Label>Content</Label>
+              <div className="border rounded-lg overflow-hidden bg-card">
+                <ReactQuill
+                  theme="snow"
+                  value={formData.content}
+                  onChange={(content) =>
+                    setFormData((prev) => ({ ...prev, content }))
+                  }
+                  modules={quillModules}
+                  placeholder="Write your post content here..."
+                  className="min-h-[400px]"
+                />
+              </div>
+            </div>
 
-      {/* Custom styles for Quill editor */}
-      <style>{`
-        .ql-container {
-          font-size: 16px;
-          min-height: 350px;
-        }
-        .ql-editor {
-          min-height: 350px;
-        }
-        .dark .ql-toolbar {
-          border-color: hsl(var(--border));
-          background: hsl(var(--muted));
-        }
-        .dark .ql-container {
-          border-color: hsl(var(--border));
-        }
-        .dark .ql-editor {
-          color: hsl(var(--foreground));
-        }
-        .dark .ql-editor.ql-blank::before {
-          color: hsl(var(--muted-foreground));
-        }
-        .dark .ql-stroke {
-          stroke: hsl(var(--foreground));
-        }
-        .dark .ql-fill {
-          fill: hsl(var(--foreground));
-        }
-        .dark .ql-picker-label {
-          color: hsl(var(--foreground));
-        }
-        .dark .ql-picker-options {
-          background: hsl(var(--card));
-          border-color: hsl(var(--border));
-        }
-        .dark .ql-picker-item {
-          color: hsl(var(--foreground));
-        }
-      `}</style>
-    </div>
+            {/* Published */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="published"
+                checked={formData.published}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    published: checked === true,
+                  }))
+                }
+                disabled={saving}
+              />
+              <Label htmlFor="published" className="cursor-pointer">
+                Publish this post (visible on public blog)
+              </Label>
+            </div>
+          </form>
+        </div>
+
+        {/* Custom styles for Quill editor */}
+        <style>{`
+          .ql-container {
+            font-size: 16px;
+            min-height: 350px;
+          }
+          .ql-editor {
+            min-height: 350px;
+          }
+          .dark .ql-toolbar {
+            border-color: hsl(var(--border));
+            background: hsl(var(--muted));
+          }
+          .dark .ql-container {
+            border-color: hsl(var(--border));
+          }
+          .dark .ql-editor {
+            color: hsl(var(--foreground));
+          }
+          .dark .ql-editor.ql-blank::before {
+            color: hsl(var(--muted-foreground));
+          }
+          .dark .ql-stroke {
+            stroke: hsl(var(--foreground));
+          }
+          .dark .ql-fill {
+            fill: hsl(var(--foreground));
+          }
+          .dark .ql-picker-label {
+            color: hsl(var(--foreground));
+          }
+          .dark .ql-picker-options {
+            background: hsl(var(--card));
+            border-color: hsl(var(--border));
+          }
+          .dark .ql-picker-item {
+            color: hsl(var(--foreground));
+          }
+        `}</style>
+      </div>
+    </AdminLayout>
   );
 };
 

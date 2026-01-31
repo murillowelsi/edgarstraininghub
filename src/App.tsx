@@ -17,6 +17,8 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/Login";
 import AdminPostForm from "./pages/admin/PostForm";
 import AdminPosts from "./pages/admin/Posts";
+import AdminUserForm from "./pages/admin/UserForm";
+import AdminUsers from "./pages/admin/Users";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,30 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAdmin>
                       <AdminPostForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminUsers />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users/new"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminUserForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users/:id/edit"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminUserForm />
                     </ProtectedRoute>
                   }
                 />

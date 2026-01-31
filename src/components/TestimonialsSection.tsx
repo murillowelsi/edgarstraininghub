@@ -70,7 +70,7 @@ const TestimonialsSection = () => {
                 className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
                 aria-label="Previous testimonial"
               >
-                <ChevronLeft className="h-6 w-6 text-brand-dark" />
+                <ChevronLeft className="h-6 w-6 text-foreground" />
               </button>
 
               <button
@@ -78,7 +78,7 @@ const TestimonialsSection = () => {
                 className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
                 aria-label="Next testimonial"
               >
-                <ChevronRight className="h-6 w-6 text-brand-dark" />
+                <ChevronRight className="h-6 w-6 text-foreground" />
               </button>
             </div>
           </div>

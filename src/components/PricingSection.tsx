@@ -84,7 +84,7 @@ const PricingSection = () => {
                   className={`w-full h-12 text-white font-semibold ${
                     plan.popular
                       ? "bg-primary hover:bg-primary/90"
-                      : "bg-foreground hover:bg-foreground/90"
+                      : "bg-zinc-800 hover:bg-zinc-700 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                   }`}
                   onClick={() => {
                     navigate("/contact");

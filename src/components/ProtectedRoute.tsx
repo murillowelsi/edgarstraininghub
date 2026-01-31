@@ -4,13 +4,17 @@ import { useAuth } from "../contexts/AuthContext";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requireEditor?: boolean;
+  requireAthlete?: boolean;
 }
 
 export const ProtectedRoute = ({
   children,
   requireAdmin = false,
+  requireEditor = false,
+  requireAthlete = false,
 }: ProtectedRouteProps) => {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, isEditor, isAthlete } = useAuth();
   const location = useLocation();
 
   // Show loading state while checking auth
@@ -29,6 +33,16 @@ export const ProtectedRoute = ({
 
   // Requires admin but user is not admin
   if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  // Requires editor but user is not editor (or admin)
+  if (requireEditor && !isEditor) {
+    return <Navigate to="/" replace />;
+  }
+
+  // Requires athlete but user is not athlete
+  if (requireAthlete && !isAthlete) {
     return <Navigate to="/" replace />;
   }
 
