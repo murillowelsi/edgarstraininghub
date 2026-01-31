@@ -4,18 +4,21 @@ service cloud.firestore {
     // Helper function to check if user is admin
     function isAdmin() {
       return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
     }
 
     // Helper function to check if user is editor or admin
     function isEditor() {
       return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["admin", "editor"];
     }
 
-    // Users collection: admins can CRUD, users can read their own document
+    // Users collection: authenticated users can read their own, admins can read all and manage
     match /users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
