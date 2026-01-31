@@ -94,11 +94,11 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold">Users</h1>
+      <div className="p-4 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
+          <h1 className="text-xl md:text-2xl font-bold">Users</h1>
           <Link to="/admin/users/new">
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               New User
             </Button>
@@ -117,15 +117,15 @@ const AdminUsers = () => {
             </Link>
           </div>
         ) : (
-          <div className="rounded-lg border bg-card">
+          <div className="rounded-lg border bg-card overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="min-w-[150px]">Name</TableHead>
+                  <TableHead className="min-w-[200px]">Email</TableHead>
+                  <TableHead className="min-w-[100px]">Role</TableHead>
+                  <TableHead className="min-w-[120px]">Created</TableHead>
+                  <TableHead className="text-right min-w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

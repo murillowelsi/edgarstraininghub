@@ -168,19 +168,19 @@ const AdminPostForm = () => {
     <AdminLayout>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <header className="border-b bg-card sticky top-0 z-10 px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <header className="border-b bg-card sticky top-0 z-10 px-4 md:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link to="/admin/posts">
               <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
               </Button>
             </Link>
-            <h1 className="text-xl font-bold">
+            <h1 className="text-lg sm:text-xl font-bold">
               {isEditing ? "Edit Post" : "New Post"}
             </h1>
           </div>
-          <Button onClick={handleSubmit} disabled={saving}>
+          <Button onClick={handleSubmit} disabled={saving} className="w-full sm:w-auto">
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -196,8 +196,8 @@ const AdminPostForm = () => {
         </header>
 
         {/* Form */}
-        <div className="flex-1 overflow-auto p-8">
-          <form onSubmit={handleSubmit} className="max-w-4xl space-y-8">
+        <div className="flex-1 overflow-auto p-4 md:p-8">
+          <form onSubmit={handleSubmit} className="max-w-4xl space-y-6 md:space-y-8">
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>

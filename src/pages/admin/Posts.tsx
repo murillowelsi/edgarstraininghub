@@ -77,11 +77,11 @@ const AdminPosts = () => {
 
   return (
     <AdminLayout>
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold">Posts</h1>
+      <div className="p-4 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
+          <h1 className="text-xl md:text-2xl font-bold">Posts</h1>
           <Link to="/admin/posts/new">
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               New Post
             </Button>
@@ -100,14 +100,14 @@ const AdminPosts = () => {
             </Link>
           </div>
         ) : (
-          <div className="rounded-lg border bg-card">
+          <div className="rounded-lg border bg-card overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="min-w-[200px]">Title</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[120px]">Created</TableHead>
+                  <TableHead className="text-right min-w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -116,7 +116,7 @@ const AdminPosts = () => {
                     <TableCell>
                       <div>
                         <p className="font-medium">{post.title}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground break-all">
                           /blog/{post.slug}
                         </p>
                       </div>
