@@ -12,6 +12,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Table,
   TableBody,
   TableCell,
@@ -23,7 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
 import type { Workout } from "@/types/workout";
 import { format } from "date-fns";
-import { Edit, Loader2, Plus, Trash2 } from "lucide-react";
+import { Bike, ChevronDown, Edit, Loader2, PersonStanding, Plus, Trash2, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -94,12 +100,35 @@ const AdminWorkouts = () => {
       <div className="p-4 md:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
           <h1 className="text-xl md:text-2xl font-bold">Workouts</h1>
-          <Link to="/admin/workouts/new">
-            <Button className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              New Workout
-            </Button>
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <Plus className="h-4 w-4 mr-2" />
+                New Workout
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/admin/workouts/new?type=running" className="flex items-center">
+                  <PersonStanding className="h-4 w-4 mr-2" />
+                  Running Workout
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/admin/workouts/new?type=cycling" className="flex items-center">
+                  <Bike className="h-4 w-4 mr-2" />
+                  Cycling Workout
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/admin/workouts/new?type=swimming" className="flex items-center">
+                  <Waves className="h-4 w-4 mr-2" />
+                  Swimming Workout
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {loading ? (
@@ -109,9 +138,26 @@ const AdminWorkouts = () => {
         ) : workouts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">No workouts yet.</p>
-            <Link to="/admin/workouts/new">
-              <Button>Create your first workout</Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
+              <Link to="/admin/workouts/new?type=running">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <PersonStanding className="h-4 w-4 mr-2" />
+                  Running
+                </Button>
+              </Link>
+              <Link to="/admin/workouts/new?type=cycling">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Bike className="h-4 w-4 mr-2" />
+                  Cycling
+                </Button>
+              </Link>
+              <Link to="/admin/workouts/new?type=swimming">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Waves className="h-4 w-4 mr-2" />
+                  Swimming
+                </Button>
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="rounded-lg border bg-card overflow-x-auto">
@@ -132,7 +178,10 @@ const AdminWorkouts = () => {
                       {workout.name}
                     </TableCell>
                     <TableCell>
-                      <Badge className={workoutTypeBadgeColors[workout.type]}>
+                      <Badge className={`${workoutTypeBadgeColors[workout.type]} flex items-center gap-1.5 w-fit`}>
+                        {workout.type === "cycling" && <Bike className="h-3 w-3" />}
+                        {workout.type === "running" && <PersonStanding className="h-3 w-3" />}
+                        {workout.type === "swimming" && <Waves className="h-3 w-3" />}
                         {workoutTypeLabels[workout.type]}
                       </Badge>
                     </TableCell>

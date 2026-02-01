@@ -28,17 +28,20 @@ import {
   getWorkoutById,
   updateWorkout,
 } from "@/services/workoutsService";
-import type { WorkoutFormData, WorkoutStage } from "@/types/workout";
+import type { WorkoutFormData, WorkoutStage, WorkoutType } from "@/types/workout";
 import {
   createDefaultStage,
   createRepeatBlock,
+  getDefaultStageType,
+  intensityLabels,
   stageColors,
   stageLabels,
   durationLabels,
+  workoutTypeLabels,
 } from "@/types/workout";
-import { ArrowLeft, GripVertical, Loader2, Pencil, Plus, PersonStanding, Repeat, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Bike, GripVertical, Loader2, Pencil, Plus, PersonStanding, Repeat, Save, Trash2, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import StageEditor from "../../components/workout/StageEditor";
 import { useAuth } from "../../contexts/AuthContext";
@@ -53,6 +56,38 @@ const formatDuration = (stage: WorkoutStage) => {
     return `${stage.duration.value} ${unit}`;
   }
   return durationLabels[stage.duration.type];
+};
+
+// Helper to format intensity for display
+const formatIntensity = (stage: WorkoutStage): string | null => {
+  const { intensity } = stage;
+
+  if (intensity.type === "none") {
+    return null;
+  }
+
+  // Zone-based intensity
+  if (intensity.type === "heartRateZone" && intensity.value) {
+    return `HR Zone ${intensity.value}`;
+  }
+  if (intensity.type === "powerZone" && intensity.value) {
+    return `Power Zone ${intensity.value}`;
+  }
+
+  // Range-based intensity (min-max)
+  if (intensity.min !== undefined && intensity.max !== undefined) {
+    const unit = intensity.unit || "";
+    return `${intensity.min}-${intensity.max} ${unit}`;
+  }
+
+  // Single value intensity
+  if (intensity.value !== undefined) {
+    const unit = intensity.unit || "";
+    return `${intensity.value} ${unit}`;
+  }
+
+  // Just show the type label if no values
+  return intensityLabels[intensity.type];
 };
 
 // Draggable stage item component
@@ -83,6 +118,7 @@ const DraggableStage = ({
   };
 
   const color = stageColors[stage.type];
+  const intensityDisplay = formatIntensity(stage);
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -103,9 +139,17 @@ const DraggableStage = ({
             <p className={`font-medium ${isNested ? 'text-sm' : ''}`}>
               {stageLabels[stage.type]}
             </p>
-            <p className={`text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
-              {formatDuration(stage)}
-            </p>
+            <div className={`flex items-center gap-4 text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
+              <span>{formatDuration(stage)}</span>
+              {intensityDisplay && (
+                <span className="text-primary/80">{intensityDisplay}</span>
+              )}
+            </div>
+            {stage.notes && (
+              <p className={`text-muted-foreground mt-1 truncate ${isNested ? 'text-xs' : 'text-sm'}`}>
+                {stage.notes}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-1">
             <Button
@@ -164,6 +208,7 @@ const RepeatBlock = ({
   onDeleteNested,
   onStageChange,
   onDoneEditing,
+  workoutType = "running",
 }: {
   stage: WorkoutStage;
   onEdit: () => void;
@@ -174,6 +219,7 @@ const RepeatBlock = ({
   onDeleteNested: (id: string) => void;
   onStageChange: (stage: WorkoutStage) => void;
   onDoneEditing: () => void;
+  workoutType?: WorkoutType;
 }) => {
   const {
     attributes,
@@ -254,6 +300,7 @@ const RepeatBlock = ({
                       onNestedStagesChange(newStages);
                     }}
                     onDone={onDoneEditing}
+                    workoutType={workoutType}
                   />
                 ) : (
                   <DraggableStage
@@ -279,6 +326,7 @@ const RepeatBlock = ({
 // Stage overlay for drag preview
 const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
   const color = stageColors[stage.type];
+  const intensityDisplay = formatIntensity(stage);
 
   if (stage.type === "repeat") {
     return (
@@ -310,7 +358,12 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
         <GripVertical className="h-5 w-5 text-muted-foreground" />
         <div>
           <p className="font-medium">{stageLabels[stage.type]}</p>
-          <p className="text-sm text-muted-foreground">{formatDuration(stage)}</p>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>{formatDuration(stage)}</span>
+            {intensityDisplay && (
+              <span className="text-primary/80">{intensityDisplay}</span>
+            )}
+          </div>
         </div>
       </div>
     </Card>
@@ -319,10 +372,14 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
 
 const WorkoutEditor = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const isEditing = Boolean(id);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Get workout type from URL query param (for new workouts)
+  const urlWorkoutType = (searchParams.get("type") as WorkoutType) || "running";
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
@@ -330,8 +387,8 @@ const WorkoutEditor = () => {
   const [editingStageId, setEditingStageId] = useState<string | null>(null);
   const [activeStage, setActiveStage] = useState<WorkoutStage | null>(null);
   const [formData, setFormData] = useState<WorkoutFormData>({
-    name: "Running Workout",
-    type: "running",
+    name: `${workoutTypeLabels[urlWorkoutType]} Workout`,
+    type: urlWorkoutType,
     stages: [],
   });
 
@@ -424,7 +481,7 @@ const WorkoutEditor = () => {
   };
 
   const handleAddStage = () => {
-    const newStage = createDefaultStage("run");
+    const newStage = createDefaultStage(getDefaultStageType(formData.type));
     setFormData((prev) => ({
       ...prev,
       stages: [...prev.stages, newStage],
@@ -433,7 +490,7 @@ const WorkoutEditor = () => {
   };
 
   const handleAddRepetition = () => {
-    const newRepeat = createRepeatBlock(2);
+    const newRepeat = createRepeatBlock(2, formData.type);
     setFormData((prev) => ({
       ...prev,
       stages: [...prev.stages, newRepeat],
@@ -680,7 +737,9 @@ const WorkoutEditor = () => {
 
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <PersonStanding className="h-5 w-5" />
+                {formData.type === "cycling" && <Bike className="h-5 w-5" />}
+                {formData.type === "running" && <PersonStanding className="h-5 w-5" />}
+                {formData.type === "swimming" && <Waves className="h-5 w-5" />}
               </div>
 
               {editingName ? (
@@ -733,79 +792,86 @@ const WorkoutEditor = () => {
           <div className="p-4 md:p-8">
             <div className="flex gap-8">
               {/* Stages list */}
-              <div className="flex-1 space-y-3">
-                {formData.stages.length === 0 ? (
-                  <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                    <p className="text-muted-foreground mb-4">
-                      No stages yet. Add your first stage to get started.
-                    </p>
-                    <Button onClick={handleAddStage}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Stage
-                    </Button>
+              <Card className="flex-1">
+                <div className="p-4 md:p-6">
+                  <h2 className="font-semibold mb-4">Stages</h2>
+                  <div className="space-y-3">
+                    {formData.stages.length === 0 ? (
+                      <div className="text-center py-12 border-2 border-dashed rounded-lg">
+                        <p className="text-muted-foreground mb-4">
+                          No stages yet. Add your first stage to get started.
+                        </p>
+                        <Button onClick={handleAddStage}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Stage
+                        </Button>
+                      </div>
+                    ) : (
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCorners}
+                        onDragStart={handleDragStart}
+                        onDragOver={handleDragOver}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <SortableContext
+                          items={getAllSortableIds()}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          {formData.stages.map((stage) => {
+                            if (editingStageId === stage.id) {
+                              return (
+                                <StageEditor
+                                  key={stage.id}
+                                  stage={stage}
+                                  onChange={handleStageChange}
+                                  onDone={() => setEditingStageId(null)}
+                                  workoutType={formData.type}
+                                />
+                              );
+                            }
+
+                            if (stage.type === "repeat") {
+                              return (
+                                <RepeatBlock
+                                  key={stage.id}
+                                  stage={stage}
+                                  onEdit={() => setEditingStageId(stage.id)}
+                                  onDelete={() => handleDeleteStage(stage.id)}
+                                  onNestedStagesChange={(nestedStages) =>
+                                    handleNestedStagesChange(stage.id, nestedStages)
+                                  }
+                                  editingStageId={editingStageId}
+                                  onEditNested={(nestedId) => setEditingStageId(nestedId)}
+                                  onDeleteNested={(nestedId) =>
+                                    handleDeleteNestedStage(stage.id, nestedId)
+                                  }
+                                  onStageChange={handleStageChange}
+                                  onDoneEditing={() => setEditingStageId(null)}
+                                  workoutType={formData.type}
+                                />
+                              );
+                            }
+
+                            return (
+                              <DraggableStage
+                                key={stage.id}
+                                stage={stage}
+                                onEdit={() => setEditingStageId(stage.id)}
+                                onDelete={() => handleDeleteStage(stage.id)}
+                              />
+                            );
+                          })}
+                        </SortableContext>
+
+                        <DragOverlay>
+                          {activeStage ? <StageOverlay stage={activeStage} /> : null}
+                        </DragOverlay>
+                      </DndContext>
+                    )}
                   </div>
-                ) : (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCorners}
-                    onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <SortableContext
-                      items={getAllSortableIds()}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      {formData.stages.map((stage) => {
-                        if (editingStageId === stage.id) {
-                          return (
-                            <StageEditor
-                              key={stage.id}
-                              stage={stage}
-                              onChange={handleStageChange}
-                              onDone={() => setEditingStageId(null)}
-                            />
-                          );
-                        }
-
-                        if (stage.type === "repeat") {
-                          return (
-                            <RepeatBlock
-                              key={stage.id}
-                              stage={stage}
-                              onEdit={() => setEditingStageId(stage.id)}
-                              onDelete={() => handleDeleteStage(stage.id)}
-                              onNestedStagesChange={(nestedStages) =>
-                                handleNestedStagesChange(stage.id, nestedStages)
-                              }
-                              editingStageId={editingStageId}
-                              onEditNested={(nestedId) => setEditingStageId(nestedId)}
-                              onDeleteNested={(nestedId) =>
-                                handleDeleteNestedStage(stage.id, nestedId)
-                              }
-                              onStageChange={handleStageChange}
-                              onDoneEditing={() => setEditingStageId(null)}
-                            />
-                          );
-                        }
-
-                        return (
-                          <DraggableStage
-                            key={stage.id}
-                            stage={stage}
-                            onEdit={() => setEditingStageId(stage.id)}
-                            onDelete={() => handleDeleteStage(stage.id)}
-                          />
-                        );
-                      })}
-                    </SortableContext>
-
-                    <DragOverlay>
-                      {activeStage ? <StageOverlay stage={activeStage} /> : null}
-                    </DragOverlay>
-                  </DndContext>
-                )}
-              </div>
+                </div>
+              </Card>
 
               {/* Sidebar */}
               <div className="w-64 flex-shrink-0 hidden lg:block">

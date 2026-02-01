@@ -15,15 +15,26 @@ import type {
   DurationUnit,
   IntensityType,
   StageType,
+  SwimmingDrillType,
+  SwimmingEquipmentType,
+  SwimmingStrokeType,
   WorkoutStage,
+  WorkoutType,
 } from "@/types/workout";
 import {
   createDefaultStage,
+  drillLabels,
   durationLabels,
-  generateStageId,
+  durationTypesByWorkout,
+  equipmentLabels,
+  getDefaultIntervalType,
   intensityLabels,
+  intensityTypesByWorkout,
   stageColors,
   stageLabels,
+  stageTypesByWorkout,
+  strokeLabels,
+  swimmingDistancePresets,
 } from "@/types/workout";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 
@@ -31,14 +42,18 @@ interface StageEditorProps {
   stage: WorkoutStage;
   onChange: (stage: WorkoutStage) => void;
   onDone: () => void;
+  workoutType?: WorkoutType;
 }
 
-// Editor for non-repeat stage types
-const regularStageTypes = ["warmup", "run", "cooldown", "recovery", "interval"] as const;
-
-const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
+const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: StageEditorProps) => {
   const color = stageColors[stage.type];
   const isRepeat = stage.type === "repeat";
+  const isSwimming = workoutType === "swimming";
+
+  // Get available types based on workout type
+  const availableStageTypes = stageTypesByWorkout[workoutType];
+  const availableDurationTypes = durationTypesByWorkout[workoutType];
+  const availableIntensityTypes = intensityTypesByWorkout[workoutType];
 
   const handleTypeChange = (type: StageType) => {
     if (type === "repeat") {
@@ -47,7 +62,7 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
         ...stage,
         type,
         repeatCount: 2,
-        stages: [createDefaultStage("interval"), createDefaultStage("recovery")],
+        stages: [createDefaultStage(getDefaultIntervalType(workoutType)), createDefaultStage("recovery")],
       });
     } else {
       // Converting from repeat - remove nested stages
@@ -74,7 +89,7 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
       duration: {
         type,
         value: type === "lapButton" ? undefined : stage.duration.value,
-        unit: type === "distance" ? "km" : type === "time" ? "min" : undefined,
+        unit: type === "distance" ? "km" : type === "time" ? "min" : type === "power" ? "w" : undefined,
       },
     });
   };
@@ -97,15 +112,86 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
     });
   };
 
+  // Swimming distance preset handler
+  const handleSwimmingDistancePreset = (value: string) => {
+    if (value === "custom") {
+      onChange({
+        ...stage,
+        duration: { ...stage.duration, value: undefined, unit: "m" },
+      });
+    } else {
+      onChange({
+        ...stage,
+        duration: { ...stage.duration, value: parseInt(value), unit: "m" },
+      });
+    }
+  };
+
+  // Swimming-specific handlers
+  const handleStrokeTypeChange = (strokeType: SwimmingStrokeType) => {
+    onChange({ ...stage, strokeType });
+  };
+
+  const handleDrillTypeChange = (drillType: SwimmingDrillType) => {
+    onChange({ ...stage, drillType });
+  };
+
+  const handleEquipmentChange = (equipment: SwimmingEquipmentType) => {
+    onChange({ ...stage, equipment });
+  };
+
   const handleIntensityTypeChange = (type: IntensityType) => {
+    let unit: string | undefined = undefined;
+    let defaultValue: number | undefined = undefined;
+
+    if (type === "pace") unit = "min/km";
+    if (type === "speed") unit = "km/h";
+    if (type === "cadence" || type === "bikeCadence") unit = "rpm";
+    if (type === "customHeartRate") unit = "bpm";
+    if (type === "customPower") unit = "W";
+    if (type === "heartRateZone") defaultValue = 1;
+    if (type === "powerZone") defaultValue = 1;
+
     onChange({
       ...stage,
       intensity: {
         type,
-        value: undefined,
+        value: defaultValue,
         min: undefined,
         max: undefined,
-        unit: type === "pace" ? "min/km" : undefined,
+        unit,
+      },
+    });
+  };
+
+  const handleIntensityMinChange = (value: string) => {
+    const numValue = parseFloat(value);
+    onChange({
+      ...stage,
+      intensity: {
+        ...stage.intensity,
+        min: isNaN(numValue) ? undefined : numValue,
+      },
+    });
+  };
+
+  const handleIntensityMaxChange = (value: string) => {
+    const numValue = parseFloat(value);
+    onChange({
+      ...stage,
+      intensity: {
+        ...stage.intensity,
+        max: isNaN(numValue) ? undefined : numValue,
+      },
+    });
+  };
+
+  const handleIntensityZoneChange = (zone: string) => {
+    onChange({
+      ...stage,
+      intensity: {
+        ...stage.intensity,
+        value: parseInt(zone),
       },
     });
   };
@@ -113,6 +199,48 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
   const handleNotesChange = (notes: string) => {
     onChange({ ...stage, notes: notes || undefined });
   };
+
+  // Intensity type helpers
+  const needsRangeInput = ["speed", "bikeCadence", "cadence", "customHeartRate", "customPower", "pace"].includes(stage.intensity.type);
+  const needsZoneSelect = ["heartRateZone", "powerZone"].includes(stage.intensity.type);
+
+  const getIntensityLabel = () => {
+    switch (stage.intensity.type) {
+      case "speed": return "Speed";
+      case "bikeCadence": return "Bike Cadence";
+      case "cadence": return "Cadence";
+      case "pace": return "Pace";
+      case "customHeartRate": return "Heart Rate";
+      case "customPower": return "Power";
+      case "heartRateZone": return "HR Zone";
+      case "powerZone": return "Power Zone";
+      default: return "Value";
+    }
+  };
+
+  const getIntensityUnit = () => {
+    return stage.intensity.unit || "";
+  };
+
+  // Heart rate zones (based on typical Garmin zones)
+  const heartRateZones = [
+    { value: 1, label: "Zone 1 (101-121 bpm)" },
+    { value: 2, label: "Zone 2 (121-141 bpm)" },
+    { value: 3, label: "Zone 3 (141-159 bpm)" },
+    { value: 4, label: "Zone 4 (159-181 bpm)" },
+    { value: 5, label: "Zone 5 (181-201 bpm)" },
+  ];
+
+  // Power zones (based on typical cycling zones)
+  const powerZones = [
+    { value: 1, label: "Zone 1 (0-110 W)" },
+    { value: 2, label: "Zone 2 (110-150 W)" },
+    { value: 3, label: "Zone 3 (150-185 W)" },
+    { value: 4, label: "Zone 4 (185-220 W)" },
+    { value: 5, label: "Zone 5 (220-260 W)" },
+    { value: 6, label: "Zone 6 (260-310 W)" },
+    { value: 7, label: "Zone 7 (310+ W)" },
+  ];
 
   // Nested stage handlers for repeat blocks
   const handleNestedStageChange = (index: number, nestedStage: WorkoutStage) => {
@@ -122,7 +250,7 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
   };
 
   const handleAddNestedStage = () => {
-    const newStage = createDefaultStage("interval");
+    const newStage = createDefaultStage(getDefaultIntervalType(workoutType));
     onChange({
       ...stage,
       stages: [...(stage.stages || []), newStage],
@@ -137,6 +265,7 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
   const showDurationValue = stage.duration.type !== "lapButton";
   const showDistanceUnit = stage.duration.type === "distance";
   const showTimeUnit = stage.duration.type === "time";
+  const showPowerUnit = stage.duration.type === "power";
 
   return (
     <Card className="relative overflow-hidden">
@@ -170,11 +299,14 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {(Object.keys(stageLabels) as StageType[]).map((type) => (
+                        {availableStageTypes.map((type) => (
                           <SelectItem key={type} value={type}>
                             {stageLabels[type]}
                           </SelectItem>
                         ))}
+                        <SelectItem value="repeat">
+                          {stageLabels.repeat}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -215,13 +347,11 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {(Object.keys(durationLabels) as DurationType[]).map(
-                            (type) => (
-                              <SelectItem key={type} value={type}>
-                                {durationLabels[type]}
-                              </SelectItem>
-                            )
-                          )}
+                          {availableDurationTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {durationLabels[type]}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -236,18 +366,44 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
                           ? "Time"
                           : stage.duration.type === "calories"
                           ? "Calories"
+                          : stage.duration.type === "power"
+                          ? "Power"
                           : "Value"}
                       </Label>
                       <div className="col-span-2 flex gap-2">
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={stage.duration.value || ""}
-                          onChange={(e) => handleDurationValueChange(e.target.value)}
-                          placeholder="0.00"
-                          className="flex-1"
-                        />
-                        {showDistanceUnit && (
+                        {/* Swimming distance presets */}
+                        {isSwimming && showDistanceUnit ? (
+                          <Select
+                            value={
+                              stage.duration.value && swimmingDistancePresets.includes(stage.duration.value)
+                                ? String(stage.duration.value)
+                                : "custom"
+                            }
+                            onValueChange={handleSwimmingDistancePreset}
+                          >
+                            <SelectTrigger className="flex-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {swimmingDistancePresets.map((dist) => (
+                                <SelectItem key={dist} value={String(dist)}>
+                                  {dist} m
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="custom">Custom</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={stage.duration.value || ""}
+                            onChange={(e) => handleDurationValueChange(e.target.value)}
+                            placeholder="0.00"
+                            className="flex-1"
+                          />
+                        )}
+                        {showDistanceUnit && !isSwimming && (
                           <Select
                             value={stage.duration.unit || "km"}
                             onValueChange={(v) =>
@@ -280,11 +436,102 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
                             </SelectContent>
                           </Select>
                         )}
+                        {showPowerUnit && (
+                          <span className="flex items-center text-sm text-muted-foreground px-2">
+                            W
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
               </div>
+            )}
+
+            {/* Swimming-specific fields - only for swimming workouts and non-repeat */}
+            {isSwimming && !isRepeat && (
+              <>
+                {/* Stroke Type Section */}
+                <div>
+                  <h3 className="font-semibold mb-4">Stroke Type</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label className="text-right">Type</Label>
+                      <div className="col-span-2">
+                        <Select
+                          value={stage.strokeType || "freestyle"}
+                          onValueChange={(v) => handleStrokeTypeChange(v as SwimmingStrokeType)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(Object.keys(strokeLabels) as SwimmingStrokeType[]).map((stroke) => (
+                              <SelectItem key={stroke} value={stroke}>
+                                {strokeLabels[stroke]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Drill Type Section */}
+                <div>
+                  <h3 className="font-semibold mb-4">Drill Type</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label className="text-right">Type</Label>
+                      <div className="col-span-2">
+                        <Select
+                          value={stage.drillType || "none"}
+                          onValueChange={(v) => handleDrillTypeChange(v as SwimmingDrillType)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(Object.keys(drillLabels) as SwimmingDrillType[]).map((drill) => (
+                              <SelectItem key={drill} value={drill}>
+                                {drillLabels[drill]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Equipment Section */}
+                <div>
+                  <h3 className="font-semibold mb-4">Equipment</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label className="text-right">Type</Label>
+                      <div className="col-span-2">
+                        <Select
+                          value={stage.equipment || "none"}
+                          onValueChange={(v) => handleEquipmentChange(v as SwimmingEquipmentType)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(Object.keys(equipmentLabels) as SwimmingEquipmentType[]).map((equip) => (
+                              <SelectItem key={equip} value={equip}>
+                                {equipmentLabels[equip]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Intensity Section - only for non-repeat */}
@@ -303,17 +550,92 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {(Object.keys(intensityLabels) as IntensityType[]).map(
-                            (type) => (
-                              <SelectItem key={type} value={type}>
-                                {intensityLabels[type]}
-                              </SelectItem>
-                            )
-                          )}
+                          {availableIntensityTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {intensityLabels[type]}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
+
+                  {/* Range input for speed, cadence, custom HR, custom power */}
+                  {needsRangeInput && (
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label className="text-right">{getIntensityLabel()}</Label>
+                      <div className="col-span-2 flex items-center gap-2">
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={stage.intensity.min ?? ""}
+                          onChange={(e) => handleIntensityMinChange(e.target.value)}
+                          placeholder="Min"
+                          className="w-24"
+                        />
+                        <span className="text-muted-foreground">to</span>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={stage.intensity.max ?? ""}
+                          onChange={(e) => handleIntensityMaxChange(e.target.value)}
+                          placeholder="Max"
+                          className="w-24"
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {getIntensityUnit()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Zone select for heart rate zone */}
+                  {stage.intensity.type === "heartRateZone" && (
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label className="text-right">{getIntensityLabel()}</Label>
+                      <div className="col-span-2">
+                        <Select
+                          value={String(stage.intensity.value || 1)}
+                          onValueChange={handleIntensityZoneChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {heartRateZones.map((zone) => (
+                              <SelectItem key={zone.value} value={String(zone.value)}>
+                                {zone.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Zone select for power zone */}
+                  {stage.intensity.type === "powerZone" && (
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label className="text-right">{getIntensityLabel()}</Label>
+                      <div className="col-span-2">
+                        <Select
+                          value={String(stage.intensity.value || 1)}
+                          onValueChange={handleIntensityZoneChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {powerZones.map((zone) => (
+                              <SelectItem key={zone.value} value={String(zone.value)}>
+                                {zone.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -346,7 +668,7 @@ const StageEditor = ({ stage, onChange, onDone }: StageEditorProps) => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {regularStageTypes.map((type) => (
+                            {availableStageTypes.map((type) => (
                               <SelectItem key={type} value={type}>
                                 {stageLabels[type]}
                               </SelectItem>
