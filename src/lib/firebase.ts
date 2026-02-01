@@ -19,6 +19,10 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
+// Secondary app instance for creating users without affecting current session
+const secondaryApp = initializeApp(firebaseConfig, "secondary");
+export const secondaryAuth = getAuth(secondaryApp);
+
 // Analytics is optional - may be blocked by ad blockers
 export let analytics: Analytics | null = null;
 try {

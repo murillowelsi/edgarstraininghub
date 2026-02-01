@@ -21,6 +21,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -32,14 +37,17 @@ import type { WorkoutFormData, WorkoutStage, WorkoutType } from "@/types/workout
 import {
   createDefaultStage,
   createRepeatBlock,
+  drillLabels,
+  equipmentLabels,
   getDefaultStageType,
   intensityLabels,
   stageColors,
   stageLabels,
+  strokeLabels,
   durationLabels,
   workoutTypeLabels,
 } from "@/types/workout";
-import { ArrowLeft, Bike, GripVertical, Loader2, Pencil, Plus, PersonStanding, Repeat, Save, Trash2, Waves } from "lucide-react";
+import { ArrowLeft, Bike, ChevronDown, ChevronRight, GripVertical, Loader2, Pencil, Plus, PersonStanding, Repeat, Save, Trash2, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -90,7 +98,22 @@ const formatIntensity = (stage: WorkoutStage): string | null => {
   return intensityLabels[intensity.type];
 };
 
-// Draggable stage item component
+// Helper to format swimming details
+const formatSwimmingDetails = (stage: WorkoutStage): string[] => {
+  const details: string[] = [];
+  if (stage.strokeType) {
+    details.push(strokeLabels[stage.strokeType]);
+  }
+  if (stage.drillType && stage.drillType !== "none") {
+    details.push(drillLabels[stage.drillType]);
+  }
+  if (stage.equipment && stage.equipment !== "none") {
+    details.push(equipmentLabels[stage.equipment]);
+  }
+  return details;
+};
+
+// Draggable stage item component with collapsible details
 const DraggableStage = ({
   stage,
   onEdit,
@@ -102,6 +125,7 @@ const DraggableStage = ({
   onDelete: () => void;
   isNested?: boolean;
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
     listeners,
@@ -119,6 +143,7 @@ const DraggableStage = ({
 
   const color = stageColors[stage.type];
   const intensityDisplay = formatIntensity(stage);
+  const swimmingDetails = formatSwimmingDetails(stage);
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -127,49 +152,144 @@ const DraggableStage = ({
           className="absolute left-0 top-0 bottom-0 w-1"
           style={{ backgroundColor: color }}
         />
-        <div className={`flex items-center gap-3 ${isNested ? 'p-3 pl-4' : 'p-4 pl-5'}`}>
-          <div
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-          >
-            <GripVertical className={isNested ? "h-4 w-4" : "h-5 w-5"} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className={`font-medium ${isNested ? 'text-sm' : ''}`}>
-              {stageLabels[stage.type]}
-            </p>
-            <div className={`flex items-center gap-4 text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
-              <span>{formatDuration(stage)}</span>
-              {intensityDisplay && (
-                <span className="text-primary/80">{intensityDisplay}</span>
-              )}
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+          <div className={isNested ? 'p-3 pl-4' : 'p-4 pl-5'}>
+            {/* Header row - always visible */}
+            <div className="flex items-center gap-3">
+              {/* Drag handle */}
+              <div
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+              >
+                <GripVertical className={isNested ? "h-4 w-4" : "h-5 w-5"} />
+              </div>
+
+              {/* Expand/collapse toggle */}
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-center w-6 h-6 rounded hover:bg-muted transition-colors">
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </button>
+              </CollapsibleTrigger>
+
+              {/* Stage summary */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3">
+                  <p className={`font-medium ${isNested ? 'text-sm' : ''}`}>
+                    {stageLabels[stage.type]}
+                  </p>
+                  <span className={`text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
+                    {formatDuration(stage)}
+                  </span>
+                  {!isExpanded && swimmingDetails.length > 0 && (
+                    <span className={`text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
+                      · {swimmingDetails[0]}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onEdit}
+                  className="text-primary h-8"
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onDelete}
+                  className="text-muted-foreground hover:text-destructive h-8 w-8"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            {stage.notes && (
-              <p className={`text-muted-foreground mt-1 truncate ${isNested ? 'text-xs' : 'text-sm'}`}>
-                {stage.notes}
-              </p>
-            )}
+
+            {/* Expanded details */}
+            <CollapsibleContent>
+              <div className={`ml-9 mt-3 pt-3 border-t space-y-3 ${isNested ? 'text-xs' : 'text-sm'}`}>
+                {/* Duration & Intensity row */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                      Duration
+                    </p>
+                    <p className="font-medium">{formatDuration(stage)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {durationLabels[stage.duration.type]}
+                    </p>
+                  </div>
+
+                  {intensityDisplay && (
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                        Intensity
+                      </p>
+                      <p className="font-medium">{intensityDisplay}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {intensityLabels[stage.intensity.type]}
+                      </p>
+                    </div>
+                  )}
+
+                  {stage.strokeType && (
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                        Stroke
+                      </p>
+                      <p className="font-medium">{strokeLabels[stage.strokeType]}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Swimming-specific details */}
+                {((stage.drillType && stage.drillType !== "none") ||
+                  (stage.equipment && stage.equipment !== "none")) && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {stage.drillType && stage.drillType !== "none" && (
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                          Drill Type
+                        </p>
+                        <p className="font-medium">{drillLabels[stage.drillType]}</p>
+                      </div>
+                    )}
+
+                    {stage.equipment && stage.equipment !== "none" && (
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                          Equipment
+                        </p>
+                        <p className="font-medium">{equipmentLabels[stage.equipment]}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Notes */}
+                {stage.notes && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                      Notes
+                    </p>
+                    <p className="text-muted-foreground bg-muted/50 p-2 rounded">
+                      {stage.notes}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CollapsibleContent>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEdit}
-              className="text-primary h-8"
-            >
-              Edit
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onDelete}
-              className="text-muted-foreground hover:text-destructive h-8 w-8"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        </Collapsible>
       </Card>
     </div>
   );
@@ -221,6 +341,7 @@ const RepeatBlock = ({
   onDoneEditing: () => void;
   workoutType?: WorkoutType;
 }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
   const {
     attributes,
     listeners,
@@ -246,78 +367,99 @@ const RepeatBlock = ({
           className="absolute left-0 top-0 bottom-0 w-1"
           style={{ backgroundColor: color }}
         />
-        <div className="p-4 pl-5">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              {...attributes}
-              {...listeners}
-              className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-            >
-              <GripVertical className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <Repeat className="h-4 w-4 text-indigo-500" />
-                <p className="font-medium">Repeat {stage.repeatCount || 2}x</p>
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+          <div className="p-4 pl-5">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <div
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+              >
+                <GripVertical className="h-5 w-5" />
+              </div>
+
+              {/* Expand/collapse toggle */}
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-center w-6 h-6 rounded hover:bg-muted transition-colors">
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </button>
+              </CollapsibleTrigger>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <Repeat className="h-4 w-4 text-indigo-500" />
+                  <p className="font-medium">Repeat {stage.repeatCount || 2}x</p>
+                  {!isExpanded && nestedStages.length > 0 && (
+                    <span className="text-sm text-muted-foreground">
+                      ({nestedStages.length} stages)
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onEdit}
+                  className="text-primary h-8"
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onDelete}
+                  className="text-muted-foreground hover:text-destructive h-8 w-8"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onEdit}
-                className="text-primary h-8"
-              >
-                Edit
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onDelete}
-                className="text-muted-foreground hover:text-destructive h-8 w-8"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
 
-          {/* Nested stages - droppable area */}
-          <div className="ml-6 space-y-2 border-l-2 border-indigo-200 dark:border-indigo-800 pl-4 min-h-[60px] py-2">
-            <SortableContext
-              items={nestedStages.map((s) => s.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {nestedStages.map((nestedStage) => (
-                editingStageId === nestedStage.id ? (
-                  <StageEditor
-                    key={nestedStage.id}
-                    stage={nestedStage}
-                    onChange={(updated) => {
-                      const newStages = nestedStages.map((s) =>
-                        s.id === updated.id ? updated : s
-                      );
-                      onNestedStagesChange(newStages);
-                    }}
-                    onDone={onDoneEditing}
-                    workoutType={workoutType}
-                  />
-                ) : (
-                  <DraggableStage
-                    key={nestedStage.id}
-                    stage={nestedStage}
-                    onEdit={() => onEditNested(nestedStage.id)}
-                    onDelete={() => onDeleteNested(nestedStage.id)}
-                    isNested
-                  />
-                )
-              ))}
-            </SortableContext>
-            {nestedStages.length === 0 && (
-              <EmptyRepeatDropZone repeatId={stage.id} />
-            )}
+            {/* Nested stages - collapsible droppable area */}
+            <CollapsibleContent>
+              <div className="ml-9 mt-3 space-y-2 border-l-2 border-indigo-200 dark:border-indigo-800 pl-4 min-h-[60px] py-2">
+                <SortableContext
+                  items={nestedStages.map((s) => s.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {nestedStages.map((nestedStage) => (
+                    editingStageId === nestedStage.id ? (
+                      <StageEditor
+                        key={nestedStage.id}
+                        stage={nestedStage}
+                        onChange={(updated) => {
+                          const newStages = nestedStages.map((s) =>
+                            s.id === updated.id ? updated : s
+                          );
+                          onNestedStagesChange(newStages);
+                        }}
+                        onDone={onDoneEditing}
+                        workoutType={workoutType}
+                      />
+                    ) : (
+                      <DraggableStage
+                        key={nestedStage.id}
+                        stage={nestedStage}
+                        onEdit={() => onEditNested(nestedStage.id)}
+                        onDelete={() => onDeleteNested(nestedStage.id)}
+                        isNested
+                      />
+                    )
+                  ))}
+                </SortableContext>
+                {nestedStages.length === 0 && (
+                  <EmptyRepeatDropZone repeatId={stage.id} />
+                )}
+              </div>
+            </CollapsibleContent>
           </div>
-        </div>
+        </Collapsible>
       </Card>
     </div>
   );
@@ -380,6 +522,7 @@ const WorkoutEditor = () => {
 
   // Get workout type from URL query param (for new workouts)
   const urlWorkoutType = (searchParams.get("type") as WorkoutType) || "running";
+  const fromCalendar = searchParams.get("fromCalendar") === "true";
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
@@ -458,14 +601,21 @@ const WorkoutEditor = () => {
           title: "Workout updated",
           description: "Your changes have been saved.",
         });
+        navigate("/admin/workouts");
       } else {
-        await createWorkout(formData, user?.uid || "");
+        const newWorkoutId = await createWorkout(formData, user?.uid || "");
         toast({
           title: "Workout created",
           description: "Your workout has been created successfully.",
         });
+
+        // If we came from the calendar, redirect back with the new workout ID
+        if (fromCalendar) {
+          navigate(`/admin/calendar?newWorkoutId=${newWorkoutId}`);
+        } else {
+          navigate("/admin/workouts");
+        }
       }
-      navigate("/admin/workouts");
     } catch (error: unknown) {
       console.error("Error saving workout:", error);
       const errorMessage =

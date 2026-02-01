@@ -1,12 +1,14 @@
 import type { Timestamp } from "firebase/firestore";
+import type { WorkoutExercise } from "./exercise";
 
 // Workout types
-export type WorkoutType = "running" | "cycling" | "swimming";
+export type WorkoutType = "running" | "cycling" | "swimming" | "strength";
 
 export const workoutTypeLabels: Record<WorkoutType, string> = {
   running: "Running",
   cycling: "Cycling",
   swimming: "Swimming",
+  strength: "Strength",
 };
 
 // Stage types with associated colors
@@ -195,6 +197,7 @@ export interface Workout {
   name: string;
   type: WorkoutType;
   stages: WorkoutStage[];
+  exercises?: WorkoutExercise[]; // For strength workouts
   notes?: string;
   authorId: string;
   createdAt: Date;
@@ -206,6 +209,7 @@ export interface WorkoutFormData {
   name: string;
   type: WorkoutType;
   stages: WorkoutStage[];
+  exercises?: WorkoutExercise[]; // For strength workouts
   notes?: string;
 }
 
@@ -214,6 +218,7 @@ export interface WorkoutDocument {
   name: string;
   type: WorkoutType;
   stages: WorkoutStage[];
+  exercises?: WorkoutExercise[]; // For strength workouts
   notes?: string;
   authorId: string;
   createdAt: Timestamp;

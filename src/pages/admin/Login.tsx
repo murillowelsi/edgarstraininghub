@@ -22,17 +22,22 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, isAthlete, userRole, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
-  // Get the redirect path from state, or default to admin posts
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/admin/posts";
+  // Get the redirect path from state
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
 
-  // If already logged in and is admin, redirect
-  if (!authLoading && user && isAdmin) {
-    return <Navigate to={from} replace />;
+  // If already logged in, redirect based on role
+  if (!authLoading && user && userRole) {
+    if (isAdmin) {
+      return <Navigate to={from || "/admin/posts"} replace />;
+    }
+    if (isAthlete) {
+      return <Navigate to="/athlete" replace />;
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,12 +47,12 @@ const AdminLogin = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-      // Check if user is admin
+      // Check user role
       const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
-      if (!userDoc.exists() || userDoc.data()?.role !== "admin") {
+      if (!userDoc.exists()) {
         toast({
           title: "Access Denied",
-          description: "You don't have admin privileges.",
+          description: "User account not found.",
           variant: "destructive",
         });
         await auth.signOut();
@@ -55,11 +60,22 @@ const AdminLogin = () => {
         return;
       }
 
+      const role = userDoc.data()?.role;
+
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      navigate(from, { replace: true });
+
+      // Redirect based on role
+      if (role === "admin") {
+        navigate(from || "/admin/posts", { replace: true });
+      } else if (role === "athlete") {
+        navigate("/athlete", { replace: true });
+      } else {
+        // Editor or other roles go to admin
+        navigate(from || "/admin/posts", { replace: true });
+      }
     } catch (error: unknown) {
       console.error("Login error:", error);
       toast({
@@ -86,9 +102,9 @@ const AdminLogin = () => {
       <main className="flex-1 flex items-center justify-center bg-muted p-4 pt-24">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+            <CardTitle className="text-2xl font-bold">Login</CardTitle>
             <CardDescription>
-              Sign in to manage your blog posts
+              Sign in to access your account
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -26,13 +26,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { deleteAssignmentsByWorkout } from "@/services/workoutAssignmentsService";
 import { deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
 import type { Workout } from "@/types/workout";
 import { format } from "date-fns";
-import { Bike, ChevronDown, Edit, Loader2, PersonStanding, Plus, Trash2, Waves } from "lucide-react";
+import { Bike, ChevronDown, Dumbbell, Edit, Loader2, PersonStanding, Plus, Trash2, UserPlus, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
+import { AssignWorkoutDialog } from "../../components/workout/AssignWorkoutDialog";
 
 const workoutTypeLabels: Record<string, string> = {
   running: "Running",
@@ -52,6 +54,8 @@ const AdminWorkouts = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -77,11 +81,13 @@ const AdminWorkouts = () => {
   const handleDelete = async (id: string) => {
     setDeleting(id);
     try {
+      // Delete associated assignments first (cascade delete)
+      await deleteAssignmentsByWorkout(id);
       await deleteWorkout(id);
       setWorkouts(workouts.filter((w) => w.id !== id));
       toast({
         title: "Workout deleted",
-        description: "The workout has been permanently deleted.",
+        description: "The workout and its assignments have been permanently deleted.",
       });
     } catch (error) {
       console.error("Error deleting workout:", error);
@@ -93,6 +99,11 @@ const AdminWorkouts = () => {
     } finally {
       setDeleting(null);
     }
+  };
+
+  const handleAssignClick = (workout: Workout) => {
+    setSelectedWorkout(workout);
+    setAssignDialogOpen(true);
   };
 
   return (
@@ -127,6 +138,12 @@ const AdminWorkouts = () => {
                   Swimming Workout
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/admin/workouts/strength/new" className="flex items-center">
+                  <Dumbbell className="h-4 w-4 mr-2" />
+                  Strength Workout
+                </Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -157,6 +174,12 @@ const AdminWorkouts = () => {
                   Swimming
                 </Button>
               </Link>
+              <Link to="/admin/workouts/strength/new">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Dumbbell className="h-4 w-4 mr-2" />
+                  Strength
+                </Button>
+              </Link>
             </div>
           </div>
         ) : (
@@ -182,16 +205,29 @@ const AdminWorkouts = () => {
                         {workout.type === "cycling" && <Bike className="h-3 w-3" />}
                         {workout.type === "running" && <PersonStanding className="h-3 w-3" />}
                         {workout.type === "swimming" && <Waves className="h-3 w-3" />}
+                        {workout.type === "strength" && <Dumbbell className="h-3 w-3" />}
                         {workoutTypeLabels[workout.type]}
                       </Badge>
                     </TableCell>
-                    <TableCell>{workout.stages.length} stages</TableCell>
+                    <TableCell>
+                      {workout.type === "strength"
+                        ? `${workout.exercises?.length || 0} exercises`
+                        : `${workout.stages.length} stages`}
+                    </TableCell>
                     <TableCell>
                       {format(workout.createdAt, "MMM d, yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Link to={`/admin/workouts/${workout.id}/edit`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAssignClick(workout)}
+                          title="Assign to athletes"
+                        >
+                          <UserPlus className="h-4 w-4" />
+                        </Button>
+                        <Link to={workout.type === "strength" ? `/admin/workouts/strength/${workout.id}/edit` : `/admin/workouts/${workout.id}/edit`}>
                           <Button variant="ghost" size="sm">
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -238,6 +274,12 @@ const AdminWorkouts = () => {
           </div>
         )}
       </div>
+
+      <AssignWorkoutDialog
+        workout={selectedWorkout}
+        open={assignDialogOpen}
+        onOpenChange={setAssignDialogOpen}
+      />
     </AdminLayout>
   );
 };

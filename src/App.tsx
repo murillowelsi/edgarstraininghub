@@ -14,13 +14,19 @@ import BlogPage from "./pages/BlogPage";
 import Contact from "./pages/Contact";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import AdminCalendar from "./pages/admin/Calendar";
 import AdminLogin from "./pages/admin/Login";
 import AdminPostForm from "./pages/admin/PostForm";
 import AdminPosts from "./pages/admin/Posts";
 import AdminUserForm from "./pages/admin/UserForm";
 import AdminUsers from "./pages/admin/Users";
+import AdminStrengthWorkoutEditor from "./pages/admin/StrengthWorkoutEditor";
 import AdminWorkoutEditor from "./pages/admin/WorkoutEditor";
 import AdminWorkouts from "./pages/admin/Workouts";
+import AthleteCalendarView from "./pages/athlete/CalendarView";
+import AthleteHome from "./pages/athlete/Home";
+import AthleteWorkoutsList from "./pages/athlete/WorkoutsList";
+import AthleteWorkoutView from "./pages/athlete/WorkoutView";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +47,9 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogArticlePage />} />
+
+                {/* Login Route */}
+                <Route path="/login" element={<AdminLogin />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
@@ -113,6 +122,64 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAdmin>
                       <AdminWorkoutEditor />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/workouts/strength/new"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminStrengthWorkoutEditor />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/workouts/strength/:id/edit"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminStrengthWorkoutEditor />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/calendar"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminCalendar />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Athlete Routes */}
+                <Route
+                  path="/athlete"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteHome />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/calendar"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteCalendarView />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/workouts"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteWorkoutsList />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/workout/:id"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteWorkoutView />
                     </ProtectedRoute>
                   }
                 />

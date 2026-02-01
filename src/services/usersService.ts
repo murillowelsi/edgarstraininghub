@@ -10,8 +10,9 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
+import { db, secondaryAuth } from "../lib/firebase";
 import type { User, UserDocument, UserFormData } from "../types/user";
 
 const USERS_COLLECTION = "users";
@@ -66,19 +67,23 @@ export const getUserById = async (id: string): Promise<User | null> => {
 };
 
 // Create new user (creates both Auth user and Firestore document)
+// Uses secondary auth instance to avoid logging out the current admin
 export const createUser = async (data: UserFormData): Promise<string> => {
   if (!data.password) {
     throw new Error("Password is required for new users");
   }
 
-  // Create Firebase Auth user
+  // Create Firebase Auth user using secondary auth (doesn't affect current session)
   const userCredential = await createUserWithEmailAndPassword(
-    auth,
+    secondaryAuth,
     data.email,
     data.password
   );
 
   const uid = userCredential.user.uid;
+
+  // Sign out from secondary auth immediately
+  await secondaryAuth.signOut();
 
   // Create Firestore user document
   await setDoc(doc(db, USERS_COLLECTION, uid), {
@@ -118,4 +123,18 @@ export const updateUser = async (
 export const deleteUser = async (id: string): Promise<void> => {
   const docRef = doc(db, USERS_COLLECTION, id);
   await deleteDoc(docRef);
+};
+
+// Get users by role
+export const getUsersByRole = async (role: string): Promise<User[]> => {
+  const q = query(
+    collection(db, USERS_COLLECTION),
+    where("role", "==", role)
+  );
+  const snapshot = await getDocs(q);
+  const users = await Promise.all(
+    snapshot.docs.map((doc) => docToUser(doc.id, doc.data() as UserDocument))
+  );
+  // Sort by displayName in JavaScript to avoid needing a composite index
+  return users.sort((a, b) => a.displayName.localeCompare(b.displayName));
 };

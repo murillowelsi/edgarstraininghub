@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import type { Workout, WorkoutDocument, WorkoutFormData, WorkoutStage } from "../types/workout";
+import type { WorkoutExercise } from "../types/exercise";
 
 const WORKOUTS_COLLECTION = "workouts";
 
@@ -60,12 +61,31 @@ const cleanStagesForFirestore = (stages: WorkoutStage[]): Record<string, unknown
   });
 };
 
+// Clean exercises data for Firestore (remove undefined values and circular refs)
+const cleanExercisesForFirestore = (exercises: WorkoutExercise[]): Record<string, unknown>[] => {
+  return exercises.map((exercise) =>
+    removeUndefined({
+      id: exercise.id,
+      exerciseId: exercise.exerciseId,
+      sets: exercise.sets,
+      reps: exercise.reps,
+      weight: exercise.weight,
+      duration: exercise.duration,
+      restSeconds: exercise.restSeconds,
+      notes: exercise.notes,
+      order: exercise.order,
+      // Don't include the populated exercise object
+    })
+  );
+};
+
 // Convert Firestore document to Workout
 const docToWorkout = (id: string, data: WorkoutDocument): Workout => ({
   id,
   name: data.name,
   type: data.type,
   stages: data.stages || [],
+  exercises: data.exercises || [],
   notes: data.notes,
   authorId: data.authorId,
   createdAt: data.createdAt?.toDate() || new Date(),
@@ -99,7 +119,7 @@ export const createWorkout = async (
   data: WorkoutFormData,
   authorId: string
 ): Promise<string> => {
-  const docRef = await addDoc(collection(db, WORKOUTS_COLLECTION), {
+  const workoutData: Record<string, unknown> = {
     name: data.name,
     type: data.type,
     stages: cleanStagesForFirestore(data.stages),
@@ -107,7 +127,14 @@ export const createWorkout = async (
     authorId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-  });
+  };
+
+  // Add exercises for strength workouts
+  if (data.type === "strength" && data.exercises) {
+    workoutData.exercises = cleanExercisesForFirestore(data.exercises);
+  }
+
+  const docRef = await addDoc(collection(db, WORKOUTS_COLLECTION), workoutData);
 
   return docRef.id;
 };
@@ -119,13 +146,20 @@ export const updateWorkout = async (
 ): Promise<void> => {
   const docRef = doc(db, WORKOUTS_COLLECTION, id);
 
-  await updateDoc(docRef, {
+  const updateData: Record<string, unknown> = {
     name: data.name,
     type: data.type,
     stages: cleanStagesForFirestore(data.stages),
     notes: data.notes || "",
     updatedAt: serverTimestamp(),
-  });
+  };
+
+  // Add exercises for strength workouts
+  if (data.type === "strength" && data.exercises) {
+    updateData.exercises = cleanExercisesForFirestore(data.exercises);
+  }
+
+  await updateDoc(docRef, updateData);
 };
 
 // Delete workout

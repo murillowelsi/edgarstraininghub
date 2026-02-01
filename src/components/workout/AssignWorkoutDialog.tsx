@@ -1,0 +1,253 @@
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { createAssignments } from "@/services/workoutAssignmentsService";
+import { getUsersByRole } from "@/services/usersService";
+import type { User } from "@/types/user";
+import type { Workout } from "@/types/workout";
+import { format } from "date-fns";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+
+interface AssignWorkoutDialogProps {
+  workout: Workout | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
+}
+
+export const AssignWorkoutDialog = ({
+  workout,
+  open,
+  onOpenChange,
+  onSuccess,
+}: AssignWorkoutDialogProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [athletes, setAthletes] = useState<User[]>([]);
+  const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(
+    undefined
+  );
+  const [loading, setLoading] = useState(false);
+  const [loadingAthletes, setLoadingAthletes] = useState(false);
+
+  useEffect(() => {
+    const loadAthletes = async () => {
+      setLoadingAthletes(true);
+      try {
+        const athleteUsers = await getUsersByRole("athlete");
+        setAthletes(athleteUsers);
+      } catch (error) {
+        console.error("Error loading athletes:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load athletes.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingAthletes(false);
+      }
+    };
+
+    if (open) {
+      loadAthletes();
+      // Reset form when dialog opens
+      setSelectedAthletes([]);
+      setScheduledDate(undefined);
+    }
+  }, [open, toast]);
+
+  const handleAthleteToggle = (athleteId: string) => {
+    setSelectedAthletes((prev) =>
+      prev.includes(athleteId)
+        ? prev.filter((id) => id !== athleteId)
+        : [...prev, athleteId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedAthletes.length === athletes.length) {
+      setSelectedAthletes([]);
+    } else {
+      setSelectedAthletes(athletes.map((a) => a.id));
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!workout || !user || selectedAthletes.length === 0 || !scheduledDate) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createAssignments(
+        {
+          workoutId: workout.id,
+          athleteIds: selectedAthletes,
+          scheduledDate,
+        },
+        user.uid
+      );
+
+      toast({
+        title: "Workout assigned",
+        description: `Successfully assigned "${workout.name}" to ${selectedAthletes.length} athlete${selectedAthletes.length > 1 ? "s" : ""}.`,
+      });
+
+      onOpenChange(false);
+      onSuccess?.();
+    } catch (error) {
+      console.error("Error assigning workout:", error);
+      toast({
+        title: "Error",
+        description: "Failed to assign workout.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isValid = selectedAthletes.length > 0 && scheduledDate;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Assign Workout</DialogTitle>
+          <DialogDescription>
+            Assign "{workout?.name}" to athletes with a scheduled date.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          {/* Date Picker */}
+          <div className="space-y-2">
+            <Label>Scheduled Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !scheduledDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {scheduledDate
+                    ? format(scheduledDate, "PPP")
+                    : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={scheduledDate}
+                  onSelect={setScheduledDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Athletes List */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Select Athletes</Label>
+              {athletes.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSelectAll}
+                >
+                  {selectedAthletes.length === athletes.length
+                    ? "Deselect All"
+                    : "Select All"}
+                </Button>
+              )}
+            </div>
+
+            {loadingAthletes ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : athletes.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No athletes found. Create athlete users first.
+              </div>
+            ) : (
+              <ScrollArea className="h-[200px] rounded-md border p-4">
+                <div className="space-y-3">
+                  {athletes.map((athlete) => (
+                    <div
+                      key={athlete.id}
+                      className="flex items-center space-x-3"
+                    >
+                      <Checkbox
+                        id={`athlete-${athlete.id}`}
+                        checked={selectedAthletes.includes(athlete.id)}
+                        onCheckedChange={() => handleAthleteToggle(athlete.id)}
+                      />
+                      <Label
+                        htmlFor={`athlete-${athlete.id}`}
+                        className="flex-1 cursor-pointer"
+                      >
+                        <span className="font-medium">
+                          {athlete.displayName}
+                        </span>
+                        <span className="text-muted-foreground ml-2 text-sm">
+                          {athlete.email}
+                        </span>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+
+            {selectedAthletes.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                {selectedAthletes.length} athlete
+                {selectedAthletes.length > 1 ? "s" : ""} selected
+              </p>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={!isValid || loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Assign Workout
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};

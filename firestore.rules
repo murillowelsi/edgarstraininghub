@@ -28,9 +28,25 @@ service cloud.firestore {
       allow create, update, delete: if isEditor();
     }
 
-    // Workouts collection: admins can CRUD
+    // Workouts collection: admins can CRUD, athletes can read assigned workouts
     match /workouts/{workoutId} {
-      allow read, create, update, delete: if isAdmin();
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Workout assignments: admins can CRUD, athletes can read their own and update completion
+    match /workoutAssignments/{assignmentId} {
+      allow read: if request.auth != null &&
+        (isAdmin() || resource.data.athleteId == request.auth.uid);
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (request.auth != null && resource.data.athleteId == request.auth.uid);
+    }
+
+    // Exercises collection: admins can CRUD, authenticated users can read
+    match /exercises/{exerciseId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
     }
 
     // Default deny
