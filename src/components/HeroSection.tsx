@@ -37,8 +37,8 @@ const HeroSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center max-w-7xl mx-auto">
           <div className="space-y-5 md:space-y-8 animate-slide-in-left text-center md:text-left">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
-              {t.hero.title}{" "}
-              <span className="text-primary">{t.hero.titleHighlight}</span>
+              <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-foreground align-middle">{t.hero.title}</span>{" "}
+              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-primary font-bold whitespace-nowrap align-middle">{t.hero.titleHighlight}</span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-xl leading-relaxed mx-auto md:mx-0">
               {t.hero.subtitle}
