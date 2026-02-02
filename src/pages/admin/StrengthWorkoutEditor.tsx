@@ -394,10 +394,15 @@ const WorkoutExerciseRow = ({
   onUpdate: (updates: Partial<WorkoutExercise>) => void;
   onRemove: () => void;
 }) => {
-  const videoId = exercise?.videoUrl ? getYouTubeVideoId(exercise.videoUrl) : null;
+  // Use exercise from lookup, or fall back to denormalized data stored with workout item
+  const exerciseName = exercise?.name || item.exerciseName || "Unknown Exercise";
+  const videoUrl = exercise?.videoUrl || item.exerciseVideoUrl;
+  const thumbnailUrl = exercise?.thumbnailUrl || item.exerciseThumbnailUrl;
+
+  const videoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
   const thumbnail = videoId
     ? getYouTubeThumbnail(videoId)
-    : exercise?.thumbnailUrl || null;
+    : thumbnailUrl || null;
 
   return (
     <div className="flex items-center gap-3 p-3 bg-card border rounded-lg">
@@ -409,7 +414,7 @@ const WorkoutExerciseRow = ({
         {thumbnail ? (
           <img
             src={thumbnail}
-            alt={exercise?.name || "Exercise"}
+            alt={exerciseName}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -420,7 +425,7 @@ const WorkoutExerciseRow = ({
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="font-medium truncate">{exercise?.name || "Unknown"}</p>
+        <p className="font-medium truncate">{exerciseName}</p>
         <div className="flex items-center gap-2 mt-1">
           <Input
             type="number"
@@ -527,7 +532,25 @@ const StrengthWorkoutEditor = () => {
         if (workout) {
           setName(workout.name);
           setNotes(workout.notes || "");
-          setWorkoutExercises(workout.exercises || []);
+
+          // Populate exercise reference on each workout exercise for proper display and re-saving
+          const populatedExercises = (workout.exercises || []).map((we) => {
+            // Try to find exercise by ID first
+            let exercise = loadedExercises.find((e) => e.id === we.exerciseId);
+
+            // If not found by ID, try to find by name (for workouts created before seeding)
+            if (!exercise && we.exerciseName) {
+              exercise = loadedExercises.find((e) => e.name === we.exerciseName);
+            }
+
+            // Return workout exercise with populated exercise reference
+            return {
+              ...we,
+              exercise: exercise || undefined,
+            };
+          });
+
+          setWorkoutExercises(populatedExercises);
         }
       }
     } catch (error) {
@@ -585,6 +608,12 @@ const StrengthWorkoutEditor = () => {
       reps: "10",
       restSeconds: 60,
       order: workoutExercises.length,
+      // Store denormalized data directly for reliable saving
+      exerciseName: exercise.name,
+      exerciseVideoUrl: exercise.videoUrl,
+      exerciseThumbnailUrl: exercise.thumbnailUrl,
+      exerciseMuscleGroups: exercise.muscleGroups,
+      exerciseInstructions: exercise.instructions,
     };
     setWorkoutExercises([...workoutExercises, newItem]);
     toast({ title: `Added: ${exercise.name}` });

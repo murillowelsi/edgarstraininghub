@@ -18,26 +18,24 @@ import {
   startOfDay,
   startOfWeek,
 } from "date-fns";
+import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   Award,
-  Bike,
   CalendarCheck,
   ChevronRight,
   Dumbbell,
   Flame,
   Loader2,
-  PersonStanding,
   Target,
   TrendingUp,
-  Waves,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
-  running: PersonStanding,
-  cycling: Bike,
-  swimming: Waves,
+  running: GrRun,
+  cycling: GrBike,
+  swimming: GrSwim,
   strength: Dumbbell,
 };
 
@@ -145,7 +143,7 @@ const AthleteHome = () => {
 
   return (
     <AthletePortalLayout>
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-4">
         {/* Welcome Section */}
         <div className="pt-2">
           <p className="text-muted-foreground">Welcome back,</p>
@@ -308,7 +306,7 @@ const AthleteHome = () => {
                   <p className="text-sm">No workouts scheduled</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div>
                   {selectedDateAssignments.map((assignment) => {
                     const workout = assignment.workout;
                     const Icon = workoutTypeIcons[workout.type] || PersonStanding;
@@ -321,7 +319,7 @@ const AthleteHome = () => {
                       >
                         <div
                           className={cn(
-                            "flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md",
+                            "flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md mb-2",
                             isCompleted
                               ? "bg-green-50 border-green-200 dark:bg-green-950/20"
                               : "bg-card hover:border-primary/50"

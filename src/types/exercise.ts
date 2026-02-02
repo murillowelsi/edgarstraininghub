@@ -114,6 +114,12 @@ export interface WorkoutExercise {
   restSeconds: number;
   notes?: string;
   order: number;
+  // Denormalized exercise data (stored with workout for offline access)
+  exerciseName?: string;
+  exerciseVideoUrl?: string;
+  exerciseThumbnailUrl?: string;
+  exerciseMuscleGroups?: MuscleGroup[];
+  exerciseInstructions?: string;
 }
 
 // Helper to extract YouTube video ID

@@ -30,7 +30,8 @@ import { deleteAssignmentsByWorkout } from "@/services/workoutAssignmentsService
 import { deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
 import type { Workout } from "@/types/workout";
 import { format } from "date-fns";
-import { Bike, ChevronDown, Dumbbell, Edit, Loader2, PersonStanding, Plus, Trash2, UserPlus, Waves } from "lucide-react";
+import { GrSwim, GrBike, GrRun } from "react-icons/gr";
+import { ChevronDown, Dumbbell, Edit, Loader2, Plus, Trash2, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -122,19 +123,19 @@ const AdminWorkouts = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link to="/admin/workouts/new?type=running" className="flex items-center">
-                  <PersonStanding className="h-4 w-4 mr-2" />
+                  <GrRun className="h-4 w-4 mr-2" />
                   Running Workout
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/admin/workouts/new?type=cycling" className="flex items-center">
-                  <Bike className="h-4 w-4 mr-2" />
+                  <GrBike className="h-4 w-4 mr-2" />
                   Cycling Workout
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/admin/workouts/new?type=swimming" className="flex items-center">
-                  <Waves className="h-4 w-4 mr-2" />
+                  <GrSwim className="h-4 w-4 mr-2" />
                   Swimming Workout
                 </Link>
               </DropdownMenuItem>
@@ -158,19 +159,19 @@ const AdminWorkouts = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
               <Link to="/admin/workouts/new?type=running">
                 <Button variant="outline" className="w-full sm:w-auto">
-                  <PersonStanding className="h-4 w-4 mr-2" />
+                  <GrRun className="h-4 w-4 mr-2" />
                   Running
                 </Button>
               </Link>
               <Link to="/admin/workouts/new?type=cycling">
                 <Button variant="outline" className="w-full sm:w-auto">
-                  <Bike className="h-4 w-4 mr-2" />
+                  <GrBike className="h-4 w-4 mr-2" />
                   Cycling
                 </Button>
               </Link>
               <Link to="/admin/workouts/new?type=swimming">
                 <Button variant="outline" className="w-full sm:w-auto">
-                  <Waves className="h-4 w-4 mr-2" />
+                  <GrSwim className="h-4 w-4 mr-2" />
                   Swimming
                 </Button>
               </Link>
@@ -202,9 +203,9 @@ const AdminWorkouts = () => {
                     </TableCell>
                     <TableCell>
                       <Badge className={`${workoutTypeBadgeColors[workout.type]} flex items-center gap-1.5 w-fit`}>
-                        {workout.type === "cycling" && <Bike className="h-3 w-3" />}
-                        {workout.type === "running" && <PersonStanding className="h-3 w-3" />}
-                        {workout.type === "swimming" && <Waves className="h-3 w-3" />}
+                        {workout.type === "cycling" && <GrBike className="h-3 w-3" />}
+                        {workout.type === "running" && <GrRun className="h-3 w-3" />}
+                        {workout.type === "swimming" && <GrSwim className="h-3 w-3" />}
                         {workout.type === "strength" && <Dumbbell className="h-3 w-3" />}
                         {workoutTypeLabels[workout.type]}
                       </Badge>

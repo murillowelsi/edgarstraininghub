@@ -25,6 +25,7 @@ import AdminWorkoutEditor from "./pages/admin/WorkoutEditor";
 import AdminWorkouts from "./pages/admin/Workouts";
 import AthleteCalendarView from "./pages/athlete/CalendarView";
 import AthleteHome from "./pages/athlete/Home";
+import AthleteStrengthSession from "./pages/athlete/StrengthWorkoutSession";
 import AthleteWorkoutsList from "./pages/athlete/WorkoutsList";
 import AthleteWorkoutView from "./pages/athlete/WorkoutView";
 
@@ -180,6 +181,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAthlete>
                       <AthleteWorkoutView />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/workout/:id/session"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteStrengthSession />
                     </ProtectedRoute>
                   }
                 />

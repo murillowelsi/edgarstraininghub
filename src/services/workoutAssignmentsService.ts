@@ -38,14 +38,55 @@ const docToAssignment = (
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
 
+// Check if an assignment already exists
+const assignmentExists = async (
+  workoutId: string,
+  athleteId: string,
+  scheduledDate: Date
+): Promise<boolean> => {
+  // Get the start and end of the scheduled date to match any time on that day
+  const startOfDay = new Date(scheduledDate);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(scheduledDate);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const q = query(
+    collection(db, ASSIGNMENTS_COLLECTION),
+    where("workoutId", "==", workoutId),
+    where("athleteId", "==", athleteId)
+  );
+  const snapshot = await getDocs(q);
+
+  // Check if any existing assignment is on the same date
+  return snapshot.docs.some((doc) => {
+    const data = doc.data() as WorkoutAssignmentDocument;
+    const assignmentDate = data.scheduledDate?.toDate();
+    if (!assignmentDate) return false;
+    return assignmentDate >= startOfDay && assignmentDate <= endOfDay;
+  });
+};
+
 // Create assignments for multiple athletes
 export const createAssignments = async (
   data: WorkoutAssignmentFormData,
   assignedBy: string
 ): Promise<string[]> => {
   const ids: string[] = [];
+  const skipped: string[] = [];
 
   for (const athleteId of data.athleteIds) {
+    // Check if assignment already exists
+    const exists = await assignmentExists(
+      data.workoutId,
+      athleteId,
+      data.scheduledDate
+    );
+
+    if (exists) {
+      skipped.push(athleteId);
+      continue;
+    }
+
     const docRef = await addDoc(collection(db, ASSIGNMENTS_COLLECTION), {
       workoutId: data.workoutId,
       athleteId,
@@ -137,6 +178,44 @@ export const getAllAssignments = async (): Promise<WorkoutAssignment[]> => {
   return snapshot.docs.map((doc) =>
     docToAssignment(doc.id, doc.data() as WorkoutAssignmentDocument)
   );
+};
+
+// Remove duplicate assignments (keeps the oldest one for each workout+athlete+date combo)
+export const removeDuplicateAssignments = async (): Promise<number> => {
+  const allAssignments = await getAllAssignments();
+
+  // Group by workout + athlete + date (date as YYYY-MM-DD string)
+  const groups = new Map<string, WorkoutAssignment[]>();
+
+  for (const assignment of allAssignments) {
+    const dateStr = assignment.scheduledDate.toISOString().split("T")[0];
+    const key = `${assignment.workoutId}-${assignment.athleteId}-${dateStr}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key)!.push(assignment);
+  }
+
+  // Find and delete duplicates (keep the oldest one based on createdAt)
+  let deletedCount = 0;
+
+  for (const [, assignments] of groups) {
+    if (assignments.length > 1) {
+      // Sort by createdAt ascending (oldest first)
+      assignments.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      );
+
+      // Delete all but the first (oldest) one
+      for (let i = 1; i < assignments.length; i++) {
+        await deleteAssignment(assignments[i].id);
+        deletedCount++;
+      }
+    }
+  }
+
+  return deletedCount;
 };
 
 // Get all assignments with workout and athlete details (for admin calendar)

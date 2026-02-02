@@ -7,23 +7,21 @@ import { cn } from "@/lib/utils";
 import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmentsService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { addDays, format, isSameDay, isToday, isTomorrow } from "date-fns";
+import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
-  Bike,
   Check,
   ChevronRight,
   Dumbbell,
   Loader2,
-  PersonStanding,
   RefreshCw,
-  Waves,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
-  running: PersonStanding,
-  cycling: Bike,
-  swimming: Waves,
+  running: GrRun,
+  cycling: GrBike,
+  swimming: GrSwim,
   strength: Dumbbell,
 };
 
@@ -188,7 +186,7 @@ const AthleteCalendarView = () => {
 
               {/* Workouts for this day */}
               {hasWorkouts && (
-                <div className="px-4 pb-3 space-y-2">
+                <div className="px-4 pb-3">
                   {dayAssignments.map((assignment) => {
                     const workout = assignment.workout;
                     const Icon =
@@ -202,7 +200,7 @@ const AthleteCalendarView = () => {
                       >
                         <Card
                           className={cn(
-                            "transition-all hover:shadow-md",
+                            "transition-all hover:shadow-md mb-2",
                             isCompleted
                               ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800"
                               : "hover:border-primary/50"

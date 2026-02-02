@@ -267,25 +267,34 @@ const StageItem = ({
   );
 };
 
+// Exercise data type for video dialog (can be from Exercise or denormalized data)
+interface ExerciseDialogData {
+  name: string;
+  videoUrl?: string;
+  instructions?: string;
+  muscleGroups?: string[];
+  equipment?: string[];
+}
+
 // Video dialog for exercises
 const ExerciseVideoDialog = ({
-  exercise,
+  exerciseData,
   open,
   onOpenChange,
 }: {
-  exercise: Exercise | null;
+  exerciseData: ExerciseDialogData | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {
-  if (!exercise) return null;
+  if (!exerciseData) return null;
 
-  const videoId = exercise.videoUrl ? getYouTubeVideoId(exercise.videoUrl) : null;
+  const videoId = exerciseData.videoUrl ? getYouTubeVideoId(exerciseData.videoUrl) : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>{exercise.name}</DialogTitle>
+          <DialogTitle>{exerciseData.name}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -294,7 +303,7 @@ const ExerciseVideoDialog = ({
             {videoId ? (
               <iframe
                 src={`https://www.youtube.com/embed/${videoId}`}
-                title={exercise.name}
+                title={exerciseData.name}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="w-full h-full"
@@ -308,42 +317,42 @@ const ExerciseVideoDialog = ({
 
           {/* Details */}
           <div className="space-y-4">
-            {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
+            {exerciseData.muscleGroups && exerciseData.muscleGroups.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
                   Muscle Groups
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {exercise.muscleGroups.map((mg) => (
+                  {exerciseData.muscleGroups.map((mg) => (
                     <Badge key={mg} variant="secondary">
-                      {muscleGroupLabels[mg]}
+                      {muscleGroupLabels[mg as keyof typeof muscleGroupLabels] || mg}
                     </Badge>
                   ))}
                 </div>
               </div>
             )}
 
-            {exercise.equipment && exercise.equipment.length > 0 && (
+            {exerciseData.equipment && exerciseData.equipment.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
                   Equipment
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {exercise.equipment.map((eq) => (
+                  {exerciseData.equipment.map((eq) => (
                     <Badge key={eq} variant="outline">
-                      {equipmentTypeLabels[eq]}
+                      {equipmentTypeLabels[eq as keyof typeof equipmentTypeLabels] || eq}
                     </Badge>
                   ))}
                 </div>
               </div>
             )}
 
-            {exercise.instructions && (
+            {exerciseData.instructions && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
                   Instructions
                 </p>
-                <p className="text-sm">{exercise.instructions}</p>
+                <p className="text-sm">{exerciseData.instructions}</p>
               </div>
             )}
           </div>
@@ -366,10 +375,17 @@ const ExerciseItem = ({
   onVideoClick: () => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const videoId = exercise?.videoUrl ? getYouTubeVideoId(exercise.videoUrl) : null;
+
+  // Use exercise from lookup, or fall back to denormalized data stored with workout
+  const exerciseName = exercise?.name || workoutExercise.exerciseName || "Exercise";
+  const videoUrl = exercise?.videoUrl || workoutExercise.exerciseVideoUrl;
+  const thumbnailUrl = exercise?.thumbnailUrl || workoutExercise.exerciseThumbnailUrl;
+  const muscleGroups = exercise?.muscleGroups || workoutExercise.exerciseMuscleGroups;
+
+  const videoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
   const thumbnail = videoId
     ? getYouTubeThumbnail(videoId)
-    : exercise?.thumbnailUrl || null;
+    : thumbnailUrl || null;
 
   return (
     <Card className="overflow-hidden border-l-4 border-l-orange-500">
@@ -383,7 +399,7 @@ const ExerciseItem = ({
             </div>
             <div className="flex-1 text-left min-w-0">
               <p className="font-medium truncate">
-                {exercise?.name || "Unknown Exercise"}
+                {exerciseName}
               </p>
               <p className="text-sm text-muted-foreground">
                 {workoutExercise.sets} sets × {workoutExercise.reps || "10"} reps
@@ -412,7 +428,7 @@ const ExerciseItem = ({
               >
                 <img
                   src={thumbnail}
-                  alt={exercise?.name}
+                  alt={exerciseName}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -459,11 +475,11 @@ const ExerciseItem = ({
             </div>
 
             {/* Muscle Groups */}
-            {exercise?.muscleGroups && exercise.muscleGroups.length > 0 && (
+            {muscleGroups && muscleGroups.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {exercise.muscleGroups.map((mg) => (
+                {muscleGroups.map((mg) => (
                   <Badge key={mg} variant="secondary" className="text-xs">
-                    {muscleGroupLabels[mg]}
+                    {muscleGroupLabels[mg] || mg}
                   </Badge>
                 ))}
               </div>
@@ -511,7 +527,7 @@ const AthleteWorkoutView = () => {
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [selectedExerciseData, setSelectedExerciseData] = useState<ExerciseDialogData | null>(null);
 
   useEffect(() => {
     const loadAssignment = async () => {
@@ -550,10 +566,28 @@ const AthleteWorkoutView = () => {
     }
   }, [user, id, toast]);
 
-  // Helper to find exercise by ID
-  const getExerciseById = (exerciseId: string): Exercise | undefined => {
-    return exercises.find((e) => e.id === exerciseId);
+  // Helper to find exercise by ID or name (fallback for old workouts)
+  const getExerciseByIdOrName = (workoutExercise: WorkoutExercise): Exercise | undefined => {
+    // Try by ID first
+    let exercise = exercises.find((e) => e.id === workoutExercise.exerciseId);
+    // If not found, try by name
+    if (!exercise && workoutExercise.exerciseName) {
+      exercise = exercises.find((e) => e.name === workoutExercise.exerciseName);
+    }
+    return exercise;
   };
+
+  // Build exercise data for video dialog (from exercise or denormalized data)
+  const buildExerciseDialogData = (
+    workoutExercise: WorkoutExercise,
+    exercise?: Exercise
+  ): ExerciseDialogData => ({
+    name: exercise?.name || workoutExercise.exerciseName || "Exercise",
+    videoUrl: exercise?.videoUrl || workoutExercise.exerciseVideoUrl,
+    instructions: exercise?.instructions || workoutExercise.exerciseInstructions,
+    muscleGroups: exercise?.muscleGroups || workoutExercise.exerciseMuscleGroups,
+    equipment: exercise?.equipment,
+  });
 
   const handleToggleComplete = async () => {
     if (!assignment) return;
@@ -711,14 +745,14 @@ const AthleteWorkoutView = () => {
               </h3>
               <div className="space-y-3">
                 {workout.exercises?.map((workoutExercise, index) => {
-                  const exercise = getExerciseById(workoutExercise.exerciseId);
+                  const exercise = getExerciseByIdOrName(workoutExercise);
                   return (
                     <ExerciseItem
                       key={workoutExercise.id}
                       workoutExercise={workoutExercise}
                       exercise={exercise}
                       index={index}
-                      onVideoClick={() => exercise && setSelectedExercise(exercise)}
+                      onVideoClick={() => setSelectedExerciseData(buildExerciseDialogData(workoutExercise, exercise))}
                     />
                   );
                 })}
@@ -729,7 +763,7 @@ const AthleteWorkoutView = () => {
               <h3 className="font-semibold text-lg mb-3">
                 Workout Stages ({workout.stages.length})
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {workout.stages.map((stage, index) => (
                   <StageItem key={stage.id} stage={stage} index={index} />
                 ))}
@@ -741,38 +775,50 @@ const AthleteWorkoutView = () => {
 
       {/* Bottom Action Button */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-bottom">
-        <Button
-          onClick={handleToggleComplete}
-          disabled={completing}
-          size="lg"
-          className={cn(
-            "w-full h-12 text-base font-semibold rounded-xl",
-            isCompleted
-              ? "bg-muted text-muted-foreground hover:bg-muted/80"
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
-          )}
-        >
-          {completing ? (
-            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-          ) : isCompleted ? (
-            <>
-              <Circle className="h-5 w-5 mr-2" />
-              Mark as Incomplete
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="h-5 w-5 mr-2" />
-              Complete Workout
-            </>
-          )}
-        </Button>
+        {workout.type === "strength" && !isCompleted ? (
+          <Link to={`/athlete/workout/${id}/session`} className="block">
+            <Button
+              size="lg"
+              className="w-full h-12 text-base font-semibold rounded-xl bg-amber-500 hover:bg-amber-600 text-black"
+            >
+              <Play className="h-5 w-5 mr-2" />
+              Start Workout
+            </Button>
+          </Link>
+        ) : (
+          <Button
+            onClick={handleToggleComplete}
+            disabled={completing}
+            size="lg"
+            className={cn(
+              "w-full h-12 text-base font-semibold rounded-xl",
+              isCompleted
+                ? "bg-muted text-muted-foreground hover:bg-muted/80"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
+            )}
+          >
+            {completing ? (
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+            ) : isCompleted ? (
+              <>
+                <Circle className="h-5 w-5 mr-2" />
+                Mark as Incomplete
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-5 w-5 mr-2" />
+                Complete Workout
+              </>
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Exercise Video Dialog */}
       <ExerciseVideoDialog
-        exercise={selectedExercise}
-        open={!!selectedExercise}
-        onOpenChange={(open) => !open && setSelectedExercise(null)}
+        exerciseData={selectedExerciseData}
+        open={!!selectedExerciseData}
+        onOpenChange={(open) => !open && setSelectedExerciseData(null)}
       />
     </div>
   );

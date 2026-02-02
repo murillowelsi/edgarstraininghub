@@ -2,6 +2,20 @@ import type { Timestamp } from "firebase/firestore";
 import type { User } from "./user";
 import type { Workout } from "./workout";
 
+// Progress data for a single set
+export interface SetProgressData {
+  setNumber: number;
+  reps: string;
+  weight: string;
+  completed: boolean;
+}
+
+// Progress data for a single exercise
+export interface ExerciseProgressData {
+  exerciseId: string;
+  sets: SetProgressData[];
+}
+
 // Workout assignment domain model
 export interface WorkoutAssignment {
   id: string;
@@ -10,6 +24,9 @@ export interface WorkoutAssignment {
   scheduledDate: Date;
   assignedBy: string;
   completedAt: Date | null;
+  completionPercentage?: number;
+  totalTime?: number; // in seconds
+  progressData?: ExerciseProgressData[];
   createdAt: Date;
   updatedAt: Date;
 }

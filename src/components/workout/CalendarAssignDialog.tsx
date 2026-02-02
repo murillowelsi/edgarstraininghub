@@ -19,15 +19,14 @@ import { getAllWorkouts } from "@/services/workoutsService";
 import type { User } from "@/types/user";
 import type { Workout, WorkoutType } from "@/types/workout";
 import { format } from "date-fns";
+import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   ArrowLeft,
-  Bike,
   Check,
+  Dumbbell,
   Loader2,
-  PersonStanding,
   Plus,
   Search,
-  Waves,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,22 +36,30 @@ const workoutTypeConfig: Record<
   WorkoutType,
   { label: string; icon: React.ElementType; color: string }
 > = {
-  running: {
-    label: "Running",
-    icon: PersonStanding,
-    color: "bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200",
+  swimming: {
+    label: "Swimming",
+    icon: GrSwim,
+    color: "bg-cyan-100 border-cyan-300 text-cyan-700 hover:bg-cyan-200",
   },
   cycling: {
     label: "Cycling",
-    icon: Bike,
+    icon: GrBike,
     color: "bg-green-100 border-green-300 text-green-700 hover:bg-green-200",
   },
-  swimming: {
-    label: "Swimming",
-    icon: Waves,
-    color: "bg-cyan-100 border-cyan-300 text-cyan-700 hover:bg-cyan-200",
+  running: {
+    label: "Running",
+    icon: GrRun,
+    color: "bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200",
+  },
+  strength: {
+    label: "Strength",
+    icon: Dumbbell,
+    color: "bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-200",
   },
 };
+
+// Define the order of workout types for display
+const workoutTypeOrder: WorkoutType[] = ["swimming", "cycling", "running", "strength"];
 
 type Step = "type" | "workout" | "athletes";
 
@@ -280,8 +287,8 @@ export const CalendarAssignDialog = ({
       <p className="text-sm text-muted-foreground text-center">
         What type of workout do you want to assign?
       </p>
-      <div className="grid grid-cols-3 gap-3">
-        {(Object.keys(workoutTypeConfig) as WorkoutType[]).map((type) => {
+      <div className="grid grid-cols-4 gap-3">
+        {workoutTypeOrder.map((type) => {
           const config = workoutTypeConfig[type];
           const Icon = config.icon;
           const count = workouts.filter((w) => w.type === type).length;

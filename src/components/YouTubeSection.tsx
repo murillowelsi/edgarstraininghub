@@ -3,7 +3,7 @@ import { useLatestYouTubeVideo } from "@/hooks/useLatestYouTubeVideo";
 
 const YouTubeSection = () => {
   const { t } = useLanguage();
-  const { video, loading } = useLatestYouTubeVideo();
+  const { video, loading, error, retry } = useLatestYouTubeVideo();
 
   return (
     <section id="youtube" className="section bg-muted">
@@ -25,6 +25,17 @@ const YouTubeSection = () => {
               <div className="w-full h-full flex items-center justify-center bg-muted">
                 <p className="text-muted-foreground">Loading latest video...</p>
               </div>
+            ) : error ? (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-muted gap-2">
+                <p className="text-red-500 font-semibold">Could not load the latest YouTube video.</p>
+                <p className="text-xs text-muted-foreground">{error}</p>
+                <button
+                  onClick={retry}
+                  className="mt-2 px-4 py-2 rounded bg-primary text-white hover:bg-primary/90 transition"
+                >
+                  Retry
+                </button>
+              </div>
             ) : video?.videoId ? (
               <iframe
                 width="100%"
@@ -38,9 +49,7 @@ const YouTubeSection = () => {
               ></iframe>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-muted">
-                <p className="text-red-500">
-                  Failed to load video. Check console for details.
-                </p>
+                <p className="text-red-500">No video found.</p>
               </div>
             )}
           </div>

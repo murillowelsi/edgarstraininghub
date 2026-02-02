@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import {
   deleteAssignment,
   getAllAssignmentsWithDetails,
+  removeDuplicateAssignments,
 } from "@/services/workoutAssignmentsService";
 import { getUsersByRole } from "@/services/usersService";
 import type { User } from "@/types/user";
@@ -50,18 +51,17 @@ import {
   startOfWeek,
   subMonths,
 } from "date-fns";
+import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
-  Bike,
   CalendarDays,
   Check,
   ChevronLeft,
   ChevronRight,
+  Dumbbell,
   Loader2,
   Pencil,
-  PersonStanding,
   Plus,
   Trash2,
-  Waves,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -71,12 +71,14 @@ const workoutTypeColors: Record<WorkoutType, string> = {
   running: "bg-blue-100 border-blue-300 text-blue-800",
   cycling: "bg-green-100 border-green-300 text-green-800",
   swimming: "bg-cyan-100 border-cyan-300 text-cyan-800",
+  strength: "bg-orange-100 border-orange-300 text-orange-800",
 };
 
 const workoutTypeIcons: Record<WorkoutType, React.ElementType> = {
-  running: PersonStanding,
-  cycling: Bike,
-  swimming: Waves,
+  running: GrRun,
+  cycling: GrBike,
+  swimming: GrSwim,
+  strength: Dumbbell,
 };
 
 interface CalendarDayProps {
@@ -257,6 +259,7 @@ const AdminCalendar = () => {
   const [selectedAssignment, setSelectedAssignment] =
     useState<AssignmentWithDetails | null>(null);
   const [deletingAssignment, setDeletingAssignment] = useState(false);
+  const [cleaningDuplicates, setCleaningDuplicates] = useState(false);
 
   // Generate calendar days for current month view
   const monthStart = startOfMonth(currentMonth);
@@ -337,6 +340,34 @@ const AdminCalendar = () => {
 
   const handleToday = () => {
     setCurrentMonth(new Date());
+  };
+
+  const handleCleanupDuplicates = async () => {
+    setCleaningDuplicates(true);
+    try {
+      const deletedCount = await removeDuplicateAssignments();
+      if (deletedCount > 0) {
+        toast({
+          title: "Duplicates removed",
+          description: `Removed ${deletedCount} duplicate assignment${deletedCount > 1 ? "s" : ""}.`,
+        });
+        await loadData(); // Reload data
+      } else {
+        toast({
+          title: "No duplicates found",
+          description: "All assignments are unique.",
+        });
+      }
+    } catch (error) {
+      console.error("Error removing duplicates:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove duplicates.",
+        variant: "destructive",
+      });
+    } finally {
+      setCleaningDuplicates(false);
+    }
   };
 
   const handleAssignmentClick = (assignment: AssignmentWithDetails) => {
@@ -451,6 +482,20 @@ const AdminCalendar = () => {
               <Button variant="outline" size="sm" onClick={handleToday}>
                 Today
               </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCleanupDuplicates}
+                disabled={cleaningDuplicates}
+                title="Remove duplicate assignments"
+              >
+                {cleaningDuplicates ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -495,16 +540,20 @@ const AdminCalendar = () => {
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <span className="text-muted-foreground">Workout types:</span>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-blue-200 border border-blue-300" />
-              <span>Running</span>
+              <div className="w-3 h-3 rounded bg-cyan-200 border border-cyan-300" />
+              <span>Swimming</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded bg-green-200 border border-green-300" />
               <span>Cycling</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-cyan-200 border border-cyan-300" />
-              <span>Swimming</span>
+              <div className="w-3 h-3 rounded bg-blue-200 border border-blue-300" />
+              <span>Running</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded bg-orange-200 border border-orange-300" />
+              <span>Strength</span>
             </div>
             <div className="flex items-center gap-1 ml-4">
               <Check className="h-3 w-3 text-muted-foreground" />
@@ -522,13 +571,16 @@ const AdminCalendar = () => {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   {selectedAssignment.workout.type === "running" && (
-                    <PersonStanding className="h-5 w-5 text-blue-600" />
+                    <GrRun className="h-5 w-5" />
                   )}
                   {selectedAssignment.workout.type === "cycling" && (
-                    <Bike className="h-5 w-5 text-green-600" />
+                    <GrBike className="h-5 w-5" />
                   )}
                   {selectedAssignment.workout.type === "swimming" && (
-                    <Waves className="h-5 w-5 text-cyan-600" />
+                    <GrSwim className="h-5 w-5" />
+                  )}
+                  {selectedAssignment.workout.type === "strength" && (
+                    <Dumbbell className="h-5 w-5 text-orange-600" />
                   )}
                   {selectedAssignment.workout.name}
                 </DialogTitle>

@@ -10,22 +10,20 @@ import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmen
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { format } from "date-fns";
+import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
-  Bike,
   Check,
   ChevronRight,
   Dumbbell,
   Loader2,
-  PersonStanding,
-  Waves,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
-  running: PersonStanding,
-  cycling: Bike,
-  swimming: Waves,
+  running: GrRun,
+  cycling: GrBike,
+  swimming: GrSwim,
   strength: Dumbbell,
 };
 

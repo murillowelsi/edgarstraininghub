@@ -139,7 +139,6 @@ const AthletePortalLayout = ({
                     "h-5 w-5 transition-transform",
                     active && "scale-110"
                   )}
-                  strokeWidth={active ? 2.5 : 2}
                 />
                 <span
                   className={cn(

@@ -74,7 +74,13 @@ const cleanExercisesForFirestore = (exercises: WorkoutExercise[]): Record<string
       restSeconds: exercise.restSeconds,
       notes: exercise.notes,
       order: exercise.order,
-      // Don't include the populated exercise object
+      // Store essential exercise info for display (denormalized)
+      // Use exercise lookup data if available, otherwise preserve existing denormalized data
+      exerciseName: exercise.exercise?.name || exercise.exerciseName,
+      exerciseVideoUrl: exercise.exercise?.videoUrl || exercise.exerciseVideoUrl,
+      exerciseThumbnailUrl: exercise.exercise?.thumbnailUrl || exercise.exerciseThumbnailUrl,
+      exerciseMuscleGroups: exercise.exercise?.muscleGroups || exercise.exerciseMuscleGroups,
+      exerciseInstructions: exercise.exercise?.instructions || exercise.exerciseInstructions,
     })
   );
 };
