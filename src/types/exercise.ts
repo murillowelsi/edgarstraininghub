@@ -68,9 +68,14 @@ export interface Exercise {
   instructions?: string;
   videoUrl?: string; // YouTube URL
   thumbnailUrl?: string;
+  gifUrl?: string; // GIF URL from ExerciseDB
   muscleGroups: MuscleGroup[];
   equipment: EquipmentType[];
+  targetMuscle?: string; // Primary target muscle from ExerciseDB
+  secondaryMuscles?: string[]; // Secondary muscles from ExerciseDB
+  bodyPart?: string; // Body part from ExerciseDB
   isCustom: boolean; // true if created by user, false if predefined
+  exerciseDbId?: string; // Original ID from ExerciseDB for reference
   createdBy?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -83,9 +88,14 @@ export interface ExerciseDocument {
   instructions?: string;
   videoUrl?: string;
   thumbnailUrl?: string;
+  gifUrl?: string;
   muscleGroups: MuscleGroup[];
   equipment: EquipmentType[];
+  targetMuscle?: string;
+  secondaryMuscles?: string[];
+  bodyPart?: string;
   isCustom: boolean;
+  exerciseDbId?: string;
   createdBy?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -118,6 +128,7 @@ export interface WorkoutExercise {
   exerciseName?: string;
   exerciseVideoUrl?: string;
   exerciseThumbnailUrl?: string;
+  exerciseGifUrl?: string; // GIF URL from ExerciseDB
   exerciseMuscleGroups?: MuscleGroup[];
   exerciseInstructions?: string;
 }

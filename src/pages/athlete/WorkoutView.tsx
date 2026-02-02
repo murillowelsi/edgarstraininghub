@@ -48,6 +48,7 @@ import {
   ChevronDown,
   ChevronRight,
   Circle,
+  Clock,
   Dumbbell,
   Layers,
   Loader2,
@@ -56,6 +57,18 @@ import {
   Repeat,
   Waves,
 } from "lucide-react";
+
+// Format time as MM:SS or HH:MM:SS
+const formatTime = (seconds: number | undefined) => {
+  if (seconds === undefined) return null;
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  if (hrs > 0) {
+    return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+};
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -271,9 +284,11 @@ const StageItem = ({
 interface ExerciseDialogData {
   name: string;
   videoUrl?: string;
+  gifUrl?: string;
   instructions?: string;
   muscleGroups?: string[];
   equipment?: string[];
+  targetMuscle?: string;
 }
 
 // Video dialog for exercises
@@ -289,6 +304,7 @@ const ExerciseVideoDialog = ({
   if (!exerciseData) return null;
 
   const videoId = exerciseData.videoUrl ? getYouTubeVideoId(exerciseData.videoUrl) : null;
+  const hasGif = !!exerciseData.gifUrl;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -298,9 +314,15 @@ const ExerciseVideoDialog = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Video */}
-          <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-            {videoId ? (
+          {/* Media - GIF or Video */}
+          <div className={cn("bg-muted rounded-lg overflow-hidden", hasGif ? "aspect-square max-w-md mx-auto" : "aspect-video")}>
+            {hasGif ? (
+              <img
+                src={exerciseData.gifUrl}
+                alt={exerciseData.name}
+                className="w-full h-full object-cover"
+              />
+            ) : videoId ? (
               <iframe
                 src={`https://www.youtube.com/embed/${videoId}`}
                 title={exerciseData.name}
@@ -317,6 +339,17 @@ const ExerciseVideoDialog = ({
 
           {/* Details */}
           <div className="space-y-4">
+            {exerciseData.targetMuscle && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Target Muscle
+                </p>
+                <Badge variant="default" className="capitalize">
+                  {exerciseData.targetMuscle}
+                </Badge>
+              </div>
+            )}
+
             {exerciseData.muscleGroups && exerciseData.muscleGroups.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
@@ -352,7 +385,7 @@ const ExerciseVideoDialog = ({
                 <p className="text-sm font-medium text-muted-foreground mb-2">
                   Instructions
                 </p>
-                <p className="text-sm">{exerciseData.instructions}</p>
+                <p className="text-sm whitespace-pre-wrap">{exerciseData.instructions}</p>
               </div>
             )}
           </div>
@@ -380,12 +413,15 @@ const ExerciseItem = ({
   const exerciseName = exercise?.name || workoutExercise.exerciseName || "Exercise";
   const videoUrl = exercise?.videoUrl || workoutExercise.exerciseVideoUrl;
   const thumbnailUrl = exercise?.thumbnailUrl || workoutExercise.exerciseThumbnailUrl;
+  const gifUrl = exercise?.gifUrl || workoutExercise.exerciseGifUrl;
   const muscleGroups = exercise?.muscleGroups || workoutExercise.exerciseMuscleGroups;
 
   const videoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
   const thumbnail = videoId
     ? getYouTubeThumbnail(videoId)
     : thumbnailUrl || null;
+  const hasGif = !!gifUrl;
+  const mediaUrl = gifUrl || thumbnail;
 
   return (
     <Card className="overflow-hidden border-l-4 border-l-orange-500">
@@ -417,27 +453,32 @@ const ExerciseItem = ({
 
         <CollapsibleContent>
           <div className="px-4 pb-4 pt-2 border-t border-border/50 space-y-3">
-            {/* Video Thumbnail */}
-            {thumbnail && (
+            {/* Media Thumbnail - GIF or Video */}
+            {mediaUrl && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onVideoClick();
                 }}
-                className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden group"
+                className={cn(
+                  "relative w-full bg-muted rounded-lg overflow-hidden group",
+                  hasGif ? "aspect-square max-w-xs mx-auto" : "aspect-video"
+                )}
               >
                 <img
-                  src={thumbnail}
+                  src={mediaUrl}
                   alt={exerciseName}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="h-8 w-8 text-black ml-1" />
+                {!hasGif && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+                      <Play className="h-8 w-8 text-black ml-1" />
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                  Watch Video
+                  {hasGif ? "View Animation" : "Watch Video"}
                 </div>
               </button>
             )}
@@ -495,8 +536,8 @@ const ExerciseItem = ({
               </div>
             )}
 
-            {/* Watch Video Button (if no thumbnail) */}
-            {videoId && !thumbnail && (
+            {/* Watch Video Button (if no media preview) */}
+            {(videoId || hasGif) && !mediaUrl && (
               <Button
                 variant="outline"
                 className="w-full"
@@ -506,7 +547,7 @@ const ExerciseItem = ({
                 }}
               >
                 <Play className="h-4 w-4 mr-2" />
-                Watch Video
+                {hasGif ? "View Animation" : "Watch Video"}
               </Button>
             )}
           </div>
@@ -584,9 +625,11 @@ const AthleteWorkoutView = () => {
   ): ExerciseDialogData => ({
     name: exercise?.name || workoutExercise.exerciseName || "Exercise",
     videoUrl: exercise?.videoUrl || workoutExercise.exerciseVideoUrl,
+    gifUrl: exercise?.gifUrl || workoutExercise.exerciseGifUrl,
     instructions: exercise?.instructions || workoutExercise.exerciseInstructions,
     muscleGroups: exercise?.muscleGroups || workoutExercise.exerciseMuscleGroups,
     equipment: exercise?.equipment,
+    targetMuscle: exercise?.targetMuscle,
   });
 
   const handleToggleComplete = async () => {
@@ -707,7 +750,9 @@ const AthleteWorkoutView = () => {
                     {isCompleted && (
                       <Badge className="bg-green-100 text-green-700 dark:bg-green-900/50">
                         <Check className="h-3 w-3 mr-1" />
-                        Completed
+                        {assignment.completionPercentage !== undefined
+                          ? `${assignment.completionPercentage}% Completed`
+                          : "Completed"}
                       </Badge>
                     )}
                   </div>
@@ -723,6 +768,12 @@ const AthleteWorkoutView = () => {
                         ? `${workout.exercises?.length || 0} exercises`
                         : `${workout.stages.length} stages`}
                     </div>
+                    {assignment.totalTime !== undefined && assignment.totalTime > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-4 w-4" />
+                        {formatTime(assignment.totalTime)}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

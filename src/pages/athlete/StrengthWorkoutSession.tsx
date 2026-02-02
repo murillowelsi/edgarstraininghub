@@ -13,8 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAllExercises } from "@/services/exercisesService";
 import {
+  completeWorkoutWithProgress,
   getAssignmentsWithWorkoutsByAthlete,
-  toggleAssignmentComplete,
 } from "@/services/workoutAssignmentsService";
 import type { Exercise, WorkoutExercise } from "@/types/exercise";
 import {
@@ -66,8 +66,10 @@ const formatTime = (seconds: number) => {
 interface ExerciseDialogData {
   name: string;
   videoUrl?: string;
+  gifUrl?: string;
   instructions?: string;
   muscleGroups?: string[];
+  targetMuscle?: string;
 }
 
 // Video Dialog Component - Full screen on mobile, centered on desktop
@@ -83,6 +85,7 @@ const ExerciseVideoDialog = ({
   if (!exerciseData) return null;
 
   const videoId = exerciseData.videoUrl ? getYouTubeVideoId(exerciseData.videoUrl) : null;
+  const hasGif = !!exerciseData.gifUrl;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -94,15 +97,18 @@ const ExerciseVideoDialog = ({
               <DialogTitle className="text-white text-lg font-bold">
                 {exerciseData.name}
               </DialogTitle>
-              {exerciseData.muscleGroups && exerciseData.muscleGroups.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {exerciseData.muscleGroups.map((mg) => (
-                    <Badge key={mg} variant="secondary" className="bg-white/20 text-white border-0 text-xs">
-                      {muscleGroupLabels[mg as keyof typeof muscleGroupLabels] || mg}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+              <div className="flex flex-wrap gap-1 mt-1">
+                {exerciseData.targetMuscle && (
+                  <Badge variant="secondary" className="bg-primary/80 text-white border-0 text-xs capitalize">
+                    {exerciseData.targetMuscle}
+                  </Badge>
+                )}
+                {exerciseData.muscleGroups && exerciseData.muscleGroups.map((mg) => (
+                  <Badge key={mg} variant="secondary" className="bg-white/20 text-white border-0 text-xs">
+                    {muscleGroupLabels[mg as keyof typeof muscleGroupLabels] || mg}
+                  </Badge>
+                ))}
+              </div>
             </div>
             <Button
               variant="ghost"
@@ -115,9 +121,15 @@ const ExerciseVideoDialog = ({
           </div>
         </div>
 
-        {/* Video Player */}
-        <div className="aspect-video bg-black">
-          {videoId ? (
+        {/* Media - GIF or Video Player */}
+        <div className={hasGif ? "aspect-square max-w-2xl mx-auto bg-black" : "aspect-video bg-black"}>
+          {hasGif ? (
+            <img
+              src={exerciseData.gifUrl}
+              alt={exerciseData.name}
+              className="w-full h-full object-contain"
+            />
+          ) : videoId ? (
             <iframe
               src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
               title={exerciseData.name}
@@ -139,7 +151,7 @@ const ExerciseVideoDialog = ({
         {exerciseData.instructions && (
           <div className="p-4 bg-zinc-900">
             <p className="text-white/60 text-xs uppercase font-medium mb-2">How to perform</p>
-            <p className="text-white/90 text-sm leading-relaxed">{exerciseData.instructions}</p>
+            <p className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap">{exerciseData.instructions}</p>
           </div>
         )}
       </DialogContent>
@@ -176,8 +188,12 @@ const ExerciseSessionCard = ({
   // Use exercise from lookup, or fall back to denormalized data stored with workout
   const exerciseName = exercise?.name || workoutExercise.exerciseName || "Exercise";
   const videoUrl = exercise?.videoUrl || workoutExercise.exerciseVideoUrl;
+  const gifUrl = exercise?.gifUrl || workoutExercise.exerciseGifUrl;
   const videoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
   const thumbnail = videoId ? getYouTubeThumbnail(videoId) : null;
+  const hasGif = !!gifUrl;
+  const mediaUrl = gifUrl || thumbnail;
+  const hasMedia = !!mediaUrl || !!videoId;
 
   const completedSets = progress.sets.filter((s) => s.completed).length;
   const totalSets = progress.sets.length;
@@ -221,35 +237,44 @@ const ExerciseSessionCard = ({
           </div>
         </div>
 
-        {/* Video Preview - Prominent Display */}
-        {videoId && (
+        {/* Media Preview - GIF or Video Thumbnail */}
+        {hasMedia && (
           <button
             onClick={onWatchVideo}
-            className="w-full aspect-video rounded-xl overflow-hidden bg-black relative group mb-4 shadow-lg"
+            className={cn(
+              "w-full rounded-xl overflow-hidden bg-black relative group mb-4 shadow-lg",
+              hasGif ? "aspect-square max-w-xs mx-auto" : "aspect-video"
+            )}
           >
-            <img
-              src={thumbnail || ""}
-              alt={exerciseName}
-              className="w-full h-full object-cover"
-            />
+            {mediaUrl && (
+              <img
+                src={mediaUrl}
+                alt={exerciseName}
+                className="w-full h-full object-cover"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                <Play className="h-7 w-7 text-black ml-1" />
+            {!hasGif && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                  <Play className="h-7 w-7 text-black ml-1" />
+                </div>
               </div>
-            </div>
+            )}
             <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-              <span className="text-white text-sm font-medium">Watch how to do it</span>
-              <Badge className="bg-red-600 text-white border-0">
+              <span className="text-white text-sm font-medium">
+                {hasGif ? "View full animation" : "Watch how to do it"}
+              </span>
+              <Badge className={hasGif ? "bg-green-600 text-white border-0" : "bg-red-600 text-white border-0"}>
                 <Play className="h-3 w-3 mr-1" />
-                Video
+                {hasGif ? "GIF" : "Video"}
               </Badge>
             </div>
           </button>
         )}
 
-        {/* No video placeholder */}
-        {!videoId && (
+        {/* No media placeholder */}
+        {!hasMedia && (
           <div className="w-full aspect-[3/1] rounded-xl bg-muted/50 flex items-center justify-center mb-4 border-2 border-dashed border-muted-foreground/20">
             <div className="text-center text-muted-foreground">
               <Dumbbell className="h-8 w-8 mx-auto mb-2" />
@@ -525,10 +550,31 @@ const StrengthWorkoutSession = () => {
 
     setSaving(true);
     try {
-      await toggleAssignmentComplete(assignment.id, true);
+      // Convert exercise progress to the format expected by the service
+      const progressData = Array.from(exerciseProgress.entries()).map(
+        ([, progress]) => ({
+          exerciseId: progress.exerciseId,
+          sets: progress.sets.map((set) => ({
+            setNumber: set.setNumber,
+            reps: set.reps,
+            weight: set.weight,
+            completed: set.completed,
+          })),
+        })
+      );
+
+      const completionPercentage = getCompletionPercentage();
+
+      await completeWorkoutWithProgress(
+        assignment.id,
+        progressData,
+        completionPercentage,
+        totalElapsedTime
+      );
+
       toast({
         title: "Workout completed!",
-        description: `Great job! Total time: ${formatTime(totalElapsedTime)}`,
+        description: `Great job! ${completionPercentage}% completed in ${formatTime(totalElapsedTime)}`,
       });
       navigate("/athlete");
     } catch (error) {
@@ -619,8 +665,10 @@ const StrengthWorkoutSession = () => {
   ): ExerciseDialogData => ({
     name: exercise?.name || workoutExercise.exerciseName || "Exercise",
     videoUrl: exercise?.videoUrl || workoutExercise.exerciseVideoUrl,
+    gifUrl: exercise?.gifUrl || workoutExercise.exerciseGifUrl,
     instructions: exercise?.instructions || workoutExercise.exerciseInstructions,
     muscleGroups: exercise?.muscleGroups || workoutExercise.exerciseMuscleGroups,
+    targetMuscle: exercise?.targetMuscle,
   });
 
   // Calculate completion percentage

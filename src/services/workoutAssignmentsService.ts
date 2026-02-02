@@ -14,6 +14,7 @@ import { db } from "../lib/firebase";
 import type {
   AssignmentWithDetails,
   AssignmentWithWorkout,
+  ExerciseProgressData,
   WorkoutAssignment,
   WorkoutAssignmentDocument,
   WorkoutAssignmentFormData,
@@ -34,6 +35,9 @@ const docToAssignment = (
   scheduledDate: data.scheduledDate?.toDate() || new Date(),
   assignedBy: data.assignedBy,
   completedAt: data.completedAt?.toDate() || null,
+  completionPercentage: data.completionPercentage,
+  totalTime: data.totalTime,
+  progressData: data.progressData,
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
@@ -110,6 +114,23 @@ export const toggleAssignmentComplete = async (
   const docRef = doc(db, ASSIGNMENTS_COLLECTION, id);
   await updateDoc(docRef, {
     completedAt: completed ? serverTimestamp() : null,
+    updatedAt: serverTimestamp(),
+  });
+};
+
+// Complete workout with progress data (for strength workouts)
+export const completeWorkoutWithProgress = async (
+  id: string,
+  progressData: ExerciseProgressData[],
+  completionPercentage: number,
+  totalTime: number
+): Promise<void> => {
+  const docRef = doc(db, ASSIGNMENTS_COLLECTION, id);
+  await updateDoc(docRef, {
+    completedAt: serverTimestamp(),
+    progressData,
+    completionPercentage,
+    totalTime,
     updatedAt: serverTimestamp(),
   });
 };

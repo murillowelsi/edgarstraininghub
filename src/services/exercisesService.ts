@@ -27,9 +27,14 @@ const docToExercise = (id: string, data: ExerciseDocument): Exercise => ({
   instructions: data.instructions,
   videoUrl: data.videoUrl,
   thumbnailUrl: data.thumbnailUrl,
+  gifUrl: data.gifUrl,
   muscleGroups: data.muscleGroups || [],
   equipment: data.equipment || [],
+  targetMuscle: data.targetMuscle,
+  secondaryMuscles: data.secondaryMuscles,
+  bodyPart: data.bodyPart,
   isCustom: data.isCustom,
+  exerciseDbId: data.exerciseDbId,
   createdBy: data.createdBy,
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
@@ -80,6 +85,100 @@ export const createExercise = async (
   });
 
   return docRef.id;
+};
+
+// Import exercise from ExerciseDB API
+export const importExerciseFromDb = async (
+  exerciseDbData: {
+    id: string;
+    name: string;
+    bodyPart: string;
+    equipment: string;
+    gifUrl: string;
+    target: string;
+    secondaryMuscles: string[];
+    instructions: string[];
+  },
+  createdBy: string
+): Promise<string> => {
+  // Check if already imported
+  const existing = await getExerciseByExerciseDbId(exerciseDbData.id);
+  if (existing) {
+    return existing.id;
+  }
+
+  // Map ExerciseDB equipment to our equipment types
+  const equipmentMap: Record<string, string> = {
+    "body weight": "bodyweight",
+    dumbbell: "dumbbell",
+    barbell: "barbell",
+    kettlebell: "kettlebell",
+    cable: "cable",
+    "leverage machine": "machine",
+    "smith machine": "machine",
+    "resistance band": "resistanceBand",
+    "medicine ball": "medicineBall",
+    roller: "foamRoller",
+    band: "resistanceBand",
+    assisted: "machine",
+  };
+
+  // Map ExerciseDB body parts to our muscle groups
+  const bodyPartToMuscleGroup: Record<string, string[]> = {
+    back: ["back"],
+    chest: ["chest"],
+    shoulders: ["shoulders"],
+    "upper arms": ["biceps", "triceps"],
+    "lower arms": ["forearms"],
+    waist: ["core"],
+    "upper legs": ["quadriceps", "hamstrings", "glutes"],
+    "lower legs": ["calves"],
+    cardio: ["fullBody"],
+    neck: ["back"],
+  };
+
+  const equipment = equipmentMap[exerciseDbData.equipment] || "other";
+  const muscleGroups = bodyPartToMuscleGroup[exerciseDbData.bodyPart] || ["fullBody"];
+
+  // Build document data, only including defined values
+  const docData: Record<string, unknown> = {
+    name: exerciseDbData.name,
+    description: `Target: ${exerciseDbData.target}`,
+    instructions: exerciseDbData.instructions?.join("\n") || "",
+    muscleGroups,
+    equipment: [equipment],
+    targetMuscle: exerciseDbData.target,
+    secondaryMuscles: exerciseDbData.secondaryMuscles || [],
+    bodyPart: exerciseDbData.bodyPart,
+    isCustom: false,
+    exerciseDbId: exerciseDbData.id,
+    createdBy,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  // Only add gifUrl if it exists
+  if (exerciseDbData.gifUrl) {
+    docData.gifUrl = exerciseDbData.gifUrl;
+  }
+
+  const docRef = await addDoc(collection(db, EXERCISES_COLLECTION), docData);
+
+  return docRef.id;
+};
+
+// Get exercise by ExerciseDB ID
+export const getExerciseByExerciseDbId = async (
+  exerciseDbId: string
+): Promise<Exercise | null> => {
+  const q = query(
+    collection(db, EXERCISES_COLLECTION),
+    where("exerciseDbId", "==", exerciseDbId)
+  );
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
+  const docSnapshot = snapshot.docs[0];
+  return docToExercise(docSnapshot.id, docSnapshot.data() as ExerciseDocument);
 };
 
 // Update existing exercise

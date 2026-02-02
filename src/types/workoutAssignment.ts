@@ -38,6 +38,9 @@ export interface WorkoutAssignmentDocument {
   scheduledDate: Timestamp;
   assignedBy: string;
   completedAt: Timestamp | null;
+  completionPercentage?: number;
+  totalTime?: number; // in seconds
+  progressData?: ExerciseProgressData[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

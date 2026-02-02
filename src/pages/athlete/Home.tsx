@@ -353,7 +353,9 @@ const AthleteHome = () => {
                               variant="secondary"
                               className="bg-green-100 text-green-700"
                             >
-                              Done
+                              {assignment.completionPercentage !== undefined
+                                ? `${assignment.completionPercentage}%`
+                                : "Done"}
                             </Badge>
                           ) : (
                             <ChevronRight className="h-5 w-5 text-muted-foreground" />
