@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ExerciseDbBrowserProps {
   onExerciseImported: (exercise: Exercise) => void;
@@ -51,11 +52,13 @@ const ExerciseDbCard = ({
   onPreview,
   onImport,
   importing,
+  translations,
 }: {
   exercise: ExerciseDbExercise;
   onPreview: () => void;
   onImport: () => void;
   importing: boolean;
+  translations: ReturnType<typeof useLanguage>["t"];
 }) => {
   const [imageError, setImageError] = useState(false);
 
@@ -76,7 +79,7 @@ const ExerciseDbCard = ({
         ) : (
           <div className="text-center text-muted-foreground p-4">
             <Database className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-xs">No image</p>
+            <p className="text-xs">{translations.workout.library.noImage}</p>
           </div>
         )}
       </div>
@@ -104,7 +107,7 @@ const ExerciseDbCard = ({
           ) : (
             <Plus className="h-3 w-3 mr-1" />
           )}
-          Add
+          {translations.workout.common.add}
         </Button>
       </CardContent>
     </Card>
@@ -118,12 +121,14 @@ const ExerciseDbPreviewDialog = ({
   onOpenChange,
   onImport,
   importing,
+  translations,
 }: {
   exercise: ExerciseDbExercise | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImport: () => void;
   importing: boolean;
+  translations: ReturnType<typeof useLanguage>["t"];
 }) => {
   if (!exercise) return null;
 
@@ -133,7 +138,7 @@ const ExerciseDbPreviewDialog = ({
         <DialogHeader>
           <DialogTitle className="capitalize">{exercise.name}</DialogTitle>
           <DialogDescription>
-            From ExerciseDB - {exercise.bodyPart}
+            {translations.workout.library.fromExerciseLibrary} - {translations.workout.bodyParts[exercise.bodyPart as keyof typeof translations.workout.bodyParts] || exercise.bodyPart}
           </DialogDescription>
         </DialogHeader>
 
@@ -151,7 +156,7 @@ const ExerciseDbPreviewDialog = ({
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">
-                Target Muscle
+                {translations.workout.exerciseForm.muscleGroups}
               </p>
               <Badge variant="default" className="capitalize">
                 {targetLabels[exercise.target] || exercise.target}
@@ -161,7 +166,7 @@ const ExerciseDbPreviewDialog = ({
             {exercise.secondaryMuscles.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Secondary Muscles
+                  {translations.workout.exerciseForm.muscleGroups}
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {exercise.secondaryMuscles.map((muscle) => (
@@ -175,16 +180,16 @@ const ExerciseDbPreviewDialog = ({
 
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">
-                Body Part
+                {translations.workout.library.filterByBodyPart}
               </p>
               <Badge variant="outline" className="capitalize">
-                {bodyPartLabels[exercise.bodyPart] || exercise.bodyPart}
+                {translations.workout.bodyParts[exercise.bodyPart as keyof typeof translations.workout.bodyParts] || bodyPartLabels[exercise.bodyPart] || exercise.bodyPart}
               </Badge>
             </div>
 
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">
-                Equipment
+                {translations.workout.exerciseForm.equipment}
               </p>
               <Badge variant="outline" className="capitalize">
                 {equipmentLabelsDb[exercise.equipment] || exercise.equipment}
@@ -194,7 +199,7 @@ const ExerciseDbPreviewDialog = ({
             {exercise.instructions.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Instructions
+                  {translations.workout.exerciseForm.instructions}
                 </p>
                 <ol className="text-sm space-y-1 list-decimal list-inside">
                   {exercise.instructions.map((instruction, idx) => (
@@ -210,7 +215,7 @@ const ExerciseDbPreviewDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            {translations.workout.common.close}
           </Button>
           <Button onClick={onImport} disabled={importing}>
             {importing ? (
@@ -218,7 +223,7 @@ const ExerciseDbPreviewDialog = ({
             ) : (
               <Plus className="h-4 w-4 mr-2" />
             )}
-            Add to Workout
+            {translations.workout.library.addToWorkout}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -229,6 +234,7 @@ const ExerciseDbPreviewDialog = ({
 const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBodyPart, setSelectedBodyPart] = useState<string>("all");
   const [exercises, setExercises] = useState<ExerciseDbExercise[]>([]);
@@ -264,8 +270,8 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
     } catch (error) {
       console.error("Error loading exercises:", error);
       toast({
-        title: "Error",
-        description: "Failed to load exercises from ExerciseDB",
+        title: t.workout.common.error,
+        description: t.workout.toast.failedToLoadFromApi,
         variant: "destructive",
       });
     } finally {
@@ -315,7 +321,7 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
       };
 
       onExerciseImported(importedExercise);
-      toast({ title: `Added: ${exercise.name}` });
+      toast({ title: t.workout.toast.added.replace("{{name}}", exercise.name) });
 
       // Close preview if open
       if (previewExercise?.id === exercise.id) {
@@ -324,8 +330,8 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
     } catch (error) {
       console.error("Error importing exercise:", error);
       toast({
-        title: "Error",
-        description: "Failed to import exercise",
+        title: t.workout.common.error,
+        description: t.workout.toast.failedToImport,
         variant: "destructive",
       });
     } finally {
@@ -352,7 +358,8 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
       <div className="p-4 border-b bg-background space-y-3">
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">ExerciseDB</span>
+          <span className="text-sm font-medium">{t.workout.library.exerciseLibrary}</span>
+          <span className="text-xs text-muted-foreground">{t.workout.library.exerciseCount}</span>
         </div>
 
         <div className="relative">
@@ -360,7 +367,7 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search exercises..."
+            placeholder={t.workout.library.searchExercises}
             className="pl-9"
           />
           {searchQuery && (
@@ -375,13 +382,13 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
 
         <Select value={selectedBodyPart} onValueChange={setSelectedBodyPart}>
           <SelectTrigger>
-            <SelectValue placeholder="Filter by body part" />
+            <SelectValue placeholder={t.workout.library.filterByBodyPart} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Body Parts</SelectItem>
+            <SelectItem value="all">{t.workout.library.allBodyParts}</SelectItem>
             {bodyParts.map((part) => (
               <SelectItem key={part} value={part}>
-                {bodyPartLabels[part] || part}
+                {t.workout.bodyParts[part as keyof typeof t.workout.bodyParts] || bodyPartLabels[part] || part}
               </SelectItem>
             ))}
           </SelectContent>
@@ -404,19 +411,20 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
                   onPreview={() => setPreviewExercise(exercise)}
                   onImport={() => handleImport(exercise)}
                   importing={importing === exercise.id}
+                  translations={t}
                 />
               ))}
             </div>
           ) : hasSearched ? (
             <div className="text-center py-12 text-muted-foreground">
-              <p>No exercises found</p>
-              <p className="text-sm mt-1">Try a different search term</p>
+              <p>{t.workout.library.noExercisesFound}</p>
+              <p className="text-sm mt-1">{t.workout.library.tryDifferentSearch}</p>
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               <Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Search or select a body part</p>
-              <p className="text-sm mt-1">to browse 1,300+ exercises</p>
+              <p>{t.workout.library.searchOrFilter}</p>
+              <p className="text-sm mt-1">{t.workout.library.orFilterByBodyPart}</p>
             </div>
           )}
         </div>
@@ -429,6 +437,7 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
         onOpenChange={(open) => !open && setPreviewExercise(null)}
         onImport={() => previewExercise && handleImport(previewExercise)}
         importing={importing === previewExercise?.id}
+        translations={t}
       />
     </div>
   );

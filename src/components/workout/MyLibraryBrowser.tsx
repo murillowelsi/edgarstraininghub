@@ -20,7 +20,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { createExercise, getAllExercises } from "@/services/exercisesService";
+import {
+  createExercise,
+  deleteExercise,
+  getAllExercises,
+  updateExercise,
+} from "@/services/exercisesService";
 import type { Exercise, MuscleGroup, EquipmentType } from "@/types/exercise";
 import {
   muscleGroupLabels,
@@ -29,16 +34,21 @@ import {
   getYouTubeThumbnail,
 } from "@/types/exercise";
 import {
+  AlertTriangle,
   Dumbbell,
+  Edit,
   Library,
   Loader2,
   Plus,
+  Save,
   Search,
+  Trash2,
   X,
   Youtube,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MyLibraryBrowserProps {
   onExerciseSelected: (exercise: Exercise) => void;
@@ -49,10 +59,12 @@ const LibraryExerciseCard = ({
   exercise,
   onPreview,
   onAdd,
+  translations,
 }: {
   exercise: Exercise;
   onPreview: () => void;
   onAdd: () => void;
+  translations: ReturnType<typeof useLanguage>["t"];
 }) => {
   const thumbnailUrl = exercise.gifUrl ||
     (exercise.videoUrl ? getYouTubeThumbnail(getYouTubeVideoId(exercise.videoUrl) || "") : null);
@@ -73,7 +85,7 @@ const LibraryExerciseCard = ({
         ) : (
           <div className="text-center text-muted-foreground p-4">
             <Dumbbell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-xs">No image</p>
+            <p className="text-xs">{translations.workout.library.noImage}</p>
           </div>
         )}
         {exercise.videoUrl && (
@@ -89,7 +101,7 @@ const LibraryExerciseCard = ({
         <div className="flex flex-wrap gap-1 mt-1">
           {exercise.muscleGroups.slice(0, 2).map((mg) => (
             <Badge key={mg} variant="secondary" className="text-xs">
-              {muscleGroupLabels[mg]}
+              {translations.workout.muscleGroups[mg] || muscleGroupLabels[mg]}
             </Badge>
           ))}
         </div>
@@ -103,7 +115,7 @@ const LibraryExerciseCard = ({
           }}
         >
           <Plus className="h-3 w-3 mr-1" />
-          Add
+          {translations.workout.common.add}
         </Button>
       </CardContent>
     </Card>
@@ -116,11 +128,17 @@ const ExercisePreviewDialog = ({
   open,
   onOpenChange,
   onAdd,
+  onEdit,
+  onDelete,
+  translations,
 }: {
   exercise: Exercise | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdd: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  translations: ReturnType<typeof useLanguage>["t"];
 }) => {
   if (!exercise) return null;
 
@@ -132,7 +150,7 @@ const ExercisePreviewDialog = ({
         <DialogHeader>
           <DialogTitle className="capitalize">{exercise.name}</DialogTitle>
           <DialogDescription>
-            {exercise.isCustom ? "Custom Exercise" : "From Library"}
+            {exercise.isCustom ? translations.workout.library.customExercise : translations.workout.library.fromExerciseLibrary}
           </DialogDescription>
         </DialogHeader>
 
@@ -164,7 +182,7 @@ const ExercisePreviewDialog = ({
             {exercise.description && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Description
+                  {translations.workout.exerciseForm.description}
                 </p>
                 <p className="text-sm">{exercise.description}</p>
               </div>
@@ -172,12 +190,12 @@ const ExercisePreviewDialog = ({
 
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">
-                Muscle Groups
+                {translations.workout.exerciseForm.muscleGroups}
               </p>
               <div className="flex flex-wrap gap-1">
                 {exercise.muscleGroups.map((mg) => (
                   <Badge key={mg} variant="default">
-                    {muscleGroupLabels[mg]}
+                    {translations.workout.muscleGroups[mg] || muscleGroupLabels[mg]}
                   </Badge>
                 ))}
               </div>
@@ -186,12 +204,12 @@ const ExercisePreviewDialog = ({
             {exercise.equipment.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Equipment
+                  {translations.workout.exerciseForm.equipment}
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {exercise.equipment.map((eq) => (
                     <Badge key={eq} variant="outline">
-                      {equipmentTypeLabels[eq]}
+                      {translations.workout.equipmentTypes[eq] || equipmentTypeLabels[eq]}
                     </Badge>
                   ))}
                 </div>
@@ -201,7 +219,7 @@ const ExercisePreviewDialog = ({
             {exercise.instructions && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Instructions
+                  {translations.workout.exerciseForm.instructions}
                 </p>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                   {exercise.instructions}
@@ -211,29 +229,45 @@ const ExercisePreviewDialog = ({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-          <Button onClick={onAdd}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add to Workout
-          </Button>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <div className="flex gap-2 mr-auto">
+            <Button variant="outline" size="sm" onClick={onEdit}>
+              <Edit className="h-4 w-4 mr-1" />
+              {translations.workout.common.edit}
+            </Button>
+            <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={onDelete}>
+              <Trash2 className="h-4 w-4 mr-1" />
+              {translations.workout.common.delete}
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {translations.workout.common.close}
+            </Button>
+            <Button onClick={onAdd}>
+              <Plus className="h-4 w-4 mr-2" />
+              {translations.workout.library.addToWorkout}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
 
-// Create exercise dialog
-const CreateExerciseDialog = ({
+// Exercise form dialog (create or edit)
+const ExerciseFormDialog = ({
   open,
   onOpenChange,
-  onCreated,
+  onSaved,
+  exerciseToEdit,
+  translations,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated: (exercise: Exercise) => void;
+  onSaved: (exercise: Exercise) => void;
+  exerciseToEdit?: Exercise | null;
+  translations: ReturnType<typeof useLanguage>["t"];
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -246,6 +280,22 @@ const CreateExerciseDialog = ({
   const [muscleGroups, setMuscleGroups] = useState<MuscleGroup[]>([]);
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentType | "">("");
   const [equipment, setEquipment] = useState<EquipmentType[]>([]);
+
+  const isEditing = !!exerciseToEdit;
+
+  // Populate form when editing
+  useEffect(() => {
+    if (exerciseToEdit) {
+      setName(exerciseToEdit.name);
+      setDescription(exerciseToEdit.description || "");
+      setInstructions(exerciseToEdit.instructions || "");
+      setVideoUrl(exerciseToEdit.videoUrl || "");
+      setMuscleGroups(exerciseToEdit.muscleGroups);
+      setEquipment(exerciseToEdit.equipment);
+    } else {
+      resetForm();
+    }
+  }, [exerciseToEdit, open]);
 
   const resetForm = () => {
     setName("");
@@ -288,21 +338,7 @@ const CreateExerciseDialog = ({
       const videoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
       const thumbnailUrl = videoId ? getYouTubeThumbnail(videoId) : undefined;
 
-      const exerciseId = await createExercise(
-        {
-          name: name.trim(),
-          description: description.trim() || undefined,
-          instructions: instructions.trim() || undefined,
-          videoUrl: videoUrl.trim() || undefined,
-          thumbnailUrl,
-          muscleGroups,
-          equipment,
-        },
-        user.uid
-      );
-
-      const newExercise: Exercise = {
-        id: exerciseId,
+      const exerciseData = {
         name: name.trim(),
         description: description.trim() || undefined,
         instructions: instructions.trim() || undefined,
@@ -310,21 +346,42 @@ const CreateExerciseDialog = ({
         thumbnailUrl,
         muscleGroups,
         equipment,
-        isCustom: true,
-        createdBy: user.uid,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
-      toast({ title: "Exercise created" });
-      onCreated(newExercise);
+      if (isEditing && exerciseToEdit) {
+        await updateExercise(exerciseToEdit.id, exerciseData);
+
+        const updatedExercise: Exercise = {
+          ...exerciseToEdit,
+          ...exerciseData,
+          updatedAt: new Date(),
+        };
+
+        toast({ title: translations.workout.toast.exerciseUpdated });
+        onSaved(updatedExercise);
+      } else {
+        const exerciseId = await createExercise(exerciseData, user.uid);
+
+        const newExercise: Exercise = {
+          id: exerciseId,
+          ...exerciseData,
+          isCustom: true,
+          createdBy: user.uid,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        toast({ title: translations.workout.toast.exerciseCreated });
+        onSaved(newExercise);
+      }
+
       resetForm();
       onOpenChange(false);
     } catch (error) {
-      console.error("Error creating exercise:", error);
+      console.error("Error saving exercise:", error);
       toast({
-        title: "Error",
-        description: "Failed to create exercise",
+        title: translations.workout.common.error,
+        description: isEditing ? translations.workout.toast.failedToUpdate : translations.workout.toast.failedToCreate,
         variant: "destructive",
       });
     } finally {
@@ -336,38 +393,40 @@ const CreateExerciseDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>Create Custom Exercise</DialogTitle>
+          <DialogTitle>
+            {isEditing ? translations.workout.exerciseForm.editExercise : translations.workout.exerciseForm.createCustomExercise}
+          </DialogTitle>
           <DialogDescription>
-            Add a new exercise to your library
+            {isEditing ? translations.workout.exerciseForm.updateExerciseDetails : translations.workout.exerciseForm.addNewExercise}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Exercise Name *</Label>
+            <Label>{translations.workout.exerciseForm.exerciseName} *</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Bulgarian Split Squat"
+              placeholder={translations.workout.exerciseForm.exerciseNamePlaceholder}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Description</Label>
+            <Label>{translations.workout.exerciseForm.description}</Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Brief description of the exercise..."
+              placeholder={translations.workout.exerciseForm.descriptionPlaceholder}
               rows={2}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Instructions</Label>
+            <Label>{translations.workout.exerciseForm.instructions}</Label>
             <Textarea
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              placeholder="Step-by-step instructions..."
+              placeholder={translations.workout.exerciseForm.instructionsPlaceholder}
               rows={3}
             />
           </div>
@@ -375,12 +434,12 @@ const CreateExerciseDialog = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <Youtube className="h-4 w-4 text-red-500" />
-              YouTube Video URL
+              {translations.workout.exerciseForm.youtubeUrl}
             </Label>
             <Input
               value={videoUrl}
               onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder={translations.workout.exerciseForm.youtubeUrlPlaceholder}
             />
             {videoUrl && getYouTubeVideoId(videoUrl) && (
               <div className="mt-2 aspect-video rounded overflow-hidden">
@@ -394,14 +453,14 @@ const CreateExerciseDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label>Muscle Groups *</Label>
+            <Label>{translations.workout.exerciseForm.muscleGroups} *</Label>
             <div className="flex gap-2">
               <Select
                 value={selectedMuscleGroup}
                 onValueChange={(v) => setSelectedMuscleGroup(v as MuscleGroup)}
               >
                 <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select muscle group" />
+                  <SelectValue placeholder={translations.workout.exerciseForm.selectMuscleGroup} />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(muscleGroupLabels).map(([value, label]) => (
@@ -410,7 +469,7 @@ const CreateExerciseDialog = ({
                       value={value}
                       disabled={muscleGroups.includes(value as MuscleGroup)}
                     >
-                      {label}
+                      {translations.workout.muscleGroups[value as MuscleGroup] || label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -433,7 +492,7 @@ const CreateExerciseDialog = ({
                     className="cursor-pointer"
                     onClick={() => handleRemoveMuscleGroup(mg)}
                   >
-                    {muscleGroupLabels[mg]}
+                    {translations.workout.muscleGroups[mg] || muscleGroupLabels[mg]}
                     <X className="h-3 w-3 ml-1" />
                   </Badge>
                 ))}
@@ -442,14 +501,14 @@ const CreateExerciseDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label>Equipment</Label>
+            <Label>{translations.workout.exerciseForm.equipment}</Label>
             <div className="flex gap-2">
               <Select
                 value={selectedEquipment}
                 onValueChange={(v) => setSelectedEquipment(v as EquipmentType)}
               >
                 <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select equipment" />
+                  <SelectValue placeholder={translations.workout.exerciseForm.selectEquipment} />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(equipmentTypeLabels).map(([value, label]) => (
@@ -458,7 +517,7 @@ const CreateExerciseDialog = ({
                       value={value}
                       disabled={equipment.includes(value as EquipmentType)}
                     >
-                      {label}
+                      {translations.workout.equipmentTypes[value as EquipmentType] || label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -481,7 +540,7 @@ const CreateExerciseDialog = ({
                     className="cursor-pointer"
                     onClick={() => handleRemoveEquipment(eq)}
                   >
-                    {equipmentTypeLabels[eq]}
+                    {translations.workout.equipmentTypes[eq] || equipmentTypeLabels[eq]}
                     <X className="h-3 w-3 ml-1" />
                   </Badge>
                 ))}
@@ -492,7 +551,7 @@ const CreateExerciseDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {translations.workout.common.cancel}
           </Button>
           <Button
             onClick={handleSave}
@@ -500,10 +559,83 @@ const CreateExerciseDialog = ({
           >
             {saving ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : isEditing ? (
+              <Save className="h-4 w-4 mr-2" />
             ) : (
               <Plus className="h-4 w-4 mr-2" />
             )}
-            Create Exercise
+            {isEditing ? translations.workout.exerciseForm.saveChanges : translations.workout.library.createExercise}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Delete confirmation dialog
+const DeleteExerciseDialog = ({
+  exercise,
+  open,
+  onOpenChange,
+  onConfirm,
+  translations,
+}: {
+  exercise: Exercise | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  translations: ReturnType<typeof useLanguage>["t"];
+}) => {
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    if (!exercise) return;
+
+    setDeleting(true);
+    try {
+      await deleteExercise(exercise.id);
+      toast({ title: translations.workout.toast.exerciseDeleted });
+      onConfirm();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error deleting exercise:", error);
+      toast({
+        title: translations.workout.common.error,
+        description: translations.workout.toast.failedToDelete,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  if (!exercise) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-5 w-5" />
+            {translations.workout.deleteDialog.deleteExercise}
+          </DialogTitle>
+          <DialogDescription>
+            {translations.workout.deleteDialog.confirmDelete.replace("{{name}}", exercise.name)}
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={deleting}>
+            {translations.workout.common.cancel}
+          </Button>
+          <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+            {deleting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4 mr-2" />
+            )}
+            {translations.workout.common.delete}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -512,13 +644,17 @@ const CreateExerciseDialog = ({
 };
 
 const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewExercise, setPreviewExercise] = useState<Exercise | null>(null);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showFormDialog, setShowFormDialog] = useState(false);
+  const [exerciseToEdit, setExerciseToEdit] = useState<Exercise | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [exerciseToDelete, setExerciseToDelete] = useState<Exercise | null>(null);
 
   const loadExercises = useCallback(async () => {
     setLoading(true);
@@ -529,8 +665,8 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
     } catch (error) {
       console.error("Error loading exercises:", error);
       toast({
-        title: "Error",
-        description: "Failed to load exercises",
+        title: t.workout.common.error,
+        description: t.workout.toast.failedToLoad,
         variant: "destructive",
       });
     } finally {
@@ -562,14 +698,47 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
 
   const handleAddExercise = (exercise: Exercise) => {
     onExerciseSelected(exercise);
-    toast({ title: `Added: ${exercise.name}` });
+    toast({ title: t.workout.toast.added.replace("{{name}}", exercise.name) });
     if (previewExercise?.id === exercise.id) {
       setPreviewExercise(null);
     }
   };
 
-  const handleExerciseCreated = (exercise: Exercise) => {
-    setExercises((prev) => [exercise, ...prev]);
+  const handleOpenCreateDialog = () => {
+    setExerciseToEdit(null);
+    setShowFormDialog(true);
+  };
+
+  const handleOpenEditDialog = (exercise: Exercise) => {
+    setExerciseToEdit(exercise);
+    setShowFormDialog(true);
+    setPreviewExercise(null);
+  };
+
+  const handleOpenDeleteDialog = (exercise: Exercise) => {
+    setExerciseToDelete(exercise);
+    setShowDeleteDialog(true);
+    setPreviewExercise(null);
+  };
+
+  const handleExerciseSaved = (exercise: Exercise) => {
+    if (exerciseToEdit) {
+      // Update existing
+      setExercises((prev) =>
+        prev.map((e) => (e.id === exercise.id ? exercise : e))
+      );
+    } else {
+      // Add new
+      setExercises((prev) => [exercise, ...prev]);
+    }
+    setExerciseToEdit(null);
+  };
+
+  const handleExerciseDeleted = () => {
+    if (exerciseToDelete) {
+      setExercises((prev) => prev.filter((e) => e.id !== exerciseToDelete.id));
+      setExerciseToDelete(null);
+    }
   };
 
   return (
@@ -579,11 +748,11 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Library className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">My Library</span>
+            <span className="text-sm font-medium">{t.workout.library.myLibrary}</span>
           </div>
-          <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+          <Button size="sm" onClick={handleOpenCreateDialog}>
             <Plus className="h-4 w-4 mr-1" />
-            New
+            {t.workout.common.new}
           </Button>
         </div>
 
@@ -592,7 +761,7 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search exercises..."
+            placeholder={t.workout.library.searchExercises}
             className="pl-9"
           />
           {searchQuery && (
@@ -621,26 +790,27 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
                   exercise={exercise}
                   onPreview={() => setPreviewExercise(exercise)}
                   onAdd={() => handleAddExercise(exercise)}
+                  translations={t}
                 />
               ))}
             </div>
           ) : exercises.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Library className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No exercises in your library</p>
-              <p className="text-sm mt-1">Create your first custom exercise</p>
+              <p>{t.workout.library.noExercisesInLibrary}</p>
+              <p className="text-sm mt-1">{t.workout.library.createFirstExercise}</p>
               <Button
                 className="mt-4"
-                onClick={() => setShowCreateDialog(true)}
+                onClick={handleOpenCreateDialog}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Create Exercise
+                {t.workout.library.createExercise}
               </Button>
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
-              <p>No exercises found</p>
-              <p className="text-sm mt-1">Try a different search term</p>
+              <p>{t.workout.library.noExercisesFound}</p>
+              <p className="text-sm mt-1">{t.workout.library.tryDifferentSearch}</p>
             </div>
           )}
         </div>
@@ -652,13 +822,27 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
         open={!!previewExercise}
         onOpenChange={(open) => !open && setPreviewExercise(null)}
         onAdd={() => previewExercise && handleAddExercise(previewExercise)}
+        onEdit={() => previewExercise && handleOpenEditDialog(previewExercise)}
+        onDelete={() => previewExercise && handleOpenDeleteDialog(previewExercise)}
+        translations={t}
       />
 
-      {/* Create Dialog */}
-      <CreateExerciseDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-        onCreated={handleExerciseCreated}
+      {/* Create/Edit Dialog */}
+      <ExerciseFormDialog
+        open={showFormDialog}
+        onOpenChange={setShowFormDialog}
+        onSaved={handleExerciseSaved}
+        exerciseToEdit={exerciseToEdit}
+        translations={t}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteExerciseDialog
+        exercise={exerciseToDelete}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleExerciseDeleted}
+        translations={t}
       />
     </div>
   );

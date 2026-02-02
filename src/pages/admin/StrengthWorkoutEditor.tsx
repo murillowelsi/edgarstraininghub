@@ -2,16 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { getAllExercises } from "@/services/exercisesService";
 import { createWorkout, getWorkoutById, updateWorkout } from "@/services/workoutsService";
 import type { Exercise, WorkoutExercise } from "@/types/exercise";
-import { generateExerciseId } from "@/types/exercise";
+import { generateExerciseId, getYouTubeVideoId, getYouTubeThumbnail } from "@/types/exercise";
 import {
   ArrowLeft,
+  Database,
   Dumbbell,
   GripVertical,
+  Library,
   Loader2,
   Save,
   Trash2,
@@ -20,7 +23,9 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import ExerciseDbBrowser from "@/components/workout/ExerciseDbBrowser";
+import MyLibraryBrowser from "@/components/workout/MyLibraryBrowser";
 
 // Workout exercise row
 const WorkoutExerciseRow = ({
@@ -28,14 +33,29 @@ const WorkoutExerciseRow = ({
   exercise,
   onUpdate,
   onRemove,
+  translations,
 }: {
   item: WorkoutExercise;
   exercise?: Exercise;
   onUpdate: (updates: Partial<WorkoutExercise>) => void;
   onRemove: () => void;
+  translations: ReturnType<typeof useLanguage>["t"];
 }) => {
   const exerciseName = exercise?.name || item.exerciseName || "Unknown Exercise";
   const gifUrl = exercise?.gifUrl || item.exerciseGifUrl;
+  const videoUrl = exercise?.videoUrl || item.exerciseVideoUrl;
+
+  // Get thumbnail: prefer gifUrl, then YouTube thumbnail
+  const getThumbnail = () => {
+    if (gifUrl) return gifUrl;
+    if (videoUrl) {
+      const videoId = getYouTubeVideoId(videoUrl);
+      if (videoId) return getYouTubeThumbnail(videoId);
+    }
+    return null;
+  };
+
+  const thumbnailUrl = getThumbnail();
 
   return (
     <div className="flex items-center gap-3 p-3 bg-card border rounded-lg">
@@ -44,9 +64,9 @@ const WorkoutExerciseRow = ({
       </div>
 
       <div className="w-16 h-16 rounded overflow-hidden bg-muted flex-shrink-0">
-        {gifUrl ? (
+        {thumbnailUrl ? (
           <img
-            src={gifUrl}
+            src={thumbnailUrl}
             alt={exerciseName}
             className="w-full h-full object-cover"
           />
@@ -67,7 +87,7 @@ const WorkoutExerciseRow = ({
             className="w-16 h-8 text-center"
             min={1}
           />
-          <span className="text-sm text-muted-foreground">sets</span>
+          <span className="text-sm text-muted-foreground">{translations.workout.common.sets}</span>
           <span className="text-muted-foreground">×</span>
           <Input
             value={item.reps || ""}
@@ -75,13 +95,13 @@ const WorkoutExerciseRow = ({
             className="w-20 h-8"
             placeholder="8-12"
           />
-          <span className="text-sm text-muted-foreground">reps</span>
+          <span className="text-sm text-muted-foreground">{translations.workout.common.reps}</span>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
         <div className="text-sm">
-          <Label className="text-xs text-muted-foreground">Rest</Label>
+          <Label className="text-xs text-muted-foreground">{translations.workout.common.rest}</Label>
           <div className="flex items-center gap-1">
             <Input
               type="number"
@@ -114,6 +134,7 @@ const StrengthWorkoutEditor = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const isEditing = !!id;
 
@@ -176,18 +197,18 @@ const StrengthWorkoutEditor = () => {
 
       if (isEditing && id) {
         await updateWorkout(id, workoutData);
-        toast({ title: "Workout updated" });
+        toast({ title: t.workout.toast.workoutUpdated });
       } else {
         await createWorkout(workoutData, user.uid);
-        toast({ title: "Workout created" });
+        toast({ title: t.workout.toast.workoutCreated });
       }
 
       navigate("/admin/workouts");
     } catch (error) {
       console.error("Error saving workout:", error);
       toast({
-        title: "Error",
-        description: "Failed to save workout",
+        title: t.workout.common.error,
+        description: t.workout.toast.failedToSaveWorkout,
         variant: "destructive",
       });
     } finally {
@@ -207,11 +228,13 @@ const StrengthWorkoutEditor = () => {
       // Store denormalized data for offline access
       exerciseName: exercise.name,
       exerciseGifUrl: exercise.gifUrl,
+      exerciseVideoUrl: exercise.videoUrl,
+      exerciseThumbnailUrl: exercise.thumbnailUrl,
       exerciseMuscleGroups: exercise.muscleGroups,
       exerciseInstructions: exercise.instructions,
     };
     setWorkoutExercises([...workoutExercises, newItem]);
-    toast({ title: `Added: ${exercise.name}` });
+    toast({ title: t.workout.toast.added.replace("{{name}}", exercise.name) });
   };
 
   const updateWorkoutExercise = (id: string, updates: Partial<WorkoutExercise>) => {
@@ -249,7 +272,7 @@ const StrengthWorkoutEditor = () => {
             </Button>
             <div>
               <h1 className="font-semibold">
-                {isEditing ? "Edit Strength Workout" : "New Strength Workout"}
+                {isEditing ? t.workout.editor.editStrengthWorkout : t.workout.editor.newStrengthWorkout}
               </h1>
             </div>
           </div>
@@ -260,7 +283,7 @@ const StrengthWorkoutEditor = () => {
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Save Workout
+            {t.workout.editor.saveWorkout}
           </Button>
         </div>
 
@@ -270,23 +293,23 @@ const StrengthWorkoutEditor = () => {
           <div className="flex-1 overflow-auto p-4">
             <Card className="mb-4">
               <CardHeader>
-                <CardTitle className="text-base">Workout Details</CardTitle>
+                <CardTitle className="text-base">{t.workout.editor.workoutDetails}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Workout Name *</Label>
+                  <Label>{t.workout.editor.workoutName} *</Label>
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g., Full Body Workout A"
+                    placeholder={t.workout.editor.workoutNamePlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Instructions / Notes</Label>
+                  <Label>{t.workout.editor.instructionsNotes}</Label>
                   <Textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add any instructions or notes for this workout..."
+                    placeholder={t.workout.editor.instructionsPlaceholder}
                     rows={2}
                   />
                 </div>
@@ -297,7 +320,7 @@ const StrengthWorkoutEditor = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">
-                    Exercises ({workoutExercises.length})
+                    {t.workout.common.exercises} ({workoutExercises.length})
                   </CardTitle>
                 </div>
               </CardHeader>
@@ -305,9 +328,9 @@ const StrengthWorkoutEditor = () => {
                 {workoutExercises.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="mb-2">No exercises added yet</p>
+                    <p className="mb-2">{t.workout.editor.noExercisesYet}</p>
                     <p className="text-sm">
-                      Search and add exercises from ExerciseDB on the right
+                      {t.workout.editor.browseExercisesHint}
                     </p>
                   </div>
                 ) : (
@@ -325,6 +348,7 @@ const StrengthWorkoutEditor = () => {
                             updateWorkoutExercise(item.id, updates)
                           }
                           onRemove={() => removeWorkoutExercise(item.id)}
+                          translations={t}
                         />
                       );
                     })}
@@ -334,20 +358,50 @@ const StrengthWorkoutEditor = () => {
             </Card>
           </div>
 
-          {/* Right Panel - ExerciseDB */}
+          {/* Right Panel - Exercise Browser */}
           <div className="w-96 border-l bg-muted/30 flex flex-col overflow-hidden">
-            <ExerciseDbBrowser
-              onExerciseImported={(exercise) => {
-                // Add to exercises list for lookup
-                setExercises((prev) => {
-                  if (prev.some((e) => e.id === exercise.id)) {
-                    return prev;
-                  }
-                  return [...prev, exercise];
-                });
-                addExerciseToWorkout(exercise);
-              }}
-            />
+            <Tabs defaultValue="library" className="flex flex-col h-full">
+              <div className="border-b px-4 pt-3">
+                <TabsList className="w-full">
+                  <TabsTrigger value="library" className="flex-1 gap-1">
+                    <Library className="h-3.5 w-3.5" />
+                    {t.workout.library.myLibrary}
+                  </TabsTrigger>
+                  <TabsTrigger value="browse" className="flex-1 gap-1">
+                    <Database className="h-3.5 w-3.5" />
+                    {t.workout.library.browse}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent value="library" className="flex-1 overflow-hidden m-0">
+                <MyLibraryBrowser
+                  onExerciseSelected={(exercise) => {
+                    // Add to exercises list for lookup
+                    setExercises((prev) => {
+                      if (prev.some((e) => e.id === exercise.id)) {
+                        return prev;
+                      }
+                      return [...prev, exercise];
+                    });
+                    addExerciseToWorkout(exercise);
+                  }}
+                />
+              </TabsContent>
+              <TabsContent value="browse" className="flex-1 overflow-hidden m-0">
+                <ExerciseDbBrowser
+                  onExerciseImported={(exercise) => {
+                    // Add to exercises list for lookup
+                    setExercises((prev) => {
+                      if (prev.some((e) => e.id === exercise.id)) {
+                        return prev;
+                      }
+                      return [...prev, exercise];
+                    });
+                    addExerciseToWorkout(exercise);
+                  }}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
