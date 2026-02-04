@@ -3,7 +3,7 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { Chat, Message } from "@/types/chat";
-import { Loader2, Plus, Search, MessageSquare } from "lucide-react";
+import { Loader2, Plus, Search, MessageSquare, ChevronLeft } from "lucide-react";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { getUsersByRole } from "@/services/usersService";
@@ -278,11 +278,19 @@ export default function AthleteChat() {
                     {selectedChat ? (
                         <>
                             {/* Mobile Header to go back */}
-                            <div className="md:hidden p-3 border-b flex items-center gap-3 bg-background">
-                                <Button variant="ghost" size="sm" onClick={() => setSelectedChat(null)}>
-                                    ← Back
+                            <div className="md:hidden p-3 border-b flex items-center gap-3 bg-background sticky top-0 z-10">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 -ml-1"
+                                    onClick={() => setSelectedChat(null)}
+                                >
+                                    <ChevronLeft className="h-5 w-5" />
                                 </Button>
-                                <span className="font-semibold">{getChatDisplayName(selectedChat)}</span>
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback>{getChatDisplayName(selectedChat)[0]?.toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <span className="font-semibold text-sm">{getChatDisplayName(selectedChat)}</span>
                             </div>
 
                             <ChatWindow
