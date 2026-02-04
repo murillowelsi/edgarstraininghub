@@ -43,12 +43,12 @@ const AthletePortalLayout = ({
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribe = ChatService.subscribeToMyChat(user.uid, (chat) => {
-      if (chat && chat.unreadCount) {
-        setChatUnreadCount(chat.unreadCount[user.uid] || 0);
-      } else {
-        setChatUnreadCount(0);
-      }
+    const unsubscribe = ChatService.subscribeToAthleteChats(user.uid, (chats) => {
+      // Calculate total unread count across all chats
+      const totalUnread = chats.reduce((sum, chat) => {
+        return sum + (chat.unreadCount?.[user.uid] || 0);
+      }, 0);
+      setChatUnreadCount(totalUnread);
     });
 
     return () => unsubscribe();

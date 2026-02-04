@@ -41,14 +41,16 @@ export default function AdminChat() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
-    // Subscribe to all chats
+    // Subscribe to all chats where the user is a participant
     useEffect(() => {
-        const unsubscribe = ChatService.subscribeToAllChats((updatedChats) => {
+        if (!user) return;
+
+        const unsubscribe = ChatService.subscribeToUserChats(user.uid, (updatedChats) => {
             setChats(updatedChats);
             setLoading(false);
         });
         return () => unsubscribe();
-    }, []);
+    }, [user]);
 
     // Subscribe to messages when a chat is selected
     useEffect(() => {
@@ -124,6 +126,30 @@ export default function AdminChat() {
             athlete.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    // Load all users to resolve names
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+
+    useEffect(() => {
+        getAllUsers().then(setAllUsers).catch(console.error);
+    }, []);
+
+    // Helper to get display name
+    const getChatDisplayName = (chat: Chat) => {
+        // Find participant who is NOT me
+        const otherId = chat.participantIds.find(id => id !== user?.uid);
+        if (otherId) {
+            const otherUser = allUsers.find(u => u.id === otherId);
+            if (otherUser) return otherUser.displayName;
+        }
+        return chat.athleteName || "Athlete";
+    };
+
+    // Chats with resolved names
+    const displayChats = chats.map(c => ({
+        ...c,
+        athleteName: getChatDisplayName(c)
+    }));
+
     return (
         <AdminLayout>
             <div className="flex h-[calc(100vh-73px)]">
@@ -193,7 +219,7 @@ export default function AdminChat() {
                             </div>
                         ) : (
                             <ChatList
-                                chats={chats}
+                                chats={displayChats}
                                 selectedChatId={selectedChat?.id || null}
                                 onSelectChat={setSelectedChat}
                                 currentUserId={user?.uid || ""}
@@ -223,7 +249,7 @@ export default function AdminChat() {
                                     messages={messages}
                                     currentUserId={user?.uid || ""}
                                     onSendMessage={handleSendMessage}
-                                    participantName={selectedChat.athleteName}
+                                    participantName={getChatDisplayName(selectedChat)}
                                 />
                             </div>
                         </>
