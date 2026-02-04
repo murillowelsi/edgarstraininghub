@@ -3,12 +3,16 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext";
+import { ChatService } from "../services/chat";
+import { useEffect } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { user, isAthlete } = useAuth(); // Get auth state
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -59,6 +63,11 @@ const Navbar = () => {
             {t.nav.contact}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </Link>
+
+          {user && isAthlete && (
+            <ChatLinkWithBadge user={user} />
+          )}
+
 
           {/* Utility buttons group */}
           <div className="flex items-center gap-1 pl-4 border-l border-border">
@@ -112,44 +121,84 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-background/95 backdrop-blur-lg py-6 px-4 shadow-xl animate-fade-in border-t border-border/50">
-          <div className="flex flex-col space-y-4">
-            <a
-              href="/#home"
-              className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
-            >
-              {t.nav.home}
-            </a>
-            <Link
-              to="/about"
-              className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
-            >
-              {t.nav.about}
-            </Link>
-            <Link
-              to="/blog"
-              className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
-            >
-              Blog
-            </Link>
-            <Link
-              to="/contact"
-              className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
-            >
-              {t.nav.contact}
-            </Link>
-            <Link
-              to="/admin/login"
-              className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
-            >
-              <LogIn size={18} />
-              Login
-            </Link>
+      {
+        isMenuOpen && (
+          <div className="md:hidden bg-background/95 backdrop-blur-lg py-6 px-4 shadow-xl animate-fade-in border-t border-border/50">
+            <div className="flex flex-col space-y-4">
+              <a
+                href="/#home"
+                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
+              >
+                {t.nav.home}
+              </a>
+              <Link
+                to="/about"
+                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
+              >
+                {t.nav.about}
+              </Link>
+              <Link
+                to="/blog"
+                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
+              >
+                Blog
+              </Link>
+              <Link
+                to="/contact"
+                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
+              >
+                {t.nav.contact}
+              </Link>
+              {user && isAthlete && (
+                <ChatLinkWithBadge
+                  user={user}
+                  className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center justify-between"
+                />
+              )}
+              <Link
+                to="/admin/login"
+                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
+              >
+                <LogIn size={18} />
+                Login
+              </Link>
+            </div>
           </div>
-        </div>
+        )
+      }
+    </nav >
+  );
+};
+
+const ChatLinkWithBadge = ({ user, className }: { user: any, className?: string }) => {
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to athlete's chat to get unread count
+    const unsubscribe = ChatService.subscribeToMyChat(user.uid, (chat) => {
+      if (chat && chat.unreadCount) {
+        setUnreadCount(chat.unreadCount[user.uid] || 0);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  return (
+    <Link
+      to="/athlete/chat"
+      className={className || "font-semibold text-muted-foreground hover:text-primary transition-colors relative group flex items-center gap-1"}
+    >
+      Chat
+      {unreadCount > 0 && (
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+          {unreadCount}
+        </span>
       )}
-    </nav>
+      {!className && <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>}
+    </Link>
   );
 };
 

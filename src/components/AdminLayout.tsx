@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Menu, Users } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Menu, Users, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { auth } from "../lib/firebase";
 import Navbar from "./Navbar";
+import { ChatService } from "../services/chat";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ const navItems = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/workouts", label: "Workouts", icon: Dumbbell },
   { href: "/admin/calendar", label: "Calendar", icon: CalendarDays },
+  { href: "/admin/chat", label: "Chat", icon: MessageSquare },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
@@ -31,10 +33,28 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     }
     return false;
   });
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
 
   useEffect(() => {
     localStorage.setItem("adminSidebarCollapsed", sidebarCollapsed.toString());
   }, [sidebarCollapsed]);
+
+  // Subscribe to all chats to calculate total unread for admin
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = ChatService.subscribeToAllChats((chats) => {
+      let totalUnread = 0;
+      chats.forEach((chat) => {
+        if (chat.unreadCount && chat.unreadCount[user.uid]) {
+          totalUnread += chat.unreadCount[user.uid];
+        }
+      });
+      setChatUnreadCount(totalUnread);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -62,18 +82,29 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
           const isActive = location.pathname.startsWith(item.href);
+          const showBadge = item.href === "/admin/chat" && chatUnreadCount > 0;
           return (
             <Link key={item.href} to={item.href} onClick={() => setSidebarOpen(false)}>
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full",
+                  "w-full relative",
                   collapsed ? "justify-center px-2" : "justify-start",
                   isActive && "bg-accent text-accent-foreground"
                 )}
                 title={collapsed ? item.label : undefined}
               >
-                <item.icon className={cn("h-4 w-4", !collapsed && "mr-3")} />
+                <div className="relative">
+                  <item.icon className={cn("h-4 w-4", !collapsed && "mr-3")} />
+                  {showBadge && (
+                    <span className={cn(
+                      "absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white",
+                      !collapsed && "-right-2"
+                    )}>
+                      {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
+                    </span>
+                  )}
+                </div>
                 {!collapsed && item.label}
               </Button>
             </Link>
@@ -89,9 +120,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </Button>
           </Link>
         )}
-        <Button 
-          variant="ghost" 
-          className={cn("w-full", collapsed && "px-2")} 
+        <Button
+          variant="ghost"
+          className={cn("w-full", collapsed && "px-2")}
           onClick={handleLogout}
           title={collapsed ? "Logout" : undefined}
         >
@@ -122,12 +153,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="pt-[73px] flex min-h-[calc(100vh-73px)]">
         {/* Mobile Sidebar Trigger */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetTrigger asChild>
-            <Button 
+            <Button
               size="icon"
               className="fixed bottom-4 left-4 z-30 md:hidden shadow-lg"
               aria-label="Open admin menu"

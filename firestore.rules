@@ -49,6 +49,16 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Chat rules: Admin can read/write any chat. Athlete can read/write ONLY their own chat (where chatId == their uid)
+    match /chats/{chatId} {
+      // The document ID for 'chats' IS the athleteId
+      allow read, write: if request.auth != null && (isAdmin() || request.auth.uid == chatId);
+      
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null && (isAdmin() || request.auth.uid == chatId);
+      }
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;

@@ -28,6 +28,8 @@ import AthleteHome from "./pages/athlete/Home";
 import AthleteStrengthSession from "./pages/athlete/StrengthWorkoutSession";
 import AthleteWorkoutsList from "./pages/athlete/WorkoutsList";
 import AthleteWorkoutView from "./pages/athlete/WorkoutView";
+import AdminChat from "./pages/admin/Chat";
+import AthleteChat from "./pages/athlete/Chat";
 
 const queryClient = new QueryClient();
 
@@ -150,6 +152,14 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/admin/chat"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminChat />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Athlete Routes */}
                 <Route
@@ -189,6 +199,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAthlete>
                       <AthleteStrengthSession />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/chat"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteChat />
                     </ProtectedRoute>
                   }
                 />

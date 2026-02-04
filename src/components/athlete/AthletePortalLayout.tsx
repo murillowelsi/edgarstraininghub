@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Calendar, Dumbbell, Home, LogOut, Moon, Sun } from "lucide-react";
+import { Calendar, Dumbbell, Home, LogOut, Moon, Sun, MessageSquare } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -12,6 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ChatService } from "@/services/chat";
+import { useEffect, useState } from "react";
 
 interface AthletePortalLayoutProps {
   children: React.ReactNode;
@@ -23,6 +25,7 @@ const navItems = [
   { href: "/athlete", label: "Home", icon: Home },
   { href: "/athlete/calendar", label: "Calendar", icon: Calendar },
   { href: "/athlete/workouts", label: "Workouts", icon: Dumbbell },
+  { href: "/athlete/chat", label: "Chat", icon: MessageSquare },
 ];
 
 const AthletePortalLayout = ({
@@ -34,6 +37,22 @@ const AthletePortalLayout = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+
+  // Subscribe to chat unread count
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = ChatService.subscribeToMyChat(user.uid, (chat) => {
+      if (chat && chat.unreadCount) {
+        setChatUnreadCount(chat.unreadCount[user.uid] || 0);
+      } else {
+        setChatUnreadCount(0);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   const isActive = (href: string) => {
     if (href === "/athlete") {
@@ -123,23 +142,31 @@ const AthletePortalLayout = ({
         <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
           {navItems.map((item) => {
             const active = isActive(item.href);
+            const showBadge = item.href === "/athlete/chat" && chatUnreadCount > 0;
             return (
               <Link
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center flex-1 h-full transition-all",
+                  "flex flex-col items-center justify-center flex-1 h-full transition-all relative",
                   active
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <item.icon
-                  className={cn(
-                    "h-5 w-5 transition-transform",
-                    active && "scale-110"
+                <div className="relative">
+                  <item.icon
+                    className={cn(
+                      "h-5 w-5 transition-transform",
+                      active && "scale-110"
+                    )}
+                  />
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                      {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
+                    </span>
                   )}
-                />
+                </div>
                 <span
                   className={cn(
                     "text-xs mt-1",
