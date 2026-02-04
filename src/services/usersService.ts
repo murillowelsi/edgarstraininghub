@@ -13,14 +13,14 @@ import {
   where,
 } from "firebase/firestore";
 import { db, secondaryAuth } from "../lib/firebase";
-import type { User, UserDocument, UserFormData } from "../types/user";
+import type { User, UserDocument, UserFormData, SubscriptionStatus, SubscriptionPlan } from "../types/user";
 
 const USERS_COLLECTION = "users";
 
 // Helper to convert Firestore document to User
 const docToUser = async (id: string, data: UserDocument): Promise<User> => {
   let email = data.email;
-  
+
   // If email is not in Firestore, try to get it from Firebase Auth
   if (!email) {
     try {
@@ -33,12 +33,16 @@ const docToUser = async (id: string, data: UserDocument): Promise<User> => {
       console.error("Error fetching email from Auth:", error);
     }
   }
-  
+
   return {
     id,
     email: email || "",
     displayName: data.displayName,
     role: data.role,
+    subscriptionStatus: data.subscriptionStatus || (data.role === "athlete" ? "inactive" : "active"),
+    subscriptionPlan: data.subscriptionPlan || (data.role === "athlete" ? "none" : "yearly"),
+    subscriptionStartDate: data.subscriptionStartDate?.toDate(),
+    subscriptionEndDate: data.subscriptionEndDate?.toDate(),
     createdAt: data.createdAt?.toDate() || new Date(),
     updatedAt: data.updatedAt?.toDate() || new Date(),
   };
@@ -90,6 +94,10 @@ export const createUser = async (data: UserFormData): Promise<string> => {
     email: data.email,
     displayName: data.displayName,
     role: data.role,
+    subscriptionStatus: data.subscriptionStatus || (data.role === "athlete" ? "inactive" : "active"),
+    subscriptionPlan: data.subscriptionPlan || (data.role === "athlete" ? "none" : "yearly"),
+    subscriptionStartDate: data.subscriptionStartDate || null,
+    subscriptionEndDate: data.subscriptionEndDate || null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -114,6 +122,18 @@ export const updateUser = async (
   if (data.role !== undefined) {
     updateData.role = data.role;
   }
+  if (data.subscriptionStatus !== undefined) {
+    updateData.subscriptionStatus = data.subscriptionStatus;
+  }
+  if (data.subscriptionPlan !== undefined) {
+    updateData.subscriptionPlan = data.subscriptionPlan;
+  }
+  if (data.subscriptionStartDate !== undefined) {
+    updateData.subscriptionStartDate = data.subscriptionStartDate;
+  }
+  if (data.subscriptionEndDate !== undefined) {
+    updateData.subscriptionEndDate = data.subscriptionEndDate;
+  }
 
   await updateDoc(docRef, updateData);
 };
@@ -137,4 +157,35 @@ export const getUsersByRole = async (role: string): Promise<User[]> => {
   );
   // Sort by displayName in JavaScript to avoid needing a composite index
   return users.sort((a, b) => a.displayName.localeCompare(b.displayName));
+};
+
+// Update subscription status for a user
+export const updateSubscription = async (
+  id: string,
+  status: SubscriptionStatus,
+  plan: SubscriptionPlan,
+  startDate?: Date,
+  endDate?: Date
+): Promise<void> => {
+  const docRef = doc(db, USERS_COLLECTION, id);
+
+  const updateData: Record<string, unknown> = {
+    subscriptionStatus: status,
+    subscriptionPlan: plan,
+    updatedAt: serverTimestamp(),
+  };
+
+  if (startDate !== undefined) {
+    updateData.subscriptionStartDate = startDate;
+  }
+  if (endDate !== undefined) {
+    updateData.subscriptionEndDate = endDate;
+  }
+
+  await updateDoc(docRef, updateData);
+};
+
+// Get all athletes
+export const getAllAthletes = async (): Promise<User[]> => {
+  return getUsersByRole("athlete");
 };

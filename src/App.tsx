@@ -18,6 +18,7 @@ import AdminCalendar from "./pages/admin/Calendar";
 import AdminLogin from "./pages/admin/Login";
 import AdminPostForm from "./pages/admin/PostForm";
 import AdminPosts from "./pages/admin/Posts";
+import AdminSubscriptions from "./pages/admin/Subscriptions";
 import AdminUserForm from "./pages/admin/UserForm";
 import AdminUsers from "./pages/admin/Users";
 import AdminStrengthWorkoutEditor from "./pages/admin/StrengthWorkoutEditor";
@@ -101,6 +102,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAdmin>
                       <AdminUserForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/subscriptions"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminSubscriptions />
                     </ProtectedRoute>
                   }
                 />

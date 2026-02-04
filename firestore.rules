@@ -59,6 +59,13 @@ service cloud.firestore {
       }
     }
 
+    // Subscription history: admins can read/write all, athletes can read their own
+    match /subscriptionHistory/{historyId} {
+      allow read: if request.auth != null && 
+        (isAdmin() || resource.data.athleteId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;
