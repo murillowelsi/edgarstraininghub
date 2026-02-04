@@ -44,10 +44,11 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAllAthletes, updateSubscription } from "@/services/usersService";
-import { addSubscriptionHistory, getAthleteSubscriptionHistory } from "@/services/subscriptionHistoryService";
+import { addSubscriptionHistory, getAthleteSubscriptionHistory, updateSubscriptionHistoryEntry, deleteSubscriptionHistoryEntry } from "@/services/subscriptionHistoryService";
 import type { User, SubscriptionStatus, SubscriptionPlan, SubscriptionHistoryEntry } from "@/types/user";
 import { format, addMonths, addYears } from "date-fns";
 import {
@@ -64,7 +65,20 @@ import {
     XCircle,
     AlertTriangle,
     Users,
+    Trash2,
+    DollarSign,
+    FileText,
+    Plus,
+    MoreHorizontal
 } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import AdminLayout from "../../components/AdminLayout";
@@ -108,17 +122,30 @@ const AdminSubscriptions = () => {
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+    const [registerPaymentOpen, setRegisterPaymentOpen] = useState(false);
     const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+    const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
     const [athleteToActivate, setAthleteToActivate] = useState<User | null>(null);
+    const [athleteToDeactivate, setAthleteToDeactivate] = useState<User | null>(null);
     const [selectedAthlete, setSelectedAthlete] = useState<User | null>(null);
     const [athleteHistory, setAthleteHistory] = useState<SubscriptionHistoryEntry[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
+
+    // History Edit State
+    const [editHistoryDialogOpen, setEditHistoryDialogOpen] = useState(false);
+    const [historyEntryToEdit, setHistoryEntryToEdit] = useState<SubscriptionHistoryEntry | null>(null);
+    const [historyEditPaymentAmount, setHistoryEditPaymentAmount] = useState("");
+    const [historyEditPaymentMethod, setHistoryEditPaymentMethod] = useState("cash");
+    const [historyEditNotes, setHistoryEditNotes] = useState("");
+    const [historyEditDate, setHistoryEditDate] = useState<Date | undefined>(undefined);
+
+    // Form States
     const [formStatus, setFormStatus] = useState<SubscriptionStatus>("inactive");
     const [formPlan, setFormPlan] = useState<SubscriptionPlan>("none");
     const [formStartDate, setFormStartDate] = useState<Date | undefined>(undefined);
     const [formEndDate, setFormEndDate] = useState<Date | undefined>(undefined);
     const [formPaymentAmount, setFormPaymentAmount] = useState("");
+    const [formPaymentMethod, setFormPaymentMethod] = useState("cash");
     const [formNotes, setFormNotes] = useState("");
     const { toast } = useToast();
 
@@ -173,6 +200,19 @@ const AdminSubscriptions = () => {
         setEditDialogOpen(true);
     };
 
+    const openRegisterPaymentDialog = (athlete: User) => {
+        setAthleteToActivate(athlete);
+        // Default values for new payment
+        setFormPlan("monthly");
+        const start = new Date();
+        setFormStartDate(start);
+        setFormEndDate(addMonths(start, 1));
+        setFormPaymentAmount("");
+        setFormPaymentMethod("cash");
+        setFormNotes("");
+        setRegisterPaymentOpen(true);
+    };
+
     const openHistoryDialog = async (athlete: User) => {
         setSelectedAthlete(athlete);
         setLoadingHistory(true);
@@ -195,7 +235,6 @@ const AdminSubscriptions = () => {
 
     const handlePlanChange = (plan: SubscriptionPlan) => {
         setFormPlan(plan);
-        // Auto-calculate end date based on plan duration
         if (plan !== "none" && formStartDate) {
             let endDate: Date;
             switch (plan) {
@@ -217,7 +256,6 @@ const AdminSubscriptions = () => {
 
     const handleStartDateChange = (date: Date | undefined) => {
         setFormStartDate(date);
-        // Auto-calculate end date based on plan duration
         if (formPlan !== "none" && date) {
             let endDate: Date;
             switch (formPlan) {
@@ -237,7 +275,67 @@ const AdminSubscriptions = () => {
         }
     };
 
-    const handleSaveSubscription = async () => {
+    const handleRegisterPayment = async () => {
+        if (!athleteToActivate || !user || !formStartDate || !formEndDate) return;
+
+        setUpdating(athleteToActivate.id);
+        try {
+            // Update user subscription
+            await updateSubscription(
+                athleteToActivate.id,
+                "active",
+                formPlan,
+                formStartDate,
+                formEndDate
+            );
+
+            // Create history entry
+            await addSubscriptionHistory(
+                athleteToActivate.id,
+                formPlan,
+                "active",
+                formStartDate,
+                formEndDate,
+                user.uid,
+                formPaymentAmount ? parseFloat(formPaymentAmount) : undefined,
+                formPaymentMethod,
+                formNotes
+            );
+
+            setAthletes((prev) =>
+                prev.map((a) =>
+                    a.id === athleteToActivate.id
+                        ? {
+                            ...a,
+                            subscriptionStatus: "active",
+                            subscriptionPlan: formPlan,
+                            subscriptionStartDate: formStartDate,
+                            subscriptionEndDate: formEndDate,
+                        }
+                        : a
+                )
+            );
+
+            toast({
+                title: "Payment Registered",
+                description: `Subscription activated for ${athleteToActivate.displayName}.`,
+            });
+            setRegisterPaymentOpen(false);
+
+        } catch (error) {
+            console.error("Error registering payment:", error);
+            toast({
+                title: "Error",
+                description: "Failed to register payment.",
+                variant: "destructive",
+            });
+        } finally {
+            setUpdating(null);
+            setAthleteToActivate(null);
+        }
+    };
+
+    const handleEditSubscription = async () => {
         if (!selectedAthlete || !user) return;
 
         setUpdating(selectedAthlete.id);
@@ -250,18 +348,18 @@ const AdminSubscriptions = () => {
                 formEndDate
             );
 
-            // Add to history if it's a new subscription or active status
-            if (formStatus === "active" && formStartDate && formEndDate) {
+            // Add to history ONLY if payment amount provided, implying a payment fix/update
+            if (formPaymentAmount) {
                 await addSubscriptionHistory(
                     selectedAthlete.id,
                     formPlan,
                     formStatus,
-                    formStartDate,
-                    formEndDate,
+                    formStartDate || new Date(),
+                    formEndDate || new Date(),
                     user.uid,
-                    formPaymentAmount ? parseFloat(formPaymentAmount) : undefined,
-                    undefined,
-                    formNotes || undefined
+                    parseFloat(formPaymentAmount),
+                    "manual_update", // distinguish manual edits
+                    `Manual update: ${formNotes}`
                 );
             }
 
@@ -297,74 +395,16 @@ const AdminSubscriptions = () => {
         }
     };
 
-    const openActivateDialog = (athlete: User) => {
-        setAthleteToActivate(athlete);
-        setActivateDialogOpen(true);
+    const openDeactivateDialog = (athlete: User) => {
+        setAthleteToDeactivate(athlete);
+        setDeactivateDialogOpen(true);
     };
 
-    const quickActivate = async (plan: SubscriptionPlan) => {
-        if (!athleteToActivate || !user) return;
-
-        setActivateDialogOpen(false);
-        setUpdating(athleteToActivate.id);
-
-        try {
-            const startDate = new Date();
-            let endDate: Date;
-            switch (plan) {
-                case "monthly":
-                    endDate = addMonths(startDate, 1);
-                    break;
-                case "quarterly":
-                    endDate = addMonths(startDate, 3);
-                    break;
-                case "yearly":
-                    endDate = addYears(startDate, 1);
-                    break;
-                default:
-                    endDate = startDate;
-            }
-
-            await updateSubscription(athleteToActivate.id, "active", plan, startDate, endDate);
-
-            // Add to subscription history
-            await addSubscriptionHistory(
-                athleteToActivate.id,
-                plan,
-                "active",
-                startDate,
-                endDate,
-                user.uid
-            );
-
-            setAthletes((prev) =>
-                prev.map((a) =>
-                    a.id === athleteToActivate.id
-                        ? {
-                            ...a,
-                            subscriptionStatus: "active",
-                            subscriptionPlan: plan,
-                            subscriptionStartDate: startDate,
-                            subscriptionEndDate: endDate,
-                        }
-                        : a
-                )
-            );
-
-            toast({
-                title: "Subscription Activated",
-                description: `${athleteToActivate.displayName} is now subscribed with a ${plan} plan.`,
-            });
-        } catch (error) {
-            console.error("Error activating subscription:", error);
-            toast({
-                title: "Error",
-                description: "Failed to activate subscription.",
-                variant: "destructive",
-            });
-        } finally {
-            setUpdating(null);
-            setAthleteToActivate(null);
+    const handleDeactivateConfirm = async () => {
+        if (athleteToDeactivate) {
+            await deactivateSubscription(athleteToDeactivate);
+            setDeactivateDialogOpen(false);
+            setAthleteToDeactivate(null);
         }
     };
 
@@ -402,6 +442,83 @@ const AdminSubscriptions = () => {
             setUpdating(null);
         }
     };
+
+    const openHistoryEditDialog = (entry: SubscriptionHistoryEntry) => {
+        setHistoryEntryToEdit(entry);
+        setHistoryEditPaymentAmount(entry.paymentAmount ? entry.paymentAmount.toString() : "");
+        setHistoryEditPaymentMethod(entry.paymentMethod || "cash");
+        setHistoryEditNotes(entry.notes || "");
+        setHistoryEditDate(entry.createdAt || new Date());
+        setEditHistoryDialogOpen(true);
+    };
+
+    const handleUpdateHistoryEntry = async () => {
+        if (!historyEntryToEdit) return;
+
+        setLoadingHistory(true);
+        try {
+            await updateSubscriptionHistoryEntry(historyEntryToEdit.id, {
+                paymentAmount: historyEditPaymentAmount ? parseFloat(historyEditPaymentAmount) : undefined,
+                paymentMethod: historyEditPaymentMethod,
+                notes: historyEditNotes,
+                createdAt: historyEditDate // allow editing date if needed
+            });
+
+            // Update local state
+            setAthleteHistory(prev => prev.map(entry =>
+                entry.id === historyEntryToEdit.id ? {
+                    ...entry,
+                    paymentAmount: historyEditPaymentAmount ? parseFloat(historyEditPaymentAmount) : undefined,
+                    paymentMethod: historyEditPaymentMethod,
+                    notes: historyEditNotes,
+                    createdAt: historyEditDate || entry.createdAt
+                } : entry
+            ));
+
+            toast({
+                title: "Entry Updated",
+                description: "Payment record updated successfully.",
+            });
+            setEditHistoryDialogOpen(false);
+        } catch (error) {
+            console.error("Error updating history:", error);
+            toast({
+                title: "Error",
+                description: "Failed to update record.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
+    const handleDeleteHistoryEntry = async (entryId: string) => {
+        if (!confirm("Are you sure you want to delete this payment record?")) return;
+
+        setLoadingHistory(true);
+        try {
+            await deleteSubscriptionHistoryEntry(entryId);
+            setAthleteHistory(prev => prev.filter(entry => entry.id !== entryId));
+            toast({
+                title: "Entry Deleted",
+                description: "Payment record deleted.",
+            });
+        } catch (error) {
+            console.error("Error deleting history:", error);
+            toast({
+                title: "Error",
+                description: "Failed to delete record.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
+    // Calculate total history amount
+    const totalHistoryAmount = useMemo(() => {
+        return athleteHistory.reduce((sum, entry) => sum + (entry.paymentAmount || 0), 0);
+    }, [athleteHistory]);
 
     return (
         <AdminLayout>
@@ -612,7 +729,7 @@ const AdminSubscriptions = () => {
                                             <TableHead className="min-w-[100px]">Plan</TableHead>
                                             <TableHead className="min-w-[120px]">Start Date</TableHead>
                                             <TableHead className="min-w-[120px]">End Date</TableHead>
-                                            <TableHead className="text-right min-w-[250px]">Actions</TableHead>
+                                            <TableHead className="text-right min-w-[200px]">Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -656,81 +773,50 @@ const AdminSubscriptions = () => {
                                                         </span>
                                                     </TableCell>
                                                     <TableCell className="text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => openHistoryDialog(athlete)}
-                                                                title="View History"
-                                                            >
-                                                                <History className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => openEditDialog(athlete)}
-                                                                disabled={updating === athlete.id}
-                                                            >
-                                                                <Edit className="h-4 w-4" />
-                                                            </Button>
-
-                                                            {athlete.subscriptionStatus !== "active" ? (
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                                                                    disabled={updating === athlete.id}
-                                                                    onClick={() => openActivateDialog(athlete)}
-                                                                >
-                                                                    {updating === athlete.id ? (
-                                                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                                                    ) : (
-                                                                        <>
-                                                                            <CheckCircle2 className="h-4 w-4 mr-1" />
-                                                                            Activate
-                                                                        </>
-                                                                    )}
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                                                    <span className="sr-only">Open menu</span>
+                                                                    <MoreHorizontal className="h-4 w-4" />
                                                                 </Button>
-                                                            ) : (
-                                                                <AlertDialog>
-                                                                    <AlertDialogTrigger asChild>
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                                                                            disabled={updating === athlete.id}
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                {athlete.subscriptionStatus !== "active" && (
+                                                                    <DropdownMenuItem onClick={() => openRegisterPaymentDialog(athlete)}>
+                                                                        <DollarSign className="mr-2 h-4 w-4" />
+                                                                        <span>Register Payment</span>
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                                {athlete.subscriptionStatus === "active" && (
+                                                                    <DropdownMenuItem onClick={() => openRegisterPaymentDialog(athlete)}>
+                                                                        <Plus className="mr-2 h-4 w-4" />
+                                                                        <span>Renew / Add Payment</span>
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem onClick={() => openHistoryDialog(athlete)}>
+                                                                    <FileText className="mr-2 h-4 w-4" />
+                                                                    <span>View History</span>
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => openEditDialog(athlete)}>
+                                                                    <Edit className="mr-2 h-4 w-4" />
+                                                                    <span>Edit Details</span>
+                                                                </DropdownMenuItem>
+                                                                {athlete.subscriptionStatus === "active" && (
+                                                                    <>
+                                                                        <DropdownMenuSeparator />
+                                                                        <DropdownMenuItem
+                                                                            onClick={() => openDeactivateDialog(athlete)}
+                                                                            className="text-red-600 focus:text-red-600"
                                                                         >
-                                                                            {updating === athlete.id ? (
-                                                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                                                            ) : (
-                                                                                <>
-                                                                                    <XCircle className="h-4 w-4 mr-1" />
-                                                                                    Deactivate
-                                                                                </>
-                                                                            )}
-                                                                        </Button>
-                                                                    </AlertDialogTrigger>
-                                                                    <AlertDialogContent>
-                                                                        <AlertDialogHeader>
-                                                                            <AlertDialogTitle>Deactivate Subscription</AlertDialogTitle>
-                                                                            <AlertDialogDescription>
-                                                                                Are you sure you want to deactivate {athlete.displayName}'s
-                                                                                subscription? They will lose access to premium features.
-                                                                            </AlertDialogDescription>
-                                                                        </AlertDialogHeader>
-                                                                        <AlertDialogFooter>
-                                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                            <AlertDialogAction
-                                                                                onClick={() => deactivateSubscription(athlete)}
-                                                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                                            >
-                                                                                Deactivate
-                                                                            </AlertDialogAction>
-                                                                        </AlertDialogFooter>
-                                                                    </AlertDialogContent>
-                                                                </AlertDialog>
-                                                            )}
-                                                        </div>
+                                                                            <XCircle className="mr-2 h-4 w-4" />
+                                                                            <span>Deactivate</span>
+                                                                        </DropdownMenuItem>
+                                                                    </>
+                                                                )}
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -742,13 +828,13 @@ const AdminSubscriptions = () => {
                     </Card>
                 )}
 
-                {/* Edit Subscription Dialog */}
+                {/* Edit Subscription Dialog (Super Admin / Manual) */}
                 <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
-                            <DialogTitle>Edit Subscription</DialogTitle>
+                            <DialogTitle>Edit Subscription Details</DialogTitle>
                             <DialogDescription>
-                                Update subscription details for {selectedAthlete?.displayName}
+                                Manually update details for {selectedAthlete?.displayName}. Use "Register Payment" for payments.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
@@ -786,6 +872,7 @@ const AdminSubscriptions = () => {
                                     </SelectContent>
                                 </Select>
                             </div>
+                            {/* ... (Kept existing form fields for dates/payment - optional manual edit) ... */}
                             <div className="grid gap-2">
                                 <Label>Start Date</Label>
                                 <Popover>
@@ -836,31 +923,12 @@ const AdminSubscriptions = () => {
                                     </PopoverContent>
                                 </Popover>
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="paymentAmount">Payment Amount (optional)</Label>
-                                <Input
-                                    id="paymentAmount"
-                                    type="number"
-                                    placeholder="0.00"
-                                    value={formPaymentAmount}
-                                    onChange={(e) => setFormPaymentAmount(e.target.value)}
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="notes">Notes (optional)</Label>
-                                <Input
-                                    id="notes"
-                                    placeholder="Add any notes..."
-                                    value={formNotes}
-                                    onChange={(e) => setFormNotes(e.target.value)}
-                                />
-                            </div>
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
                                 Cancel
                             </Button>
-                            <Button onClick={handleSaveSubscription} disabled={updating !== null}>
+                            <Button onClick={handleEditSubscription} disabled={updating !== null}>
                                 {updating ? (
                                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                 ) : null}
@@ -870,135 +938,371 @@ const AdminSubscriptions = () => {
                     </DialogContent>
                 </Dialog>
 
-                {/* Activate Subscription Dialog */}
-                <Dialog open={activateDialogOpen} onOpenChange={setActivateDialogOpen}>
-                    <DialogContent className="sm:max-w-[400px]">
+                {/* Register Payment Dialog (New Flow) */}
+                <Dialog open={registerPaymentOpen} onOpenChange={setRegisterPaymentOpen}>
+                    <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
-                            <DialogTitle>Activate Subscription</DialogTitle>
+                            <DialogTitle>Register Payment & Subscription</DialogTitle>
                             <DialogDescription>
-                                Select a plan to activate for {athleteToActivate?.displayName}.
+                                Activate subscription and record payment for {athleteToActivate?.displayName}
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="flex flex-col gap-3 py-4">
-                            <Button
-                                variant="outline"
-                                className="w-full justify-between h-auto py-3"
-                                onClick={() => quickActivate("monthly")}
-                            >
-                                <span className="font-medium">Monthly</span>
-                                <span className="text-muted-foreground text-sm">1 month</span>
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full justify-between h-auto py-3"
-                                onClick={() => quickActivate("quarterly")}
-                            >
-                                <span className="font-medium">Quarterly</span>
-                                <span className="text-muted-foreground text-sm">3 months</span>
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full justify-between h-auto py-3"
-                                onClick={() => quickActivate("yearly")}
-                            >
-                                <span className="font-medium">Yearly</span>
-                                <span className="text-muted-foreground text-sm">12 months</span>
-                            </Button>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="pay-plan">Subscription Plan</Label>
+                                    <Select
+                                        value={formPlan}
+                                        onValueChange={(value) => handlePlanChange(value as SubscriptionPlan)}
+                                    >
+                                        <SelectTrigger id="pay-plan">
+                                            <SelectValue placeholder="Select plan" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="monthly">Monthly</SelectItem>
+                                            <SelectItem value="quarterly">Quarterly</SelectItem>
+                                            <SelectItem value="yearly">Yearly</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="pay-amount">Amount Paid (€)</Label>
+                                    <div className="relative">
+                                        <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            id="pay-amount"
+                                            type="number"
+                                            className="pl-9"
+                                            placeholder="0.00"
+                                            value={formPaymentAmount}
+                                            onChange={(e) => setFormPaymentAmount(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label>Start Date</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !formStartDate && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {formStartDate ? format(formStartDate, "PPP") : "Date"}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={formStartDate}
+                                                onSelect={handleStartDateChange}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>End Date</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !formEndDate && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {formEndDate ? format(formEndDate, "PPP") : "Date"}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={formEndDate}
+                                                onSelect={setFormEndDate}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="pay-method">Payment Method</Label>
+                                <Select
+                                    value={formPaymentMethod}
+                                    onValueChange={setFormPaymentMethod}
+                                >
+                                    <SelectTrigger id="pay-method">
+                                        <SelectValue placeholder="Select method" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="cash">Cash</SelectItem>
+                                        <SelectItem value="card">Credit Card</SelectItem>
+                                        <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="pay-notes">Notes / Receipt Ref</Label>
+                                <Textarea
+                                    id="pay-notes"
+                                    placeholder="Optional notes about the payment..."
+                                    value={formNotes}
+                                    onChange={(e) => setFormNotes(e.target.value)}
+                                    rows={3}
+                                />
+                            </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setActivateDialogOpen(false)}>
+                            <Button variant="ghost" onClick={() => setRegisterPaymentOpen(false)}>
                                 Cancel
+                            </Button>
+                            <Button onClick={handleRegisterPayment} disabled={updating !== null}>
+                                {updating ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : null}
+                                Confirm Payment
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
 
-                {/* Subscription History Dialog */}
+                {/* Subscription History Report Dialog */}
                 <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-                    <DialogContent className="sm:max-w-[600px]">
+                    <DialogContent className="sm:max-w-[800px]">
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
-                                <History className="h-5 w-5" />
-                                Subscription History
+                                <FileText className="h-5 w-5" />
+                                Payment Report: {selectedAthlete?.displayName}
                             </DialogTitle>
                             <DialogDescription>
-                                Payment history for {selectedAthlete?.displayName}
+                                History of all subscription payments and activations.
                             </DialogDescription>
                         </DialogHeader>
+
+                        {/* Summary Header */}
+                        <div className="bg-muted/30 p-4 rounded-lg flex items-center justify-between border">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Paid</p>
+                                <p className="text-2xl font-bold">€{totalHistoryAmount.toFixed(2)}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-sm font-medium text-muted-foreground">Last Payment</p>
+                                <p className="font-medium">
+                                    {athleteHistory.length > 0
+                                        ? format(athleteHistory[0].createdAt, "MMM d, yyyy")
+                                        : "N/A"}
+                                </p>
+                            </div>
+                        </div>
+
                         <div className="py-4">
                             {loadingHistory ? (
                                 <div className="flex items-center justify-center py-8">
                                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                                 </div>
                             ) : athleteHistory.length === 0 ? (
-                                <div className="text-center py-8">
-                                    <History className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-                                    <p className="text-muted-foreground">No subscription history yet.</p>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                        Subscription records will appear here after activations.
-                                    </p>
+                                <div className="text-center py-16 border rounded-lg border-dashed">
+                                    <History className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+                                    <p className="text-muted-foreground">No payment history recorded.</p>
                                 </div>
                             ) : (
-                                <ScrollArea className="h-[300px]">
-                                    <div className="space-y-3">
-                                        {athleteHistory.map((entry) => {
-                                            const StatusIcon = statusConfig[entry.status].icon;
-                                            return (
-                                                <div
-                                                    key={entry.id}
-                                                    className="flex items-start gap-4 p-4 rounded-lg border bg-card"
-                                                >
-                                                    <div className={cn(
-                                                        "p-2 rounded-full",
-                                                        entry.status === "active" ? "bg-emerald-500/10" : "bg-muted"
-                                                    )}>
-                                                        <StatusIcon className={cn(
-                                                            "h-4 w-4",
-                                                            entry.status === "active" ? "text-emerald-500" : "text-muted-foreground"
-                                                        )} />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <Badge variant="outline" className="font-medium">
-                                                                {planConfig[entry.plan].label}
-                                                            </Badge>
-                                                            <Badge className={statusConfig[entry.status].color}>
-                                                                {statusConfig[entry.status].label}
-                                                            </Badge>
+                                <div className="border rounded-md">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Date</TableHead>
+                                                <TableHead>Plan</TableHead>
+                                                <TableHead>Amount</TableHead>
+                                                <TableHead>Method</TableHead>
+                                                <TableHead>Period</TableHead>
+                                                <TableHead className="text-right">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {athleteHistory.map((entry) => (
+                                                <TableRow key={entry.id}>
+                                                    <TableCell>
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium">
+                                                                {format(entry.createdAt, "MMM d, yyyy")}
+                                                            </span>
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {format(entry.createdAt, "h:mm a")}
+                                                            </span>
                                                         </div>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {format(entry.startDate, "MMM d, yyyy")} — {format(entry.endDate, "MMM d, yyyy")}
-                                                        </p>
-                                                        {entry.paymentAmount && (
-                                                            <p className="text-sm font-medium mt-1">
-                                                                ${entry.paymentAmount.toFixed(2)}
-                                                            </p>
-                                                        )}
-                                                        {entry.notes && (
-                                                            <p className="text-sm text-muted-foreground mt-1 italic">
-                                                                {entry.notes}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                    <div className="text-xs text-muted-foreground text-right shrink-0">
-                                                        {format(entry.createdAt, "MMM d, yyyy")}
-                                                        <br />
-                                                        {format(entry.createdAt, "h:mm a")}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </ScrollArea>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="outline" className="capitalize">
+                                                            {entry.plan}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="font-medium text-emerald-600">
+                                                        {entry.paymentAmount ? `€${entry.paymentAmount.toFixed(2)}` : "-"}
+                                                    </TableCell>
+                                                    <TableCell className="capitalize text-muted-foreground">
+                                                        {entry.paymentMethod?.replace('_', ' ') || "Manual"}
+                                                    </TableCell>
+                                                    <TableCell className="text-xs text-muted-foreground">
+                                                        {format(entry.startDate, "MMM d")} - {format(entry.endDate, "MMM d, yyyy")}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex items-center justify-end gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                                onClick={() => openHistoryEditDialog(entry)}
+                                                            >
+                                                                <Edit className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                                                                onClick={() => handleDeleteHistoryEntry(entry.id)}
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
                             )}
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setHistoryDialogOpen(false)}>
-                                Close
+                                Close Report
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
+                {/* Edit History Entry Dialog */}
+                <Dialog open={editHistoryDialogOpen} onOpenChange={setEditHistoryDialogOpen}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>Edit Payment Record</DialogTitle>
+                            <DialogDescription>
+                                Update payment details.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="edit-amount">Amount (€)</Label>
+                                    <div className="relative">
+                                        <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            id="edit-amount"
+                                            type="number"
+                                            className="pl-9"
+                                            value={historyEditPaymentAmount}
+                                            onChange={(e) => setHistoryEditPaymentAmount(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="edit-method">Method</Label>
+                                    <Select
+                                        value={historyEditPaymentMethod}
+                                        onValueChange={setHistoryEditPaymentMethod}
+                                    >
+                                        <SelectTrigger id="edit-method">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="cash">Cash</SelectItem>
+                                            <SelectItem value="card">Credit Card</SelectItem>
+                                            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                                            <SelectItem value="other">Other</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit-date">Payment Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            className={cn(
+                                                "w-full justify-start text-left font-normal",
+                                                !historyEditDate && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {historyEditDate ? format(historyEditDate, "PPP") : "Pick a date"}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={historyEditDate}
+                                            onSelect={setHistoryEditDate}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit-notes">Notes</Label>
+                                <Textarea
+                                    id="edit-notes"
+                                    value={historyEditNotes}
+                                    onChange={(e) => setHistoryEditNotes(e.target.value)}
+                                    rows={3}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="ghost" onClick={() => setEditHistoryDialogOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button onClick={handleUpdateHistoryEntry} disabled={loadingHistory}>
+                                {loadingHistory ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : null}
+                                Save Changes
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Deactivate User Confirmation Dialog (Global for cleanliness) */}
+                <AlertDialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Deactivate Subscription</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to deactivate {athleteToDeactivate?.displayName}'s
+                                subscription? They will lose access to premium features.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleDeactivateConfirm}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                                Deactivate
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </AdminLayout>
     );

@@ -7,6 +7,9 @@ import {
     orderBy,
     serverTimestamp,
     Timestamp,
+    doc,
+    updateDoc,
+    deleteDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import type {
@@ -97,4 +100,26 @@ export const getAllSubscriptionHistory = async (): Promise<
     return snapshot.docs.map((doc) =>
         docToHistoryEntry(doc.id, doc.data() as SubscriptionHistoryDocument)
     );
+};
+
+// Update a subscription history entry
+export const updateSubscriptionHistoryEntry = async (
+    id: string,
+    updates: Partial<SubscriptionHistoryEntry>
+): Promise<void> => {
+    const docRef = doc(db, SUBSCRIPTION_HISTORY_COLLECTION, id);
+
+    // Convert dates back to Timestamps if present
+    const firestoreUpdates: any = { ...updates };
+    if (updates.startDate) firestoreUpdates.startDate = Timestamp.fromDate(updates.startDate);
+    if (updates.endDate) firestoreUpdates.endDate = Timestamp.fromDate(updates.endDate);
+    if (updates.createdAt) delete firestoreUpdates.createdAt; // Don't update creation time usually
+
+    await updateDoc(docRef, firestoreUpdates);
+};
+
+// Delete a subscription history entry
+export const deleteSubscriptionHistoryEntry = async (id: string): Promise<void> => {
+    const docRef = doc(db, SUBSCRIPTION_HISTORY_COLLECTION, id);
+    await deleteDoc(docRef);
 };
