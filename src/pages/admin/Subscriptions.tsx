@@ -116,6 +116,13 @@ const planConfig: Record<SubscriptionPlan, { label: string; duration: number }> 
     none: { label: "No Plan", duration: 0 },
 };
 
+const currencyConfig: Record<string, { symbol: string; label: string }> = {
+    EUR: { symbol: "€", label: "Euro" },
+    USD: { symbol: "$", label: "US Dollar" },
+    GBP: { symbol: "£", label: "British Pound" },
+    BRL: { symbol: "R$", label: "Brazilian Real" },
+};
+
 const AdminSubscriptions = () => {
     const { user } = useAuth();
     const [athletes, setAthletes] = useState<User[]>([]);
@@ -135,6 +142,7 @@ const AdminSubscriptions = () => {
     const [editHistoryDialogOpen, setEditHistoryDialogOpen] = useState(false);
     const [historyEntryToEdit, setHistoryEntryToEdit] = useState<SubscriptionHistoryEntry | null>(null);
     const [historyEditPaymentAmount, setHistoryEditPaymentAmount] = useState("");
+    const [historyEditCurrency, setHistoryEditCurrency] = useState("EUR");
     const [historyEditPaymentMethod, setHistoryEditPaymentMethod] = useState("cash");
     const [historyEditNotes, setHistoryEditNotes] = useState("");
     const [historyEditDate, setHistoryEditDate] = useState<Date | undefined>(undefined);
@@ -145,6 +153,7 @@ const AdminSubscriptions = () => {
     const [formStartDate, setFormStartDate] = useState<Date | undefined>(undefined);
     const [formEndDate, setFormEndDate] = useState<Date | undefined>(undefined);
     const [formPaymentAmount, setFormPaymentAmount] = useState("");
+    const [formCurrency, setFormCurrency] = useState("EUR");
     const [formPaymentMethod, setFormPaymentMethod] = useState("cash");
     const [formNotes, setFormNotes] = useState("");
     const { toast } = useToast();
@@ -208,6 +217,7 @@ const AdminSubscriptions = () => {
         setFormStartDate(start);
         setFormEndDate(addMonths(start, 1));
         setFormPaymentAmount("");
+        setFormCurrency("EUR");
         setFormPaymentMethod("cash");
         setFormNotes("");
         setRegisterPaymentOpen(true);
@@ -298,6 +308,7 @@ const AdminSubscriptions = () => {
                 formEndDate,
                 user.uid,
                 formPaymentAmount ? parseFloat(formPaymentAmount) : undefined,
+                formCurrency,
                 formPaymentMethod,
                 formNotes
             );
@@ -349,6 +360,8 @@ const AdminSubscriptions = () => {
             );
 
             // Add to history ONLY if payment amount provided, implying a payment fix/update
+            // For manual edit, we default to EUR if not specified in UI (since there's no currency selector in manual edit)
+            // Or we could skip currency if it's undefined.
             if (formPaymentAmount) {
                 await addSubscriptionHistory(
                     selectedAthlete.id,
@@ -358,7 +371,8 @@ const AdminSubscriptions = () => {
                     formEndDate || new Date(),
                     user.uid,
                     parseFloat(formPaymentAmount),
-                    "manual_update", // distinguish manual edits
+                    "EUR", // Default for manual advanced edit
+                    "manual_update",
                     `Manual update: ${formNotes}`
                 );
             }
@@ -446,6 +460,7 @@ const AdminSubscriptions = () => {
     const openHistoryEditDialog = (entry: SubscriptionHistoryEntry) => {
         setHistoryEntryToEdit(entry);
         setHistoryEditPaymentAmount(entry.paymentAmount ? entry.paymentAmount.toString() : "");
+        setHistoryEditCurrency(entry.currency || "EUR");
         setHistoryEditPaymentMethod(entry.paymentMethod || "cash");
         setHistoryEditNotes(entry.notes || "");
         setHistoryEditDate(entry.createdAt || new Date());
@@ -459,6 +474,7 @@ const AdminSubscriptions = () => {
         try {
             await updateSubscriptionHistoryEntry(historyEntryToEdit.id, {
                 paymentAmount: historyEditPaymentAmount ? parseFloat(historyEditPaymentAmount) : undefined,
+                currency: historyEditCurrency,
                 paymentMethod: historyEditPaymentMethod,
                 notes: historyEditNotes,
                 createdAt: historyEditDate // allow editing date if needed
@@ -469,6 +485,7 @@ const AdminSubscriptions = () => {
                 entry.id === historyEntryToEdit.id ? {
                     ...entry,
                     paymentAmount: historyEditPaymentAmount ? parseFloat(historyEditPaymentAmount) : undefined,
+                    currency: historyEditCurrency,
                     paymentMethod: historyEditPaymentMethod,
                     notes: historyEditNotes,
                     createdAt: historyEditDate || entry.createdAt
@@ -515,9 +532,15 @@ const AdminSubscriptions = () => {
         }
     };
 
-    // Calculate total history amount
+    // Calculate total history amount (Summing strictly as simple sum, might be mixed currency but simpler to just show breakdown in table)
+    // For now, I'll group by currency to show a smart summary.
     const totalHistoryAmount = useMemo(() => {
-        return athleteHistory.reduce((sum, entry) => sum + (entry.paymentAmount || 0), 0);
+        const totals: Record<string, number> = {};
+        athleteHistory.forEach(entry => {
+            const curr = entry.currency || "EUR";
+            totals[curr] = (totals[curr] || 0) + (entry.paymentAmount || 0);
+        });
+        return totals;
     }, [athleteHistory]);
 
     return (
@@ -532,7 +555,7 @@ const AdminSubscriptions = () => {
                     </div>
                 </div>
 
-                {/* Stats Cards */}
+                {/* Stats Cards ... (Keep Existing) */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <Card className="relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/5" />
@@ -604,7 +627,7 @@ const AdminSubscriptions = () => {
                     </Card>
                 </div>
 
-                {/* Plan Distribution */}
+                {/* Plan Distribution (Keep Existing) */}
                 <Card className="mb-8">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
@@ -614,7 +637,6 @@ const AdminSubscriptions = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-col md:flex-row gap-6">
-                            {/* Visual Bar Chart */}
                             <div className="flex-1">
                                 <div className="space-y-4">
                                     <div className="space-y-2">
@@ -664,7 +686,6 @@ const AdminSubscriptions = () => {
                                 </div>
                             </div>
 
-                            {/* Circular Stats */}
                             <div className="flex items-center justify-center md:w-48">
                                 <div className="relative w-32 h-32">
                                     <svg className="w-32 h-32 transform -rotate-90">
@@ -834,9 +855,10 @@ const AdminSubscriptions = () => {
                         <DialogHeader>
                             <DialogTitle>Edit Subscription Details</DialogTitle>
                             <DialogDescription>
-                                Manually update details for {selectedAthlete?.displayName}. Use "Register Payment" for payments.
+                                Manually update details for {selectedAthlete?.displayName}.
                             </DialogDescription>
                         </DialogHeader>
+                        {/* ... Keep form content ... */}
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="status">Status</Label>
@@ -872,7 +894,6 @@ const AdminSubscriptions = () => {
                                     </SelectContent>
                                 </Select>
                             </div>
-                            {/* ... (Kept existing form fields for dates/payment - optional manual edit) ... */}
                             <div className="grid gap-2">
                                 <Label>Start Date</Label>
                                 <Popover>
@@ -948,36 +969,57 @@ const AdminSubscriptions = () => {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="pay-plan">Subscription Plan</Label>
+                                <Select
+                                    value={formPlan}
+                                    onValueChange={(value) => handlePlanChange(value as SubscriptionPlan)}
+                                >
+                                    <SelectTrigger id="pay-plan">
+                                        <SelectValue placeholder="Select plan" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="monthly">Monthly</SelectItem>
+                                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                                        <SelectItem value="yearly">Yearly</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="pay-plan">Subscription Plan</Label>
-                                    <Select
-                                        value={formPlan}
-                                        onValueChange={(value) => handlePlanChange(value as SubscriptionPlan)}
-                                    >
-                                        <SelectTrigger id="pay-plan">
-                                            <SelectValue placeholder="Select plan" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="monthly">Monthly</SelectItem>
-                                            <SelectItem value="quarterly">Quarterly</SelectItem>
-                                            <SelectItem value="yearly">Yearly</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="pay-amount">Amount Paid (€)</Label>
+                                    <Label htmlFor="pay-amount">Amount</Label>
                                     <div className="relative">
-                                        <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <div className="absolute left-2.5 top-2.5 text-muted-foreground font-medium text-xs flex items-center h-4">
+                                            {currencyConfig[formCurrency]?.symbol || "€"}
+                                        </div>
                                         <Input
                                             id="pay-amount"
                                             type="number"
-                                            className="pl-9"
+                                            className="pl-8"
                                             placeholder="0.00"
                                             value={formPaymentAmount}
                                             onChange={(e) => setFormPaymentAmount(e.target.value)}
                                         />
                                     </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="pay-currency">Currency</Label>
+                                    <Select
+                                        value={formCurrency}
+                                        onValueChange={setFormCurrency}
+                                    >
+                                        <SelectTrigger id="pay-currency">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(currencyConfig).map(([code, { label, symbol }]) => (
+                                                <SelectItem key={code} value={code}>
+                                                    {code} ({symbol})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
 
@@ -1094,7 +1136,16 @@ const AdminSubscriptions = () => {
                         <div className="bg-muted/30 p-4 rounded-lg flex items-center justify-between border">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Total Paid</p>
-                                <p className="text-2xl font-bold">€{totalHistoryAmount.toFixed(2)}</p>
+                                <div className="flex flex-col">
+                                    {Object.entries(totalHistoryAmount).map(([curr, amount]) => (
+                                        <p key={curr} className="text-xl font-bold">
+                                            {currencyConfig[curr]?.symbol || curr}{amount.toFixed(2)}
+                                        </p>
+                                    ))}
+                                    {Object.keys(totalHistoryAmount).length === 0 && (
+                                        <p className="text-xl font-bold">€0.00</p>
+                                    )}
+                                </div>
                             </div>
                             <div className="text-right">
                                 <p className="text-sm font-medium text-muted-foreground">Last Payment</p>
@@ -1148,7 +1199,9 @@ const AdminSubscriptions = () => {
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell className="font-medium text-emerald-600">
-                                                        {entry.paymentAmount ? `€${entry.paymentAmount.toFixed(2)}` : "-"}
+                                                        {entry.paymentAmount
+                                                            ? `${currencyConfig[entry.currency || "EUR"]?.symbol || "€"}${entry.paymentAmount.toFixed(2)}`
+                                                            : "-"}
                                                     </TableCell>
                                                     <TableCell className="capitalize text-muted-foreground">
                                                         {entry.paymentMethod?.replace('_', ' ') || "Manual"}
@@ -1203,35 +1256,55 @@ const AdminSubscriptions = () => {
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit-amount">Amount (€)</Label>
+                                    <Label htmlFor="edit-amount">Amount</Label>
                                     <div className="relative">
-                                        <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <div className="absolute left-2.5 top-2.5 text-muted-foreground font-medium text-xs flex items-center h-4">
+                                            {currencyConfig[historyEditCurrency]?.symbol || "€"}
+                                        </div>
                                         <Input
                                             id="edit-amount"
                                             type="number"
-                                            className="pl-9"
+                                            className="pl-8"
                                             value={historyEditPaymentAmount}
                                             onChange={(e) => setHistoryEditPaymentAmount(e.target.value)}
                                         />
                                     </div>
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit-method">Method</Label>
+                                    <Label htmlFor="edit-currency">Currency</Label>
                                     <Select
-                                        value={historyEditPaymentMethod}
-                                        onValueChange={setHistoryEditPaymentMethod}
+                                        value={historyEditCurrency}
+                                        onValueChange={setHistoryEditCurrency}
                                     >
-                                        <SelectTrigger id="edit-method">
+                                        <SelectTrigger id="edit-currency">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="cash">Cash</SelectItem>
-                                            <SelectItem value="card">Credit Card</SelectItem>
-                                            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
+                                            {Object.entries(currencyConfig).map(([code, { label, symbol }]) => (
+                                                <SelectItem key={code} value={code}>
+                                                    {code} ({symbol})
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit-method">Method</Label>
+                                <Select
+                                    value={historyEditPaymentMethod}
+                                    onValueChange={setHistoryEditPaymentMethod}
+                                >
+                                    <SelectTrigger id="edit-method">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="cash">Cash</SelectItem>
+                                        <SelectItem value="card">Credit Card</SelectItem>
+                                        <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="edit-date">Payment Date</Label>

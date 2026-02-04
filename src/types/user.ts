@@ -55,6 +55,7 @@ export interface SubscriptionHistoryEntry {
   startDate: Date;
   endDate: Date;
   paymentAmount?: number;
+  currency?: string;
   paymentMethod?: string;
   notes?: string;
   createdAt: Date;
@@ -69,6 +70,7 @@ export interface SubscriptionHistoryDocument {
   startDate: import("firebase/firestore").Timestamp;
   endDate: import("firebase/firestore").Timestamp;
   paymentAmount?: number;
+  currency?: string;
   paymentMethod?: string;
   notes?: string;
   createdAt: import("firebase/firestore").Timestamp;

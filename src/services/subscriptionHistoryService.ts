@@ -33,6 +33,7 @@ const docToHistoryEntry = (
     startDate: data.startDate?.toDate() || new Date(),
     endDate: data.endDate?.toDate() || new Date(),
     paymentAmount: data.paymentAmount,
+    currency: data.currency,
     paymentMethod: data.paymentMethod,
     notes: data.notes,
     createdAt: data.createdAt?.toDate() || new Date(),
@@ -48,6 +49,7 @@ export const addSubscriptionHistory = async (
     endDate: Date,
     createdBy: string,
     paymentAmount?: number,
+    currency?: string,
     paymentMethod?: string,
     notes?: string
 ): Promise<string> => {
@@ -58,6 +60,7 @@ export const addSubscriptionHistory = async (
         startDate: Timestamp.fromDate(startDate),
         endDate: Timestamp.fromDate(endDate),
         paymentAmount: paymentAmount || null,
+        currency: currency || null,
         paymentMethod: paymentMethod || null,
         notes: notes || null,
         createdAt: serverTimestamp(),
