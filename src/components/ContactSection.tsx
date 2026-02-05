@@ -56,7 +56,7 @@ const ContactSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t.contact.info.location}</h4>
-                <p className="text-muted-foreground">Porto, Portugal</p>
+                <p className="text-muted-foreground">Bournemouth, England</p>
                 <p className="text-muted-foreground text-sm mt-1">{t.contact.info.locationDesc}</p>
               </div>
             </div>

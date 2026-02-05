@@ -107,7 +107,7 @@ const Contact = () => {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-2xl font-bold text-primary mb-2">
-                  Porto, Portugal
+                  Bournemouth, England
                 </p>
                 <p className="text-muted-foreground">
                   {t.contact?.locationCard?.description ||
@@ -155,7 +155,7 @@ const Contact = () => {
               <div className="mt-6 text-center">
                 <p className="text-muted-foreground">
                   {t.contact?.info?.locationDesc ||
-                    "Atendo clientes em todo o Porto e também ofereço treinos online personalizados"}
+                    "Atendo clientes em todo o Bournemouth e também ofereço treinos online personalizados"}
                 </p>
               </div>
             </CardContent>
