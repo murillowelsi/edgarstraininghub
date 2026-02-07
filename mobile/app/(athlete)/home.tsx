@@ -28,11 +28,23 @@ const workoutTypeIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
     strength: 'barbell',
 };
 
-const workoutTypeColors: Record<string, { bg: string; text: string; border: string }> = {
-    running: { bg: '#DBEAFE', text: '#2563EB', border: '#BFDBFE' },
-    cycling: { bg: '#D1FAE5', text: '#059669', border: '#A7F3D0' },
-    swimming: { bg: '#CFFAFE', text: '#0891B2', border: '#A5F3FC' },
-    strength: { bg: '#FED7AA', text: '#EA580C', border: '#FDBA74' },
+const workoutTypeColors = {
+    running: {
+        light: { bg: '#DBEAFE', text: '#2563EB', border: '#BFDBFE' },
+        dark: { bg: 'rgba(37, 99, 235, 0.2)', text: '#60A5FA', border: 'rgba(37, 99, 235, 0.3)' }
+    },
+    cycling: {
+        light: { bg: '#D1FAE5', text: '#059669', border: '#A7F3D0' },
+        dark: { bg: 'rgba(5, 150, 105, 0.2)', text: '#34D399', border: 'rgba(5, 150, 105, 0.3)' }
+    },
+    swimming: {
+        light: { bg: '#CFFAFE', text: '#0891B2', border: '#A5F3FC' },
+        dark: { bg: 'rgba(8, 145, 178, 0.2)', text: '#22D3EE', border: 'rgba(8, 145, 178, 0.3)' }
+    },
+    strength: {
+        light: { bg: '#FFEDD5', text: '#EA580C', border: '#FED7AA' },
+        dark: { bg: 'rgba(234, 88, 12, 0.2)', text: '#FB923C', border: 'rgba(234, 88, 12, 0.3)' }
+    },
 };
 
 const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.create({
@@ -75,56 +87,62 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
     statCard: {
         width: (width - 44) / 2,
         padding: 16,
-        borderRadius: 12,
+        borderRadius: 16,
         borderWidth: 1,
     },
-    primaryCard: {
-        backgroundColor: isDark ? '#1E3A8A20' : '#EFF6FF',
-        borderColor: isDark ? '#1E3A8A40' : '#BFDBFE',
+    primaryCard: { // Completion (Blue)
+        backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : '#EFF6FF',
+        borderColor: isDark ? 'rgba(59, 130, 246, 0.2)' : '#BFDBFE',
     },
-    orangeCard: {
-        backgroundColor: isDark ? '#EA580C20' : '#FFF7ED',
-        borderColor: isDark ? '#EA580C40' : '#FDBA74',
+    orangeCard: { // Completed (Orange)
+        backgroundColor: isDark ? 'rgba(249, 115, 22, 0.1)' : '#FFF7ED',
+        borderColor: isDark ? 'rgba(249, 115, 22, 0.2)' : '#FED7AA',
     },
-    blueCard: {
-        backgroundColor: isDark ? '#1E3A8A20' : '#EFF6FF',
-        borderColor: isDark ? '#1E3A8A40' : '#BFDBFE',
+    blueCard: { // Total (Indigo/Blue)
+        backgroundColor: isDark ? 'rgba(99, 102, 241, 0.1)' : '#EEF2FF',
+        borderColor: isDark ? 'rgba(99, 102, 241, 0.2)' : '#C7D2FE',
     },
-    greenCard: {
-        backgroundColor: isDark ? '#05966920' : '#F0FDF4',
-        borderColor: isDark ? '#05966940' : '#A7F3D0',
+    greenCard: { // Today (Emerald)
+        backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : '#ECFDF5',
+        borderColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#A7F3D0',
     },
     statIconContainer: {
         width: 32,
         height: 32,
         borderRadius: 8,
-        backgroundColor: isDark ? '#1E3A8A30' : '#DBEAFE',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 12,
     },
     statValue: {
         fontSize: 24,
         fontWeight: 'bold',
         color: colors.text,
+        marginBottom: 2,
     },
     statLabel: {
-        fontSize: 12,
+        fontSize: 13,
         color: colors.icon,
+        fontWeight: '500',
     },
     card: {
         backgroundColor: colors.card,
-        borderRadius: 12,
+        borderRadius: 16,
         padding: 16,
         marginBottom: 16,
         borderWidth: 1,
         borderColor: colors.border,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: isDark ? 0.2 : 0.05,
+        shadowRadius: 8,
+        elevation: 2,
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 16,
     },
     cardTitleRow: {
         flexDirection: 'row',
@@ -132,13 +150,14 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
         gap: 8,
     },
     cardTitle: {
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: '700',
         color: colors.text,
     },
     cardSubtitle: {
         fontSize: 14,
         color: colors.icon,
+        fontWeight: '500',
     },
     progressBarContainer: {
         height: 12,
@@ -417,32 +436,32 @@ export default function AthleteHome() {
                     {/* Stats Cards */}
                     <View style={styles.statsGrid}>
                         <View style={[styles.statCard, styles.primaryCard]}>
-                            <View style={styles.statIconContainer}>
-                                <Ionicons name="radio-button-on" size={20} color="#3B82F6" />
+                            <View style={[styles.statIconContainer, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#DBEAFE' }]}>
+                                <Ionicons name="radio-button-on" size={20} color={isDark ? '#60A5FA' : '#2563EB'} />
                             </View>
                             <Text style={styles.statValue}>{completionRate}%</Text>
                             <Text style={styles.statLabel}>Completion</Text>
                         </View>
 
                         <View style={[styles.statCard, styles.orangeCard]}>
-                            <View style={[styles.statIconContainer, { backgroundColor: '#FED7AA' }]}>
-                                <Ionicons name="flame" size={20} color="#EA580C" />
+                            <View style={[styles.statIconContainer, { backgroundColor: isDark ? 'rgba(234, 88, 12, 0.2)' : '#FFEDD5' }]}>
+                                <Ionicons name="flame" size={20} color={isDark ? '#FB923C' : '#EA580C'} />
                             </View>
                             <Text style={styles.statValue}>{completedWorkouts}</Text>
                             <Text style={styles.statLabel}>Completed</Text>
                         </View>
 
                         <View style={[styles.statCard, styles.blueCard]}>
-                            <View style={[styles.statIconContainer, { backgroundColor: '#DBEAFE' }]}>
-                                <Ionicons name="calendar-outline" size={20} color="#2563EB" />
+                            <View style={[styles.statIconContainer, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.2)' : '#E0E7FF' }]}>
+                                <Ionicons name="calendar-outline" size={20} color={isDark ? '#818CF8' : '#4F46E5'} />
                             </View>
                             <Text style={styles.statValue}>{totalWorkouts}</Text>
                             <Text style={styles.statLabel}>Total</Text>
                         </View>
 
                         <View style={[styles.statCard, styles.greenCard]}>
-                            <View style={[styles.statIconContainer, { backgroundColor: '#D1FAE5' }]}>
-                                <Ionicons name="trending-up" size={20} color="#059669" />
+                            <View style={[styles.statIconContainer, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#D1FAE5' }]}>
+                                <Ionicons name="trending-up" size={20} color={isDark ? '#34D399' : '#059669'} />
                             </View>
                             <Text style={styles.statValue}>
                                 {todaysCompleted}/{todaysWorkouts.length}
@@ -548,7 +567,8 @@ export default function AthleteHome() {
                                 selectedDateAssignments.map((assignment) => {
                                     const workout = assignment.workout;
                                     const iconName = workoutTypeIcons[workout.type] || 'fitness';
-                                    const colors = workoutTypeColors[workout.type] || workoutTypeColors.strength;
+                                    const colorSet = workoutTypeColors[workout.type as keyof typeof workoutTypeColors] || workoutTypeColors.strength;
+                                    const colors = isDark ? colorSet.dark : colorSet.light;
                                     const isCompleted = !!assignment.completedAt;
 
                                     return (
@@ -620,7 +640,8 @@ export default function AthleteHome() {
                             {upcomingWorkouts.map((assignment) => {
                                 const workout = assignment.workout;
                                 const iconName = workoutTypeIcons[workout.type] || 'fitness';
-                                const colors = workoutTypeColors[workout.type] || workoutTypeColors.strength;
+                                const colorSet = workoutTypeColors[workout.type as keyof typeof workoutTypeColors] || workoutTypeColors.strength;
+                                const colors = isDark ? colorSet.dark : colorSet.light;
 
                                 return (
                                     <TouchableOpacity

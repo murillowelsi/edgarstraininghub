@@ -22,15 +22,15 @@ export const Colors = {
     destructive: '#EF4444',
   },
   dark: {
-    text: '#F9FAFB', // foreground dark
-    background: '#09090B', // background dark
-    tint: primaryColorDark,
-    icon: '#A1A1AA', // muted-foreground dark
-    tabIconDefault: '#A1A1AA',
-    tabIconSelected: primaryColorDark,
-    border: '#27272A',
-    card: '#18181B',
-    muted: '#27272A',
+    text: '#F8FAFC', // foreground (slate-50ish)
+    background: '#0F172A', // --background: 222 47% 11%
+    tint: '#E1AD0F',      // --primary: 48 96% 45%
+    icon: '#94A3B8',      // --muted-foreground: 215 20% 65%
+    tabIconDefault: '#94A3B8',
+    tabIconSelected: '#E1AD0F',
+    border: '#1E293B',    // --border: 217 33% 17% (Slate 800ish)
+    card: '#111C31',      // --card: 222 47% 13%
+    muted: '#1E293B',     // --muted: 217 33% 17%
     destructive: '#EF4444',
   },
 };

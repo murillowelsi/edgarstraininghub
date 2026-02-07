@@ -33,8 +33,8 @@ export default function AthleteHeader() {
                 styles.header,
                 {
                     paddingTop: insets.top + 8,
-                    backgroundColor: isDark ? 'rgba(9, 9, 11, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-                    borderBottomColor: isDark ? 'rgba(39, 39, 42, 0.5)' : 'rgba(228, 228, 231, 0.5)',
+                    backgroundColor: isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                    borderBottomColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(228, 228, 231, 0.5)',
                 },
             ]}
         >
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     logoText: {
         fontSize: 30,
         fontWeight: '800',
-        color: '#E6B800', // Primary yellow/gold color from web
+        color: '#E1AD0F', // Primary yellow/gold color from web
         letterSpacing: -1,
     },
     brandText: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: '#E6B800', // Primary color
+        backgroundColor: '#E1AD0F', // Primary color
         justifyContent: 'center',
         alignItems: 'center',
     },

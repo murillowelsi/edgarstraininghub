@@ -29,11 +29,11 @@ export default function AthleteLayout() {
                     tabBarInactiveTintColor: colors.icon,
                     tabBarStyle: {
                         borderTopWidth: 1,
-                        borderTopColor: isDark ? 'rgba(39, 39, 42, 0.5)' : 'rgba(228, 228, 231, 0.5)',
+                        borderTopColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(228, 228, 231, 0.5)',
                         paddingTop: 8,
                         height: 60 + insets.bottom,
                         paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
-                        backgroundColor: isDark ? 'rgba(9, 9, 11, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                     },
                 }}
             >
