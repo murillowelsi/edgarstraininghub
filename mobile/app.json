@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "EZ Training Hub",
+    "slug": "edgarstraininghub",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-logo.png",
-    "scheme": "mobile",
+    "scheme": "edgarstraininghub",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.edgarstraininghub"
     },
     "android": {
       "adaptiveIcon": {

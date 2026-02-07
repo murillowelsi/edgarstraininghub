@@ -60,7 +60,7 @@ export default function LoginScreen() {
                     style={styles.logo}
                     resizeMode="contain"
                 />
-                <Text style={styles.title}>Edgar's Training Hub</Text>
+                <Text style={styles.title}>EZ Training Hub</Text>
                 <Text style={styles.subtitle}>Athlete Portal</Text>
             </View>
 
