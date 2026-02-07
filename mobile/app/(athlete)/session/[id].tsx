@@ -13,7 +13,7 @@ import {
     Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
@@ -79,6 +79,7 @@ export default function WorkoutSessionScreen() {
     const [selectedExercise, setSelectedExercise] = useState<any>(null);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
     const [exitModalVisible, setExitModalVisible] = useState(false);
+    const [isExiting, setIsExiting] = useState(false);
     const [workoutStats, setWorkoutStats] = useState({ percentage: 0, time: 0 });
 
     // Timers
@@ -89,13 +90,24 @@ export default function WorkoutSessionScreen() {
         if (id && user) {
             loadData();
         }
-        // Handle back button
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
         return () => {
             backHandler.remove();
             stopTimers();
         };
     }, [id, user]);
+
+    const navigation = useNavigation();
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+            if (!isExiting && !saving && !successModalVisible && isWorkoutStarted) {
+                e.preventDefault();
+                setExitModalVisible(true);
+            }
+        });
+        return unsubscribe;
+    }, [navigation, isExiting, saving, successModalVisible, isWorkoutStarted]);
 
     const stopTimers = () => {
         if (totalTimerRef.current) clearInterval(totalTimerRef.current);
@@ -657,6 +669,7 @@ export default function WorkoutSessionScreen() {
                             <TouchableOpacity
                                 style={styles.exitButton}
                                 onPress={() => {
+                                    setIsExiting(true);
                                     setExitModalVisible(false);
                                     stopTimers();
                                     router.back();
