@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useSegments } from 'expo-router';
 import { View } from 'react-native';
 import { Home, Calendar, Dumbbell, MessageSquare } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,11 +11,15 @@ export default function AthleteLayout() {
     const { colorScheme } = useTheme();
     const colors = Colors[colorScheme];
     const isDark = colorScheme === 'dark';
+    const segments = useSegments();
+
+    // Hide header on detail pages
+    const hideHeader = (segments as string[]).includes('workout') || (segments as string[]).includes('session');
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
-            {/* Custom Header */}
-            <AthleteHeader />
+            {/* Custom Header - Only show on main tabs */}
+            {!hideHeader && <AthleteHeader />}
 
             {/* Tabs Navigation */}
             <Tabs
