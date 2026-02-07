@@ -24,7 +24,7 @@ function RootLayoutNav() {
     } else if (user && !inAuthGroup) {
       // Redirect to athlete home if logged in and not in auth group (unless specific logic needed)
       if (isAthlete) {
-        router.replace('/(athlete)/home');
+        router.replace('/(athlete)/(tabs)/home');
       }
     }
   }, [user, loading, segments, isAthlete]);
