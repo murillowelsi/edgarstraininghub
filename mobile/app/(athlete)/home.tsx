@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
     View,
     Text,
@@ -10,7 +10,7 @@ import {
     Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link, router } from 'expo-router';
+import { Link, router, useFocusEffect } from 'expo-router';
 import { format, addDays, isSameDay, isToday, startOfWeek, isAfter, isBefore, startOfDay } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,9 +65,11 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
         padding: 16,
         paddingBottom: 32,
     },
-    welcomeSection: {
-        paddingTop: 8,
-        marginBottom: 16,
+    header: {
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 12,
+        backgroundColor: colors.background,
     },
     welcomeText: {
         fontSize: 14,
@@ -334,18 +336,19 @@ export default function AthleteHome() {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
     const weekDays = Array.from({ length: 14 }, (_, i) => addDays(weekStart, i));
 
-    useEffect(() => {
-        if (user) {
-            loadData();
-        }
-    }, [user]);
+    useFocusEffect(
+        useCallback(() => {
+            if (user) {
+                loadData();
+            }
+        }, [user])
+    );
 
     const loadData = async () => {
         if (!user) return;
 
         try {
-            setLoading(true);
-
+            // Removed setLoading(true)
             // Parallel fetch for better performance
             const [profile, assignmentsData] = await Promise.all([
                 getAthleteProfile(user.uid),
@@ -425,14 +428,14 @@ export default function AthleteHome() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['bottom']}>
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={[styles.welcomeText, { color: colors.icon }]}>Welcome back,</Text>
+                <Text style={[styles.displayName, { color: colors.text }]}>{displayName}</Text>
+            </View>
+
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
-                    {/* Welcome Section */}
-                    <View style={styles.welcomeSection}>
-                        <Text style={[styles.welcomeText, { color: colors.icon }]}>Welcome back,</Text>
-                        <Text style={[styles.displayName, { color: colors.text }]}>{displayName}</Text>
-                    </View>
-
                     {/* Stats Cards */}
                     <View style={styles.statsGrid}>
                         <View style={[styles.statCard, styles.primaryCard]}>
@@ -474,7 +477,7 @@ export default function AthleteHome() {
                     <View style={styles.card}>
                         <View style={styles.cardHeader}>
                             <View style={styles.cardTitleRow}>
-                                <Ionicons name="trophy" size={20} color="#3B82F6" />
+                                <Ionicons name="trophy" size={20} color={colors.tint} />
                                 <Text style={styles.cardTitle}>Your Progress</Text>
                             </View>
                             <Text style={styles.cardSubtitle}>
@@ -632,7 +635,7 @@ export default function AthleteHome() {
                                 <TouchableOpacity onPress={() => router.push('/calendar')}>
                                     <View style={styles.seeAllButton}>
                                         <Text style={styles.seeAllText}>See all</Text>
-                                        <Ionicons name="chevron-forward" size={16} color="#3B82F6" />
+                                        <Ionicons name="chevron-forward" size={16} color={colors.tint} />
                                     </View>
                                 </TouchableOpacity>
                             </View>

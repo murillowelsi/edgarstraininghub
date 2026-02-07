@@ -1,10 +1,13 @@
+import React, { useState, useEffect } from 'react';
 import { Tabs, useSegments } from 'expo-router';
 import { View } from 'react-native';
 import { Home, Calendar, Dumbbell, MessageSquare } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Colors } from '@/constants/theme';
 import AthleteHeader from '@/components/AthleteHeader';
+import { ChatService, type Chat } from '@/services/chatService';
 
 export default function AthleteLayout() {
     const insets = useSafeAreaInsets();
@@ -15,6 +18,22 @@ export default function AthleteLayout() {
 
     // Hide header on detail pages
     const hideHeader = (segments as string[]).includes('workout') || (segments as string[]).includes('session');
+
+    const [unreadCount, setUnreadCount] = useState(0);
+    const { user } = useAuth();
+
+    useEffect(() => {
+        if (!user?.uid) return;
+
+        const unsubscribe = ChatService.subscribeToUserChats(user.uid, (chats) => {
+            const count = chats.reduce((total, chat) => {
+                return total + (chat.unreadCount?.[user.uid] || 0);
+            }, 0);
+            setUnreadCount(count);
+        });
+
+        return () => unsubscribe();
+    }, [user?.uid]);
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -68,6 +87,8 @@ export default function AthleteLayout() {
                     name="chat"
                     options={{
                         title: 'Chat',
+                        tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+                        tabBarBadgeStyle: { backgroundColor: colors.tint, color: '#FFFFFF' },
                         tabBarIcon: ({ color, size }) => (
                             <MessageSquare size={size} color={color} />
                         ),
@@ -77,7 +98,7 @@ export default function AthleteLayout() {
                     name="workout/[id]"
                     options={{
                         href: null,
-                        tabBarStyle: { display: 'none' },
+                        // Tab bar should be visible for consistency
                     }}
                 />
                 <Tabs.Screen

@@ -212,21 +212,20 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
         backgroundColor: colors.background,
     },
     header: {
-        paddingHorizontal: 20,
-        paddingVertical: 16,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 12,
         backgroundColor: colors.background,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         color: colors.text,
+        marginBottom: 4,
     },
     headerSubtitle: {
         fontSize: 14,
         color: colors.icon,
-        marginTop: 2,
     },
     scrollView: {
         flex: 1,

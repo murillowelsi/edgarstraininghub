@@ -229,7 +229,7 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
         backgroundColor: colors.background,
     },
     header: {
-        paddingHorizontal: 20,
+        paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 12,
         backgroundColor: colors.background,
@@ -246,7 +246,7 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
     },
     filterContainer: {
         flexDirection: 'row',
-        paddingHorizontal: 20,
+        paddingHorizontal: 16,
         marginBottom: 8,
         gap: 12,
     },
@@ -274,7 +274,7 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
         flex: 1,
     },
     content: {
-        padding: 20,
+        padding: 16,
         paddingBottom: 40,
     },
     emptyState: {

@@ -78,6 +78,7 @@ export default function WorkoutSessionScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedExercise, setSelectedExercise] = useState<any>(null);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [exitModalVisible, setExitModalVisible] = useState(false);
     const [workoutStats, setWorkoutStats] = useState({ percentage: 0, time: 0 });
 
     // Timers
@@ -104,21 +105,7 @@ export default function WorkoutSessionScreen() {
     };
 
     const handleBackPress = () => {
-        Alert.alert(
-            'Exit Workout?',
-            'Your progress will be lost unless you save.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Exit',
-                    style: 'destructive',
-                    onPress: () => {
-                        stopTimers();
-                        router.back();
-                    }
-                }
-            ]
-        );
+        setExitModalVisible(true);
         return true;
     };
 
@@ -640,6 +627,47 @@ export default function WorkoutSessionScreen() {
                     </View>
                 </View>
             </Modal>
+
+            {/* Exit Confirmation Modal */}
+            <Modal
+                visible={exitModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setExitModalVisible(false)}
+            >
+                <View style={styles.successModalOverlay}>
+                    <View style={styles.successCard}>
+                        <View style={styles.successHeader}>
+                            <Ionicons name="warning" size={48} color="#EF4444" />
+                        </View>
+
+                        <Text style={styles.successTitle}>Exit Workout?</Text>
+                        <Text style={styles.successSubtitle}>
+                            Your progress will be lost unless you save. Are you sure?
+                        </Text>
+
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity
+                                style={styles.resumeButton}
+                                onPress={() => setExitModalVisible(false)}
+                            >
+                                <Text style={styles.resumeButtonText}>Resume Workout</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.exitButton}
+                                onPress={() => {
+                                    setExitModalVisible(false);
+                                    stopTimers();
+                                    router.back();
+                                }}
+                            >
+                                <Text style={styles.exitButtonText}>Exit Workout</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -1089,6 +1117,38 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
         backgroundColor: 'rgba(255,255,255,0.2)',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    // Exit Modal Styles
+    modalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 20,
+    },
+    resumeButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        backgroundColor: colors.tint,
+        alignItems: 'center',
+    },
+    resumeButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#0F172A',
+    },
+    exitButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#FECACA',
+    },
+    exitButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#EF4444',
     },
     modalMedia: {
         width: '100%',

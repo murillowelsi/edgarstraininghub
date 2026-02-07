@@ -147,7 +147,7 @@ export default function WorkoutDetailScreen() {
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    <Ionicons name="chevron-back" size={28} color={colors.tint} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle} numberOfLines={1}>{workout.name}</Text>
                 <View style={{ width: 40 }} />
@@ -647,23 +647,23 @@ const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.c
         left: 0,
         right: 0,
         padding: 16,
-        backgroundColor: isDark ? 'rgba(9, 9, 11, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: colors.card,
         borderTopWidth: 1,
-        borderTopColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+        borderTopColor: colors.border,
     },
     startButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-        backgroundColor: '#F59E0B',
+        backgroundColor: colors.tint,
         paddingVertical: 16,
         borderRadius: 12,
     },
     startButtonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#000',
+        color: '#0F172A',
     },
     // Modal Styles
     modalOverlay: {
