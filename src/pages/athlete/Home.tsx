@@ -26,6 +26,7 @@ import {
   Dumbbell,
   Flame,
   Loader2,
+  PersonStanding,
   Target,
   TrendingUp,
 } from "lucide-react";
@@ -345,7 +346,7 @@ const AthleteHome = () => {
                             <p className="text-xs text-muted-foreground">
                               {workout.type === "strength"
                                 ? `${workout.exercises?.length || 0} exercises`
-                                : `${workout.stages.length} stages`}
+                                : `${workout.stages?.length || 0} stages`}
                             </p>
                           </div>
                           {isCompleted ? (
