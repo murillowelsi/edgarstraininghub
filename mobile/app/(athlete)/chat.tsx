@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -14,31 +14,18 @@ import {
 import { router } from 'expo-router';
 import { formatDistanceToNow } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-
-// Mock types
-interface Message {
-    id: string;
-    senderId: string;
-    text: string;
-    createdAt: { seconds: number };
-}
-
-interface Chat {
-    id: string;
-    participantIds: string[];
-    lastMessage: string;
-    lastMessageTime: { seconds: number };
-    unreadCount?: Record<string, number>;
-}
-
-interface User {
-    id: string;
-    displayName: string;
-    email: string;
-    role: string;
-}
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Colors } from '@/constants/theme';
+import { ChatService, type Chat, type Message, type User } from '@/services/chatService';
 
 export default function AthleteChat() {
+    const { user } = useAuth();
+    const { colorScheme } = useTheme();
+    const colors = Colors[colorScheme];
+    const isDark = colorScheme === 'dark';
+    const styles = getStyles(colors, isDark);
+
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -48,31 +35,51 @@ export default function AthleteChat() {
     const [admins, setAdmins] = useState<User[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const currentUserId = 'user-123'; // TODO: Get from auth context
+    const scrollViewRef = useRef<ScrollView>(null);
+    const currentUserId = user?.uid;
 
     useEffect(() => {
-        loadData();
-    }, []);
+        if (!currentUserId) return;
 
-    const loadData = async () => {
-        try {
-            // TODO: Replace with actual API calls
-            // Load chats and admins
-            setChats([]);
-            setAdmins([]);
-        } catch (error) {
-            console.error('Error loading data:', error);
-        } finally {
+        // Load coaches for new chat functionality
+        loadAdmins();
+
+        // Subscribe to user's chats
+        const unsubscribe = ChatService.subscribeToUserChats(currentUserId, (updatedChats) => {
+            setChats(updatedChats);
             setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [currentUserId]);
+
+    useEffect(() => {
+        if (!selectedChat || !currentUserId) return;
+
+        // Subscribe to messages for the selected chat
+        const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
+            setMessages(msgs);
+            // Mark as read when messages are received/viewed
+            ChatService.markAsRead(selectedChat.id, currentUserId);
+        });
+
+        return () => unsubscribe();
+    }, [selectedChat, currentUserId]);
+
+    const loadAdmins = async () => {
+        try {
+            const coaches = await ChatService.getCoaches();
+            setAdmins(coaches);
+        } catch (error) {
+            console.error('Error loading coaches:', error);
         }
     };
 
     const handleSendMessage = async () => {
-        if (!messageText.trim() || !selectedChat) return;
+        if (!messageText.trim() || !selectedChat || !currentUserId) return;
 
         try {
-            // TODO: Send message via API
-            // await ChatService.sendMessage(selectedChat.id, currentUserId, messageText);
+            await ChatService.sendMessage(selectedChat.id, currentUserId, messageText);
             setMessageText('');
         } catch (error) {
             console.error('Error sending message:', error);
@@ -80,10 +87,13 @@ export default function AthleteChat() {
     };
 
     const handleStartChat = async (admin: User) => {
+        if (!currentUserId) return;
+
         try {
-            // TODO: Create or get chat
-            // const chat = await ChatService.createOrGetChat(currentUserId, 'Athlete', admin.id);
-            // setSelectedChat(chat);
+            const athleteName = user?.displayName || 'Athlete';
+            const chatObj = await ChatService.createOrGetChat(currentUserId, athleteName, admin.id);
+
+            setSelectedChat(chatObj as Chat);
             setIsNewChatOpen(false);
         } catch (error) {
             console.error('Error starting chat:', error);
@@ -91,21 +101,23 @@ export default function AthleteChat() {
     };
 
     const getChatDisplayName = (chat: Chat) => {
-        // Find the other participant
         const otherId = chat.participantIds.find((id) => id !== currentUserId);
-        return 'Coach'; // TODO: Get actual name from admin map
+        if (!otherId) return 'Coach';
+
+        const admin = admins.find(a => a.id === otherId);
+        return admin ? admin.displayName : 'Coach';
     };
 
     const filteredAdmins = admins.filter(
         (a) =>
-            a.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            a.email.toLowerCase().includes(searchQuery.toLowerCase())
+            (a.displayName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+            (a.email?.toLowerCase() || '').includes(searchQuery.toLowerCase())
     );
 
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3B82F6" />
+                <ActivityIndicator size="large" color={colors.tint} />
             </View>
         );
     }
@@ -117,19 +129,19 @@ export default function AthleteChat() {
                 {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#111827" />
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>Chat</Text>
                     <TouchableOpacity onPress={() => setIsNewChatOpen(true)}>
-                        <Ionicons name="add-circle-outline" size={28} color="#3B82F6" />
+                        <Ionicons name="add-circle-outline" size={28} color={colors.tint} />
                     </TouchableOpacity>
                 </View>
 
                 {/* Chat List */}
-                <ScrollView style={styles.chatList}>
+                <ScrollView style={styles.chatList} contentContainerStyle={styles.chatListContent}>
                     {chats.length === 0 ? (
                         <View style={styles.emptyState}>
-                            <Ionicons name="chatbubbles-outline" size={64} color="#9CA3AF" />
+                            <Ionicons name="chatbubbles-outline" size={64} color={colors.icon} />
                             <Text style={styles.emptyStateText}>No conversations yet</Text>
                             <TouchableOpacity
                                 style={styles.startChatButton}
@@ -141,7 +153,8 @@ export default function AthleteChat() {
                     ) : (
                         chats.map((chat) => {
                             const displayName = getChatDisplayName(chat);
-                            const unreadCount = chat.unreadCount?.[currentUserId] || 0;
+                            const unreadCount = chat.unreadCount?.[currentUserId || ''] || 0;
+                            const lastMsgTime = chat.lastMessageTime as { seconds: number } | undefined;
 
                             return (
                                 <TouchableOpacity
@@ -162,10 +175,10 @@ export default function AthleteChat() {
                                             >
                                                 {displayName}
                                             </Text>
-                                            {chat.lastMessageTime && (
+                                            {lastMsgTime && (
                                                 <Text style={styles.chatItemTime}>
                                                     {formatDistanceToNow(
-                                                        new Date(chat.lastMessageTime.seconds * 1000),
+                                                        new Date(lastMsgTime.seconds * 1000),
                                                         { addSuffix: true }
                                                     )}
                                                 </Text>
@@ -204,17 +217,18 @@ export default function AthleteChat() {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalHeader}>
                             <TouchableOpacity onPress={() => setIsNewChatOpen(false)}>
-                                <Ionicons name="close" size={28} color="#111827" />
+                                <Ionicons name="close" size={28} color={colors.text} />
                             </TouchableOpacity>
                             <Text style={styles.modalTitle}>New Message</Text>
                             <View style={{ width: 28 }} />
                         </View>
 
                         <View style={styles.searchContainer}>
-                            <Ionicons name="search" size={20} color="#9CA3AF" style={styles.searchIcon} />
+                            <Ionicons name="search" size={20} color={colors.icon} style={styles.searchIcon} />
                             <TextInput
                                 style={styles.searchInput}
                                 placeholder="Search coaches..."
+                                placeholderTextColor={colors.icon}
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
                             />
@@ -231,7 +245,7 @@ export default function AthleteChat() {
                                         onPress={() => handleStartChat(admin)}
                                     >
                                         <View style={styles.avatar}>
-                                            <Text style={styles.avatarText}>{admin.displayName[0]?.toUpperCase()}</Text>
+                                            <Text style={styles.avatarText}>{admin.displayName?.[0]?.toUpperCase()}</Text>
                                         </View>
                                         <View>
                                             <Text style={styles.adminName}>{admin.displayName}</Text>
@@ -257,7 +271,7 @@ export default function AthleteChat() {
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => setSelectedChat(null)} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#111827" />
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <View style={styles.chatHeaderInfo}>
                     <View style={[styles.avatar, styles.avatarSmall]}>
@@ -274,7 +288,8 @@ export default function AthleteChat() {
             <ScrollView
                 style={styles.messagesContainer}
                 contentContainerStyle={styles.messagesContent}
-                ref={(ref) => ref?.scrollToEnd({ animated: false })}
+                ref={scrollViewRef}
+                onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
             >
                 {messages.length === 0 ? (
                     <View style={styles.emptyMessagesState}>
@@ -284,6 +299,7 @@ export default function AthleteChat() {
                 ) : (
                     messages.map((message) => {
                         const isOwnMessage = message.senderId === currentUserId;
+                        const createdAt = message.createdAt as { seconds: number };
 
                         return (
                             <View
@@ -307,7 +323,7 @@ export default function AthleteChat() {
                                         isOwnMessage ? styles.messageTimeOwn : styles.messageTimeOther,
                                     ]}
                                 >
-                                    {formatDistanceToNow(new Date(message.createdAt.seconds * 1000), {
+                                    {createdAt && formatDistanceToNow(new Date(createdAt.seconds * 1000), {
                                         addSuffix: true,
                                     })}
                                 </Text>
@@ -322,6 +338,7 @@ export default function AthleteChat() {
                 <TextInput
                     style={styles.messageInput}
                     placeholder="Type a message..."
+                    placeholderTextColor={colors.icon}
                     value={messageText}
                     onChangeText={setMessageText}
                     multiline
@@ -335,7 +352,7 @@ export default function AthleteChat() {
                     <Ionicons
                         name="send"
                         size={20}
-                        color={messageText.trim() ? '#FFFFFF' : '#9CA3AF'}
+                        color={messageText.trim() ? '#FFFFFF' : colors.icon}
                     />
                 </TouchableOpacity>
             </View>
@@ -343,16 +360,16 @@ export default function AthleteChat() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.background,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -360,9 +377,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors.background,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
+        borderBottomColor: colors.border,
+        marginTop: 40,
     },
     backButton: {
         padding: 4,
@@ -370,7 +388,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#111827',
+        color: colors.text,
     },
     chatHeaderInfo: {
         flexDirection: 'row',
@@ -380,10 +398,13 @@ const styles = StyleSheet.create({
     chatHeaderName: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#111827',
+        color: colors.text,
     },
     chatList: {
         flex: 1,
+    },
+    chatListContent: {
+        paddingBottom: 20,
     },
     emptyState: {
         flex: 1,
@@ -393,12 +414,12 @@ const styles = StyleSheet.create({
     },
     emptyStateText: {
         fontSize: 16,
-        color: '#6B7280',
+        color: colors.icon,
         marginTop: 16,
         marginBottom: 24,
     },
     startChatButton: {
-        backgroundColor: '#3B82F6',
+        backgroundColor: colors.tint,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 8,
@@ -411,15 +432,15 @@ const styles = StyleSheet.create({
     chatItem: {
         flexDirection: 'row',
         padding: 16,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors.card,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
+        borderBottomColor: colors.border,
     },
     avatar: {
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: '#3B82F6',
+        backgroundColor: colors.tint,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -450,14 +471,14 @@ const styles = StyleSheet.create({
     chatItemName: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#111827',
+        color: colors.text,
     },
     chatItemNameUnread: {
         fontWeight: '700',
     },
     chatItemTime: {
         fontSize: 10,
-        color: '#9CA3AF',
+        color: colors.icon,
     },
     chatItemFooter: {
         flexDirection: 'row',
@@ -466,15 +487,15 @@ const styles = StyleSheet.create({
     },
     chatItemMessage: {
         fontSize: 14,
-        color: '#6B7280',
+        color: colors.icon,
         flex: 1,
     },
     chatItemMessageUnread: {
-        color: '#111827',
+        color: colors.text,
         fontWeight: '500',
     },
     unreadBadge: {
-        backgroundColor: '#3B82F6',
+        backgroundColor: colors.tint,
         width: 20,
         height: 20,
         borderRadius: 10,
@@ -489,7 +510,7 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors.background,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -498,20 +519,22 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
+        borderBottomColor: colors.border,
     },
     modalTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#111827',
+        color: colors.text,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         margin: 16,
         paddingHorizontal: 12,
-        backgroundColor: '#F3F4F6',
+        backgroundColor: colors.card,
         borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     searchIcon: {
         marginRight: 8,
@@ -520,7 +543,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 12,
         fontSize: 16,
-        color: '#111827',
+        color: colors.text,
     },
     adminList: {
         flex: 1,
@@ -529,28 +552,28 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         padding: 32,
         fontSize: 14,
-        color: '#6B7280',
+        color: colors.icon,
     },
     adminItem: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
+        borderBottomColor: colors.border,
     },
     adminName: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#111827',
+        color: colors.text,
     },
     adminRole: {
         fontSize: 12,
-        color: '#6B7280',
+        color: colors.icon,
         textTransform: 'capitalize',
     },
     messagesContainer: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.background,
     },
     messagesContent: {
         padding: 16,
@@ -562,11 +585,11 @@ const styles = StyleSheet.create({
     emptyMessagesText: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#6B7280',
+        color: colors.icon,
     },
     emptyMessagesSubtext: {
         fontSize: 14,
-        color: '#9CA3AF',
+        color: colors.icon,
         marginTop: 4,
     },
     messageBubble: {
@@ -577,13 +600,15 @@ const styles = StyleSheet.create({
     },
     messageBubbleOwn: {
         alignSelf: 'flex-end',
-        backgroundColor: '#3B82F6',
+        backgroundColor: colors.tint,
         borderBottomRightRadius: 4,
     },
     messageBubbleOther: {
         alignSelf: 'flex-start',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors.card,
         borderBottomLeftRadius: 4,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     messageText: {
         fontSize: 16,
@@ -593,7 +618,7 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
     },
     messageTextOther: {
-        color: '#111827',
+        color: colors.text,
     },
     messageTime: {
         fontSize: 10,
@@ -602,36 +627,38 @@ const styles = StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.7)',
     },
     messageTimeOther: {
-        color: '#9CA3AF',
+        color: colors.icon,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'flex-end',
         padding: 12,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors.card,
         borderTopWidth: 1,
-        borderTopColor: '#E5E7EB',
+        borderTopColor: colors.border,
     },
     messageInput: {
         flex: 1,
         maxHeight: 100,
         paddingHorizontal: 16,
         paddingVertical: 10,
-        backgroundColor: '#F3F4F6',
+        backgroundColor: isDark ? colors.background : '#F3F4F6',
         borderRadius: 20,
         fontSize: 16,
-        color: '#111827',
+        color: colors.text,
         marginRight: 8,
+        borderWidth: isDark ? 1 : 0,
+        borderColor: colors.border,
     },
     sendButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#3B82F6',
+        backgroundColor: colors.tint,
         justifyContent: 'center',
         alignItems: 'center',
     },
     sendButtonDisabled: {
-        backgroundColor: '#E5E7EB',
+        backgroundColor: colors.border,
     },
 });

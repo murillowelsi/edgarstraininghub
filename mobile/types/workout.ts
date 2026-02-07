@@ -71,3 +71,30 @@ export interface WorkoutDocument {
 export interface AssignmentWithWorkout extends WorkoutAssignment {
     workout: Workout;
 }
+
+// Exercise definition from database
+export interface Exercise {
+    id: string;
+    name: string;
+    description?: string;
+    category?: string;
+    muscleGroups?: string[];
+    equipment?: string[];
+    gifUrl?: string; // Important for display
+    videoUrl?: string;
+    thumbnailUrl?: string;
+    instructions?: string;
+}
+
+export interface WorkoutExercise {
+    id: string;
+    exerciseId?: string; // Link to master exercise
+    exerciseName?: string; // Denormalized name
+    exerciseGifUrl?: string; // Denormalized gif
+    exerciseVideoUrl?: string;
+    sets: number;
+    reps: string;
+    weight?: string;
+    restSeconds?: number;
+    notes?: string;
+}

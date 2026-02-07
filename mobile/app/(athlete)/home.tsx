@@ -7,13 +7,16 @@ import {
     ActivityIndicator,
     StyleSheet,
     Dimensions,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, router } from 'expo-router';
 import { format, addDays, isSameDay, isToday, startOfWeek, isAfter, isBefore, startOfDay } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAthleteProfile, getAthleteAssignments } from '@/services/athleteService';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Colors } from '@/constants/theme';
+import { getAthleteProfile, getAthleteAssignments, toggleAssignmentComplete } from '@/services/athleteService';
 import type { AssignmentWithWorkout } from '@/types/workout';
 
 const { width } = Dimensions.get('window');
@@ -32,8 +35,276 @@ const workoutTypeColors: Record<string, { bg: string; text: string; border: stri
     strength: { bg: '#FED7AA', text: '#EA580C', border: '#FDBA74' },
 };
 
+const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    content: {
+        padding: 16,
+        paddingBottom: 32,
+    },
+    welcomeSection: {
+        paddingTop: 8,
+        marginBottom: 16,
+    },
+    welcomeText: {
+        fontSize: 14,
+        color: colors.icon,
+    },
+    displayName: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: colors.text,
+    },
+    statsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+        marginBottom: 16,
+    },
+    statCard: {
+        width: (width - 44) / 2,
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    primaryCard: {
+        backgroundColor: isDark ? '#1E3A8A20' : '#EFF6FF',
+        borderColor: isDark ? '#1E3A8A40' : '#BFDBFE',
+    },
+    orangeCard: {
+        backgroundColor: isDark ? '#EA580C20' : '#FFF7ED',
+        borderColor: isDark ? '#EA580C40' : '#FDBA74',
+    },
+    blueCard: {
+        backgroundColor: isDark ? '#1E3A8A20' : '#EFF6FF',
+        borderColor: isDark ? '#1E3A8A40' : '#BFDBFE',
+    },
+    greenCard: {
+        backgroundColor: isDark ? '#05966920' : '#F0FDF4',
+        borderColor: isDark ? '#05966940' : '#A7F3D0',
+    },
+    statIconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        backgroundColor: isDark ? '#1E3A8A30' : '#DBEAFE',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    statValue: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: colors.text,
+    },
+    statLabel: {
+        fontSize: 12,
+        color: colors.icon,
+    },
+    card: {
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    cardTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    cardTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    cardSubtitle: {
+        fontSize: 14,
+        color: colors.icon,
+    },
+    progressBarContainer: {
+        height: 12,
+        backgroundColor: colors.muted,
+        borderRadius: 6,
+        overflow: 'hidden',
+        marginBottom: 8,
+    },
+    progressBar: {
+        height: '100%',
+        backgroundColor: colors.tint,
+        borderRadius: 6,
+    },
+    progressText: {
+        fontSize: 12,
+        color: colors.icon,
+    },
+    todayButton: {
+        fontSize: 14,
+        color: colors.tint,
+        fontWeight: '500',
+    },
+    weekScroll: {
+        marginHorizontal: -16,
+        marginBottom: 16,
+    },
+    weekScrollContent: {
+        paddingHorizontal: 16,
+        gap: 8,
+    },
+    dayButton: {
+        width: 48,
+        height: 64,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.card,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    dayButtonSelected: {
+        backgroundColor: colors.tint,
+        borderColor: colors.tint,
+    },
+    dayButtonToday: {
+        backgroundColor: colors.muted,
+        borderColor: isDark ? '#1E3A8A40' : '#BFDBFE',
+    },
+    dayLabel: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: colors.icon,
+        marginBottom: 4,
+    },
+    dayLabelSelected: {
+        color: '#09090B',
+    },
+    dayNumber: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.text,
+    },
+    dayNumberSelected: {
+        color: '#09090B',
+    },
+    dayDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        marginTop: 4,
+    },
+    dayDotSelected: {
+        backgroundColor: '#09090B',
+    },
+    dayDotPrimary: {
+        backgroundColor: colors.tint,
+    },
+    dayDotGreen: {
+        backgroundColor: '#10B981',
+    },
+    selectedDateSection: {
+        marginTop: 16,
+    },
+    selectedDateTitle: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.icon,
+        marginBottom: 12,
+    },
+    emptyState: {
+        paddingVertical: 24,
+        alignItems: 'center',
+    },
+    emptyStateText: {
+        fontSize: 14,
+        color: colors.icon,
+    },
+    workoutItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.card,
+        marginBottom: 8,
+    },
+    workoutItemCompleted: {
+        backgroundColor: isDark ? '#05966920' : '#F0FDF4',
+        borderColor: isDark ? '#05966940' : '#BBF7D0',
+    },
+    workoutIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    workoutInfo: {
+        flex: 1,
+    },
+    workoutName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+        marginBottom: 2,
+    },
+    workoutNameCompleted: {
+        textDecorationLine: 'line-through',
+        color: colors.icon,
+    },
+    workoutDetails: {
+        fontSize: 12,
+        color: colors.icon,
+    },
+    completedBadge: {
+        backgroundColor: isDark ? '#05966930' : '#D1FAE5',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+    },
+    completedBadgeText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#059669',
+    },
+    seeAllButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    seeAllText: {
+        fontSize: 14,
+        color: colors.tint,
+        fontWeight: '500',
+    },
+});
+
+
 export default function AthleteHome() {
     const { user } = useAuth();
+    const { colorScheme } = useTheme();
+    const colors = Colors[colorScheme];
+    const isDark = colorScheme === 'dark';
+    const styles = getStyles(colors, isDark);
     const [displayName, setDisplayName] = useState('Athlete');
     const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
     const [loading, setLoading] = useState(true);
@@ -74,6 +345,30 @@ export default function AthleteHome() {
         }
     };
 
+    const handleToggleComplete = async (assignment: AssignmentWithWorkout) => {
+        const newStatus = !assignment.completedAt;
+
+        try {
+            // Update local state immediately for responsiveness
+            setAssignments(prev => prev.map(a =>
+                a.id === assignment.id
+                    ? { ...a, completedAt: newStatus ? new Date() : null }
+                    : a
+            ));
+
+            await toggleAssignmentComplete(assignment.id, newStatus);
+        } catch (error) {
+            // Revert on error
+            console.error('Error toggling status:', error);
+            setAssignments(prev => prev.map(a =>
+                a.id === assignment.id
+                    ? { ...a, completedAt: assignment.completedAt }
+                    : a
+            ));
+            Alert.alert('Error', 'Failed to update workout status');
+        }
+    };
+
     // Calculate stats
     const totalWorkouts = assignments.length;
     const completedWorkouts = assignments.filter((a) => a.completedAt).length;
@@ -103,20 +398,20 @@ export default function AthleteHome() {
 
     if (loading) {
         return (
-            <SafeAreaView style={styles.loadingContainer} edges={['top']}>
-                <ActivityIndicator size="large" color="#3B82F6" />
+            <SafeAreaView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+                <ActivityIndicator size="large" color={colors.tint} />
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['bottom']}>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
                     {/* Welcome Section */}
                     <View style={styles.welcomeSection}>
-                        <Text style={styles.welcomeText}>Welcome back,</Text>
-                        <Text style={styles.displayName}>{displayName}</Text>
+                        <Text style={[styles.welcomeText, { color: colors.icon }]}>Welcome back,</Text>
+                        <Text style={[styles.displayName, { color: colors.text }]}>{displayName}</Text>
                     </View>
 
                     {/* Stats Cards */}
@@ -263,7 +558,7 @@ export default function AthleteHome() {
                                                 styles.workoutItem,
                                                 isCompleted && styles.workoutItemCompleted,
                                             ]}
-                                            onPress={() => router.push(`/(athlete)/workout/${assignment.id}`)}
+                                            onPress={() => router.push(`/workout/${assignment.id}`)}
                                         >
                                             <View style={[styles.workoutIcon, { backgroundColor: colors.bg }]}>
                                                 <Ionicons name={iconName} size={20} color={colors.text} />
@@ -283,17 +578,25 @@ export default function AthleteHome() {
                                                         : `${workout.stages?.length || 0} stages`}
                                                 </Text>
                                             </View>
-                                            {isCompleted ? (
-                                                <View style={styles.completedBadge}>
-                                                    <Text style={styles.completedBadgeText}>
-                                                        {assignment.completionPercentage !== undefined
-                                                            ? `${assignment.completionPercentage}%`
-                                                            : 'Done'}
-                                                    </Text>
-                                                </View>
-                                            ) : (
-                                                <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-                                            )}
+                                            <TouchableOpacity
+                                                onPress={(e) => {
+                                                    e.stopPropagation();
+                                                    handleToggleComplete(assignment);
+                                                }}
+                                                style={{ minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
+                                            >
+                                                {isCompleted ? (
+                                                    <View style={styles.completedBadge}>
+                                                        <Text style={styles.completedBadgeText}>
+                                                            {assignment.completionPercentage !== undefined
+                                                                ? `${assignment.completionPercentage}%`
+                                                                : 'Done'}
+                                                        </Text>
+                                                    </View>
+                                                ) : (
+                                                    <Ionicons name="ellipse-outline" size={24} color="#D1D5DB" />
+                                                )}
+                                            </TouchableOpacity>
                                         </TouchableOpacity>
                                     );
                                 })
@@ -306,7 +609,7 @@ export default function AthleteHome() {
                         <View style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <Text style={styles.cardTitle}>Upcoming</Text>
-                                <TouchableOpacity onPress={() => router.push('/(athlete)/calendar')}>
+                                <TouchableOpacity onPress={() => router.push('/calendar')}>
                                     <View style={styles.seeAllButton}>
                                         <Text style={styles.seeAllText}>See all</Text>
                                         <Ionicons name="chevron-forward" size={16} color="#3B82F6" />
@@ -323,7 +626,7 @@ export default function AthleteHome() {
                                     <TouchableOpacity
                                         key={assignment.id}
                                         style={styles.workoutItem}
-                                        onPress={() => router.push(`/(athlete)/workout/${assignment.id}`)}
+                                        onPress={() => router.push(`/workout/${assignment.id}`)}
                                     >
                                         <View style={[styles.workoutIcon, { backgroundColor: colors.bg }]}>
                                             <Ionicons name={iconName} size={20} color={colors.text} />
@@ -345,266 +648,3 @@ export default function AthleteHome() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F9FAFB',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F9FAFB',
-    },
-    content: {
-        padding: 16,
-        paddingBottom: 32,
-    },
-    welcomeSection: {
-        paddingTop: 8,
-        marginBottom: 16,
-    },
-    welcomeText: {
-        fontSize: 14,
-        color: '#6B7280',
-    },
-    displayName: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#111827',
-    },
-    statsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 12,
-        marginBottom: 16,
-    },
-    statCard: {
-        width: (width - 44) / 2,
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-    },
-    primaryCard: {
-        backgroundColor: '#EFF6FF',
-        borderColor: '#BFDBFE',
-    },
-    orangeCard: {
-        backgroundColor: '#FFF7ED',
-        borderColor: '#FDBA74',
-    },
-    blueCard: {
-        backgroundColor: '#EFF6FF',
-        borderColor: '#BFDBFE',
-    },
-    greenCard: {
-        backgroundColor: '#F0FDF4',
-        borderColor: '#A7F3D0',
-    },
-    statIconContainer: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        backgroundColor: '#DBEAFE',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    statValue: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#111827',
-    },
-    statLabel: {
-        fontSize: 12,
-        color: '#6B7280',
-    },
-    card: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    cardTitleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    cardSubtitle: {
-        fontSize: 14,
-        color: '#6B7280',
-    },
-    progressBarContainer: {
-        height: 12,
-        backgroundColor: '#E5E7EB',
-        borderRadius: 6,
-        overflow: 'hidden',
-        marginBottom: 8,
-    },
-    progressBar: {
-        height: '100%',
-        backgroundColor: '#3B82F6',
-        borderRadius: 6,
-    },
-    progressText: {
-        fontSize: 12,
-        color: '#6B7280',
-    },
-    todayButton: {
-        fontSize: 14,
-        color: '#3B82F6',
-        fontWeight: '500',
-    },
-    weekScroll: {
-        marginHorizontal: -16,
-        marginBottom: 16,
-    },
-    weekScrollContent: {
-        paddingHorizontal: 16,
-        gap: 8,
-    },
-    dayButton: {
-        width: 48,
-        height: 64,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        backgroundColor: '#FFFFFF',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    dayButtonSelected: {
-        backgroundColor: '#3B82F6',
-        borderColor: '#3B82F6',
-    },
-    dayButtonToday: {
-        backgroundColor: '#F3F4F6',
-        borderColor: '#BFDBFE',
-    },
-    dayLabel: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#6B7280',
-        marginBottom: 4,
-    },
-    dayLabelSelected: {
-        color: '#FFFFFF',
-    },
-    dayNumber: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#111827',
-    },
-    dayNumberSelected: {
-        color: '#FFFFFF',
-    },
-    dayDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        marginTop: 4,
-    },
-    dayDotSelected: {
-        backgroundColor: '#FFFFFF',
-    },
-    dayDotPrimary: {
-        backgroundColor: '#3B82F6',
-    },
-    dayDotGreen: {
-        backgroundColor: '#10B981',
-    },
-    selectedDateSection: {
-        marginTop: 16,
-    },
-    selectedDateTitle: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#6B7280',
-        marginBottom: 12,
-    },
-    emptyState: {
-        paddingVertical: 24,
-        alignItems: 'center',
-    },
-    emptyStateText: {
-        fontSize: 14,
-        color: '#6B7280',
-    },
-    workoutItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        backgroundColor: '#FFFFFF',
-        marginBottom: 8,
-    },
-    workoutItemCompleted: {
-        backgroundColor: '#F0FDF4',
-        borderColor: '#BBF7D0',
-    },
-    workoutIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    workoutInfo: {
-        flex: 1,
-    },
-    workoutName: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-        marginBottom: 2,
-    },
-    workoutNameCompleted: {
-        textDecorationLine: 'line-through',
-        color: '#6B7280',
-    },
-    workoutDetails: {
-        fontSize: 12,
-        color: '#6B7280',
-    },
-    completedBadge: {
-        backgroundColor: '#D1FAE5',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-    },
-    completedBadgeText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#059669',
-    },
-    seeAllButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    seeAllText: {
-        fontSize: 14,
-        color: '#3B82F6',
-        fontWeight: '500',
-    },
-});

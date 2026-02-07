@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, doc, getDoc, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, orderBy, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { AssignmentWithWorkout, WorkoutAssignmentDocument, WorkoutDocument } from '../types/workout';
 
@@ -19,6 +19,22 @@ export const getAthleteProfile = async (userId: string) => {
     } catch (error) {
         console.error('Error fetching athlete profile:', error);
         return null;
+    }
+};
+
+export const toggleAssignmentComplete = async (
+    id: string,
+    completed: boolean
+): Promise<void> => {
+    try {
+        const docRef = doc(db, 'workoutAssignments', id);
+        await updateDoc(docRef, {
+            completedAt: completed ? serverTimestamp() : null,
+            updatedAt: serverTimestamp(),
+        });
+    } catch (error) {
+        console.error('Error toggling assignment completion:', error);
+        throw error;
     }
 };
 
@@ -74,11 +90,44 @@ export const getAthleteAssignments = async (userId: string): Promise<AssignmentW
             }
         }
 
-        // Sort by date (descending or ascending) - let's do ascending scheduled date
         return assignments.sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime());
 
     } catch (error) {
         console.error('Error fetching assignments:', error);
         return [];
+    }
+};
+
+export const getAllExercises = async () => {
+    try {
+        const querySnapshot = await getDocs(collection(db, 'exercises'));
+        return querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error('Error fetching exercises:', error);
+        return [];
+    }
+};
+
+export const completeWorkoutWithProgress = async (
+    assignmentId: string,
+    progressData: any[],
+    completionPercentage: number,
+    totalTime: number
+) => {
+    try {
+        const docRef = doc(db, 'workoutAssignments', assignmentId);
+        await updateDoc(docRef, {
+            completedAt: serverTimestamp(),
+            progressData,
+            completionPercentage,
+            totalTime,
+            updatedAt: serverTimestamp(),
+        });
+    } catch (error) {
+        console.error('Error completing workout with progress:', error);
+        throw error;
     }
 };

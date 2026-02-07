@@ -7,25 +7,18 @@ import {
     ActivityIndicator,
     StyleSheet,
     RefreshControl,
+    Dimensions,
+    Alert,
 } from 'react-native';
-import { router } from 'expo-router';
-import { format, addDays, isSameDay, isToday, isTomorrow } from 'date-fns';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { format, addDays, isSameDay, isToday, isTomorrow, startOfDay } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
-
-// Mock types
-interface AssignmentWithWorkout {
-    id: string;
-    scheduledDate: Date;
-    completedAt: Date | null;
-    completionPercentage?: number;
-    workout: {
-        id: string;
-        name: string;
-        type: 'running' | 'cycling' | 'swimming' | 'strength';
-        stages: any[];
-        exercises?: any[];
-    };
-}
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Colors } from '@/constants/theme';
+import { getAthleteAssignments } from '@/services/athleteService';
+import type { AssignmentWithWorkout } from '@/types/workout';
 
 const workoutTypeIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
     running: 'walk',
@@ -42,26 +35,35 @@ const workoutTypeColors: Record<string, { bg: string; text: string }> = {
 };
 
 export default function AthleteCalendarView() {
+    const { user } = useAuth();
+    const router = useRouter();
+    const { colorScheme } = useTheme();
+    const colors = Colors[colorScheme];
+    const isDark = colorScheme === 'dark';
+    const styles = getStyles(colors, isDark);
+
     const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const todayRef = useRef<View>(null);
 
-    // Generate 60 days (7 days back, 53 days forward)
-    const today = new Date();
-    const days = Array.from({ length: 60 }, (_, i) => addDays(today, i - 7));
+    // Generate 30 days (7 days back, 23 days forward)
+    const today = startOfDay(new Date());
+    const days = Array.from({ length: 30 }, (_, i) => addDays(today, i - 7));
 
     useEffect(() => {
-        loadData();
-    }, []);
+        if (user) {
+            loadData();
+        }
+    }, [user]);
 
     const loadData = async () => {
+        if (!user) return;
         try {
-            // TODO: Replace with actual API calls
-            // const data = await getAssignmentsWithWorkoutsByAthlete(user.uid);
-            setAssignments([]);
+            const fetchedAssignments = await getAthleteAssignments(user.uid);
+            setAssignments(fetchedAssignments);
         } catch (error) {
-            console.error('Error loading assignments:', error);
+            console.error('Error loading calendar data:', error);
+            Alert.alert('Error', 'Failed to load calendar');
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -84,300 +86,281 @@ export default function AthleteCalendarView() {
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3B82F6" />
-            </View>
+            <SafeAreaView style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={colors.tint} />
+            </SafeAreaView>
         );
     }
 
     return (
-        <View style={styles.container}>
-            {/* Header */}
+        <SafeAreaView style={styles.container} edges={['bottom']}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#111827" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Calendar</Text>
-                <View style={styles.headerRight} />
+                <Text style={styles.headerTitle}>Schedule</Text>
+                <Text style={styles.headerSubtitle}>{format(new Date(), 'MMMM yyyy')}</Text>
             </View>
 
-            {/* Sticky Sub-header */}
-            <View style={styles.subHeader}>
-                <Text style={styles.monthTitle}>{format(new Date(), 'MMMM yyyy')}</Text>
-                <TouchableOpacity onPress={handleRefresh}>
-                    <Ionicons
-                        name="refresh"
-                        size={20}
-                        color={refreshing ? '#3B82F6' : '#6B7280'}
-                    />
-                </TouchableOpacity>
-            </View>
-
-            {/* Calendar List */}
             <ScrollView
                 style={styles.scrollView}
-                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.content}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.tint} />
                 }
+                showsVerticalScrollIndicator={false}
             >
-                {days.map((day) => {
-                    const dayAssignments = getAssignmentsForDate(day);
-                    const isTodayDate = isToday(day);
-                    const hasWorkouts = dayAssignments.length > 0;
+                {days.map((date, index) => {
+                    const dateAssignments = getAssignmentsForDate(date);
+                    const isDateToday = isToday(date);
+                    const isPast = date < today && !isDateToday;
 
                     return (
-                        <View
-                            key={day.toISOString()}
-                            ref={isTodayDate ? todayRef : undefined}
-                            style={[styles.dayContainer, isTodayDate && styles.todayContainer]}
-                        >
-                            {/* Date Header */}
-                            <View style={styles.dateHeader}>
-                                {isTodayDate && <View style={styles.todayIndicator} />}
-                                <View style={styles.dateInfo}>
-                                    <Text
-                                        style={[
-                                            styles.dayLabel,
-                                            isTodayDate && styles.todayLabel,
-                                        ]}
-                                    >
-                                        {formatDateLabel(day)}
+                        <View key={date.toISOString()} style={[
+                            styles.dayRow,
+                            isPast && styles.pastDayRow
+                        ]}>
+                            {/* Date Column */}
+                            <View style={styles.dateColumn}>
+                                <Text style={[
+                                    styles.dayName,
+                                    isDateToday && styles.todayText
+                                ]}>
+                                    {format(date, 'EEE')}
+                                </Text>
+                                <View style={[
+                                    styles.dayNumberContainer,
+                                    isDateToday && styles.todayNumberContainer
+                                ]}>
+                                    <Text style={[
+                                        styles.dayNumber,
+                                        isDateToday && styles.todayNumberText
+                                    ]}>
+                                        {format(date, 'd')}
                                     </Text>
-                                    <Text style={styles.dateText}>{format(day, 'MMM d')}</Text>
                                 </View>
-                                {hasWorkouts && (
-                                    <View style={styles.workoutCountBadge}>
-                                        <Text style={styles.workoutCountText}>
-                                            {dayAssignments.length} workout{dayAssignments.length > 1 ? 's' : ''}
-                                        </Text>
-                                    </View>
-                                )}
                             </View>
 
-                            {/* Workouts for this day */}
-                            {hasWorkouts && (
-                                <View style={styles.workoutsContainer}>
-                                    {dayAssignments.map((assignment) => {
-                                        const workout = assignment.workout;
-                                        const iconName = workoutTypeIcons[workout.type] || 'fitness';
-                                        const colors = workoutTypeColors[workout.type] || workoutTypeColors.strength;
+                            {/* Timeline Line */}
+                            <View style={styles.timelineColumn}>
+                                <View style={[styles.timelineLine, isPast && styles.pastTimelineLine]} />
+                                <View style={[
+                                    styles.timelineDot,
+                                    isDateToday && styles.timelineDotToday,
+                                    dateAssignments.length > 0 && styles.timelineDotActive
+                                ]} />
+                            </View>
+
+                            {/* Assignments Column */}
+                            <View style={styles.assignmentsColumn}>
+                                {dateAssignments.length === 0 ? (
+                                    <View style={styles.emptyDayPlaceholder} />
+                                ) : (
+                                    dateAssignments.map(assignment => {
                                         const isCompleted = !!assignment.completedAt;
+                                        const typeStyle = workoutTypeColors[assignment.workout.type] || { bg: colors.muted, text: colors.text };
+                                        const Icon = workoutTypeIcons[assignment.workout.type] || 'fitness';
 
                                         return (
                                             <TouchableOpacity
                                                 key={assignment.id}
                                                 style={[
-                                                    styles.workoutCard,
-                                                    isCompleted && styles.workoutCardCompleted,
+                                                    styles.assignmentCard,
+                                                    isCompleted && styles.assignmentCardCompleted
                                                 ]}
-                                                onPress={() => router.push(`/(athlete)/workout/${assignment.id}`)}
+                                                onPress={() => router.push(`/workout/${assignment.id}`)}
+                                                activeOpacity={0.7}
                                             >
-                                                <View
-                                                    style={[
-                                                        styles.workoutIcon,
-                                                        {
-                                                            backgroundColor: isCompleted ? '#D1FAE5' : colors.bg,
-                                                        },
-                                                    ]}
-                                                >
-                                                    {isCompleted ? (
-                                                        <Ionicons name="checkmark" size={20} color="#059669" />
-                                                    ) : (
-                                                        <Ionicons name={iconName} size={20} color={colors.text} />
+                                                <View style={[styles.iconContainer, { backgroundColor: isDark ? typeStyle.bg + '40' : typeStyle.bg }]}>
+                                                    <Ionicons name={Icon} size={18} color={typeStyle.text} />
+                                                </View>
+                                                <View style={styles.assignmentDetails}>
+                                                    <Text style={[
+                                                        styles.assignmentTitle,
+                                                        isCompleted && styles.completedText
+                                                    ]} numberOfLines={1}>
+                                                        {assignment.workout.name}
+                                                    </Text>
+                                                    {assignment.workout.type === 'strength' && (
+                                                        <Text style={styles.assignmentSubtitle}>
+                                                            {assignment.workout.exercises?.length || 0} exercises
+                                                        </Text>
                                                     )}
                                                 </View>
-                                                <View style={styles.workoutInfo}>
-                                                    <Text
-                                                        style={[
-                                                            styles.workoutName,
-                                                            isCompleted && styles.workoutNameCompleted,
-                                                        ]}
-                                                    >
-                                                        {workout.name}
-                                                    </Text>
-                                                    <Text style={styles.workoutDetails}>
-                                                        {workout.type === 'strength'
-                                                            ? `${workout.exercises?.length || 0} exercises`
-                                                            : `${workout.stages.length} stages`}{' '}
-                                                        · <Text style={styles.workoutType}>{workout.type}</Text>
-                                                    </Text>
-                                                </View>
-                                                {isCompleted ? (
-                                                    <View style={styles.completedBadge}>
-                                                        <Text style={styles.completedBadgeText}>
-                                                            {assignment.completionPercentage !== undefined
-                                                                ? `${assignment.completionPercentage}%`
-                                                                : 'Done'}
-                                                        </Text>
-                                                    </View>
-                                                ) : (
-                                                    <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                                                {isCompleted && (
+                                                    <Ionicons name="checkmark-circle" size={20} color="#059669" />
                                                 )}
                                             </TouchableOpacity>
                                         );
-                                    })}
-                                </View>
-                            )}
+                                    })
+                                )}
+                            </View>
                         </View>
                     );
                 })}
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: typeof Colors.light, isDark: boolean) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.background,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.background,
     },
     header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: '#FFFFFF',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        backgroundColor: colors.background,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
-    },
-    backButton: {
-        padding: 4,
+        borderBottomColor: colors.border,
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#111827',
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: colors.text,
     },
-    headerRight: {
-        width: 32,
-    },
-    subHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
-    },
-    monthTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
+    headerSubtitle: {
+        fontSize: 14,
+        color: colors.icon,
+        marginTop: 2,
     },
     scrollView: {
         flex: 1,
     },
-    dayContainer: {
-        borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
+    content: {
+        paddingVertical: 20,
     },
-    todayContainer: {
-        backgroundColor: '#EFF6FF',
-    },
-    dateHeader: {
+    dayRow: {
         flexDirection: 'row',
+        minHeight: 80,
+    },
+    pastDayRow: {
+        opacity: 0.6,
+    },
+    dateColumn: {
+        width: 60,
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingTop: 4,
     },
-    todayIndicator: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#3B82F6',
-        marginRight: 12,
-    },
-    dateInfo: {
-        flex: 1,
-    },
-    dayLabel: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    todayLabel: {
-        color: '#3B82F6',
-    },
-    dateText: {
-        fontSize: 14,
-        color: '#6B7280',
-        marginLeft: 8,
-    },
-    workoutCountBadge: {
-        backgroundColor: '#F3F4F6',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-    },
-    workoutCountText: {
+    dayName: {
         fontSize: 12,
-        color: '#6B7280',
+        color: colors.icon,
+        fontWeight: '500',
+        marginBottom: 4,
+        textTransform: 'uppercase',
     },
-    workoutsContainer: {
-        paddingHorizontal: 16,
-        paddingBottom: 12,
+    todayText: {
+        color: colors.tint,
+        fontWeight: '700',
     },
-    workoutCard: {
+    dayNumberContainer: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    todayNumberContainer: {
+        backgroundColor: colors.tint,
+    },
+    dayNumber: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    todayNumberText: {
+        color: '#ffffff',
+    },
+    timelineColumn: {
+        width: 20,
+        alignItems: 'center',
+    },
+    timelineLine: {
+        width: 2,
+        height: '100%',
+        backgroundColor: colors.border,
+        position: 'absolute',
+        top: 0,
+    },
+    pastTimelineLine: {
+        backgroundColor: colors.border,
+    },
+    timelineDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: colors.border,
+        marginTop: 18,
+        borderWidth: 2,
+        borderColor: colors.background,
+        zIndex: 1,
+    },
+    timelineDotToday: {
+        backgroundColor: colors.tint,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        marginTop: 17,
+    },
+    timelineDotActive: {
+        backgroundColor: colors.tint,
+    },
+    assignmentsColumn: {
+        flex: 1,
+        paddingRight: 20,
+        paddingLeft: 12,
+        paddingBottom: 16,
+    },
+    emptyDayPlaceholder: {
+        height: 40,
+    },
+    assignmentCard: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: colors.card,
         padding: 12,
         borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        backgroundColor: '#FFFFFF',
         marginBottom: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
     },
-    workoutCardCompleted: {
-        backgroundColor: '#F0FDF4',
-        borderColor: '#BBF7D0',
+    assignmentCardCompleted: {
+        backgroundColor: isDark ? '#05966910' : '#F0FDF4',
+        borderColor: isDark ? '#05966930' : '#BBF7D0',
+        opacity: 0.8,
     },
-    workoutIcon: {
-        width: 40,
-        height: 40,
+    iconContainer: {
+        width: 36,
+        height: 36,
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
     },
-    workoutInfo: {
+    assignmentDetails: {
         flex: 1,
     },
-    workoutName: {
-        fontSize: 16,
+    assignmentTitle: {
+        fontSize: 15,
         fontWeight: '600',
-        color: '#111827',
-        marginBottom: 2,
+        color: colors.text,
     },
-    workoutNameCompleted: {
+    completedText: {
         textDecorationLine: 'line-through',
-        color: '#6B7280',
+        color: colors.icon,
     },
-    workoutDetails: {
+    assignmentSubtitle: {
         fontSize: 12,
-        color: '#6B7280',
-    },
-    workoutType: {
-        textTransform: 'capitalize',
-    },
-    completedBadge: {
-        backgroundColor: '#D1FAE5',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-    },
-    completedBadgeText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#059669',
+        color: colors.icon,
+        marginTop: 2,
     },
 });

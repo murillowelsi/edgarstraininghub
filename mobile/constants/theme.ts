@@ -5,25 +5,33 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const primaryColor = '#E6B800'; // Yellow/Gold from web
+const primaryColorDark = '#E6B800';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: '#09090B', // foreground
+    background: '#FFFFFF', // background
+    tint: primaryColor,
+    icon: '#71717A', // muted-foreground
+    tabIconDefault: '#71717A',
+    tabIconSelected: primaryColor,
+    border: '#E4E4E7',
+    card: '#FFFFFF',
+    muted: '#F4F4F5',
+    destructive: '#EF4444',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: '#F9FAFB', // foreground dark
+    background: '#09090B', // background dark
+    tint: primaryColorDark,
+    icon: '#A1A1AA', // muted-foreground dark
+    tabIconDefault: '#A1A1AA',
+    tabIconSelected: primaryColorDark,
+    border: '#27272A',
+    card: '#18181B',
+    muted: '#27272A',
+    destructive: '#EF4444',
   },
 };
 

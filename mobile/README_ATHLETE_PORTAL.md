@@ -10,6 +10,8 @@ All screens are located in `/mobile/app/(athlete)/`:
 2. **Calendar** (`calendar.tsx`) - 60-day calendar view with workout scheduling
 3. **Workouts List** (`workouts-list.tsx`) - Filterable list of all workouts
 4. **Chat** (`chat.tsx`) - Real-time messaging with coaches
+5. **Workout Details** (`workout/[id]/index.tsx`) - Detailed view of a workout
+6. **Workout Session** (`workout/[id]/session.tsx`) - Active workout tracking screen
 
 ## 🚀 Getting Started
 
@@ -306,10 +308,9 @@ npx expo install expo-router react-native-safe-area-context react-native-screens
 
 ## 📚 Next Steps
 
-1. **Complete Remaining Screens:**
-   - Workout detail view (`workout/[id].tsx`)
-   - Strength workout session (`workout-session/[id].tsx`)
-
+1. **Completed:**
+   - All core athlete screens are now migrated and functional (Home, Calendar, Workouts, Chat, Workout Details, Workout Session).
+ 
 2. **Add Features:**
    - Pull-to-refresh on all list screens
    - Offline support with AsyncStorage
