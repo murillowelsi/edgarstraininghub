@@ -17,9 +17,15 @@ import { deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
 import type { Workout } from "@/types/workout";
 import { format } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import { Dumbbell, Edit, Loader2, Plus, Trash2, UserPlus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown, Dumbbell, Edit, Loader2, Plus, Trash2, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
@@ -103,16 +109,41 @@ const AdminWorkouts = () => {
         <AdminPageHeader
           title="Workouts"
           actions={
-            <>
-              <Button variant="outline" onClick={() => navigate("/admin/workouts/strength/new")}>
-                <Plus className="h-4 w-4 mr-2" />
-                Strength
-              </Button>
-              <Button onClick={() => navigate("/admin/workouts/new")}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Workout
-              </Button>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Workout
+                  <ChevronDown className="h-4 w-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/admin/workouts/new?type=running" className="flex items-center">
+                    <GrRun className="h-4 w-4 mr-2" />
+                    Running Workout
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/admin/workouts/new?type=cycling" className="flex items-center">
+                    <GrBike className="h-4 w-4 mr-2" />
+                    Cycling Workout
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/admin/workouts/new?type=swimming" className="flex items-center">
+                    <GrSwim className="h-4 w-4 mr-2" />
+                    Swimming Workout
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/admin/workouts/strength/new" className="flex items-center">
+                    <Dumbbell className="h-4 w-4 mr-2" />
+                    Strength Workout
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           }
         />
 
