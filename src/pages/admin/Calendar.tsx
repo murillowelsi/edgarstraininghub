@@ -500,8 +500,8 @@ const AdminCalendar = () => {
           </div>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="flex-1 p-4 overflow-auto">
+        {/* Calendar Grid — desktop only */}
+        <div className="hidden md:block flex-1 p-4 overflow-auto">
           <div className="min-w-[800px]">
             {/* Day headers */}
             <div className="grid grid-cols-7 gap-0 mb-1">
@@ -533,6 +533,107 @@ const AdminCalendar = () => {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Mobile List View — visible below md breakpoint */}
+        <div className="md:hidden flex-1 overflow-auto p-4 space-y-4">
+          {calendarDays
+            .filter((day) => isSameMonth(day, currentMonth))
+            .map((day) => {
+              const dayAssignments = filteredAssignments.filter((a) =>
+                isSameDay(a.scheduledDate, day)
+              );
+              return (
+                <div key={day.toISOString()} className="space-y-2">
+                  {/* Day header */}
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={cn(
+                        "text-sm font-semibold",
+                        isToday(day) && "text-primary"
+                      )}
+                    >
+                      {format(day, "EEEE, MMM d")}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs text-muted-foreground"
+                      onClick={() => handleEmptyCellClick(day)}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+
+                  {/* Assignments for this day */}
+                  {dayAssignments.length === 0 ? (
+                    <p className="text-xs text-muted-foreground pl-1">
+                      No workouts
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {dayAssignments.map((assignment) => {
+                        const Icon = workoutTypeIcons[assignment.workout.type];
+                        const isCompleted = !!assignment.completedAt;
+                        return (
+                          <div
+                            key={assignment.id}
+                            className={cn(
+                              "flex items-center justify-between rounded-lg border p-3",
+                              workoutTypeColors[assignment.workout.type],
+                              isCompleted && "opacity-60"
+                            )}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              {isCompleted ? (
+                                <Check className="h-4 w-4 flex-shrink-0" />
+                              ) : (
+                                <Icon className="h-4 w-4 flex-shrink-0" />
+                              )}
+                              <div className="min-w-0">
+                                <p
+                                  className={cn(
+                                    "text-sm font-medium truncate",
+                                    isCompleted && "line-through"
+                                  )}
+                                >
+                                  {assignment.workout.name}
+                                </p>
+                                <p className="text-xs truncate opacity-75">
+                                  {assignment.athlete.displayName}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => handleAssignmentClick(assignment)}
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                onClick={() => {
+                                  setSelectedAssignment(assignment);
+                                  setDetailsDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
         </div>
 
         {/* Legend */}
