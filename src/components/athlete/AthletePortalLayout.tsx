@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChatService } from "@/services/chat";
+import { NotificationService } from "@/services/notifications";
 import { useEffect, useState } from "react";
 
 interface AthletePortalLayoutProps {
@@ -49,6 +50,8 @@ const AthletePortalLayout = ({
         return sum + (chat.unreadCount?.[user.uid] || 0);
       }, 0);
       setChatUnreadCount(totalUnread);
+      // Update app icon badge
+      NotificationService.setBadge(totalUnread);
     });
 
     return () => unsubscribe();

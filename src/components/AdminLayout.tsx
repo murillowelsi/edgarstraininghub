@@ -8,6 +8,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { auth } from "../lib/firebase";
 import AdminTopBar from "./AdminTopBar";
 import { ChatService } from "../services/chat";
+import { NotificationService } from "../services/notifications";
 import { BottomNav } from "./admin/BottomNav";
 
 interface AdminLayoutProps {
@@ -52,6 +53,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         }
       });
       setChatUnreadCount(totalUnread);
+      // Update app icon badge
+      NotificationService.setBadge(totalUnread);
     });
 
     return () => unsubscribe();

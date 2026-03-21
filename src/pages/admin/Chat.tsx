@@ -61,10 +61,11 @@ export default function AdminChat() {
     useEffect(() => {
         if (!selectedChat || !user) return;
         ChatService.markAsRead(selectedChat.id, user.uid);
-        let previousCount = 0;
+        // -1 = first load (don't notify for existing messages, only for new ones)
+        let previousCount = -1;
         const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
-            // Notify on new incoming messages
-            if (msgs.length > previousCount) {
+            // Notify only on genuinely new messages (not the initial load)
+            if (previousCount >= 0 && msgs.length > previousCount) {
                 const newest = msgs[msgs.length - 1];
                 if (newest && newest.senderId !== user.uid) {
                     const senderName = getChatDisplayName(selectedChat);

@@ -1,72 +1,75 @@
 /**
  * NotificationService
  *
- * Handles browser notification permissions and showing chat notifications.
- * Works in two modes:
- *  - Foreground: Firestore listener detects a new message → show notification
- *    if the window is hidden/minimised.
- *  - Background (future): A Cloud Function sends a Web Push payload to the
- *    registered push subscription, and the service worker shows it even when
- *    the app is closed.
+ * Handles browser notification permissions, chat notifications, and app badge.
  */
 
 export const NotificationService = {
-  /** Returns true if notifications are currently granted */
   isGranted(): boolean {
-    return typeof Notification !== 'undefined' && Notification.permission === 'granted'
+    return typeof Notification !== "undefined" && Notification.permission === "granted";
   },
 
-  /** Returns true if notifications are blocked by the user */
   isDenied(): boolean {
-    return typeof Notification !== 'undefined' && Notification.permission === 'denied'
+    return typeof Notification !== "undefined" && Notification.permission === "denied";
   },
 
-  /** Request permission. Returns true if granted. */
   async requestPermission(): Promise<boolean> {
-    if (typeof Notification === 'undefined') return false
-    if (Notification.permission === 'granted') return true
-    if (Notification.permission === 'denied') return false
-
-    const result = await Notification.requestPermission()
-    return result === 'granted'
+    if (typeof Notification === "undefined") return false;
+    if (Notification.permission === "granted") return true;
+    if (Notification.permission === "denied") return false;
+    const result = await Notification.requestPermission();
+    return result === "granted";
   },
 
   /**
    * Show a chat notification.
-   * Only fires when permission is granted AND the document is not visible
-   * (i.e. the user has another tab or app focused).
+   * Only fires when permission is granted AND document is not visible.
    */
   async showChatNotification(
     senderName: string,
     messageText: string,
     chatUrl: string
   ): Promise<void> {
-    if (!this.isGranted()) return
-    if (typeof document !== 'undefined' && document.visibilityState === 'visible') return
+    if (!this.isGranted()) return;
+    if (typeof document !== "undefined" && document.visibilityState === "visible") return;
 
-    const title = senderName
-    const body =
-      messageText.length > 80 ? messageText.substring(0, 80) + '…' : messageText
+    const body = messageText.length > 80 ? messageText.substring(0, 80) + "…" : messageText;
 
     const options: NotificationOptions = {
       body,
-      icon: '/pwa-192x192.png',
-      badge: '/pwa-192x192.png',
+      icon: "/pwa-192x192.png",
+      badge: "/pwa-192x192.png",
       data: { url: chatUrl },
-      tag: chatUrl, // one notification per chat thread (replaces previous)
+      tag: chatUrl,
       renotify: true,
       vibrate: [200, 100, 200],
-    }
+    };
 
     try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.ready
-        await registration.showNotification(title, options)
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.showNotification(senderName, options);
       } else {
-        new Notification(title, options)
+        new Notification(senderName, options);
       }
     } catch {
-      // Notification API not available in this context — silently ignore
+      // Silently ignore
     }
   },
-}
+
+  /** Update the app icon badge with the total unread count. */
+  async setBadge(count: number): Promise<void> {
+    if (!("setAppBadge" in navigator)) return;
+    try {
+      if (count > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (navigator as any).setAppBadge(count);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (navigator as any).clearAppBadge();
+      }
+    } catch {
+      // Not supported or permission denied
+    }
+  },
+};
