@@ -32,7 +32,16 @@ export const FCMService = {
     }
 
     try {
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+      // Explicitly register the FCM service worker to avoid conflicts with our custom sw.js
+      const swRegistration = await navigator.serviceWorker.register(
+        "/firebase-messaging-sw.js",
+        { scope: "/" }
+      );
+
+      const token = await getToken(messaging, {
+        vapidKey: VAPID_KEY,
+        serviceWorkerRegistration: swRegistration,
+      });
       if (!token) return null;
 
       // Save token to Firestore so Cloud Function can look it up

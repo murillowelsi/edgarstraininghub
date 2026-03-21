@@ -1,8 +1,9 @@
 // Firebase Cloud Messaging Service Worker
-// Handles background push messages when the app is closed or backgrounded.
+// Receives push notifications from FCM even when the app is closed or backgrounded.
+// This file is served at /firebase-messaging-sw.js and registered automatically by FCM.
 
-importScripts('https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.0.0/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
 
 firebase.initializeApp({
   apiKey: "AIzaSyDQEuJeX-fd3GXcT83nlzoywDY9CqtUcBU",
@@ -15,44 +16,50 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Background messages (app minimized or closed)
+// Handle background push (app minimised or closed)
 messaging.onBackgroundMessage((payload) => {
   const title = payload.notification?.title || payload.data?.title || 'New message';
-  const body = payload.notification?.body || payload.data?.body || '';
-  const chatUrl = payload.data?.url || '/';
+  const body  = payload.notification?.body  || payload.data?.body  || '';
+  const url   = payload.data?.url || '/';
   const unreadCount = parseInt(payload.data?.unreadCount || '1', 10);
 
-  // Update app icon badge
+  // Update home screen badge
   if ('setAppBadge' in self) {
     self.setAppBadge(unreadCount).catch(() => {});
   }
 
   return self.registration.showNotification(title, {
     body,
-    icon: '/pwa-192x192.png',
-    badge: '/pwa-192x192.png',
-    data: { url: chatUrl },
-    tag: chatUrl,
+    icon:    '/pwa-192x192.png',
+    badge:   '/pwa-192x192.png',
+    data:    { url },
+    tag:     url,
     renotify: true,
     vibrate: [200, 100, 200],
   });
 });
 
-// Open/focus app when notification is clicked
+// Open or focus the app when the notification is tapped
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if ('focus' in client) {
-          client.focus();
-          client.navigate(url);
-          return;
+    clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((windowClients) => {
+        // If the app is already open, just focus it and navigate
+        for (const client of windowClients) {
+          if ('focus' in client) {
+            client.focus();
+            client.navigate(url);
+            return;
+          }
         }
-      }
-      if (clients.openWindow) return clients.openWindow(url);
-    })
+        // Otherwise open a new window
+        if (clients.openWindow) {
+          return clients.openWindow(url);
+        }
+      })
   );
 });
