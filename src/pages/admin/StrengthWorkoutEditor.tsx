@@ -257,151 +257,152 @@ const StrengthWorkoutEditor = () => {
     );
   }
 
+  const handleAddExercise = (exercise: Exercise) => {
+    setExercises((prev) =>
+      prev.some((e) => e.id === exercise.id) ? prev : [...prev, exercise]
+    );
+    addExerciseToWorkout(exercise);
+  };
+
+  const WorkoutBuilder = () => (
+    <>
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="text-base">{t.workout.editor.workoutDetails}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>{t.workout.editor.workoutName} *</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t.workout.editor.workoutNamePlaceholder}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>{t.workout.editor.instructionsNotes}</Label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder={t.workout.editor.instructionsPlaceholder}
+              rows={2}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {t.workout.common.exercises} ({workoutExercises.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {workoutExercises.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="mb-2">{t.workout.editor.noExercisesYet}</p>
+              <p className="text-sm">{t.workout.editor.browseExercisesHint}</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {workoutExercises.map((item) => {
+                const exercise = exercises.find((e) => e.id === item.exerciseId) || item.exercise;
+                return (
+                  <WorkoutExerciseRow
+                    key={item.id}
+                    item={item}
+                    exercise={exercise}
+                    onUpdate={(updates) => updateWorkoutExercise(item.id, updates)}
+                    onRemove={() => removeWorkoutExercise(item.id)}
+                    translations={t}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
+  );
+
+  const ExerciseBrowser = () => (
+    <Tabs defaultValue="library" className="flex flex-col h-full">
+      <div className="border-b px-4 pt-3 shrink-0">
+        <TabsList className="w-full">
+          <TabsTrigger value="library" className="flex-1 gap-1">
+            <Library className="h-3.5 w-3.5" />
+            {t.workout.library.myLibrary}
+          </TabsTrigger>
+          <TabsTrigger value="browse" className="flex-1 gap-1">
+            <Database className="h-3.5 w-3.5" />
+            {t.workout.library.browse}
+          </TabsTrigger>
+        </TabsList>
+      </div>
+      <TabsContent value="library" className="flex-1 overflow-hidden m-0">
+        <MyLibraryBrowser onExerciseSelected={handleAddExercise} />
+      </TabsContent>
+      <TabsContent value="browse" className="flex-1 overflow-hidden m-0">
+        <ExerciseDbBrowser onExerciseImported={handleAddExercise} />
+      </TabsContent>
+    </Tabs>
+  );
+
   return (
     <AdminLayout>
       <div className="h-[calc(100vh-73px)] flex flex-col">
         {/* Header */}
-        <div className="border-b bg-card px-4 py-3 flex items-center justify-between">
+        <div className="border-b bg-card px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/admin/workouts")}
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin/workouts")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="font-semibold">
-                {isEditing ? t.workout.editor.editStrengthWorkout : t.workout.editor.newStrengthWorkout}
-              </h1>
-            </div>
+            <h1 className="font-semibold">
+              {isEditing ? t.workout.editor.editStrengthWorkout : t.workout.editor.newStrengthWorkout}
+            </h1>
           </div>
-
           <Button onClick={handleSave} disabled={!name.trim() || saving}>
-            {saving ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
             {t.workout.editor.saveWorkout}
           </Button>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-          {/* Left Panel - Workout Builder */}
+        {/* Mobile: top-level tabs — Workout | Add Exercises */}
+        <div className="flex-1 flex flex-col overflow-hidden md:hidden">
+          <Tabs defaultValue="workout" className="flex flex-col h-full">
+            <div className="border-b bg-card px-4 pt-2 shrink-0">
+              <TabsList className="w-full">
+                <TabsTrigger value="workout" className="flex-1">
+                  {t.workout.editor.workoutDetails}
+                </TabsTrigger>
+                <TabsTrigger value="add" className="flex-1 gap-1">
+                  <Dumbbell className="h-3.5 w-3.5" />
+                  {t.workout.common.exercises}
+                  {workoutExercises.length > 0 && (
+                    <span className="ml-1 text-xs bg-primary text-primary-foreground rounded-full px-1.5">
+                      {workoutExercises.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="workout" className="flex-1 overflow-auto m-0 p-4">
+              <WorkoutBuilder />
+            </TabsContent>
+            <TabsContent value="add" className="flex-1 overflow-hidden m-0">
+              <ExerciseBrowser />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Desktop: side-by-side panels */}
+        <div className="hidden md:flex flex-1 overflow-hidden">
           <div className="flex-1 overflow-auto p-4">
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle className="text-base">{t.workout.editor.workoutDetails}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>{t.workout.editor.workoutName} *</Label>
-                  <Input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={t.workout.editor.workoutNamePlaceholder}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t.workout.editor.instructionsNotes}</Label>
-                  <Textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder={t.workout.editor.instructionsPlaceholder}
-                    rows={2}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">
-                    {t.workout.common.exercises} ({workoutExercises.length})
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {workoutExercises.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="mb-2">{t.workout.editor.noExercisesYet}</p>
-                    <p className="text-sm">
-                      {t.workout.editor.browseExercisesHint}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {workoutExercises.map((item) => {
-                      const exercise = exercises.find(
-                        (e) => e.id === item.exerciseId
-                      ) || item.exercise;
-                      return (
-                        <WorkoutExerciseRow
-                          key={item.id}
-                          item={item}
-                          exercise={exercise}
-                          onUpdate={(updates) =>
-                            updateWorkoutExercise(item.id, updates)
-                          }
-                          onRemove={() => removeWorkoutExercise(item.id)}
-                          translations={t}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <WorkoutBuilder />
           </div>
-
-          {/* Right Panel - Exercise Browser */}
-          <div className="h-72 md:h-auto md:w-96 border-t md:border-t-0 md:border-l bg-muted/30 flex flex-col overflow-hidden">
-            <Tabs defaultValue="library" className="flex flex-col h-full">
-              <div className="border-b px-4 pt-3">
-                <TabsList className="w-full">
-                  <TabsTrigger value="library" className="flex-1 gap-1">
-                    <Library className="h-3.5 w-3.5" />
-                    {t.workout.library.myLibrary}
-                  </TabsTrigger>
-                  <TabsTrigger value="browse" className="flex-1 gap-1">
-                    <Database className="h-3.5 w-3.5" />
-                    {t.workout.library.browse}
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              <TabsContent value="library" className="flex-1 overflow-hidden m-0">
-                <MyLibraryBrowser
-                  onExerciseSelected={(exercise) => {
-                    // Add to exercises list for lookup
-                    setExercises((prev) => {
-                      if (prev.some((e) => e.id === exercise.id)) {
-                        return prev;
-                      }
-                      return [...prev, exercise];
-                    });
-                    addExerciseToWorkout(exercise);
-                  }}
-                />
-              </TabsContent>
-              <TabsContent value="browse" className="flex-1 overflow-hidden m-0">
-                <ExerciseDbBrowser
-                  onExerciseImported={(exercise) => {
-                    // Add to exercises list for lookup
-                    setExercises((prev) => {
-                      if (prev.some((e) => e.id === exercise.id)) {
-                        return prev;
-                      }
-                      return [...prev, exercise];
-                    });
-                    addExerciseToWorkout(exercise);
-                  }}
-                />
-              </TabsContent>
-            </Tabs>
+          <div className="w-96 border-l bg-muted/30 flex flex-col overflow-hidden">
+            <ExerciseBrowser />
           </div>
         </div>
       </div>
