@@ -11,30 +11,19 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { deleteAssignmentsByWorkout } from "@/services/workoutAssignmentsService";
 import { deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
 import type { Workout } from "@/types/workout";
 import { format } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import { ChevronDown, Dumbbell, Edit, Loader2, Plus, Trash2, UserPlus } from "lucide-react";
+import { Dumbbell, Edit, Loader2, Plus, Trash2, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
+import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
+import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
+import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
 import { AssignWorkoutDialog } from "../../components/workout/AssignWorkoutDialog";
 
 const workoutTypeLabels: Record<string, string> = {
@@ -58,6 +47,7 @@ const AdminWorkouts = () => {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadWorkouts();
@@ -110,170 +100,120 @@ const AdminWorkouts = () => {
   return (
     <AdminLayout>
       <div className="p-4 md:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
-          <h1 className="text-xl md:text-2xl font-bold">Workouts</h1>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="w-full sm:w-auto">
+        <AdminPageHeader
+          title="Workouts"
+          actions={
+            <>
+              <Button variant="outline" onClick={() => navigate("/admin/workouts/strength/new")}>
+                <Plus className="h-4 w-4 mr-2" />
+                Strength
+              </Button>
+              <Button onClick={() => navigate("/admin/workouts/new")}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Workout
-                <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link to="/admin/workouts/new?type=running" className="flex items-center">
-                  <GrRun className="h-4 w-4 mr-2" />
-                  Running Workout
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/admin/workouts/new?type=cycling" className="flex items-center">
-                  <GrBike className="h-4 w-4 mr-2" />
-                  Cycling Workout
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/admin/workouts/new?type=swimming" className="flex items-center">
-                  <GrSwim className="h-4 w-4 mr-2" />
-                  Swimming Workout
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/admin/workouts/strength/new" className="flex items-center">
-                  <Dumbbell className="h-4 w-4 mr-2" />
-                  Strength Workout
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            </>
+          }
+        />
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : workouts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No workouts yet.</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
-              <Link to="/admin/workouts/new?type=running">
-                <Button variant="outline" className="w-full sm:w-auto">
-                  <GrRun className="h-4 w-4 mr-2" />
-                  Running
+        <ResponsiveTable
+          loading={loading}
+          rowKey="_id"
+          columns={[
+            { key: "name", label: "Name" },
+            { key: "type", label: "Type" },
+            { key: "stages", label: "Stages" },
+            { key: "created", label: "Created" },
+          ]}
+          rows={workouts.map((workout) => ({
+            _id: workout.id,
+            name: <span className="font-medium">{workout.name}</span>,
+            type: (
+              <Badge className={`${workoutTypeBadgeColors[workout.type]} flex items-center gap-1.5 w-fit`}>
+                {workout.type === "cycling" && <GrBike className="h-3 w-3" />}
+                {workout.type === "running" && <GrRun className="h-3 w-3" />}
+                {workout.type === "swimming" && <GrSwim className="h-3 w-3" />}
+                {workout.type === "strength" && <Dumbbell className="h-3 w-3" />}
+                {workoutTypeLabels[workout.type]}
+              </Badge>
+            ),
+            stages:
+              workout.type === "strength"
+                ? `${workout.exercises?.length || 0} exercises`
+                : `${workout.stages.length} stages`,
+            created: format(workout.createdAt, "MMM d, yyyy"),
+            _workout: workout,
+          }))}
+          actions={(row) => {
+            const workout = row._workout as Workout;
+            return (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleAssignClick(workout)}
+                  title="Assign to athletes"
+                >
+                  <UserPlus className="h-4 w-4" />
                 </Button>
-              </Link>
-              <Link to="/admin/workouts/new?type=cycling">
-                <Button variant="outline" className="w-full sm:w-auto">
-                  <GrBike className="h-4 w-4 mr-2" />
-                  Cycling
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    navigate(
+                      workout.type === "strength"
+                        ? `/admin/workouts/strength/${workout.id}/edit`
+                        : `/admin/workouts/${workout.id}/edit`
+                    )
+                  }
+                >
+                  <Edit className="h-4 w-4" />
                 </Button>
-              </Link>
-              <Link to="/admin/workouts/new?type=swimming">
-                <Button variant="outline" className="w-full sm:w-auto">
-                  <GrSwim className="h-4 w-4 mr-2" />
-                  Swimming
-                </Button>
-              </Link>
-              <Link to="/admin/workouts/strength/new">
-                <Button variant="outline" className="w-full sm:w-auto">
-                  <Dumbbell className="h-4 w-4 mr-2" />
-                  Strength
-                </Button>
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-lg border bg-card overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[200px]">Name</TableHead>
-                  <TableHead className="min-w-[100px]">Type</TableHead>
-                  <TableHead className="min-w-[100px]">Stages</TableHead>
-                  <TableHead className="min-w-[120px]">Created</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {workouts.map((workout) => (
-                  <TableRow key={workout.id}>
-                    <TableCell className="font-medium">
-                      {workout.name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`${workoutTypeBadgeColors[workout.type]} flex items-center gap-1.5 w-fit`}>
-                        {workout.type === "cycling" && <GrBike className="h-3 w-3" />}
-                        {workout.type === "running" && <GrRun className="h-3 w-3" />}
-                        {workout.type === "swimming" && <GrSwim className="h-3 w-3" />}
-                        {workout.type === "strength" && <Dumbbell className="h-3 w-3" />}
-                        {workoutTypeLabels[workout.type]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {workout.type === "strength"
-                        ? `${workout.exercises?.length || 0} exercises`
-                        : `${workout.stages.length} stages`}
-                    </TableCell>
-                    <TableCell>
-                      {format(workout.createdAt, "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAssignClick(workout)}
-                          title="Assign to athletes"
-                        >
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
-                        <Link to={workout.type === "strength" ? `/admin/workouts/strength/${workout.id}/edit` : `/admin/workouts/${workout.id}/edit`}>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive hover:text-destructive"
-                            >
-                              {deleting === workout.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Workout</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{workout.name}"?
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(workout.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                    >
+                      {deleting === workout.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Workout</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{workout.name}"?
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                      <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(workout.id)}
+                        className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            );
+          }}
+          emptyState={
+            <AdminEmptyState
+              icon={Dumbbell}
+              title="No workouts yet"
+              description="Create your first workout to get started."
+              action={{ label: "New Workout", onClick: () => navigate("/admin/workouts/new") }}
+            />
+          }
+        />
       </div>
 
       <AssignWorkoutDialog
