@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Menu, Users, MessageSquare } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -41,19 +41,46 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     localStorage.setItem("adminSidebarCollapsed", sidebarCollapsed.toString());
   }, [sidebarCollapsed]);
 
-  // Subscribe to all chats to calculate total unread for admin
+  // Track previous lastMessageTime per chat to detect genuinely new messages
+  const prevMessageTimes = useRef<Map<string, number>>(new Map());
+  const isFirstLoad = useRef(true);
+
+  // Subscribe to all chats — calculate unread count and detect new messages
   useEffect(() => {
     if (!user) return;
 
     const unsubscribe = ChatService.subscribeToAllChats((chats) => {
       let totalUnread = 0;
+
       chats.forEach((chat) => {
         if (chat.unreadCount && chat.unreadCount[user.uid]) {
           totalUnread += chat.unreadCount[user.uid];
         }
+
+        // Detect new incoming messages (skip first load to avoid notifying old messages)
+        if (!isFirstLoad.current) {
+          const currentTime = chat.lastMessageTime?.toMillis?.() ?? 0;
+          const prevTime = prevMessageTimes.current.get(chat.id) ?? 0;
+          const hasNewMessage = currentTime > prevTime;
+          const hasUnread = (chat.unreadCount?.[user.uid] ?? 0) > 0;
+          const onChatPage = window.location.pathname.includes('/chat');
+
+          if (hasNewMessage && hasUnread && !onChatPage) {
+            const senderName = chat.athleteName || 'Someone';
+            NotificationService.showChatNotification(
+              senderName,
+              chat.lastMessage || 'New message',
+              '/admin/chat'
+            );
+          }
+        }
+
+        prevMessageTimes.current.set(chat.id, chat.lastMessageTime?.toMillis?.() ?? 0);
       });
+
+      if (isFirstLoad.current) isFirstLoad.current = false;
+
       setChatUnreadCount(totalUnread);
-      // Update app icon badge
       NotificationService.setBadge(totalUnread);
     });
 

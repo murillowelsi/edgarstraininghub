@@ -31,7 +31,10 @@ export const NotificationService = {
     chatUrl: string
   ): Promise<void> {
     if (!this.isGranted()) return;
-    if (typeof document !== "undefined" && document.visibilityState === "visible") return;
+    // Block only if the user is actively viewing the chat (not just if app is visible)
+    const onChatPage =
+      typeof window !== "undefined" && window.location.pathname.includes("/chat");
+    if (onChatPage && typeof document !== "undefined" && document.visibilityState === "visible") return;
 
     const body = messageText.length > 80 ? messageText.substring(0, 80) + "…" : messageText;
 
