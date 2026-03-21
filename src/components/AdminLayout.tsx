@@ -170,7 +170,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           {children}
         </main>
       </div>
-      <BottomNav />
+      <BottomNav chatUnreadCount={chatUnreadCount} />
     </div>
   );
 };
