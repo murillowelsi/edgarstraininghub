@@ -348,7 +348,7 @@ const ExerciseItem = ({
                     />
                   ) : videoId ? (
                     <iframe
-                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`}
                       title={exerciseName}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                       allowFullScreen
