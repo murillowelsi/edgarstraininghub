@@ -58,72 +58,65 @@ const WorkoutExerciseRow = ({
   const thumbnailUrl = getThumbnail();
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-card border rounded-lg">
-      <div className="cursor-grab text-muted-foreground">
-        <GripVertical className="h-5 w-5" />
-      </div>
-
-      <div className="w-16 h-16 rounded overflow-hidden bg-muted flex-shrink-0">
-        {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={exerciseName}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Dumbbell className="h-5 w-5 text-muted-foreground" />
-          </div>
-        )}
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <p className="font-medium truncate capitalize">{exerciseName}</p>
-        <div className="flex items-center gap-2 mt-1">
-          <Input
-            type="number"
-            value={item.sets}
-            onChange={(e) => onUpdate({ sets: parseInt(e.target.value) || 1 })}
-            className="w-16 h-8 text-center"
-            min={1}
-          />
-          <span className="text-sm text-muted-foreground">{translations.workout.common.sets}</span>
-          <span className="text-muted-foreground">×</span>
-          <Input
-            value={item.reps || ""}
-            onChange={(e) => onUpdate({ reps: e.target.value })}
-            className="w-20 h-8"
-            placeholder="8-12"
-          />
-          <span className="text-sm text-muted-foreground">{translations.workout.common.reps}</span>
+    <div className="bg-card border rounded-lg overflow-hidden">
+      {/* Top row: grip + image + name + delete */}
+      <div className="flex items-center gap-2 p-3">
+        <div className="cursor-grab text-muted-foreground shrink-0">
+          <GripVertical className="h-4 w-4" />
         </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <div className="text-sm">
-          <Label className="text-xs text-muted-foreground">{translations.workout.common.rest}</Label>
-          <div className="flex items-center gap-1">
-            <Input
-              type="number"
-              value={item.restSeconds}
-              onChange={(e) =>
-                onUpdate({ restSeconds: parseInt(e.target.value) || 0 })
-              }
-              className="w-16 h-8 text-center"
-              min={0}
-            />
-            <span className="text-xs text-muted-foreground">s</span>
-          </div>
+        <div className="w-12 h-12 rounded overflow-hidden bg-muted shrink-0">
+          {thumbnailUrl ? (
+            <img src={thumbnailUrl} alt={exerciseName} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Dumbbell className="h-4 w-4 text-muted-foreground" />
+            </div>
+          )}
         </div>
-
+        <p className="flex-1 font-medium text-sm capitalize min-w-0 truncate">{exerciseName}</p>
         <Button
           variant="ghost"
           size="icon"
-          className="text-muted-foreground hover:text-destructive"
+          className="shrink-0 text-muted-foreground hover:text-destructive"
           onClick={onRemove}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
+      </div>
+
+      {/* Bottom row: sets × reps + rest */}
+      <div className="flex items-center gap-2 px-3 pb-3 border-t pt-2 bg-muted/20">
+        <div className="flex items-center gap-1">
+          <Input
+            type="number"
+            value={item.sets}
+            onChange={(e) => onUpdate({ sets: parseInt(e.target.value) || 1 })}
+            className="w-12 h-7 text-center text-sm"
+            min={1}
+          />
+          <span className="text-xs text-muted-foreground">{translations.workout.common.sets}</span>
+        </div>
+        <span className="text-muted-foreground text-sm">×</span>
+        <div className="flex items-center gap-1">
+          <Input
+            value={item.reps || ""}
+            onChange={(e) => onUpdate({ reps: e.target.value })}
+            className="w-16 h-7 text-sm"
+            placeholder="8-12"
+          />
+          <span className="text-xs text-muted-foreground">{translations.workout.common.reps}</span>
+        </div>
+        <div className="flex items-center gap-1 ml-auto">
+          <span className="text-xs text-muted-foreground">{translations.workout.common.rest}</span>
+          <Input
+            type="number"
+            value={item.restSeconds}
+            onChange={(e) => onUpdate({ restSeconds: parseInt(e.target.value) || 0 })}
+            className="w-12 h-7 text-center text-sm"
+            min={0}
+          />
+          <span className="text-xs text-muted-foreground">s</span>
+        </div>
       </div>
     </div>
   );
