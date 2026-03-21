@@ -11,22 +11,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { deleteUser, getAllUsers } from "@/services/usersService";
 import type { User, UserRole } from "@/types/user";
 import { format } from "date-fns";
-import { Edit, Loader2, Plus, Trash2 } from "lucide-react";
+import { Edit, Loader2, Plus, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
+import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
+import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
+import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
 import { useAuth } from "../../contexts/AuthContext";
 
 const roleBadgeColors: Record<UserRole, string> = {
@@ -41,6 +36,7 @@ const AdminUsers = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadUsers();
@@ -95,103 +91,92 @@ const AdminUsers = () => {
   return (
     <AdminLayout>
       <div className="p-4 md:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
-          <h1 className="text-xl md:text-2xl font-bold">Users</h1>
-          <Link to="/admin/users/new">
-            <Button className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              New User
-            </Button>
-          </Link>
-        </div>
+        <AdminPageHeader
+          title="Users"
+          action={{ label: "New User", icon: Plus, onClick: () => navigate("/admin/users/new") }}
+        />
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : users.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No users yet.</p>
-          </div>
-        ) : (
-          <div className="rounded-lg border bg-card overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[150px]">Name</TableHead>
-                  <TableHead className="min-w-[200px]">Email</TableHead>
-                  <TableHead className="min-w-[100px]">Role</TableHead>
-                  <TableHead className="min-w-[120px]">Created</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((u) => (
-                  <TableRow key={u.id}>
-                    <TableCell className="font-medium">
-                      {u.displayName}
-                      {u.id === user?.uid && (
-                        <span className="ml-2 text-xs text-muted-foreground">(you)</span>
+        <ResponsiveTable
+          loading={loading}
+          columns={[
+            { key: "name", label: "Name" },
+            { key: "email", label: "Email" },
+            { key: "role", label: "Role" },
+            { key: "created", label: "Created" },
+          ]}
+          rows={users.map((u) => ({
+            name: (
+              <span className="font-medium">
+                {u.displayName}
+                {u.id === user?.uid && (
+                  <span className="ml-2 text-xs text-muted-foreground">(you)</span>
+                )}
+              </span>
+            ),
+            email: u.email,
+            role: (
+              <Badge className={roleBadgeColors[u.role]}>
+                {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+              </Badge>
+            ),
+            created: format(u.createdAt, "MMM d, yyyy"),
+            _user: u,
+          }))}
+          actions={(row) => {
+            const u = row._user as User;
+            return (
+              <>
+                <Link to={`/admin/users/${u.id}/edit`}>
+                  <Button variant="ghost" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      disabled={u.id === user?.uid}
+                    >
+                      {deleting === u.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
                       )}
-                    </TableCell>
-                    <TableCell>{u.email}</TableCell>
-                    <TableCell>
-                      <Badge className={roleBadgeColors[u.role]}>
-                        {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {format(u.createdAt, "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link to={`/admin/users/${u.id}/edit`}>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive hover:text-destructive"
-                              disabled={u.id === user?.uid}
-                            >
-                              {deleting === u.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete User</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{u.displayName}"?
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(u.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete User</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{u.displayName}"?
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                      <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(u.id)}
+                        className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            );
+          }}
+          emptyState={
+            <AdminEmptyState
+              icon={Users}
+              title="No users yet"
+              description="Add your first user to get started."
+              action={{ label: "New User", onClick: () => navigate("/admin/users/new") }}
+            />
+          }
+        />
       </div>
     </AdminLayout>
   );
