@@ -3,6 +3,7 @@ import AdminLayout from "@/components/AdminLayout";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
 import { ChevronLeft, Loader2, MessageSquare, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 
 export default function AdminChat() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -78,7 +80,7 @@ export default function AdminChat() {
             const otherUser = allUsers.find(u => u.id === otherId);
             if (otherUser) return otherUser.displayName;
         }
-        return chat.athleteName || "Athlete";
+        return chat.athleteName || t.admin.chat.athleteFallback;
     };
 
     const handleSendMessage = async (text: string) => {
@@ -105,10 +107,10 @@ export default function AdminChat() {
             setSelectedChat(null);
             setMessages([]);
             setIsDeleteDialogOpen(false);
-            toast.success("Chat deleted successfully");
+            toast.success(t.admin.chat.toast.deleteSuccess);
         } catch (error) {
             console.error("Failed to delete chat", error);
-            toast.error("Failed to delete chat. Please try again.");
+            toast.error(t.admin.chat.toast.deleteError);
         } finally {
             setDeleting(false);
         }
@@ -125,7 +127,7 @@ export default function AdminChat() {
             <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Search athletes..."
+                    placeholder={t.admin.chat.searchAthletes}
                     className="pl-9"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -137,7 +139,7 @@ export default function AdminChat() {
                         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
                 ) : filteredAthletes.length === 0 ? (
-                    <p className="text-center text-muted-foreground p-4">No athletes found.</p>
+                    <p className="text-center text-muted-foreground p-4">{t.admin.chat.noAthletesFound}</p>
                 ) : (
                     filteredAthletes.map((athlete) => (
                         <button
@@ -169,7 +171,7 @@ export default function AdminChat() {
                     selectedChat ? "hidden md:flex" : "flex"
                 )}>
                     <div className="p-4 border-b flex items-center justify-between bg-muted/30">
-                        <h3 className="font-semibold">Messages</h3>
+                        <h3 className="font-semibold">{t.admin.chat.title}</h3>
                         {/* Desktop only — mobile uses FAB below */}
                         <Button size="icon" variant="ghost" className="hidden sm:flex h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
                             <Plus className="h-5 w-5" />
@@ -184,9 +186,9 @@ export default function AdminChat() {
                         ) : chats.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground p-4 text-center">
                                 <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
-                                <p className="text-sm">No conversations yet.</p>
+                                <p className="text-sm">{t.admin.chat.noConversations}</p>
                                 <Button variant="link" className="mt-2" onClick={() => setIsNewChatOpen(true)}>
-                                    Start a chat
+                                    {t.admin.chat.startChat}
                                 </Button>
                             </div>
                         ) : (
@@ -221,7 +223,7 @@ export default function AdminChat() {
                                                     "text-sm truncate max-w-[160px]",
                                                     unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"
                                                 )}>
-                                                    {chat.lastMessage || "No messages"}
+                                                    {chat.lastMessage || t.admin.chat.noMessages}
                                                 </p>
                                                 {unreadCount > 0 && (
                                                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
@@ -279,7 +281,7 @@ export default function AdminChat() {
                                     onClick={() => setIsDeleteDialogOpen(true)}
                                 >
                                     <Trash2 className="h-4 w-4 mr-1" />
-                                    Delete Chat
+                                    {t.admin.chat.deleteChat}
                                 </Button>
                             </div>
 
@@ -295,8 +297,8 @@ export default function AdminChat() {
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
                             <MessageSquare className="h-12 w-12 mb-4 opacity-20" />
-                            <p className="text-lg font-medium">Select a conversation</p>
-                            <p className="text-sm">Choose an athlete from the list or start a new chat.</p>
+                            <p className="text-lg font-medium">{t.admin.chat.selectConversation}</p>
+                            <p className="text-sm">{t.admin.chat.selectConversationDescription}</p>
                         </div>
                     )}
                 </div>
@@ -308,7 +310,7 @@ export default function AdminChat() {
                     onClick={() => setIsNewChatOpen(true)}
                     className="fixed right-4 z-30 sm:hidden h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
                     style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-                    aria-label="New Message"
+                    aria-label={t.admin.chat.newMessage}
                 >
                     <Plus className="h-6 w-6" />
                 </button>
@@ -318,7 +320,7 @@ export default function AdminChat() {
             <ResponsiveModal
                 open={isNewChatOpen}
                 onOpenChange={setIsNewChatOpen}
-                title="New Message"
+                title={t.admin.chat.newMessage}
             >
                 {newChatModalContent}
             </ResponsiveModal>
@@ -327,12 +329,10 @@ export default function AdminChat() {
             <ResponsiveConfirm
                 open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
-                title="Delete Conversation"
+                title={t.admin.chat.deleteConversation}
                 description={
                     <>
-                        Are you sure you want to delete this conversation with{" "}
-                        <strong>{selectedChat ? getChatDisplayName(selectedChat) : ""}</strong>?
-                        This will permanently remove all messages and cannot be undone.
+                        {t.admin.chat.deleteConversationDescription.replace("{{name}}", selectedChat ? getChatDisplayName(selectedChat) : "")}
                     </>
                 }
                 confirmLabel="Delete"

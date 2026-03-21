@@ -4,6 +4,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Me
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import { auth } from "../lib/firebase";
 import AdminTopBar from "./AdminTopBar";
 import { ChatService } from "../services/chat";
@@ -13,16 +14,17 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const navItems = [
-  { href: "/admin/posts", label: "Posts", icon: FileText },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/workouts", label: "Workouts", icon: Dumbbell },
-  { href: "/admin/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/admin/chat", label: "Chat", icon: MessageSquare },
-];
-
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { href: "/admin/posts", label: t.admin.nav.posts, icon: FileText },
+    { href: "/admin/users", label: t.admin.nav.users, icon: Users },
+    { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell },
+    { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
+    { href: "/admin/chat", label: t.admin.nav.chat, icon: MessageSquare },
+  ];
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -65,7 +67,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       <div className="p-6 border-b">
         {!collapsed && (
           <>
-            <h1 className="text-xl font-bold">Admin Panel</h1>
+            <h1 className="text-xl font-bold">{t.admin.panel}</h1>
             <p className="text-sm text-muted-foreground truncate">
               {user?.email}
             </p>
@@ -115,7 +117,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         {!collapsed && (
           <Link to="/">
             <Button variant="outline" className="w-full">
-              View Site
+              {t.admin.viewSite}
             </Button>
           </Link>
         )}
@@ -123,10 +125,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           variant="ghost"
           className={cn("w-full", collapsed && "px-2")}
           onClick={handleLogout}
-          title={collapsed ? "Logout" : undefined}
+          title={collapsed ? t.auth.logout : undefined}
         >
           <LogOut className={cn("h-4 w-4", !collapsed && "mr-2")} />
-          {!collapsed && "Logout"}
+          {!collapsed && t.auth.logout}
         </Button>
         {showCollapseButton && (
           <Button
@@ -140,7 +142,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             ) : (
               <>
                 <ChevronLeft className="h-4 w-4 mr-2" />
-                Collapse
+                {t.admin.collapse}
               </>
             )}
           </Button>

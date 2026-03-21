@@ -1,21 +1,23 @@
 import { cn } from "@/lib/utils";
 import { CalendarDays, Dumbbell, FileText, MessageSquare, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BottomNavProps {
   chatUnreadCount: number;
 }
 
-const navItems = [
-  { href: "/admin/posts", label: "Posts", icon: FileText },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/workouts", label: "Workouts", icon: Dumbbell },
-  { href: "/admin/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/admin/chat", label: "Chat", icon: MessageSquare },
-];
-
 export function BottomNav({ chatUnreadCount }: BottomNavProps) {
   const location = useLocation();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { href: "/admin/posts", label: t.admin.nav.posts, icon: FileText },
+    { href: "/admin/users", label: t.admin.nav.users, icon: Users },
+    { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell },
+    { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
+    { href: "/admin/chat", label: t.admin.nav.chat, icon: MessageSquare },
+  ];
 
   return (
     <nav
