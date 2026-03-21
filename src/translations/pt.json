@@ -353,5 +353,197 @@
       "upperLegs": "Coxas",
       "waist": "Abdômen/Core"
     }
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Criar",
+    "loading": "A carregar...",
+    "saving": "A guardar...",
+    "error": "Erro",
+    "back": "Voltar",
+    "today": "Hoje",
+    "search": "Pesquisar",
+    "add": "Adicionar",
+    "actions": "Ações",
+    "name": "Nome",
+    "email": "Email",
+    "role": "Função",
+    "created": "Criado",
+    "status": "Estado",
+    "type": "Tipo",
+    "all": "Todos",
+    "noData": "Sem dados disponíveis",
+    "cannotBeUndone": "Esta ação não pode ser desfeita."
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "signIn": "Entrar",
+    "signingIn": "A entrar...",
+    "emailPlaceholder": "admin@exemplo.com",
+    "passwordPlaceholder": "Introduza a sua palavra-passe",
+    "signInDescription": "Entre para aceder à sua conta",
+    "accessDenied": "Acesso Negado",
+    "userNotFound": "Conta de utilizador não encontrada.",
+    "welcomeBack": "Bem-vindo de volta!",
+    "loggedIn": "Sessão iniciada com sucesso.",
+    "loginFailed": "Falha no Login",
+    "invalidCredentials": "Email ou palavra-passe inválidos."
+  },
+  "admin": {
+    "panel": "Painel Admin",
+    "viewSite": "Ver Site",
+    "collapse": "Recolher",
+    "nav": {
+      "posts": "Artigos",
+      "users": "Utilizadores",
+      "workouts": "Treinos",
+      "calendar": "Calendário",
+      "chat": "Chat"
+    },
+    "posts": {
+      "title": "Artigos",
+      "newPost": "Novo Artigo",
+      "columns": { "title": "Título", "status": "Estado", "created": "Criado" },
+      "published": "Publicado",
+      "draft": "Rascunho",
+      "empty": { "title": "Sem artigos", "description": "Crie o seu primeiro artigo para começar." },
+      "delete": { "title": "Eliminar Artigo", "description": "Tem a certeza que quer eliminar \"{{name}}\"?" },
+      "toast": { "loadError": "Erro ao carregar artigos.", "deleted": "Artigo eliminado", "deletedDescription": "O artigo foi eliminado permanentemente.", "deleteError": "Erro ao eliminar artigo." }
+    },
+    "users": {
+      "title": "Utilizadores",
+      "newUser": "Novo Utilizador",
+      "you": "você",
+      "columns": { "name": "Nome", "email": "Email", "role": "Função", "created": "Criado" },
+      "roles": { "admin": "Admin", "editor": "Editor", "athlete": "Atleta" },
+      "empty": { "title": "Sem utilizadores", "description": "Adicione o seu primeiro utilizador para começar." },
+      "delete": { "title": "Eliminar Utilizador", "description": "Tem a certeza que quer eliminar \"{{name}}\"?", "selfDeleteError": "Não pode eliminar a sua própria conta." },
+      "toast": { "loadError": "Erro ao carregar utilizadores.", "deleted": "Utilizador eliminado", "deletedDescription": "O utilizador foi removido.", "deleteError": "Erro ao eliminar utilizador." }
+    },
+    "workouts": {
+      "title": "Treinos",
+      "newWorkout": "Novo Treino",
+      "runningWorkout": "Treino de Corrida",
+      "cyclingWorkout": "Treino de Ciclismo",
+      "swimmingWorkout": "Treino de Natação",
+      "strengthWorkout": "Treino de Força",
+      "assignToAthletes": "Atribuir a atletas",
+      "stagesCount": "{{count}} etapas",
+      "exercisesCount": "{{count}} exercícios",
+      "empty": { "title": "Sem treinos", "description": "Crie o seu primeiro treino para começar." },
+      "delete": { "title": "Eliminar Treino", "description": "Tem a certeza que quer eliminar \"{{name}}\"?" },
+      "toast": { "loadError": "Erro ao carregar treinos.", "deleted": "Treino eliminado", "deletedDescription": "O treino e as suas atribuições foram eliminados permanentemente.", "deleteError": "Erro ao eliminar treino." }
+    },
+    "userForm": {
+      "createTitle": "Criar Novo Utilizador",
+      "editTitle": "Editar Utilizador",
+      "createDescription": "Adicione um novo utilizador ao sistema com email e palavra-passe.",
+      "editDescription": "Atualize as informações e função do utilizador.",
+      "displayName": "Nome de Exibição",
+      "displayNamePlaceholder": "João Silva",
+      "emailPlaceholder": "joao@exemplo.com",
+      "password": "Palavra-passe",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "passwordHint": "Deve ter pelo menos 6 caracteres.",
+      "rolePlaceholder": "Selecione uma função",
+      "roleDescriptions": { "admin": "Acesso total para gerir utilizadores e artigos", "editor": "Pode criar e editar artigos do blog", "athlete": "Acesso ao painel do atleta" },
+      "editNote": "O email e a palavra-passe não podem ser alterados aqui. Contacte o administrador do sistema.",
+      "createButton": "Criar Utilizador",
+      "updateButton": "Atualizar Utilizador",
+      "toast": { "notFound": "Utilizador não encontrado", "notFoundDescription": "O utilizador que está a tentar editar não existe.", "loadError": "Erro ao carregar utilizador.", "displayNameRequired": "O nome de exibição é obrigatório.", "emailRequired": "O email é obrigatório.", "passwordTooShort": "A palavra-passe deve ter pelo menos 6 caracteres.", "updated": "Utilizador atualizado", "updatedDescription": "As informações do utilizador foram guardadas.", "created": "Utilizador criado", "createdDescription": "O novo utilizador foi criado com sucesso." }
+    },
+    "postForm": {
+      "createTitle": "Criar Novo Artigo",
+      "editTitle": "Editar Artigo",
+      "createDescription": "Escreva e publique um novo artigo do blog.",
+      "editDescription": "Atualize o conteúdo e as configurações do artigo.",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Introduza o título do artigo",
+      "excerptLabel": "Resumo",
+      "excerptPlaceholder": "Breve resumo do artigo (exibido nas listagens do blog)",
+      "featuredImage": "Imagem em Destaque",
+      "publishLabel": "Publicar este artigo",
+      "savePublish": "Guardar e Publicar",
+      "saveDraft": "Guardar como Rascunho",
+      "toast": { "imageUploaded": "Imagem carregada", "imageUploadedDescription": "A sua imagem foi carregada com sucesso.", "uploadFailed": "Falha no carregamento", "uploadFailedDescription": "Erro ao carregar imagem. Tente novamente.", "notFound": "Artigo não encontrado", "notFoundDescription": "O artigo que está a tentar editar não existe.", "loadError": "Erro ao carregar artigo.", "titleRequired": "O título é obrigatório.", "contentRequired": "O conteúdo é obrigatório.", "updated": "Artigo atualizado", "updatedDescription": "As suas alterações foram guardadas.", "createdPublished": "O seu artigo foi publicado.", "createdDraft": "O seu artigo foi guardado como rascunho.", "invalidFile": "Por favor carregue um ficheiro de imagem." }
+    },
+    "workoutEditor": {
+      "pressLapButton": "Pressionar Botão Lap",
+      "dragHere": "Arraste etapas para aqui",
+      "dropHere": "Soltar aqui",
+      "noStages": "Sem etapas. Adicione a sua primeira etapa para começar.",
+      "toast": { "notFound": "Treino não encontrado", "notFoundDescription": "O treino que está a tentar editar não existe.", "loadError": "Erro ao carregar treino.", "nameRequired": "O nome do treino é obrigatório.", "updated": "Treino atualizado", "updatedDescription": "As suas alterações foram guardadas.", "created": "Treino criado", "createdDescription": "O seu treino foi criado com sucesso.", "saveError": "Erro ao guardar treino." }
+    },
+    "calendar": {
+      "title": "Calendário",
+      "allAthletes": "Todos os Atletas",
+      "today": "Hoje",
+      "days": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+      "noWorkouts": "Sem treinos",
+      "completedOn": "Concluído em",
+      "deleteAssignment": "Eliminar Atribuição",
+      "deleteAssignmentDescription": "Tem a certeza que quer eliminar esta atribuição? Esta ação não pode ser desfeita.",
+      "editWorkout": "Editar Treino",
+      "add": "Adicionar",
+      "legend": { "workoutTypes": "Tipos de treino:", "completed": "= Concluído" },
+      "toast": { "loadError": "Erro ao carregar dados do calendário.", "assignmentDeleted": "Atribuição eliminada", "assignmentDeletedDescription": "A atribuição do treino foi removida.", "deleteError": "Erro ao eliminar a atribuição." }
+    },
+    "chat": {
+      "title": "Mensagens",
+      "newMessage": "Nova Mensagem",
+      "searchAthletes": "Pesquisar atletas...",
+      "noAthletesFound": "Nenhum atleta encontrado.",
+      "noConversations": "Sem conversas.",
+      "startChat": "Iniciar conversa",
+      "selectConversation": "Selecione uma conversa",
+      "selectConversationDescription": "Escolha um atleta da lista ou inicie uma nova conversa.",
+      "athleteFallback": "Atleta",
+      "noMessages": "Sem mensagens",
+      "deleteChat": "Eliminar Chat",
+      "deleteConversation": "Eliminar Conversa",
+      "deleteConversationDescription": "Tem a certeza que quer eliminar esta conversa com {{name}}? Todas as mensagens serão eliminadas permanentemente.",
+      "toast": { "deleteSuccess": "Chat eliminado com sucesso", "deleteError": "Erro ao eliminar o chat. Tente novamente." }
+    }
+  },
+  "athlete": {
+    "toast": {
+      "loadError": "Erro ao carregar os seus dados.",
+      "workoutsLoadError": "Erro ao carregar os seus treinos.",
+      "calendarLoadError": "Erro ao carregar o seu calendário.",
+      "workoutLoadError": "Erro ao carregar os detalhes do treino.",
+      "workoutCompleted": "Treino concluído!",
+      "workoutUnmarked": "Treino desmarcado",
+      "workoutStatusError": "Erro ao atualizar o estado do treino.",
+      "sessionLoadError": "Erro ao carregar o treino.",
+      "sessionCompleted": "Treino concluído!",
+      "sessionCompletedDescription": "Excelente! {{percentage}}% concluído em {{time}}",
+      "sessionSaveError": "Erro ao guardar o treino."
+    },
+    "chat": {
+      "title": "Mensagens",
+      "newMessage": "Nova Mensagem",
+      "searchCoaches": "Pesquisar coaches...",
+      "noCoachesFound": "Nenhum coach encontrado.",
+      "noConversations": "Sem conversas.",
+      "startChat": "Iniciar conversa",
+      "selectConversation": "Selecione uma conversa",
+      "selectConversationDescription": "Escolha um coach da lista ou inicie uma nova conversa.",
+      "coachFallback": "Coach"
+    }
+  },
+  "chatComponent": {
+    "noMessages": "Sem mensagens. Inicie uma conversa!",
+    "noChats": "Sem conversas ativas.",
+    "noMessagesYet": "Sem mensagens"
+  },
+  "blog": {
+    "title": "Blog &",
+    "titleHighlight": "Artigos",
+    "subtitle": "Dicas práticas sobre treino, nutrição e desempenho desportivo",
+    "noPosts": "Ainda não há artigos publicados. Volte em breve!"
   }
 }
