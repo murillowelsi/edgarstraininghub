@@ -1,14 +1,4 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +42,7 @@ const AdminWorkouts = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
+  const [confirmWorkout, setConfirmWorkout] = useState<Workout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -238,39 +229,18 @@ const AdminWorkouts = () => {
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                    >
-                      {deleting === workout.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Workout</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete "{workout.name}"?
-                        This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                      <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDelete(workout.id)}
-                        className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setConfirmWorkout(workout)}
+                >
+                  {deleting === workout.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
               </>
             );
           }}
@@ -289,6 +259,21 @@ const AdminWorkouts = () => {
         workout={selectedWorkout}
         open={assignDialogOpen}
         onOpenChange={setAssignDialogOpen}
+      />
+
+      <ResponsiveConfirm
+        open={!!confirmWorkout}
+        onOpenChange={(open) => { if (!open) setConfirmWorkout(null); }}
+        title="Delete Workout"
+        description={`Are you sure you want to delete "${confirmWorkout?.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        destructive
+        loading={deleting === confirmWorkout?.id}
+        onConfirm={() => {
+          if (confirmWorkout) {
+            handleDelete(confirmWorkout.id).then(() => setConfirmWorkout(null));
+          }
+        }}
       />
     </AdminLayout>
   );
