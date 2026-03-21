@@ -14,6 +14,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Dumbbell, Edit, Loader2, Plus, Trash2, UserPlus } from "lucide-react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -43,6 +49,7 @@ const AdminWorkouts = () => {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [confirmWorkout, setConfirmWorkout] = useState<Workout | null>(null);
+  const [newWorkoutDrawerOpen, setNewWorkoutDrawerOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -137,42 +144,13 @@ const AdminWorkouts = () => {
             </DropdownMenu>
           }
           mobileFab={
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-                  aria-label="New Workout"
-                >
-                  <Plus className="h-6 w-6" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" side="top">
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/workouts/new?type=running" className="flex items-center">
-                    <GrRun className="h-4 w-4 mr-2" />
-                    Running Workout
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/workouts/new?type=cycling" className="flex items-center">
-                    <GrBike className="h-4 w-4 mr-2" />
-                    Cycling Workout
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/workouts/new?type=swimming" className="flex items-center">
-                    <GrSwim className="h-4 w-4 mr-2" />
-                    Swimming Workout
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/workouts/strength/new" className="flex items-center">
-                    <Dumbbell className="h-4 w-4 mr-2" />
-                    Strength Workout
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button
+              onClick={() => setNewWorkoutDrawerOpen(true)}
+              className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+              aria-label="New Workout"
+            >
+              <Plus className="h-6 w-6" />
+            </button>
           }
         />
 
@@ -254,6 +232,33 @@ const AdminWorkouts = () => {
           }
         />
       </div>
+
+      {/* Mobile: New Workout type drawer */}
+      <Drawer open={newWorkoutDrawerOpen} onOpenChange={setNewWorkoutDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>New Workout</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2">
+            {[
+              { label: "Running Workout", icon: <GrRun className="h-5 w-5" />, to: "/admin/workouts/new?type=running" },
+              { label: "Cycling Workout", icon: <GrBike className="h-5 w-5" />, to: "/admin/workouts/new?type=cycling" },
+              { label: "Swimming Workout", icon: <GrSwim className="h-5 w-5" />, to: "/admin/workouts/new?type=swimming" },
+              { label: "Strength Workout", icon: <Dumbbell className="h-5 w-5" />, to: "/admin/workouts/strength/new" },
+            ].map(({ label, icon, to }) => (
+              <Link
+                key={to}
+                to={to}
+                onClick={() => setNewWorkoutDrawerOpen(false)}
+                className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
+              >
+                {icon}
+                {label}
+              </Link>
+            ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <AssignWorkoutDialog
         workout={selectedWorkout}
