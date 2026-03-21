@@ -1,4 +1,4 @@
-import { LogIn, Menu, Moon, Sun, X } from "lucide-react";
+import { LogIn, Menu, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -7,16 +7,13 @@ import { useAuth } from "../contexts/AuthContext";
 import { ChatService } from "../services/chat";
 import { useEffect } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const { user, isAthlete } = useAuth(); // Get auth state
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const { user, isAthlete } = useAuth();
 
   return (
     <nav className="bg-background/80 backdrop-blur-lg fixed w-full z-50 border-b border-border/50">
@@ -91,7 +88,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile: utility buttons + Sheet trigger */}
         <div className="md:hidden flex items-center gap-1">
           <LanguageSwitcher />
 
@@ -103,70 +100,67 @@ const Navbar = () => {
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
 
-          <Link
-            to="/admin/login"
-            className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-            aria-label="Admin login"
-          >
-            <LogIn size={18} />
-          </Link>
-
-          <button
-            onClick={toggleMenu}
-            className="p-2 text-foreground hover:text-primary transition-colors"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                className="p-2 text-foreground hover:text-primary transition-colors"
+                aria-label="Open menu"
+              >
+                <Menu size={24} />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72 p-0">
+              <div className="flex flex-col h-full pt-12">
+                <nav className="flex flex-col px-6 space-y-1">
+                  <a
+                    href="/#home"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
+                  >
+                    {t.nav.home}
+                  </a>
+                  <Link
+                    to="/about"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
+                  >
+                    {t.nav.about}
+                  </Link>
+                  <Link
+                    to="/blog"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
+                  >
+                    Blog
+                  </Link>
+                  <Link
+                    to="/contact"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
+                  >
+                    {t.nav.contact}
+                  </Link>
+                  {user && isAthlete && (
+                    <ChatLinkWithBadge
+                      user={user}
+                      className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center justify-between"
+                    />
+                  )}
+                  <Link
+                    to="/admin/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
+                  >
+                    <LogIn size={18} />
+                    Login
+                  </Link>
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {
-        isMenuOpen && (
-          <div className="md:hidden bg-background/95 backdrop-blur-lg py-6 px-4 shadow-xl animate-fade-in border-t border-border/50">
-            <div className="flex flex-col space-y-4">
-              <a
-                href="/#home"
-                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
-              >
-                {t.nav.home}
-              </a>
-              <Link
-                to="/about"
-                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
-              >
-                {t.nav.about}
-              </Link>
-              <Link
-                to="/blog"
-                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
-              >
-                Blog
-              </Link>
-              <Link
-                to="/contact"
-                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
-              >
-                {t.nav.contact}
-              </Link>
-              {user && isAthlete && (
-                <ChatLinkWithBadge
-                  user={user}
-                  className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center justify-between"
-                />
-              )}
-              <Link
-                to="/admin/login"
-                className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
-              >
-                <LogIn size={18} />
-                Login
-              </Link>
-            </div>
-          </div>
-        )
-      }
-    </nav >
+    </nav>
   );
 };
 
