@@ -466,13 +466,13 @@ const AdminPostForm = () => {
           "sticky bottom-0 bg-background border-t p-4 -mx-4 mt-6",
           "md:static md:border-0 md:p-0 md:mx-0"
         )}>
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+          <div className="flex sm:justify-end gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => navigate("/admin/posts")}
               disabled={saving}
-              className="gap-2 w-full sm:w-auto"
+              className="gap-2 flex-1 sm:flex-none"
             >
               <X className="h-4 w-4" />
               Cancel
@@ -481,7 +481,7 @@ const AdminPostForm = () => {
               type="button"
               onClick={handleSubmit}
               disabled={saving}
-              className="gap-2 w-full sm:w-auto"
+              className="gap-2 flex-1 sm:flex-none"
             >
               {saving ? (
                 <>
