@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChatService } from "@/services/chat";
 import { NotificationService } from "@/services/notifications";
+import { FCMService } from "@/services/fcm";
 import { useEffect, useRef, useState } from "react";
 
 interface AthletePortalLayoutProps {
@@ -42,6 +43,29 @@ const AthletePortalLayout = ({
 
   const prevMessageTimes = useRef<Map<string, number>>(new Map());
   const isFirstLoad = useRef(true);
+
+  // Register for push notifications and listen for FCM messages
+  useEffect(() => {
+    if (!user) return;
+
+    const setupFCM = async () => {
+      // Request notification permission if not already granted
+      if (!NotificationService.isGranted() && !NotificationService.isDenied()) {
+        await NotificationService.requestPermission();
+      }
+
+      // Register device for push notifications
+      if (NotificationService.isGranted()) {
+        await FCMService.registerToken(user.uid);
+      }
+
+      // Listen for foreground messages
+      const unsubscribeFCM = FCMService.listenForeground('/athlete/chat');
+      return unsubscribeFCM;
+    };
+
+    setupFCM();
+  }, [user]);
 
   // Subscribe to chats — unread count, badge, and in-app notifications
   useEffect(() => {

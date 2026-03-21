@@ -170,11 +170,10 @@ const ChatLinkWithBadge = ({ user, className }: { user: any, className?: string 
   useEffect(() => {
     if (!user) return;
 
-    // Subscribe to athlete's chat to get unread count
-    const unsubscribe = ChatService.subscribeToMyChat(user.uid, (chat) => {
-      if (chat && chat.unreadCount) {
-        setUnreadCount(chat.unreadCount[user.uid] || 0);
-      }
+    // Subscribe to athlete's chats to get total unread count
+    const unsubscribe = ChatService.subscribeToUserChats(user.uid, (chats) => {
+      const total = chats.reduce((sum, chat) => sum + (chat.unreadCount?.[user.uid] || 0), 0);
+      setUnreadCount(total);
     });
 
     return () => unsubscribe();
