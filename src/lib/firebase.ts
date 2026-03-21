@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getMessaging, type Messaging } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -29,4 +30,14 @@ try {
   analytics = getAnalytics(app);
 } catch (e) {
   console.warn("Analytics blocked or unavailable");
+}
+
+// Firebase Cloud Messaging — only available in browsers that support service workers
+export let messaging: Messaging | null = null;
+try {
+  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+    messaging = getMessaging(app);
+  }
+} catch (e) {
+  console.warn("Firebase Messaging unavailable:", e);
 }

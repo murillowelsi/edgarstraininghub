@@ -1,34 +1,44 @@
-import { Bell, BellOff, X } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { NotificationService } from "@/services/notifications";
+import { FCMService } from "@/services/fcm";
 
 /**
  * Shows a banner asking the user to enable notifications.
  * Uses a button click (user gesture) to call requestPermission(),
  * which is required by all mobile browsers.
- * Hidden if already granted, denied, or dismissed.
+ * After granting, registers the FCM token so push notifications work
+ * even when the app is closed (requires Cloud Function).
  */
 export function NotificationBanner() {
+  const { user } = useAuth();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Only show if notifications are supported and not yet decided
     if (
       typeof Notification !== "undefined" &&
       Notification.permission === "default"
     ) {
       setVisible(true);
+    } else if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "granted" &&
+      user
+    ) {
+      // Already granted — register FCM token silently (no banner needed)
+      FCMService.registerToken(user.uid);
     }
-  }, []);
+  }, [user]);
 
   if (!visible) return null;
 
   const handleEnable = async () => {
     const granted = await NotificationService.requestPermission();
     setVisible(false);
-    if (!granted) {
-      // Browser denied — nothing we can do
+    if (granted && user) {
+      await FCMService.registerToken(user.uid);
     }
   };
 
