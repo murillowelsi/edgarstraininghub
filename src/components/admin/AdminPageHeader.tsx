@@ -26,7 +26,7 @@ export function AdminPageHeader({ title, description, action, actions }: AdminPa
           {action.label}
         </Button>
       )}
-      {actions && <div className="flex gap-2">{actions}</div>}
+      {actions && <div className="flex gap-2 w-full sm:w-auto">{actions}</div>}
     </div>
   );
 }
