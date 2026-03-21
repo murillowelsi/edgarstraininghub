@@ -1,13 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -512,43 +506,36 @@ export const CalendarAssignDialog = ({
     </div>
   );
 
-  const getStepTitle = () => {
-    switch (step) {
-      case "type":
-        return "Select Workout Type";
-      case "workout":
-        return "Choose Workout";
-      case "athletes":
-        return "Assign to Athletes";
-    }
-  };
+  const stepTitle =
+    step === "type"
+      ? "Select Workout Type"
+      : step === "workout"
+        ? "Choose Workout"
+        : "Select Athletes";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {step !== "type" && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleBack}
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            )}
-            {getStepTitle()}
-          </DialogTitle>
-          <DialogDescription>
-            {selectedDate && (
-              <span className="font-medium">
-                Scheduling for {format(selectedDate, "EEEE, MMMM d, yyyy")}
-              </span>
-            )}
-          </DialogDescription>
-        </DialogHeader>
-
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={stepTitle}
+      description={
+        selectedDate
+          ? `Scheduling for ${format(selectedDate, "EEEE, MMMM d, yyyy")}`
+          : undefined
+      }
+    >
+        {step !== "type" && (
+          <div className="mb-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleBack}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
         {renderStepIndicator()}
 
         <div className="py-2">
@@ -575,7 +562,6 @@ export const CalendarAssignDialog = ({
             </Button>
           )}
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveModal>
   );
 };
