@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Menu, Users, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,6 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { auth } from "../lib/firebase";
 import Navbar from "./Navbar";
 import { ChatService } from "../services/chat";
+import { BottomNav } from "./admin/BottomNav";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -25,7 +25,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("adminSidebarCollapsed");
@@ -84,7 +83,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           const isActive = location.pathname.startsWith(item.href);
           const showBadge = item.href === "/admin/chat" && chatUnreadCount > 0;
           return (
-            <Link key={item.href} to={item.href} onClick={() => setSidebarOpen(false)}>
+            <Link key={item.href} to={item.href}>
               <Button
                 variant="ghost"
                 className={cn(
@@ -114,7 +113,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       <div className="p-4 border-t space-y-2">
         {!collapsed && (
-          <Link to="/" onClick={() => setSidebarOpen(false)}>
+          <Link to="/">
             <Button variant="outline" className="w-full">
               View Site
             </Button>
@@ -155,24 +154,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       <Navbar />
 
       <div className="pt-[73px] flex min-h-[calc(100vh-73px)]">
-        {/* Mobile Sidebar Trigger */}
-        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetTrigger asChild>
-            <Button
-              size="icon"
-              className="fixed bottom-4 left-4 z-30 md:hidden shadow-lg"
-              aria-label="Open admin menu"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64">
-            <div className="flex flex-col h-full">
-              <SidebarContent />
-            </div>
-          </SheetContent>
-        </Sheet>
-
         {/* Desktop Sidebar */}
         <aside className={cn(
           "hidden md:flex border-r bg-card flex-col fixed left-0 top-[73px] h-[calc(100vh-73px)] overflow-y-auto transition-all duration-300",
@@ -183,12 +164,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
         {/* Main content */}
         <main className={cn(
-          "flex-1 overflow-auto transition-all duration-300",
+          "flex-1 overflow-auto transition-all duration-300 pb-16 md:pb-0",
           sidebarCollapsed ? "md:ml-20" : "md:ml-64"
         )}>
           {children}
         </main>
       </div>
+      <BottomNav />
     </div>
   );
 };
