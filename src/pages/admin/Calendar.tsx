@@ -1,13 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import {
   Popover,
   PopoverContent,
@@ -259,6 +253,7 @@ const AdminCalendar = () => {
   const [selectedAssignment, setSelectedAssignment] =
     useState<AssignmentWithDetails | null>(null);
   const [deletingAssignment, setDeletingAssignment] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [cleaningDuplicates, setCleaningDuplicates] = useState(false);
 
   // Generate calendar days for current month view
@@ -401,6 +396,7 @@ const AdminCalendar = () => {
         title: "Assignment deleted",
         description: "The workout assignment has been removed.",
       });
+      setConfirmDeleteOpen(false);
       setDetailsDialogOpen(false);
       setSelectedAssignment(null);
       loadData();
@@ -661,95 +657,101 @@ const AdminCalendar = () => {
         </div>
       </div>
 
-      {/* Assignment Details Dialog */}
-      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          {selectedAssignment && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  {selectedAssignment.workout.type === "running" && (
-                    <GrRun className="h-5 w-5" />
-                  )}
-                  {selectedAssignment.workout.type === "cycling" && (
-                    <GrBike className="h-5 w-5" />
-                  )}
-                  {selectedAssignment.workout.type === "swimming" && (
-                    <GrSwim className="h-5 w-5" />
-                  )}
-                  {selectedAssignment.workout.type === "strength" && (
-                    <Dumbbell className="h-5 w-5 text-orange-600" />
-                  )}
-                  {selectedAssignment.workout.name}
-                </DialogTitle>
-                <DialogDescription>
-                  {selectedAssignment.workout.stages.length} stages ·{" "}
-                  {selectedAssignment.workout.type}
-                </DialogDescription>
-              </DialogHeader>
+      {/* Assignment Details Modal */}
+      <ResponsiveModal
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        title={selectedAssignment?.workout.name ?? ""}
+        description={
+          selectedAssignment
+            ? `${selectedAssignment.workout.stages.length} stages · ${selectedAssignment.workout.type}`
+            : undefined
+        }
+        className="sm:max-w-[425px]"
+      >
+        {selectedAssignment && (
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              {selectedAssignment.workout.type === "running" && (
+                <GrRun className="h-5 w-5" />
+              )}
+              {selectedAssignment.workout.type === "cycling" && (
+                <GrBike className="h-5 w-5" />
+              )}
+              {selectedAssignment.workout.type === "swimming" && (
+                <GrSwim className="h-5 w-5" />
+              )}
+              {selectedAssignment.workout.type === "strength" && (
+                <Dumbbell className="h-5 w-5 text-orange-600" />
+              )}
+            </div>
 
-              <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Athlete</p>
-                    <p className="font-medium">
-                      {selectedAssignment.athlete.displayName}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Scheduled</p>
-                    <p className="font-medium">
-                      {format(selectedAssignment.scheduledDate, "PPP")}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedAssignment.completedAt && (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-                    <Check className="h-4 w-4" />
-                    <span className="text-sm">
-                      Completed on {format(selectedAssignment.completedAt, "PPp")}
-                    </span>
-                  </div>
-                )}
-
-                {selectedAssignment.workout.notes && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Notes</p>
-                    <p className="text-sm bg-muted p-2 rounded">
-                      {selectedAssignment.workout.notes}
-                    </p>
-                  </div>
-                )}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Athlete</p>
+                <p className="font-medium">
+                  {selectedAssignment.athlete.displayName}
+                </p>
               </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Scheduled</p>
+                <p className="font-medium">
+                  {format(selectedAssignment.scheduledDate, "PPP")}
+                </p>
+              </div>
+            </div>
 
-              <DialogFooter className="flex-col sm:flex-row gap-2">
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteAssignment}
-                  disabled={deletingAssignment}
-                  className="w-full sm:w-auto"
-                >
-                  {deletingAssignment ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4 mr-2" />
-                  )}
-                  Delete Assignment
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleEditWorkout}
-                  className="w-full sm:w-auto"
-                >
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit Workout
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+            {selectedAssignment.completedAt && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+                <Check className="h-4 w-4" />
+                <span className="text-sm">
+                  Completed on {format(selectedAssignment.completedAt, "PPp")}
+                </span>
+              </div>
+            )}
+
+            {selectedAssignment.workout.notes && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Notes</p>
+                <p className="text-sm bg-muted p-2 rounded">
+                  {selectedAssignment.workout.notes}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <Button
+                variant="destructive"
+                onClick={() => setConfirmDeleteOpen(true)}
+                className="w-full sm:w-auto"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Assignment
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleEditWorkout}
+                className="w-full sm:w-auto"
+              >
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit Workout
+              </Button>
+            </div>
+          </div>
+        )}
+      </ResponsiveModal>
+
+      {/* Delete Assignment Confirm */}
+      <ResponsiveConfirm
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title="Delete Assignment"
+        description="Are you sure you want to delete this assignment? This action cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        loading={deletingAssignment}
+        onConfirm={handleDeleteAssignment}
+      />
 
       {/* Assign Workout Dialog */}
       <CalendarAssignDialog
