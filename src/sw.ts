@@ -4,8 +4,45 @@ import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { initializeApp } from 'firebase/app'
+import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
 
 declare let self: ServiceWorkerGlobalScope
+
+// Initialize Firebase in the service worker so FCM can deliver background push
+// messages via onBackgroundMessage (required — raw push events alone are unreliable
+// when the app is closed because Firebase SDK expects to own the push lifecycle).
+const _firebaseApp = initializeApp({
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID as string,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET as string,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID as string,
+})
+
+const _messaging = getMessaging(_firebaseApp)
+
+onBackgroundMessage(_messaging, (payload) => {
+  const title = payload.notification?.title || (payload.data?.title as string) || 'New message'
+  const body  = payload.notification?.body  || (payload.data?.body  as string) || ''
+  const url   = (payload.data?.url as string) || '/'
+  const unreadCount = parseInt((payload.data?.unreadCount as string) || '1', 10)
+
+  if ('setAppBadge' in self) {
+    (self as any).setAppBadge(unreadCount).catch(() => {})
+  }
+
+  return self.registration.showNotification(title, {
+    body,
+    icon:     '/pwa-192x192.png',
+    badge:    '/pwa-192x192.png',
+    data:     { url },
+    vibrate:  [200, 100, 200],
+    tag:      url,
+    renotify: true,
+  })
+})
 
 self.skipWaiting()
 clientsClaim()
@@ -88,37 +125,3 @@ self.addEventListener('notificationclick', (event) => {
   )
 })
 
-// Handle incoming push messages (sent via FCM by the Vercel serverless function)
-// FCM delivers the payload as: { notification: { title, body }, data: { url, unreadCount, ... } }
-self.addEventListener('push', (event) => {
-  if (!event.data) return
-
-  try {
-    const payload = event.data.json()
-
-    // FCM format: notification.title/body + data.url/unreadCount
-    const title = payload.notification?.title || payload.data?.title || payload.title || 'New message'
-    const body  = payload.notification?.body  || payload.data?.body  || payload.body  || ''
-    const url   = payload.data?.url || payload.fcmOptions?.link || '/'
-    const unreadCount = parseInt(payload.data?.unreadCount || '1', 10)
-
-    // Update home-screen badge
-    if ('setAppBadge' in self) {
-      (self as any).setAppBadge(unreadCount).catch(() => {})
-    }
-
-    event.waitUntil(
-      self.registration.showNotification(title, {
-        body,
-        icon: '/pwa-192x192.png',
-        badge: '/pwa-192x192.png',
-        data: { url },
-        vibrate: [200, 100, 200],
-        tag: url,
-        renotify: true,
-      })
-    )
-  } catch {
-    // Malformed push data — ignore
-  }
-})
