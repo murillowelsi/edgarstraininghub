@@ -28,6 +28,7 @@ import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
 import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
 import { AssignWorkoutDialog } from "../../components/workout/AssignWorkoutDialog";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const workoutTypeLabels: Record<string, string> = {
   running: "Running",
@@ -172,83 +173,93 @@ const AdminWorkouts = () => {
           }
         />
 
-        <ResponsiveTable
-          loading={loading}
-          rowKey="_id"
-          columns={[
-            { key: "name", label: t.common.name },
-            { key: "type", label: t.common.type },
-            { key: "stages", label: "Stages" },
-            { key: "created", label: t.common.created },
-          ]}
-          rows={workouts.map((workout) => ({
-            _id: workout.id,
-            name: <span className="font-medium">{workout.name}</span>,
-            type: (
-              <Badge className={`${workoutTypeBadgeColors[workout.type]} flex items-center gap-1.5 w-fit`}>
-                {workout.type === "cycling" && <GrBike className="h-3 w-3" />}
-                {workout.type === "running" && <GrRun className="h-3 w-3" />}
-                {workout.type === "swimming" && <GrSwim className="h-3 w-3" />}
-                {workout.type === "strength" && <Dumbbell className="h-3 w-3" />}
-                {workoutTypeLabels[workout.type]}
-              </Badge>
-            ),
-            stages:
-              workout.type === "strength"
-                ? `${workout.exercises?.length || 0} exercises`
-                : `${workout.stages.length} stages`,
-            created: format(workout.createdAt, "MMM d, yyyy"),
-            _workout: workout,
-          }))}
-          actions={(row) => {
-            const workout = row._workout as Workout;
-            return (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleAssignClick(workout)}
-                  title="Assign to athletes"
-                >
-                  <UserPlus className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    navigate(
-                      workout.type === "strength"
-                        ? `/admin/workouts/strength/${workout.id}/edit`
-                        : `/admin/workouts/${workout.id}/edit`
-                    )
-                  }
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => setConfirmWorkout(workout)}
-                >
-                  {deleting === workout.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </Button>
-              </>
-            );
-          }}
-          emptyState={
-            <AdminEmptyState
-              icon={Dumbbell}
-              title={t.admin.workouts.empty.title}
-              description={t.admin.workouts.empty.description}
-              action={{ label: t.admin.workouts.newWorkout, onClick: () => navigate("/admin/workouts/new") }}
-            />
-          }
-        />
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="mt-4">
+          <TabsList className="mb-4 flex-wrap h-auto gap-1">
+            <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
+            <TabsTrigger value="running">Running ({tabCounts.running})</TabsTrigger>
+            <TabsTrigger value="cycling">Cycling ({tabCounts.cycling})</TabsTrigger>
+            <TabsTrigger value="swimming">Swimming ({tabCounts.swimming})</TabsTrigger>
+            <TabsTrigger value="strength">Strength ({tabCounts.strength})</TabsTrigger>
+          </TabsList>
+
+          <ResponsiveTable
+            loading={loading}
+            rowKey="_id"
+            columns={[
+              { key: "name", label: t.common.name },
+              { key: "type", label: t.common.type },
+              { key: "stages", label: "Stages" },
+              { key: "created", label: t.common.created },
+            ]}
+            rows={filteredWorkouts.map((workout) => ({
+              _id: workout.id,
+              name: <span className="font-medium">{workout.name}</span>,
+              type: (
+                <Badge className={`${workoutTypeBadgeColors[workout.type]} flex items-center gap-1.5 w-fit`}>
+                  {workout.type === "cycling" && <GrBike className="h-3 w-3" />}
+                  {workout.type === "running" && <GrRun className="h-3 w-3" />}
+                  {workout.type === "swimming" && <GrSwim className="h-3 w-3" />}
+                  {workout.type === "strength" && <Dumbbell className="h-3 w-3" />}
+                  {workoutTypeLabels[workout.type]}
+                </Badge>
+              ),
+              stages:
+                workout.type === "strength"
+                  ? `${workout.exercises?.length || 0} exercises`
+                  : `${workout.stages.length} stages`,
+              created: format(workout.createdAt, "MMM d, yyyy"),
+              _workout: workout,
+            }))}
+            actions={(row) => {
+              const workout = row._workout as Workout;
+              return (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleAssignClick(workout)}
+                    title="Assign to athletes"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      navigate(
+                        workout.type === "strength"
+                          ? `/admin/workouts/strength/${workout.id}/edit`
+                          : `/admin/workouts/${workout.id}/edit`
+                      )
+                    }
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setConfirmWorkout(workout)}
+                  >
+                    {deleting === workout.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </>
+              );
+            }}
+            emptyState={
+              <AdminEmptyState
+                icon={Dumbbell}
+                title={t.admin.workouts.empty.title}
+                description={t.admin.workouts.empty.description}
+                action={{ label: t.admin.workouts.newWorkout, onClick: () => navigate("/admin/workouts/new") }}
+              />
+            }
+          />
+        </Tabs>
       </div>
 
       {/* Mobile: New Workout type drawer */}
