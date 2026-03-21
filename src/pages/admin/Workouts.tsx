@@ -105,7 +105,7 @@ const AdminWorkouts = () => {
 
   return (
     <AdminLayout>
-      <div className="p-4 md:p-8">
+      <div className="p-4 md:p-8 pb-24 md:pb-8">
         <AdminPageHeader
           title="Workouts"
           actions={

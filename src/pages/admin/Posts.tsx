@@ -73,7 +73,7 @@ const AdminPosts = () => {
 
   return (
     <AdminLayout>
-      <div className="p-4 md:p-8">
+      <div className="p-4 md:p-8 pb-24 md:pb-8">
         <AdminPageHeader
           title="Posts"
           action={{ label: "New Post", icon: Plus, onClick: () => navigate("/admin/posts/new") }}

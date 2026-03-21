@@ -90,7 +90,7 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
-      <div className="p-4 md:p-8">
+      <div className="p-4 md:p-8 pb-24 md:pb-8">
         <AdminPageHeader
           title="Users"
           action={{ label: "New User", icon: Plus, onClick: () => navigate("/admin/users/new") }}
