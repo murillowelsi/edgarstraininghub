@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
-import ChatList from "@/components/chat/ChatList";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { Chat, Message } from "@/types/chat";
-import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronLeft, Loader2, MessageSquare, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -22,85 +21,85 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
 export default function AdminChat() {
     const { user } = useAuth();
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-    const [selectedChatMobile, setSelectedChatMobile] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // New Chat Dialog State
+    // New Chat Dialog
     const [isNewChatOpen, setIsNewChatOpen] = useState(false);
     const [athletes, setAthletes] = useState<User[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loadingAthletes, setLoadingAthletes] = useState(false);
 
-    // Delete Chat State
+    // Delete Chat
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
-    // Subscribe to all chats where the user is a participant
+    // All users for name resolution
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+
+    useEffect(() => {
+        getAllUsers().then(setAllUsers).catch(console.error);
+    }, []);
+
     useEffect(() => {
         if (!user) return;
-
         const unsubscribe = ChatService.subscribeToUserChats(user.uid, (updatedChats) => {
             setChats(updatedChats);
             setLoading(false);
-        });
-        return () => unsubscribe();
-    }, [user]);
-
-    // The active chat is whichever is selected (desktop or mobile)
-    const activeChat = selectedChat ?? selectedChatMobile;
-
-    // Subscribe to messages when a chat is selected
-    useEffect(() => {
-        if (!activeChat) return;
-
-        if (user) {
-            ChatService.markAsRead(activeChat.id, user.uid);
-        }
-
-        const unsubscribe = ChatService.subscribeToMessages(activeChat.id, (msgs) => {
-            setMessages(msgs);
-            if (user && msgs.length > 0) {
-                ChatService.markAsRead(activeChat.id, user.uid);
+            if (selectedChat) {
+                const updated = updatedChats.find(c => c.id === selectedChat.id);
+                if (updated) setSelectedChat(updated);
             }
         });
-
         return () => unsubscribe();
-    }, [activeChat, user]);
+    }, [user, selectedChat?.id]);
 
-    // Load athletes for new chat dialog
     useEffect(() => {
-        if (isNewChatOpen) {
-            setLoadingAthletes(true);
-            getAllUsers().then((users) => {
-                const onlyAthletes = users.filter((u) => u.role === "athlete");
-                setAthletes(onlyAthletes);
-                setLoadingAthletes(false);
-            });
-        }
+        if (!selectedChat || !user) return;
+        ChatService.markAsRead(selectedChat.id, user.uid);
+        const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
+            setMessages(msgs);
+            if (msgs.length > 0) ChatService.markAsRead(selectedChat.id, user.uid).catch(console.error);
+        });
+        return () => unsubscribe();
+    }, [selectedChat, user]);
+
+    useEffect(() => {
+        if (!isNewChatOpen) return;
+        setLoadingAthletes(true);
+        getAllUsers().then((users) => {
+            setAthletes(users.filter((u) => u.role === "athlete"));
+            setLoadingAthletes(false);
+        });
     }, [isNewChatOpen]);
 
+    const getChatDisplayName = (chat: Chat) => {
+        const otherId = chat.participantIds.find(id => id !== user?.uid);
+        if (otherId) {
+            const otherUser = allUsers.find(u => u.id === otherId);
+            if (otherUser) return otherUser.displayName;
+        }
+        return chat.athleteName || "Athlete";
+    };
+
     const handleSendMessage = async (text: string) => {
-        if (!activeChat || !user) return;
-        await ChatService.sendMessage(activeChat.id, user.uid, text);
+        if (!selectedChat || !user) return;
+        await ChatService.sendMessage(selectedChat.id, user.uid, text);
     };
 
     const handleStartChat = async (athlete: User) => {
         if (!user) return;
         try {
-            const chat = await ChatService.createOrGetChat(
-                athlete.id,
-                athlete.displayName,
-                user.uid
-            );
+            const chat = await ChatService.createOrGetChat(athlete.id, athlete.displayName, user.uid);
             setSelectedChat(chat);
-            setSelectedChatMobile(chat);
             setIsNewChatOpen(false);
         } catch (error) {
             console.error("Failed to start chat", error);
@@ -108,13 +107,11 @@ export default function AdminChat() {
     };
 
     const handleDeleteChat = async () => {
-        if (!activeChat) return;
-
+        if (!selectedChat) return;
         setDeleting(true);
         try {
-            await ChatService.deleteChat(activeChat.id);
+            await ChatService.deleteChat(selectedChat.id);
             setSelectedChat(null);
-            setSelectedChatMobile(null);
             setMessages([]);
             setIsDeleteDialogOpen(false);
             toast.success("Chat deleted successfully");
@@ -127,120 +124,172 @@ export default function AdminChat() {
     };
 
     const filteredAthletes = athletes.filter(
-        (athlete) =>
-            athlete.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            athlete.email.toLowerCase().includes(searchQuery.toLowerCase())
+        (a) =>
+            a.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            a.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Load all users to resolve names
-    const [allUsers, setAllUsers] = useState<User[]>([]);
-
-    useEffect(() => {
-        getAllUsers().then(setAllUsers).catch(console.error);
-    }, []);
-
-    // Helper to get display name
-    const getChatDisplayName = (chat: Chat) => {
-        // Find participant who is NOT me
-        const otherId = chat.participantIds.find(id => id !== user?.uid);
-        if (otherId) {
-            const otherUser = allUsers.find(u => u.id === otherId);
-            if (otherUser) return otherUser.displayName;
-        }
-        return chat.athleteName || "Athlete";
-    };
-
-    // Chats with resolved names
-    const displayChats = chats.map(c => ({
-        ...c,
-        athleteName: getChatDisplayName(c)
-    }));
+    const NewChatDialog = () => (
+        <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
+            <DialogTrigger asChild>
+                <Button size="icon" variant="ghost" className="h-8 w-8">
+                    <Plus className="h-5 w-5" />
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>New Message</DialogTitle>
+                </DialogHeader>
+                <div className="p-2 space-y-4">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search athletes..."
+                            className="pl-9"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div className="h-[300px] overflow-y-auto space-y-2">
+                        {loadingAthletes ? (
+                            <div className="flex justify-center p-4">
+                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : filteredAthletes.length === 0 ? (
+                            <p className="text-center text-muted-foreground p-4">No athletes found.</p>
+                        ) : (
+                            filteredAthletes.map((athlete) => (
+                                <button
+                                    key={athlete.id}
+                                    onClick={() => handleStartChat(athlete)}
+                                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                                >
+                                    <Avatar>
+                                        <AvatarFallback>{athlete.displayName[0]?.toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-medium">{athlete.displayName}</p>
+                                        <p className="text-xs text-muted-foreground">{athlete.email}</p>
+                                    </div>
+                                </button>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
 
     return (
         <AdminLayout>
-            {/* Desktop layout */}
-            <div className="hidden md:flex h-[calc(100vh-73px)]">
-                <div className="w-80 border-r flex flex-col flex-shrink-0 bg-background">
-                    <div className="p-4 border-b flex items-center justify-between">
-                        <h2 className="font-semibold text-lg">Messages</h2>
-                        <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
-                            <DialogTrigger asChild>
-                                <Button size="icon" variant="ghost" title="New Message">
-                                    <Plus className="h-5 w-5" />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>New Message</DialogTitle>
-                                </DialogHeader>
-                                <div className="p-2 space-y-4">
-                                    <div className="relative">
-                                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Search athletes..."
-                                            className="pl-9"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="h-[300px] overflow-y-auto space-y-2">
-                                        {loadingAthletes ? (
-                                            <div className="flex justify-center p-4">
-                                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                                            </div>
-                                        ) : filteredAthletes.length === 0 ? (
-                                            <p className="text-center text-muted-foreground p-4">
-                                                No athletes found.
-                                            </p>
-                                        ) : (
-                                            filteredAthletes.map((athlete) => (
-                                                <button
-                                                    key={athlete.id}
-                                                    onClick={() => handleStartChat(athlete)}
-                                                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                                                >
-                                                    <Avatar>
-                                                        <AvatarFallback>
-                                                            {athlete.displayName[0]?.toUpperCase()}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                    <div>
-                                                        <p className="font-medium">{athlete.displayName}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {athlete.email}
-                                                        </p>
-                                                    </div>
-                                                </button>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+            <div className="flex flex-col md:flex-row h-[calc(100vh-73px)] md:m-4 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
+
+                {/* Chat List Sidebar */}
+                <div className={cn(
+                    "w-full md:w-80 border-r flex flex-col bg-background",
+                    selectedChat ? "hidden md:flex" : "flex"
+                )}>
+                    <div className="p-4 border-b flex items-center justify-between bg-muted/30">
+                        <h3 className="font-semibold">Messages</h3>
+                        <NewChatDialog />
                     </div>
 
-                    <div className="flex-1 overflow-hidden">
+                    <div className="flex-1 overflow-y-auto">
                         {loading ? (
-                            <div className="flex justify-center items-center h-full">
+                            <div className="flex justify-center items-center h-40">
                                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                             </div>
+                        ) : chats.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground p-4 text-center">
+                                <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
+                                <p className="text-sm">No conversations yet.</p>
+                                <Button variant="link" className="mt-2" onClick={() => setIsNewChatOpen(true)}>
+                                    Start a chat
+                                </Button>
+                            </div>
                         ) : (
-                            <ChatList
-                                chats={displayChats}
-                                selectedChatId={selectedChat?.id || null}
-                                onSelectChat={setSelectedChat}
-                                currentUserId={user?.uid || ""}
-                            />
+                            chats.map((chat) => {
+                                const displayName = getChatDisplayName(chat);
+                                const unreadCount = user ? (chat.unreadCount?.[user.uid] || 0) : 0;
+                                return (
+                                    <button
+                                        key={chat.id}
+                                        onClick={() => setSelectedChat(chat)}
+                                        className={cn(
+                                            "w-full flex items-start gap-3 p-4 text-left transition-colors hover:bg-muted/50 border-b",
+                                            selectedChat?.id === chat.id && "bg-muted"
+                                        )}
+                                    >
+                                        <Avatar>
+                                            <AvatarFallback>{displayName[0]?.toUpperCase()}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 overflow-hidden">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className={cn("font-medium", unreadCount > 0 && "font-bold")}>
+                                                    {displayName}
+                                                </span>
+                                                {chat.lastMessageTime && (
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {formatDistanceToNow(new Date(chat.lastMessageTime.seconds * 1000), { addSuffix: true })}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <p className={cn(
+                                                    "text-sm truncate max-w-[160px]",
+                                                    unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"
+                                                )}>
+                                                    {chat.lastMessage || "No messages"}
+                                                </p>
+                                                {unreadCount > 0 && (
+                                                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                                                        {unreadCount}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </button>
+                                );
+                            })
                         )}
                     </div>
                 </div>
 
-                <div className="flex-1 bg-muted/10 p-4 flex flex-col">
+                {/* Chat Window */}
+                <div className={cn(
+                    "flex-1 flex flex-col bg-muted/5",
+                    !selectedChat ? "hidden md:flex" : "flex"
+                )}>
                     {selectedChat ? (
                         <>
-                            {/* Chat Header with Delete Button */}
-                            <div className="flex items-center justify-between mb-2">
-                                <div />
+                            {/* Mobile header: back + avatar + name + delete */}
+                            <div className="md:hidden p-3 border-b flex items-center gap-3 bg-background sticky top-0 z-10">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 -ml-1 shrink-0"
+                                    onClick={() => setSelectedChat(null)}
+                                >
+                                    <ChevronLeft className="h-5 w-5" />
+                                </Button>
+                                <Avatar className="h-8 w-8 shrink-0">
+                                    <AvatarFallback>{getChatDisplayName(selectedChat)[0]?.toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <span className="font-semibold text-sm flex-1 truncate">
+                                    {getChatDisplayName(selectedChat)}
+                                </span>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
+                                    onClick={() => setIsDeleteDialogOpen(true)}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+
+                            {/* Desktop header: delete button */}
+                            <div className="hidden md:flex items-center justify-end p-2 border-b">
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -251,6 +300,7 @@ export default function AdminChat() {
                                     Delete Chat
                                 </Button>
                             </div>
+
                             <div className="flex-1 overflow-hidden">
                                 <ChatWindow
                                     messages={messages}
@@ -261,131 +311,24 @@ export default function AdminChat() {
                             </div>
                         </>
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
-                            <p>Select a conversation to start messaging</p>
+                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
+                            <MessageSquare className="h-12 w-12 mb-4 opacity-20" />
+                            <p className="text-lg font-medium">Select a conversation</p>
+                            <p className="text-sm">Choose an athlete from the list or start a new chat.</p>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Mobile view */}
-            <div className="md:hidden flex flex-col flex-1 overflow-hidden h-[calc(100vh-73px)]">
-                {selectedChatMobile === null ? (
-                    <div className="flex-1 overflow-y-auto">
-                        <div className="p-4 border-b flex items-center justify-between bg-background">
-                            <h2 className="font-semibold text-lg">Messages</h2>
-                            <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
-                                <DialogTrigger asChild>
-                                    <Button size="icon" variant="ghost" title="New Message">
-                                        <Plus className="h-5 w-5" />
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>New Message</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="p-2 space-y-4">
-                                        <div className="relative">
-                                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                placeholder="Search athletes..."
-                                                className="pl-9"
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                            />
-                                        </div>
-                                        <div className="h-[300px] overflow-y-auto space-y-2">
-                                            {loadingAthletes ? (
-                                                <div className="flex justify-center p-4">
-                                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                                                </div>
-                                            ) : filteredAthletes.length === 0 ? (
-                                                <p className="text-center text-muted-foreground p-4">
-                                                    No athletes found.
-                                                </p>
-                                            ) : (
-                                                filteredAthletes.map((athlete) => (
-                                                    <button
-                                                        key={athlete.id}
-                                                        onClick={() => handleStartChat(athlete)}
-                                                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                                                    >
-                                                        <Avatar>
-                                                            <AvatarFallback>
-                                                                {athlete.displayName[0]?.toUpperCase()}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <p className="font-medium">{athlete.displayName}</p>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                {athlete.email}
-                                                            </p>
-                                                        </div>
-                                                    </button>
-                                                ))
-                                            )}
-                                        </div>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-                        {loading ? (
-                            <div className="flex justify-center items-center h-40">
-                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                            </div>
-                        ) : (
-                            <ChatList
-                                chats={displayChats}
-                                selectedChatId={selectedChatMobile?.id || null}
-                                onSelectChat={setSelectedChatMobile}
-                                currentUserId={user?.uid || ""}
-                            />
-                        )}
-                    </div>
-                ) : (
-                    <div className="flex flex-col flex-1">
-                        <div className="flex items-center gap-2 p-3 border-b bg-card shrink-0">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedChatMobile(null)}
-                                className="h-8 px-2"
-                            >
-                                ← Back
-                            </Button>
-                            <span className="font-medium text-sm truncate flex-1">
-                                {getChatDisplayName(selectedChatMobile)}
-                            </span>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 px-2 text-destructive hover:text-destructive shrink-0"
-                                onClick={() => setIsDeleteDialogOpen(true)}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        <div className="flex-1 overflow-hidden">
-                            <ChatWindow
-                                messages={messages}
-                                currentUserId={user?.uid || ""}
-                                onSendMessage={handleSendMessage}
-                                participantName={getChatDisplayName(selectedChatMobile)}
-                            />
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Delete Chat Confirmation Dialog */}
+            {/* Delete Confirmation */}
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
                         <AlertDialogDescription>
                             Are you sure you want to delete this conversation with{" "}
-                            <strong>{activeChat?.athleteName}</strong>? This will permanently
-                            remove all messages and cannot be undone.
+                            <strong>{selectedChat ? getChatDisplayName(selectedChat) : ""}</strong>?
+                            This will permanently remove all messages and cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -395,11 +338,7 @@ export default function AdminChat() {
                             disabled={deleting}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                            {deleting ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            ) : (
-                                <Trash2 className="h-4 w-4 mr-2" />
-                            )}
+                            {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>
