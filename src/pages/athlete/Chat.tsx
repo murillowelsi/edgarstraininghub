@@ -182,7 +182,7 @@ export default function AthleteChat() {
                 )}>
                     <div className="p-4 border-b flex items-center justify-between bg-muted/30">
                         <h3 className="font-semibold">{t.athlete.chat.title}</h3>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
+                        <Button size="icon" variant="ghost" className="hidden sm:flex h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
                             <Plus className="h-5 w-5" />
                         </Button>
                         <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title={t.athlete.chat.newMessage}>
@@ -322,6 +322,17 @@ export default function AthleteChat() {
                     )}
                 </div>
             </div>
+        {/* Mobile FAB — only shown on chat list view */}
+        {!selectedChat && (
+            <button
+                onClick={() => setIsNewChatOpen(true)}
+                className="fixed right-4 z-30 sm:hidden h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+                style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+                aria-label={t.athlete.chat.newMessage}
+            >
+                <Plus className="h-6 w-6" />
+            </button>
+        )}
         </AthletePortalLayout>
     );
 }
