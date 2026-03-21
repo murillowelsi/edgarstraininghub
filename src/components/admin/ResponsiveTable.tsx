@@ -10,12 +10,13 @@ interface Column {
 interface ResponsiveTableProps {
   columns: Column[];
   rows: Record<string, ReactNode>[];
+  rowKey?: string;
   actions?: (row: Record<string, ReactNode>) => ReactNode;
   emptyState?: ReactNode;
   loading?: boolean;
 }
 
-export function ResponsiveTable({ columns, rows, actions, emptyState, loading }: ResponsiveTableProps) {
+export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, loading }: ResponsiveTableProps) {
   if (loading) {
     return (
       <>
@@ -85,7 +86,7 @@ export function ResponsiveTable({ columns, rows, actions, emptyState, loading }:
           </thead>
           <tbody>
             {rows.map((row, i) => (
-              <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+              <tr key={rowKey ? String(row[rowKey]) : i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                 {columns.map((col) => (
                   <td key={col.key} className={`px-4 py-3 ${col.className ?? ""}`}>
                     {row[col.key]}
@@ -103,7 +104,7 @@ export function ResponsiveTable({ columns, rows, actions, emptyState, loading }:
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {rows.map((row, i) => (
-          <div key={i} className="rounded-lg border bg-card p-4">
+          <div key={rowKey ? String(row[rowKey]) : i} className="rounded-lg border bg-card p-4">
             <div className="space-y-2">
               {columns.map((col) => (
                 <div key={col.key}>

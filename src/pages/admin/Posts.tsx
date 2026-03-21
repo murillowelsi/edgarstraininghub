@@ -81,12 +81,14 @@ const AdminPosts = () => {
 
         <ResponsiveTable
           loading={loading}
+          rowKey="_id"
           columns={[
             { key: "title", label: "Title" },
             { key: "status", label: "Status" },
             { key: "created", label: "Created" },
           ]}
           rows={posts.map((post) => ({
+            _id: post.id,
             title: (
               <div>
                 <p className="font-medium">{post.title}</p>

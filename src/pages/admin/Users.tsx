@@ -98,6 +98,7 @@ const AdminUsers = () => {
 
         <ResponsiveTable
           loading={loading}
+          rowKey="_id"
           columns={[
             { key: "name", label: "Name" },
             { key: "email", label: "Email" },
@@ -105,6 +106,7 @@ const AdminUsers = () => {
             { key: "created", label: "Created" },
           ]}
           rows={users.map((u) => ({
+            _id: u.id,
             name: (
               <span className="font-medium">
                 {u.displayName}
