@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { auth } from "../lib/firebase";
-import Navbar from "./Navbar";
+import AdminTopBar from "./AdminTopBar";
 import { ChatService } from "../services/chat";
 import { BottomNav } from "./admin/BottomNav";
 
@@ -151,7 +151,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <AdminTopBar />
 
       <div className="pt-[73px] flex min-h-[calc(100vh-73px)]">
         {/* Desktop Sidebar */}
