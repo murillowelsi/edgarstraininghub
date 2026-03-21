@@ -8,6 +8,7 @@ import { Loader2, Plus, Search, MessageSquare, ChevronLeft } from "lucide-react"
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
+import { NotificationBanner } from "@/components/NotificationBanner";
 import { getUsersByRole } from "@/services/usersService";
 import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -59,12 +60,6 @@ export default function AthleteChat() {
         loadAdmins();
     }, []);
 
-    // Request notification permission when the chat page opens
-    useEffect(() => {
-        if (!NotificationService.isDenied()) {
-            NotificationService.requestPermission();
-        }
-    }, []);
 
     // Subscribe to athlete's chats
     useEffect(() => {
@@ -176,6 +171,7 @@ export default function AthleteChat() {
 
     return (
         <AthletePortalLayout title="Chat" showHeader={true}>
+            <NotificationBanner />
             <div className="flex flex-col md:flex-row h-[calc(100vh-8rem)] bg-card rounded-lg border overflow-hidden shadow-sm">
 
                 {/* Chat List Sidebar */}

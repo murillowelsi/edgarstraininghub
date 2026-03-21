@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
+import { NotificationBanner } from "@/components/NotificationBanner";
 
 export default function AdminChat() {
     const { user } = useAuth();
@@ -43,12 +44,6 @@ export default function AdminChat() {
         getAllUsers().then(setAllUsers).catch(console.error);
     }, []);
 
-    // Request notification permission when the chat page opens
-    useEffect(() => {
-        if (!NotificationService.isDenied()) {
-            NotificationService.requestPermission();
-        }
-    }, []);
 
     useEffect(() => {
         if (!user) return;
@@ -186,6 +181,7 @@ export default function AdminChat() {
 
     return (
         <AdminLayout>
+            <NotificationBanner />
             <div className="flex flex-col md:flex-row h-[calc(100vh-73px)] md:m-4 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
 
                 {/* Chat List Sidebar */}
