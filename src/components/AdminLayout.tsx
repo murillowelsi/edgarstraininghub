@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight, CreditCard, Dumbbell, FileText, LogOut, Menu, Users, MessageSquare } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Menu, Users, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -16,7 +16,6 @@ interface AdminLayoutProps {
 const navItems = [
   { href: "/admin/posts", label: "Posts", icon: FileText },
   { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/admin/workouts", label: "Workouts", icon: Dumbbell },
   { href: "/admin/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/admin/chat", label: "Chat", icon: MessageSquare },
