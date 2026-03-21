@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { getUsersByRole } from "@/services/usersService";
 import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -162,50 +162,43 @@ export default function AthleteChat() {
                 )}>
                     <div className="p-4 border-b flex items-center justify-between bg-muted/30">
                         <h3 className="font-semibold">Conversations</h3>
-                        <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
-                            <DialogTrigger asChild>
-                                <Button size="icon" variant="ghost" className="h-8 w-8">
-                                    <Plus className="h-5 w-5" />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>New Message</DialogTitle>
-                                </DialogHeader>
-                                <div className="p-2 space-y-4">
-                                    <div className="relative">
-                                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Search coaches..."
-                                            className="pl-9"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="h-[300px] overflow-y-auto space-y-2">
-                                        {filteredAdmins.length === 0 ? (
-                                            <p className="text-center text-muted-foreground p-4">No coaches found.</p>
-                                        ) : (
-                                            filteredAdmins.map((admin) => (
-                                                <button
-                                                    key={admin.id}
-                                                    onClick={() => handleStartChat(admin)}
-                                                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                                                >
-                                                    <Avatar>
-                                                        <AvatarFallback>{admin.displayName[0]?.toUpperCase()}</AvatarFallback>
-                                                    </Avatar>
-                                                    <div>
-                                                        <p className="font-medium">{admin.displayName}</p>
-                                                        <p className="text-xs text-muted-foreground">{admin.role}</p>
-                                                    </div>
-                                                </button>
-                                            ))
-                                        )}
-                                    </div>
+                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
+                            <Plus className="h-5 w-5" />
+                        </Button>
+                        <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title="New Message">
+                            <div className="p-2 space-y-4">
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search coaches..."
+                                        className="pl-9"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
                                 </div>
-                            </DialogContent>
-                        </Dialog>
+                                <div className="h-[300px] overflow-y-auto space-y-2">
+                                    {filteredAdmins.length === 0 ? (
+                                        <p className="text-center text-muted-foreground p-4">No coaches found.</p>
+                                    ) : (
+                                        filteredAdmins.map((admin) => (
+                                            <button
+                                                key={admin.id}
+                                                onClick={() => handleStartChat(admin)}
+                                                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                                            >
+                                                <Avatar>
+                                                    <AvatarFallback>{admin.displayName[0]?.toUpperCase()}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="font-medium">{admin.displayName}</p>
+                                                    <p className="text-xs text-muted-foreground">{admin.role}</p>
+                                                </div>
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </ResponsiveModal>
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
