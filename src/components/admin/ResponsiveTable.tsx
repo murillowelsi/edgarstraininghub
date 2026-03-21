@@ -1,5 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
+import { ReactNode, useState } from "react";
 
 interface Column {
   key: string;
@@ -17,6 +19,17 @@ interface ResponsiveTableProps {
 }
 
 export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, loading }: ResponsiveTableProps) {
+  const [expandedRows, setExpandedRows] = useState<Set<string | number>>(new Set());
+
+  const toggleRow = (key: string | number) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
   if (loading) {
     return (
       <>
@@ -48,12 +61,12 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
           </table>
         </div>
         {/* Mobile skeleton */}
-        <div className="md:hidden space-y-3">
+        <div className="md:hidden space-y-2">
           {[...Array(3)].map((_, i) => (
-            <div key={`skeleton-mobile-${i}`} className="rounded-lg border bg-card p-4 space-y-2">
-              {columns.map((col) => (
-                <Skeleton key={col.key} className="h-4 w-full" />
-              ))}
+            <div key={`skeleton-mobile-${i}`} className="rounded-lg border bg-card px-3 py-2.5 flex items-center gap-2">
+              <Skeleton className="h-4 w-4 shrink-0" />
+              <Skeleton className="h-4 flex-1" />
+              <Skeleton className="h-6 w-16 ml-auto" />
             </div>
           ))}
         </div>
@@ -68,6 +81,8 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
       <div className="text-center py-8 text-muted-foreground text-sm">No data available</div>
     );
   }
+
+  const [primaryCol, ...restCols] = columns;
 
   return (
     <>
@@ -102,24 +117,48 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
       </div>
 
       {/* Mobile cards */}
-      <div className="md:hidden space-y-3">
-        {rows.map((row, i) => (
-          <div key={rowKey ? String(row[rowKey]) : i} className="rounded-lg border bg-card p-4">
-            <div className="space-y-2">
-              {columns.map((col) => (
-                <div key={col.key}>
-                  <p className="text-xs text-muted-foreground">{col.label}</p>
-                  <div className="text-sm">{row[col.key]}</div>
+      <div className="md:hidden space-y-2">
+        {rows.map((row, i) => {
+          const key = rowKey ? String(row[rowKey]) : i;
+          const isExpanded = expandedRows.has(key);
+
+          return (
+            <div key={key} className="rounded-lg border bg-card overflow-hidden">
+              {/* Always-visible row: chevron + primary field + actions */}
+              <div className="flex items-center gap-2 px-3 py-2.5">
+                {restCols.length > 0 && (
+                  <button
+                    onClick={() => toggleRow(key)}
+                    className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={isExpanded ? "Collapse" : "Expand"}
+                  >
+                    <ChevronRight className={cn("h-4 w-4 transition-transform duration-200", isExpanded && "rotate-90")} />
+                  </button>
+                )}
+                <div className="flex-1 min-w-0 text-sm">
+                  {row[primaryCol.key]}
                 </div>
-              ))}
-            </div>
-            {actions && (
-              <div className="mt-3 pt-3 border-t flex gap-2">
-                {actions(row)}
+                {actions && (
+                  <div className="flex gap-1 shrink-0 ml-auto">
+                    {actions(row)}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+
+              {/* Expandable section */}
+              {isExpanded && restCols.length > 0 && (
+                <div className="border-t px-3 py-2.5 space-y-1.5 bg-muted/20">
+                  {restCols.map((col) => (
+                    <div key={col.key} className="flex items-start gap-2">
+                      <span className="text-xs text-muted-foreground w-20 shrink-0 pt-0.5">{col.label}</span>
+                      <div className="text-sm flex-1">{row[col.key]}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </>
   );
