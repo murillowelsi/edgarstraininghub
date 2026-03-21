@@ -5,12 +5,7 @@ import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategi
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 
-// Firebase Cloud Messaging initialization
-declare let self: ServiceWorkerGlobalScope & { __WB_MANIFEST?: any }
-
-// Import Firebase libraries at runtime for FCM background message handling
-importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js')
-importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js')
+declare let self: ServiceWorkerGlobalScope
 
 self.skipWaiting()
 clientsClaim()
@@ -66,45 +61,6 @@ registerRoute(
   })
 )
 
-// Initialize Firebase for background message handling
-try {
-  (self as any).firebase?.initializeApp({
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  })
-
-  const messaging = (self as any).firebase.messaging()
-
-  // Handle FCM background messages (when app is closed or backgrounded)
-  messaging.onBackgroundMessage((payload: any) => {
-    const title = payload.notification?.title || payload.data?.title || 'New message'
-    const body = payload.notification?.body || payload.data?.body || ''
-    const url = payload.data?.url || '/'
-    const unreadCount = parseInt(payload.data?.unreadCount || '1', 10)
-
-    // Update home screen badge
-    if ('setAppBadge' in self) {
-      self.setAppBadge(unreadCount).catch(() => {})
-    }
-
-    return self.registration.showNotification(title, {
-      body,
-      icon: '/pwa-192x192.png',
-      badge: '/pwa-192x192.png',
-      data: { url },
-      tag: url,
-      renotify: true,
-      vibrate: [200, 100, 200],
-    })
-  })
-} catch (err) {
-  console.error('FCM initialization failed:', err)
-}
-
 // Handle notification click — open or focus the app at the right URL
 self.addEventListener('notificationclick', (event) => {
   const notification = event.notification
@@ -132,26 +88,33 @@ self.addEventListener('notificationclick', (event) => {
   )
 })
 
-// Handle incoming push messages (sent by a server/Cloud Function)
+// Handle incoming push messages (sent via FCM by the Vercel serverless function)
+// FCM delivers the payload as: { notification: { title, body }, data: { url, unreadCount, ... } }
 self.addEventListener('push', (event) => {
   if (!event.data) return
 
   try {
-    const data = event.data.json() as {
-      title: string
-      body: string
-      url?: string
-      senderName?: string
+    const payload = event.data.json()
+
+    // FCM format: notification.title/body + data.url/unreadCount
+    const title = payload.notification?.title || payload.data?.title || payload.title || 'New message'
+    const body  = payload.notification?.body  || payload.data?.body  || payload.body  || ''
+    const url   = payload.data?.url || payload.fcmOptions?.link || '/'
+    const unreadCount = parseInt(payload.data?.unreadCount || '1', 10)
+
+    // Update home-screen badge
+    if ('setAppBadge' in self) {
+      (self as any).setAppBadge(unreadCount).catch(() => {})
     }
 
     event.waitUntil(
-      self.registration.showNotification(data.title, {
-        body: data.body,
+      self.registration.showNotification(title, {
+        body,
         icon: '/pwa-192x192.png',
         badge: '/pwa-192x192.png',
-        data: { url: data.url || '/' },
+        data: { url },
         vibrate: [200, 100, 200],
-        tag: data.url || 'chat', // collapse duplicate notifications for same chat
+        tag: url,
         renotify: true,
       })
     )
