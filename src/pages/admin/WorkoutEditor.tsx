@@ -53,11 +53,12 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import AdminLayout from "../../components/AdminLayout";
 import StageEditor from "../../components/workout/StageEditor";
 import { useAuth } from "../../contexts/AuthContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 // Helper to format duration for display
-const formatDuration = (stage: WorkoutStage) => {
+const formatDuration = (stage: WorkoutStage, pressLapButtonLabel = "Press Lap Button") => {
   if (stage.duration.type === "lapButton") {
-    return "Press Lap Button";
+    return pressLapButtonLabel;
   }
   if (stage.duration.value !== undefined) {
     const unit = stage.duration.unit || "";
@@ -125,6 +126,7 @@ const DraggableStage = ({
   onDelete: () => void;
   isNested?: boolean;
 }) => {
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
@@ -183,7 +185,7 @@ const DraggableStage = ({
                     {stageLabels[stage.type]}
                   </p>
                   <span className={`text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
-                    {formatDuration(stage)}
+                    {formatDuration(stage, t.admin.workoutEditor.pressLapButton)}
                   </span>
                   {!isExpanded && swimmingDetails.length > 0 && (
                     <span className={`text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
@@ -223,7 +225,7 @@ const DraggableStage = ({
                     <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                       Duration
                     </p>
-                    <p className="font-medium">{formatDuration(stage)}</p>
+                    <p className="font-medium">{formatDuration(stage, t.admin.workoutEditor.pressLapButton)}</p>
                     <p className="text-xs text-muted-foreground">
                       {durationLabels[stage.duration.type]}
                     </p>
@@ -298,6 +300,7 @@ const DraggableStage = ({
 // Repeat block container with nested sortable
 // Empty drop zone for repeat blocks
 const EmptyRepeatDropZone = ({ repeatId }: { repeatId: string }) => {
+  const { t } = useLanguage();
   const { setNodeRef, isOver } = useDroppable({
     id: `empty-${repeatId}`,
     data: {
@@ -313,7 +316,7 @@ const EmptyRepeatDropZone = ({ repeatId }: { repeatId: string }) => {
         isOver ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950" : ""
       }`}
     >
-      {isOver ? "Drop here" : "Drag stages here"}
+      {isOver ? t.admin.workoutEditor.dropHere : t.admin.workoutEditor.dragHere}
     </div>
   );
 };
@@ -467,6 +470,7 @@ const RepeatBlock = ({
 
 // Stage overlay for drag preview
 const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
+  const { t } = useLanguage();
   const color = stageColors[stage.type];
   const intensityDisplay = formatIntensity(stage);
 
@@ -501,7 +505,7 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
         <div>
           <p className="font-medium">{stageLabels[stage.type]}</p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>{formatDuration(stage)}</span>
+            <span>{formatDuration(stage, t.admin.workoutEditor.pressLapButton)}</span>
             {intensityDisplay && (
               <span className="text-primary/80">{intensityDisplay}</span>
             )}
@@ -513,6 +517,7 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
 };
 
 const WorkoutEditor = () => {
+  const { t } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const isEditing = Boolean(id);
@@ -557,8 +562,8 @@ const WorkoutEditor = () => {
       const workout = await getWorkoutById(workoutId);
       if (!workout) {
         toast({
-          title: "Workout not found",
-          description: "The workout you're trying to edit doesn't exist.",
+          title: t.admin.workoutEditor.toast.notFound,
+          description: t.admin.workoutEditor.toast.notFoundDescription,
           variant: "destructive",
         });
         navigate("/admin/workouts");
@@ -573,8 +578,8 @@ const WorkoutEditor = () => {
     } catch (error) {
       console.error("Error loading workout:", error);
       toast({
-        title: "Error",
-        description: "Failed to load workout.",
+        title: t.common.error,
+        description: t.admin.workoutEditor.toast.loadError,
         variant: "destructive",
       });
     } finally {
@@ -585,8 +590,8 @@ const WorkoutEditor = () => {
   const handleSubmit = async () => {
     if (!formData.name.trim()) {
       toast({
-        title: "Validation Error",
-        description: "Workout name is required.",
+        title: t.common.error,
+        description: t.admin.workoutEditor.toast.nameRequired,
         variant: "destructive",
       });
       return;
@@ -598,15 +603,15 @@ const WorkoutEditor = () => {
       if (isEditing && id) {
         await updateWorkout(id, formData);
         toast({
-          title: "Workout updated",
-          description: "Your changes have been saved.",
+          title: t.admin.workoutEditor.toast.updated,
+          description: t.admin.workoutEditor.toast.updatedDescription,
         });
         navigate("/admin/workouts");
       } else {
         const newWorkoutId = await createWorkout(formData, user?.uid || "");
         toast({
-          title: "Workout created",
-          description: "Your workout has been created successfully.",
+          title: t.admin.workoutEditor.toast.created,
+          description: t.admin.workoutEditor.toast.createdDescription,
         });
 
         // If we came from the calendar, redirect back with the new workout ID
@@ -619,9 +624,9 @@ const WorkoutEditor = () => {
     } catch (error: unknown) {
       console.error("Error saving workout:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to save workout.";
+        error instanceof Error ? error.message : t.admin.workoutEditor.toast.saveError;
       toast({
-        title: "Error",
+        title: t.common.error,
         description: errorMessage,
         variant: "destructive",
       });
@@ -950,7 +955,7 @@ const WorkoutEditor = () => {
                     {formData.stages.length === 0 ? (
                       <div className="text-center py-10 border border-dashed rounded-lg">
                         <p className="text-sm text-muted-foreground mb-4">
-                          No stages yet. Add your first stage to get started.
+                          {t.admin.workoutEditor.noStages}
                         </p>
                         <Button onClick={handleAddStage} size="sm" className="hidden lg:inline-flex">
                           <Plus className="h-4 w-4 mr-2" />

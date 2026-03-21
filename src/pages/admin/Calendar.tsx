@@ -58,6 +58,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CalendarAssignDialog } from "@/components/workout/CalendarAssignDialog";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 const workoutTypeColors: Record<WorkoutType, string> = {
   running: "bg-blue-100 border-blue-300 text-blue-800",
@@ -236,6 +237,7 @@ const CalendarDay = ({
 };
 
 const AdminCalendar = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -281,8 +283,8 @@ const AdminCalendar = () => {
     } catch (error) {
       console.error("Error loading calendar data:", error);
       toast({
-        title: "Error",
-        description: "Failed to load calendar data.",
+        title: t.common.error,
+        description: t.admin.calendar.toast.loadError,
         variant: "destructive",
       });
     } finally {
@@ -363,8 +365,8 @@ const AdminCalendar = () => {
     try {
       await deleteAssignment(selectedAssignment.id);
       toast({
-        title: "Assignment deleted",
-        description: "The workout assignment has been removed.",
+        title: t.admin.calendar.toast.assignmentDeleted,
+        description: t.admin.calendar.toast.assignmentDeletedDescription,
       });
       setConfirmDeleteOpen(false);
       setDetailsDialogOpen(false);
@@ -373,8 +375,8 @@ const AdminCalendar = () => {
     } catch (error) {
       console.error("Error deleting assignment:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete the assignment.",
+        title: t.common.error,
+        description: t.admin.calendar.toast.deleteError,
         variant: "destructive",
       });
     } finally {
@@ -405,7 +407,7 @@ const AdminCalendar = () => {
         <div className="px-4 pt-4 pb-3 border-b bg-background sticky top-0 z-10 space-y-3">
           {/* Row 1: Title + month navigation */}
           <div className="flex items-center justify-between">
-            <h1 className="text-xl md:text-2xl font-bold">Calendar</h1>
+            <h1 className="text-xl md:text-2xl font-bold">{t.admin.calendar.title}</h1>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" onClick={handlePrevMonth}>
                 <ChevronLeft className="h-4 w-4" />
@@ -426,10 +428,10 @@ const AdminCalendar = () => {
           <div className="flex items-center gap-2">
             <Select value={selectedAthleteId} onValueChange={setSelectedAthleteId}>
               <SelectTrigger className="flex-1 h-8 text-sm">
-                <SelectValue placeholder="All Athletes" />
+                <SelectValue placeholder={t.admin.calendar.allAthletes} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Athletes</SelectItem>
+                <SelectItem value="all">{t.admin.calendar.allAthletes}</SelectItem>
                 {athletes.map((athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
                     {athlete.displayName}
@@ -438,7 +440,7 @@ const AdminCalendar = () => {
               </SelectContent>
             </Select>
             <Button variant="outline" size="sm" onClick={handleToday} className="shrink-0">
-              Today
+              {t.admin.calendar.today}
             </Button>
           </div>
         </div>
@@ -448,7 +450,7 @@ const AdminCalendar = () => {
           <div className="min-w-[800px]">
             {/* Day headers */}
             <div className="grid grid-cols-7 gap-0 mb-1">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+              {t.admin.calendar.days.map((day) => (
                 <div
                   key={day}
                   className="text-center text-sm font-medium text-muted-foreground py-2"
@@ -505,14 +507,14 @@ const AdminCalendar = () => {
                       onClick={() => handleEmptyCellClick(day)}
                     >
                       <Plus className="h-3 w-3 mr-1" />
-                      Add
+                      {t.admin.calendar.add}
                     </Button>
                   </div>
 
                   {/* Assignments for this day */}
                   {dayAssignments.length === 0 ? (
                     <p className="text-xs text-muted-foreground pl-1">
-                      No workouts
+                      {t.admin.calendar.noWorkouts}
                     </p>
                   ) : (
                     <div className="space-y-2">
@@ -579,7 +581,7 @@ const AdminCalendar = () => {
         {/* Legend */}
         <div className="p-4 border-t bg-background">
           <div className="flex flex-wrap items-center gap-4 text-sm">
-            <span className="text-muted-foreground">Workout types:</span>
+            <span className="text-muted-foreground">{t.admin.calendar.legend.workoutTypes}</span>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded bg-cyan-200 border border-cyan-300" />
               <span>Swimming</span>
@@ -598,7 +600,7 @@ const AdminCalendar = () => {
             </div>
             <div className="flex items-center gap-1 ml-4">
               <Check className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">= Completed</span>
+              <span className="text-muted-foreground">{t.admin.calendar.legend.completed}</span>
             </div>
           </div>
         </div>
@@ -652,7 +654,7 @@ const AdminCalendar = () => {
               <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
                 <Check className="h-4 w-4" />
                 <span className="text-sm">
-                  Completed on {format(selectedAssignment.completedAt, "PPp")}
+                  {t.admin.calendar.completedOn} {format(selectedAssignment.completedAt, "PPp")}
                 </span>
               </div>
             )}
@@ -673,7 +675,7 @@ const AdminCalendar = () => {
                 className="w-full sm:w-auto"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Assignment
+                {t.admin.calendar.deleteAssignment}
               </Button>
               <Button
                 variant="outline"
@@ -681,7 +683,7 @@ const AdminCalendar = () => {
                 className="w-full sm:w-auto"
               >
                 <Pencil className="h-4 w-4 mr-2" />
-                Edit Workout
+                {t.admin.calendar.editWorkout}
               </Button>
             </div>
           </div>
@@ -692,9 +694,9 @@ const AdminCalendar = () => {
       <ResponsiveConfirm
         open={confirmDeleteOpen}
         onOpenChange={setConfirmDeleteOpen}
-        title="Delete Assignment"
-        description="Are you sure you want to delete this assignment? This action cannot be undone."
-        confirmLabel="Delete"
+        title={t.admin.calendar.deleteAssignment}
+        description={t.admin.calendar.deleteAssignmentDescription}
+        confirmLabel={t.common.delete}
         destructive
         loading={deletingAssignment}
         onConfirm={handleDeleteAssignment}
