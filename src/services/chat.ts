@@ -52,7 +52,12 @@ export const ChatService = {
     },
 
     // Send a message
-    sendMessage: async (chatId: string, senderId: string, text: string) => {
+    sendMessage: async (
+        chatId: string,
+        senderId: string,
+        text: string,
+        senderName?: string
+    ) => {
         const messagesRef = collection(db, "chats", chatId, "messages");
 
         // Add message to subcollection
@@ -73,7 +78,7 @@ export const ChatService = {
 
         // Calculate unread updates
         const participants = chatData.participantIds || [];
-        const unreadUpdates: Record<string, any> = {};
+        const unreadUpdates: Record<string, unknown> = {};
 
         participants.forEach(pId => {
             if (pId !== senderId) {
@@ -86,6 +91,33 @@ export const ChatService = {
             lastMessageTime: serverTimestamp(),
             ...unreadUpdates
         });
+
+        // Trigger push notification via Vercel API (fire-and-forget, don't block the send)
+        const recipientId = participants.find(pId => pId !== senderId);
+        if (recipientId) {
+            try {
+                const { getAuth } = await import("firebase/auth");
+                const { auth } = await import("../lib/firebase");
+                const idToken = await getAuth(auth.app).currentUser?.getIdToken();
+                if (idToken) {
+                    fetch("/api/notify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            chatId,
+                            messageText: text,
+                            senderName: senderName || "Coach",
+                            recipientId,
+                            idToken,
+                        }),
+                    }).catch(() => {
+                        // Notification failed silently — message was already saved
+                    });
+                }
+            } catch {
+                // Auth token unavailable — skip notification
+            }
+        }
     },
 
     // Subscribe to messages for a specific chat

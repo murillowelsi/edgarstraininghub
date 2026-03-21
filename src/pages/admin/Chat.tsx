@@ -104,7 +104,7 @@ export default function AdminChat() {
 
     const handleSendMessage = async (text: string) => {
         if (!selectedChat || !user) return;
-        await ChatService.sendMessage(selectedChat.id, user.uid, text);
+        await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Coach");
     };
 
     const handleStartChat = async (athlete: User) => {

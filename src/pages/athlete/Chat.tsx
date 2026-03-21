@@ -139,7 +139,7 @@ export default function AthleteChat() {
         }
 
         try {
-            await ChatService.sendMessage(selectedChat.id, user.uid, text);
+            await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Athlete");
         } catch (error) {
             console.error("Error sending message:", error);
             toast.error("Failed to send message.");
