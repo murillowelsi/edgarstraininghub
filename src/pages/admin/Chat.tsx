@@ -6,21 +6,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Chat, Message } from "@/types/chat";
 import { ChevronLeft, Loader2, MessageSquare, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { getAllUsers } from "@/services/usersService";
 import { User } from "@/types/user";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
@@ -130,16 +121,15 @@ export default function AdminChat() {
     );
 
     const NewChatDialog = () => (
-        <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
-            <DialogTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-8 w-8">
-                    <Plus className="h-5 w-5" />
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>New Message</DialogTitle>
-                </DialogHeader>
+        <>
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
+                <Plus className="h-5 w-5" />
+            </Button>
+            <ResponsiveModal
+                open={isNewChatOpen}
+                onOpenChange={setIsNewChatOpen}
+                title="New Message"
+            >
                 <div className="p-2 space-y-4">
                     <div className="relative">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -176,8 +166,8 @@ export default function AdminChat() {
                         )}
                     </div>
                 </div>
-            </DialogContent>
-        </Dialog>
+            </ResponsiveModal>
+        </>
     );
 
     return (
@@ -321,29 +311,22 @@ export default function AdminChat() {
             </div>
 
             {/* Delete Confirmation */}
-            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Are you sure you want to delete this conversation with{" "}
-                            <strong>{selectedChat ? getChatDisplayName(selectedChat) : ""}</strong>?
-                            This will permanently remove all messages and cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDeleteChat}
-                            disabled={deleting}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
-                            Delete
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <ResponsiveConfirm
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                title="Delete Conversation"
+                description={
+                    <>
+                        Are you sure you want to delete this conversation with{" "}
+                        <strong>{selectedChat ? getChatDisplayName(selectedChat) : ""}</strong>?
+                        This will permanently remove all messages and cannot be undone.
+                    </>
+                }
+                confirmLabel="Delete"
+                destructive
+                loading={deleting}
+                onConfirm={handleDeleteChat}
+            />
         </AdminLayout>
     );
 }
