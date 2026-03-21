@@ -1,14 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -130,15 +124,12 @@ export const AssignWorkoutDialog = ({
   const isValid = selectedAthletes.length > 0 && scheduledDate;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Assign Workout</DialogTitle>
-          <DialogDescription>
-            Assign "{workout?.name}" to athletes with a scheduled date.
-          </DialogDescription>
-        </DialogHeader>
-
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Assign Workout"
+      description={`Assign "${workout?.name}" to athletes with a scheduled date.`}
+    >
         <div className="space-y-4 py-4">
           {/* Date Picker */}
           <div className="space-y-2">
@@ -247,7 +238,6 @@ export const AssignWorkoutDialog = ({
             Assign Workout
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveModal>
   );
 };
