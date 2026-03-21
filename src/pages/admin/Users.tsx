@@ -102,8 +102,8 @@ const AdminUsers = () => {
           columns={[
             { key: "name", label: "Name" },
             { key: "email", label: "Email" },
-            { key: "role", label: "Role" },
-            { key: "created", label: "Created" },
+            { key: "role", label: "Role", mobilePrimaryBadge: true },
+            { key: "created", label: "Created", mobileHidden: true },
           ]}
           rows={users.map((u) => ({
             _id: u.id,

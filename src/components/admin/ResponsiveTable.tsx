@@ -7,6 +7,10 @@ interface Column {
   key: string;
   label: string;
   className?: string;
+  /** Show this column's value in the primary collapsed row (top-right), without a label */
+  mobilePrimaryBadge?: boolean;
+  /** Hide this column entirely on mobile */
+  mobileHidden?: boolean;
 }
 
 interface ResponsiveTableProps {
@@ -82,7 +86,9 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
     );
   }
 
-  const [primaryCol, ...restCols] = columns;
+  const primaryCol = columns[0];
+  const badgeCols = columns.filter((c) => c.mobilePrimaryBadge);
+  const expandableCols = columns.filter((c) => !c.mobilePrimaryBadge && !c.mobileHidden && c.key !== primaryCol.key);
 
   return (
     <>
@@ -124,9 +130,9 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
 
           return (
             <div key={key} className="rounded-lg border bg-card overflow-hidden">
-              {/* Always-visible row: chevron + primary field + actions */}
+              {/* Always-visible row: chevron + primary field + badge(s) + actions */}
               <div className="flex items-center gap-2 px-3 py-2.5">
-                {restCols.length > 0 && (
+                {expandableCols.length > 0 && (
                   <button
                     onClick={() => toggleRow(key)}
                     className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
@@ -138,17 +144,22 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
                 <div className="flex-1 min-w-0 text-sm">
                   {row[primaryCol.key]}
                 </div>
+                {badgeCols.map((col) => (
+                  <div key={col.key} className="shrink-0">
+                    {row[col.key]}
+                  </div>
+                ))}
                 {actions && (
-                  <div className="flex gap-1 shrink-0 ml-auto">
+                  <div className="flex gap-1 shrink-0 ml-1">
                     {actions(row)}
                   </div>
                 )}
               </div>
 
               {/* Expandable section */}
-              {isExpanded && restCols.length > 0 && (
+              {isExpanded && expandableCols.length > 0 && (
                 <div className="border-t px-3 py-2.5 space-y-1.5 bg-muted/20">
-                  {restCols.map((col) => (
+                  {expandableCols.map((col) => (
                     <div key={col.key} className="flex items-start gap-2">
                       <span className="text-xs text-muted-foreground w-20 shrink-0 pt-0.5">{col.label}</span>
                       <div className="text-sm flex-1">{row[col.key]}</div>
