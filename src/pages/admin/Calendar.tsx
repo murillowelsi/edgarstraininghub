@@ -618,10 +618,7 @@ const AdminCalendar = () => {
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-destructive hover:text-destructive"
-                                onClick={() => {
-                                  setSelectedAssignment(assignment);
-                                  setDetailsDialogOpen(true);
-                                }}
+                                onClick={() => handleAssignmentClick(assignment)}
                               >
                                 <Trash2 className="h-3 w-3" />
                               </Button>
