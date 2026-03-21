@@ -28,6 +28,7 @@ export default function AdminChat() {
     const { user } = useAuth();
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+    const [selectedChatMobile, setSelectedChatMobile] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -52,23 +53,26 @@ export default function AdminChat() {
         return () => unsubscribe();
     }, [user]);
 
+    // The active chat is whichever is selected (desktop or mobile)
+    const activeChat = selectedChat ?? selectedChatMobile;
+
     // Subscribe to messages when a chat is selected
     useEffect(() => {
-        if (!selectedChat) return;
+        if (!activeChat) return;
 
         if (user) {
-            ChatService.markAsRead(selectedChat.id, user.uid);
+            ChatService.markAsRead(activeChat.id, user.uid);
         }
 
-        const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
+        const unsubscribe = ChatService.subscribeToMessages(activeChat.id, (msgs) => {
             setMessages(msgs);
             if (user && msgs.length > 0) {
-                ChatService.markAsRead(selectedChat.id, user.uid);
+                ChatService.markAsRead(activeChat.id, user.uid);
             }
         });
 
         return () => unsubscribe();
-    }, [selectedChat, user]);
+    }, [activeChat, user]);
 
     // Load athletes for new chat dialog
     useEffect(() => {
@@ -83,8 +87,8 @@ export default function AdminChat() {
     }, [isNewChatOpen]);
 
     const handleSendMessage = async (text: string) => {
-        if (!selectedChat || !user) return;
-        await ChatService.sendMessage(selectedChat.id, user.uid, text);
+        if (!activeChat || !user) return;
+        await ChatService.sendMessage(activeChat.id, user.uid, text);
     };
 
     const handleStartChat = async (athlete: User) => {
@@ -96,6 +100,7 @@ export default function AdminChat() {
                 user.uid
             );
             setSelectedChat(chat);
+            setSelectedChatMobile(chat);
             setIsNewChatOpen(false);
         } catch (error) {
             console.error("Failed to start chat", error);
@@ -103,12 +108,13 @@ export default function AdminChat() {
     };
 
     const handleDeleteChat = async () => {
-        if (!selectedChat) return;
+        if (!activeChat) return;
 
         setDeleting(true);
         try {
-            await ChatService.deleteChat(selectedChat.id);
+            await ChatService.deleteChat(activeChat.id);
             setSelectedChat(null);
+            setSelectedChatMobile(null);
             setMessages([]);
             setIsDeleteDialogOpen(false);
             toast.success("Chat deleted successfully");
@@ -152,7 +158,8 @@ export default function AdminChat() {
 
     return (
         <AdminLayout>
-            <div className="flex h-[calc(100vh-73px)]">
+            {/* Desktop layout */}
+            <div className="hidden md:flex h-[calc(100vh-73px)]">
                 <div className="w-80 border-r flex flex-col flex-shrink-0 bg-background">
                     <div className="p-4 border-b flex items-center justify-between">
                         <h2 className="font-semibold text-lg">Messages</h2>
@@ -261,6 +268,107 @@ export default function AdminChat() {
                 </div>
             </div>
 
+            {/* Mobile view */}
+            <div className="md:hidden flex flex-col flex-1 overflow-hidden h-[calc(100vh-73px)]">
+                {selectedChatMobile === null ? (
+                    <div className="flex-1 overflow-y-auto">
+                        <div className="p-4 border-b flex items-center justify-between bg-background">
+                            <h2 className="font-semibold text-lg">Messages</h2>
+                            <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
+                                <DialogTrigger asChild>
+                                    <Button size="icon" variant="ghost" title="New Message">
+                                        <Plus className="h-5 w-5" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>New Message</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="p-2 space-y-4">
+                                        <div className="relative">
+                                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="Search athletes..."
+                                                className="pl-9"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="h-[300px] overflow-y-auto space-y-2">
+                                            {loadingAthletes ? (
+                                                <div className="flex justify-center p-4">
+                                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                                </div>
+                                            ) : filteredAthletes.length === 0 ? (
+                                                <p className="text-center text-muted-foreground p-4">
+                                                    No athletes found.
+                                                </p>
+                                            ) : (
+                                                filteredAthletes.map((athlete) => (
+                                                    <button
+                                                        key={athlete.id}
+                                                        onClick={() => handleStartChat(athlete)}
+                                                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                                                    >
+                                                        <Avatar>
+                                                            <AvatarFallback>
+                                                                {athlete.displayName[0]?.toUpperCase()}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <div>
+                                                            <p className="font-medium">{athlete.displayName}</p>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                {athlete.email}
+                                                            </p>
+                                                        </div>
+                                                    </button>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                        {loading ? (
+                            <div className="flex justify-center items-center h-40">
+                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : (
+                            <ChatList
+                                chats={displayChats}
+                                selectedChatId={selectedChatMobile?.id || null}
+                                onSelectChat={setSelectedChatMobile}
+                                currentUserId={user?.uid || ""}
+                            />
+                        )}
+                    </div>
+                ) : (
+                    <div className="flex flex-col flex-1">
+                        <div className="flex items-center gap-2 p-3 border-b bg-card shrink-0">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedChatMobile(null)}
+                                className="h-8 px-2"
+                            >
+                                ← Back
+                            </Button>
+                            <span className="font-medium text-sm truncate">
+                                {getChatDisplayName(selectedChatMobile)}
+                            </span>
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                            <ChatWindow
+                                messages={messages}
+                                currentUserId={user?.uid || ""}
+                                onSendMessage={handleSendMessage}
+                                participantName={getChatDisplayName(selectedChatMobile)}
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
+
             {/* Delete Chat Confirmation Dialog */}
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogContent>
@@ -268,7 +376,7 @@ export default function AdminChat() {
                         <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
                         <AlertDialogDescription>
                             Are you sure you want to delete this conversation with{" "}
-                            <strong>{selectedChat?.athleteName}</strong>? This will permanently
+                            <strong>{activeChat?.athleteName}</strong>? This will permanently
                             remove all messages and cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
