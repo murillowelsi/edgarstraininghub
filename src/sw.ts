@@ -5,7 +5,12 @@ import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategi
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 
-declare let self: ServiceWorkerGlobalScope
+// Firebase Cloud Messaging initialization
+declare let self: ServiceWorkerGlobalScope & { __WB_MANIFEST?: any }
+
+// Import Firebase libraries at runtime for FCM background message handling
+importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js')
+importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js')
 
 self.skipWaiting()
 clientsClaim()
@@ -60,6 +65,45 @@ registerRoute(
     ],
   })
 )
+
+// Initialize Firebase for background message handling
+try {
+  (self as any).firebase?.initializeApp({
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  })
+
+  const messaging = (self as any).firebase.messaging()
+
+  // Handle FCM background messages (when app is closed or backgrounded)
+  messaging.onBackgroundMessage((payload: any) => {
+    const title = payload.notification?.title || payload.data?.title || 'New message'
+    const body = payload.notification?.body || payload.data?.body || ''
+    const url = payload.data?.url || '/'
+    const unreadCount = parseInt(payload.data?.unreadCount || '1', 10)
+
+    // Update home screen badge
+    if ('setAppBadge' in self) {
+      self.setAppBadge(unreadCount).catch(() => {})
+    }
+
+    return self.registration.showNotification(title, {
+      body,
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
+      data: { url },
+      tag: url,
+      renotify: true,
+      vibrate: [200, 100, 200],
+    })
+  })
+} catch (err) {
+  console.error('FCM initialization failed:', err)
+}
 
 // Handle notification click — open or focus the app at the right URL
 self.addEventListener('notificationclick', (event) => {

@@ -25,24 +25,35 @@ export const FCMService = {
    * Call this after the user grants notification permission.
    */
   async registerToken(userId: string): Promise<string | null> {
-    if (!messaging) return null;
+    if (!messaging) {
+      console.warn("FCM: Messaging not initialized");
+      return null;
+    }
     if (!VAPID_KEY) {
       console.warn("FCM: VITE_FIREBASE_VAPID_KEY not set. Push notifications won't work.");
       return null;
     }
 
     try {
-      // Explicitly register the FCM service worker to avoid conflicts with our custom sw.js
-      const swRegistration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js",
-        { scope: "/" }
-      );
+      console.log("FCM: Requesting FCM token with existing PWA service worker...");
+
+      // Use the existing PWA service worker (registered by vite-plugin-pwa)
+      // The PWA service worker now includes FCM background message handling
+      const swRegistration = await navigator.serviceWorker.ready;
+
+      console.log("FCM: Using service worker:", swRegistration);
 
       const token = await getToken(messaging, {
         vapidKey: VAPID_KEY,
         serviceWorkerRegistration: swRegistration,
       });
-      if (!token) return null;
+
+      if (!token) {
+        console.warn("FCM: Failed to get FCM token - it returned null");
+        return null;
+      }
+
+      console.log("FCM: Token obtained successfully:", token.substring(0, 20) + "...");
 
       // Save token to Firestore so Cloud Function can look it up
       await setDoc(
@@ -50,9 +61,11 @@ export const FCMService = {
         { token, updatedAt: new Date(), platform: navigator.userAgent }
       );
 
+      console.log("FCM: Token saved to Firestore");
+
       return token;
     } catch (err) {
-      console.warn("FCM token registration failed:", err);
+      console.error("FCM token registration failed:", err);
       return null;
     }
   },

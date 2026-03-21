@@ -48,23 +48,40 @@ const AthletePortalLayout = ({
   useEffect(() => {
     if (!user) return;
 
+    let unsubscribeFCM: (() => void) | null = null;
+
     const setupFCM = async () => {
+      console.log("Setting up FCM for athlete:", user.uid);
+
       // Request notification permission if not already granted
       if (!NotificationService.isGranted() && !NotificationService.isDenied()) {
-        await NotificationService.requestPermission();
+        console.log("Requesting notification permission...");
+        const granted = await NotificationService.requestPermission();
+        console.log("Notification permission granted:", granted);
+      } else {
+        console.log("Notification permission status:", Notification.permission);
       }
 
       // Register device for push notifications
       if (NotificationService.isGranted()) {
+        console.log("Registering FCM token...");
         await FCMService.registerToken(user.uid);
+      } else {
+        console.warn("FCM: Cannot register token - notification permission not granted");
       }
 
       // Listen for foreground messages
-      const unsubscribeFCM = FCMService.listenForeground('/athlete/chat');
-      return unsubscribeFCM;
+      unsubscribeFCM = FCMService.listenForeground('/athlete/chat');
+      console.log("FCM foreground listener set up");
     };
 
-    setupFCM();
+    setupFCM().catch(err => console.error("FCM setup error:", err));
+
+    return () => {
+      if (unsubscribeFCM) {
+        unsubscribeFCM();
+      }
+    };
   }, [user]);
 
   // Subscribe to chats — unread count, badge, and in-app notifications
