@@ -102,7 +102,7 @@ const AdminLogin = () => {
       <main className="flex-1 flex items-center justify-center bg-muted p-4 pt-24">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Login</CardTitle>
+            <CardTitle className="text-xl font-bold">Login</CardTitle>
             <CardDescription>
               Sign in to access your account
             </CardDescription>
