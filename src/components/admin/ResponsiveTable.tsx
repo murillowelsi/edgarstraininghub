@@ -34,7 +34,7 @@ export function ResponsiveTable({ columns, rows, actions, emptyState, loading }:
             </thead>
             <tbody>
               {[...Array(3)].map((_, i) => (
-                <tr key={i} className="border-b">
+                <tr key={`skeleton-desktop-${i}`} className="border-b">
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3">
                       <Skeleton className="h-4 w-full" />
@@ -49,7 +49,7 @@ export function ResponsiveTable({ columns, rows, actions, emptyState, loading }:
         {/* Mobile skeleton */}
         <div className="md:hidden space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="rounded-lg border bg-card p-4 space-y-2">
+            <div key={`skeleton-mobile-${i}`} className="rounded-lg border bg-card p-4 space-y-2">
               {columns.map((col) => (
                 <Skeleton key={col.key} className="h-4 w-full" />
               ))}
@@ -60,8 +60,12 @@ export function ResponsiveTable({ columns, rows, actions, emptyState, loading }:
     );
   }
 
-  if (!rows.length && emptyState) {
-    return <>{emptyState}</>;
+  if (!rows.length) {
+    return emptyState ? (
+      <>{emptyState}</>
+    ) : (
+      <div className="text-center py-8 text-muted-foreground text-sm">No data available</div>
+    );
   }
 
   return (
