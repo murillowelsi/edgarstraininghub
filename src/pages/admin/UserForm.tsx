@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { createUser, getUserById, updateUser } from "@/services/usersService";
 import type { UserFormData, UserRole } from "@/types/user";
 import { Check, Loader2, Save, X } from "lucide-react";
@@ -32,13 +31,6 @@ const AdminUserForm = () => {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("adminSidebarCollapsed");
-      return stored === "true";
-    }
-    return false;
-  });
   const [formData, setFormData] = useState<UserFormData>({
     email: "",
     displayName: "",
@@ -51,17 +43,6 @@ const AdminUserForm = () => {
       loadUser(id);
     }
   }, [id, isEditing]);
-
-  // Listen to sidebar collapse state changes
-  useEffect(() => {
-    const checkSidebarState = () => {
-      const stored = localStorage.getItem("adminSidebarCollapsed");
-      setSidebarCollapsed(stored === "true");
-    };
-    checkSidebarState();
-    const interval = setInterval(checkSidebarState, 100);
-    return () => clearInterval(interval);
-  }, []);
 
   const loadUser = async (userId: string) => {
     try {
@@ -291,12 +272,9 @@ const AdminUserForm = () => {
           </div>
         </div>
 
-        {/* Floating Action Buttons */}
-        <div className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t shadow-lg transition-all duration-300",
-          sidebarCollapsed ? "md:left-20" : "md:left-64"
-        )}>
-          <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-end gap-3">
+        {/* Action Buttons */}
+        <div className="sticky bottom-0 bg-background border-t p-4 -mx-4 mt-6 md:static md:border-0 md:p-0 md:mx-0">
+          <div className="flex gap-2 justify-end">
             <Button
               type="button"
               variant="outline"
