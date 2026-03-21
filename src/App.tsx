@@ -9,6 +9,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import About from "./pages/About";
+import AppEntry from "./pages/AppEntry";
 import BlogArticlePage from "./pages/BlogArticlePage";
 import BlogPage from "./pages/BlogPage";
 import Contact from "./pages/Contact";
@@ -44,6 +45,9 @@ const App = () => (
             <BrowserRouter>
               <ScrollToTop />
               <Routes>
+                {/* PWA entry point — redirects to app based on auth state */}
+                <Route path="/app" element={<AppEntry />} />
+
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
