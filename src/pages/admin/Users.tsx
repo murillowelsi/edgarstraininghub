@@ -1,16 +1,6 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
 import { deleteUser, getAllUsers } from "@/services/usersService";
 import type { User, UserRole } from "@/types/user";
@@ -34,6 +24,7 @@ const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmUser, setConfirmUser] = useState<User | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -133,40 +124,15 @@ const AdminUsers = () => {
                     <Edit className="h-4 w-4" />
                   </Button>
                 </Link>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      disabled={u.id === user?.uid}
-                    >
-                      {deleting === u.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete User</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete "{u.displayName}"?
-                        This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                      <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDelete(u.id)}
-                        className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  disabled={u.id === user?.uid}
+                  onClick={() => setConfirmUser(u)}
+                >
+                  {deleting === u.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                </Button>
               </>
             );
           }}
@@ -180,6 +146,16 @@ const AdminUsers = () => {
           }
         />
       </div>
+      <ResponsiveConfirm
+        open={confirmUser !== null}
+        onOpenChange={(open) => { if (!open) setConfirmUser(null); }}
+        title="Delete User"
+        description={<>Are you sure you want to delete "<strong>{confirmUser?.displayName}</strong>"? This action cannot be undone.</>}
+        confirmLabel="Delete"
+        destructive
+        loading={deleting !== null}
+        onConfirm={() => { if (confirmUser) handleDelete(confirmUser.id); setConfirmUser(null); }}
+      />
     </AdminLayout>
   );
 };
