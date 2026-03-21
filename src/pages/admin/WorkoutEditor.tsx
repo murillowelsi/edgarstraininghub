@@ -948,11 +948,11 @@ const WorkoutEditor = () => {
                   <h2 className="font-semibold mb-4">Stages</h2>
                   <div className="space-y-3">
                     {formData.stages.length === 0 ? (
-                      <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                        <p className="text-muted-foreground mb-4">
+                      <div className="text-center py-10 border border-dashed rounded-lg">
+                        <p className="text-sm text-muted-foreground mb-4">
                           No stages yet. Add your first stage to get started.
                         </p>
-                        <Button onClick={handleAddStage}>
+                        <Button onClick={handleAddStage} size="sm" className="hidden lg:inline-flex">
                           <Plus className="h-4 w-4 mr-2" />
                           Add Stage
                         </Button>
