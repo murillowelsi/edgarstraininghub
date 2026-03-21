@@ -463,8 +463,8 @@ const AdminPostForm = () => {
 
         {/* Action Buttons */}
         <div className={cn(
-          "sticky bottom-0 bg-background border-t p-4 mt-6",
-          "md:static md:border-0 md:p-0"
+          "fixed bottom-16 left-0 right-0 z-20 bg-background border-t p-4",
+          "md:static md:bottom-auto md:border-0 md:p-0"
         )}>
           <div className="flex sm:justify-end gap-2">
             <Button
