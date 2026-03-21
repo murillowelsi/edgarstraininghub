@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmentsService";
@@ -49,6 +50,7 @@ const workoutTypeColors: Record<string, string> = {
 
 const AthleteHome = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState<string>("");
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
@@ -79,8 +81,8 @@ const AthleteHome = () => {
       } catch (error) {
         console.error("Error loading data:", error);
         toast({
-          title: "Error",
-          description: "Failed to load your data.",
+          title: t.common.error,
+          description: t.athlete.toast.loadError,
           variant: "destructive",
         });
       } finally {

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
 import { Loader2, Plus, Search, MessageSquare, ChevronLeft } from "lucide-react";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
@@ -17,6 +18,7 @@ import { formatDistanceToNow } from "date-fns";
 
 export default function AthleteChat() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -133,7 +135,7 @@ export default function AthleteChat() {
         if (otherId && adminMap[otherId]) {
             return adminMap[otherId];
         }
-        return "Coach"; // Fallback
+        return t.athlete.chat.coachFallback; // Fallback
     };
 
     const filteredAdmins = admins.filter(a =>
@@ -161,16 +163,16 @@ export default function AthleteChat() {
                     selectedChat ? "hidden md:flex" : "flex"
                 )}>
                     <div className="p-4 border-b flex items-center justify-between bg-muted/30">
-                        <h3 className="font-semibold">Conversations</h3>
+                        <h3 className="font-semibold">{t.athlete.chat.title}</h3>
                         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
                             <Plus className="h-5 w-5" />
                         </Button>
-                        <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title="New Message">
+                        <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title={t.athlete.chat.newMessage}>
                             <div className="p-2 space-y-4">
                                 <div className="relative">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
-                                        placeholder="Search coaches..."
+                                        placeholder={t.athlete.chat.searchCoaches}
                                         className="pl-9"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -178,7 +180,7 @@ export default function AthleteChat() {
                                 </div>
                                 <div className="h-[300px] overflow-y-auto space-y-2">
                                     {filteredAdmins.length === 0 ? (
-                                        <p className="text-center text-muted-foreground p-4">No coaches found.</p>
+                                        <p className="text-center text-muted-foreground p-4">{t.athlete.chat.noCoachesFound}</p>
                                     ) : (
                                         filteredAdmins.map((admin) => (
                                             <button
@@ -205,13 +207,13 @@ export default function AthleteChat() {
                         {chats.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground p-4 text-center">
                                 <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
-                                <p className="text-sm">No conversations yet.</p>
+                                <p className="text-sm">{t.athlete.chat.noConversations}</p>
                                 <Button
                                     variant="link"
                                     className="mt-2"
                                     onClick={() => setIsNewChatOpen(true)}
                                 >
-                                    Start a chat
+                                    {t.athlete.chat.startChat}
                                 </Button>
                             </div>
                         ) : (
@@ -297,7 +299,7 @@ export default function AthleteChat() {
                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
                             <MessageSquare className="h-12 w-12 mb-4 opacity-20" />
                             <p className="text-lg font-medium">Select a conversation</p>
-                            <p className="text-sm">Choose a coach from the list or start a new chat.</p>
+                            <p className="text-sm">{t.athlete.chat.selectConversationDescription}</p>
                         </div>
                     )}
                 </div>

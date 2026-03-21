@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAllExercises } from "@/services/exercisesService";
@@ -340,6 +341,7 @@ const StrengthWorkoutSession = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
 
   // State
@@ -407,8 +409,8 @@ const StrengthWorkoutSession = () => {
       } catch (error) {
         console.error("Error loading workout:", error);
         toast({
-          title: "Error",
-          description: "Failed to load workout.",
+          title: t.common.error,
+          description: t.athlete.toast.sessionLoadError,
           variant: "destructive",
         });
       } finally {
@@ -506,15 +508,17 @@ const StrengthWorkoutSession = () => {
       );
 
       toast({
-        title: "Workout completed!",
-        description: `Great job! ${completionPercentage}% completed in ${formatTime(totalElapsedTime)}`,
+        title: t.athlete.toast.sessionCompleted,
+        description: t.athlete.toast.sessionCompletedDescription
+          .replace("{{percentage}}", String(completionPercentage))
+          .replace("{{time}}", formatTime(totalElapsedTime)),
       });
       navigate("/athlete");
     } catch (error) {
       console.error("Error saving workout:", error);
       toast({
-        title: "Error",
-        description: "Failed to save workout.",
+        title: t.common.error,
+        description: t.athlete.toast.sessionSaveError,
         variant: "destructive",
       });
     } finally {

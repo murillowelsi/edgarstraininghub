@@ -2,6 +2,7 @@ import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmentsService";
@@ -34,6 +35,7 @@ const workoutTypeColors: Record<string, string> = {
 
 const AthleteCalendarView = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,8 +56,8 @@ const AthleteCalendarView = () => {
       } catch (error) {
         console.error("Error loading assignments:", error);
         toast({
-          title: "Error",
-          description: "Failed to load your calendar.",
+          title: t.common.error,
+          description: t.athlete.toast.calendarLoadError,
           variant: "destructive",
         });
       } finally {

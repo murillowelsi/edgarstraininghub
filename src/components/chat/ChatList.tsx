@@ -2,6 +2,7 @@ import { Chat } from "@/types/chat";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ChatListProps {
     chats: Chat[];
@@ -16,13 +17,14 @@ export default function ChatList({
     onSelectChat,
     currentUserId
 }: ChatListProps) {
+    const { t } = useLanguage();
     return (
         <div className="flex flex-col h-full bg-background border-r">
 
             <div className="flex-1 overflow-y-auto">
                 {chats.length === 0 && (
                     <div className="p-4 text-center text-muted-foreground text-sm">
-                        No active chats.
+                        {t.chatComponent.noChats}
                     </div>
                 )}
 
@@ -59,7 +61,7 @@ export default function ChatList({
                                         "text-sm truncate max-w-[180px]",
                                         unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"
                                     )}>
-                                        {chat.lastMessage || "No messages yet"}
+                                        {chat.lastMessage || t.chatComponent.noMessagesYet}
                                     </p>
 
                                     {unreadCount > 0 && (

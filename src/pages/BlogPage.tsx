@@ -62,14 +62,14 @@ const BlogPage = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Blog & <span className="text-primary">Articles</span>
+              {t.blog.title} <span className="text-primary">{t.blog.titleHighlight}</span>
             </h1>
             <div
               className="h-1.5 w-24 mx-auto rounded-full mb-6"
               style={{ background: "var(--gradient-secondary)" }}
             />
             <p className="max-w-2xl mx-auto text-muted-foreground text-lg">
-              Practical tips on training, nutrition, and athletic performance
+              {t.blog.subtitle}
             </p>
           </div>
 
@@ -92,7 +92,7 @@ const BlogPage = () => {
           ) : posts.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">
-                No posts published yet. Check back soon!
+                {t.blog.noPosts}
               </p>
             </div>
           ) : (

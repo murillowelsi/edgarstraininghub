@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ChatWindowProps {
     messages: Message[];
@@ -22,6 +23,7 @@ export default function ChatWindow({
     isLoading,
     participantName
 }: ChatWindowProps) {
+    const { t } = useLanguage();
     const scrollRef = useRef<HTMLDivElement>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -57,7 +59,7 @@ export default function ChatWindow({
                 <div className="flex flex-col gap-4 min-h-0">
                     {messages.length === 0 && (
                         <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm py-8">
-                            No messages yet. Start a conversation!
+                            {t.chatComponent.noMessages}
                         </div>
                     )}
 

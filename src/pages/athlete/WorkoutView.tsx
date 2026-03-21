@@ -7,6 +7,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAllExercises } from "@/services/exercisesService";
@@ -480,6 +481,7 @@ const AthleteWorkoutView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [assignment, setAssignment] = useState<AssignmentWithWorkout | null>(
     null
@@ -511,8 +513,8 @@ const AthleteWorkoutView = () => {
       } catch (error) {
         console.error("Error loading workout:", error);
         toast({
-          title: "Error",
-          description: "Failed to load workout details.",
+          title: t.common.error,
+          description: t.athlete.toast.workoutLoadError,
           variant: "destructive",
         });
       } finally {
@@ -550,7 +552,7 @@ const AthleteWorkoutView = () => {
       });
 
       toast({
-        title: newCompletedState ? "Workout completed!" : "Workout unmarked",
+        title: newCompletedState ? t.athlete.toast.workoutCompleted : t.athlete.toast.workoutUnmarked,
         description: newCompletedState
           ? "Great job on completing your workout!"
           : "Workout marked as incomplete.",
@@ -558,8 +560,8 @@ const AthleteWorkoutView = () => {
     } catch (error) {
       console.error("Error updating workout:", error);
       toast({
-        title: "Error",
-        description: "Failed to update workout status.",
+        title: t.common.error,
+        description: t.athlete.toast.workoutStatusError,
         variant: "destructive",
       });
     } finally {
