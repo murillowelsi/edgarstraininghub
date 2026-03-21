@@ -1,0 +1,141 @@
+<h2>Tela de Sessão — Proposta de Melhoria</h2>
+<p class="subtitle">Vídeo inline + timer de descanso automático</p>
+
+<div style="max-width: 390px; margin: 0 auto;">
+
+  <!-- Header -->
+  <div style="background: #0f172a; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <div style="font-size: 13px; color: #64748b;">✕ Cancelar</div>
+    <div style="font-family: monospace; font-size: 24px; font-weight: 700; color: #6366f1;">00:14:32</div>
+    <div style="background: #6366f1; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: white;">Salvar</div>
+  </div>
+
+  <!-- Progress -->
+  <div style="background: #0f172a; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div style="font-size: 13px; color: #94a3b8;">Progresso</div>
+      <div style="font-size: 13px; font-weight: 600; color: #6366f1;">1 de 3 exercícios</div>
+    </div>
+    <div style="height: 6px; background: #1e293b; border-radius: 99px; overflow: hidden;">
+      <div style="height: 100%; width: 33%; background: #6366f1; border-radius: 99px;"></div>
+    </div>
+  </div>
+
+  <!-- Exercise Card 1 - WITH VIDEO PLAYING (expanded) -->
+  <div style="background: #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 12px; border: 1.5px solid #6366f1;">
+
+    <!-- Video thumbnail area (playing state) -->
+    <div style="position: relative; aspect-ratio: 16/9; background: #000; cursor: pointer;">
+      <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a1a2e, #0f1729); display: flex; align-items: center; justify-content: center;">
+        <!-- Simulated GIF/video frame -->
+        <div style="text-align: center;">
+          <div style="font-size: 40px; margin-bottom: 4px;">🏋️</div>
+          <div style="color: rgba(255,255,255,0.3); font-size: 11px;">Vídeo tocando</div>
+        </div>
+      </div>
+      <!-- Playing indicator -->
+      <div style="position: absolute; top: 10px; left: 10px; background: rgba(99,102,241,0.9); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: white; font-weight: 600;">▶ AO VIVO</div>
+      <!-- Tap to pause hint -->
+      <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: rgba(255,255,255,0.7);">toque para pausar</div>
+    </div>
+
+    <!-- Exercise info -->
+    <div style="padding: 12px 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+        <div>
+          <div style="font-weight: 700; color: #f1f5f9; font-size: 15px;">Supino Reto</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">4 séries × 8 reps · 90s descanso</div>
+        </div>
+        <div style="background: #166534; border-radius: 6px; padding: 3px 10px; font-size: 11px; color: #4ade80;">1/4 ✓</div>
+      </div>
+
+      <!-- REST TIMER — active after completing a set -->
+      <div style="background: #1e293b; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; border: 1px solid #334155; text-align: center;">
+        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Descanso</div>
+        <div style="font-family: monospace; font-size: 32px; font-weight: 700; color: #f59e0b; line-height: 1;">01:23</div>
+        <div style="height: 4px; background: #334155; border-radius: 99px; margin: 10px 0 8px; overflow: hidden;">
+          <div style="height: 100%; width: 60%; background: #f59e0b; border-radius: 99px; transition: width 1s linear;"></div>
+        </div>
+        <div style="display: flex; gap: 8px; justify-content: center;">
+          <div style="border: 1px solid #334155; border-radius: 6px; padding: 5px 14px; font-size: 12px; color: #64748b; cursor: pointer;">Pular</div>
+          <div style="background: #f59e0b; border-radius: 6px; padding: 5px 14px; font-size: 12px; color: #000; font-weight: 600; cursor: pointer;">+30s</div>
+        </div>
+      </div>
+
+      <!-- Sets table -->
+      <div style="display: grid; grid-template-columns: 30px 1fr 1fr 1fr 32px; gap: 6px; align-items: center; font-size: 12px; color: #64748b; padding: 0 2px; margin-bottom: 6px;">
+        <div>#</div><div>Ant.</div><div>Reps</div><div>Kg</div><div></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <!-- Set 1 - done -->
+        <div style="display: grid; grid-template-columns: 30px 1fr 1fr 1fr 32px; gap: 6px; align-items: center; background: #052e16; border-radius: 8px; padding: 8px 10px;">
+          <div style="font-size: 12px; color: #4ade80; font-weight: 600;">1</div>
+          <div style="font-size: 12px; color: #64748b;">8×60</div>
+          <div style="font-size: 13px; color: #f1f5f9; font-weight: 600;">8</div>
+          <div style="font-size: 13px; color: #f1f5f9; font-weight: 600;">62</div>
+          <div style="width: 24px; height: 24px; background: #4ade80; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;">✓</div>
+        </div>
+        <!-- Set 2 - current -->
+        <div style="display: grid; grid-template-columns: 30px 1fr 1fr 1fr 32px; gap: 6px; align-items: center; background: #1e293b; border-radius: 8px; padding: 8px 10px; border: 1px solid #6366f1;">
+          <div style="font-size: 12px; color: #94a3b8;">2</div>
+          <div style="font-size: 12px; color: #64748b;">8×60</div>
+          <div style="background: #0f172a; border-radius: 6px; padding: 4px 8px; font-size: 13px; color: #f1f5f9; text-align: center;">8</div>
+          <div style="background: #0f172a; border-radius: 6px; padding: 4px 8px; font-size: 13px; color: #f1f5f9; text-align: center;">62</div>
+          <div style="width: 24px; height: 24px; background: #1e293b; border-radius: 6px; border: 1.5px solid #334155;"></div>
+        </div>
+        <!-- Set 3 -->
+        <div style="display: grid; grid-template-columns: 30px 1fr 1fr 1fr 32px; gap: 6px; align-items: center; background: #1e293b; border-radius: 8px; padding: 8px 10px; opacity: 0.5;">
+          <div style="font-size: 12px; color: #94a3b8;">3</div>
+          <div style="font-size: 12px; color: #64748b;">8×60</div>
+          <div style="background: #0f172a; border-radius: 6px; padding: 4px 8px; font-size: 13px; color: #475569; text-align: center;">—</div>
+          <div style="background: #0f172a; border-radius: 6px; padding: 4px 8px; font-size: 13px; color: #475569; text-align: center;">—</div>
+          <div style="width: 24px; height: 24px; background: #1e293b; border-radius: 6px; border: 1.5px solid #334155;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise Card 2 - collapsed with thumbnail -->
+  <div style="background: #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 12px; opacity: 0.6;">
+    <div style="display: flex; align-items: center; gap: 0;">
+      <!-- Small thumbnail -->
+      <div style="width: 80px; height: 72px; flex-shrink: 0; background: linear-gradient(135deg, #1a1a2e, #0f1729); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;">
+        <div style="font-size: 24px;">🏃</div>
+        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3);">
+          <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">▶</div>
+        </div>
+      </div>
+      <!-- Info -->
+      <div style="padding: 12px 14px; flex: 1;">
+        <div style="font-weight: 600; color: #f1f5f9; font-size: 14px;">Agachamento</div>
+        <div style="font-size: 12px; color: #64748b; margin-top: 2px;">4 × 10 reps · 60s</div>
+        <div style="font-size: 11px; color: #475569; margin-top: 4px;">Pendente</div>
+      </div>
+      <div style="padding: 0 14px; font-size: 18px; color: #334155;">›</div>
+    </div>
+  </div>
+
+  <!-- Exercise Card 3 - collapsed with thumbnail -->
+  <div style="background: #0f172a; border-radius: 12px; overflow: hidden; opacity: 0.4;">
+    <div style="display: flex; align-items: center; gap: 0;">
+      <div style="width: 80px; height: 72px; flex-shrink: 0; background: linear-gradient(135deg, #1e3a5f, #0f2a4a); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;">
+        <div style="font-size: 24px;">💪</div>
+        <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+          <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">▶</div>
+        </div>
+      </div>
+      <div style="padding: 12px 14px; flex: 1;">
+        <div style="font-weight: 600; color: #f1f5f9; font-size: 14px;">Desenvolvimento</div>
+        <div style="font-size: 12px; color: #64748b; margin-top: 2px;">3 × 12 reps · 60s</div>
+        <div style="font-size: 11px; color: #475569; margin-top: 4px;">Pendente</div>
+      </div>
+      <div style="padding: 0 14px; font-size: 18px; color: #334155;">›</div>
+    </div>
+  </div>
+
+  <p class="subtitle" style="text-align: center; margin-top: 20px; font-size: 12px;">
+    ✅ Série marcada → timer de descanso inicia automaticamente<br>
+    ▶ Thumbnail nos cards → clica para tocar o vídeo inline
+  </p>
+
+</div>

@@ -6,12 +6,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -56,6 +50,7 @@ import {
   Play,
   Repeat,
   Waves,
+  X,
 } from "lucide-react";
 
 // Format time as MM:SS or HH:MM:SS
@@ -280,134 +275,18 @@ const StageItem = ({
   );
 };
 
-// Exercise data type for video dialog (can be from Exercise or denormalized data)
-interface ExerciseDialogData {
-  name: string;
-  videoUrl?: string;
-  gifUrl?: string;
-  instructions?: string;
-  muscleGroups?: string[];
-  equipment?: string[];
-  targetMuscle?: string;
-}
-
-// Video dialog for exercises
-const ExerciseVideoDialog = ({
-  exerciseData,
-  open,
-  onOpenChange,
-}: {
-  exerciseData: ExerciseDialogData | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) => {
-  if (!exerciseData) return null;
-
-  const videoId = exerciseData.videoUrl ? getYouTubeVideoId(exerciseData.videoUrl) : null;
-  const hasGif = !!exerciseData.gifUrl;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle>{exerciseData.name}</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {/* Media - GIF or Video */}
-          <div className={cn("bg-muted rounded-lg overflow-hidden", hasGif ? "aspect-square max-w-md mx-auto" : "aspect-video")}>
-            {hasGif ? (
-              <img
-                src={exerciseData.gifUrl}
-                alt={exerciseData.name}
-                className="w-full h-full object-cover"
-              />
-            ) : videoId ? (
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}`}
-                title={exerciseData.name}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                No video available
-              </div>
-            )}
-          </div>
-
-          {/* Details */}
-          <div className="space-y-4">
-            {exerciseData.targetMuscle && (
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Target Muscle
-                </p>
-                <Badge variant="default" className="capitalize">
-                  {exerciseData.targetMuscle}
-                </Badge>
-              </div>
-            )}
-
-            {exerciseData.muscleGroups && exerciseData.muscleGroups.length > 0 && (
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Muscle Groups
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {exerciseData.muscleGroups.map((mg) => (
-                    <Badge key={mg} variant="secondary">
-                      {muscleGroupLabels[mg as keyof typeof muscleGroupLabels] || mg}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {exerciseData.equipment && exerciseData.equipment.length > 0 && (
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Equipment
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {exerciseData.equipment.map((eq) => (
-                    <Badge key={eq} variant="outline">
-                      {equipmentTypeLabels[eq as keyof typeof equipmentTypeLabels] || eq}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {exerciseData.instructions && (
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Instructions
-                </p>
-                <p className="text-sm whitespace-pre-wrap">{exerciseData.instructions}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 // Exercise item component for strength workouts
 const ExerciseItem = ({
   workoutExercise,
   exercise,
   index,
-  onVideoClick,
 }: {
   workoutExercise: WorkoutExercise;
   exercise?: Exercise;
   index: number;
-  onVideoClick: () => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Use exercise from lookup, or fall back to denormalized data stored with workout
   const exerciseName = exercise?.name || workoutExercise.exerciseName || "Exercise";
@@ -415,6 +294,7 @@ const ExerciseItem = ({
   const thumbnailUrl = exercise?.thumbnailUrl || workoutExercise.exerciseThumbnailUrl;
   const gifUrl = exercise?.gifUrl || workoutExercise.exerciseGifUrl;
   const muscleGroups = exercise?.muscleGroups || workoutExercise.exerciseMuscleGroups;
+  const instructions = exercise?.instructions || workoutExercise.exerciseInstructions;
 
   const videoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
   const thumbnail = videoId
@@ -453,34 +333,63 @@ const ExerciseItem = ({
 
         <CollapsibleContent>
           <div className="px-4 pb-4 pt-2 border-t border-border/50 space-y-3">
-            {/* Media Thumbnail - GIF or Video */}
+            {/* Media - Inline Player or Thumbnail */}
             {mediaUrl && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onVideoClick();
-                }}
-                className={cn(
-                  "relative w-full bg-muted rounded-lg overflow-hidden group",
+              isPlaying ? (
+                <div className={cn(
+                  "relative rounded-lg overflow-hidden",
                   hasGif ? "aspect-square max-w-xs mx-auto" : "aspect-video"
-                )}
-              >
-                <img
-                  src={mediaUrl}
-                  alt={exerciseName}
-                  className="w-full h-full object-cover"
-                />
-                {!hasGif && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-                      <Play className="h-8 w-8 text-black ml-1" />
-                    </div>
-                  </div>
-                )}
-                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                  {hasGif ? "View Animation" : "Watch Video"}
+                )}>
+                  {hasGif ? (
+                    <img
+                      src={gifUrl}
+                      alt={exerciseName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : videoId ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
+                      title={exerciseName}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      className="w-full h-full"
+                    />
+                  ) : null}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsPlaying(false); }}
+                    className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black/90"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-              </button>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsPlaying(true);
+                  }}
+                  className={cn(
+                    "relative w-full bg-muted rounded-lg overflow-hidden group",
+                    hasGif ? "aspect-square max-w-xs mx-auto" : "aspect-video"
+                  )}
+                >
+                  <img
+                    src={mediaUrl}
+                    alt={exerciseName}
+                    className="w-full h-full object-cover"
+                  />
+                  {!hasGif && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+                        <Play className="h-8 w-8 text-black ml-1" />
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    {hasGif ? "View Animation" : "Watch Video"}
+                  </div>
+                </button>
+              )
             )}
 
             {/* Exercise Details */}
@@ -526,6 +435,16 @@ const ExerciseItem = ({
               </div>
             )}
 
+            {/* Instructions */}
+            {instructions && (
+              <div className="bg-muted/50 p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground uppercase font-medium">
+                  Instructions
+                </p>
+                <p className="text-sm mt-1 whitespace-pre-wrap">{instructions}</p>
+              </div>
+            )}
+
             {/* Notes */}
             {workoutExercise.notes && (
               <div className="bg-muted/50 p-3 rounded-lg">
@@ -536,14 +455,14 @@ const ExerciseItem = ({
               </div>
             )}
 
-            {/* Watch Video Button (if no media preview) */}
+            {/* Watch Video Button (if no media preview but has video/gif data) */}
             {(videoId || hasGif) && !mediaUrl && (
               <Button
                 variant="outline"
                 className="w-full"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onVideoClick();
+                  setIsPlaying(true);
                 }}
               >
                 <Play className="h-4 w-4 mr-2" />
@@ -568,7 +487,6 @@ const AthleteWorkoutView = () => {
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [selectedExerciseData, setSelectedExerciseData] = useState<ExerciseDialogData | null>(null);
 
   useEffect(() => {
     const loadAssignment = async () => {
@@ -617,20 +535,6 @@ const AthleteWorkoutView = () => {
     }
     return exercise;
   };
-
-  // Build exercise data for video dialog (from exercise or denormalized data)
-  const buildExerciseDialogData = (
-    workoutExercise: WorkoutExercise,
-    exercise?: Exercise
-  ): ExerciseDialogData => ({
-    name: exercise?.name || workoutExercise.exerciseName || "Exercise",
-    videoUrl: exercise?.videoUrl || workoutExercise.exerciseVideoUrl,
-    gifUrl: exercise?.gifUrl || workoutExercise.exerciseGifUrl,
-    instructions: exercise?.instructions || workoutExercise.exerciseInstructions,
-    muscleGroups: exercise?.muscleGroups || workoutExercise.exerciseMuscleGroups,
-    equipment: exercise?.equipment,
-    targetMuscle: exercise?.targetMuscle,
-  });
 
   const handleToggleComplete = async () => {
     if (!assignment) return;
@@ -803,7 +707,6 @@ const AthleteWorkoutView = () => {
                       workoutExercise={workoutExercise}
                       exercise={exercise}
                       index={index}
-                      onVideoClick={() => setSelectedExerciseData(buildExerciseDialogData(workoutExercise, exercise))}
                     />
                   );
                 })}
@@ -865,12 +768,6 @@ const AthleteWorkoutView = () => {
         )}
       </div>
 
-      {/* Exercise Video Dialog */}
-      <ExerciseVideoDialog
-        exerciseData={selectedExerciseData}
-        open={!!selectedExerciseData}
-        onOpenChange={(open) => !open && setSelectedExerciseData(null)}
-      />
     </div>
   );
 };

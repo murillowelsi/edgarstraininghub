@@ -1,0 +1,99 @@
+<h2>Como o vídeo do exercício deve funcionar?</h2>
+<p class="subtitle">Hoje abre um modal — qual das opções abaixo faz mais sentido?</p>
+
+<div class="cards" style="gap: 24px; display: flex; flex-direction: column;">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)" style="padding: 0; overflow: hidden;">
+    <div class="card-body" style="padding: 16px 20px 8px;">
+      <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 4px;">
+        <div class="letter" style="flex-shrink:0; width:28px; height:28px; font-size:13px;">A</div>
+        <h3 style="margin:0;">Inline toggle — vídeo abre dentro do card</h3>
+      </div>
+      <p style="margin: 4px 0 12px; color: var(--text-secondary); font-size: 14px;">Clica no thumbnail → o card se expande e o vídeo toca ali mesmo. Clica de novo para recolher.</p>
+    </div>
+    <div class="mockup-body" style="background: #0f172a; padding: 16px; margin: 0;">
+      <!-- Exercise card mockup -->
+      <div style="background: #1e293b; border-radius: 10px; overflow: hidden;">
+        <div style="padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 600; color: #f1f5f9; font-size: 14px;">Supino Reto</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">4 séries × 8 reps · 90s descanso</div>
+          </div>
+          <div style="background: #334155; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #94a3b8;">▶ Assistir</div>
+        </div>
+        <!-- Expanded video inline -->
+        <div style="background: #000; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a1a2e, #16213e); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
+            <div style="width: 56px; height: 56px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px;">▶</div>
+            <div style="color: rgba(255,255,255,0.5); font-size: 12px;">Vídeo tocando inline</div>
+          </div>
+        </div>
+        <div style="padding: 12px 14px; display: flex; gap: 8px; align-items: center; justify-content: flex-end; border-top: 1px solid #334155;">
+          <div style="font-size: 12px; color: #64748b;">▲ Fechar vídeo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)" style="padding: 0; overflow: hidden;">
+    <div class="card-body" style="padding: 16px 20px 8px;">
+      <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 4px;">
+        <div class="letter" style="flex-shrink:0; width:28px; height:28px; font-size:13px;">B</div>
+        <h3 style="margin:0;">Preview fixo — thumbnail sempre visível no card</h3>
+      </div>
+      <p style="margin: 4px 0 12px; color: var(--text-secondary); font-size: 14px;">O card já mostra um thumbnail pequeno. Clica → vídeo começa a tocar inline no lugar do thumbnail.</p>
+    </div>
+    <div class="mockup-body" style="background: #0f172a; padding: 16px; margin: 0;">
+      <div style="background: #1e293b; border-radius: 10px; overflow: hidden; display: flex;">
+        <!-- Thumbnail column -->
+        <div style="width: 100px; flex-shrink: 0; background: #000; display: flex; align-items: center; justify-content: center; position: relative; min-height: 80px;">
+          <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">▶</div>
+          </div>
+        </div>
+        <!-- Content column -->
+        <div style="padding: 12px 14px; flex: 1;">
+          <div style="font-weight: 600; color: #f1f5f9; font-size: 14px;">Supino Reto</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">4 séries × 8 reps</div>
+          <div style="font-size: 12px; color: #94a3b8;">90s descanso</div>
+          <div style="margin-top: 8px; display: flex; gap: 6px;">
+            <div style="background: #1d4ed8; border-radius: 4px; padding: 2px 8px; font-size: 11px; color: #93c5fd;">Peito</div>
+            <div style="background: #334155; border-radius: 4px; padding: 2px 8px; font-size: 11px; color: #94a3b8;">Tríceps</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)" style="padding: 0; overflow: hidden;">
+    <div class="card-body" style="padding: 16px 20px 8px;">
+      <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 4px;">
+        <div class="letter" style="flex-shrink:0; width:28px; height:28px; font-size:13px;">C</div>
+        <h3 style="margin:0;">Player flutuante — vídeo fica no topo da tela</h3>
+      </div>
+      <p style="margin: 4px 0 12px; color: var(--text-secondary); font-size: 14px;">Clica no exercício → vídeo abre numa área fixa no topo da tela. O atleta rola a lista de séries enquanto o vídeo fica visível.</p>
+    </div>
+    <div class="mockup-body" style="background: #0f172a; padding: 16px; margin: 0;">
+      <div style="background: #1e293b; border-radius: 10px; overflow: hidden;">
+        <!-- Sticky video at top -->
+        <div style="background: #000; aspect-ratio: 16/7; display: flex; align-items: center; justify-content: center; position: relative;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a1a2e, #16213e); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px;">
+            <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;">▶</div>
+            <div style="color: rgba(255,255,255,0.4); font-size: 11px;">Supino Reto — player fixo</div>
+          </div>
+          <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: #94a3b8;">✕</div>
+        </div>
+        <!-- Scrollable content below -->
+        <div style="padding: 12px 14px;">
+          <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">↕ Role para ver as séries enquanto assiste</div>
+          <div style="background: #334155; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #94a3b8;">Série 1 · 8 reps · 60kg</div>
+          <div style="background: #334155; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #94a3b8; margin-top: 6px;">Série 2 · 8 reps · 60kg</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
