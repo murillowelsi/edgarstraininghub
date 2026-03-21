@@ -218,7 +218,7 @@ const DraggableStage = ({
             <CollapsibleContent>
               <div className={`ml-9 mt-3 pt-3 border-t space-y-3 ${isNested ? 'text-xs' : 'text-sm'}`}>
                 {/* Duration & Intensity row */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                       Duration
@@ -254,7 +254,7 @@ const DraggableStage = ({
                 {/* Swimming-specific details */}
                 {((stage.drillType && stage.drillType !== "none") ||
                   (stage.equipment && stage.equipment !== "none")) && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {stage.drillType && stage.drillType !== "none" && (
                       <div>
                         <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
