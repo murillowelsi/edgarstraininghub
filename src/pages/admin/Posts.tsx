@@ -12,6 +12,7 @@ import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
 import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 const AdminPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -20,6 +21,7 @@ const AdminPosts = () => {
   const [confirmPost, setConfirmPost] = useState<Post | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     loadPosts();
@@ -32,8 +34,8 @@ const AdminPosts = () => {
     } catch (error) {
       console.error("Error loading posts:", error);
       toast({
-        title: "Error",
-        description: "Failed to load posts.",
+        title: t.common.error,
+        description: t.admin.posts.toast.loadError,
         variant: "destructive",
       });
     } finally {
@@ -47,14 +49,14 @@ const AdminPosts = () => {
       await deletePost(id);
       setPosts(posts.filter((p) => p.id !== id));
       toast({
-        title: "Post deleted",
-        description: "The post has been permanently deleted.",
+        title: t.admin.posts.toast.deleted,
+        description: t.admin.posts.toast.deletedDescription,
       });
     } catch (error) {
       console.error("Error deleting post:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete post.",
+        title: t.common.error,
+        description: t.admin.posts.toast.deleteError,
         variant: "destructive",
       });
     } finally {
@@ -66,17 +68,17 @@ const AdminPosts = () => {
     <AdminLayout>
       <div className="p-4 md:p-8 pb-24 md:pb-8">
         <AdminPageHeader
-          title="Posts"
-          action={{ label: "New Post", icon: Plus, onClick: () => navigate("/admin/posts/new") }}
+          title={t.admin.posts.title}
+          action={{ label: t.admin.posts.newPost, icon: Plus, onClick: () => navigate("/admin/posts/new") }}
         />
 
         <ResponsiveTable
           loading={loading}
           rowKey="_id"
           columns={[
-            { key: "title", label: "Title" },
-            { key: "status", label: "Status" },
-            { key: "created", label: "Created" },
+            { key: "title", label: t.admin.posts.columns.title },
+            { key: "status", label: t.admin.posts.columns.status },
+            { key: "created", label: t.admin.posts.columns.created },
           ]}
           rows={posts.map((post) => ({
             _id: post.id,
@@ -87,9 +89,9 @@ const AdminPosts = () => {
               </div>
             ),
             status: post.published ? (
-              <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20">Published</Badge>
+              <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20">{t.admin.posts.published}</Badge>
             ) : (
-              <Badge variant="secondary">Draft</Badge>
+              <Badge variant="secondary">{t.admin.posts.draft}</Badge>
             ),
             created: format(post.createdAt, "MMM d, yyyy"),
             _post: post,
@@ -117,9 +119,9 @@ const AdminPosts = () => {
           emptyState={
             <AdminEmptyState
               icon={FileText}
-              title="No posts yet"
-              description="Create your first blog post to get started."
-              action={{ label: "New Post", onClick: () => navigate("/admin/posts/new") }}
+              title={t.admin.posts.empty.title}
+              description={t.admin.posts.empty.description}
+              action={{ label: t.admin.posts.newPost, onClick: () => navigate("/admin/posts/new") }}
             />
           }
         />
@@ -127,9 +129,9 @@ const AdminPosts = () => {
       <ResponsiveConfirm
         open={confirmPost !== null}
         onOpenChange={(open) => { if (!open) setConfirmPost(null); }}
-        title="Delete Post"
-        description={<>Are you sure you want to delete "<strong>{confirmPost?.title}</strong>"? This action cannot be undone.</>}
-        confirmLabel="Delete"
+        title={t.admin.posts.delete.title}
+        description={<>{t.admin.posts.delete.description.replace("{{name}}", confirmPost?.title || "")}</>}
+        confirmLabel={t.common.delete}
         destructive
         loading={deleting !== null}
         onConfirm={() => { if (confirmPost) handleDelete(confirmPost.id); setConfirmPost(null); }}

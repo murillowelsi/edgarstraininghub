@@ -13,6 +13,7 @@ import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
 import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
 import { useAuth } from "../../contexts/AuthContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 const roleBadgeColors: Record<UserRole, string> = {
   admin: "bg-red-500/10 text-red-600 hover:bg-red-500/20",
@@ -28,6 +29,7 @@ const AdminUsers = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     loadUsers();
@@ -40,8 +42,8 @@ const AdminUsers = () => {
     } catch (error) {
       console.error("Error loading users:", error);
       toast({
-        title: "Error",
-        description: "Failed to load users.",
+        title: t.common.error,
+        description: t.admin.users.toast.loadError,
         variant: "destructive",
       });
     } finally {
@@ -52,8 +54,8 @@ const AdminUsers = () => {
   const handleDelete = async (id: string) => {
     if (id === user?.uid) {
       toast({
-        title: "Error",
-        description: "You cannot delete your own account.",
+        title: t.common.error,
+        description: t.admin.users.delete.selfDeleteError,
         variant: "destructive",
       });
       return;
@@ -64,14 +66,14 @@ const AdminUsers = () => {
       await deleteUser(id);
       setUsers(users.filter((u) => u.id !== id));
       toast({
-        title: "User deleted",
-        description: "The user has been removed.",
+        title: t.admin.users.toast.deleted,
+        description: t.admin.users.toast.deletedDescription,
       });
     } catch (error) {
       console.error("Error deleting user:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete user.",
+        title: t.common.error,
+        description: t.admin.users.toast.deleteError,
         variant: "destructive",
       });
     } finally {
@@ -83,18 +85,18 @@ const AdminUsers = () => {
     <AdminLayout>
       <div className="p-4 md:p-8 pb-24 md:pb-8">
         <AdminPageHeader
-          title="Users"
-          action={{ label: "New User", icon: Plus, onClick: () => navigate("/admin/users/new") }}
+          title={t.admin.users.title}
+          action={{ label: t.admin.users.newUser, icon: Plus, onClick: () => navigate("/admin/users/new") }}
         />
 
         <ResponsiveTable
           loading={loading}
           rowKey="_id"
           columns={[
-            { key: "name", label: "Name" },
-            { key: "email", label: "Email" },
-            { key: "role", label: "Role", mobilePrimaryBadge: true },
-            { key: "created", label: "Created", mobileHidden: true },
+            { key: "name", label: t.admin.users.columns.name },
+            { key: "email", label: t.admin.users.columns.email },
+            { key: "role", label: t.admin.users.columns.role, mobilePrimaryBadge: true },
+            { key: "created", label: t.admin.users.columns.created, mobileHidden: true },
           ]}
           rows={users.map((u) => ({
             _id: u.id,
@@ -102,14 +104,14 @@ const AdminUsers = () => {
               <span className="font-medium">
                 {u.displayName}
                 {u.id === user?.uid && (
-                  <span className="ml-2 text-xs text-muted-foreground">(you)</span>
+                  <span className="ml-2 text-xs text-muted-foreground">({t.admin.users.you})</span>
                 )}
               </span>
             ),
             email: u.email,
             role: (
               <Badge className={roleBadgeColors[u.role]}>
-                {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+                {t.admin.users.roles[u.role]}
               </Badge>
             ),
             created: format(u.createdAt, "MMM d, yyyy"),
@@ -139,9 +141,9 @@ const AdminUsers = () => {
           emptyState={
             <AdminEmptyState
               icon={Users}
-              title="No users yet"
-              description="Add your first user to get started."
-              action={{ label: "New User", onClick: () => navigate("/admin/users/new") }}
+              title={t.admin.users.empty.title}
+              description={t.admin.users.empty.description}
+              action={{ label: t.admin.users.newUser, onClick: () => navigate("/admin/users/new") }}
             />
           }
         />
@@ -149,9 +151,9 @@ const AdminUsers = () => {
       <ResponsiveConfirm
         open={confirmUser !== null}
         onOpenChange={(open) => { if (!open) setConfirmUser(null); }}
-        title="Delete User"
-        description={<>Are you sure you want to delete "<strong>{confirmUser?.displayName}</strong>"? This action cannot be undone.</>}
-        confirmLabel="Delete"
+        title={t.admin.users.delete.title}
+        description={<>{t.admin.users.delete.description.replace("{{name}}", confirmUser?.displayName || "")}</>}
+        confirmLabel={t.common.delete}
         destructive
         loading={deleting !== null}
         onConfirm={() => { if (confirmUser) handleDelete(confirmUser.id); setConfirmUser(null); }}

@@ -27,6 +27,7 @@ import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
 import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
 import { AssignWorkoutDialog } from "../../components/workout/AssignWorkoutDialog";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 const workoutTypeLabels: Record<string, string> = {
   running: "Running",
@@ -52,6 +53,7 @@ const AdminWorkouts = () => {
   const [newWorkoutDrawerOpen, setNewWorkoutDrawerOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     loadWorkouts();
@@ -64,8 +66,8 @@ const AdminWorkouts = () => {
     } catch (error) {
       console.error("Error loading workouts:", error);
       toast({
-        title: "Error",
-        description: "Failed to load workouts.",
+        title: t.common.error,
+        description: t.admin.workouts.toast.loadError,
         variant: "destructive",
       });
     } finally {
@@ -81,14 +83,14 @@ const AdminWorkouts = () => {
       await deleteWorkout(id);
       setWorkouts(workouts.filter((w) => w.id !== id));
       toast({
-        title: "Workout deleted",
-        description: "The workout and its assignments have been permanently deleted.",
+        title: t.admin.workouts.toast.deleted,
+        description: t.admin.workouts.toast.deletedDescription,
       });
     } catch (error) {
       console.error("Error deleting workout:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete workout.",
+        title: t.common.error,
+        description: t.admin.workouts.toast.deleteError,
         variant: "destructive",
       });
     } finally {
@@ -105,13 +107,13 @@ const AdminWorkouts = () => {
     <AdminLayout>
       <div className="p-4 md:p-8 pb-24 md:pb-8">
         <AdminPageHeader
-          title="Workouts"
+          title={t.admin.workouts.title}
           actions={
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
-                  New Workout
+                  {t.admin.workouts.newWorkout}
                   <ChevronDown className="h-4 w-4 ml-2" />
                 </Button>
               </DropdownMenuTrigger>
@@ -119,25 +121,25 @@ const AdminWorkouts = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/admin/workouts/new?type=running" className="flex items-center">
                     <GrRun className="h-4 w-4 mr-2" />
-                    Running Workout
+                    {t.admin.workouts.runningWorkout}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/admin/workouts/new?type=cycling" className="flex items-center">
                     <GrBike className="h-4 w-4 mr-2" />
-                    Cycling Workout
+                    {t.admin.workouts.cyclingWorkout}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/admin/workouts/new?type=swimming" className="flex items-center">
                     <GrSwim className="h-4 w-4 mr-2" />
-                    Swimming Workout
+                    {t.admin.workouts.swimmingWorkout}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/admin/workouts/strength/new" className="flex items-center">
                     <Dumbbell className="h-4 w-4 mr-2" />
-                    Strength Workout
+                    {t.admin.workouts.strengthWorkout}
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -147,7 +149,7 @@ const AdminWorkouts = () => {
             <button
               onClick={() => setNewWorkoutDrawerOpen(true)}
               className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-              aria-label="New Workout"
+              aria-label={t.admin.workouts.newWorkout}
             >
               <Plus className="h-6 w-6" />
             </button>
@@ -158,10 +160,10 @@ const AdminWorkouts = () => {
           loading={loading}
           rowKey="_id"
           columns={[
-            { key: "name", label: "Name" },
-            { key: "type", label: "Type" },
+            { key: "name", label: t.common.name },
+            { key: "type", label: t.common.type },
             { key: "stages", label: "Stages" },
-            { key: "created", label: "Created" },
+            { key: "created", label: t.common.created },
           ]}
           rows={workouts.map((workout) => ({
             _id: workout.id,
@@ -225,9 +227,9 @@ const AdminWorkouts = () => {
           emptyState={
             <AdminEmptyState
               icon={Dumbbell}
-              title="No workouts yet"
-              description="Create your first workout to get started."
-              action={{ label: "New Workout", onClick: () => navigate("/admin/workouts/new") }}
+              title={t.admin.workouts.empty.title}
+              description={t.admin.workouts.empty.description}
+              action={{ label: t.admin.workouts.newWorkout, onClick: () => navigate("/admin/workouts/new") }}
             />
           }
         />
@@ -237,14 +239,14 @@ const AdminWorkouts = () => {
       <Drawer open={newWorkoutDrawerOpen} onOpenChange={setNewWorkoutDrawerOpen}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>New Workout</DrawerTitle>
+            <DrawerTitle>{t.admin.workouts.newWorkout}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6 space-y-2">
             {[
-              { label: "Running Workout", icon: <GrRun className="h-5 w-5" />, to: "/admin/workouts/new?type=running" },
-              { label: "Cycling Workout", icon: <GrBike className="h-5 w-5" />, to: "/admin/workouts/new?type=cycling" },
-              { label: "Swimming Workout", icon: <GrSwim className="h-5 w-5" />, to: "/admin/workouts/new?type=swimming" },
-              { label: "Strength Workout", icon: <Dumbbell className="h-5 w-5" />, to: "/admin/workouts/strength/new" },
+              { label: t.admin.workouts.runningWorkout, icon: <GrRun className="h-5 w-5" />, to: "/admin/workouts/new?type=running" },
+              { label: t.admin.workouts.cyclingWorkout, icon: <GrBike className="h-5 w-5" />, to: "/admin/workouts/new?type=cycling" },
+              { label: t.admin.workouts.swimmingWorkout, icon: <GrSwim className="h-5 w-5" />, to: "/admin/workouts/new?type=swimming" },
+              { label: t.admin.workouts.strengthWorkout, icon: <Dumbbell className="h-5 w-5" />, to: "/admin/workouts/strength/new" },
             ].map(({ label, icon, to }) => (
               <Link
                 key={to}
@@ -269,9 +271,9 @@ const AdminWorkouts = () => {
       <ResponsiveConfirm
         open={!!confirmWorkout}
         onOpenChange={(open) => { if (!open) setConfirmWorkout(null); }}
-        title="Delete Workout"
-        description={`Are you sure you want to delete "${confirmWorkout?.name}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t.admin.workouts.delete.title}
+        description={t.admin.workouts.delete.description.replace("{{name}}", confirmWorkout?.name || "")}
+        confirmLabel={t.common.delete}
         destructive
         loading={deleting === confirmWorkout?.id}
         onConfirm={() => {
