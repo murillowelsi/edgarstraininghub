@@ -1,6 +1,6 @@
-import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
+import { cleanupOutdatedCaches, precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching'
 import { clientsClaim } from 'workbox-core'
-import { registerRoute } from 'workbox-routing'
+import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
@@ -13,6 +13,14 @@ clientsClaim()
 // Precache all build assets
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
+
+// SPA navigation fallback — all routes (/, /app, /athlete, /admin/...) serve index.html
+// This is required so the PWA works correctly when opened at any deep URL
+const handler = createHandlerBoundToURL('/index.html')
+registerRoute(new NavigationRoute(handler, {
+  // Exclude the Firebase messaging SW from the fallback
+  denylist: [/firebase-messaging-sw\.js/],
+}))
 
 // Runtime caching rules (mirrors vite.config.ts runtimeCaching)
 registerRoute(
