@@ -7,6 +7,7 @@ import { Chat, Message } from "@/types/chat";
 import { Loader2, Plus, Search, MessageSquare, ChevronLeft } from "lucide-react";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
+import { NotificationService } from "@/services/notifications";
 import { getUsersByRole } from "@/services/usersService";
 import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,13 @@ export default function AthleteChat() {
         loadAdmins();
     }, []);
 
+    // Request notification permission when the chat page opens
+    useEffect(() => {
+        if (!NotificationService.isDenied()) {
+            NotificationService.requestPermission();
+        }
+    }, []);
+
     // Subscribe to athlete's chats
     useEffect(() => {
         if (!user) return;
@@ -85,19 +93,32 @@ export default function AthleteChat() {
     useEffect(() => {
         if (!selectedChat || !user) return;
 
-        // Mark as read immediately
         ChatService.markAsRead(selectedChat.id, user.uid);
+        let previousCount = 0;
 
         const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
+            // Notify on new incoming messages (not sent by current user)
+            if (msgs.length > previousCount) {
+                const newest = msgs[msgs.length - 1];
+                if (newest && newest.senderId !== user.uid) {
+                    const senderName = getChatDisplayName(selectedChat);
+                    NotificationService.showChatNotification(
+                        senderName,
+                        newest.text,
+                        '/athlete/chat'
+                    );
+                }
+            }
+            previousCount = msgs.length;
             setMessages(msgs);
-            // Also mark as read when new messages arrive if we are focused
             if (msgs.length > 0) {
                 ChatService.markAsRead(selectedChat.id, user.uid).catch(console.error);
             }
         });
 
         return () => unsubscribe();
-    }, [selectedChat, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedChat?.id, user]);
 
     const handleStartChat = async (admin: User) => {
         if (!user) return;

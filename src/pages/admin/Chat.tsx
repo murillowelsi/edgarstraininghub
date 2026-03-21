@@ -16,6 +16,7 @@ import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { NotificationService } from "@/services/notifications";
 
 export default function AdminChat() {
     const { user } = useAuth();
@@ -42,6 +43,13 @@ export default function AdminChat() {
         getAllUsers().then(setAllUsers).catch(console.error);
     }, []);
 
+    // Request notification permission when the chat page opens
+    useEffect(() => {
+        if (!NotificationService.isDenied()) {
+            NotificationService.requestPermission();
+        }
+    }, []);
+
     useEffect(() => {
         if (!user) return;
         const unsubscribe = ChatService.subscribeToUserChats(user.uid, (updatedChats) => {
@@ -58,12 +66,27 @@ export default function AdminChat() {
     useEffect(() => {
         if (!selectedChat || !user) return;
         ChatService.markAsRead(selectedChat.id, user.uid);
+        let previousCount = 0;
         const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
+            // Notify on new incoming messages
+            if (msgs.length > previousCount) {
+                const newest = msgs[msgs.length - 1];
+                if (newest && newest.senderId !== user.uid) {
+                    const senderName = getChatDisplayName(selectedChat);
+                    NotificationService.showChatNotification(
+                        senderName,
+                        newest.text,
+                        '/admin/chat'
+                    );
+                }
+            }
+            previousCount = msgs.length;
             setMessages(msgs);
             if (msgs.length > 0) ChatService.markAsRead(selectedChat.id, user.uid).catch(console.error);
         });
         return () => unsubscribe();
-    }, [selectedChat, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedChat?.id, user]);
 
     useEffect(() => {
         if (!isNewChatOpen) return;
