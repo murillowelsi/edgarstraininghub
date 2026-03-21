@@ -27,6 +27,7 @@ import "react-quill/dist/quill.snow.css";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 // Custom horizontal rule blot
 const BlockEmbed = Quill.import('blots/block/embed');
@@ -42,6 +43,7 @@ const AdminPostForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
@@ -79,24 +81,24 @@ const AdminPostForm = () => {
             if (file) {
               const quill = (this as any).quill;
               const range = quill.getSelection();
-              
+
               // Show loading state
               quill.enable(false);
-              
+
               try {
                 const imageUrl = await uploadImageToCloudinary(file);
                 quill.insertEmbed(range.index, 'image', imageUrl);
                 quill.setSelection(range.index + 1);
-                
+
                 toast({
-                  title: "Image uploaded",
-                  description: "Your image has been successfully uploaded.",
+                  title: t.admin.postForm.toast.imageUploaded,
+                  description: t.admin.postForm.toast.imageUploadedDescription,
                 });
               } catch (error) {
                 console.error('Error uploading image:', error);
                 toast({
-                  title: "Upload failed",
-                  description: "Failed to upload image. Please try again.",
+                  title: t.admin.postForm.toast.uploadFailed,
+                  description: t.admin.postForm.toast.uploadFailedDescription,
                   variant: "destructive",
                 });
               } finally {
@@ -130,8 +132,8 @@ const AdminPostForm = () => {
       const post = await getPostById(postId);
       if (!post) {
         toast({
-          title: "Post not found",
-          description: "The post you're trying to edit doesn't exist.",
+          title: t.admin.postForm.toast.notFound,
+          description: t.admin.postForm.toast.notFoundDescription,
           variant: "destructive",
         });
         navigate("/admin/posts");
@@ -148,8 +150,8 @@ const AdminPostForm = () => {
     } catch (error) {
       console.error("Error loading post:", error);
       toast({
-        title: "Error",
-        description: "Failed to load post.",
+        title: t.common.error,
+        description: t.admin.postForm.toast.loadError,
         variant: "destructive",
       });
     } finally {
@@ -175,7 +177,7 @@ const AdminPostForm = () => {
     if (!formData.title.trim()) {
       toast({
         title: "Validation Error",
-        description: "Title is required.",
+        description: t.admin.postForm.toast.titleRequired,
         variant: "destructive",
       });
       return;
@@ -184,7 +186,7 @@ const AdminPostForm = () => {
     if (!formData.content.trim()) {
       toast({
         title: "Validation Error",
-        description: "Content is required.",
+        description: t.admin.postForm.toast.contentRequired,
         variant: "destructive",
       });
       return;
@@ -196,8 +198,8 @@ const AdminPostForm = () => {
       if (isEditing && id) {
         await updatePost(id, formData);
         toast({
-          title: "Post updated",
-          description: "Your changes have been saved.",
+          title: t.admin.postForm.toast.updated,
+          description: t.admin.postForm.toast.updatedDescription,
         });
       } else {
         await createPost(
@@ -208,8 +210,8 @@ const AdminPostForm = () => {
         toast({
           title: "Post created",
           description: formData.published
-            ? "Your post has been published."
-            : "Your post has been saved as a draft.",
+            ? t.admin.postForm.toast.createdPublished
+            : t.admin.postForm.toast.createdDraft,
         });
       }
       navigate("/admin/posts");
@@ -217,7 +219,7 @@ const AdminPostForm = () => {
       console.error("Error saving post:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to save post.";
       toast({
-        title: "Error",
+        title: t.common.error,
         description: errorMessage,
         variant: "destructive",
       });
@@ -243,21 +245,19 @@ const AdminPostForm = () => {
           <div className="max-w-5xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle>{isEditing ? "Edit Post" : "Create New Post"}</CardTitle>
+                <CardTitle>{isEditing ? t.admin.postForm.editTitle : t.admin.postForm.createTitle}</CardTitle>
                 <CardDescription>
-                  {isEditing
-                    ? "Update your blog post content and settings."
-                    : "Write and publish a new blog post."}
+                  {isEditing ? t.admin.postForm.editDescription : t.admin.postForm.createDescription}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
                   {/* Title */}
                   <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title">{t.admin.postForm.titleLabel}</Label>
                     <Input
                       id="title"
-                      placeholder="Enter post title"
+                      placeholder={t.admin.postForm.titlePlaceholder}
                       value={formData.title}
                       onChange={handleTitleChange}
                       className="text-lg"
@@ -287,10 +287,10 @@ const AdminPostForm = () => {
 
                   {/* Excerpt */}
                   <div className="space-y-2">
-                    <Label htmlFor="excerpt">Excerpt</Label>
+                    <Label htmlFor="excerpt">{t.admin.postForm.excerptLabel}</Label>
                     <Textarea
                       id="excerpt"
-                      placeholder="Brief summary of the post (displayed in blog listings)"
+                      placeholder={t.admin.postForm.excerptPlaceholder}
                       value={formData.excerpt}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
@@ -302,7 +302,7 @@ const AdminPostForm = () => {
 
                   {/* Featured Image */}
                   <div className="space-y-2">
-                    <Label>Featured Image</Label>
+                    <Label>{t.admin.postForm.featuredImage}</Label>
                     <div className="space-y-3">
                       {!formData.featuredImage ? (
                         <div
@@ -325,14 +325,14 @@ const AdminPostForm = () => {
                                 const imageUrl = await uploadImageToCloudinary(file);
                                 setFormData((prev) => ({ ...prev, featuredImage: imageUrl }));
                                 toast({
-                                  title: "Image uploaded",
-                                  description: "Featured image has been uploaded successfully.",
+                                  title: t.admin.postForm.toast.imageUploaded,
+                                  description: t.admin.postForm.toast.imageUploadedDescription,
                                 });
                               } catch (error) {
                                 console.error('Error uploading image:', error);
                                 toast({
-                                  title: "Upload failed",
-                                  description: "Failed to upload image. Please try again.",
+                                  title: t.admin.postForm.toast.uploadFailed,
+                                  description: t.admin.postForm.toast.uploadFailedDescription,
                                   variant: "destructive",
                                 });
                               } finally {
@@ -341,7 +341,7 @@ const AdminPostForm = () => {
                             } else {
                               toast({
                                 title: "Invalid file",
-                                description: "Please upload an image file.",
+                                description: t.admin.postForm.toast.invalidFile,
                                 variant: "destructive",
                               });
                             }
@@ -361,14 +361,14 @@ const AdminPostForm = () => {
                                   const imageUrl = await uploadImageToCloudinary(file);
                                   setFormData((prev) => ({ ...prev, featuredImage: imageUrl }));
                                   toast({
-                                    title: "Image uploaded",
-                                    description: "Featured image has been uploaded successfully.",
+                                    title: t.admin.postForm.toast.imageUploaded,
+                                    description: t.admin.postForm.toast.imageUploadedDescription,
                                   });
                                 } catch (error) {
                                   console.error('Error uploading image:', error);
                                   toast({
-                                    title: "Upload failed",
-                                    description: "Failed to upload image. Please try again.",
+                                    title: t.admin.postForm.toast.uploadFailed,
+                                    description: t.admin.postForm.toast.uploadFailedDescription,
                                     variant: "destructive",
                                   });
                                 } finally {
@@ -452,7 +452,7 @@ const AdminPostForm = () => {
                       disabled={saving}
                     />
                     <Label htmlFor="published" className="cursor-pointer">
-                      Publish this post (visible on public blog)
+                      {t.admin.postForm.publishLabel}
                     </Label>
                   </div>
                 </form>
@@ -475,7 +475,7 @@ const AdminPostForm = () => {
               className="gap-2 flex-1 sm:flex-none"
             >
               <X className="h-4 w-4" />
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               type="button"
@@ -486,19 +486,19 @@ const AdminPostForm = () => {
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving...
+                  {t.common.saving}
                 </>
               ) : (
                 <>
-                  {isEditing ? (
+                  {formData.published ? (
                     <>
-                      <Save className="h-4 w-4" />
-                      Update Post
+                      <Check className="h-4 w-4" />
+                      {t.admin.postForm.savePublish}
                     </>
                   ) : (
                     <>
-                      <Check className="h-4 w-4" />
-                      Create Post
+                      <Save className="h-4 w-4" />
+                      {t.admin.postForm.saveDraft}
                     </>
                   )}
                 </>
