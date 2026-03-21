@@ -25,7 +25,6 @@ import { cn } from "@/lib/utils";
 import {
   deleteAssignment,
   getAllAssignmentsWithDetails,
-  removeDuplicateAssignments,
 } from "@/services/workoutAssignmentsService";
 import { getUsersByRole } from "@/services/usersService";
 import type { User } from "@/types/user";
@@ -47,7 +46,6 @@ import {
 } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
-  CalendarDays,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -254,7 +252,6 @@ const AdminCalendar = () => {
     useState<AssignmentWithDetails | null>(null);
   const [deletingAssignment, setDeletingAssignment] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [cleaningDuplicates, setCleaningDuplicates] = useState(false);
 
   // Generate calendar days for current month view
   const monthStart = startOfMonth(currentMonth);
@@ -337,33 +334,6 @@ const AdminCalendar = () => {
     setCurrentMonth(new Date());
   };
 
-  const handleCleanupDuplicates = async () => {
-    setCleaningDuplicates(true);
-    try {
-      const deletedCount = await removeDuplicateAssignments();
-      if (deletedCount > 0) {
-        toast({
-          title: "Duplicates removed",
-          description: `Removed ${deletedCount} duplicate assignment${deletedCount > 1 ? "s" : ""}.`,
-        });
-        await loadData(); // Reload data
-      } else {
-        toast({
-          title: "No duplicates found",
-          description: "All assignments are unique.",
-        });
-      }
-    } catch (error) {
-      console.error("Error removing duplicates:", error);
-      toast({
-        title: "Error",
-        description: "Failed to remove duplicates.",
-        variant: "destructive",
-      });
-    } finally {
-      setCleaningDuplicates(false);
-    }
-  };
 
   const handleAssignmentClick = (assignment: AssignmentWithDetails) => {
     setSelectedAssignment(assignment);
@@ -432,67 +402,44 @@ const AdminCalendar = () => {
     <AdminLayout>
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b bg-background sticky top-0 z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="h-6 w-6" />
-              <h1 className="text-2xl font-bold">Calendar</h1>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Athlete filter */}
-              <Select
-                value={selectedAthleteId}
-                onValueChange={setSelectedAthleteId}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by athlete" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Athletes</SelectItem>
-                  {athletes.map((athlete) => (
-                    <SelectItem key={athlete.id} value={athlete.id}>
-                      {athlete.displayName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Month navigation */}
-              <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" onClick={handlePrevMonth}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="min-w-[140px]"
-                  onClick={handleToday}
-                >
-                  {format(currentMonth, "MMMM yyyy")}
-                </Button>
-                <Button variant="outline" size="icon" onClick={handleNextMonth}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <Button variant="outline" size="sm" onClick={handleToday}>
-                Today
+        <div className="px-4 pt-4 pb-3 border-b bg-background sticky top-0 z-10 space-y-3">
+          {/* Row 1: Title + month navigation */}
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl md:text-2xl font-bold">Calendar</h1>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" onClick={handlePrevMonth}>
+                <ChevronLeft className="h-4 w-4" />
               </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCleanupDuplicates}
-                disabled={cleaningDuplicates}
-                title="Remove duplicate assignments"
+              <button
+                onClick={handleToday}
+                className="px-3 py-1.5 text-sm font-semibold rounded-md hover:bg-muted transition-colors min-w-[120px] text-center"
               >
-                {cleaningDuplicates ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
+                {format(currentMonth, "MMM yyyy")}
+              </button>
+              <Button variant="ghost" size="icon" onClick={handleNextMonth}>
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+
+          {/* Row 2: Athlete filter + Today */}
+          <div className="flex items-center gap-2">
+            <Select value={selectedAthleteId} onValueChange={setSelectedAthleteId}>
+              <SelectTrigger className="flex-1 h-8 text-sm">
+                <SelectValue placeholder="All Athletes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Athletes</SelectItem>
+                {athletes.map((athlete) => (
+                  <SelectItem key={athlete.id} value={athlete.id}>
+                    {athlete.displayName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" onClick={handleToday} className="shrink-0">
+              Today
+            </Button>
           </div>
         </div>
 
