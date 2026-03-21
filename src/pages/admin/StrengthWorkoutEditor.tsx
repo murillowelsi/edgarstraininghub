@@ -288,7 +288,7 @@ const StrengthWorkoutEditor = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Left Panel - Workout Builder */}
           <div className="flex-1 overflow-auto p-4">
             <Card className="mb-4">
@@ -359,7 +359,7 @@ const StrengthWorkoutEditor = () => {
           </div>
 
           {/* Right Panel - Exercise Browser */}
-          <div className="w-96 border-l bg-muted/30 flex flex-col overflow-hidden">
+          <div className="h-72 md:h-auto md:w-96 border-t md:border-t-0 md:border-l bg-muted/30 flex flex-col overflow-hidden">
             <Tabs defaultValue="library" className="flex flex-col h-full">
               <div className="border-b px-4 pt-3">
                 <TabsList className="w-full">
