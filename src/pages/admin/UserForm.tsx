@@ -273,7 +273,7 @@ const AdminUserForm = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="sticky bottom-0 bg-background border-t p-4 -mx-4 mt-6 md:static md:border-0 md:p-0 md:mx-0">
+        <div className="sticky bottom-0 bg-background border-t p-4 mt-6 md:static md:border-0 md:p-0">
           <div className="flex sm:justify-end gap-2">
             <Button
               type="button"
