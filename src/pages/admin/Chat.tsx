@@ -353,9 +353,17 @@ export default function AdminChat() {
                             >
                                 ← Back
                             </Button>
-                            <span className="font-medium text-sm truncate">
+                            <span className="font-medium text-sm truncate flex-1">
                                 {getChatDisplayName(selectedChatMobile)}
                             </span>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 px-2 text-destructive hover:text-destructive shrink-0"
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
                         </div>
                         <div className="flex-1 overflow-hidden">
                             <ChatWindow
