@@ -20,7 +20,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
@@ -51,6 +51,22 @@ const AdminWorkouts = () => {
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [confirmWorkout, setConfirmWorkout] = useState<Workout | null>(null);
   const [newWorkoutDrawerOpen, setNewWorkoutDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"all" | "running" | "cycling" | "swimming" | "strength">("all");
+  const filteredWorkouts = useMemo(
+    () => (activeTab === "all" ? workouts : workouts.filter((w) => w.type === activeTab)),
+    [workouts, activeTab]
+  );
+
+  const tabCounts = useMemo(
+    () => ({
+      all: workouts.length,
+      running: workouts.filter((w) => w.type === "running").length,
+      cycling: workouts.filter((w) => w.type === "cycling").length,
+      swimming: workouts.filter((w) => w.type === "swimming").length,
+      strength: workouts.filter((w) => w.type === "strength").length,
+    }),
+    [workouts]
+  );
   const { toast } = useToast();
   const navigate = useNavigate();
   const { t } = useLanguage();
