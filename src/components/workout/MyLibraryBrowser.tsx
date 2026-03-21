@@ -1,14 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -34,7 +29,6 @@ import {
   getYouTubeThumbnail,
 } from "@/types/exercise";
 import {
-  AlertTriangle,
   Dumbbell,
   Edit,
   Library,
@@ -145,15 +139,13 @@ const ExercisePreviewDialog = ({
   const videoId = exercise.videoUrl ? getYouTubeVideoId(exercise.videoUrl) : null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle className="capitalize">{exercise.name}</DialogTitle>
-          <DialogDescription>
-            {exercise.isCustom ? translations.workout.library.customExercise : translations.workout.library.fromExerciseLibrary}
-          </DialogDescription>
-        </DialogHeader>
-
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={exercise.name}
+      description={exercise.isCustom ? translations.workout.library.customExercise : translations.workout.library.fromExerciseLibrary}
+      className="max-w-3xl max-h-[90vh] overflow-auto"
+    >
         <div className="grid md:grid-cols-2 gap-6">
           {/* Video/Image */}
           <div className="aspect-video bg-muted rounded-lg overflow-hidden">
@@ -250,8 +242,7 @@ const ExercisePreviewDialog = ({
             </Button>
           </div>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveModal>
   );
 };
 
@@ -390,17 +381,13 @@ const ExerciseFormDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? translations.workout.exerciseForm.editExercise : translations.workout.exerciseForm.createCustomExercise}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditing ? translations.workout.exerciseForm.updateExerciseDetails : translations.workout.exerciseForm.addNewExercise}
-          </DialogDescription>
-        </DialogHeader>
-
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEditing ? translations.workout.exerciseForm.editExercise : translations.workout.exerciseForm.createCustomExercise}
+      description={isEditing ? translations.workout.exerciseForm.updateExerciseDetails : translations.workout.exerciseForm.addNewExercise}
+      className="max-w-lg max-h-[90vh] overflow-auto"
+    >
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>{translations.workout.exerciseForm.exerciseName} *</Label>
@@ -567,8 +554,7 @@ const ExerciseFormDialog = ({
             {isEditing ? translations.workout.exerciseForm.saveChanges : translations.workout.library.createExercise}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveModal>
   );
 };
 
@@ -613,33 +599,17 @@ const DeleteExerciseDialog = ({
   if (!exercise) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="h-5 w-5" />
-            {translations.workout.deleteDialog.deleteExercise}
-          </DialogTitle>
-          <DialogDescription>
-            {translations.workout.deleteDialog.confirmDelete.replace("{{name}}", exercise.name)}
-          </DialogDescription>
-        </DialogHeader>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={deleting}>
-            {translations.workout.common.cancel}
-          </Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-            {deleting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4 mr-2" />
-            )}
-            {translations.workout.common.delete}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ResponsiveConfirm
+      open={open}
+      onOpenChange={onOpenChange}
+      title={translations.workout.deleteDialog.deleteExercise}
+      description={translations.workout.deleteDialog.confirmDelete.replace("{{name}}", exercise.name)}
+      confirmLabel={translations.workout.common.delete}
+      cancelLabel={translations.workout.common.cancel}
+      destructive
+      loading={deleting}
+      onConfirm={handleDelete}
+    />
   );
 };
 
