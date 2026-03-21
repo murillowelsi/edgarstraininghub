@@ -120,54 +120,43 @@ export default function AdminChat() {
             a.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const NewChatDialog = () => (
-        <>
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
-                <Plus className="h-5 w-5" />
-            </Button>
-            <ResponsiveModal
-                open={isNewChatOpen}
-                onOpenChange={setIsNewChatOpen}
-                title="New Message"
-            >
-                <div className="p-2 space-y-4">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search athletes..."
-                            className="pl-9"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+    const newChatModalContent = (
+        <div className="p-2 space-y-4">
+            <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                    placeholder="Search athletes..."
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+            <div className="h-[300px] overflow-y-auto space-y-2">
+                {loadingAthletes ? (
+                    <div className="flex justify-center p-4">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                    <div className="h-[300px] overflow-y-auto space-y-2">
-                        {loadingAthletes ? (
-                            <div className="flex justify-center p-4">
-                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                ) : filteredAthletes.length === 0 ? (
+                    <p className="text-center text-muted-foreground p-4">No athletes found.</p>
+                ) : (
+                    filteredAthletes.map((athlete) => (
+                        <button
+                            key={athlete.id}
+                            onClick={() => handleStartChat(athlete)}
+                            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                        >
+                            <Avatar>
+                                <AvatarFallback>{athlete.displayName[0]?.toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-medium">{athlete.displayName}</p>
+                                <p className="text-xs text-muted-foreground">{athlete.email}</p>
                             </div>
-                        ) : filteredAthletes.length === 0 ? (
-                            <p className="text-center text-muted-foreground p-4">No athletes found.</p>
-                        ) : (
-                            filteredAthletes.map((athlete) => (
-                                <button
-                                    key={athlete.id}
-                                    onClick={() => handleStartChat(athlete)}
-                                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                                >
-                                    <Avatar>
-                                        <AvatarFallback>{athlete.displayName[0]?.toUpperCase()}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-medium">{athlete.displayName}</p>
-                                        <p className="text-xs text-muted-foreground">{athlete.email}</p>
-                                    </div>
-                                </button>
-                            ))
-                        )}
-                    </div>
-                </div>
-            </ResponsiveModal>
-        </>
+                        </button>
+                    ))
+                )}
+            </div>
+        </div>
     );
 
     return (
@@ -181,7 +170,9 @@ export default function AdminChat() {
                 )}>
                     <div className="p-4 border-b flex items-center justify-between bg-muted/30">
                         <h3 className="font-semibold">Messages</h3>
-                        <NewChatDialog />
+                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
+                            <Plus className="h-5 w-5" />
+                        </Button>
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
@@ -309,6 +300,15 @@ export default function AdminChat() {
                     )}
                 </div>
             </div>
+
+            {/* New Chat Modal */}
+            <ResponsiveModal
+                open={isNewChatOpen}
+                onOpenChange={setIsNewChatOpen}
+                title="New Message"
+            >
+                {newChatModalContent}
+            </ResponsiveModal>
 
             {/* Delete Confirmation */}
             <ResponsiveConfirm
