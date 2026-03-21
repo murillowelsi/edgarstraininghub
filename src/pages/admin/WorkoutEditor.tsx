@@ -923,13 +923,17 @@ const WorkoutEditor = () => {
             </Link>
             <Button onClick={handleSubmit} disabled={saving} size="sm">
               {saving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Saving...
+                </>
               ) : (
-                <Save className="h-4 w-4" />
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  <span className="md:hidden">Save</span>
+                  <span className="hidden md:inline">Save Workout</span>
+                </>
               )}
-              <span className="hidden md:inline ml-2">
-                {saving ? "Saving..." : "Save Workout"}
-              </span>
             </Button>
           </div>
         </header>
