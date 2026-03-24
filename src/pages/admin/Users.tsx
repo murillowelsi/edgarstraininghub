@@ -1,13 +1,23 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { deleteUser, getAllUsers } from "@/services/usersService";
-import type { User, UserRole } from "@/types/user";
+import { createUser, deleteUser, getAllUsers } from "@/services/usersService";
+import type { User, UserFormData, UserRole } from "@/types/user";
 import { format } from "date-fns";
 import { Edit, Loader2, Plus, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
@@ -26,9 +36,16 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmUser, setConfirmUser] = useState<User | null>(null);
+  const [isNewUserOpen, setIsNewUserOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newUserForm, setNewUserForm] = useState<UserFormData>({
+    email: "",
+    displayName: "",
+    role: "athlete",
+    password: "",
+  });
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -48,6 +65,28 @@ const AdminUsers = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserForm.displayName.trim() || !newUserForm.email.trim()) return;
+    if (!newUserForm.password || newUserForm.password.length < 6) {
+      toast({ title: t.common.error, description: t.admin.userForm.toast.passwordTooShort, variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    try {
+      await createUser(newUserForm);
+      toast({ title: t.admin.userForm.toast.created, description: t.admin.userForm.toast.createdDescription });
+      setIsNewUserOpen(false);
+      setNewUserForm({ email: "", displayName: "", role: "athlete", password: "" });
+      loadUsers();
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : t.common.error;
+      toast({ title: t.common.error, description: msg, variant: "destructive" });
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -86,7 +125,7 @@ const AdminUsers = () => {
       <div className="p-4 md:p-8 pb-24 md:pb-8">
         <AdminPageHeader
           title={t.admin.users.title}
-          action={{ label: t.admin.users.newUser, icon: Plus, onClick: () => navigate("/admin/users/new") }}
+          action={{ label: t.admin.users.newUser, icon: Plus, onClick: () => setIsNewUserOpen(true) }}
         />
 
         <ResponsiveTable
@@ -143,7 +182,7 @@ const AdminUsers = () => {
               icon={Users}
               title={t.admin.users.empty.title}
               description={t.admin.users.empty.description}
-              action={{ label: t.admin.users.newUser, onClick: () => navigate("/admin/users/new") }}
+              action={{ label: t.admin.users.newUser, onClick: () => setIsNewUserOpen(true) }}
             />
           }
         />
@@ -158,6 +197,78 @@ const AdminUsers = () => {
         loading={deleting !== null}
         onConfirm={() => { if (confirmUser) handleDelete(confirmUser.id); setConfirmUser(null); }}
       />
+
+      <ResponsiveModal
+        open={isNewUserOpen}
+        onOpenChange={(open) => {
+          setIsNewUserOpen(open);
+          if (!open) setNewUserForm({ email: "", displayName: "", role: "athlete", password: "" });
+        }}
+        title={t.admin.userForm.createTitle}
+        className="max-w-md"
+      >
+        <form onSubmit={handleCreateUser} className="space-y-4 p-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="new-displayName">{t.admin.userForm.displayName} *</Label>
+            <Input
+              id="new-displayName"
+              placeholder={t.admin.userForm.displayNamePlaceholder}
+              value={newUserForm.displayName}
+              onChange={(e) => setNewUserForm((prev) => ({ ...prev, displayName: e.target.value }))}
+              required
+              autoFocus
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-email">{t.common.email} *</Label>
+            <Input
+              id="new-email"
+              type="email"
+              placeholder={t.admin.userForm.emailPlaceholder}
+              value={newUserForm.email}
+              onChange={(e) => setNewUserForm((prev) => ({ ...prev, email: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-password">{t.admin.userForm.password} *</Label>
+            <Input
+              id="new-password"
+              type="password"
+              placeholder={t.admin.userForm.passwordPlaceholder}
+              value={newUserForm.password}
+              onChange={(e) => setNewUserForm((prev) => ({ ...prev, password: e.target.value }))}
+              minLength={6}
+              required
+            />
+            <p className="text-xs text-muted-foreground">{t.admin.userForm.passwordHint}</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-role">{t.common.role} *</Label>
+            <Select
+              value={newUserForm.role}
+              onValueChange={(value: UserRole) => setNewUserForm((prev) => ({ ...prev, role: value }))}
+            >
+              <SelectTrigger id="new-role">
+                <SelectValue placeholder={t.admin.userForm.rolePlaceholder} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="admin">{t.admin.users.roles.admin}</SelectItem>
+                <SelectItem value="editor">{t.admin.users.roles.editor}</SelectItem>
+                <SelectItem value="athlete">{t.admin.users.roles.athlete}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={creating || !newUserForm.displayName.trim() || !newUserForm.email.trim() || !newUserForm.password}
+          >
+            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t.admin.userForm.createButton}
+          </Button>
+        </form>
+      </ResponsiveModal>
     </AdminLayout>
   );
 };
