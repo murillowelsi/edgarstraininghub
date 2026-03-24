@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Calendar, Dumbbell, Home, LogOut, Moon, Sun, MessageSquare } from "lucide-react";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
