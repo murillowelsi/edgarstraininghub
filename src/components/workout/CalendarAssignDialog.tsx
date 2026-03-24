@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { createAssignments } from "@/services/workoutAssignmentsService";
 import { getUsersByRole } from "@/services/usersService";
 import { getAllWorkouts } from "@/services/workoutsService";
+import { getTeamsByCoach, addTeamWorkoutAssignment } from "@/services/teamsService";
+import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import type { Workout, WorkoutType } from "@/types/workout";
 import { format } from "date-fns";
@@ -21,7 +23,10 @@ import {
   Loader2,
   Plus,
   Search,
+  Users2,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -88,6 +93,12 @@ export const CalendarAssignDialog = ({
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
+  // Team tab state
+  const [assignTab, setAssignTab] = useState<"athletes" | "team">("athletes");
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [loadingTeam, setLoadingTeam] = useState(false);
+
   // Load workouts and athletes when dialog opens
   useEffect(() => {
     const loadData = async () => {
@@ -95,12 +106,14 @@ export const CalendarAssignDialog = ({
 
       setLoadingData(true);
       try {
-        const [workoutsData, athletesData] = await Promise.all([
+        const [workoutsData, athletesData, teamsData] = await Promise.all([
           getAllWorkouts(),
           getUsersByRole("athlete"),
+          user ? getTeamsByCoach(user.uid) : Promise.resolve([]),
         ]);
         setWorkouts(workoutsData);
         setAthletes(athletesData);
+        setTeams(teamsData);
 
         // If there's a pre-selected workout (from returning after creating a new one),
         // auto-select it and skip to the athletes step
@@ -139,6 +152,8 @@ export const CalendarAssignDialog = ({
       setSelectedWorkout(null);
       setSelectedAthletes([]);
       setSearchQuery("");
+      setAssignTab("athletes");
+      setSelectedTeamId("");
     }
   }, [open]);
 
@@ -238,6 +253,41 @@ export const CalendarAssignDialog = ({
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTeamSubmit = async () => {
+    if (!selectedWorkout || !user || !selectedTeamId || !selectedDate) return;
+    const selectedTeam = teams.find((t) => t.id === selectedTeamId);
+    if (!selectedTeam) return;
+
+    setLoadingTeam(true);
+    try {
+      const result = await createAssignments(
+        {
+          workoutId: selectedWorkout.id,
+          athleteIds: selectedTeam.memberIds,
+          scheduledDate: selectedDate,
+        },
+        user.uid
+      );
+
+      const assignedCount = result.length;
+      const skippedCount = selectedTeam.memberIds.length - assignedCount;
+
+      if (assignedCount === 0) {
+        toast({ title: "Nothing to assign", description: "All team members are already scheduled for this workout on that date.", variant: "destructive" });
+      } else {
+        await addTeamWorkoutAssignment(selectedTeam.id, selectedWorkout.id, selectedDate);
+        toast({ title: "Assignments created", description: `${assignedCount} assigned, ${skippedCount} already scheduled` });
+        onOpenChange(false);
+        onSuccess?.();
+      }
+    } catch (error) {
+      console.error("Error assigning workout to team:", error);
+      toast({ title: "Error", description: "Failed to assign workout to team.", variant: "destructive" });
+    } finally {
+      setLoadingTeam(false);
     }
   };
 
@@ -445,64 +495,97 @@ export const CalendarAssignDialog = ({
         </div>
       )}
 
-      {/* Athletes list */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label>Select Athletes</Label>
-          {athletes.length > 0 && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleSelectAll}
-            >
-              {selectedAthletes.length === athletes.length
-                ? "Deselect All"
-                : "Select All"}
-            </Button>
-          )}
-        </div>
+      <Tabs value={assignTab} onValueChange={(v) => setAssignTab(v as "athletes" | "team")}>
+        <TabsList className="w-full">
+          <TabsTrigger value="athletes" className="flex-1">Athletes</TabsTrigger>
+          <TabsTrigger value="team" className="flex-1">Team</TabsTrigger>
+        </TabsList>
 
-        {loadingData ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        {/* Athletes tab */}
+        <TabsContent value="athletes" className="space-y-2 mt-3">
+          <div className="flex items-center justify-between">
+            <Label>Select Athletes</Label>
+            {athletes.length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleSelectAll}
+              >
+                {selectedAthletes.length === athletes.length
+                  ? "Deselect All"
+                  : "Select All"}
+              </Button>
+            )}
           </div>
-        ) : athletes.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No athletes found. Create athlete users first.
-          </div>
-        ) : (
-          <ScrollArea className="h-[200px] rounded-md border p-4">
-            <div className="space-y-3">
-              {athletes.map((athlete) => (
-                <div key={athlete.id} className="flex items-center space-x-3">
-                  <Checkbox
-                    id={`cal-athlete-${athlete.id}`}
-                    checked={selectedAthletes.includes(athlete.id)}
-                    onCheckedChange={() => handleAthleteToggle(athlete.id)}
-                  />
-                  <Label
-                    htmlFor={`cal-athlete-${athlete.id}`}
-                    className="flex-1 cursor-pointer"
-                  >
-                    <span className="font-medium">{athlete.displayName}</span>
-                    <span className="text-muted-foreground ml-2 text-sm">
-                      {athlete.email}
-                    </span>
-                  </Label>
-                </div>
-              ))}
+
+          {loadingData ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          </ScrollArea>
-        )}
+          ) : athletes.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No athletes found. Create athlete users first.
+            </div>
+          ) : (
+            <ScrollArea className="h-[200px] rounded-md border p-4">
+              <div className="space-y-3">
+                {athletes.map((athlete) => (
+                  <div key={athlete.id} className="flex items-center space-x-3">
+                    <Checkbox
+                      id={`cal-athlete-${athlete.id}`}
+                      checked={selectedAthletes.includes(athlete.id)}
+                      onCheckedChange={() => handleAthleteToggle(athlete.id)}
+                    />
+                    <Label
+                      htmlFor={`cal-athlete-${athlete.id}`}
+                      className="flex-1 cursor-pointer"
+                    >
+                      <span className="font-medium">{athlete.displayName}</span>
+                      <span className="text-muted-foreground ml-2 text-sm">
+                        {athlete.email}
+                      </span>
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
 
-        {selectedAthletes.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {selectedAthletes.length} athlete
-            {selectedAthletes.length > 1 ? "s" : ""} selected
-          </p>
-        )}
-      </div>
+          {selectedAthletes.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {selectedAthletes.length} athlete
+              {selectedAthletes.length > 1 ? "s" : ""} selected
+            </p>
+          )}
+        </TabsContent>
+
+        {/* Team tab */}
+        <TabsContent value="team" className="space-y-3 mt-3">
+          {teams.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground text-center">
+              <Users2 className="h-8 w-8 mb-2 opacity-30" />
+              <p className="text-sm">No teams found. Create a team first.</p>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <Label>Select Team</Label>
+              <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a team…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teams.map((team) => (
+                    <SelectItem key={team.id} value={team.id}>
+                      {team.name} ({team.memberIds.length} member{team.memberIds.length !== 1 ? "s" : ""})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 
@@ -552,13 +635,22 @@ export const CalendarAssignDialog = ({
           >
             Cancel
           </Button>
-          {step === "athletes" && (
+          {step === "athletes" && assignTab === "athletes" && (
             <Button
               onClick={handleSubmit}
               disabled={selectedAthletes.length === 0 || loading}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Assign Workout
+            </Button>
+          )}
+          {step === "athletes" && assignTab === "team" && (
+            <Button
+              onClick={handleTeamSubmit}
+              disabled={!selectedTeamId || loadingTeam}
+            >
+              {loadingTeam && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Assign to Team
             </Button>
           )}
         </DialogFooter>
