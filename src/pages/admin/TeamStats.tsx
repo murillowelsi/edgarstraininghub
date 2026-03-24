@@ -242,7 +242,7 @@ export default function AdminTeamStats() {
                       const completed = !!assignment?.completedAt;
 
                       let detail = "—";
-                      if (completed && assignment) {
+                      if (completed && assignment && selectedWorkout) {
                         if (isCardio) {
                           detail = format(assignment.completedAt!, "dd/MM/yyyy");
                         } else {
