@@ -88,6 +88,10 @@ export default function AdminTeamDetail() {
         );
         if (cancelled) return;
         setMembers(memberUsers.filter((u): u is User => u !== null));
+        // Silently sync group chat so all members see it without needing to click the button
+        if (user) {
+          ChatService.createOrGetGroupChat(team.id, team.name, user.uid, team.memberIds).catch(() => {});
+        }
       } catch {
         if (cancelled) return;
         toast({ title: t.common.error, description: t.admin.teamDetail.toast.loadError, variant: "destructive" });
@@ -196,8 +200,13 @@ export default function AdminTeamDetail() {
     try {
       await addMemberToTeam(team.id, athlete.id);
       await autoAssignTeamWorkoutsToMember(team.id, athlete.id);
-      setTeam((prev) => prev ? { ...prev, memberIds: [...prev.memberIds, athlete.id] } : prev);
+      const updatedMemberIds = [...team.memberIds, athlete.id];
+      setTeam((prev) => prev ? { ...prev, memberIds: updatedMemberIds } : prev);
       setMembers((prev) => [...prev, athlete]);
+      // Sync new member into the group chat
+      if (user) {
+        ChatService.createOrGetGroupChat(team.id, team.name, user.uid, updatedMemberIds).catch(() => {});
+      }
       toast({
         title: t.admin.teamDetail.toast.athleteAdded,
         description: t.admin.teamDetail.toast.athleteAddedDescription.replace("{{name}}", athlete.displayName),

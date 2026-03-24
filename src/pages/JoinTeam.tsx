@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { getTeamByInviteToken, addMemberToTeam, autoAssignTeamWorkoutsToMember } from "@/services/teamsService";
+import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Team } from "@/types/team";
@@ -59,6 +60,7 @@ export default function JoinTeam() {
       // Athlete is logged in but not yet a member — join automatically
       addMemberToTeam(team.id, user.uid)
         .then(() => autoAssignTeamWorkoutsToMember(team.id, user.uid))
+        .then(() => ChatService.createOrGetGroupChat(team.id, team.name, team.coachId, [...team.memberIds, user.uid]).catch(() => {}))
         .then(() => {
           toast({ title: t.joinTeam.joined.replace("{{name}}", team.name) });
           navigate("/athlete");
@@ -92,6 +94,7 @@ export default function JoinTeam() {
       // Join the team and auto-assign any previously assigned workouts
       await addMemberToTeam(team.id, uid);
       await autoAssignTeamWorkoutsToMember(team.id, uid);
+      ChatService.createOrGetGroupChat(team.id, team.name, team.coachId, [...team.memberIds, uid]).catch(() => {});
 
       toast({ title: t.joinTeam.welcome.replace("{{name}}", team.name) });
       navigate("/athlete");
@@ -113,6 +116,7 @@ export default function JoinTeam() {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       await addMemberToTeam(team.id, cred.user.uid);
       await autoAssignTeamWorkoutsToMember(team.id, cred.user.uid);
+      ChatService.createOrGetGroupChat(team.id, team.name, team.coachId, [...team.memberIds, cred.user.uid]).catch(() => {});
       toast({ title: t.joinTeam.joined.replace("{{name}}", team.name) });
       navigate("/athlete");
     } catch (err: unknown) {

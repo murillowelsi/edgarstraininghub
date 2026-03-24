@@ -77,8 +77,12 @@ service cloud.firestore {
       );
       
       allow update: if request.auth != null && (
-        isAdmin() || 
-        request.auth.uid in resource.data.participantIds
+        isAdmin() ||
+        request.auth.uid in resource.data.participantIds ||
+        // Allow self-joining a team group chat (athlete joining via invite link)
+        (chatId.matches('team_.*') &&
+         request.resource.data.participantIds.hasAll(resource.data.participantIds) &&
+         request.resource.data.participantIds.removeAll(resource.data.participantIds).hasOnly([request.auth.uid]))
       );
       
       allow delete: if isAdmin();
