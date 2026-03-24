@@ -51,8 +51,9 @@ export const AssignWorkoutDialog = ({
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(
     undefined
   );
-  const [loading, setLoading] = useState(false);
   const [loadingAthletes, setLoadingAthletes] = useState(false);
+  const [loadingTeam, setLoadingTeam] = useState(false);
+  const [loadingAthletesList, setLoadingAthletesList] = useState(false);
 
   // Team tab state
   const [activeTab, setActiveTab] = useState<"athletes" | "team">("athletes");
@@ -65,7 +66,7 @@ export const AssignWorkoutDialog = ({
 
   useEffect(() => {
     const loadAthletes = async () => {
-      setLoadingAthletes(true);
+      setLoadingAthletesList(true);
       try {
         const athleteUsers = await getUsersByRole("athlete");
         setAthletes(athleteUsers);
@@ -77,7 +78,7 @@ export const AssignWorkoutDialog = ({
           variant: "destructive",
         });
       } finally {
-        setLoadingAthletes(false);
+        setLoadingAthletesList(false);
       }
     };
 
@@ -132,7 +133,7 @@ export const AssignWorkoutDialog = ({
       return;
     }
 
-    setLoading(true);
+    setLoadingAthletes(true);
     try {
       await createAssignments(
         {
@@ -158,7 +159,7 @@ export const AssignWorkoutDialog = ({
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setLoadingAthletes(false);
     }
   };
 
@@ -177,7 +178,7 @@ export const AssignWorkoutDialog = ({
       return;
     }
 
-    setLoading(true);
+    setLoadingTeam(true);
     try {
       const result = await createAssignments(
         {
@@ -191,13 +192,13 @@ export const AssignWorkoutDialog = ({
       const assignedCount = result.length;
       const skippedCount = selectedTeam.memberIds.length - assignedCount;
 
-      toast({
-        title: "Workout assigned",
-        description: `${assignedCount} assigned, ${skippedCount} already scheduled`,
-      });
-
-      onOpenChange(false);
-      onSuccess?.();
+      if (assignedCount === 0) {
+        toast({ title: "Nothing to assign", description: "All team members are already scheduled for this workout on that date.", variant: "destructive" });
+      } else {
+        toast({ title: "Assignments created", description: `${assignedCount} assigned, ${skippedCount} already scheduled` });
+        onOpenChange(false);
+        onSuccess?.();
+      }
     } catch (error) {
       console.error("Error assigning workout to team:", error);
       toast({
@@ -206,7 +207,7 @@ export const AssignWorkoutDialog = ({
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setLoadingTeam(false);
     }
   };
 
@@ -282,7 +283,7 @@ export const AssignWorkoutDialog = ({
                 )}
               </div>
 
-              {loadingAthletes ? (
+              {loadingAthletesList ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
@@ -335,12 +336,12 @@ export const AssignWorkoutDialog = ({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={loading}
+              disabled={loadingAthletes}
             >
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={!isValid || loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleSubmit} disabled={!isValid || loadingAthletes}>
+              {loadingAthletes && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Assign Workout
             </Button>
           </DialogFooter>
@@ -415,15 +416,15 @@ export const AssignWorkoutDialog = ({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={loading}
+              disabled={loadingTeam}
             >
               Cancel
             </Button>
             <Button
               onClick={handleTeamSubmit}
-              disabled={!isTeamValid || loading}
+              disabled={!isTeamValid || loadingTeam}
             >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loadingTeam && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Assign to Team
             </Button>
           </DialogFooter>
