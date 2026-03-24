@@ -1,8 +1,10 @@
 import { cn } from "@/lib/utils";
 import { Calendar, Dumbbell, Home, LogOut, Moon, Sun, MessageSquare } from "lucide-react";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import GB from "country-flag-icons/react/3x2/GB";
+import PT from "country-flag-icons/react/3x2/PT";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { auth } from "@/lib/firebase";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -24,13 +26,6 @@ interface AthletePortalLayoutProps {
   showHeader?: boolean;
 }
 
-const navItems = [
-  { href: "/athlete", label: "Home", icon: Home },
-  { href: "/athlete/calendar", label: "Calendar", icon: Calendar },
-  { href: "/athlete/workouts", label: "Workouts", icon: Dumbbell },
-  { href: "/athlete/chat", label: "Chat", icon: MessageSquare },
-];
-
 const AthletePortalLayout = ({
   children,
   title,
@@ -39,7 +34,15 @@ const AthletePortalLayout = ({
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t, language, changeLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+
+  const navItems = [
+    { href: "/athlete", label: t.athlete.nav.home, icon: Home },
+    { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar },
+    { href: "/athlete/workouts", label: t.athlete.nav.workouts, icon: Dumbbell },
+    { href: "/athlete/chat", label: t.athlete.nav.chat, icon: MessageSquare },
+  ];
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
 
   const prevMessageTimes = useRef<Map<string, number>>(new Map());
@@ -169,7 +172,6 @@ const AthletePortalLayout = ({
 
             {/* User Menu */}
             <div className="flex items-center gap-2">
-              <LanguageSwitcher />
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
@@ -191,12 +193,29 @@ const AthletePortalLayout = ({
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-2 py-1.5">
                     <p className="text-sm font-medium truncate">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground">Athlete</p>
+                    <p className="text-xs text-muted-foreground">{t.athlete.role}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="flex items-center gap-1 px-2 py-1.5">
+                    <button
+                      onClick={() => changeLanguage("en")}
+                      className={`flex items-center gap-1.5 flex-1 px-2 py-1 rounded-md text-sm transition-colors ${language === "en" ? "bg-accent font-medium" : "hover:bg-accent/50 text-muted-foreground"}`}
+                    >
+                      <GB className="w-4 h-3 rounded-sm shrink-0" />
+                      EN
+                    </button>
+                    <button
+                      onClick={() => changeLanguage("pt")}
+                      className={`flex items-center gap-1.5 flex-1 px-2 py-1 rounded-md text-sm transition-colors ${language === "pt" ? "bg-accent font-medium" : "hover:bg-accent/50 text-muted-foreground"}`}
+                    >
+                      <PT className="w-4 h-3 rounded-sm shrink-0" />
+                      PT
+                    </button>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                     <LogOut className="h-4 w-4 mr-2" />
-                    Logout
+                    {t.athlete.logout}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

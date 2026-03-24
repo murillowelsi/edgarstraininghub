@@ -149,7 +149,7 @@ const AthleteHome = () => {
       <div className="p-4 space-y-4">
         {/* Welcome Section */}
         <div className="pt-2">
-          <p className="text-muted-foreground">Welcome back,</p>
+          <p className="text-muted-foreground">{t.athlete.home.welcomeBack}</p>
           <h1 className="text-3xl font-bold font-display">{displayName}</h1>
         </div>
 
@@ -163,7 +163,7 @@ const AthleteHome = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{completionRate}%</p>
-                  <p className="text-xs text-muted-foreground">Completion</p>
+                  <p className="text-xs text-muted-foreground">{t.athlete.home.statCompletion}</p>
                 </div>
               </div>
             </CardContent>
@@ -177,7 +177,7 @@ const AthleteHome = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{completedWorkouts}</p>
-                  <p className="text-xs text-muted-foreground">Completed</p>
+                  <p className="text-xs text-muted-foreground">{t.athlete.home.statCompleted}</p>
                 </div>
               </div>
             </CardContent>
@@ -191,7 +191,7 @@ const AthleteHome = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{totalWorkouts}</p>
-                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="text-xs text-muted-foreground">{t.athlete.home.statTotal}</p>
                 </div>
               </div>
             </CardContent>
@@ -207,7 +207,7 @@ const AthleteHome = () => {
                   <p className="text-2xl font-bold">
                     {todaysCompleted}/{todaysWorkouts.length}
                   </p>
-                  <p className="text-xs text-muted-foreground">Today</p>
+                  <p className="text-xs text-muted-foreground">{t.athlete.home.statToday}</p>
                 </div>
               </div>
             </CardContent>
@@ -220,7 +220,7 @@ const AthleteHome = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <Award className="h-5 w-5 text-primary" />
-                Your Progress
+                {t.athlete.home.yourProgress}
               </CardTitle>
               <span className="text-sm text-muted-foreground">
                 {completedWorkouts} of {totalWorkouts}
@@ -230,7 +230,7 @@ const AthleteHome = () => {
           <CardContent>
             <Progress value={completionRate} className="h-3" />
             <p className="text-xs text-muted-foreground mt-2">
-              {totalWorkouts - completedWorkouts} workouts remaining
+              {t.athlete.home.workoutsRemaining.replace("{{count}}", String(totalWorkouts - completedWorkouts))}
             </p>
           </CardContent>
         </Card>
@@ -246,7 +246,7 @@ const AthleteHome = () => {
                 onClick={handleTodayClick}
                 className="text-sm text-primary font-medium hover:underline"
               >
-                Today
+                {t.athlete.home.today}
               </button>
             </div>
           </CardHeader>
@@ -300,13 +300,13 @@ const AthleteHome = () => {
             <div className="mt-4 space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
                 {isToday(selectedDate)
-                  ? "Today's Workouts"
+                  ? t.athlete.home.todaysWorkouts
                   : format(selectedDate, "EEEE, MMM d")}
               </p>
 
               {selectedDateAssignments.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground">
-                  <p className="text-sm">No workouts scheduled</p>
+                  <p className="text-sm">{t.athlete.home.noWorkoutsScheduled}</p>
                 </div>
               ) : (
                 <div>
@@ -347,8 +347,8 @@ const AthleteHome = () => {
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {workout.type === "strength"
-                                ? `${workout.exercises?.length || 0} exercises`
-                                : `${workout.stages?.length || 0} stages`}
+                                ? `${workout.exercises?.length || 0} ${t.athlete.home.exercises}`
+                                : `${workout.stages?.length || 0} ${t.athlete.home.stages}`}
                             </p>
                           </div>
                           {isCompleted ? (
@@ -358,7 +358,7 @@ const AthleteHome = () => {
                             >
                               {assignment.completionPercentage !== undefined
                                 ? `${assignment.completionPercentage}%`
-                                : "Done"}
+                                : t.athlete.home.done}
                             </Badge>
                           ) : (
                             <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -378,12 +378,12 @@ const AthleteHome = () => {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Upcoming</CardTitle>
+                <CardTitle className="text-base">{t.athlete.home.upcoming}</CardTitle>
                 <Link
                   to="/athlete/calendar"
                   className="text-sm text-primary font-medium hover:underline flex items-center gap-1"
                 >
-                  See all
+                  {t.athlete.home.seeAll}
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>

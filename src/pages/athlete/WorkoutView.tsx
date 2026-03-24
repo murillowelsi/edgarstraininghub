@@ -83,9 +83,9 @@ const workoutTypeColors: Record<string, string> = {
 };
 
 // Utility functions for formatting
-const formatDuration = (stage: WorkoutStage): string => {
+const formatDuration = (stage: WorkoutStage, lapLabel: string = "Press Lap Button"): string => {
   if (stage.duration.type === "lapButton") {
-    return "Press Lap Button";
+    return lapLabel;
   }
   if (stage.duration.value !== undefined) {
     const unit = stage.duration.unit || "";
@@ -125,9 +125,12 @@ const formatSwimmingDetails = (stage: WorkoutStage): string[] => {
 const StageItem = ({
   stage,
   index,
+  t,
 }: {
   stage: WorkoutStage;
   index: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const color = stageColors[stage.type];
@@ -144,9 +147,9 @@ const StageItem = ({
                 <Repeat className="h-4 w-4 text-indigo-600" />
               </div>
               <div className="flex-1 text-left">
-                <p className="font-medium">Repeat {stage.repeatCount || 2}x</p>
+                <p className="font-medium">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}x</p>
                 <p className="text-sm text-muted-foreground">
-                  {stage.stages?.length || 0} stages
+                  {stage.stages?.length || 0} {t.athlete.workoutView.stages}
                 </p>
               </div>
               {isExpanded ? (
@@ -170,7 +173,7 @@ const StageItem = ({
                       {nestedIndex + 1}. {stageLabels[nestedStage.type]}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDuration(nestedStage)}
+                      {formatDuration(nestedStage, t.athlete.workoutView.pressLapButton)}
                       {formatIntensity(nestedStage) &&
                         ` · ${formatIntensity(nestedStage)}`}
                     </p>
@@ -201,7 +204,7 @@ const StageItem = ({
             <div className="flex-1 text-left">
               <p className="font-medium">{stageLabels[stage.type]}</p>
               <p className="text-sm text-muted-foreground">
-                {formatDuration(stage)}
+                {formatDuration(stage, t.athlete.workoutView.pressLapButton)}
                 {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
               </p>
             </div>
@@ -218,14 +221,14 @@ const StageItem = ({
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground uppercase font-medium">
-                  Duration
+                  {t.athlete.workoutView.duration}
                 </p>
-                <p className="font-medium mt-1">{formatDuration(stage)}</p>
+                <p className="font-medium mt-1">{formatDuration(stage, t.athlete.workoutView.pressLapButton)}</p>
               </div>
               {intensity && (
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-xs text-muted-foreground uppercase font-medium">
-                    Intensity
+                    {t.athlete.workoutView.intensity}
                   </p>
                   <p className="font-medium mt-1">{intensity}</p>
                 </div>
@@ -233,7 +236,7 @@ const StageItem = ({
               {stage.strokeType && (
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-xs text-muted-foreground uppercase font-medium">
-                    Stroke
+                    {t.athlete.workoutView.stroke}
                   </p>
                   <p className="font-medium mt-1">
                     {strokeLabels[stage.strokeType]}
@@ -243,7 +246,7 @@ const StageItem = ({
               {stage.drillType && stage.drillType !== "none" && (
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-xs text-muted-foreground uppercase font-medium">
-                    Drill
+                    {t.athlete.workoutView.drill}
                   </p>
                   <p className="font-medium mt-1">
                     {drillLabels[stage.drillType]}
@@ -253,7 +256,7 @@ const StageItem = ({
               {stage.equipment && stage.equipment !== "none" && (
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-xs text-muted-foreground uppercase font-medium">
-                    Equipment
+                    {t.athlete.workoutView.equipment}
                   </p>
                   <p className="font-medium mt-1">
                     {equipmentLabels[stage.equipment]}
@@ -264,7 +267,7 @@ const StageItem = ({
             {stage.notes && (
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground uppercase font-medium">
-                  Notes
+                  {t.athlete.workoutView.notes}
                 </p>
                 <p className="text-sm mt-1">{stage.notes}</p>
               </div>
@@ -281,16 +284,19 @@ const ExerciseItem = ({
   workoutExercise,
   exercise,
   index,
+  t,
 }: {
   workoutExercise: WorkoutExercise;
   exercise?: Exercise;
   index: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Use exercise from lookup, or fall back to denormalized data stored with workout
-  const exerciseName = exercise?.name || workoutExercise.exerciseName || "Exercise";
+  const exerciseName = exercise?.name || workoutExercise.exerciseName || t.athlete.workoutView.exercisesSection;
   const videoUrl = exercise?.videoUrl || workoutExercise.exerciseVideoUrl;
   const thumbnailUrl = exercise?.thumbnailUrl || workoutExercise.exerciseThumbnailUrl;
   const gifUrl = exercise?.gifUrl || workoutExercise.exerciseGifUrl;
@@ -387,7 +393,7 @@ const ExerciseItem = ({
                     </div>
                   )}
                   <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    {hasGif ? "View Animation" : "Watch Video"}
+                    {hasGif ? t.athlete.workoutView.viewAnimation : t.athlete.workoutView.watchVideo}
                   </div>
                 </button>
               )
@@ -397,20 +403,20 @@ const ExerciseItem = ({
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground uppercase font-medium">
-                  Sets
+                  {t.athlete.workoutView.sets}
                 </p>
                 <p className="font-medium mt-1">{workoutExercise.sets}</p>
               </div>
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground uppercase font-medium">
-                  Reps
+                  {t.athlete.workoutView.reps}
                 </p>
                 <p className="font-medium mt-1">{workoutExercise.reps || "10"}</p>
               </div>
               {workoutExercise.restSeconds > 0 && (
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-xs text-muted-foreground uppercase font-medium">
-                    Rest
+                    {t.athlete.workoutView.rest}
                   </p>
                   <p className="font-medium mt-1">{workoutExercise.restSeconds}s</p>
                 </div>
@@ -418,7 +424,7 @@ const ExerciseItem = ({
               {workoutExercise.weight && (
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-xs text-muted-foreground uppercase font-medium">
-                    Weight
+                    {t.athlete.workoutView.weight}
                   </p>
                   <p className="font-medium mt-1">{workoutExercise.weight}</p>
                 </div>
@@ -440,7 +446,7 @@ const ExerciseItem = ({
             {instructions && (
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground uppercase font-medium">
-                  Instructions
+                  {t.athlete.workoutView.instructions}
                 </p>
                 <p className="text-sm mt-1 whitespace-pre-wrap">{instructions}</p>
               </div>
@@ -450,7 +456,7 @@ const ExerciseItem = ({
             {workoutExercise.notes && (
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground uppercase font-medium">
-                  Notes
+                  {t.athlete.workoutView.notes}
                 </p>
                 <p className="text-sm mt-1">{workoutExercise.notes}</p>
               </div>
@@ -467,7 +473,7 @@ const ExerciseItem = ({
                 }}
               >
                 <Play className="h-4 w-4 mr-2" />
-                {hasGif ? "View Animation" : "Watch Video"}
+                {hasGif ? t.athlete.workoutView.viewAnimation : t.athlete.workoutView.watchVideo}
               </Button>
             )}
           </div>
@@ -554,8 +560,8 @@ const AthleteWorkoutView = () => {
       toast({
         title: newCompletedState ? t.athlete.toast.workoutCompleted : t.athlete.toast.workoutUnmarked,
         description: newCompletedState
-          ? "Great job on completing your workout!"
-          : "Workout marked as incomplete.",
+          ? t.athlete.workoutView.workoutCompletedDesc
+          : t.athlete.workoutView.workoutUnmarkedDesc,
       });
     } catch (error) {
       console.error("Error updating workout:", error);
@@ -580,8 +586,8 @@ const AthleteWorkoutView = () => {
   if (!assignment) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <p className="text-muted-foreground mb-4">Workout not found</p>
-        <Button onClick={() => navigate("/athlete")}>Go Back</Button>
+        <p className="text-muted-foreground mb-4">{t.athlete.workoutView.workoutNotFound}</p>
+        <Button onClick={() => navigate("/athlete")}>{t.athlete.workoutView.goBack}</Button>
       </div>
     );
   }
@@ -657,8 +663,8 @@ const AthleteWorkoutView = () => {
                       <Badge className="bg-green-100 text-green-700 dark:bg-green-900/50">
                         <Check className="h-3 w-3 mr-1" />
                         {assignment.completionPercentage !== undefined
-                          ? `${assignment.completionPercentage}% Completed`
-                          : "Completed"}
+                          ? `${assignment.completionPercentage}% ${t.athlete.workoutView.completedBadge}`
+                          : t.athlete.workoutView.completedBadge}
                       </Badge>
                     )}
                   </div>
@@ -671,8 +677,8 @@ const AthleteWorkoutView = () => {
                     <div className="flex items-center gap-1.5">
                       <Layers className="h-4 w-4" />
                       {workout.type === "strength"
-                        ? `${workout.exercises?.length || 0} exercises`
-                        : `${workout.stages.length} stages`}
+                        ? `${workout.exercises?.length || 0} ${t.athlete.workoutView.exercises}`
+                        : `${workout.stages.length} ${t.athlete.workoutView.stages}`}
                     </div>
                     {assignment.totalTime !== undefined && assignment.totalTime > 0 && (
                       <div className="flex items-center gap-1.5">
@@ -698,7 +704,7 @@ const AthleteWorkoutView = () => {
           {workout.type === "strength" ? (
             <>
               <h3 className="font-semibold text-lg mb-3">
-                Exercises ({workout.exercises?.length || 0})
+                {t.athlete.workoutView.exercisesSection} ({workout.exercises?.length || 0})
               </h3>
               <div className="space-y-3">
                 {workout.exercises?.map((workoutExercise, index) => {
@@ -709,6 +715,7 @@ const AthleteWorkoutView = () => {
                       workoutExercise={workoutExercise}
                       exercise={exercise}
                       index={index}
+                      t={t}
                     />
                   );
                 })}
@@ -717,11 +724,11 @@ const AthleteWorkoutView = () => {
           ) : (
             <>
               <h3 className="font-semibold text-lg mb-3">
-                Workout Stages ({workout.stages.length})
+                {t.athlete.workoutView.stagesSection} ({workout.stages.length})
               </h3>
               <div className="space-y-2">
                 {workout.stages.map((stage, index) => (
-                  <StageItem key={stage.id} stage={stage} index={index} />
+                  <StageItem key={stage.id} stage={stage} index={index} t={t} />
                 ))}
               </div>
             </>
@@ -738,7 +745,7 @@ const AthleteWorkoutView = () => {
               className="w-full h-12 text-base font-semibold rounded-xl bg-amber-500 hover:bg-amber-600 text-black"
             >
               <Play className="h-5 w-5 mr-2" />
-              Start Workout
+              {t.athlete.workoutView.startWorkout}
             </Button>
           </Link>
         ) : (
@@ -758,12 +765,12 @@ const AthleteWorkoutView = () => {
             ) : isCompleted ? (
               <>
                 <Circle className="h-5 w-5 mr-2" />
-                Mark as Incomplete
+                {t.athlete.workoutView.markIncomplete}
               </>
             ) : (
               <>
                 <CheckCircle2 className="h-5 w-5 mr-2" />
-                Complete Workout
+                {t.athlete.workoutView.completeWorkout}
               </>
             )}
           </Button>

@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Dumbbell,
   Loader2,
+  PersonStanding,
   RefreshCw,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -103,14 +104,14 @@ const AthleteCalendarView = () => {
 
   // Format date label
   const formatDateLabel = (date: Date) => {
-    if (isToday(date)) return "Today";
-    if (isTomorrow(date)) return "Tomorrow";
+    if (isToday(date)) return t.athlete.calendar.today;
+    if (isTomorrow(date)) return t.athlete.calendar.tomorrow;
     return format(date, "EEEE");
   };
 
   if (loading) {
     return (
-      <AthletePortalLayout title="Calendar">
+      <AthletePortalLayout title={t.athlete.calendar.title}>
         <div className="flex items-center justify-center h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -119,7 +120,7 @@ const AthleteCalendarView = () => {
   }
 
   return (
-    <AthletePortalLayout title="Calendar">
+    <AthletePortalLayout title={t.athlete.calendar.title}>
       {/* Sticky Header */}
       <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-lg border-b border-border/50 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -129,7 +130,7 @@ const AthleteCalendarView = () => {
               onClick={handleScrollToToday}
               className="text-sm text-primary font-medium hover:underline"
             >
-              Today
+              {t.athlete.calendar.today}
             </button>
             <button
               onClick={handleRefresh}
@@ -180,8 +181,7 @@ const AthleteCalendarView = () => {
                 </div>
                 {hasWorkouts && (
                   <Badge variant="secondary" className="text-xs">
-                    {dayAssignments.length} workout
-                    {dayAssignments.length > 1 ? "s" : ""}
+                    {dayAssignments.length} {dayAssignments.length > 1 ? t.athlete.calendar.workouts : t.athlete.calendar.workout}
                   </Badge>
                 )}
               </div>
@@ -236,8 +236,8 @@ const AthleteCalendarView = () => {
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   {workout.type === "strength"
-                                    ? `${workout.exercises?.length || 0} exercises`
-                                    : `${workout.stages.length} stages`}{" "}
+                                    ? `${workout.exercises?.length || 0} ${t.athlete.workouts.exercises}`
+                                    : `${workout.stages.length} ${t.athlete.workouts.stages}`}{" "}
                                   ·{" "}
                                   <span className="capitalize">
                                     {workout.type}
@@ -251,7 +251,7 @@ const AthleteCalendarView = () => {
                                 >
                                   {assignment.completionPercentage !== undefined
                                     ? `${assignment.completionPercentage}%`
-                                    : "Done"}
+                                    : t.athlete.workouts.done}
                                 </Badge>
                               ) : (
                                 <ChevronRight className="h-5 w-5 text-muted-foreground" />

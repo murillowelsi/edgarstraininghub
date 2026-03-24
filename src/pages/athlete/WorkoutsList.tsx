@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Dumbbell,
   Loader2,
+  PersonStanding,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -91,7 +92,7 @@ const AthleteWorkoutsList = () => {
 
   if (loading) {
     return (
-      <AthletePortalLayout title="Workouts">
+      <AthletePortalLayout title={t.athlete.workouts.title}>
         <div className="flex items-center justify-center h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -100,7 +101,7 @@ const AthleteWorkoutsList = () => {
   }
 
   return (
-    <AthletePortalLayout title="Workouts">
+    <AthletePortalLayout title={t.athlete.workouts.title}>
       <div className="p-4 space-y-6">
         {/* Program Header */}
         <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
@@ -110,9 +111,9 @@ const AthleteWorkoutsList = () => {
                 <Dumbbell className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-xl">{displayName}'s Program</CardTitle>
+                <CardTitle className="text-xl">{displayName}{t.athlete.workouts.program}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Your training schedule
+                  {t.athlete.workouts.trainingSchedule}
                 </p>
               </div>
             </div>
@@ -120,9 +121,9 @@ const AthleteWorkoutsList = () => {
           <CardContent>
             <div className="mt-4 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Progress</span>
+                <span className="text-muted-foreground">{t.athlete.workouts.progress}</span>
                 <span className="font-medium">
-                  {completedWorkouts} / {totalWorkouts} completed
+                  {completedWorkouts} / {totalWorkouts} {t.athlete.workouts.completed}
                 </span>
               </div>
               <Progress value={completionRate} className="h-2" />
@@ -132,17 +133,17 @@ const AthleteWorkoutsList = () => {
             <div className="grid grid-cols-3 gap-3 mt-4">
               <div className="text-center p-3 rounded-xl bg-background/50">
                 <p className="text-2xl font-bold">{totalWorkouts}</p>
-                <p className="text-xs text-muted-foreground">Total</p>
+                <p className="text-xs text-muted-foreground">{t.athlete.workouts.total}</p>
               </div>
               <div className="text-center p-3 rounded-xl bg-background/50">
                 <p className="text-2xl font-bold text-green-600">
                   {completedWorkouts}
                 </p>
-                <p className="text-xs text-muted-foreground">Done</p>
+                <p className="text-xs text-muted-foreground">{t.athlete.workouts.done}</p>
               </div>
               <div className="text-center p-3 rounded-xl bg-background/50">
                 <p className="text-2xl font-bold text-primary">{pendingWorkouts}</p>
-                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="text-xs text-muted-foreground">{t.athlete.workouts.pending}</p>
               </div>
             </div>
           </CardContent>
@@ -156,13 +157,13 @@ const AthleteWorkoutsList = () => {
         >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="all">
-              All ({totalWorkouts})
+              {t.athlete.workouts.tabAll} ({totalWorkouts})
             </TabsTrigger>
             <TabsTrigger value="pending">
-              Pending ({pendingWorkouts})
+              {t.athlete.workouts.tabPending} ({pendingWorkouts})
             </TabsTrigger>
             <TabsTrigger value="completed">
-              Done ({completedWorkouts})
+              {t.athlete.workouts.tabDone} ({completedWorkouts})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -174,10 +175,10 @@ const AthleteWorkoutsList = () => {
               <Dumbbell className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
               <p className="text-muted-foreground">
                 {filter === "pending"
-                  ? "No pending workouts"
+                  ? t.athlete.workouts.noPending
                   : filter === "completed"
-                    ? "No completed workouts yet"
-                    : "No workouts assigned"}
+                    ? t.athlete.workouts.noCompleted
+                    : t.athlete.workouts.noAssigned}
               </p>
             </CardContent>
           </Card>
@@ -239,8 +240,8 @@ const AthleteWorkoutsList = () => {
                             <span className="text-xs text-muted-foreground">
                               ·{" "}
                               {workout.type === "strength"
-                                ? `${workout.exercises?.length || 0} exercises`
-                                : `${workout.stages.length} stages`}
+                                ? `${workout.exercises?.length || 0} ${t.athlete.workouts.exercises}`
+                                : `${workout.stages.length} ${t.athlete.workouts.stages}`}
                             </span>
                           </div>
                         </div>
@@ -251,7 +252,7 @@ const AthleteWorkoutsList = () => {
                           >
                             {assignment.completionPercentage !== undefined
                               ? `${assignment.completionPercentage}%`
-                              : "Done"}
+                              : t.athlete.workouts.done}
                           </Badge>
                         ) : (
                           <ChevronRight className="h-5 w-5 text-muted-foreground" />

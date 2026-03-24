@@ -69,6 +69,7 @@ const ExerciseSessionCard = ({
   onUpdateSet,
   onAddSet,
   onToggleSetComplete,
+  t,
 }: {
   workoutExercise: WorkoutExercise;
   exercise?: Exercise;
@@ -80,11 +81,13 @@ const ExerciseSessionCard = ({
   onUpdateSet: (setIndex: number, field: "reps" | "weight", value: string) => void;
   onAddSet: () => void;
   onToggleSetComplete: (setIndex: number) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Use exercise from lookup, or fall back to denormalized data stored with workout
-  const exerciseName = exercise?.name || workoutExercise.exerciseName || "Exercise";
+  const exerciseName = exercise?.name || workoutExercise.exerciseName || t.athlete.session.exerciseFallback;
   const videoUrl = exercise?.videoUrl || workoutExercise.exerciseVideoUrl;
   const gifUrl = exercise?.gifUrl || workoutExercise.exerciseGifUrl;
   const instructions = exercise?.instructions || workoutExercise.exerciseInstructions;
@@ -127,7 +130,7 @@ const ExerciseSessionCard = ({
             {allComplete && (
               <Badge className="bg-green-100 text-green-700 dark:bg-green-900/50">
                 <Check className="h-3 w-3 mr-1" />
-                Complete
+                {t.athlete.session.complete}
               </Badge>
             )}
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -190,7 +193,7 @@ const ExerciseSessionCard = ({
               )}
               <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
                 <span className="text-white text-sm font-medium">
-                  {hasGif ? "View full animation" : "Watch how to do it"}
+                  {hasGif ? t.athlete.session.viewFullAnimation : t.athlete.session.watchHowTo}
                 </span>
                 <Badge className={hasGif ? "bg-green-600 text-white border-0" : "bg-red-600 text-white border-0"}>
                   <Play className="h-3 w-3 mr-1" />
@@ -204,7 +207,7 @@ const ExerciseSessionCard = ({
         {/* Instructions */}
         {instructions && (
           <div className="bg-muted/50 p-3 rounded-lg mb-4">
-            <p className="text-xs text-muted-foreground uppercase font-medium">How to perform</p>
+            <p className="text-xs text-muted-foreground uppercase font-medium">{t.athlete.session.howToPerform}</p>
             <p className="text-sm mt-1 leading-relaxed whitespace-pre-wrap">{instructions}</p>
           </div>
         )}
@@ -214,7 +217,7 @@ const ExerciseSessionCard = ({
           <div className="w-full aspect-[3/1] rounded-xl bg-muted/50 flex items-center justify-center mb-4 border-2 border-dashed border-muted-foreground/20">
             <div className="text-center text-muted-foreground">
               <Dumbbell className="h-8 w-8 mx-auto mb-2" />
-              <p className="text-sm">No video available</p>
+              <p className="text-sm">{t.athlete.session.noVideoAvailable}</p>
             </div>
           </div>
         )}
@@ -232,7 +235,7 @@ const ExerciseSessionCard = ({
             <Timer className={cn("h-5 w-5", isActive ? "text-blue-600" : "text-muted-foreground")} />
             <div>
               <p className={cn("text-sm font-medium", isActive && "text-blue-600")}>
-                Exercise Timer
+                {t.athlete.session.exerciseTimer}
               </p>
               <p className={cn("text-2xl font-mono font-bold", isActive && "text-blue-600")}>
                 {formatTime(progress.exerciseTime)}
@@ -248,7 +251,7 @@ const ExerciseSessionCard = ({
               className="gap-2"
             >
               <StopCircle className="h-4 w-4" />
-              Stop
+              {t.athlete.session.stop}
             </Button>
           ) : (
             <Button
@@ -258,7 +261,7 @@ const ExerciseSessionCard = ({
               className="gap-2 bg-blue-600 hover:bg-blue-700"
             >
               <Play className="h-4 w-4" />
-              Start
+              {t.athlete.session.start}
             </Button>
           )}
         </div>
@@ -267,17 +270,17 @@ const ExerciseSessionCard = ({
         {workoutExercise.restSeconds > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 p-2 bg-muted/30 rounded">
             <Clock className="h-4 w-4" />
-            <span>Rest {workoutExercise.restSeconds}s between sets</span>
+            <span>{t.athlete.session.restBetweenSets.replace("{{seconds}}", String(workoutExercise.restSeconds))}</span>
           </div>
         )}
 
         {/* Sets Table */}
         <div>
           <div className="grid grid-cols-[40px_1fr_80px_80px_40px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
-            <span>Set</span>
-            <span>Previous</span>
-            <span className="text-center">Reps</span>
-            <span className="text-center">Kg</span>
+            <span>{t.athlete.session.setHeader}</span>
+            <span>{t.athlete.session.previousHeader}</span>
+            <span className="text-center">{t.athlete.session.repsHeader}</span>
+            <span className="text-center">{t.athlete.session.kgHeader}</span>
             <span></span>
           </div>
 
@@ -329,7 +332,7 @@ const ExerciseSessionCard = ({
             className="flex items-center gap-2 text-sm text-primary font-medium mt-4 hover:underline"
           >
             <Plus className="h-4 w-4" />
-            Add new set
+            {t.athlete.session.addNewSet}
           </button>
         </div>
       </CardContent>
@@ -617,8 +620,8 @@ const StrengthWorkoutSession = () => {
   if (!assignment || assignment.workout.type !== "strength") {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <p className="text-muted-foreground mb-4">Workout not found</p>
-        <Button onClick={() => navigate("/athlete")}>Go Back</Button>
+        <p className="text-muted-foreground mb-4">{t.athlete.session.workoutNotFound}</p>
+        <Button onClick={() => navigate("/athlete")}>{t.athlete.session.goBack}</Button>
       </div>
     );
   }
@@ -633,7 +636,7 @@ const StrengthWorkoutSession = () => {
         {/* Total Timer Bar (when workout started) */}
         {isWorkoutStarted && (
           <div className="bg-primary/10 py-3 text-center border-b">
-            <p className="text-xs text-muted-foreground mb-1">Total Time</p>
+            <p className="text-xs text-muted-foreground mb-1">{t.athlete.session.totalTime}</p>
             <div className="text-3xl font-mono font-bold text-primary">
               {formatTime(totalElapsedTime)}
             </div>
@@ -644,14 +647,14 @@ const StrengthWorkoutSession = () => {
           {isWorkoutStarted ? (
             <>
               <Button variant="ghost" onClick={handleCancel}>
-                Cancel
+                {t.athlete.session.cancel}
               </Button>
               <div className="flex items-center gap-2">
                 <Button onClick={handleSave} disabled={saving}>
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
-                  Save
+                  {t.athlete.session.save}
                 </Button>
               </div>
             </>
@@ -698,12 +701,12 @@ const StrengthWorkoutSession = () => {
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Dumbbell className="h-4 w-4" />
-                      {workout.exercises?.length || 0} Exercises
+                      {workout.exercises?.length || 0} {t.athlete.session.exercisesCount}
                     </div>
                     {isWorkoutStarted && (
                       <div className="flex items-center gap-1">
                         <CheckCircle2 className="h-4 w-4" />
-                        {completionPercentage}% Complete
+                        {completionPercentage}% {t.athlete.session.completePercent}
                       </div>
                     )}
                   </div>
@@ -745,6 +748,7 @@ const StrengthWorkoutSession = () => {
                   onToggleSetComplete={(setIndex) =>
                     handleToggleSetComplete(workoutExercise.id, setIndex)
                   }
+                  t={t}
                 />
               );
             })}
