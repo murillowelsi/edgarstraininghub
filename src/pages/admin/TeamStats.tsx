@@ -44,6 +44,7 @@ export default function AdminTeamStats() {
   const [workoutMap, setWorkoutMap] = useState<Map<string, Workout>>(new Map());
   // Selected workout filter
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string>("");
+  const [workoutOptions, setWorkoutOptions] = useState<string[]>([]);
 
   useEffect(() => {
     if (!teamId) return;
@@ -73,6 +74,10 @@ export default function AdminTeamStats() {
         setMembers(memberResults.filter((u): u is User => u !== null));
 
         // 3. Query all assignments for team members (in query, safe up to 30)
+        if (t.memberIds.length === 0) {
+          setLoading(false);
+          return;
+        }
         const q = query(
           collection(db, "workoutAssignments"),
           where("athleteId", "in", t.memberIds)
@@ -109,9 +114,13 @@ export default function AdminTeamStats() {
         });
         setWorkoutMap(wMap);
 
-        if (uniqueWorkoutIds.length > 0) {
-          setSelectedWorkoutId(uniqueWorkoutIds[0]);
-        }
+        const sortedWorkoutIds = [...wMap.keys()].sort((a, b) => {
+          const nameA = wMap.get(a)?.name ?? "";
+          const nameB = wMap.get(b)?.name ?? "";
+          return nameA.localeCompare(nameB);
+        });
+        setWorkoutOptions(sortedWorkoutIds);
+        if (sortedWorkoutIds.length > 0) setSelectedWorkoutId(sortedWorkoutIds[0]);
       } catch {
         if (cancelled) return;
         toast({
@@ -129,9 +138,6 @@ export default function AdminTeamStats() {
       cancelled = true;
     };
   }, [teamId]);
-
-  // Build a set of unique workout ids that actually have assignments
-  const workoutOptions = [...workoutMap.keys()];
 
   // For selected workout, build a lookup of athleteId -> assignment
   const assignmentByAthlete = new Map<string, WorkoutAssignment>();
