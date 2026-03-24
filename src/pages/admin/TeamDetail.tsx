@@ -55,36 +55,41 @@ export default function AdminTeamDetail() {
 
   useEffect(() => {
     if (!teamId) return;
-    loadTeam();
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const t = await getTeamById(teamId);
+        if (cancelled) return;
+        if (!t) { navigate("/admin/teams"); return; }
+        setTeam(t);
+        setNameInput(t.name);
+        const memberUsers = await Promise.all(
+          t.memberIds.map((uid) => getUserById(uid))
+        );
+        if (cancelled) return;
+        setMembers(memberUsers.filter((u): u is User => u !== null));
+      } catch {
+        if (cancelled) return;
+        toast({ title: "Error", description: "Failed to load team.", variant: "destructive" });
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
   }, [teamId]);
-
-  const loadTeam = async () => {
-    if (!teamId) return;
-    try {
-      const t = await getTeamById(teamId);
-      if (!t) { navigate("/admin/teams"); return; }
-      setTeam(t);
-      setNameInput(t.name);
-      // Load member details
-      const memberUsers = await Promise.all(
-        t.memberIds.map((uid) => getUserById(uid))
-      );
-      setMembers(memberUsers.filter((u): u is User => u !== null));
-    } catch {
-      toast({ title: "Error", description: "Failed to load team.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const inviteUrl = team
     ? `${window.location.origin}/join/${team.inviteToken}`
     : "";
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(inviteUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      toast({ title: "Error", description: "Could not copy to clipboard.", variant: "destructive" });
+    });
   };
 
   const handleSaveName = async () => {
@@ -242,7 +247,7 @@ export default function AdminTeamDetail() {
             </Button>
           </div>
           <div className="p-4 bg-white rounded-lg inline-block border">
-            <QRCodeSVG value={inviteUrl} size={160} />
+            {inviteUrl && <QRCodeSVG value={inviteUrl} size={160} />}
           </div>
         </section>
 
