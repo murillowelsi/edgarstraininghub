@@ -16,13 +16,16 @@ service cloud.firestore {
     }
 
     // Users collection: authenticated users can read their own, admins can read all and manage
+    // Users can also create their own document (self-registration via team invite)
     match /users/{userId} {
       allow read: if request.auth != null && (
-        request.auth.uid == userId || 
-        isAdmin() || 
+        request.auth.uid == userId ||
+        isAdmin() ||
         resource.data.role in ['admin', 'editor']
       );
-      allow create, update, delete: if isAdmin();
+      allow create: if isAdmin() ||
+        (request.auth != null && request.auth.uid == userId);
+      allow update, delete: if isAdmin();
     }
 
     // Posts collection: public can read published, editors can CRUD
@@ -87,6 +90,29 @@ service cloud.firestore {
       allow read: if request.auth != null && 
         (isAdmin() || resource.data.athleteId == request.auth.uid);
       allow create, update, delete: if isAdmin();
+    }
+
+    // Teams collection
+    match /teams/{teamId} {
+      // Public read: allows unauthenticated lookup by inviteToken on the join page
+      allow read: if true;
+
+      // Only the team's coach (coachId) can create or delete
+      allow create: if request.auth != null
+        && request.resource.data.coachId == request.auth.uid;
+      allow delete: if request.auth != null
+        && resource.data.coachId == request.auth.uid;
+
+      // Coach can update anything.
+      // An authenticated user can append only their own UID to memberIds (team join).
+      allow update: if request.auth != null && (
+        resource.data.coachId == request.auth.uid
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["memberIds", "updatedAt"])
+          && request.resource.data.memberIds.hasAll(resource.data.memberIds)
+          && request.resource.data.memberIds.removeAll(resource.data.memberIds).hasOnly([request.auth.uid])
+        )
+      );
     }
 
     // Default deny
