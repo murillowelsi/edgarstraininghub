@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createTeam, deleteTeam, getTeamsByCoach } from "@/services/teamsService";
 import type { Team } from "@/types/team";
-import { Users2, Loader2, Trash2, ChevronRight } from "lucide-react";
+import { Shield, Users2, Loader2, Trash2, ChevronRight } from "lucide-react";
 
 export default function AdminTeams() {
   const { user } = useAuth();
@@ -91,7 +91,7 @@ export default function AdminTeams() {
           </div>
         ) : teams.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-center">
-            <Users2 className="h-10 w-10 mb-3 opacity-30" />
+            <Shield className="h-10 w-10 mb-3 opacity-30" />
             <p className="font-medium">{t.admin.teams.noTeamsTitle}</p>
             <p className="text-sm mt-1">{t.admin.teams.noTeamsDescription}</p>
           </div>
