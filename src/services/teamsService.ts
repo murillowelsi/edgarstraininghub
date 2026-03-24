@@ -40,6 +40,7 @@ export const createTeam = async (name: string, coachId: string): Promise<Team> =
     updatedAt: serverTimestamp(),
   });
   const snap = await getDoc(ref);
+  if (!snap.exists()) throw new Error("Failed to read team after creation");
   return docToTeam(snap.id, snap.data() as TeamDocument);
 };
 
