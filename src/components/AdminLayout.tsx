@@ -23,7 +23,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/posts", label: t.admin.nav.posts, icon: FileText },
     { href: "/admin/users", label: t.admin.nav.users, icon: Users },
     { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell },
-    { href: "/admin/teams", label: "Teams", icon: Users2 },
+    { href: "/admin/teams", label: t.admin.nav.teams, icon: Users2 },
     { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
     { href: "/admin/chat", label: t.admin.nav.chat, icon: MessageSquare },
   ];

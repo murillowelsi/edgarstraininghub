@@ -402,7 +402,8 @@
       "users": "Utilizadores",
       "workouts": "Treinos",
       "calendar": "Calendário",
-      "chat": "Chat"
+      "chat": "Chat",
+      "teams": "Times"
     },
     "posts": {
       "title": "Artigos",
@@ -507,6 +508,74 @@
       "deleteConversation": "Eliminar Conversa",
       "deleteConversationDescription": "Tem a certeza que quer eliminar esta conversa com {{name}}? Todas as mensagens serão eliminadas permanentemente.",
       "toast": { "deleteSuccess": "Chat eliminado com sucesso", "deleteError": "Erro ao eliminar o chat. Tente novamente." }
+    },
+    "teams": {
+      "title": "Times",
+      "description": "Gerencie os seus grupos de treino e convide atletas.",
+      "newTeam": "Novo Grupo",
+      "member": "membro",
+      "members": "membros",
+      "teamName": "Nome do Grupo",
+      "teamNamePlaceholder": "ex: Sub-17 Futebol",
+      "createTeam": "Criar Grupo",
+      "noTeamsTitle": "Ainda sem grupos",
+      "noTeamsDescription": "Crie um grupo para começar a convidar atletas.",
+      "delete": {
+        "title": "Eliminar Grupo",
+        "description": "Tem a certeza que quer eliminar \"{{name}}\"? Os membros e as suas atribuições de treino não são afetados."
+      },
+      "toast": {
+        "loadError": "Erro ao carregar grupos.",
+        "created": "Grupo criado",
+        "createdDescription": "\"{{name}}\" está pronto.",
+        "createError": "Erro ao criar grupo.",
+        "deleted": "Grupo eliminado",
+        "deletedDescription": "\"{{name}}\" foi eliminado.",
+        "deleteError": "Erro ao eliminar grupo."
+      }
+    },
+    "teamDetail": {
+      "viewStats": "Ver Estatísticas",
+      "renameTeam": "Renomear grupo",
+      "membersTitle": "Membros ({{count}})",
+      "noMembers": "Ainda sem membros. Partilhe o link de convite abaixo.",
+      "inviteLink": "Link de Convite",
+      "dangerZone": "Zona de Perigo",
+      "deleteTeam": "Eliminar Grupo",
+      "removeMember": {
+        "title": "Remover Membro",
+        "description": "Remover {{name}} deste grupo? As atribuições de treino não são afetadas.",
+        "confirm": "Remover"
+      },
+      "deleteConfirm": {
+        "description": "Tem a certeza que quer eliminar este grupo? Os membros e as suas atribuições de treino não são afetados."
+      },
+      "toast": {
+        "loadError": "Erro ao carregar grupo.",
+        "teamRenamed": "Grupo renomeado",
+        "renameError": "Erro ao renomear grupo.",
+        "memberRemoved": "Membro removido",
+        "memberRemovedDescription": "{{name}} removido do grupo.",
+        "removeError": "Erro ao remover membro.",
+        "teamDeleted": "Grupo eliminado",
+        "deleteError": "Erro ao eliminar grupo."
+      }
+    },
+    "teamStats": {
+      "description": "Veja quais atletas concluíram o treino em cada dia.",
+      "noMembers": "Ainda não há membros neste grupo.",
+      "noAssignments": "Nenhuma atribuição de treino encontrada para os membros do grupo.",
+      "selectDate": "Selecionar Data",
+      "chooseDate": "Escolha uma data",
+      "columns": {
+        "athlete": "Atleta",
+        "workout": "Treino",
+        "status": "Estado",
+        "detail": "Detalhe"
+      },
+      "notAssigned": "Não atribuído",
+      "completed": "Concluído",
+      "notCompleted": "Não concluído"
     }
   },
   "athlete": {
@@ -539,6 +608,36 @@
     "noMessages": "Sem mensagens. Inicie uma conversa!",
     "noChats": "Sem conversas ativas.",
     "noMessagesYet": "Sem mensagens"
+  },
+  "joinTeam": {
+    "invalidLink": "Link de convite inválido.",
+    "teamNotFound": "O link de convite é inválido ou o grupo já não existe.",
+    "loadError": "Erro ao carregar o grupo. Tente novamente.",
+    "joined": "Entrou para o {{name}}!",
+    "welcome": "Bem-vindo! Entrou para o {{name}}.",
+    "joinError": "Erro ao entrar no grupo.",
+    "invalidInvite": "Convite Inválido",
+    "athletesOnly": "Convite Apenas para Atletas",
+    "athletesOnlyDesc": "Este convite é apenas para atletas.",
+    "alreadyMember": "Já é Membro",
+    "alreadyMemberDesc": "Já é membro deste grupo.",
+    "goToDashboard": "Ir para o Dashboard",
+    "joinTitle": "Entrar no {{name}}",
+    "registerSubtitle": "Crie uma conta para entrar neste grupo.",
+    "loginSubtitle": "Entre na sua conta para se juntar ao grupo.",
+    "name": "Nome",
+    "namePlaceholder": "O seu nome completo",
+    "password": "Palavra-passe",
+    "createPasswordPlaceholder": "Crie uma palavra-passe",
+    "yourPasswordPlaceholder": "A sua palavra-passe",
+    "createAccountJoin": "Criar Conta e Entrar",
+    "logInJoin": "Entrar e Juntar-se",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "logIn": "Entrar",
+    "newHere": "Novo aqui?",
+    "createAccount": "Criar conta",
+    "registrationFailed": "Erro no registo.",
+    "loginFailed": "Erro no login."
   },
   "blog": {
     "title": "Blog &",

@@ -402,7 +402,8 @@
       "users": "Users",
       "workouts": "Workouts",
       "calendar": "Calendar",
-      "chat": "Chat"
+      "chat": "Chat",
+      "teams": "Teams"
     },
     "posts": {
       "title": "Posts",
@@ -507,6 +508,74 @@
       "deleteConversation": "Delete Conversation",
       "deleteConversationDescription": "Are you sure you want to delete this conversation with {{name}}? This will permanently remove all messages and cannot be undone.",
       "toast": { "deleteSuccess": "Chat deleted successfully", "deleteError": "Failed to delete chat. Please try again." }
+    },
+    "teams": {
+      "title": "Teams",
+      "description": "Manage your training teams and invite athletes.",
+      "newTeam": "New Team",
+      "member": "member",
+      "members": "members",
+      "teamName": "Team Name",
+      "teamNamePlaceholder": "e.g. U17 Football",
+      "createTeam": "Create Team",
+      "noTeamsTitle": "No teams yet",
+      "noTeamsDescription": "Create a team to start inviting athletes.",
+      "delete": {
+        "title": "Delete Team",
+        "description": "Are you sure you want to delete \"{{name}}\"? Members and their workout assignments are not affected."
+      },
+      "toast": {
+        "loadError": "Failed to load teams.",
+        "created": "Team created",
+        "createdDescription": "\"{{name}}\" is ready.",
+        "createError": "Failed to create team.",
+        "deleted": "Team deleted",
+        "deletedDescription": "\"{{name}}\" has been deleted.",
+        "deleteError": "Failed to delete team."
+      }
+    },
+    "teamDetail": {
+      "viewStats": "View Stats",
+      "renameTeam": "Rename team",
+      "membersTitle": "Members ({{count}})",
+      "noMembers": "No members yet. Share the invite link below.",
+      "inviteLink": "Invite Link",
+      "dangerZone": "Danger Zone",
+      "deleteTeam": "Delete Team",
+      "removeMember": {
+        "title": "Remove Member",
+        "description": "Remove {{name}} from this team? Their workout assignments are not affected.",
+        "confirm": "Remove"
+      },
+      "deleteConfirm": {
+        "description": "Are you sure you want to delete this team? Members and their workout assignments are not affected."
+      },
+      "toast": {
+        "loadError": "Failed to load team.",
+        "teamRenamed": "Team renamed",
+        "renameError": "Failed to rename team.",
+        "memberRemoved": "Member removed",
+        "memberRemovedDescription": "{{name}} removed from team.",
+        "removeError": "Failed to remove member.",
+        "teamDeleted": "Team deleted",
+        "deleteError": "Failed to delete team."
+      }
+    },
+    "teamStats": {
+      "description": "See which athletes completed their workout each day.",
+      "noMembers": "No members in this team yet.",
+      "noAssignments": "No workout assignments found for team members.",
+      "selectDate": "Select Date",
+      "chooseDate": "Choose a date",
+      "columns": {
+        "athlete": "Athlete",
+        "workout": "Workout",
+        "status": "Status",
+        "detail": "Detail"
+      },
+      "notAssigned": "Not assigned",
+      "completed": "Completed",
+      "notCompleted": "Not completed"
     }
   },
   "athlete": {
@@ -539,6 +608,36 @@
     "noMessages": "No messages yet. Start a conversation!",
     "noChats": "No active chats.",
     "noMessagesYet": "No messages yet"
+  },
+  "joinTeam": {
+    "invalidLink": "Invalid invite link.",
+    "teamNotFound": "Invite link is invalid or the team no longer exists.",
+    "loadError": "Failed to load team. Try again.",
+    "joined": "You joined {{name}}!",
+    "welcome": "Welcome! You joined {{name}}.",
+    "joinError": "Failed to join team.",
+    "invalidInvite": "Invalid Invite",
+    "athletesOnly": "Invite for Athletes Only",
+    "athletesOnlyDesc": "This invite is for athletes only.",
+    "alreadyMember": "Already a Member",
+    "alreadyMemberDesc": "You are already a member of this team.",
+    "goToDashboard": "Go to Dashboard",
+    "joinTitle": "Join {{name}}",
+    "registerSubtitle": "Create an account to join this team.",
+    "loginSubtitle": "Log in to join this team.",
+    "name": "Name",
+    "namePlaceholder": "Your full name",
+    "password": "Password",
+    "createPasswordPlaceholder": "Create a password",
+    "yourPasswordPlaceholder": "Your password",
+    "createAccountJoin": "Create Account & Join",
+    "logInJoin": "Log In & Join",
+    "alreadyHaveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "newHere": "New here?",
+    "createAccount": "Create account",
+    "registrationFailed": "Registration failed.",
+    "loginFailed": "Login failed."
   },
   "blog": {
     "title": "Blog &",

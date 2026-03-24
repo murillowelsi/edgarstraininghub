@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   getTeamById,
   updateTeamName,
@@ -31,6 +32,7 @@ export default function AdminTeamDetail() {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [team, setTeam] = useState<Team | null>(null);
   const [members, setMembers] = useState<User[]>([]);
@@ -57,19 +59,19 @@ export default function AdminTeamDetail() {
     let cancelled = false;
     const load = async () => {
       try {
-        const t = await getTeamById(teamId);
+        const team = await getTeamById(teamId);
         if (cancelled) return;
-        if (!t) { navigate("/admin/teams"); return; }
-        setTeam(t);
-        setNameInput(t.name);
+        if (!team) { navigate("/admin/teams"); return; }
+        setTeam(team);
+        setNameInput(team.name);
         const memberUsers = await Promise.all(
-          t.memberIds.map((uid) => getUserById(uid))
+          team.memberIds.map((uid) => getUserById(uid))
         );
         if (cancelled) return;
         setMembers(memberUsers.filter((u): u is User => u !== null));
       } catch {
         if (cancelled) return;
-        toast({ title: "Error", description: "Failed to load team.", variant: "destructive" });
+        toast({ title: t.common.error, description: t.admin.teamDetail.toast.loadError, variant: "destructive" });
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -87,7 +89,7 @@ export default function AdminTeamDetail() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {
-      toast({ title: "Error", description: "Could not copy to clipboard.", variant: "destructive" });
+      toast({ title: t.common.error, description: "Could not copy to clipboard.", variant: "destructive" });
     });
   };
 
@@ -99,11 +101,11 @@ export default function AdminTeamDetail() {
     setSavingName(true);
     try {
       await updateTeamName(team.id, nameInput.trim());
-      setTeam((t) => t ? { ...t, name: nameInput.trim() } : t);
+      setTeam((prev) => prev ? { ...prev, name: nameInput.trim() } : prev);
       setEditingName(false);
-      toast({ title: "Team renamed" });
+      toast({ title: t.admin.teamDetail.toast.teamRenamed });
     } catch {
-      toast({ title: "Error", description: "Failed to rename team.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.admin.teamDetail.toast.renameError, variant: "destructive" });
     } finally {
       setSavingName(false);
     }
@@ -115,10 +117,13 @@ export default function AdminTeamDetail() {
     try {
       await removeMemberFromTeam(team.id, member.id);
       setMembers((prev) => prev.filter((m) => m.id !== member.id));
-      setTeam((t) => t ? { ...t, memberIds: t.memberIds.filter((id) => id !== member.id) } : t);
-      toast({ title: "Member removed", description: `${member.displayName} removed from team.` });
+      setTeam((prev) => prev ? { ...prev, memberIds: prev.memberIds.filter((id) => id !== member.id) } : prev);
+      toast({
+        title: t.admin.teamDetail.toast.memberRemoved,
+        description: t.admin.teamDetail.toast.memberRemovedDescription.replace("{{name}}", member.displayName),
+      });
     } catch {
-      toast({ title: "Error", description: "Failed to remove member.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.admin.teamDetail.toast.removeError, variant: "destructive" });
     } finally {
       setRemovingMember(null);
       setConfirmMember(null);
@@ -130,10 +135,10 @@ export default function AdminTeamDetail() {
     setDeleting(true);
     try {
       await deleteTeam(team.id);
-      toast({ title: "Team deleted" });
+      toast({ title: t.admin.teamDetail.toast.teamDeleted });
       navigate("/admin/teams");
     } catch {
-      toast({ title: "Error", description: "Failed to delete team.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.admin.teamDetail.toast.deleteError, variant: "destructive" });
       setDeleting(false);
       setConfirmDelete(false);
     }
@@ -183,7 +188,7 @@ export default function AdminTeamDetail() {
                 variant="ghost"
                 className="h-7 w-7 text-muted-foreground hover:text-foreground"
                 onClick={() => setEditingName(true)}
-                aria-label="Rename team"
+                aria-label={t.admin.teamDetail.renameTeam}
               >
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
@@ -191,7 +196,7 @@ export default function AdminTeamDetail() {
           )}
           <Button onClick={() => navigate(`/admin/teams/${team.id}/stats`)} className="hidden sm:flex w-auto shrink-0">
             <BarChart2 className="h-4 w-4 mr-2" />
-            View Stats
+            {t.admin.teamDetail.viewStats}
           </Button>
         </div>
         {/* Mobile FAB for Stats */}
@@ -199,7 +204,7 @@ export default function AdminTeamDetail() {
           onClick={() => navigate(`/admin/teams/${team.id}/stats`)}
           className="fixed right-4 z-30 sm:hidden h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
           style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-          aria-label="View Stats"
+          aria-label={t.admin.teamDetail.viewStats}
         >
           <BarChart2 className="h-6 w-6" />
         </button>
@@ -207,10 +212,10 @@ export default function AdminTeamDetail() {
         {/* Members */}
         <section>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Members ({members.length})
+            {t.admin.teamDetail.membersTitle.replace("{{count}}", String(members.length))}
           </h2>
           {members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No members yet. Share the invite link below.</p>
+            <p className="text-sm text-muted-foreground">{t.admin.teamDetail.noMembers}</p>
           ) : (
             <div className="space-y-2">
               {members.map((member) => (
@@ -244,7 +249,7 @@ export default function AdminTeamDetail() {
         {/* Invite section */}
         <section>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Invite Link
+            {t.admin.teamDetail.inviteLink}
           </h2>
           <div className="flex items-center gap-2 mb-4">
             <Input value={inviteUrl} readOnly className="text-sm font-mono" />
@@ -260,7 +265,7 @@ export default function AdminTeamDetail() {
         {/* Danger zone */}
         <section>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Danger Zone
+            {t.admin.teamDetail.dangerZone}
           </h2>
           <Button
             variant="destructive"
@@ -268,7 +273,7 @@ export default function AdminTeamDetail() {
             disabled={deleting}
           >
             {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-            Delete Team
+            {t.admin.teamDetail.deleteTeam}
           </Button>
         </section>
       </div>
@@ -277,9 +282,9 @@ export default function AdminTeamDetail() {
       <ResponsiveConfirm
         open={!!confirmMember}
         onOpenChange={(open) => { if (!open) setConfirmMember(null); }}
-        title="Remove Member"
-        description={`Remove ${confirmMember?.displayName} from this team? Their workout assignments are not affected.`}
-        confirmLabel="Remove"
+        title={t.admin.teamDetail.removeMember.title}
+        description={t.admin.teamDetail.removeMember.description.replace("{{name}}", confirmMember?.displayName ?? "")}
+        confirmLabel={t.admin.teamDetail.removeMember.confirm}
         destructive
         onConfirm={() => confirmMember && handleRemoveMember(confirmMember)}
       />
@@ -288,9 +293,9 @@ export default function AdminTeamDetail() {
       <ResponsiveConfirm
         open={confirmDelete}
         onOpenChange={(open) => { if (!open) setConfirmDelete(false); }}
-        title="Delete Team"
-        description="Are you sure you want to delete this team? Members and their workout assignments are not affected."
-        confirmLabel="Delete"
+        title={t.admin.teamDetail.deleteTeam}
+        description={t.admin.teamDetail.deleteConfirm.description}
+        confirmLabel={t.common.delete}
         destructive
         onConfirm={handleDeleteTeam}
         loading={deleting}

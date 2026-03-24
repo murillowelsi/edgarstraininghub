@@ -5,6 +5,7 @@ import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { getTeamByInviteToken, addMemberToTeam, autoAssignTeamWorkoutsToMember } from "@/services/teamsService";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { Team } from "@/types/team";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ export default function JoinTeam() {
   const navigate = useNavigate();
   const { user, isAdmin, isEditor, isAthlete, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [team, setTeam] = useState<Team | null>(null);
   const [loadingTeam, setLoadingTeam] = useState(true);
@@ -33,19 +35,19 @@ export default function JoinTeam() {
   // Fetch team by invite token
   useEffect(() => {
     if (!inviteToken) {
-      setTeamError("Invalid invite link.");
+      setTeamError(t.joinTeam.invalidLink);
       setLoadingTeam(false);
       return;
     }
     getTeamByInviteToken(inviteToken)
-      .then((t) => {
-        if (!t) {
-          setTeamError("Invite link is invalid or the team no longer exists.");
+      .then((team) => {
+        if (!team) {
+          setTeamError(t.joinTeam.teamNotFound);
         } else {
-          setTeam(t);
+          setTeam(team);
         }
       })
-      .catch(() => setTeamError("Failed to load team. Try again."))
+      .catch(() => setTeamError(t.joinTeam.loadError))
       .finally(() => setLoadingTeam(false));
   }, [inviteToken]);
 
@@ -58,11 +60,11 @@ export default function JoinTeam() {
       addMemberToTeam(team.id, user.uid)
         .then(() => autoAssignTeamWorkoutsToMember(team.id, user.uid))
         .then(() => {
-          toast({ title: `You joined ${team.name}!` });
+          toast({ title: t.joinTeam.joined.replace("{{name}}", team.name) });
           navigate("/athlete");
         })
         .catch((err: Error) => {
-          toast({ title: "Error", description: err.message || "Failed to join team.", variant: "destructive" });
+          toast({ title: t.common.error, description: err.message || t.joinTeam.joinError, variant: "destructive" });
         });
     }
   }, [loadingTeam, authLoading, team, user, isAthlete, navigate]);
@@ -91,11 +93,11 @@ export default function JoinTeam() {
       await addMemberToTeam(team.id, uid);
       await autoAssignTeamWorkoutsToMember(team.id, uid);
 
-      toast({ title: `Welcome! You joined ${team.name}.` });
+      toast({ title: t.joinTeam.welcome.replace("{{name}}", team.name) });
       navigate("/athlete");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Registration failed.";
-      toast({ title: "Error", description: msg, variant: "destructive" });
+      const msg = err instanceof Error ? err.message : t.joinTeam.registrationFailed;
+      toast({ title: t.common.error, description: msg, variant: "destructive" });
       // Roll back the Firebase Auth account so the user can retry cleanly
       if (auth.currentUser) await auth.currentUser.delete().catch(() => {});
     } finally {
@@ -111,11 +113,11 @@ export default function JoinTeam() {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       await addMemberToTeam(team.id, cred.user.uid);
       await autoAssignTeamWorkoutsToMember(team.id, cred.user.uid);
-      toast({ title: `You joined ${team.name}!` });
+      toast({ title: t.joinTeam.joined.replace("{{name}}", team.name) });
       navigate("/athlete");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Login failed.";
-      toast({ title: "Error", description: msg, variant: "destructive" });
+      const msg = err instanceof Error ? err.message : t.joinTeam.loginFailed;
+      toast({ title: t.common.error, description: msg, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -135,7 +137,7 @@ export default function JoinTeam() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-sm">
-          <p className="text-lg font-semibold text-destructive mb-2">Invalid Invite</p>
+          <p className="text-lg font-semibold text-destructive mb-2">{t.joinTeam.invalidInvite}</p>
           <p className="text-muted-foreground">{teamError}</p>
         </div>
       </div>
@@ -149,8 +151,8 @@ export default function JoinTeam() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-sm">
-          <p className="text-lg font-semibold mb-2">Invite for Athletes Only</p>
-          <p className="text-muted-foreground">This invite is for athletes only.</p>
+          <p className="text-lg font-semibold mb-2">{t.joinTeam.athletesOnly}</p>
+          <p className="text-muted-foreground">{t.joinTeam.athletesOnlyDesc}</p>
         </div>
       </div>
     );
@@ -161,10 +163,10 @@ export default function JoinTeam() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-sm">
-          <p className="text-lg font-semibold mb-2">Already a Member</p>
-          <p className="text-muted-foreground">You are already a member of this team.</p>
+          <p className="text-lg font-semibold mb-2">{t.joinTeam.alreadyMember}</p>
+          <p className="text-muted-foreground">{t.joinTeam.alreadyMemberDesc}</p>
           <Button className="mt-4" onClick={() => navigate("/athlete")}>
-            Go to Dashboard
+            {t.joinTeam.goToDashboard}
           </Button>
         </div>
       </div>
@@ -184,28 +186,26 @@ export default function JoinTeam() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Join {team.name}</h1>
+          <h1 className="text-2xl font-bold">{t.joinTeam.joinTitle.replace("{{name}}", team.name)}</h1>
           <p className="text-muted-foreground mt-1">
-            {mode === "register"
-              ? "Create an account to join this team."
-              : "Log in to join this team."}
+            {mode === "register" ? t.joinTeam.registerSubtitle : t.joinTeam.loginSubtitle}
           </p>
         </div>
 
         {mode === "register" ? (
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t.joinTeam.name}</Label>
               <Input
                 id="name"
-                placeholder="Your full name"
+                placeholder={t.joinTeam.namePlaceholder}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t.common.email}</Label>
               <Input
                 id="email"
                 type="email"
@@ -216,11 +216,11 @@ export default function JoinTeam() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t.joinTeam.password}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Create a password"
+                placeholder={t.joinTeam.createPasswordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -229,13 +229,13 @@ export default function JoinTeam() {
             </div>
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account & Join
+              {t.joinTeam.createAccountJoin}
             </Button>
           </form>
         ) : (
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t.common.email}</Label>
               <Input
                 id="email"
                 type="email"
@@ -246,11 +246,11 @@ export default function JoinTeam() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t.joinTeam.password}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Your password"
+                placeholder={t.joinTeam.yourPasswordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -258,7 +258,7 @@ export default function JoinTeam() {
             </div>
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Log In & Join
+              {t.joinTeam.logInJoin}
             </Button>
           </form>
         )}
@@ -266,24 +266,24 @@ export default function JoinTeam() {
         <div className="text-center text-sm">
           {mode === "register" ? (
             <span>
-              Already have an account?{" "}
+              {t.joinTeam.alreadyHaveAccount}{" "}
               <button
                 type="button"
                 onClick={() => setMode("login")}
                 className="text-primary underline"
               >
-                Log in
+                {t.joinTeam.logIn}
               </button>
             </span>
           ) : (
             <span>
-              New here?{" "}
+              {t.joinTeam.newHere}{" "}
               <button
                 type="button"
                 onClick={() => setMode("register")}
                 className="text-primary underline"
               >
-                Create account
+                {t.joinTeam.createAccount}
               </button>
             </span>
           )}

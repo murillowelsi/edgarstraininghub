@@ -9,12 +9,14 @@ import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { createTeam, deleteTeam, getTeamsByCoach } from "@/services/teamsService";
 import type { Team } from "@/types/team";
 import { Users2, Loader2, Trash2, ChevronRight } from "lucide-react";
 
 export default function AdminTeams() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,7 +39,7 @@ export default function AdminTeams() {
       const data = await getTeamsByCoach(user.uid);
       setTeams(data);
     } catch {
-      toast({ title: "Error", description: "Failed to load teams.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.admin.teams.toast.loadError, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -52,9 +54,9 @@ export default function AdminTeams() {
       setTeams((prev) => [team, ...prev]);
       setIsNewTeamOpen(false);
       setNewTeamName("");
-      toast({ title: "Team created", description: `"${team.name}" is ready.` });
+      toast({ title: t.admin.teams.toast.created, description: t.admin.teams.toast.createdDescription.replace("{{name}}", team.name) });
     } catch {
-      toast({ title: "Error", description: "Failed to create team.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.admin.teams.toast.createError, variant: "destructive" });
     } finally {
       setCreating(false);
     }
@@ -65,9 +67,9 @@ export default function AdminTeams() {
     try {
       await deleteTeam(team.id);
       setTeams((prev) => prev.filter((t) => t.id !== team.id));
-      toast({ title: "Team deleted", description: `"${team.name}" has been deleted.` });
+      toast({ title: t.admin.teams.toast.deleted, description: t.admin.teams.toast.deletedDescription.replace("{{name}}", team.name) });
     } catch {
-      toast({ title: "Error", description: "Failed to delete team.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.admin.teams.toast.deleteError, variant: "destructive" });
     } finally {
       setDeleting(null);
       setConfirmTeam(null);
@@ -78,9 +80,9 @@ export default function AdminTeams() {
     <AdminLayout>
       <div className="p-4 md:p-8">
         <AdminPageHeader
-          title="Teams"
-          description="Manage your training teams and invite athletes."
-          action={{ label: "New Team", onClick: () => setIsNewTeamOpen(true) }}
+          title={t.admin.teams.title}
+          description={t.admin.teams.description}
+          action={{ label: t.admin.teams.newTeam, onClick: () => setIsNewTeamOpen(true) }}
         />
 
         {loading ? (
@@ -90,8 +92,8 @@ export default function AdminTeams() {
         ) : teams.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-center">
             <Users2 className="h-10 w-10 mb-3 opacity-30" />
-            <p className="font-medium">No teams yet</p>
-            <p className="text-sm mt-1">Create a team to start inviting athletes.</p>
+            <p className="font-medium">{t.admin.teams.noTeamsTitle}</p>
+            <p className="text-sm mt-1">{t.admin.teams.noTeamsDescription}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -108,7 +110,7 @@ export default function AdminTeams() {
                   <div>
                     <p className="font-semibold">{team.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {team.memberIds.length} member{team.memberIds.length !== 1 ? "s" : ""}
+                      {team.memberIds.length} {team.memberIds.length !== 1 ? t.admin.teams.members : t.admin.teams.member}
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
@@ -135,14 +137,14 @@ export default function AdminTeams() {
         <ResponsiveModal
           open={isNewTeamOpen}
           onOpenChange={setIsNewTeamOpen}
-          title="New Team"
+          title={t.admin.teams.newTeam}
         >
           <form onSubmit={handleCreate} className="space-y-4 p-2">
             <div className="space-y-1.5">
-              <Label htmlFor="teamName">Team Name</Label>
+              <Label htmlFor="teamName">{t.admin.teams.teamName}</Label>
               <Input
                 id="teamName"
-                placeholder="e.g. U17 Football"
+                placeholder={t.admin.teams.teamNamePlaceholder}
                 value={newTeamName}
                 onChange={(e) => setNewTeamName(e.target.value)}
                 required
@@ -151,7 +153,7 @@ export default function AdminTeams() {
             </div>
             <Button type="submit" className="w-full" disabled={creating || !newTeamName.trim()}>
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Team
+              {t.admin.teams.createTeam}
             </Button>
           </form>
         </ResponsiveModal>
@@ -160,9 +162,9 @@ export default function AdminTeams() {
         <ResponsiveConfirm
           open={!!confirmTeam}
           onOpenChange={(open) => { if (!open) setConfirmTeam(null); }}
-          title="Delete Team"
-          description={`Are you sure you want to delete "${confirmTeam?.name}"? Members and their workout assignments are not affected.`}
-          confirmLabel="Delete"
+          title={t.admin.teams.delete.title}
+          description={t.admin.teams.delete.description.replace("{{name}}", confirmTeam?.name ?? "")}
+          confirmLabel={t.common.delete}
           onConfirm={() => confirmTeam && handleDelete(confirmTeam)}
           destructive
         />
