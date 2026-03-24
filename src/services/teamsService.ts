@@ -148,7 +148,14 @@ export const autoAssignTeamWorkoutsToMember = async (
   const team = await getTeamById(teamId);
   if (!team || !team.assignedWorkouts.length) return;
 
-  for (const entry of team.assignedWorkouts) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcoming = team.assignedWorkouts.filter(
+    (entry) => entry.scheduledDate >= today
+  );
+
+  for (const entry of upcoming) {
     await createAssignments(
       { workoutId: entry.workoutId, athleteIds: [uid], scheduledDate: entry.scheduledDate },
       team.coachId
