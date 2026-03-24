@@ -507,6 +507,9 @@
       "deleteChat": "Delete Chat",
       "deleteConversation": "Delete Conversation",
       "deleteConversationDescription": "Are you sure you want to delete this conversation with {{name}}? This will permanently remove all messages and cannot be undone.",
+      "tabDirect": "Direct",
+      "tabGroup": "Group",
+      "noTeams": "No teams found.",
       "toast": { "deleteSuccess": "Chat deleted successfully", "deleteError": "Failed to delete chat. Please try again." }
     },
     "teams": {

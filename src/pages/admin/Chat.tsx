@@ -10,7 +10,9 @@ import { ChevronLeft, Loader2, MessageSquare, Plus, Search, Trash2, Users2 } fro
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getAllUsers } from "@/services/usersService";
+import { getTeamsByCoach } from "@/services/teamsService";
 import { User } from "@/types/user";
+import { Team } from "@/types/team";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
@@ -32,9 +34,15 @@ export default function AdminChat() {
 
     // New Chat Dialog
     const [isNewChatOpen, setIsNewChatOpen] = useState(false);
+    const [newChatTab, setNewChatTab] = useState<"direct" | "group">("direct");
     const [athletes, setAthletes] = useState<User[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loadingAthletes, setLoadingAthletes] = useState(false);
+
+    // Teams for group chat
+    const [teams, setTeams] = useState<Team[]>([]);
+    const [loadingTeams, setLoadingTeams] = useState(false);
+    const [openingGroupChat, setOpeningGroupChat] = useState<string | null>(null);
 
     // Delete Chat
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -97,12 +105,35 @@ export default function AdminChat() {
 
     useEffect(() => {
         if (!isNewChatOpen) return;
+        setNewChatTab("direct");
+        setSearchQuery("");
         setLoadingAthletes(true);
         getAllUsers().then((users) => {
             setAthletes(users.filter((u) => u.role === "athlete"));
             setLoadingAthletes(false);
         });
-    }, [isNewChatOpen]);
+        if (user) {
+            setLoadingTeams(true);
+            getTeamsByCoach(user.uid).then((t) => {
+                setTeams(t);
+                setLoadingTeams(false);
+            }).catch(() => setLoadingTeams(false));
+        }
+    }, [isNewChatOpen, user]);
+
+    const handleOpenGroupChatFromModal = async (team: Team) => {
+        if (!user) return;
+        setOpeningGroupChat(team.id);
+        try {
+            const chat = await ChatService.createOrGetGroupChat(team.id, team.name, user.uid, team.memberIds);
+            setSelectedChat(chat);
+            setIsNewChatOpen(false);
+        } catch {
+            toast.error("Failed to open group chat.");
+        } finally {
+            setOpeningGroupChat(null);
+        }
+    };
 
     const getChatDisplayName = (chat: Chat) => {
         if (chat.isGroup) return chat.groupName || "Team";
@@ -155,40 +186,91 @@ export default function AdminChat() {
 
     const newChatModalContent = (
         <div className="p-2 space-y-4">
-            <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder={t.admin.chat.searchAthletes}
-                    className="pl-9"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            {/* Tabs */}
+            <div className="flex rounded-lg bg-muted p-1 gap-1">
+                <button
+                    className={cn("flex-1 py-1.5 text-sm font-medium rounded-md transition-colors", newChatTab === "direct" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                    onClick={() => { setNewChatTab("direct"); setSearchQuery(""); }}
+                >
+                    {t.admin.chat.tabDirect}
+                </button>
+                <button
+                    className={cn("flex-1 py-1.5 text-sm font-medium rounded-md transition-colors", newChatTab === "group" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                    onClick={() => { setNewChatTab("group"); setSearchQuery(""); }}
+                >
+                    {t.admin.chat.tabGroup}
+                </button>
             </div>
-            <div className="h-[300px] overflow-y-auto space-y-2">
-                {loadingAthletes ? (
-                    <div className="flex justify-center p-4">
-                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+
+            {newChatTab === "direct" ? (
+                <>
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder={t.admin.chat.searchAthletes}
+                            className="pl-9"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
-                ) : filteredAthletes.length === 0 ? (
-                    <p className="text-center text-muted-foreground p-4">{t.admin.chat.noAthletesFound}</p>
-                ) : (
-                    filteredAthletes.map((athlete) => (
-                        <button
-                            key={athlete.id}
-                            onClick={() => handleStartChat(athlete)}
-                            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                        >
-                            <Avatar>
-                                <AvatarFallback>{athlete.displayName[0]?.toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-medium">{athlete.displayName}</p>
-                                <p className="text-xs text-muted-foreground">{athlete.email}</p>
+                    <div className="h-[280px] overflow-y-auto space-y-2">
+                        {loadingAthletes ? (
+                            <div className="flex justify-center p-4">
+                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                             </div>
-                        </button>
-                    ))
-                )}
-            </div>
+                        ) : filteredAthletes.length === 0 ? (
+                            <p className="text-center text-muted-foreground p-4">{t.admin.chat.noAthletesFound}</p>
+                        ) : (
+                            filteredAthletes.map((athlete) => (
+                                <button
+                                    key={athlete.id}
+                                    onClick={() => handleStartChat(athlete)}
+                                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                                >
+                                    <Avatar>
+                                        <AvatarFallback>{athlete.displayName[0]?.toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-medium">{athlete.displayName}</p>
+                                        <p className="text-xs text-muted-foreground">{athlete.email}</p>
+                                    </div>
+                                </button>
+                            ))
+                        )}
+                    </div>
+                </>
+            ) : (
+                <div className="h-[320px] overflow-y-auto space-y-2">
+                    {loadingTeams ? (
+                        <div className="flex justify-center p-4">
+                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : teams.length === 0 ? (
+                        <p className="text-center text-muted-foreground p-4">{t.admin.chat.noTeams}</p>
+                    ) : (
+                        teams.map((team) => (
+                            <button
+                                key={team.id}
+                                onClick={() => handleOpenGroupChatFromModal(team)}
+                                disabled={openingGroupChat === team.id}
+                                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left disabled:opacity-60"
+                            >
+                                <Avatar>
+                                    <AvatarFallback>
+                                        {openingGroupChat === team.id
+                                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                                            : <Users2 className="h-4 w-4" />}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-medium">{team.name}</p>
+                                    <p className="text-xs text-muted-foreground">{team.memberIds.length} {team.memberIds.length === 1 ? t.admin.teams.member : t.admin.teams.members}</p>
+                                </div>
+                            </button>
+                        ))
+                    )}
+                </div>
+            )}
         </div>
     );
 

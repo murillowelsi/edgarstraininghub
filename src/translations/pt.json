@@ -507,6 +507,9 @@
       "deleteChat": "Eliminar Chat",
       "deleteConversation": "Eliminar Conversa",
       "deleteConversationDescription": "Tem a certeza que quer eliminar esta conversa com {{name}}? Todas as mensagens serão eliminadas permanentemente.",
+      "tabDirect": "Direto",
+      "tabGroup": "Grupo",
+      "noTeams": "Nenhum time encontrado.",
       "toast": { "deleteSuccess": "Chat eliminado com sucesso", "deleteError": "Erro ao eliminar o chat. Tente novamente." }
     },
     "teams": {
