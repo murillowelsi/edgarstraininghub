@@ -31,6 +31,7 @@ import AthleteWorkoutsList from "./pages/athlete/WorkoutsList";
 import AthleteWorkoutView from "./pages/athlete/WorkoutView";
 import AdminChat from "./pages/admin/Chat";
 import AthleteChat from "./pages/athlete/Chat";
+import JoinTeam from "./pages/JoinTeam";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,8 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogArticlePage />} />
+                {/* Team invite — public, no ProtectedRoute */}
+                <Route path="/join/:inviteToken" element={<JoinTeam />} />
 
                 {/* Login Route */}
                 <Route path="/login" element={<AdminLogin />} />
