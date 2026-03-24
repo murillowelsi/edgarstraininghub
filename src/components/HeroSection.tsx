@@ -72,7 +72,7 @@ const HeroSection = () => {
               <img
                 src={edgarImage}
                 alt="Edgar Zanin - Ironman Athlete"
-                className="w-full h-full object-cover object-top scale-125"
+                className="w-full h-full object-cover scale-150 object-[50%_5%]"
               />
             </div>
           </div>
