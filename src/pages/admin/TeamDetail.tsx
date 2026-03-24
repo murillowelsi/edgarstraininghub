@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -155,14 +154,9 @@ export default function AdminTeamDetail() {
   return (
     <AdminLayout>
       <div className="p-4 md:p-8 space-y-8">
-        {/* Header: title is always a plain string; inline edit UI lives below */}
-        {!editingName ? (
-          <AdminPageHeader
-            title={team.name}
-            action={{ label: "View Stats", icon: BarChart2, onClick: () => navigate(`/admin/teams/${team.id}/stats`) }}
-          />
-        ) : (
-          <div className="flex items-center justify-between gap-3 mb-6 md:mb-8">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 mb-6 md:mb-8">
+          {editingName ? (
             <div className="flex items-center gap-2">
               <Input
                 value={nameInput}
@@ -181,22 +175,34 @@ export default function AdminTeamDetail() {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <Button onClick={() => navigate(`/admin/teams/${team.id}/stats`)} className="hidden sm:flex w-auto">
-              <BarChart2 className="h-4 w-4 mr-2" />
-              View Stats
-            </Button>
-          </div>
-        )}
-
-        {/* Rename button when not editing */}
-        {!editingName && (
-          <div className="-mt-6">
-            <Button size="sm" variant="ghost" className="h-7 gap-1 text-muted-foreground" onClick={() => setEditingName(true)}>
-              <Pencil className="h-3.5 w-3.5" />
-              Rename
-            </Button>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-xl md:text-2xl font-bold">{team.name}</h1>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                onClick={() => setEditingName(true)}
+                aria-label="Rename team"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+          <Button onClick={() => navigate(`/admin/teams/${team.id}/stats`)} className="hidden sm:flex w-auto shrink-0">
+            <BarChart2 className="h-4 w-4 mr-2" />
+            View Stats
+          </Button>
+        </div>
+        {/* Mobile FAB for Stats */}
+        <button
+          onClick={() => navigate(`/admin/teams/${team.id}/stats`)}
+          className="fixed right-4 z-30 sm:hidden h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+          aria-label="View Stats"
+        >
+          <BarChart2 className="h-6 w-6" />
+        </button>
 
         {/* Members */}
         <section>
