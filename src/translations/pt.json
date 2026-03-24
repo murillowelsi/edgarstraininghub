@@ -550,6 +550,10 @@
       "deleteConfirm": {
         "description": "Tem a certeza que quer eliminar este grupo? Os membros e as suas atribuições de treino não são afetados."
       },
+      "addAthlete": "Adicionar Atleta",
+      "addAthleteTitle": "Adicionar Atleta ao Grupo",
+      "searchAthletes": "Pesquisar atletas...",
+      "noAthletesAvailable": "Todos os atletas já são membros.",
       "toast": {
         "loadError": "Erro ao carregar grupo.",
         "teamRenamed": "Grupo renomeado",
@@ -558,7 +562,10 @@
         "memberRemovedDescription": "{{name}} removido do grupo.",
         "removeError": "Erro ao remover membro.",
         "teamDeleted": "Grupo eliminado",
-        "deleteError": "Erro ao eliminar grupo."
+        "deleteError": "Erro ao eliminar grupo.",
+        "athleteAdded": "Atleta adicionado",
+        "athleteAddedDescription": "{{name}} adicionado ao grupo.",
+        "addAthleteError": "Erro ao adicionar atleta."
       }
     },
     "teamStats": {

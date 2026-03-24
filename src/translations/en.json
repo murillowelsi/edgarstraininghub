@@ -550,6 +550,10 @@
       "deleteConfirm": {
         "description": "Are you sure you want to delete this team? Members and their workout assignments are not affected."
       },
+      "addAthlete": "Add Athlete",
+      "addAthleteTitle": "Add Athlete to Team",
+      "searchAthletes": "Search athletes...",
+      "noAthletesAvailable": "All athletes are already members.",
       "toast": {
         "loadError": "Failed to load team.",
         "teamRenamed": "Team renamed",
@@ -558,7 +562,10 @@
         "memberRemovedDescription": "{{name}} removed from team.",
         "removeError": "Failed to remove member.",
         "teamDeleted": "Team deleted",
-        "deleteError": "Failed to delete team."
+        "deleteError": "Failed to delete team.",
+        "athleteAdded": "Athlete added",
+        "athleteAddedDescription": "{{name}} added to the team.",
+        "addAthleteError": "Failed to add athlete."
       }
     },
     "teamStats": {

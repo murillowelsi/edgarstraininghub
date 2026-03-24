@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -12,8 +14,10 @@ import {
   updateTeamName,
   deleteTeam,
   removeMemberFromTeam,
+  addMemberToTeam,
+  autoAssignTeamWorkoutsToMember,
 } from "@/services/teamsService";
-import { getUserById } from "@/services/usersService";
+import { getUserById, getUsersByRole } from "@/services/usersService";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import { QRCodeSVG } from "qrcode.react";
@@ -26,6 +30,7 @@ import {
   BarChart2,
   Pencil,
   X,
+  UserPlus,
 } from "lucide-react";
 
 export default function AdminTeamDetail() {
@@ -53,6 +58,13 @@ export default function AdminTeamDetail() {
   // Delete team
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Add athlete
+  const [addAthleteOpen, setAddAthleteOpen] = useState(false);
+  const [allAthletes, setAllAthletes] = useState<User[]>([]);
+  const [loadingAthletes, setLoadingAthletes] = useState(false);
+  const [athleteSearch, setAthleteSearch] = useState("");
+  const [addingAthlete, setAddingAthlete] = useState<string | null>(null);
 
   useEffect(() => {
     if (!teamId) return;
@@ -144,6 +156,52 @@ export default function AdminTeamDetail() {
     }
   };
 
+  const handleOpenAddAthlete = async () => {
+    setAddAthleteOpen(true);
+    setAthleteSearch("");
+    if (allAthletes.length > 0) return; // already loaded
+    setLoadingAthletes(true);
+    try {
+      const athletes = await getUsersByRole("athlete");
+      setAllAthletes(athletes);
+    } catch {
+      toast({ title: t.common.error, description: t.admin.teamDetail.toast.addAthleteError, variant: "destructive" });
+    } finally {
+      setLoadingAthletes(false);
+    }
+  };
+
+  const handleAddAthlete = async (athlete: User) => {
+    if (!team) return;
+    setAddingAthlete(athlete.id);
+    try {
+      await addMemberToTeam(team.id, athlete.id);
+      await autoAssignTeamWorkoutsToMember(team.id, athlete.id);
+      setTeam((prev) => prev ? { ...prev, memberIds: [...prev.memberIds, athlete.id] } : prev);
+      setMembers((prev) => [...prev, athlete]);
+      toast({
+        title: t.admin.teamDetail.toast.athleteAdded,
+        description: t.admin.teamDetail.toast.athleteAddedDescription.replace("{{name}}", athlete.displayName),
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : t.admin.teamDetail.toast.addAthleteError;
+      toast({ title: t.common.error, description: msg, variant: "destructive" });
+    } finally {
+      setAddingAthlete(null);
+    }
+  };
+
+  const memberIdSet = useMemo(() => new Set(team?.memberIds ?? []), [team?.memberIds]);
+
+  const filteredAthletes = useMemo(() => {
+    const q = athleteSearch.toLowerCase();
+    return allAthletes.filter(
+      (a) =>
+        !memberIdSet.has(a.id) &&
+        (a.displayName.toLowerCase().includes(q) || a.email.toLowerCase().includes(q))
+    );
+  }, [allAthletes, memberIdSet, athleteSearch]);
+
   if (loading) {
     return (
       <AdminLayout>
@@ -211,9 +269,15 @@ export default function AdminTeamDetail() {
 
         {/* Members */}
         <section>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            {t.admin.teamDetail.membersTitle.replace("{{count}}", String(members.length))}
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              {t.admin.teamDetail.membersTitle.replace("{{count}}", String(members.length))}
+            </h2>
+            <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs" onClick={handleOpenAddAthlete}>
+              <UserPlus className="h-3.5 w-3.5" />
+              {t.admin.teamDetail.addAthlete}
+            </Button>
+          </div>
           {members.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t.admin.teamDetail.noMembers}</p>
           ) : (
@@ -277,6 +341,67 @@ export default function AdminTeamDetail() {
           </Button>
         </section>
       </div>
+
+      {/* Add Athlete Modal */}
+      <ResponsiveModal
+        open={addAthleteOpen}
+        onOpenChange={setAddAthleteOpen}
+        title={t.admin.teamDetail.addAthleteTitle}
+      >
+        <div className="space-y-3 p-1">
+          <Input
+            placeholder={t.admin.teamDetail.searchAthletes}
+            value={athleteSearch}
+            onChange={(e) => setAthleteSearch(e.target.value)}
+            autoFocus
+          />
+          {loadingAthletes ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredAthletes.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              {t.admin.teamDetail.noAthletesAvailable}
+            </p>
+          ) : (
+            <ScrollArea className="h-64">
+              <div className="space-y-1 pr-1">
+                {filteredAthletes.map((athlete) => (
+                  <div
+                    key={athlete.id}
+                    className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Avatar className="h-8 w-8 shrink-0">
+                        <AvatarFallback className="text-xs">
+                          {athlete.displayName?.[0]?.toUpperCase() || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{athlete.displayName}</p>
+                        <p className="text-xs text-muted-foreground truncate">{athlete.email}</p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0 h-7"
+                      disabled={addingAthlete === athlete.id}
+                      onClick={() => handleAddAthlete(athlete)}
+                    >
+                      {addingAthlete === athlete.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <UserPlus className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
+      </ResponsiveModal>
 
       {/* Remove member confirm */}
       <ResponsiveConfirm
