@@ -145,7 +145,7 @@ export default function JoinTeam() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-sm">
           <p className="text-lg font-semibold mb-2">Invite for Athletes Only</p>
-          <p className="text-muted-foreground">This invite link is for athletes only.</p>
+          <p className="text-muted-foreground">This invite is for athletes only.</p>
         </div>
       </div>
     );
@@ -157,7 +157,7 @@ export default function JoinTeam() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-sm">
           <p className="text-lg font-semibold mb-2">Already a Member</p>
-          <p className="text-muted-foreground">You are already a member of {team.name}.</p>
+          <p className="text-muted-foreground">You are already a member of this team.</p>
           <Button className="mt-4" onClick={() => navigate("/athlete")}>
             Go to Dashboard
           </Button>
