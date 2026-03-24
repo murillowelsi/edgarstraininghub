@@ -30,6 +30,9 @@ import AthleteStrengthSession from "./pages/athlete/StrengthWorkoutSession";
 import AthleteWorkoutsList from "./pages/athlete/WorkoutsList";
 import AthleteWorkoutView from "./pages/athlete/WorkoutView";
 import AdminChat from "./pages/admin/Chat";
+import AdminTeams from "./pages/admin/Teams";
+import AdminTeamDetail from "./pages/admin/TeamDetail";
+import AdminTeamStats from "./pages/admin/TeamStats";
 import AthleteChat from "./pages/athlete/Chat";
 import JoinTeam from "./pages/JoinTeam";
 
@@ -164,6 +167,30 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAdmin>
                       <AdminChat />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/teams"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminTeams />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/teams/:teamId"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminTeamDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/teams/:teamId/stats"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminTeamStats />
                     </ProtectedRoute>
                   }
                 />
