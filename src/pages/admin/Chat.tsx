@@ -6,7 +6,7 @@ import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
-import { ChevronLeft, Loader2, MessageSquare, Plus, Search, Trash2, Users2 } from "lucide-react";
+import { Loader2, MessageSquare, Plus, Search, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getAllUsers } from "@/services/usersService";
@@ -275,17 +275,16 @@ export default function AdminChat() {
     );
 
     return (
-        <AdminLayout>
+        <AdminLayout fullHeight hideBottomNav={!!selectedChat}>
             <NotificationBanner />
-            <div className="flex flex-col md:flex-row h-[calc(100vh-73px)] md:m-4 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
+            <div className="flex flex-col md:flex-row flex-1 min-h-0 md:mx-4 md:mt-4 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
 
                 {/* Chat List Sidebar */}
                 <div className={cn(
                     "w-full md:w-80 border-r flex flex-col bg-background",
                     selectedChat ? "hidden md:flex" : "flex"
                 )}>
-                    <div className="p-4 border-b flex items-center justify-between bg-muted/30">
-                        <h3 className="font-semibold">{t.admin.chat.title}</h3>
+                    <div className="p-4 border-b flex items-center justify-end bg-muted/30">
                         <Button size="icon" variant="ghost" className="hidden sm:flex h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
                             <Plus className="h-5 w-5" />
                         </Button>
@@ -358,64 +357,19 @@ export default function AdminChat() {
 
                 {/* Chat Window */}
                 <div className={cn(
-                    "flex-1 flex flex-col bg-muted/5",
+                    "flex-1 flex flex-col min-h-0 bg-muted/5",
                     !selectedChat ? "hidden md:flex" : "flex"
                 )}>
                     {selectedChat ? (
-                        <>
-                            {/* Mobile header */}
-                            <div className="md:hidden p-3 border-b flex items-center gap-3 bg-background sticky top-0 z-10">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 -ml-1 shrink-0"
-                                    onClick={() => setSelectedChat(null)}
-                                >
-                                    <ChevronLeft className="h-5 w-5" />
-                                </Button>
-                                <Avatar className="h-8 w-8 shrink-0">
-                                    <AvatarFallback>
-                                        {selectedChat.isGroup
-                                            ? <Users2 className="h-4 w-4" />
-                                            : getChatDisplayName(selectedChat)[0]?.toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span className="font-semibold text-sm flex-1 truncate">
-                                    {getChatDisplayName(selectedChat)}
-                                </span>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
-                                    onClick={() => setIsDeleteDialogOpen(true)}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-
-                            {/* Desktop header */}
-                            <div className="hidden md:flex items-center justify-end p-2 border-b">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    onClick={() => setIsDeleteDialogOpen(true)}
-                                >
-                                    <Trash2 className="h-4 w-4 mr-1" />
-                                    {t.admin.chat.deleteChat}
-                                </Button>
-                            </div>
-
-                            <div className="flex-1 overflow-hidden">
-                                <ChatWindow
-                                    messages={messages}
-                                    currentUserId={user?.uid || ""}
-                                    onSendMessage={handleSendMessage}
-                                    participantName={getChatDisplayName(selectedChat)}
-                                    isGroup={selectedChat.isGroup}
-                                />
-                            </div>
-                        </>
+                        <ChatWindow
+                            messages={messages}
+                            currentUserId={user?.uid || ""}
+                            onSendMessage={handleSendMessage}
+                            participantName={getChatDisplayName(selectedChat)}
+                            isGroup={selectedChat.isGroup}
+                            onBack={() => setSelectedChat(null)}
+                            onDelete={() => setIsDeleteDialogOpen(true)}
+                        />
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
                             <MessageSquare className="h-12 w-12 mb-4 opacity-20" />

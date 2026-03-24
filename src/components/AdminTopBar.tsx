@@ -1,20 +1,39 @@
-import { Moon, Sun, LogOut } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Moon, Sun, LogOut, MessageSquare } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { auth } from "../lib/firebase";
 import { signOut } from "firebase/auth";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
 import { useState } from "react";
 
-const AdminTopBar = () => {
+interface AdminTopBarProps {
+  chatUnreadCount?: number;
+}
+
+const AdminTopBar = ({ chatUnreadCount = 0 }: AdminTopBarProps) => {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const { language, changeLanguage, t } = useLanguage();
+  const location = useLocation();
+
+  const navItems = [
+    { href: "/admin/posts", label: t.admin.nav.posts },
+    { href: "/admin/users", label: t.admin.nav.users },
+    { href: "/admin/workouts", label: t.admin.nav.workouts },
+    { href: "/admin/teams", label: t.admin.nav.teams },
+    { href: "/admin/calendar", label: t.admin.nav.calendar },
+    { href: "/admin/subscriptions", label: t.admin.nav.subscriptions },
+    { href: "/admin/chat", label: t.admin.nav.chat },
+  ];
+
+  const currentTitle = navItems.find((item) =>
+    location.pathname.startsWith(item.href)
+  )?.label ?? "";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const getInitials = (email?: string | null) => {
@@ -38,20 +57,41 @@ const AdminTopBar = () => {
           </span>
         </Link>
 
-        <button
-          onClick={() => setIsMenuOpen(true)}
-          className="p-1 rounded-full hover:bg-accent transition-colors"
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-              {getInitials(user?.email)}
-            </AvatarFallback>
-          </Avatar>
-        </button>
+        {currentTitle && (
+          <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-semibold">
+            {currentTitle}
+          </h1>
+        )}
+
+        <div className="flex items-center gap-2">
+          <Link
+            to="/admin/chat"
+            className="relative p-2 rounded-full hover:bg-accent transition-colors"
+          >
+            <MessageSquare className="h-5 w-5" />
+            {chatUnreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
+              </span>
+            )}
+          </Link>
+
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="p-1 rounded-full hover:bg-accent transition-colors"
+          >
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                {getInitials(user?.email)}
+              </AvatarFallback>
+            </Avatar>
+          </button>
+        </div>
       </div>
 
       <Drawer open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DrawerContent>
+          <DrawerTitle className="sr-only">Menu</DrawerTitle>
           <div className="px-4 pb-8 pt-2 space-y-4">
             {/* Profile info */}
             <div className="flex items-center gap-3">

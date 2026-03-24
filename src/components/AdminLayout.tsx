@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Menu, Shield, Users, MessageSquare } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Menu, Shield, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -13,9 +13,11 @@ import { BottomNav } from "./admin/BottomNav";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+  fullHeight?: boolean;
+  hideBottomNav?: boolean;
 }
 
-const AdminLayout = ({ children }: AdminLayoutProps) => {
+const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false }: AdminLayoutProps) => {
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -25,7 +27,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell },
     { href: "/admin/teams", label: t.admin.nav.teams, icon: Shield },
     { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
-    { href: "/admin/chat", label: t.admin.nav.chat, icon: MessageSquare },
   ];
   const location = useLocation();
   const navigate = useNavigate();
@@ -183,10 +184,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminTopBar />
+    <div className={cn("bg-background", fullHeight ? "h-screen overflow-hidden" : "min-h-screen")}>
+      <AdminTopBar chatUnreadCount={chatUnreadCount} />
 
-      <div className="pt-[73px] flex min-h-[calc(100vh-73px)]">
+      <div className={cn("pt-[73px] flex", fullHeight ? "h-screen" : "min-h-[calc(100vh-73px)]")}>
         {/* Desktop Sidebar */}
         <aside className={cn(
           "hidden md:flex border-r bg-card flex-col fixed left-0 top-[73px] h-[calc(100vh-73px)] overflow-y-auto transition-all duration-300",
@@ -197,13 +198,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
         {/* Main content */}
         <main className={cn(
-          "flex-1 overflow-auto transition-all duration-300 pb-16 md:pb-0",
+          "flex-1 transition-all duration-300",
+          fullHeight ? (hideBottomNav ? "overflow-hidden flex flex-col min-h-0" : "overflow-hidden flex flex-col min-h-0 pb-16 md:pb-0") : "overflow-auto pb-16 md:pb-0",
           sidebarCollapsed ? "md:ml-20" : "md:ml-64"
         )}>
           {children}
         </main>
       </div>
-      <BottomNav chatUnreadCount={chatUnreadCount} />
+      {!hideBottomNav && <BottomNav />}
     </div>
   );
 };

@@ -721,7 +721,8 @@
   "chatComponent": {
     "noMessages": "Sem mensagens. Inicie uma conversa!",
     "noChats": "Sem conversas ativas.",
-    "noMessagesYet": "Sem mensagens"
+    "noMessagesYet": "Sem mensagens",
+    "placeholder": "Enviar uma mensagem"
   },
   "joinTeam": {
     "invalidLink": "Link de convite inválido.",

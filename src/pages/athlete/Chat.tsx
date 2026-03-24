@@ -4,7 +4,7 @@ import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
-import { Loader2, Plus, Search, MessageSquare, ChevronLeft, Users2 } from "lucide-react";
+import { Loader2, Plus, Search, MessageSquare, Users2 } from "lucide-react";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
@@ -171,17 +172,16 @@ export default function AthleteChat() {
     }
 
     return (
-        <AthletePortalLayout title="Chat" showHeader={true}>
+        <AthletePortalLayout title="Chat" showHeader={true} fullHeight={true} hideBottomNav={!!selectedChat}>
             <NotificationBanner />
-            <div className="flex flex-col md:flex-row h-[calc(100vh-8rem)] bg-card rounded-lg border overflow-hidden shadow-sm">
+            <div className="flex flex-col md:flex-row flex-1 min-h-0 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
 
                 {/* Chat List Sidebar */}
                 <div className={cn(
                     "w-full md:w-80 border-r flex flex-col bg-background",
                     selectedChat ? "hidden md:flex" : "flex"
                 )}>
-                    <div className="p-4 border-b flex items-center justify-between bg-muted/30">
-                        <h3 className="font-semibold">{t.athlete.chat.title}</h3>
+                    <div className="p-4 border-b flex items-center justify-end bg-muted/30">
                         <Button size="icon" variant="ghost" className="hidden sm:flex h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
                             <Plus className="h-5 w-5" />
                         </Button>
@@ -289,39 +289,18 @@ export default function AthleteChat() {
 
                 {/* Chat Window */}
                 <div className={cn(
-                    "flex-1 flex flex-col bg-muted/5",
+                    "flex-1 flex flex-col min-h-0 bg-muted/5",
                     !selectedChat ? "hidden md:flex" : "flex"
                 )}>
                     {selectedChat ? (
-                        <>
-                            {/* Mobile Header to go back */}
-                            <div className="md:hidden p-3 border-b flex items-center gap-3 bg-background sticky top-0 z-10">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 -ml-1"
-                                    onClick={() => setSelectedChat(null)}
-                                >
-                                    <ChevronLeft className="h-5 w-5" />
-                                </Button>
-                                <Avatar className="h-8 w-8">
-                                    <AvatarFallback>
-                                        {selectedChat.isGroup
-                                            ? <Users2 className="h-4 w-4" />
-                                            : getChatDisplayName(selectedChat)[0]?.toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span className="font-semibold text-sm">{getChatDisplayName(selectedChat)}</span>
-                            </div>
-
-                            <ChatWindow
-                                messages={messages}
-                                currentUserId={user?.uid || ""}
-                                onSendMessage={handleSendMessage}
-                                participantName={getChatDisplayName(selectedChat)}
-                                isGroup={selectedChat.isGroup}
-                            />
-                        </>
+                        <ChatWindow
+                            messages={messages}
+                            currentUserId={user?.uid || ""}
+                            onSendMessage={handleSendMessage}
+                            participantName={getChatDisplayName(selectedChat)}
+                            isGroup={selectedChat.isGroup}
+                            onBack={() => setSelectedChat(null)}
+                        />
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
                             <MessageSquare className="h-12 w-12 mb-4 opacity-20" />

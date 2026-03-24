@@ -18,7 +18,7 @@ export function AdminPageHeader({ title, description, action, actions, mobileFab
   return (
     <>
       <div className="flex items-center justify-between gap-3 mb-6 md:mb-8">
-        <div>
+        <div className="hidden md:block">
           <h1 className="text-xl md:text-2xl font-bold">{title}</h1>
           {description && (
             <p className="text-sm text-muted-foreground mt-0.5">{description}</p>

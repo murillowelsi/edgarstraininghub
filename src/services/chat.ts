@@ -15,6 +15,7 @@ import {
     serverTimestamp,
     increment,
     arrayUnion,
+    writeBatch,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Chat, Message } from "../types/chat";
@@ -184,10 +185,24 @@ export const ChatService = {
 
     // Mark messages as read
     markAsRead: async (chatId: string, userId: string) => {
+        // Reset unread counter on chat document
         const chatRef = doc(db, "chats", chatId);
         await updateDoc(chatRef, {
             [`unreadCount.${userId}`]: 0
         });
+
+        // Mark individual unread messages from others as read
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        const q = query(messagesRef, where("read", "==", false));
+        const snapshot = await getDocs(q);
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach(msgDoc => {
+            if (msgDoc.data().senderId !== userId) {
+                batch.update(msgDoc.ref, { read: true });
+            }
+        });
+        await batch.commit();
     },
 
     /**

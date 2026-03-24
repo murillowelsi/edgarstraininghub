@@ -407,7 +407,7 @@ const AdminCalendar = () => {
         <div className="px-4 pt-4 pb-3 border-b bg-background sticky top-0 z-10 space-y-3">
           {/* Row 1: Title + month navigation */}
           <div className="flex items-center justify-between">
-            <h1 className="text-xl md:text-2xl font-bold">{t.admin.calendar.title}</h1>
+            <h1 className="hidden md:block text-xl md:text-2xl font-bold">{t.admin.calendar.title}</h1>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" onClick={handlePrevMonth}>
                 <ChevronLeft className="h-4 w-4" />

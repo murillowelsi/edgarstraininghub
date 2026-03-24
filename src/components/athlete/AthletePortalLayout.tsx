@@ -8,7 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { auth } from "@/lib/firebase";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { ChatService } from "@/services/chat";
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
@@ -18,12 +18,16 @@ interface AthletePortalLayoutProps {
   children: React.ReactNode;
   title?: string;
   showHeader?: boolean;
+  fullHeight?: boolean;
+  hideBottomNav?: boolean;
 }
 
 const AthletePortalLayout = ({
   children,
   title,
   showHeader = true,
+  fullHeight = false,
+  hideBottomNav = false,
 }: AthletePortalLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,7 +39,6 @@ const AthletePortalLayout = ({
     { href: "/athlete", label: t.athlete.nav.home, icon: Home },
     { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar },
     { href: "/athlete/workouts", label: t.athlete.nav.workouts, icon: Dumbbell },
-    { href: "/athlete/chat", label: t.athlete.nav.chat, icon: MessageSquare },
   ];
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -50,28 +53,13 @@ const AthletePortalLayout = ({
     let unsubscribeFCM: (() => void) | null = null;
 
     const setupFCM = async () => {
-      console.log("Setting up FCM for athlete:", user.uid);
-
-      // Request notification permission if not already granted
-      if (!NotificationService.isGranted() && !NotificationService.isDenied()) {
-        console.log("Requesting notification permission...");
-        const granted = await NotificationService.requestPermission();
-        console.log("Notification permission granted:", granted);
-      } else {
-        console.log("Notification permission status:", Notification.permission);
-      }
-
-      // Register device for push notifications
+      // Register FCM token if permission already granted (e.g. returning user)
       if (NotificationService.isGranted()) {
-        console.log("Registering FCM token...");
         await FCMService.registerToken(user.uid);
-      } else {
-        console.warn("FCM: Cannot register token - notification permission not granted");
       }
 
       // Listen for foreground messages
       unsubscribeFCM = FCMService.listenForeground('/athlete/chat');
-      console.log("FCM foreground listener set up");
     };
 
     setupFCM().catch(err => console.error("FCM setup error:", err));
@@ -165,17 +153,31 @@ const AthletePortalLayout = ({
               </h1>
             )}
 
-            {/* User Menu */}
-            <button
-              onClick={() => setIsMenuOpen(true)}
-              className="p-1 rounded-full hover:bg-accent transition-colors"
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                  {getInitials(user?.email)}
-                </AvatarFallback>
-              </Avatar>
-            </button>
+            {/* Right controls */}
+            <div className="flex items-center gap-2">
+              <Link
+                to="/athlete/chat"
+                className="relative p-2 rounded-full hover:bg-accent transition-colors"
+              >
+                <MessageSquare className="h-5 w-5" />
+                {chatUnreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                    {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
+                  </span>
+                )}
+              </Link>
+
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="p-1 rounded-full hover:bg-accent transition-colors"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                    {getInitials(user?.email)}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -183,6 +185,7 @@ const AthletePortalLayout = ({
       {/* Profile Drawer */}
       <Drawer open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DrawerContent>
+          <DrawerTitle className="sr-only">Menu</DrawerTitle>
           <div className="px-4 pb-8 pt-2 space-y-4">
             {/* Profile info */}
             <div className="flex items-center gap-3">
@@ -238,15 +241,14 @@ const AthletePortalLayout = ({
         </DrawerContent>
       </Drawer>
 
-      {/* Main content area - scrollable */}
-      <main className="flex-1 overflow-auto pb-20">{children}</main>
+      {/* Main content area */}
+      <main className={fullHeight ? (hideBottomNav ? "h-[calc(100vh-4rem)] overflow-hidden flex flex-col" : "h-[calc(100vh-8rem)] overflow-hidden flex flex-col") : "flex-1 overflow-auto pb-20"}>{children}</main>
 
       {/* Bottom navigation - fixed */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-bottom z-50">
+      <nav className={cn("fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-bottom z-50", hideBottomNav && "hidden")}>
         <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
           {navItems.map((item) => {
             const active = isActive(item.href);
-            const showBadge = item.href === "/athlete/chat" && chatUnreadCount > 0;
             return (
               <Link
                 key={item.href}
@@ -265,11 +267,6 @@ const AthletePortalLayout = ({
                       active && "scale-110"
                     )}
                   />
-                  {showBadge && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                      {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
-                    </span>
-                  )}
                 </div>
                 <span
                   className={cn(
