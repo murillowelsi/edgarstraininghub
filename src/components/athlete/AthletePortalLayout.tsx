@@ -8,13 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { auth } from "@/lib/firebase";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { ChatService } from "@/services/chat";
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
@@ -44,6 +38,7 @@ const AthletePortalLayout = ({
     { href: "/athlete/chat", label: t.athlete.nav.chat, icon: MessageSquare },
   ];
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const prevMessageTimes = useRef<Map<string, number>>(new Map());
   const isFirstLoad = useRef(true);
@@ -171,58 +166,77 @@ const AthletePortalLayout = ({
             )}
 
             {/* User Menu */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-              </button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 p-1 rounded-full hover:bg-accent transition-colors">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                        {getInitials(user?.email)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium truncate">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground">{t.athlete.role}</p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <div className="flex items-center gap-1 px-2 py-1.5">
-                    <button
-                      onClick={() => changeLanguage("en")}
-                      className={`flex items-center gap-1.5 flex-1 px-2 py-1 rounded-md text-sm transition-colors ${language === "en" ? "bg-accent font-medium" : "hover:bg-accent/50 text-muted-foreground"}`}
-                    >
-                      <GB className="w-4 h-3 rounded-sm shrink-0" />
-                      EN
-                    </button>
-                    <button
-                      onClick={() => changeLanguage("pt")}
-                      className={`flex items-center gap-1.5 flex-1 px-2 py-1 rounded-md text-sm transition-colors ${language === "pt" ? "bg-accent font-medium" : "hover:bg-accent/50 text-muted-foreground"}`}
-                    >
-                      <PT className="w-4 h-3 rounded-sm shrink-0" />
-                      PT
-                    </button>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    {t.athlete.logout}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="p-1 rounded-full hover:bg-accent transition-colors"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                  {getInitials(user?.email)}
+                </AvatarFallback>
+              </Avatar>
+            </button>
           </div>
         </header>
       )}
+
+      {/* Profile Drawer */}
+      <Drawer open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <DrawerContent>
+          <div className="px-4 pb-8 pt-2 space-y-4">
+            {/* Profile info */}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+                  {getInitials(user?.email)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="font-medium truncate">{user?.email}</p>
+                <p className="text-sm text-muted-foreground">{t.athlete.role}</p>
+              </div>
+            </div>
+
+            <div className="border-t pt-4 space-y-2">
+              {/* Language */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => changeLanguage("en")}
+                  className={`flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${language === "en" ? "bg-accent border-primary/30" : "border-border text-muted-foreground hover:bg-accent/50"}`}
+                >
+                  <GB className="w-5 h-4 rounded-sm shrink-0" />
+                  English
+                </button>
+                <button
+                  onClick={() => changeLanguage("pt")}
+                  className={`flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${language === "pt" ? "bg-accent border-primary/30" : "border-border text-muted-foreground hover:bg-accent/50"}`}
+                >
+                  <PT className="w-5 h-4 rounded-sm shrink-0" />
+                  Português
+                </button>
+              </div>
+
+              {/* Theme */}
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-border hover:bg-accent/50 transition-colors text-sm"
+              >
+                {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+                <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
+              </button>
+
+              {/* Logout */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors text-sm font-medium"
+              >
+                <LogOut size={18} />
+                {t.athlete.logout}
+              </button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* Main content area - scrollable */}
       <main className="flex-1 overflow-auto pb-20">{children}</main>
