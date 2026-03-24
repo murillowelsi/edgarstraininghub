@@ -13,7 +13,8 @@ import {
     getDocs,
     deleteDoc,
     serverTimestamp,
-    increment
+    increment,
+    arrayUnion,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Chat, Message } from "../types/chat";
@@ -64,6 +65,7 @@ export const ChatService = {
         await addDoc(messagesRef, {
             text,
             senderId,
+            senderName: senderName || null,
             createdAt: serverTimestamp(),
             read: false
         });
@@ -186,6 +188,52 @@ export const ChatService = {
         await updateDoc(chatRef, {
             [`unreadCount.${userId}`]: 0
         });
+    },
+
+    /**
+     * Create (or get) a group chat for a team.
+     * Chat ID: `team_${teamId}` — stable and unique per team.
+     * participantIds is always synced to [coachId, ...memberIds].
+     */
+    createOrGetGroupChat: async (
+        teamId: string,
+        groupName: string,
+        coachId: string,
+        memberIds: string[]
+    ): Promise<Chat> => {
+        const chatId = `team_${teamId}`;
+        const chatRef = doc(db, "chats", chatId);
+        const chatSnap = await getDoc(chatRef);
+        const participantIds = [coachId, ...memberIds.filter(id => id !== coachId)];
+
+        if (!chatSnap.exists()) {
+            const unreadCount: Record<string, number> = {};
+            participantIds.forEach(id => { unreadCount[id] = 0; });
+            const newChat: Chat = {
+                id: chatId,
+                participantIds,
+                isGroup: true,
+                teamId,
+                groupName,
+                unreadCount,
+            };
+            await setDoc(chatRef, newChat);
+            return newChat;
+        }
+
+        // Sync participantIds and groupName in case team changed
+        const existing = chatSnap.data() as Chat;
+        const newMembers = participantIds.filter(id => !existing.participantIds.includes(id));
+        if (newMembers.length > 0 || existing.groupName !== groupName) {
+            const unreadPatch: Record<string, number> = {};
+            newMembers.forEach(id => { unreadPatch[`unreadCount.${id}`] = 0; });
+            await updateDoc(chatRef, {
+                participantIds: arrayUnion(...participantIds),
+                groupName,
+                ...unreadPatch,
+            });
+        }
+        return { ...existing, participantIds, groupName };
     },
 
     // Delete a chat and all its messages

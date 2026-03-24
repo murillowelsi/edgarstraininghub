@@ -554,6 +554,7 @@
       "addAthleteTitle": "Add Athlete to Team",
       "searchAthletes": "Search athletes...",
       "noAthletesAvailable": "All athletes are already members.",
+      "groupChat": "Group Chat",
       "toast": {
         "loadError": "Failed to load team.",
         "teamRenamed": "Team renamed",

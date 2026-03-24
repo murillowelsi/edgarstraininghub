@@ -61,11 +61,14 @@ service cloud.firestore {
     // Chat rules: Admin can read/write any chat. Participants can read/write their own.
     match /chats/{chatId} {
       allow read: if request.auth != null && (
-        isAdmin() || 
+        isAdmin() ||
         (resource != null && request.auth.uid in resource.data.participantIds) ||
-        // Allow reading non-existent docs if the ID implies involvement (for creation checks)
-        // Assumes ID format: id1_id2
-        (resource == null && chatId.matches('.*' + request.auth.uid + '.*'))
+        // Allow reading non-existent docs (no data to leak): 1-to-1 IDs contain the uid,
+        // group chat IDs are team_<teamId> — allow any authenticated user to check existence.
+        (resource == null && (
+          chatId.matches('.*' + request.auth.uid + '.*') ||
+          chatId.matches('team_.*')
+        ))
       );
       
       allow create: if request.auth != null && (

@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { Send } from "lucide-react";
+import { Send, Users2 } from "lucide-react";
 import { Message } from "@/types/chat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ interface ChatWindowProps {
     onSendMessage: (text: string) => void;
     isLoading?: boolean;
     participantName: string;
+    isGroup?: boolean;
 }
 
 export default function ChatWindow({
@@ -21,7 +22,8 @@ export default function ChatWindow({
     currentUserId,
     onSendMessage,
     isLoading,
-    participantName
+    participantName,
+    isGroup,
 }: ChatWindowProps) {
     const { t } = useLanguage();
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -49,7 +51,9 @@ export default function ChatWindow({
             <div className="p-3 border-b bg-muted/30 flex-shrink-0">
                 <h3 className="font-semibold flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                        <AvatarFallback>{participantName[0]?.toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>
+                            {isGroup ? <Users2 className="h-4 w-4" /> : participantName[0]?.toUpperCase()}
+                        </AvatarFallback>
                     </Avatar>
                     {participantName}
                 </h3>
@@ -73,6 +77,11 @@ export default function ChatWindow({
                                     isMe ? "self-end items-end" : "self-start items-start"
                                 )}
                             >
+                                {isGroup && !isMe && msg.senderName && (
+                                    <span className="text-[11px] font-medium text-muted-foreground mb-0.5 px-1">
+                                        {msg.senderName}
+                                    </span>
+                                )}
                                 <div
                                     className={cn(
                                         "px-4 py-2 rounded-2xl text-sm",

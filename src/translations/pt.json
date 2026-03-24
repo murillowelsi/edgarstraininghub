@@ -554,6 +554,7 @@
       "addAthleteTitle": "Adicionar Atleta ao Grupo",
       "searchAthletes": "Pesquisar atletas...",
       "noAthletesAvailable": "Todos os atletas já são membros.",
+      "groupChat": "Chat do Grupo",
       "toast": {
         "loadError": "Erro ao carregar grupo.",
         "teamRenamed": "Grupo renomeado",

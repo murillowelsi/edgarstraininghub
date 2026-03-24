@@ -8,6 +8,7 @@ import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   getTeamById,
@@ -17,6 +18,7 @@ import {
   addMemberToTeam,
   autoAssignTeamWorkoutsToMember,
 } from "@/services/teamsService";
+import { ChatService } from "@/services/chat";
 import { getUserById, getUsersByRole } from "@/services/usersService";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
@@ -31,12 +33,14 @@ import {
   Pencil,
   X,
   UserPlus,
+  MessageSquare,
 } from "lucide-react";
 
 export default function AdminTeamDetail() {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { t } = useLanguage();
 
   const [team, setTeam] = useState<Team | null>(null);
@@ -58,6 +62,9 @@ export default function AdminTeamDetail() {
   // Delete team
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Group chat
+  const [openingChat, setOpeningChat] = useState(false);
 
   // Add athlete
   const [addAthleteOpen, setAddAthleteOpen] = useState(false);
@@ -153,6 +160,18 @@ export default function AdminTeamDetail() {
       toast({ title: t.common.error, description: t.admin.teamDetail.toast.deleteError, variant: "destructive" });
       setDeleting(false);
       setConfirmDelete(false);
+    }
+  };
+
+  const handleOpenGroupChat = async () => {
+    if (!team || !user) return;
+    setOpeningChat(true);
+    try {
+      await ChatService.createOrGetGroupChat(team.id, team.name, user.uid, team.memberIds);
+      navigate("/admin/chat", { state: { openChatId: `team_${team.id}` } });
+    } catch {
+      toast({ title: t.common.error, description: "Failed to open group chat.", variant: "destructive" });
+      setOpeningChat(false);
     }
   };
 
@@ -252,10 +271,18 @@ export default function AdminTeamDetail() {
               </Button>
             </div>
           )}
-          <Button onClick={() => navigate(`/admin/teams/${team.id}/stats`)} className="hidden sm:flex w-auto shrink-0">
-            <BarChart2 className="h-4 w-4 mr-2" />
-            {t.admin.teamDetail.viewStats}
-          </Button>
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <Button variant="outline" onClick={handleOpenGroupChat} disabled={openingChat}>
+              {openingChat
+                ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                : <MessageSquare className="h-4 w-4 mr-2" />}
+              {t.admin.teamDetail.groupChat}
+            </Button>
+            <Button onClick={() => navigate(`/admin/teams/${team.id}/stats`)}>
+              <BarChart2 className="h-4 w-4 mr-2" />
+              {t.admin.teamDetail.viewStats}
+            </Button>
+          </div>
         </div>
         {/* Mobile FAB for Stats */}
         <button

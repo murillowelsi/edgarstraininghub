@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
-import { ChevronLeft, Loader2, MessageSquare, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronLeft, Loader2, MessageSquare, Plus, Search, Trash2, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getAllUsers } from "@/services/usersService";
@@ -22,6 +23,8 @@ import { NotificationBanner } from "@/components/NotificationBanner";
 export default function AdminChat() {
     const { user } = useAuth();
     const { t } = useLanguage();
+    const location = useLocation();
+
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -44,7 +47,6 @@ export default function AdminChat() {
         getAllUsers().then(setAllUsers).catch(console.error);
     }, []);
 
-
     useEffect(() => {
         if (!user) return;
         const unsubscribe = ChatService.subscribeToUserChats(user.uid, (updatedChats) => {
@@ -58,19 +60,28 @@ export default function AdminChat() {
         return () => unsubscribe();
     }, [user, selectedChat?.id]);
 
+    // Open specific chat when navigated here with state (e.g., from TeamDetail)
+    useEffect(() => {
+        const state = location.state as { openChatId?: string } | null;
+        if (!state?.openChatId || chats.length === 0) return;
+        const target = chats.find(c => c.id === state.openChatId);
+        if (target) {
+            setSelectedChat(target);
+            // Clear state so refresh doesn't re-select
+            window.history.replaceState({}, "");
+        }
+    }, [location.state, chats]);
+
     useEffect(() => {
         if (!selectedChat || !user) return;
         ChatService.markAsRead(selectedChat.id, user.uid);
-        // -1 = first load (don't notify for existing messages, only for new ones)
         let previousCount = -1;
         const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
-            // Notify only on genuinely new messages (not the initial load)
             if (previousCount >= 0 && msgs.length > previousCount) {
                 const newest = msgs[msgs.length - 1];
                 if (newest && newest.senderId !== user.uid) {
-                    const senderName = getChatDisplayName(selectedChat);
                     NotificationService.showChatNotification(
-                        senderName,
+                        getChatDisplayName(selectedChat),
                         newest.text,
                         '/admin/chat'
                     );
@@ -94,6 +105,7 @@ export default function AdminChat() {
     }, [isNewChatOpen]);
 
     const getChatDisplayName = (chat: Chat) => {
+        if (chat.isGroup) return chat.groupName || "Team";
         const otherId = chat.participantIds.find(id => id !== user?.uid);
         if (otherId) {
             const otherUser = allUsers.find(u => u.id === otherId);
@@ -192,7 +204,6 @@ export default function AdminChat() {
                 )}>
                     <div className="p-4 border-b flex items-center justify-between bg-muted/30">
                         <h3 className="font-semibold">{t.admin.chat.title}</h3>
-                        {/* Desktop only — mobile uses FAB below */}
                         <Button size="icon" variant="ghost" className="hidden sm:flex h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
                             <Plus className="h-5 w-5" />
                         </Button>
@@ -225,7 +236,11 @@ export default function AdminChat() {
                                         )}
                                     >
                                         <Avatar>
-                                            <AvatarFallback>{displayName[0]?.toUpperCase()}</AvatarFallback>
+                                            <AvatarFallback>
+                                                {chat.isGroup
+                                                    ? <Users2 className="h-4 w-4" />
+                                                    : displayName[0]?.toUpperCase()}
+                                            </AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 overflow-hidden">
                                             <div className="flex justify-between items-center mb-1">
@@ -266,7 +281,7 @@ export default function AdminChat() {
                 )}>
                     {selectedChat ? (
                         <>
-                            {/* Mobile header: back + avatar + name + delete */}
+                            {/* Mobile header */}
                             <div className="md:hidden p-3 border-b flex items-center gap-3 bg-background sticky top-0 z-10">
                                 <Button
                                     variant="ghost"
@@ -277,7 +292,11 @@ export default function AdminChat() {
                                     <ChevronLeft className="h-5 w-5" />
                                 </Button>
                                 <Avatar className="h-8 w-8 shrink-0">
-                                    <AvatarFallback>{getChatDisplayName(selectedChat)[0]?.toUpperCase()}</AvatarFallback>
+                                    <AvatarFallback>
+                                        {selectedChat.isGroup
+                                            ? <Users2 className="h-4 w-4" />
+                                            : getChatDisplayName(selectedChat)[0]?.toUpperCase()}
+                                    </AvatarFallback>
                                 </Avatar>
                                 <span className="font-semibold text-sm flex-1 truncate">
                                     {getChatDisplayName(selectedChat)}
@@ -292,7 +311,7 @@ export default function AdminChat() {
                                 </Button>
                             </div>
 
-                            {/* Desktop header: delete button */}
+                            {/* Desktop header */}
                             <div className="hidden md:flex items-center justify-end p-2 border-b">
                                 <Button
                                     variant="ghost"
@@ -311,6 +330,7 @@ export default function AdminChat() {
                                     currentUserId={user?.uid || ""}
                                     onSendMessage={handleSendMessage}
                                     participantName={getChatDisplayName(selectedChat)}
+                                    isGroup={selectedChat.isGroup}
                                 />
                             </div>
                         </>
@@ -324,7 +344,7 @@ export default function AdminChat() {
                 </div>
             </div>
 
-            {/* Mobile FAB — only shown on chat list view */}
+            {/* Mobile FAB */}
             {!selectedChat && (
                 <button
                     onClick={() => setIsNewChatOpen(true)}

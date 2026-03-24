@@ -4,7 +4,7 @@ import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
-import { Loader2, Plus, Search, MessageSquare, ChevronLeft } from "lucide-react";
+import { Loader2, Plus, Search, MessageSquare, ChevronLeft, Users2 } from "lucide-react";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
@@ -147,12 +147,12 @@ export default function AthleteChat() {
     };
 
     const getChatDisplayName = (chat: Chat) => {
-        // Find the participant that is NOT the current user
+        if (chat.isGroup) return chat.groupName || "Team";
         const otherId = chat.participantIds.find(id => id !== user?.uid);
         if (otherId && adminMap[otherId]) {
             return adminMap[otherId];
         }
-        return t.athlete.chat.coachFallback; // Fallback
+        return t.athlete.chat.coachFallback;
     };
 
     const filteredAdmins = admins.filter(a =>
@@ -249,7 +249,11 @@ export default function AthleteChat() {
                                         )}
                                     >
                                         <Avatar>
-                                            <AvatarFallback>{displayName[0]?.toUpperCase()}</AvatarFallback>
+                                            <AvatarFallback>
+                                                {chat.isGroup
+                                                    ? <Users2 className="h-4 w-4" />
+                                                    : displayName[0]?.toUpperCase()}
+                                            </AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 overflow-hidden">
                                             <div className="flex justify-between items-center mb-1">
@@ -301,7 +305,11 @@ export default function AthleteChat() {
                                     <ChevronLeft className="h-5 w-5" />
                                 </Button>
                                 <Avatar className="h-8 w-8">
-                                    <AvatarFallback>{getChatDisplayName(selectedChat)[0]?.toUpperCase()}</AvatarFallback>
+                                    <AvatarFallback>
+                                        {selectedChat.isGroup
+                                            ? <Users2 className="h-4 w-4" />
+                                            : getChatDisplayName(selectedChat)[0]?.toUpperCase()}
+                                    </AvatarFallback>
                                 </Avatar>
                                 <span className="font-semibold text-sm">{getChatDisplayName(selectedChat)}</span>
                             </div>
@@ -311,6 +319,7 @@ export default function AthleteChat() {
                                 currentUserId={user?.uid || ""}
                                 onSendMessage={handleSendMessage}
                                 participantName={getChatDisplayName(selectedChat)}
+                                isGroup={selectedChat.isGroup}
                             />
                         </>
                     ) : (
