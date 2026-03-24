@@ -15,7 +15,7 @@ import { Loader2 } from "lucide-react";
 export default function JoinTeam() {
   const { inviteToken } = useParams<{ inviteToken: string }>();
   const navigate = useNavigate();
-  const { user, isAdmin, isEditor, isAthlete } = useAuth();
+  const { user, isAdmin, isEditor, isAthlete, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const [team, setTeam] = useState<Team | null>(null);
@@ -51,7 +51,7 @@ export default function JoinTeam() {
 
   // Once team + auth state are known, handle auto-join for logged-in athletes
   useEffect(() => {
-    if (loadingTeam || !team || !user) return;
+    if (loadingTeam || authLoading || !team || !user) return;
     if (isAthlete) {
       if (team.memberIds.includes(user.uid)) return; // will show "already a member" below
       // Athlete is logged in but not yet a member — join automatically
@@ -64,7 +64,7 @@ export default function JoinTeam() {
           toast({ title: "Error", description: err.message || "Failed to join team.", variant: "destructive" });
         });
     }
-  }, [loadingTeam, team, user, isAthlete, navigate]);
+  }, [loadingTeam, authLoading, team, user, isAthlete, navigate]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +94,8 @@ export default function JoinTeam() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Registration failed.";
       toast({ title: "Error", description: msg, variant: "destructive" });
+      // Roll back the Firebase Auth account so the user can retry cleanly
+      if (auth.currentUser) await auth.currentUser.delete().catch(() => {});
     } finally {
       setSubmitting(false);
     }
@@ -118,7 +120,7 @@ export default function JoinTeam() {
 
   // --- Render states ---
 
-  if (loadingTeam) {
+  if (loadingTeam || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
