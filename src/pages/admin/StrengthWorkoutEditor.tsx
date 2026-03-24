@@ -257,7 +257,7 @@ const StrengthWorkoutEditor = () => {
     addExerciseToWorkout(exercise);
   };
 
-  const WorkoutBuilder = () => (
+  const workoutBuilder = (
     <>
       <Card className="mb-4">
         <CardHeader>
@@ -319,7 +319,7 @@ const StrengthWorkoutEditor = () => {
     </>
   );
 
-  const ExerciseBrowser = () => (
+  const exerciseBrowser = (
     <Tabs defaultValue="library" className="flex flex-col h-full">
       <div className="border-b px-4 pt-3 shrink-0">
         <TabsList className="w-full">
@@ -381,10 +381,10 @@ const StrengthWorkoutEditor = () => {
               </TabsList>
             </div>
             <TabsContent value="workout" className="flex-1 overflow-auto m-0 p-4">
-              <WorkoutBuilder />
+              {workoutBuilder}
             </TabsContent>
             <TabsContent value="add" className="flex-1 overflow-hidden m-0">
-              <ExerciseBrowser />
+              {exerciseBrowser}
             </TabsContent>
           </Tabs>
         </div>
@@ -392,10 +392,10 @@ const StrengthWorkoutEditor = () => {
         {/* Desktop: side-by-side panels */}
         <div className="hidden md:flex flex-1 overflow-hidden">
           <div className="flex-1 overflow-auto p-4">
-            <WorkoutBuilder />
+            {workoutBuilder}
           </div>
           <div className="w-96 border-l bg-muted/30 flex flex-col overflow-hidden">
-            <ExerciseBrowser />
+            {exerciseBrowser}
           </div>
         </div>
       </div>
