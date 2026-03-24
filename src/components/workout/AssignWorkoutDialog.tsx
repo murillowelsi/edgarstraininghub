@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { createAssignments } from "@/services/workoutAssignmentsService";
 import { getUsersByRole } from "@/services/usersService";
-import { getTeamsByCoach } from "@/services/teamsService";
+import { getTeamsByCoach, addTeamWorkoutAssignment } from "@/services/teamsService";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import type { Workout } from "@/types/workout";
@@ -195,6 +195,8 @@ export const AssignWorkoutDialog = ({
       if (assignedCount === 0) {
         toast({ title: "Nothing to assign", description: "All team members are already scheduled for this workout on that date.", variant: "destructive" });
       } else {
+        // Record at team level so future joiners get auto-assigned
+        await addTeamWorkoutAssignment(selectedTeam.id, workout.id, teamScheduledDate);
         toast({ title: "Assignments created", description: `${assignedCount} assigned, ${skippedCount} already scheduled` });
         onOpenChange(false);
         onSuccess?.();

@@ -15,7 +15,8 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import type { Team, TeamDocument } from "../types/team";
+import type { Team, TeamAssignmentDocument, TeamDocument } from "../types/team";
+import { createAssignments } from "./workoutAssignmentsService";
 
 const TEAMS_COLLECTION = "teams";
 
@@ -25,6 +26,10 @@ const docToTeam = (id: string, data: TeamDocument): Team => ({
   coachId: data.coachId,
   inviteToken: data.inviteToken,
   memberIds: data.memberIds || [],
+  assignedWorkouts: (data.assignedWorkouts || []).map((a) => ({
+    workoutId: a.workoutId,
+    scheduledDate: a.scheduledDate?.toDate() || new Date(),
+  })),
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
@@ -110,4 +115,43 @@ export const removeMemberFromTeam = async (teamId: string, uid: string): Promise
     memberIds: arrayRemove(uid),
     updatedAt: serverTimestamp(),
   });
+};
+
+/**
+ * Record a workout assignment at the team level so late joiners get auto-assigned.
+ * Uses arrayUnion so calling it twice for the same workout+date is idempotent.
+ */
+export const addTeamWorkoutAssignment = async (
+  teamId: string,
+  workoutId: string,
+  scheduledDate: Date
+): Promise<void> => {
+  const entry: TeamAssignmentDocument = {
+    workoutId,
+    scheduledDate: Timestamp.fromDate(scheduledDate),
+  };
+  await updateDoc(doc(db, TEAMS_COLLECTION, teamId), {
+    assignedWorkouts: arrayUnion(entry),
+    updatedAt: serverTimestamp(),
+  });
+};
+
+/**
+ * Create individual workout assignments for a newly joined athlete
+ * based on all workouts previously assigned to the team.
+ * Idempotent — createAssignments skips already-existing assignments.
+ */
+export const autoAssignTeamWorkoutsToMember = async (
+  teamId: string,
+  uid: string
+): Promise<void> => {
+  const team = await getTeamById(teamId);
+  if (!team || !team.assignedWorkouts.length) return;
+
+  for (const entry of team.assignedWorkouts) {
+    await createAssignments(
+      { workoutId: entry.workoutId, athleteIds: [uid], scheduledDate: entry.scheduledDate },
+      team.coachId
+    );
+  }
 };

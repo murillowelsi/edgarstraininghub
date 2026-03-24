@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import { getTeamByInviteToken, addMemberToTeam } from "@/services/teamsService";
+import { getTeamByInviteToken, addMemberToTeam, autoAssignTeamWorkoutsToMember } from "@/services/teamsService";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Team } from "@/types/team";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,7 @@ export default function JoinTeam() {
       if (team.memberIds.includes(user.uid)) return; // will show "already a member" below
       // Athlete is logged in but not yet a member — join automatically
       addMemberToTeam(team.id, user.uid)
+        .then(() => autoAssignTeamWorkoutsToMember(team.id, user.uid))
         .then(() => {
           toast({ title: `You joined ${team.name}!` });
           navigate("/athlete");
@@ -86,8 +87,9 @@ export default function JoinTeam() {
         updatedAt: serverTimestamp(),
       });
 
-      // Join the team
+      // Join the team and auto-assign any previously assigned workouts
       await addMemberToTeam(team.id, uid);
+      await autoAssignTeamWorkoutsToMember(team.id, uid);
 
       toast({ title: `Welcome! You joined ${team.name}.` });
       navigate("/athlete");
@@ -108,6 +110,7 @@ export default function JoinTeam() {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       await addMemberToTeam(team.id, cred.user.uid);
+      await autoAssignTeamWorkoutsToMember(team.id, cred.user.uid);
       toast({ title: `You joined ${team.name}!` });
       navigate("/athlete");
     } catch (err: unknown) {
