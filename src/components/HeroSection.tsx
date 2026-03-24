@@ -66,6 +66,18 @@ const HeroSection = () => {
             </div>
           </div>
 
+          {/* Mobile: circular portrait */}
+          <div className="flex lg:hidden justify-center">
+            <div className="relative w-52 h-52 sm:w-64 sm:h-64 rounded-full overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20">
+              <img
+                src={edgarImage}
+                alt="Edgar Zanin - Ironman Athlete"
+                className="w-full h-full object-cover object-top scale-125"
+              />
+            </div>
+          </div>
+
+          {/* Desktop: full-height image */}
           <div className="absolute right-0 bottom-0 animate-slide-in-right hidden lg:flex items-end justify-end w-[55%] xl:w-[50%] 2xl:w-[48%]">
             <img
               src={edgarImage}
