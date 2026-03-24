@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Calendar, Dumbbell, Home, LogOut, Moon, Sun, MessageSquare } from "lucide-react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -168,6 +169,7 @@ const AthletePortalLayout = ({
 
             {/* User Menu */}
             <div className="flex items-center gap-2">
+              <LanguageSwitcher />
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
