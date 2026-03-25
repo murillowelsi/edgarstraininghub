@@ -111,7 +111,7 @@ const AdminDashboard = () => {
       <div className="p-4 md:p-8 pb-24 md:pb-8 space-y-4 max-w-4xl mx-auto">
 
         {/* Welcome */}
-        <div className="pt-2">
+        <div>
           <p className="text-muted-foreground">{t.admin.dashboard.welcomeBack}</p>
           <h1 className="text-3xl font-bold font-display">{displayName}</h1>
         </div>

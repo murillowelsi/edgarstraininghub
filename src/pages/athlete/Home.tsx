@@ -149,7 +149,7 @@ const AthleteHome = () => {
     <AthletePortalLayout title={t.athlete.nav.home}>
       <div className="p-4 space-y-4">
         {/* Welcome Section */}
-        <div className="pt-2">
+        <div>
           <p className="text-muted-foreground">{t.athlete.home.welcomeBack}</p>
           <h1 className="text-3xl font-bold font-display">{displayName}</h1>
         </div>
