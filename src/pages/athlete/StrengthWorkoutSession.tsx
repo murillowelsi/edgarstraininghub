@@ -797,11 +797,11 @@ const StrengthWorkoutSession = () => {
             <DrawerDescription>{t.athlete.session.saveConfirmDescription}</DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
-            <Button onClick={handleSave} disabled={saving} className="bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+            <Button onClick={handleSave} disabled={saving} className="w-full">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               {t.athlete.session.saveConfirmConfirm}
             </Button>
-            <Button variant="outline" onClick={() => setShowSaveConfirm(false)}>
+            <Button variant="outline" className="w-full" onClick={() => setShowSaveConfirm(false)}>
               {t.athlete.session.saveConfirmCancel}
             </Button>
           </DrawerFooter>

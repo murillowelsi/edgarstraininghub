@@ -303,6 +303,7 @@ const ExerciseItem = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   // Use exercise from lookup, or fall back to denormalized data stored with workout
   const exerciseName = exercise?.name || workoutExercise.exerciseName || t.athlete.workoutView.exercisesSection;
@@ -453,11 +454,17 @@ const ExerciseItem = ({
 
             {/* Instructions */}
             {instructions && (
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground uppercase font-medium">
-                  {t.athlete.workoutView.instructions}
-                </p>
-                <p className="text-sm mt-1 whitespace-pre-wrap">{instructions}</p>
+              <div className="bg-muted/50 rounded-lg overflow-hidden">
+                <button
+                  className="flex items-center justify-between w-full p-3 text-left"
+                  onClick={(e) => { e.stopPropagation(); setInstructionsOpen((v) => !v); }}
+                >
+                  <p className="text-xs text-muted-foreground uppercase font-medium">{t.athlete.session.howToPerform}</p>
+                  <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", instructionsOpen && "rotate-180")} />
+                </button>
+                {instructionsOpen && (
+                  <p className="text-sm px-3 pb-3 leading-relaxed whitespace-pre-wrap">{instructions}</p>
+                )}
               </div>
             )}
 
@@ -851,12 +858,12 @@ const AthleteWorkoutView = () => {
               variant="destructive"
               onClick={handleReset}
               disabled={resetting}
-              className="font-semibold"
+              className="w-full"
             >
               {resetting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               {t.athlete.workoutView.resetConfirmConfirm}
             </Button>
-            <Button variant="outline" onClick={() => setShowResetConfirm(false)}>
+            <Button variant="outline" className="w-full" onClick={() => setShowResetConfirm(false)}>
               {t.athlete.workoutView.resetConfirmCancel}
             </Button>
           </DrawerFooter>

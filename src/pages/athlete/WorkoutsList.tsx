@@ -284,8 +284,7 @@ const AthleteWorkoutsList = () => {
             {/* Mark as not done — shown for pending and completed */}
             {!actionAssignment?.skipped && (
               <button
-                className="flex items-center gap-3 w-full p-4 rounded-lg border border-transparent transition-colors text-sm font-medium"
-                style={{ backgroundColor: "#ef444410", color: "#ef4444" }}
+                className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
                 onClick={() => actionAssignment && handleMarkSkipped(actionAssignment)}
               >
                 {actioning === actionAssignment?.id ? <Loader2 className="h-5 w-5 animate-spin" /> : <XCircle className="h-5 w-5" />}
