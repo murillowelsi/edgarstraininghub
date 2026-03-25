@@ -173,7 +173,7 @@ const AdminWorkouts = () => {
           }
         />
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="mt-4">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="md:mt-4">
           <TabsList className="mb-4 flex-wrap h-auto gap-1">
             <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
             <TabsTrigger value="running">Running ({tabCounts.running})</TabsTrigger>

@@ -210,7 +210,7 @@ const AdminDashboard = () => {
             ) : (
               teams.map((team) => (
                 <Link key={team.id} to={`/admin/teams/${team.id}`}>
-                  <div className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:border-primary/50 transition-all hover:shadow-md">
+                  <div className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:border-primary/50 transition-all hover:shadow-md mb-2">
                     <div className="p-2 rounded-lg bg-violet-500/10 border border-violet-200/50">
                       <Shield className="h-5 w-5 text-violet-500" />
                     </div>

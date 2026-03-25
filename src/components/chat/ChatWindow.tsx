@@ -164,7 +164,7 @@ export default function ChatWindow({
                         placeholder={t.chatComponent.placeholder ?? "Enviar uma mensagem"}
                         disabled={isLoading}
                         autoComplete="off"
-                        className="flex-1 bg-transparent text-sm outline-none py-2 text-foreground placeholder:text-muted-foreground"
+                        className="flex-1 bg-transparent text-[16px] outline-none py-2 text-foreground placeholder:text-muted-foreground"
                     />
                     <button
                         type="submit"

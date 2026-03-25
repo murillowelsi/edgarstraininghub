@@ -136,7 +136,7 @@ const AthleteWorkoutsList = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
             {filteredAssignments.map((assignment) => {
               const workout = assignment.workout;
               const Icon = workoutTypeIcons[workout.type] || PersonStanding;
