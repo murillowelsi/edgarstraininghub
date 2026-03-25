@@ -447,6 +447,7 @@
     "workouts": {
       "title": "Workouts",
       "newWorkout": "New Workout",
+      "searchPlaceholder": "Search workouts…",
       "runningWorkout": "Running Workout",
       "cyclingWorkout": "Cycling Workout",
       "swimmingWorkout": "Swimming Workout",
@@ -683,6 +684,7 @@
       "total": "Total",
       "done": "Done",
       "pending": "Pending",
+      "searchPlaceholder": "Search workouts…",
       "tabAll": "All",
       "tabPending": "Pending",
       "tabDone": "Done",
@@ -690,7 +692,14 @@
       "noCompleted": "No completed workouts yet",
       "noAssigned": "No workouts assigned",
       "exercises": "exercises",
-      "stages": "stages"
+      "stages": "stages",
+      "tabNotDone": "Not done",
+      "notDone": "Not done",
+      "resumeWorkout": "Resume workout",
+      "markAsNotDone": "Mark as not done",
+      "markAsPending": "Mark as pending",
+      "markedNotDone": "Workout marked as not done",
+      "reopened": "Workout marked as pending"
     },
     "calendar": {
       "title": "Calendar",

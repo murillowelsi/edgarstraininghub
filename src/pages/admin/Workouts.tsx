@@ -1,11 +1,10 @@
-import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
 import { deleteAssignmentsByWorkout } from "@/services/workoutAssignmentsService";
 import { deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
 import type { Workout } from "@/types/workout";
-import { format } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   DropdownMenu,
@@ -13,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Dumbbell, Edit, Loader2, Plus, Trash2, UserPlus } from "lucide-react";
+import { ChevronDown, Dumbbell, Edit, EllipsisVertical, Loader2, Plus, Search, Trash2, UserPlus } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -25,24 +24,25 @@ import { Link, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
-import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
+import { ListItemCard } from "../../components/shared/ListItemCard";
 import { AssignWorkoutDialog } from "../../components/workout/AssignWorkoutDialog";
 import { useLanguage } from "../../contexts/LanguageContext";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
-const workoutTypeLabels: Record<string, string> = {
-  running: "Running",
-  cycling: "Cycling",
-  swimming: "Swimming",
-  strength: "Strength",
+const workoutTypeColors: Record<string, string> = {
+  running: "#3b82f6",
+  cycling: "#22c55e",
+  swimming: "#06b6d4",
+  strength: "#f97316",
 };
 
-const workoutTypeBadgeColors: Record<string, string> = {
-  running: "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20",
-  cycling: "bg-green-500/10 text-green-600 hover:bg-green-500/20",
-  swimming: "bg-cyan-500/10 text-cyan-600 hover:bg-cyan-500/20",
-  strength: "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20",
-};
+function WorkoutIcon({ type }: { type: string }) {
+  const cls = "h-5 w-5";
+  if (type === "running") return <GrRun className={cls} />;
+  if (type === "cycling") return <GrBike className={cls} />;
+  if (type === "swimming") return <GrSwim className={cls} />;
+  return <Dumbbell className={cls} />;
+}
 
 const AdminWorkouts = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -52,11 +52,14 @@ const AdminWorkouts = () => {
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [confirmWorkout, setConfirmWorkout] = useState<Workout | null>(null);
   const [newWorkoutDrawerOpen, setNewWorkoutDrawerOpen] = useState(false);
+  const [actionWorkout, setActionWorkout] = useState<Workout | null>(null);
+  const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "running" | "cycling" | "swimming" | "strength">("all");
-  const filteredWorkouts = useMemo(
-    () => (activeTab === "all" ? workouts : workouts.filter((w) => w.type === activeTab)),
-    [workouts, activeTab]
-  );
+  const filteredWorkouts = useMemo(() => {
+    let list = activeTab === "all" ? workouts : workouts.filter((w) => w.type === activeTab);
+    if (search.trim()) list = list.filter((w) => w.name.toLowerCase().includes(search.toLowerCase()));
+    return list;
+  }, [workouts, activeTab, search]);
 
   const tabCounts = useMemo(
     () => ({
@@ -173,93 +176,104 @@ const AdminWorkouts = () => {
           }
         />
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="md:mt-4">
-          <TabsList className="mb-4 flex-wrap h-auto gap-1">
-            <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
-            <TabsTrigger value="running">Running ({tabCounts.running})</TabsTrigger>
-            <TabsTrigger value="cycling">Cycling ({tabCounts.cycling})</TabsTrigger>
-            <TabsTrigger value="swimming">Swimming ({tabCounts.swimming})</TabsTrigger>
-            <TabsTrigger value="strength">Strength ({tabCounts.strength})</TabsTrigger>
-          </TabsList>
-
-          <ResponsiveTable
-            loading={loading}
-            rowKey="_id"
-            columns={[
-              { key: "name", label: t.common.name },
-              { key: "type", label: t.common.type },
-              { key: "stages", label: "Stages" },
-              { key: "created", label: t.common.created },
-            ]}
-            rows={filteredWorkouts.map((workout) => ({
-              _id: workout.id,
-              name: <span className="font-medium">{workout.name}</span>,
-              type: (
-                <Badge className={`${workoutTypeBadgeColors[workout.type]} flex items-center gap-1.5 w-fit`}>
-                  {workout.type === "cycling" && <GrBike className="h-3 w-3" />}
-                  {workout.type === "running" && <GrRun className="h-3 w-3" />}
-                  {workout.type === "swimming" && <GrSwim className="h-3 w-3" />}
-                  {workout.type === "strength" && <Dumbbell className="h-3 w-3" />}
-                  {workoutTypeLabels[workout.type]}
-                </Badge>
-              ),
-              stages:
-                workout.type === "strength"
-                  ? `${workout.exercises?.length || 0} exercises`
-                  : `${workout.stages.length} stages`,
-              created: format(workout.createdAt, "MMM d, yyyy"),
-              _workout: workout,
-            }))}
-            actions={(row) => {
-              const workout = row._workout as Workout;
-              return (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleAssignClick(workout)}
-                    title="Assign to athletes"
-                  >
-                    <UserPlus className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      navigate(
-                        workout.type === "strength"
-                          ? `/admin/workouts/strength/${workout.id}/edit`
-                          : `/admin/workouts/${workout.id}/edit`
-                      )
-                    }
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => setConfirmWorkout(workout)}
-                  >
-                    {deleting === workout.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </Button>
-                </>
-              );
-            }}
-            emptyState={
-              <AdminEmptyState
-                icon={Dumbbell}
-                title={t.admin.workouts.empty.title}
-                description={t.admin.workouts.empty.description}
-                action={{ label: t.admin.workouts.newWorkout, onClick: () => navigate("/admin/workouts/new") }}
-              />
-            }
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder={t.admin.workouts.searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8 h-8 text-sm rounded-full"
           />
-        </Tabs>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-3 mb-1 scrollbar-hide">
+          {([
+            { key: "all", label: "All", icon: null, color: null },
+            { key: "running", label: "Running", icon: <GrRun className="h-3.5 w-3.5" />, color: workoutTypeColors.running },
+            { key: "cycling", label: "Cycling", icon: <GrBike className="h-3.5 w-3.5" />, color: workoutTypeColors.cycling },
+            { key: "swimming", label: "Swimming", icon: <GrSwim className="h-3.5 w-3.5" />, color: workoutTypeColors.swimming },
+            { key: "strength", label: "Strength", icon: <Dumbbell className="h-3.5 w-3.5" />, color: workoutTypeColors.strength },
+          ] as const).map(({ key, label, icon, color }) => {
+            const isActive = activeTab === key;
+            const count = tabCounts[key];
+            return (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className="flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all border"
+                style={isActive
+                  ? { backgroundColor: color ?? "hsl(var(--primary))", color: "#fff", borderColor: "transparent" }
+                  : { backgroundColor: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                }
+              >
+                {icon}
+                {label}
+                <span
+                  className="ml-0.5 text-[10px] opacity-75"
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div>
+
+          {loading ? (
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredWorkouts.length === 0 ? (
+            <AdminEmptyState
+              icon={Dumbbell}
+              title={t.admin.workouts.empty.title}
+              description={t.admin.workouts.empty.description}
+            />
+          ) : (
+            <div className="space-y-2">
+              {filteredWorkouts.map((workout) => {
+                const color = workoutTypeColors[workout.type] ?? "#8b5cf6";
+                const stagesLabel = workout.type === "strength"
+                  ? t.admin.workouts.exercisesCount.replace("{{count}}", String(workout.exercises?.length || 0))
+                  : t.admin.workouts.stagesCount.replace("{{count}}", String(workout.stages.length));
+                return (
+                  <ListItemCard
+                    key={workout.id}
+                    to={workout.type === "strength"
+                      ? `/admin/workouts/strength/${workout.id}/edit`
+                      : `/admin/workouts/${workout.id}/edit`}
+                    icon={<WorkoutIcon type={workout.type} />}
+                    iconStyle={{ backgroundColor: `${color}1a`, color }}
+                    title={workout.name}
+                    subtitle={stagesLabel}
+                    right={
+                      <Badge
+                        variant="outline"
+                        className="text-xs font-normal border-transparent"
+                        style={{ backgroundColor: `${color}18`, color }}
+                      >
+                        {workout.type}
+                      </Badge>
+                    }
+                    actions={
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 shrink-0"
+                        onClick={(e) => { e.preventDefault(); setActionWorkout(workout); }}
+                      >
+                        {deleting === workout.id
+                          ? <Loader2 className="h-4 w-4 animate-spin" />
+                          : <EllipsisVertical className="h-4 w-4" />}
+                      </Button>
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mobile: New Workout type drawer */}
@@ -285,6 +299,43 @@ const AdminWorkouts = () => {
                 {label}
               </Link>
             ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Action drawer */}
+      <Drawer open={!!actionWorkout} onOpenChange={(open) => { if (!open) setActionWorkout(null); }}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle className="truncate">{actionWorkout?.name}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2">
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
+              onClick={() => { handleAssignClick(actionWorkout!); setActionWorkout(null); }}
+            >
+              <UserPlus className="h-5 w-5" />
+              {t.admin.workouts.assignToAthletes}
+            </button>
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
+              onClick={() => {
+                navigate(actionWorkout!.type === "strength"
+                  ? `/admin/workouts/strength/${actionWorkout!.id}/edit`
+                  : `/admin/workouts/${actionWorkout!.id}/edit`);
+                setActionWorkout(null);
+              }}
+            >
+              <Edit className="h-5 w-5" />
+              {t.common.edit}
+            </button>
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium text-destructive"
+              onClick={() => { setConfirmWorkout(actionWorkout); setActionWorkout(null); }}
+            >
+              <Trash2 className="h-5 w-5" />
+              {t.common.delete}
+            </button>
           </div>
         </DrawerContent>
       </Drawer>

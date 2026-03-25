@@ -447,6 +447,7 @@
     "workouts": {
       "title": "Treinos",
       "newWorkout": "Novo Treino",
+      "searchPlaceholder": "Pesquisar treinos…",
       "runningWorkout": "Treino de Corrida",
       "cyclingWorkout": "Treino de Ciclismo",
       "swimmingWorkout": "Treino de Natação",
@@ -683,6 +684,7 @@
       "total": "Total",
       "done": "Feito",
       "pending": "Pendente",
+      "searchPlaceholder": "Pesquisar treinos…",
       "tabAll": "Todos",
       "tabPending": "Pendentes",
       "tabDone": "Feitos",
@@ -690,7 +692,14 @@
       "noCompleted": "Nenhum treino concluído ainda",
       "noAssigned": "Nenhum treino atribuído",
       "exercises": "exercícios",
-      "stages": "etapas"
+      "stages": "etapas",
+      "tabNotDone": "Não feito",
+      "notDone": "Não feito",
+      "resumeWorkout": "Retomar treino",
+      "markAsNotDone": "Marcar como não feito",
+      "markAsPending": "Marcar como pendente",
+      "markedNotDone": "Treino marcado como não feito",
+      "reopened": "Treino marcado como pendente"
     },
     "calendar": {
       "title": "Calendário",

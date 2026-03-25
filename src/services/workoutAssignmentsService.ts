@@ -38,6 +38,7 @@ const docToAssignment = (
   completionPercentage: data.completionPercentage,
   totalTime: data.totalTime,
   progressData: data.progressData,
+  skipped: data.skipped ?? false,
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
@@ -128,6 +129,23 @@ export const resetWorkoutAssignment = async (id: string): Promise<void> => {
     totalTime: null,
     updatedAt: serverTimestamp(),
   });
+};
+
+export const markAssignmentSkipped = async (id: string): Promise<void> => {
+  const docRef = doc(db, ASSIGNMENTS_COLLECTION, id);
+  await updateDoc(docRef, {
+    skipped: true,
+    completedAt: null,
+    progressData: null,
+    completionPercentage: null,
+    totalTime: null,
+    updatedAt: serverTimestamp(),
+  });
+};
+
+export const unmarkAssignmentSkipped = async (id: string): Promise<void> => {
+  const docRef = doc(db, ASSIGNMENTS_COLLECTION, id);
+  await updateDoc(docRef, { skipped: false, updatedAt: serverTimestamp() });
 };
 
 // Complete workout with progress data (for strength workouts)

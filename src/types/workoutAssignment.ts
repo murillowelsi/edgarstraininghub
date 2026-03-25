@@ -27,6 +27,7 @@ export interface WorkoutAssignment {
   completionPercentage?: number;
   totalTime?: number; // in seconds
   progressData?: ExerciseProgressData[];
+  skipped?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +42,7 @@ export interface WorkoutAssignmentDocument {
   completionPercentage?: number;
   totalTime?: number; // in seconds
   progressData?: ExerciseProgressData[];
+  skipped?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
