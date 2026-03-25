@@ -2,6 +2,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -13,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { getAllExercises } from "@/services/exercisesService";
 import {
   getAssignmentsWithWorkoutsByAthlete,
+  resetWorkoutAssignment,
   toggleAssignmentComplete,
 } from "@/services/workoutAssignmentsService";
 import type { Exercise, WorkoutExercise } from "@/types/exercise";
@@ -494,6 +503,8 @@ const AthleteWorkoutView = () => {
   );
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
 
   useEffect(() => {
@@ -572,6 +583,32 @@ const AthleteWorkoutView = () => {
       });
     } finally {
       setCompleting(false);
+    }
+  };
+
+  const handleReset = async () => {
+    if (!assignment) return;
+
+    setResetting(true);
+    try {
+      await resetWorkoutAssignment(assignment.id);
+      setAssignment({
+        ...assignment,
+        completedAt: null,
+        progressData: undefined,
+        completionPercentage: undefined,
+        totalTime: undefined,
+      });
+      setShowResetConfirm(false);
+    } catch (error) {
+      console.error("Error resetting workout:", error);
+      toast({
+        title: t.common.error,
+        description: t.athlete.toast.workoutStatusError,
+        variant: "destructive",
+      });
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -748,6 +785,32 @@ const AthleteWorkoutView = () => {
               {t.athlete.workoutView.startWorkout}
             </Button>
           </Link>
+        ) : workout.type === "strength" && isCompleted ? (
+          <div className="flex flex-col gap-2">
+            <Link to={`/athlete/workout/${id}/session`} className="block">
+              <Button
+                size="lg"
+                className="w-full h-12 text-base font-semibold rounded-xl bg-amber-500 hover:bg-amber-600 text-black"
+              >
+                <Play className="h-5 w-5 mr-2" />
+                {t.athlete.workoutView.resumeWorkout}
+              </Button>
+            </Link>
+            <Button
+              onClick={() => setShowResetConfirm(true)}
+              disabled={resetting}
+              size="lg"
+              variant="ghost"
+              className="w-full h-10 text-sm font-medium rounded-xl text-muted-foreground"
+            >
+              {resetting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <X className="h-4 w-4 mr-2" />
+              )}
+              {t.athlete.workoutView.resetWorkout}
+            </Button>
+          </div>
         ) : (
           <Button
             onClick={handleToggleComplete}
@@ -776,6 +839,29 @@ const AthleteWorkoutView = () => {
           </Button>
         )}
       </div>
+
+      <Drawer open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{t.athlete.workoutView.resetConfirmTitle}</DrawerTitle>
+            <DrawerDescription>{t.athlete.workoutView.resetConfirmDescription}</DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter>
+            <Button
+              variant="destructive"
+              onClick={handleReset}
+              disabled={resetting}
+              className="font-semibold"
+            >
+              {resetting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {t.athlete.workoutView.resetConfirmConfirm}
+            </Button>
+            <Button variant="outline" onClick={() => setShowResetConfirm(false)}>
+              {t.athlete.workoutView.resetConfirmCancel}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
     </div>
   );

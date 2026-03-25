@@ -1,5 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import {
@@ -31,6 +33,7 @@ import type { User } from "@/types/user";
 import type { WorkoutType } from "@/types/workout";
 import type { AssignmentWithDetails } from "@/types/workoutAssignment";
 import {
+  addDays,
   addMonths,
   eachDayOfInterval,
   endOfMonth,
@@ -39,6 +42,7 @@ import {
   isSameDay,
   isSameMonth,
   isToday,
+  isTomorrow,
   isWeekend,
   startOfMonth,
   startOfWeek,
@@ -55,7 +59,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CalendarAssignDialog } from "@/components/workout/CalendarAssignDialog";
 import { useLanguage } from "../../contexts/LanguageContext";
@@ -65,6 +69,13 @@ const workoutTypeColors: Record<WorkoutType, string> = {
   cycling: "bg-green-100 border-green-300 text-green-800",
   swimming: "bg-cyan-100 border-cyan-300 text-cyan-800",
   strength: "bg-orange-100 border-orange-300 text-orange-800",
+};
+
+const workoutTypeCardColors: Record<WorkoutType, string> = {
+  running: "bg-blue-500/10 text-blue-600",
+  cycling: "bg-green-500/10 text-green-600",
+  swimming: "bg-cyan-500/10 text-cyan-600",
+  strength: "bg-orange-500/10 text-orange-600",
 };
 
 const workoutTypeIcons: Record<WorkoutType, React.ElementType> = {
@@ -254,6 +265,32 @@ const AdminCalendar = () => {
     useState<AssignmentWithDetails | null>(null);
   const [deletingAssignment, setDeletingAssignment] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const todayRef = useRef<HTMLDivElement>(null);
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
+
+  // 60-day rolling window for mobile (7 days back, 53 forward)
+  const mobileDays = Array.from({ length: 60 }, (_, i) =>
+    addDays(new Date(), i - 7)
+  );
+
+  const formatDateLabel = (date: Date) => {
+    if (isToday(date)) return t.admin.calendar.today;
+    if (isTomorrow(date)) return t.admin.calendar.tomorrow;
+    return format(date, "EEEE");
+  };
+
+  const scrollToToday = (behavior: ScrollBehavior = "smooth") => {
+    const el = todayRef.current;
+    const header = stickyHeaderRef.current;
+    if (!el) return;
+    // If sub-header is hidden (mobile), fall back to AdminTopBar height (73px)
+    const headerBottom =
+      header && header.getBoundingClientRect().height > 0
+        ? header.getBoundingClientRect().bottom
+        : 73;
+    const diff = el.getBoundingClientRect().top - headerBottom;
+    window.scrollBy({ top: diff, behavior });
+  };
 
   // Generate calendar days for current month view
   const monthStart = startOfMonth(currentMonth);
@@ -296,6 +333,18 @@ const AdminCalendar = () => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => scrollToToday("auto"), 100);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (isSameMonth(currentMonth, new Date())) {
+      setTimeout(() => scrollToToday("auto"), 100);
+    }
+  }, [currentMonth]);
 
   // Check for return from workout editor with new workout
   useEffect(() => {
@@ -403,8 +452,8 @@ const AdminCalendar = () => {
   return (
     <AdminLayout>
       <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="px-4 pt-4 pb-3 border-b bg-background sticky top-0 z-10 space-y-3">
+        {/* Header — desktop only on mobile */}
+        <div ref={stickyHeaderRef} className="hidden md:block px-4 pt-4 pb-3 border-b bg-background md:sticky md:top-0 z-10 space-y-3">
           {/* Row 1: Title + month navigation */}
           <div className="flex items-center justify-between">
             <h1 className="hidden md:block text-xl md:text-2xl font-bold">{t.admin.calendar.title}</h1>
@@ -481,94 +530,133 @@ const AdminCalendar = () => {
         </div>
 
         {/* Mobile List View — visible below md breakpoint */}
-        <div className="md:hidden flex-1 overflow-auto p-4 space-y-4">
-          {calendarDays
-            .filter((day) => isSameMonth(day, currentMonth))
-            .map((day) => {
+        <div className="md:hidden flex-1 overflow-auto divide-y divide-border/50">
+          {mobileDays.map((day) => {
               const dayAssignments = filteredAssignments.filter((a) =>
                 isSameDay(a.scheduledDate, day)
               );
+              const isTodayDate = isToday(day);
+              const hasWorkouts = dayAssignments.length > 0;
+
               return (
-                <div key={day.toISOString()} className="space-y-2">
-                  {/* Day header */}
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={cn(
-                        "text-sm font-semibold",
-                        isToday(day) && "text-primary"
+                <div
+                  key={day.toISOString()}
+                  ref={isTodayDate ? todayRef : undefined}
+                  className={cn(
+                    "transition-colors",
+                    isTodayDate && "bg-primary/5"
+                  )}
+                >
+                  {/* Date Header */}
+                  <div className="px-4 py-3 flex items-center gap-3">
+                    {isTodayDate && (
+                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    )}
+                    <div className="flex-1">
+                      <span
+                        className={cn(
+                          "font-semibold",
+                          isTodayDate ? "text-primary" : "text-foreground"
+                        )}
+                      >
+                        {formatDateLabel(day)}
+                      </span>
+                      <span className="text-muted-foreground ml-2">
+                        {format(day, "MMM d")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {hasWorkouts && (
+                        <Badge
+                          variant={isTodayDate ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {dayAssignments.length}{" "}
+                          {dayAssignments.length > 1
+                            ? t.admin.calendar.workouts
+                            : t.admin.calendar.workout}
+                        </Badge>
                       )}
-                    >
-                      {format(day, "EEEE, MMM d")}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs text-muted-foreground"
-                      onClick={() => handleEmptyCellClick(day)}
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      {t.admin.calendar.add}
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground"
+                        onClick={() => handleEmptyCellClick(day)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Assignments for this day */}
-                  {dayAssignments.length === 0 ? (
-                    <p className="text-xs text-muted-foreground pl-1">
-                      {t.admin.calendar.noWorkouts}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
+                  {hasWorkouts && (
+                    <div className="px-4 pb-3">
                       {dayAssignments.map((assignment) => {
                         const Icon = workoutTypeIcons[assignment.workout.type];
                         const isCompleted = !!assignment.completedAt;
+
                         return (
-                          <div
+                          <button
                             key={assignment.id}
-                            className={cn(
-                              "flex items-center justify-between rounded-lg border p-3",
-                              workoutTypeColors[assignment.workout.type],
-                              isCompleted && "opacity-60"
-                            )}
+                            onClick={() => handleAssignmentClick(assignment)}
+                            className="w-full mb-2 text-left"
                           >
-                            <div className="flex items-center gap-2 min-w-0">
-                              {isCompleted ? (
-                                <Check className="h-4 w-4 flex-shrink-0" />
-                              ) : (
-                                <Icon className="h-4 w-4 flex-shrink-0" />
+                            <Card
+                              className={cn(
+                                "transition-all hover:shadow-md",
+                                isCompleted
+                                  ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800"
+                                  : "hover:border-primary/50"
                               )}
-                              <div className="min-w-0">
-                                <p
-                                  className={cn(
-                                    "text-sm font-medium truncate",
-                                    isCompleted && "line-through"
+                            >
+                              <CardContent className="p-3">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={cn(
+                                      "p-2 rounded-lg",
+                                      isCompleted
+                                        ? "bg-green-100 dark:bg-green-900/30"
+                                        : workoutTypeCardColors[assignment.workout.type]
+                                    )}
+                                  >
+                                    {isCompleted ? (
+                                      <Check className="h-5 w-5 text-green-600" />
+                                    ) : (
+                                      <Icon className="h-5 w-5" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p
+                                      className={cn(
+                                        "font-medium truncate",
+                                        isCompleted &&
+                                          "line-through text-muted-foreground"
+                                      )}
+                                    >
+                                      {assignment.workout.name}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {assignment.athlete.displayName} ·{" "}
+                                      {assignment.workout.stages.length} stages ·{" "}
+                                      <span className="capitalize">
+                                        {assignment.workout.type}
+                                      </span>
+                                    </p>
+                                  </div>
+                                  {isCompleted ? (
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-green-100 text-green-700 dark:bg-green-900/50 shrink-0"
+                                    >
+                                      Done
+                                    </Badge>
+                                  ) : (
+                                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
                                   )}
-                                >
-                                  {assignment.workout.name}
-                                </p>
-                                <p className="text-xs truncate opacity-75">
-                                  {assignment.athlete.displayName}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => handleAssignmentClick(assignment)}
-                              >
-                                <Pencil className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-destructive hover:text-destructive"
-                                onClick={() => handleAssignmentClick(assignment)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </button>
                         );
                       })}
                     </div>

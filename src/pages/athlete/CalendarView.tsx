@@ -15,7 +15,6 @@ import {
   Dumbbell,
   Loader2,
   PersonStanding,
-  RefreshCw,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -40,17 +39,23 @@ const AthleteCalendarView = () => {
   const { toast } = useToast();
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const todayRef = useRef<HTMLDivElement>(null);
 
   // Generate 60 days (7 days back, 53 days forward)
   const today = new Date();
   const days = Array.from({ length: 60 }, (_, i) => addDays(today, i - 7));
 
+  const scrollToToday = (behavior: ScrollBehavior = "smooth") => {
+    const el = todayRef.current;
+    if (!el) return;
+    // 64px = h-16 main sticky header
+    const diff = el.getBoundingClientRect().top - 64;
+    window.scrollBy({ top: diff, behavior });
+  };
+
   useEffect(() => {
     const loadData = async () => {
       if (!user) return;
-
       try {
         const data = await getAssignmentsWithWorkoutsByAthlete(user.uid);
         setAssignments(data);
@@ -63,46 +68,20 @@ const AthleteCalendarView = () => {
         });
       } finally {
         setLoading(false);
-        setRefreshing(false);
       }
     };
-
     loadData();
   }, [user, toast]);
 
   useEffect(() => {
-    // Scroll to today on mount
-    if (todayRef.current && !loading) {
-      setTimeout(() => {
-        todayRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
-      }, 100);
+    if (!loading) {
+      setTimeout(() => scrollToToday("auto"), 100);
     }
   }, [loading]);
 
-  const handleRefresh = async () => {
-    if (!user) return;
-    setRefreshing(true);
-    try {
-      const data = await getAssignmentsWithWorkoutsByAthlete(user.uid);
-      setAssignments(data);
-    } catch (error) {
-      console.error("Error refreshing:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  const handleScrollToToday = () => {
-    if (todayRef.current) {
-      todayRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  // Get assignments for a specific date
   const getAssignmentsForDate = (date: Date) =>
     assignments.filter((a) => isSameDay(a.scheduledDate, date));
 
-  // Format date label
   const formatDateLabel = (date: Date) => {
     if (isToday(date)) return t.athlete.calendar.today;
     if (isTomorrow(date)) return t.athlete.calendar.tomorrow;
@@ -121,31 +100,6 @@ const AthleteCalendarView = () => {
 
   return (
     <AthletePortalLayout title={t.athlete.calendar.title}>
-      {/* Sticky Header */}
-      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-lg border-b border-border/50 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold">{format(new Date(), "MMMM yyyy")}</h2>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleScrollToToday}
-              className="text-sm text-primary font-medium hover:underline"
-            >
-              {t.athlete.calendar.today}
-            </button>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-            >
-              <RefreshCw
-                className={cn("h-4 w-4", refreshing && "animate-spin")}
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Calendar List */}
       <div className="divide-y divide-border/50">
         {days.map((day) => {
           const dayAssignments = getAssignmentsForDate(day);
@@ -164,7 +118,7 @@ const AthleteCalendarView = () => {
               {/* Date Header */}
               <div className="px-4 py-3 flex items-center gap-3">
                 {isTodayDate && (
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
                 )}
                 <div className="flex-1">
                   <span
@@ -180,8 +134,14 @@ const AthleteCalendarView = () => {
                   </span>
                 </div>
                 {hasWorkouts && (
-                  <Badge variant="secondary" className="text-xs">
-                    {dayAssignments.length} {dayAssignments.length > 1 ? t.athlete.calendar.workouts : t.athlete.calendar.workout}
+                  <Badge
+                    variant={isTodayDate ? "default" : "secondary"}
+                    className="text-xs shrink-0"
+                  >
+                    {dayAssignments.length}{" "}
+                    {dayAssignments.length > 1
+                      ? t.athlete.calendar.workouts
+                      : t.athlete.calendar.workout}
                   </Badge>
                 )}
               </div>
@@ -247,14 +207,14 @@ const AthleteCalendarView = () => {
                               {isCompleted ? (
                                 <Badge
                                   variant="secondary"
-                                  className="bg-green-100 text-green-700 dark:bg-green-900/50"
+                                  className="bg-green-100 text-green-700 dark:bg-green-900/50 shrink-0"
                                 >
                                   {assignment.completionPercentage !== undefined
                                     ? `${assignment.completionPercentage}%`
                                     : t.athlete.workouts.done}
                                 </Badge>
                               ) : (
-                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                                <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
                               )}
                             </div>
                           </CardContent>

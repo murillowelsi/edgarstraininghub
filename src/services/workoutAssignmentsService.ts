@@ -118,6 +118,18 @@ export const toggleAssignmentComplete = async (
   });
 };
 
+// Reset workout assignment (clears completion and progress data)
+export const resetWorkoutAssignment = async (id: string): Promise<void> => {
+  const docRef = doc(db, ASSIGNMENTS_COLLECTION, id);
+  await updateDoc(docRef, {
+    completedAt: null,
+    progressData: null,
+    completionPercentage: null,
+    totalTime: null,
+    updatedAt: serverTimestamp(),
+  });
+};
+
 // Complete workout with progress data (for strength workouts)
 export const completeWorkoutWithProgress = async (
   id: string,

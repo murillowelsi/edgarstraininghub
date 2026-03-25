@@ -9,9 +9,9 @@ export function BottomNav() {
 
   const navItems = [
     { href: "/admin/users", label: t.admin.nav.users, icon: Users },
-    { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell },
     { href: "/admin/teams", label: t.admin.nav.teams, icon: Shield },
     { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
+    { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell },
   ];
 
   return (

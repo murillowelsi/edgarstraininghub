@@ -1,3 +1,11 @@
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -352,6 +360,7 @@ const StrengthWorkoutSession = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   // Workout session state
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
   const [totalElapsedTime, setTotalElapsedTime] = useState(0);
@@ -392,15 +401,23 @@ const StrengthWorkoutSession = () => {
             console.error("Error loading exercises:", e);
           }
 
-          // Initialize progress for each exercise
+          // Initialize progress for each exercise, restoring saved data if available
           const initialProgress = new Map<string, ExerciseProgress>();
           found.workout.exercises?.forEach((we) => {
-            const sets: SetProgress[] = Array.from({ length: we.sets }, (_, i) => ({
-              setNumber: i + 1,
-              reps: "",
-              weight: "",
-              completed: false,
-            }));
+            const saved = found.progressData?.find((p) => p.exerciseId === we.exerciseId);
+            const sets: SetProgress[] = saved
+              ? saved.sets.map((s) => ({
+                  setNumber: s.setNumber,
+                  reps: s.reps,
+                  weight: s.weight,
+                  completed: s.completed,
+                }))
+              : Array.from({ length: we.sets }, (_, i) => ({
+                  setNumber: i + 1,
+                  reps: "",
+                  weight: "",
+                  completed: false,
+                }));
             initialProgress.set(we.id, {
               exerciseId: we.exerciseId,
               sets,
@@ -408,6 +425,11 @@ const StrengthWorkoutSession = () => {
             });
           });
           setExerciseProgress(initialProgress);
+
+          // Restore previously elapsed time if resuming a saved workout
+          if (found.totalTime) {
+            setTotalElapsedTime(found.totalTime);
+          }
         }
       } catch (error) {
         console.error("Error loading workout:", error);
@@ -650,7 +672,7 @@ const StrengthWorkoutSession = () => {
                 {t.athlete.session.cancel}
               </Button>
               <div className="flex items-center gap-2">
-                <Button onClick={handleSave} disabled={saving}>
+                <Button onClick={() => setShowSaveConfirm(true)} disabled={saving}>
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
@@ -757,6 +779,24 @@ const StrengthWorkoutSession = () => {
       </div>
 
       {/* Bottom Button - only shown during loading before auto-start */}
+
+      <Drawer open={showSaveConfirm} onOpenChange={setShowSaveConfirm}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{t.athlete.session.saveConfirmTitle}</DrawerTitle>
+            <DrawerDescription>{t.athlete.session.saveConfirmDescription}</DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter>
+            <Button onClick={handleSave} disabled={saving} className="bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {t.athlete.session.saveConfirmConfirm}
+            </Button>
+            <Button variant="outline" onClick={() => setShowSaveConfirm(false)}>
+              {t.athlete.session.saveConfirmCancel}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
     </div>
   );
