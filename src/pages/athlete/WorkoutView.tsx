@@ -27,7 +27,6 @@ import {
 } from "@/services/workoutAssignmentsService";
 import type { Exercise, WorkoutExercise } from "@/types/exercise";
 import {
-  equipmentTypeLabels,
   getYouTubeThumbnail,
   getYouTubeVideoId,
   muscleGroupLabels,
@@ -51,17 +50,20 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   Circle,
   Clock,
   Dumbbell,
+  Flame,
+  Heart,
   Layers,
   Loader2,
   PersonStanding,
   Play,
   Repeat,
   Waves,
+  Wind,
   X,
+  Zap,
 } from "lucide-react";
 
 // Format time as MM:SS or HH:MM:SS
@@ -83,6 +85,18 @@ const workoutTypeIcons: Record<string, React.ElementType> = {
   cycling: Bike,
   swimming: Waves,
   strength: Dumbbell,
+};
+
+const stageIcons: Record<string, React.ElementType> = {
+  warmup: Flame,
+  run: PersonStanding,
+  cooldown: Wind,
+  recovery: Heart,
+  interval: Zap,
+  repeat: Repeat,
+  bike: Bike,
+  rest: Clock,
+  swim: Waves,
 };
 
 const workoutTypeColors: Record<string, string> = {
@@ -134,7 +148,7 @@ const formatSwimmingDetails = (stage: WorkoutStage): string[] => {
 // Stage display component
 const StageItem = ({
   stage,
-  index,
+  index: _index,
   t,
 }: {
   stage: WorkoutStage;
@@ -146,88 +160,78 @@ const StageItem = ({
   const color = stageColors[stage.type];
   const intensity = formatIntensity(stage);
   const swimmingDetails = formatSwimmingDetails(stage);
+  const StageIcon = stageIcons[stage.type] || PersonStanding;
 
   if (stage.type === "repeat") {
     return (
-      <Card className="overflow-hidden border-l-4 border-l-indigo-500 rounded-xl hover:shadow-md transition-all">
+      <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <CollapsibleTrigger className="w-full">
             <div className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}>
+              <div className="p-2.5 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}>
                 <Repeat className="h-4 w-4" />
               </div>
-              <div className="flex-1 text-left">
-                <p className="font-medium">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}x</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="flex-1 text-left min-w-0">
+                <p className="font-semibold text-sm">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}x</p>
+                <p className="text-xs text-muted-foreground">
                   {stage.stages?.length || 0} {t.athlete.workoutView.stages}
                 </p>
               </div>
-              {isExpanded ? (
-                <ChevronDown className="h-5 w-5 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              )}
+              <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
             </div>
           </CollapsibleTrigger>
 
           <CollapsibleContent>
             {stage.stages && stage.stages.length > 0 && (
-              <div className="px-4 pb-4 space-y-2">
-                {stage.stages.map((nestedStage, nestedIndex) => (
-                  <div
-                    key={nestedStage.id}
-                    className="pl-4 border-l-2 py-2 bg-muted/30 rounded-r-lg"
-                    style={{ borderLeftColor: stageColors[nestedStage.type] }}
-                  >
-                    <p className="font-medium text-sm">
-                      {nestedIndex + 1}. {stageLabels[nestedStage.type]}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDuration(nestedStage, t.athlete.workoutView.pressLapButton)}
-                      {formatIntensity(nestedStage) &&
-                        ` · ${formatIntensity(nestedStage)}`}
-                    </p>
-                  </div>
-                ))}
+              <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-2">
+                {stage.stages.map((nestedStage, nestedIndex) => {
+                  const NestedIcon = stageIcons[nestedStage.type] || PersonStanding;
+                  const nestedColor = stageColors[nestedStage.type];
+                  return (
+                    <div key={nestedStage.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <div className="p-2 rounded-lg shrink-0 flex items-center justify-center" style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}>
+                        <NestedIcon className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-xs">{nestedIndex + 1}. {stageLabels[nestedStage.type]}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDuration(nestedStage, t.athlete.workoutView.pressLapButton)}
+                          {formatIntensity(nestedStage) && ` · ${formatIntensity(nestedStage)}`}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CollapsibleContent>
         </Collapsible>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card
-      className="overflow-hidden border-l-4 rounded-xl hover:shadow-md transition-all"
-      style={{ borderLeftColor: color }}
-    >
+    <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger className="w-full">
           <div className="p-4 flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold"
-              style={{ backgroundColor: `${color}1a`, color }}
-            >
-              {index + 1}
+            <div className="p-2.5 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: `${color}1a`, color }}>
+              <StageIcon className="h-4 w-4" />
             </div>
-            <div className="flex-1 text-left">
-              <p className="font-medium">{stageLabels[stage.type]}</p>
-              <p className="text-sm text-muted-foreground">
+            <div className="flex-1 text-left min-w-0">
+              <p className="font-semibold text-sm truncate">{stageLabels[stage.type]}</p>
+              <p className="text-xs text-muted-foreground">
                 {formatDuration(stage, t.athlete.workoutView.pressLapButton)}
                 {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
+                {intensity && ` · ${intensity}`}
               </p>
             </div>
-            {isExpanded ? (
-              <ChevronDown className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            )}
+            <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
           </div>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="px-4 pb-4 pt-2 border-t border-border/50 space-y-3">
+          <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-3">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground uppercase font-medium">
@@ -248,9 +252,7 @@ const StageItem = ({
                   <p className="text-xs text-muted-foreground uppercase font-medium">
                     {t.athlete.workoutView.stroke}
                   </p>
-                  <p className="font-medium mt-1">
-                    {strokeLabels[stage.strokeType]}
-                  </p>
+                  <p className="font-medium mt-1">{strokeLabels[stage.strokeType]}</p>
                 </div>
               )}
               {stage.drillType && stage.drillType !== "none" && (
@@ -258,9 +260,7 @@ const StageItem = ({
                   <p className="text-xs text-muted-foreground uppercase font-medium">
                     {t.athlete.workoutView.drill}
                   </p>
-                  <p className="font-medium mt-1">
-                    {drillLabels[stage.drillType]}
-                  </p>
+                  <p className="font-medium mt-1">{drillLabels[stage.drillType]}</p>
                 </div>
               )}
               {stage.equipment && stage.equipment !== "none" && (
@@ -268,9 +268,7 @@ const StageItem = ({
                   <p className="text-xs text-muted-foreground uppercase font-medium">
                     {t.athlete.workoutView.equipment}
                   </p>
-                  <p className="font-medium mt-1">
-                    {equipmentLabels[stage.equipment]}
-                  </p>
+                  <p className="font-medium mt-1">{equipmentLabels[stage.equipment]}</p>
                 </div>
               )}
             </div>
@@ -285,7 +283,7 @@ const StageItem = ({
           </div>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </div>
   );
 };
 
@@ -293,7 +291,7 @@ const StageItem = ({
 const ExerciseItem = ({
   workoutExercise,
   exercise,
-  index,
+  index: _index,
   t,
 }: {
   workoutExercise: WorkoutExercise;
@@ -322,31 +320,21 @@ const ExerciseItem = ({
   const mediaUrl = gifUrl || thumbnail;
 
   return (
-    <Card className="overflow-hidden border-l-4 border-l-amber-500 rounded-xl hover:shadow-md transition-all">
+    <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger className="w-full">
           <div className="p-4 flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold"
-              style={{ backgroundColor: "#f59e0b1a", color: "#d97706" }}
-            >
-              {index + 1}
+            <div className="p-2.5 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: "#f59e0b1a", color: "#d97706" }}>
+              <Dumbbell className="h-4 w-4" />
             </div>
             <div className="flex-1 text-left min-w-0">
-              <p className="font-medium truncate">
-                {exerciseName}
-              </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-semibold text-sm truncate">{exerciseName}</p>
+              <p className="text-xs text-muted-foreground">
                 {workoutExercise.sets} sets × {workoutExercise.reps || "10"} reps
-                {workoutExercise.restSeconds > 0 &&
-                  ` · ${workoutExercise.restSeconds}s rest`}
+                {workoutExercise.restSeconds > 0 && ` · ${workoutExercise.restSeconds}s rest`}
               </p>
             </div>
-            {isExpanded ? (
-              <ChevronDown className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            )}
+            <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
           </div>
         </CollapsibleTrigger>
 
@@ -497,7 +485,7 @@ const ExerciseItem = ({
           </div>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </div>
   );
 };
 

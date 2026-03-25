@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 import type { WorkoutStage } from "@/types/workout";
 import {
   drillLabels,
@@ -15,8 +15,33 @@ import {
   stageLabels,
   strokeLabels,
 } from "@/types/workout";
-import { ChevronDown, ChevronRight, GripVertical, Repeat, Trash2 } from "lucide-react";
+import {
+  Bike,
+  ChevronDown,
+  Clock,
+  Flame,
+  GripVertical,
+  Heart,
+  PersonStanding,
+  Repeat,
+  Trash2,
+  Waves,
+  Wind,
+  Zap,
+} from "lucide-react";
 import { useState } from "react";
+
+const stageIcons: Record<string, React.ElementType> = {
+  warmup: Flame,
+  run: PersonStanding,
+  cooldown: Wind,
+  recovery: Heart,
+  interval: Zap,
+  repeat: Repeat,
+  bike: Bike,
+  rest: Clock,
+  swim: Waves,
+};
 
 interface StageCardProps {
   stage: WorkoutStage;
@@ -76,281 +101,239 @@ const StageCard = ({
   // Render a repeat block
   if (stage.type === "repeat") {
     return (
-      <Card className="relative overflow-hidden rounded-xl hover:shadow-md transition-all">
-        {/* Color indicator */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1"
-          style={{ backgroundColor: color }}
-        />
-
+      <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <div className="p-4 pl-5">
-            {/* Header */}
-            <div className="flex items-center gap-3">
-              <div
-                {...dragHandleProps}
-                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-              >
-                <GripVertical className="h-5 w-5" />
-              </div>
-
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center gap-2 hover:text-primary transition-colors">
-                  {isExpanded ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-              </CollapsibleTrigger>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <Repeat className="h-4 w-4 text-indigo-500" />
-                  <p className="font-medium">
-                    Repeat {stage.repeatCount || 2}x
-                  </p>
-                  {!isExpanded && stage.stages && (
-                    <span className="text-sm text-muted-foreground">
-                      ({stage.stages.length} stages)
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onEdit}
-                  className="text-primary"
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onDelete}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Nested stages - collapsible */}
-            <CollapsibleContent>
-              {stage.stages && stage.stages.length > 0 && (
-                <div className="ml-8 mt-3 space-y-2 border-l-2 border-indigo-200 pl-4">
-                  {stage.stages.map((nestedStage) => {
-                    const nestedColor = stageColors[nestedStage.type];
-                    const nestedIntensity = formatIntensity(nestedStage);
-                    const nestedSwimmingDetails = formatSwimmingDetails(nestedStage);
-                    return (
-                      <div
-                        key={nestedStage.id}
-                        className="py-2 px-3 bg-muted/50 rounded-md"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div
-                            className="w-1 h-full min-h-[2rem] rounded-full flex-shrink-0"
-                            style={{ backgroundColor: nestedColor }}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium">
-                              {stageLabels[nestedStage.type]}
-                            </p>
-                            <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                              <div>
-                                <span className="text-foreground/70">Duration:</span>{" "}
-                                {formatDuration(nestedStage)}
-                              </div>
-                              {nestedSwimmingDetails.length > 0 && (
-                                <div>
-                                  <span className="text-foreground/70">Stroke:</span>{" "}
-                                  {nestedSwimmingDetails[0]}
-                                </div>
-                              )}
-                              {nestedIntensity && (
-                                <div>
-                                  <span className="text-foreground/70">Intensity:</span>{" "}
-                                  {nestedIntensity}
-                                </div>
-                              )}
-                              {nestedSwimmingDetails.length > 1 && (
-                                <div>
-                                  <span className="text-foreground/70">Details:</span>{" "}
-                                  {nestedSwimmingDetails.slice(1).join(", ")}
-                                </div>
-                              )}
-                            </div>
-                            {nestedStage.notes && (
-                              <p className="mt-2 text-xs text-muted-foreground italic">
-                                {nestedStage.notes}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CollapsibleContent>
-          </div>
-        </Collapsible>
-      </Card>
-    );
-  }
-
-  // Regular stage
-  const intensity = formatIntensity(stage);
-  const swimmingDetails = formatSwimmingDetails(stage);
-
-  return (
-    <Card className="relative overflow-hidden rounded-xl hover:shadow-md transition-all">
-      {/* Color indicator */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{ backgroundColor: color }}
-      />
-
-      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <div className="p-4 pl-5">
-          {/* Header row - always visible */}
-          <div className="flex items-center gap-3">
-            {/* Drag handle */}
+          <div className="p-4 flex items-center gap-3">
             <div
               {...dragHandleProps}
-              className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+              className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0"
             >
-              <GripVertical className="h-5 w-5" />
+              <GripVertical className="h-4 w-4" />
             </div>
 
-            {/* Expand/collapse toggle */}
+            <div
+              className="p-2 rounded-xl shrink-0 flex items-center justify-center"
+              style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}
+            >
+              <Repeat className="h-4 w-4" />
+            </div>
+
             <CollapsibleTrigger asChild>
-              <button className="flex items-center justify-center w-6 h-6 rounded hover:bg-muted transition-colors">
-                {isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
+              <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">
+                    Repeat {stage.repeatCount || 2}x
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {stage.stages?.length || 0} stages
+                  </p>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
+                    isExpanded && "rotate-180"
+                  )}
+                />
               </button>
             </CollapsibleTrigger>
 
-            {/* Stage summary */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3">
-                <p className="font-medium">{stageLabels[stage.type]}</p>
-                <span className="text-sm text-muted-foreground">
-                  {formatDuration(stage)}
-                </span>
-                {!isExpanded && swimmingDetails.length > 0 && (
-                  <span className="text-sm text-muted-foreground">
-                    · {swimmingDetails[0]}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onEdit}
-                className="text-primary"
+                className="text-primary h-8 px-2 text-xs"
               >
-                Edit stage
+                Edit
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onDelete}
-                className="text-muted-foreground hover:text-destructive"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
-          {/* Expanded details */}
           <CollapsibleContent>
-            <div className="ml-9 mt-3 pt-3 border-t space-y-3">
-              {/* Duration & Intensity row */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                    Duration
-                  </p>
-                  <p className="font-medium">{formatDuration(stage)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {durationLabels[stage.duration.type]}
-                  </p>
-                </div>
+            {stage.stages && stage.stages.length > 0 && (
+              <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-2">
+                {stage.stages.map((nestedStage) => {
+                  const NestedIcon = stageIcons[nestedStage.type] || PersonStanding;
+                  const nestedColor = stageColors[nestedStage.type];
+                  const nestedIntensity = formatIntensity(nestedStage);
+                  const nestedSwimmingDetails = formatSwimmingDetails(nestedStage);
+                  return (
+                    <div
+                      key={nestedStage.id}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/30"
+                    >
+                      <div
+                        className="p-2 rounded-lg shrink-0 flex items-center justify-center"
+                        style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}
+                      >
+                        <NestedIcon className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-xs">
+                          {stageLabels[nestedStage.type]}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDuration(nestedStage)}
+                          {nestedSwimmingDetails.length > 0 && ` · ${nestedSwimmingDetails[0]}`}
+                          {nestedIntensity && ` · ${nestedIntensity}`}
+                          {nestedStage.notes && (
+                            <span className="italic ml-1">— {nestedStage.notes}</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+    );
+  }
 
-                {intensity && (
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                      Intensity
-                    </p>
-                    <p className="font-medium">{intensity}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {intensityLabels[stage.intensity.type]}
-                    </p>
-                  </div>
-                )}
+  // Regular stage
+  const intensity = formatIntensity(stage);
+  const swimmingDetails = formatSwimmingDetails(stage);
+  const StageIcon = stageIcons[stage.type] || PersonStanding;
 
-                {stage.strokeType && (
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                      Stroke
-                    </p>
-                    <p className="font-medium">{strokeLabels[stage.strokeType]}</p>
-                  </div>
+  return (
+    <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <div className="p-4 flex items-center gap-3">
+          <div
+            {...dragHandleProps}
+            className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0"
+          >
+            <GripVertical className="h-4 w-4" />
+          </div>
+
+          <div
+            className="p-2 rounded-xl shrink-0 flex items-center justify-center"
+            style={{ backgroundColor: `${color}1a`, color }}
+          >
+            <StageIcon className="h-4 w-4" />
+          </div>
+
+          <CollapsibleTrigger asChild>
+            <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">{stageLabels[stage.type]}</p>
+                <p className="text-xs text-muted-foreground">
+                  {formatDuration(stage)}
+                  {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
+                  {!isExpanded && intensity && ` · ${intensity}`}
+                </p>
+              </div>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
+                  isExpanded && "rotate-180"
                 )}
+              />
+            </button>
+          </CollapsibleTrigger>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEdit}
+              className="text-primary h-8 px-2 text-xs"
+            >
+              Edit stage
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onDelete}
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <CollapsibleContent>
+          <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                  Duration
+                </p>
+                <p className="font-medium">{formatDuration(stage)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {durationLabels[stage.duration.type]}
+                </p>
               </div>
 
-              {/* Swimming-specific details */}
-              {(stage.drillType && stage.drillType !== "none") ||
-              (stage.equipment && stage.equipment !== "none") ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                  {stage.drillType && stage.drillType !== "none" && (
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                        Drill Type
-                      </p>
-                      <p className="font-medium">{drillLabels[stage.drillType]}</p>
-                    </div>
-                  )}
-
-                  {stage.equipment && stage.equipment !== "none" && (
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                        Equipment
-                      </p>
-                      <p className="font-medium">{equipmentLabels[stage.equipment]}</p>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-
-              {/* Notes */}
-              {stage.notes && (
+              {intensity && (
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                    Notes
+                    Intensity
                   </p>
-                  <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
-                    {stage.notes}
+                  <p className="font-medium">{intensity}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {intensityLabels[stage.intensity.type]}
                   </p>
                 </div>
               )}
+
+              {stage.strokeType && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                    Stroke
+                  </p>
+                  <p className="font-medium">{strokeLabels[stage.strokeType]}</p>
+                </div>
+              )}
             </div>
-          </CollapsibleContent>
-        </div>
+
+            {((stage.drillType && stage.drillType !== "none") ||
+              (stage.equipment && stage.equipment !== "none")) && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                {stage.drillType && stage.drillType !== "none" && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                      Drill Type
+                    </p>
+                    <p className="font-medium">{drillLabels[stage.drillType]}</p>
+                  </div>
+                )}
+
+                {stage.equipment && stage.equipment !== "none" && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                      Equipment
+                    </p>
+                    <p className="font-medium">{equipmentLabels[stage.equipment]}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {stage.notes && (
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                  Notes
+                </p>
+                <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
+                  {stage.notes}
+                </p>
+              </div>
+            )}
+          </div>
+        </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </div>
   );
 };
 
