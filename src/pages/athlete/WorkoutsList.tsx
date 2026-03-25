@@ -19,6 +19,7 @@ import {
   PersonStanding,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -38,10 +39,13 @@ const AthleteWorkoutsList = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [displayName, setDisplayName] = useState<string>("");
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
+
+  const initialFilter = (searchParams.get("filter") ?? "all") as "all" | "pending" | "completed";
+  const [filter, setFilter] = useState<"all" | "pending" | "completed">(initialFilter);
 
   useEffect(() => {
     const loadData = async () => {

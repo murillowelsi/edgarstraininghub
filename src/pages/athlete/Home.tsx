@@ -156,7 +156,7 @@ const AthleteHome = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/athlete/workouts">
+          <Link to="/athlete/workouts?filter=all">
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover:shadow-md transition-all hover:border-primary/40 cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -172,7 +172,7 @@ const AthleteHome = () => {
             </Card>
           </Link>
 
-          <Link to="/athlete/workouts">
+          <Link to="/athlete/workouts?filter=completed">
             <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-200/50 hover:shadow-md transition-all hover:border-orange-400/50 cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -188,7 +188,7 @@ const AthleteHome = () => {
             </Card>
           </Link>
 
-          <Link to="/athlete/workouts">
+          <Link to="/athlete/workouts?filter=pending">
             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-200/50 hover:shadow-md transition-all hover:border-blue-400/50 cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
