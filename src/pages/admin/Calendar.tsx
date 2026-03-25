@@ -68,14 +68,14 @@ const workoutTypeColors: Record<WorkoutType, string> = {
   running: "bg-blue-100 border-blue-300 text-blue-800",
   cycling: "bg-green-100 border-green-300 text-green-800",
   swimming: "bg-cyan-100 border-cyan-300 text-cyan-800",
-  strength: "bg-orange-100 border-orange-300 text-orange-800",
+  strength: "bg-amber-100 border-amber-300 text-amber-800",
 };
 
 const workoutTypeCardColors: Record<WorkoutType, string> = {
   running: "bg-blue-500/10 text-blue-600",
   cycling: "bg-green-500/10 text-green-600",
   swimming: "bg-cyan-500/10 text-cyan-600",
-  strength: "bg-orange-500/10 text-orange-600",
+  strength: "bg-amber-500/10 text-amber-600",
 };
 
 const workoutTypeIcons: Record<WorkoutType, React.ElementType> = {
@@ -683,7 +683,7 @@ const AdminCalendar = () => {
               <span>Running</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-orange-200 border border-orange-300" />
+              <div className="w-3 h-3 rounded bg-amber-200 border border-amber-300" />
               <span>Strength</span>
             </div>
             <div className="flex items-center gap-1 ml-4">
@@ -719,7 +719,7 @@ const AdminCalendar = () => {
                 <GrSwim className="h-5 w-5" />
               )}
               {selectedAssignment.workout.type === "strength" && (
-                <Dumbbell className="h-5 w-5 text-orange-600" />
+                <Dumbbell className="h-5 w-5 text-amber-600" />
               )}
             </div>
 

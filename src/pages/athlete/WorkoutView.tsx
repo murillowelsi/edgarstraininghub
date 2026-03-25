@@ -1,3 +1,4 @@
+import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -88,7 +89,7 @@ const workoutTypeColors: Record<string, string> = {
   running: "bg-blue-500/10 text-blue-600 border-blue-200",
   cycling: "bg-green-500/10 text-green-600 border-green-200",
   swimming: "bg-cyan-500/10 text-cyan-600 border-cyan-200",
-  strength: "bg-orange-500/10 text-orange-600 border-orange-200",
+  strength: "bg-amber-500/10 text-amber-600 border-amber-200",
 };
 
 // Utility functions for formatting
@@ -148,12 +149,12 @@ const StageItem = ({
 
   if (stage.type === "repeat") {
     return (
-      <Card className="overflow-hidden border-l-4 border-l-indigo-500">
+      <Card className="overflow-hidden border-l-4 border-l-indigo-500 rounded-xl hover:shadow-md transition-all">
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <CollapsibleTrigger className="w-full">
             <div className="p-4 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                <Repeat className="h-4 w-4 text-indigo-600" />
+              <div className="p-2 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}>
+                <Repeat className="h-4 w-4" />
               </div>
               <div className="flex-1 text-left">
                 <p className="font-medium">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}x</p>
@@ -198,15 +199,15 @@ const StageItem = ({
 
   return (
     <Card
-      className="overflow-hidden border-l-4"
+      className="overflow-hidden border-l-4 rounded-xl hover:shadow-md transition-all"
       style={{ borderLeftColor: color }}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger className="w-full">
           <div className="p-4 flex items-center gap-3">
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
-              style={{ backgroundColor: color }}
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold"
+              style={{ backgroundColor: `${color}1a`, color }}
             >
               {index + 1}
             </div>
@@ -321,12 +322,13 @@ const ExerciseItem = ({
   const mediaUrl = gifUrl || thumbnail;
 
   return (
-    <Card className="overflow-hidden border-l-4 border-l-orange-500">
+    <Card className="overflow-hidden border-l-4 border-l-amber-500 rounded-xl hover:shadow-md transition-all">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger className="w-full">
           <div className="p-4 flex items-center gap-3">
             <div
-              className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 text-sm font-medium"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold"
+              style={{ backgroundColor: "#f59e0b1a", color: "#d97706" }}
             >
               {index + 1}
             </div>
@@ -641,24 +643,22 @@ const AthleteWorkoutView = () => {
   const isCompleted = !!assignment.completedAt;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="px-4 h-14 flex items-center gap-3">
-          <Link
-            to="/athlete"
-            className="p-2 -ml-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div className="flex-1">
-            <h1 className="font-semibold truncate">{workout.name}</h1>
-          </div>
-        </div>
-      </header>
-
+    <AthletePortalLayout title={t.athlete.nav.workouts}>
       {/* Content */}
       <div className="flex-1 overflow-auto pb-24">
+        {/* Sub-header: back + centered workout name */}
+        <div className="relative flex items-center px-4 py-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-bold truncate max-w-[60%] text-center">
+            {workout.name}
+          </h1>
+        </div>
+
         {/* Workout Header Card */}
         <div className="p-4">
           <Card
@@ -870,7 +870,7 @@ const AthleteWorkoutView = () => {
         </DrawerContent>
       </Drawer>
 
-    </div>
+    </AthletePortalLayout>
   );
 };
 

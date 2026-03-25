@@ -28,7 +28,7 @@ const workoutTypeColors: Record<string, string> = {
   running: "#3b82f6",
   cycling: "#22c55e",
   swimming: "#06b6d4",
-  strength: "#f97316",
+  strength: "#f59e0b",
 };
 
 function WorkoutIcon({ type }: { type: string }) {

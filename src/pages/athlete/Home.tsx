@@ -46,7 +46,7 @@ const workoutTypeColors: Record<string, string> = {
   running: "bg-blue-500/10 text-blue-600 border-blue-200",
   cycling: "bg-green-500/10 text-green-600 border-green-200",
   swimming: "bg-cyan-500/10 text-cyan-600 border-cyan-200",
-  strength: "bg-orange-500/10 text-orange-600 border-orange-200",
+  strength: "bg-amber-500/10 text-amber-600 border-amber-200",
 };
 
 const AthleteHome = () => {

@@ -30,7 +30,7 @@ const workoutTypeColors: Record<string, string> = {
   running: "bg-blue-500/10 text-blue-600",
   cycling: "bg-green-500/10 text-green-600",
   swimming: "bg-cyan-500/10 text-cyan-600",
-  strength: "bg-orange-500/10 text-orange-600",
+  strength: "bg-amber-500/10 text-amber-600",
 };
 
 const AthleteCalendarView = () => {

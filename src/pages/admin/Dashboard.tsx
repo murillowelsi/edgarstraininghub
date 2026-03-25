@@ -40,7 +40,7 @@ const workoutTypeColors: Record<string, string> = {
   running: "bg-blue-500/10 text-blue-600",
   cycling: "bg-green-500/10 text-green-600",
   swimming: "bg-cyan-500/10 text-cyan-600",
-  strength: "bg-orange-500/10 text-orange-600",
+  strength: "bg-amber-500/10 text-amber-600",
 };
 
 const AdminDashboard = () => {
@@ -151,11 +151,11 @@ const AdminDashboard = () => {
           </Link>
 
           <Link to="/admin/workouts">
-            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-200/50 hover:shadow-md transition-all hover:border-orange-400/50 cursor-pointer">
+            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-200/50 hover:shadow-md transition-all hover:border-amber-400/50 cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-orange-500/20">
-                    <Dumbbell className="h-5 w-5 text-orange-500" />
+                  <div className="p-2 rounded-xl bg-amber-500/20">
+                    <Dumbbell className="h-5 w-5 text-amber-500" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{workoutCount}</p>
