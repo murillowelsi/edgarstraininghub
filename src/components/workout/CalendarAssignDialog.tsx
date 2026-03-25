@@ -33,28 +33,12 @@ import { useNavigate } from "react-router-dom";
 
 const workoutTypeConfig: Record<
   WorkoutType,
-  { label: string; icon: React.ElementType; color: string }
+  { label: string; icon: React.ElementType; hex: string }
 > = {
-  swimming: {
-    label: "Swimming",
-    icon: GrSwim,
-    color: "bg-cyan-100 border-cyan-300 text-cyan-700 hover:bg-cyan-200",
-  },
-  cycling: {
-    label: "Cycling",
-    icon: GrBike,
-    color: "bg-green-100 border-green-300 text-green-700 hover:bg-green-200",
-  },
-  running: {
-    label: "Running",
-    icon: GrRun,
-    color: "bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200",
-  },
-  strength: {
-    label: "Strength",
-    icon: Dumbbell,
-    color: "bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-200",
-  },
+  swimming: { label: "Swimming", icon: GrSwim, hex: "#06b6d4" },
+  cycling:  { label: "Cycling",  icon: GrBike, hex: "#22c55e" },
+  running:  { label: "Running",  icon: GrRun,  hex: "#3b82f6" },
+  strength: { label: "Strength", icon: Dumbbell, hex: "#f97316" },
 };
 
 // Define the order of workout types for display
@@ -327,71 +311,55 @@ export const CalendarAssignDialog = ({
   );
 
   const renderTypeStep = () => (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground text-center">
-        What type of workout do you want to assign?
-      </p>
-      <div className="grid grid-cols-4 gap-3">
-        {workoutTypeOrder.map((type) => {
-          const config = workoutTypeConfig[type];
-          const Icon = config.icon;
-          const count = workouts.filter((w) => w.type === type).length;
-
-          return (
-            <button
-              key={type}
-              onClick={() => handleTypeSelect(type)}
-              className={cn(
-                "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors",
-                config.color
-              )}
-            >
-              <Icon className="h-8 w-8" />
-              <span className="font-medium">{config.label}</span>
-              <span className="text-xs opacity-70">{count} workouts</span>
-            </button>
-          );
-        })}
-      </div>
-      <div className="text-center">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSelectedType(null);
-            setStep("workout");
-          }}
-        >
-          Or view all workouts
-        </Button>
-      </div>
+    <div className="space-y-2">
+      {workoutTypeOrder.map((type) => {
+        const { label, icon: Icon, hex } = workoutTypeConfig[type];
+        const count = workouts.filter((w) => w.type === type).length;
+        return (
+          <button
+            key={type}
+            onClick={() => handleTypeSelect(type)}
+            className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:border-primary/40 hover:shadow-sm transition-all text-left"
+          >
+            <div className="p-2.5 rounded-xl shrink-0" style={{ backgroundColor: `${hex}1a`, color: hex }}>
+              <Icon className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">{label}</p>
+              <p className="text-xs text-muted-foreground">{count} workout{count !== 1 ? "s" : ""}</p>
+            </div>
+          </button>
+        );
+      })}
+      <button
+        className="w-full text-center text-xs text-muted-foreground py-2 hover:text-foreground transition-colors"
+        onClick={() => { setSelectedType(null); setStep("workout"); }}
+      >
+        View all workouts
+      </button>
     </div>
   );
 
   const renderWorkoutStep = () => (
     <div className="space-y-4">
-      {/* Search and filter */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search workouts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        {selectedType && (
-          <div
-            className={cn(
-              "px-3 py-1.5 rounded-full text-sm font-medium border",
-              workoutTypeConfig[selectedType].color
-            )}
-          >
-            {workoutTypeConfig[selectedType].label}
-          </div>
-        )}
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+        <Input
+          placeholder="Search workouts..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-8 h-8 text-sm rounded-full"
+        />
       </div>
+      {selectedType && (
+        <div
+          className="inline-flex px-3 py-1 rounded-full text-xs font-medium border border-transparent"
+          style={{ backgroundColor: `${workoutTypeConfig[selectedType].hex}18`, color: workoutTypeConfig[selectedType].hex }}
+        >
+          {workoutTypeConfig[selectedType].label}
+        </div>
+      )}
 
       {/* Workout list */}
       {loadingData ? (
@@ -424,23 +392,18 @@ export const CalendarAssignDialog = ({
                   key={workout.id}
                   onClick={() => handleWorkoutSelect(workout)}
                   className={cn(
-                    "w-full text-left p-3 rounded-lg border transition-colors hover:bg-accent",
+                    "w-full text-left p-3 rounded-xl border transition-all hover:border-primary/40 hover:shadow-sm",
                     selectedWorkout?.id === workout.id && "ring-2 ring-primary"
                   )}
                 >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={cn(
-                        "p-2 rounded-lg",
-                        config.color.split(" ").slice(0, 2).join(" ")
-                      )}
-                    >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: `${config.hex}1a`, color: config.hex }}>
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{workout.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {workout.stages.length} stages · {config.label}
+                      <p className="font-semibold text-sm truncate">{workout.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {workout.type === "strength" ? `${workout.exercises?.length || 0} exercises` : `${workout.stages.length} stages`} · {config.label}
                       </p>
                     </div>
                   </div>
@@ -471,15 +434,10 @@ export const CalendarAssignDialog = ({
     <div className="space-y-4">
       {/* Selected workout summary */}
       {selectedWorkout && (
-        <div className="p-3 rounded-lg bg-muted/50 flex items-center gap-3">
+        <div className="p-3 rounded-xl border bg-card flex items-center gap-3">
           <div
-            className={cn(
-              "p-2 rounded-lg",
-              workoutTypeConfig[selectedWorkout.type].color
-                .split(" ")
-                .slice(0, 2)
-                .join(" ")
-            )}
+            className="p-2 rounded-lg shrink-0"
+            style={{ backgroundColor: `${workoutTypeConfig[selectedWorkout.type].hex}1a`, color: workoutTypeConfig[selectedWorkout.type].hex }}
           >
             {(() => {
               const Icon = workoutTypeConfig[selectedWorkout.type].icon;

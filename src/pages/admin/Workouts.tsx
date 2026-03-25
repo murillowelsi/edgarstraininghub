@@ -6,13 +6,8 @@ import { deleteAssignmentsByWorkout } from "@/services/workoutAssignmentsService
 import { deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
 import type { Workout } from "@/types/workout";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown, Dumbbell, Edit, EllipsisVertical, Loader2, Plus, Search, Trash2, UserPlus } from "lucide-react";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import { Dumbbell, Edit, EllipsisVertical, Loader2, Plus, Search, Trash2, UserPlus } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -20,7 +15,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
@@ -128,43 +123,7 @@ const AdminWorkouts = () => {
       <div className="p-4 md:p-8 pb-24 md:pb-8">
         <AdminPageHeader
           title={t.admin.workouts.title}
-          actions={
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="w-full sm:w-auto">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t.admin.workouts.newWorkout}
-                  <ChevronDown className="h-4 w-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/workouts/new?type=running" className="flex items-center">
-                    <GrRun className="h-4 w-4 mr-2" />
-                    {t.admin.workouts.runningWorkout}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/workouts/new?type=cycling" className="flex items-center">
-                    <GrBike className="h-4 w-4 mr-2" />
-                    {t.admin.workouts.cyclingWorkout}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/workouts/new?type=swimming" className="flex items-center">
-                    <GrSwim className="h-4 w-4 mr-2" />
-                    {t.admin.workouts.swimmingWorkout}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin/workouts/strength/new" className="flex items-center">
-                    <Dumbbell className="h-4 w-4 mr-2" />
-                    {t.admin.workouts.strengthWorkout}
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          }
+          action={{ label: t.admin.workouts.newWorkout, onClick: () => setNewWorkoutDrawerOpen(true) }}
           mobileFab={
             <button
               onClick={() => setNewWorkoutDrawerOpen(true)}
@@ -276,32 +235,38 @@ const AdminWorkouts = () => {
         </div>
       </div>
 
-      {/* Mobile: New Workout type drawer */}
-      <Drawer open={newWorkoutDrawerOpen} onOpenChange={setNewWorkoutDrawerOpen}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>{t.admin.workouts.newWorkout}</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-2">
-            {[
-              { label: t.admin.workouts.runningWorkout, icon: <GrRun className="h-5 w-5" />, to: "/admin/workouts/new?type=running" },
-              { label: t.admin.workouts.cyclingWorkout, icon: <GrBike className="h-5 w-5" />, to: "/admin/workouts/new?type=cycling" },
-              { label: t.admin.workouts.swimmingWorkout, icon: <GrSwim className="h-5 w-5" />, to: "/admin/workouts/new?type=swimming" },
-              { label: t.admin.workouts.strengthWorkout, icon: <Dumbbell className="h-5 w-5" />, to: "/admin/workouts/strength/new" },
-            ].map(({ label, icon, to }) => (
-              <Link
+      {/* New Workout type picker */}
+      <ResponsiveModal
+        open={newWorkoutDrawerOpen}
+        onOpenChange={setNewWorkoutDrawerOpen}
+        title={t.admin.workouts.newWorkout}
+      >
+        <div className="space-y-2 p-2">
+          {[
+            { label: t.admin.workouts.runningWorkout,  icon: GrRun,    hex: workoutTypeColors.running,  to: "/admin/workouts/new?type=running",  type: "running" },
+            { label: t.admin.workouts.cyclingWorkout,  icon: GrBike,   hex: workoutTypeColors.cycling,  to: "/admin/workouts/new?type=cycling",  type: "cycling" },
+            { label: t.admin.workouts.swimmingWorkout, icon: GrSwim,   hex: workoutTypeColors.swimming, to: "/admin/workouts/new?type=swimming", type: "swimming" },
+            { label: t.admin.workouts.strengthWorkout, icon: Dumbbell, hex: workoutTypeColors.strength, to: "/admin/workouts/strength/new",      type: "strength" },
+          ].map(({ label, icon: Icon, hex, to, type }) => {
+            const count = workouts.filter((w) => w.type === type).length;
+            return (
+              <button
                 key={to}
-                to={to}
-                onClick={() => setNewWorkoutDrawerOpen(false)}
-                className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
+                onClick={() => { navigate(to); setNewWorkoutDrawerOpen(false); }}
+                className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:border-primary/40 hover:shadow-sm transition-all text-left"
               >
-                {icon}
-                {label}
-              </Link>
-            ))}
-          </div>
-        </DrawerContent>
-      </Drawer>
+                <div className="p-2.5 rounded-xl shrink-0" style={{ backgroundColor: `${hex}1a`, color: hex }}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">{label}</p>
+                  <p className="text-xs text-muted-foreground">{count} workout{count !== 1 ? "s" : ""}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </ResponsiveModal>
 
       {/* Action drawer */}
       <Drawer open={!!actionWorkout} onOpenChange={(open) => { if (!open) setActionWorkout(null); }}>
@@ -330,7 +295,7 @@ const AdminWorkouts = () => {
               {t.common.edit}
             </button>
             <button
-              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium text-destructive"
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
               onClick={() => { setConfirmWorkout(actionWorkout); setActionWorkout(null); }}
             >
               <Trash2 className="h-5 w-5" />

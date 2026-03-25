@@ -336,13 +336,13 @@ const AdminCalendar = () => {
 
   useEffect(() => {
     if (!loading) {
-      setTimeout(() => scrollToToday("auto"), 100);
+      setTimeout(() => scrollToToday("instant"), 0);
     }
   }, [loading]);
 
   useEffect(() => {
     if (isSameMonth(currentMonth, new Date())) {
-      setTimeout(() => scrollToToday("auto"), 100);
+      setTimeout(() => scrollToToday("instant"), 0);
     }
   }, [currentMonth]);
 

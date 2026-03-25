@@ -16,6 +16,16 @@ import type { WorkoutExercise } from "../types/exercise";
 
 const WORKOUTS_COLLECTION = "workouts";
 
+// Simple in-memory cache to avoid re-fetching on every page navigation
+const CACHE_TTL = 60_000; // 1 minute
+const workoutByIdCache = new Map<string, { data: Workout; ts: number }>();
+let allWorkoutsCache: { data: Workout[]; ts: number } | null = null;
+
+export const invalidateWorkoutsCache = () => {
+  allWorkoutsCache = null;
+  workoutByIdCache.clear();
+};
+
 // Helper to remove undefined values from an object
 const removeUndefined = <T extends Record<string, unknown>>(obj: T): T => {
   return Object.fromEntries(
@@ -100,24 +110,37 @@ const docToWorkout = (id: string, data: WorkoutDocument): Workout => ({
 
 // Get all workouts
 export const getAllWorkouts = async (): Promise<Workout[]> => {
+  if (allWorkoutsCache && Date.now() - allWorkoutsCache.ts < CACHE_TTL) {
+    return allWorkoutsCache.data;
+  }
   const q = query(
     collection(db, WORKOUTS_COLLECTION),
     orderBy("createdAt", "desc")
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) =>
+  const data = snapshot.docs.map((doc) =>
     docToWorkout(doc.id, doc.data() as WorkoutDocument)
   );
+  allWorkoutsCache = { data, ts: Date.now() };
+  // Populate per-ID cache too
+  data.forEach((w) => workoutByIdCache.set(w.id, { data: w, ts: Date.now() }));
+  return data;
 };
 
 // Get single workout by ID
 export const getWorkoutById = async (id: string): Promise<Workout | null> => {
+  const cached = workoutByIdCache.get(id);
+  if (cached && Date.now() - cached.ts < CACHE_TTL) {
+    return cached.data;
+  }
   const docRef = doc(db, WORKOUTS_COLLECTION, id);
   const snapshot = await getDoc(docRef);
 
   if (!snapshot.exists()) return null;
 
-  return docToWorkout(snapshot.id, snapshot.data() as WorkoutDocument);
+  const data = docToWorkout(snapshot.id, snapshot.data() as WorkoutDocument);
+  workoutByIdCache.set(id, { data, ts: Date.now() });
+  return data;
 };
 
 // Create new workout
@@ -141,7 +164,7 @@ export const createWorkout = async (
   }
 
   const docRef = await addDoc(collection(db, WORKOUTS_COLLECTION), workoutData);
-
+  invalidateWorkoutsCache();
   return docRef.id;
 };
 
@@ -166,10 +189,12 @@ export const updateWorkout = async (
   }
 
   await updateDoc(docRef, updateData);
+  invalidateWorkoutsCache();
 };
 
 // Delete workout
 export const deleteWorkout = async (id: string): Promise<void> => {
   const docRef = doc(db, WORKOUTS_COLLECTION, id);
   await deleteDoc(docRef);
+  invalidateWorkoutsCache();
 };

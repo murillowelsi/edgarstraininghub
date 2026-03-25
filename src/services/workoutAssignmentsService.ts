@@ -184,17 +184,17 @@ export const getAssignmentsWithWorkoutsByAthlete = async (
   athleteId: string
 ): Promise<AssignmentWithWorkout[]> => {
   const assignments = await getAssignmentsByAthlete(athleteId);
-  const assignmentsWithWorkouts: AssignmentWithWorkout[] = [];
 
-  for (const assignment of assignments) {
-    const workout = await getWorkoutById(assignment.workoutId);
-    if (workout) {
-      assignmentsWithWorkouts.push({
-        ...assignment,
-        workout,
-      });
-    }
-  }
+  // Fetch unique workouts in parallel instead of sequentially
+  const uniqueWorkoutIds = [...new Set(assignments.map((a) => a.workoutId))];
+  const workouts = await Promise.all(uniqueWorkoutIds.map((id) => getWorkoutById(id)));
+  const workoutMap = new Map(
+    workouts.filter((w) => w !== null).map((w) => [w!.id, w!])
+  );
+
+  const assignmentsWithWorkouts = assignments
+    .filter((a) => workoutMap.has(a.workoutId))
+    .map((assignment) => ({ ...assignment, workout: workoutMap.get(assignment.workoutId)! }));
 
   // Sort by scheduled date (ascending)
   return assignmentsWithWorkouts.sort(

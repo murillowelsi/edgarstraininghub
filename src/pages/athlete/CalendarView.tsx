@@ -75,7 +75,7 @@ const AthleteCalendarView = () => {
 
   useEffect(() => {
     if (!loading) {
-      setTimeout(() => scrollToToday("auto"), 100);
+      setTimeout(() => scrollToToday("instant"), 0);
     }
   }, [loading]);
 

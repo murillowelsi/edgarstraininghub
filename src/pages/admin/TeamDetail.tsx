@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import { AdminEmptyState } from "@/components/admin/AdminEmptyState";
+import { ListItemCard } from "@/components/shared/ListItemCard";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
@@ -27,6 +30,7 @@ import {
   Copy,
   Check,
   UserMinus,
+  EllipsisVertical,
   BarChart2,
   UserPlus,
   MessageSquare,
@@ -34,6 +38,10 @@ import {
   Settings2,
   ChevronLeft,
 } from "lucide-react";
+
+function getInitials(name: string) {
+  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+}
 
 export default function AdminTeamDetail() {
   const { teamId } = useParams<{ teamId: string }>();
@@ -57,6 +65,7 @@ export default function AdminTeamDetail() {
   // Remove member
   const [confirmMember, setConfirmMember] = useState<User | null>(null);
   const [removingMember, setRemovingMember] = useState<string | null>(null);
+  const [actionMember, setActionMember] = useState<User | null>(null);
 
   // Group chat
   const [openingChat, setOpeningChat] = useState(false);
@@ -312,28 +321,31 @@ export default function AdminTeamDetail() {
           ) : (
             <div className="space-y-2">
               {members.map((member) => (
-                <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
-                  <Avatar className="h-9 w-9">
-                    <AvatarFallback>{member.displayName?.[0]?.toUpperCase() || "?"}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{member.displayName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{member.email}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive shrink-0"
-                    onClick={() => setConfirmMember(member)}
-                    disabled={removingMember === member.id}
-                  >
-                    {removingMember === member.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <UserMinus className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <ListItemCard
+                  key={member.id}
+                  icon={
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="text-xs font-semibold" style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}>
+                        {getInitials(member.displayName || "?")}
+                      </AvatarFallback>
+                    </Avatar>
+                  }
+                  iconClassName="p-0"
+                  title={member.displayName}
+                  subtitle={member.email}
+                  right={
+                    <Badge variant="outline" className="text-xs font-normal border-transparent" style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}>
+                      {member.role}
+                    </Badge>
+                  }
+                  actions={
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" onClick={() => setActionMember(member)}>
+                      {removingMember === member.id
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <EllipsisVertical className="h-4 w-4" />}
+                    </Button>
+                  }
+                />
               ))}
             </div>
           )}
@@ -418,6 +430,24 @@ export default function AdminTeamDetail() {
           )}
         </div>
       </ResponsiveModal>
+
+      {/* Member action drawer */}
+      <Drawer open={!!actionMember} onOpenChange={(open) => { if (!open) setActionMember(null); }}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle className="truncate">{actionMember?.displayName}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2">
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
+              onClick={() => { setConfirmMember(actionMember); setActionMember(null); }}
+            >
+              <UserMinus className="h-5 w-5" />
+              {t.admin.teamDetail.removeMember.confirm}
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* Remove member confirm */}
       <ResponsiveConfirm
