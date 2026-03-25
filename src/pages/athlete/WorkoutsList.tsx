@@ -1,11 +1,11 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
+import { ListItemCard } from "@/components/shared/ListItemCard";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmentsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
@@ -19,7 +19,6 @@ import {
   PersonStanding,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -143,78 +142,57 @@ const AthleteWorkoutsList = () => {
               const isCompleted = !!assignment.completedAt;
 
               return (
-                <Link
+                <ListItemCard
                   key={assignment.id}
                   to={`/athlete/workout/${assignment.id}`}
-                  className="block"
-                >
-                  <Card
-                    className={cn(
-                      "transition-all hover:shadow-md",
-                      isCompleted
-                        ? "bg-green-50/50 border-green-200 dark:bg-green-950/20"
-                        : "hover:border-primary/50"
-                    )}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={cn(
-                            "p-3 rounded-xl",
-                            isCompleted
-                              ? "bg-green-100 dark:bg-green-900/30"
-                              : workoutTypeColors[workout.type]
-                          )}
-                        >
-                          {isCompleted ? (
-                            <Check className="h-6 w-6 text-green-600" />
-                          ) : (
-                            <Icon className="h-6 w-6" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={cn(
-                              "font-semibold truncate",
-                              isCompleted && "line-through text-muted-foreground"
-                            )}
-                          >
-                            {workout.name}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge
-                              variant="secondary"
-                              className="text-xs capitalize"
-                            >
-                              {workout.type}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {format(assignment.scheduledDate, "MMM d")}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              ·{" "}
-                              {workout.type === "strength"
-                                ? `${workout.exercises?.length || 0} ${t.athlete.workouts.exercises}`
-                                : `${workout.stages.length} ${t.athlete.workouts.stages}`}
-                            </span>
-                          </div>
-                        </div>
-                        {isCompleted ? (
-                          <Badge
-                            variant="secondary"
-                            className="bg-green-100 text-green-700 dark:bg-green-900/50"
-                          >
-                            {assignment.completionPercentage !== undefined
-                              ? `${assignment.completionPercentage}%`
-                              : t.athlete.workouts.done}
-                          </Badge>
-                        ) : (
-                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                  icon={
+                    isCompleted ? (
+                      <Check className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <Icon className="h-5 w-5" />
+                    )
+                  }
+                  iconClassName={
+                    isCompleted
+                      ? "bg-green-100 dark:bg-green-900/30"
+                      : workoutTypeColors[workout.type]
+                  }
+                  title={workout.name}
+                  titleClassName={isCompleted ? "line-through text-muted-foreground" : undefined}
+                  subtitle={
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Badge variant="secondary" className="text-xs capitalize">
+                        {workout.type}
+                      </Badge>
+                      <span>{format(assignment.scheduledDate, "MMM d")}</span>
+                      <span>
+                        ·{" "}
+                        {workout.type === "strength"
+                          ? `${workout.exercises?.length || 0} ${t.athlete.workouts.exercises}`
+                          : `${workout.stages.length} ${t.athlete.workouts.stages}`}
+                      </span>
+                    </div>
+                  }
+                  right={
+                    isCompleted ? (
+                      <Badge
+                        variant="secondary"
+                        className="bg-green-100 text-green-700 dark:bg-green-900/50"
+                      >
+                        {assignment.completionPercentage !== undefined
+                          ? `${assignment.completionPercentage}%`
+                          : t.athlete.workouts.done}
+                      </Badge>
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    )
+                  }
+                  className={
+                    isCompleted
+                      ? "bg-green-50/50 border-green-200 dark:bg-green-950/20"
+                      : undefined
+                  }
+                />
               );
             })}
           </div>

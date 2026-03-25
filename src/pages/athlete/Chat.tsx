@@ -17,7 +17,14 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+import { format, isToday, isYesterday } from "date-fns";
+
+const formatChatTime = (timestamp: { seconds: number }) => {
+    const date = new Date(timestamp.seconds * 1000);
+    if (isToday(date)) return format(date, "HH:mm");
+    if (isYesterday(date)) return "Ontem";
+    return format(date, "dd/MM/yy");
+};
 
 export default function AthleteChat() {
     const { user } = useAuth();
@@ -181,8 +188,8 @@ export default function AthleteChat() {
                     "w-full md:w-80 border-r flex flex-col bg-background",
                     selectedChat ? "hidden md:flex" : "flex"
                 )}>
-                    <div className="p-4 border-b flex items-center justify-end bg-muted/30">
-                        <Button size="icon" variant="ghost" className="hidden sm:flex h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
+                    <div className="hidden sm:flex p-4 border-b items-center justify-end bg-muted/30">
+                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
                             <Plus className="h-5 w-5" />
                         </Button>
                         <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title={t.athlete.chat.newMessage}>
@@ -244,38 +251,38 @@ export default function AthleteChat() {
                                         key={chat.id}
                                         onClick={() => setSelectedChat(chat)}
                                         className={cn(
-                                            "w-full flex items-start gap-3 p-4 text-left transition-colors hover:bg-muted/50 border-b",
-                                            selectedChat?.id === chat.id && "bg-muted"
+                                            "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40",
+                                            selectedChat?.id === chat.id && "bg-muted/60"
                                         )}
                                     >
-                                        <Avatar>
-                                            <AvatarFallback>
+                                        <Avatar className="h-12 w-12 shrink-0">
+                                            <AvatarFallback className="text-base font-semibold">
                                                 {chat.isGroup
-                                                    ? <Users2 className="h-4 w-4" />
+                                                    ? <Users2 className="h-5 w-5" />
                                                     : displayName[0]?.toUpperCase()}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div className="flex-1 overflow-hidden">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className={cn("font-medium", unreadCount > 0 && "font-bold")}>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-baseline gap-2">
+                                                <span className={cn("font-semibold truncate", unreadCount > 0 && "text-foreground")}>
                                                     {displayName}
                                                 </span>
                                                 {chat.lastMessageTime && (
-                                                    <span className="text-[10px] text-muted-foreground">
-                                                        {formatDistanceToNow(new Date(chat.lastMessageTime.seconds * 1000), { addSuffix: true })}
+                                                    <span className={cn("text-xs shrink-0", unreadCount > 0 ? "text-primary font-medium" : "text-muted-foreground")}>
+                                                        {formatChatTime(chat.lastMessageTime)}
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="flex justify-between items-center">
+                                            <div className="flex justify-between items-center gap-2 mt-0.5">
                                                 <p className={cn(
-                                                    "text-sm truncate max-w-[160px]",
+                                                    "text-sm truncate",
                                                     unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"
                                                 )}>
                                                     {chat.lastMessage || "No messages"}
                                                 </p>
                                                 {unreadCount > 0 && (
-                                                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                                                        {unreadCount}
+                                                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                                                        {unreadCount > 9 ? "9+" : unreadCount}
                                                     </span>
                                                 )}
                                             </div>

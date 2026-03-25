@@ -1,4 +1,5 @@
 import { Moon, Sun, LogOut, MessageSquare } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -50,7 +51,7 @@ const AdminTopBar = ({ chatUnreadCount = 0 }: AdminTopBarProps) => {
     <header className="bg-background/80 backdrop-blur-lg fixed w-full z-50 border-b border-border/50">
       <div className="px-4 py-4 flex items-center justify-between">
         <Link
-          to="/"
+          to="/admin"
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <span className="text-primary font-display font-extrabold text-3xl tracking-tighter">
@@ -67,7 +68,12 @@ const AdminTopBar = ({ chatUnreadCount = 0 }: AdminTopBarProps) => {
         <div className="flex items-center gap-2">
           <Link
             to="/admin/chat"
-            className="relative p-2 rounded-full hover:bg-accent transition-colors"
+            className={cn(
+              "relative p-2 rounded-full transition-colors",
+              location.pathname.startsWith("/admin/chat")
+                ? "text-primary bg-primary/10"
+                : "hover:bg-accent"
+            )}
           >
             <MessageSquare className="h-5 w-5" />
             {chatUnreadCount > 0 && (

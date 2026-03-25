@@ -157,7 +157,12 @@ const AthletePortalLayout = ({
             <div className="flex items-center gap-2">
               <Link
                 to="/athlete/chat"
-                className="relative p-2 rounded-full hover:bg-accent transition-colors"
+                className={cn(
+                  "relative p-2 rounded-full transition-colors",
+                  location.pathname.startsWith("/athlete/chat")
+                    ? "text-primary bg-primary/10"
+                    : "hover:bg-accent"
+                )}
               >
                 <MessageSquare className="h-5 w-5" />
                 {chatUnreadCount > 0 && (

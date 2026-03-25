@@ -1,4 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
+import { ListItemCard } from "@/components/shared/ListItemCard";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -13,9 +14,11 @@ import { getAllWorkouts } from "@/services/workoutsService";
 import type { AssignmentWithDetails } from "@/types/workoutAssignment";
 import type { Team } from "@/types/team";
 import { format, isSameDay } from "date-fns";
+import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   Award,
   CalendarCheck,
+  Check,
   ChevronRight,
   Dumbbell,
   Loader2,
@@ -25,6 +28,20 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+
+const workoutTypeIcons: Record<string, React.ElementType> = {
+  running: GrRun,
+  cycling: GrBike,
+  swimming: GrSwim,
+  strength: Dumbbell,
+};
+
+const workoutTypeColors: Record<string, string> = {
+  running: "bg-blue-500/10 text-blue-600",
+  cycling: "bg-green-500/10 text-green-600",
+  swimming: "bg-cyan-500/10 text-cyan-600",
+  strength: "bg-orange-500/10 text-orange-600",
+};
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -209,20 +226,16 @@ const AdminDashboard = () => {
               </p>
             ) : (
               teams.map((team) => (
-                <Link key={team.id} to={`/admin/teams/${team.id}`}>
-                  <div className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:border-primary/50 transition-all hover:shadow-md mb-2">
-                    <div className="p-2 rounded-lg bg-violet-500/10 border border-violet-200/50">
-                      <Shield className="h-5 w-5 text-violet-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{team.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {team.memberIds.length} {t.admin.dashboard.members}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-                  </div>
-                </Link>
+                <ListItemCard
+                  key={team.id}
+                  to={`/admin/teams/${team.id}`}
+                  compact
+                  icon={<Shield className="h-4 w-4 text-violet-500" />}
+                  iconClassName="bg-violet-500/10"
+                  title={team.name}
+                  subtitle={`${team.memberIds.length} ${t.admin.dashboard.members}`}
+                  right={<ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                />
               ))
             )}
           </CardContent>
@@ -249,28 +262,32 @@ const AdminDashboard = () => {
             ) : (
               todaysAssignments.map((a) => {
                 const isCompleted = !!a.completedAt;
+                const WorkoutIcon = workoutTypeIcons[a.workout.type] || Dumbbell;
                 return (
-                  <Link key={a.id} to="/admin/calendar">
-                    <div
-                      className={cn(
-                        "flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md mb-2",
-                        isCompleted
-                          ? "bg-green-50 border-green-200 dark:bg-green-950/20"
-                          : "bg-card hover:border-primary/50"
-                      )}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className={cn("font-medium truncate text-sm", isCompleted && "line-through text-muted-foreground")}>
-                          {a.workout.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {a.athlete.displayName}
-                        </p>
-                      </div>
+                  <ListItemCard
+                    key={a.id}
+                    to="/admin/calendar"
+                    compact
+                    icon={
+                      isCompleted ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <WorkoutIcon className="h-4 w-4" />
+                      )
+                    }
+                    iconClassName={
+                      isCompleted
+                        ? "bg-green-100 dark:bg-green-900/30"
+                        : workoutTypeColors[a.workout.type] || "bg-muted"
+                    }
+                    title={a.workout.name}
+                    titleClassName={isCompleted ? "line-through text-muted-foreground" : undefined}
+                    subtitle={a.athlete.displayName}
+                    right={
                       <Badge
                         variant="secondary"
                         className={cn(
-                          "shrink-0 text-xs",
+                          "text-xs",
                           isCompleted
                             ? "bg-green-100 text-green-700"
                             : "bg-muted text-muted-foreground"
@@ -278,8 +295,13 @@ const AdminDashboard = () => {
                       >
                         {isCompleted ? t.admin.dashboard.completed : t.admin.dashboard.pending}
                       </Badge>
-                    </div>
-                  </Link>
+                    }
+                    className={
+                      isCompleted
+                        ? "bg-green-50 border-green-200 dark:bg-green-950/20"
+                        : undefined
+                    }
+                  />
                 );
               })
             )}

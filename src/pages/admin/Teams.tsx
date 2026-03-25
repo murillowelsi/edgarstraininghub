@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { ListItemCard } from "@/components/shared/ListItemCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createTeam, deleteTeam, getTeamsByCoach } from "@/services/teamsService";
 import type { Team } from "@/types/team";
-import { Shield, Users2, Loader2, Trash2, ChevronRight } from "lucide-react";
+import { Shield, Loader2, Trash2, ChevronRight } from "lucide-react";
 
 export default function AdminTeams() {
   const { user } = useAuth();
@@ -96,39 +97,32 @@ export default function AdminTeams() {
             <p className="text-sm mt-1">{t.admin.teams.noTeamsDescription}</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {teams.map((team) => (
-              <div
+              <ListItemCard
                 key={team.id}
-                className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
-              >
-                <button
-                  className="flex-1 flex items-center gap-3 text-left"
-                  onClick={() => navigate(`/admin/teams/${team.id}`)}
-                >
-                  <Users2 className="h-5 w-5 text-muted-foreground shrink-0" />
-                  <div>
-                    <p className="font-semibold">{team.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {team.memberIds.length} {team.memberIds.length !== 1 ? t.admin.teams.members : t.admin.teams.member}
-                    </p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
-                </button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive ml-2 shrink-0"
-                  onClick={() => setConfirmTeam(team)}
-                  disabled={deleting === team.id}
-                >
-                  {deleting === team.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
+                to={`/admin/teams/${team.id}`}
+                icon={<Shield className="h-5 w-5 text-violet-500" />}
+                iconClassName="bg-violet-500/10"
+                title={team.name}
+                subtitle={`${team.memberIds.length} ${team.memberIds.length !== 1 ? t.admin.teams.members : t.admin.teams.member}`}
+                right={<ChevronRight className="h-5 w-5 text-muted-foreground" />}
+                actions={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive ml-1 shrink-0"
+                    onClick={() => setConfirmTeam(team)}
+                    disabled={deleting === team.id}
+                  >
+                    {deleting === team.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                }
+              />
             ))}
           </div>
         )}

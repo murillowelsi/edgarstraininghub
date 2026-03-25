@@ -1,4 +1,5 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
+import { ListItemCard } from "@/components/shared/ListItemCard";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -317,62 +318,39 @@ const AthleteHome = () => {
                   <p className="text-sm">{t.athlete.home.noWorkoutsScheduled}</p>
                 </div>
               ) : (
-                <div>
+                <div className="space-y-2">
                   {selectedDateAssignments.map((assignment) => {
                     const workout = assignment.workout;
                     const Icon = workoutTypeIcons[workout.type] || PersonStanding;
                     const isCompleted = !!assignment.completedAt;
 
                     return (
-                      <Link
+                      <ListItemCard
                         key={assignment.id}
                         to={`/athlete/workout/${assignment.id}`}
-                      >
-                        <div
-                          className={cn(
-                            "flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md mb-2",
-                            isCompleted
-                              ? "bg-green-50 border-green-200 dark:bg-green-950/20"
-                              : "bg-card hover:border-primary/50"
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "p-2 rounded-lg",
-                              workoutTypeColors[workout.type] || "bg-muted"
-                            )}
-                          >
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p
-                              className={cn(
-                                "font-medium truncate",
-                                isCompleted && "line-through text-muted-foreground"
-                              )}
-                            >
-                              {workout.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {workout.type === "strength"
-                                ? `${workout.exercises?.length || 0} ${t.athlete.home.exercises}`
-                                : `${workout.stages?.length || 0} ${t.athlete.home.stages}`}
-                            </p>
-                          </div>
-                          {isCompleted ? (
-                            <Badge
-                              variant="secondary"
-                              className="bg-green-100 text-green-700"
-                            >
+                        compact
+                        icon={<Icon className="h-5 w-5" />}
+                        iconClassName={workoutTypeColors[workout.type] || "bg-muted text-foreground"}
+                        title={workout.name}
+                        titleClassName={isCompleted ? "line-through text-muted-foreground" : undefined}
+                        subtitle={
+                          workout.type === "strength"
+                            ? `${workout.exercises?.length || 0} ${t.athlete.home.exercises}`
+                            : `${workout.stages?.length || 0} ${t.athlete.home.stages}`
+                        }
+                        right={
+                          isCompleted ? (
+                            <Badge variant="secondary" className="bg-green-100 text-green-700">
                               {assignment.completionPercentage !== undefined
                                 ? `${assignment.completionPercentage}%`
                                 : t.athlete.home.done}
                             </Badge>
                           ) : (
                             <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                          )}
-                        </div>
-                      </Link>
+                          )
+                        }
+                        className={isCompleted ? "bg-green-50 border-green-200 dark:bg-green-950/20" : undefined}
+                      />
                     );
                   })}
                 </div>
@@ -402,28 +380,16 @@ const AthleteHome = () => {
                 const Icon = workoutTypeIcons[workout.type] || PersonStanding;
 
                 return (
-                  <Link
+                  <ListItemCard
                     key={assignment.id}
                     to={`/athlete/workout/${assignment.id}`}
-                  >
-                    <div className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:border-primary/50 transition-all hover:shadow-md">
-                      <div
-                        className={cn(
-                          "p-2 rounded-lg",
-                          workoutTypeColors[workout.type] || "bg-muted"
-                        )}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{workout.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(assignment.scheduledDate, "EEE, MMM d")}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                  </Link>
+                    compact
+                    icon={<Icon className="h-5 w-5" />}
+                    iconClassName={workoutTypeColors[workout.type] || "bg-muted text-foreground"}
+                    title={workout.name}
+                    subtitle={format(assignment.scheduledDate, "EEE, MMM d")}
+                    right={<ChevronRight className="h-5 w-5 text-muted-foreground" />}
+                  />
                 );
               })}
             </CardContent>
