@@ -23,11 +23,11 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false }: Ad
 
   const navItems = [
     { href: "/admin", label: t.admin.nav.home, icon: Home },
-    { href: "/admin/posts", label: t.admin.nav.posts, icon: FileText },
     { href: "/admin/users", label: t.admin.nav.users, icon: Users },
     { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell },
     { href: "/admin/teams", label: t.admin.nav.teams, icon: Shield },
     { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
+    { href: "/admin/posts", label: t.admin.nav.posts, icon: FileText },
   ];
   const location = useLocation();
   const navigate = useNavigate();
