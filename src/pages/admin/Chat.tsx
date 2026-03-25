@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { ChatService } from "@/services/chat";
@@ -33,6 +33,7 @@ export default function AdminChat() {
     const { user } = useAuth();
     const { t } = useLanguage();
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
@@ -50,6 +51,9 @@ export default function AdminChat() {
     const [teams, setTeams] = useState<Team[]>([]);
     const [loadingTeams, setLoadingTeams] = useState(false);
     const [openingGroupChat, setOpeningGroupChat] = useState<string | null>(null);
+
+    // Whether current chat was opened via deep link (e.g. from TeamDetail)
+    const [openedViaDeepLink, setOpenedViaDeepLink] = useState(false);
 
     // Delete Chat
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -82,6 +86,7 @@ export default function AdminChat() {
         const target = chats.find(c => c.id === state.openChatId);
         if (target) {
             setSelectedChat(target);
+            setOpenedViaDeepLink(true);
             // Clear state so refresh doesn't re-select
             window.history.replaceState({}, "");
         }
@@ -374,7 +379,14 @@ export default function AdminChat() {
                             onSendMessage={handleSendMessage}
                             participantName={getChatDisplayName(selectedChat)}
                             isGroup={selectedChat.isGroup}
-                            onBack={() => setSelectedChat(null)}
+                            onBack={() => {
+                            if (openedViaDeepLink) {
+                                navigate(-1);
+                            } else {
+                                setSelectedChat(null);
+                            }
+                            setOpenedViaDeepLink(false);
+                        }}
                             onDelete={() => setIsDeleteDialogOpen(true)}
                         />
                     ) : (

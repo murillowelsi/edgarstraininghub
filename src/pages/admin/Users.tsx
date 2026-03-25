@@ -11,24 +11,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { createUser, deleteUser, getAllUsers, getUserById, updateUser } from "@/services/usersService";
+import { createUser, deleteUser, getAllUsers, updateUser } from "@/services/usersService";
 import type { User, UserFormData, UserRole } from "@/types/user";
-import { format } from "date-fns";
-import { Edit, Loader2, Plus, Save, Trash2, Users } from "lucide-react";
+import { EllipsisVertical, Loader2, Plus, Save, Search, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
-import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
+import { ListItemCard } from "../../components/shared/ListItemCard";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
 
-const roleBadgeColors: Record<UserRole, string> = {
-  admin: "bg-red-500/10 text-red-600 hover:bg-red-500/20",
-  editor: "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20",
-  athlete: "bg-green-500/10 text-green-600 hover:bg-green-500/20",
-};
+function getInitials(name: string) {
+  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+}
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -40,6 +38,7 @@ const AdminUsers = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState<Pick<UserFormData, "displayName" | "role">>({ displayName: "", role: "athlete" });
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
   const [newUserForm, setNewUserForm] = useState<UserFormData>({
     email: "",
     displayName: "",
@@ -144,6 +143,15 @@ const AdminUsers = () => {
     }
   };
 
+  const query = search.toLowerCase();
+  const filteredUsers = query
+    ? users.filter(
+        (u) =>
+          u.displayName.toLowerCase().includes(query) ||
+          u.email.toLowerCase().includes(query)
+      )
+    : users;
+
   return (
     <AdminLayout>
       <div className="p-4 md:p-8 pb-24 md:pb-8">
@@ -152,62 +160,71 @@ const AdminUsers = () => {
           action={{ label: t.admin.users.newUser, icon: Plus, onClick: () => setIsNewUserOpen(true) }}
         />
 
-        <ResponsiveTable
-          loading={loading}
-          rowKey="_id"
-          columns={[
-            { key: "name", label: t.admin.users.columns.name },
-            { key: "email", label: t.admin.users.columns.email },
-            { key: "role", label: t.admin.users.columns.role, mobilePrimaryBadge: true },
-            { key: "created", label: t.admin.users.columns.created, mobileHidden: true },
-          ]}
-          rows={users.map((u) => ({
-            _id: u.id,
-            name: (
-              <span className="font-medium">
-                {u.displayName}
-                {u.id === user?.uid && (
-                  <span className="ml-2 text-xs text-muted-foreground">({t.admin.users.you})</span>
-                )}
-              </span>
-            ),
-            email: u.email,
-            role: (
-              <Badge className={roleBadgeColors[u.role]}>
-                {t.admin.users.roles[u.role]}
-              </Badge>
-            ),
-            created: format(u.createdAt, "MMM d, yyyy"),
-            _user: u,
-          }))}
-          actions={(row) => {
-            const u = row._user as User;
-            return (
-              <>
-                <Button variant="ghost" size="sm" onClick={() => handleOpenEdit(u)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive"
-                  disabled={u.id === user?.uid}
-                  onClick={() => setConfirmUser(u)}
-                >
-                  {deleting === u.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                </Button>
-              </>
-            );
-          }}
-          emptyState={
-            <AdminEmptyState
-              icon={Users}
-              title={t.admin.users.empty.title}
-              description={t.admin.users.empty.description}
-              action={{ label: t.admin.users.newUser, onClick: () => setIsNewUserOpen(true) }}
-            />
-          }
-        />
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder={t.admin.users.searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8 h-8 text-sm rounded-full"
+          />
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center h-40">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <AdminEmptyState
+            icon={Users}
+            title={t.admin.users.empty.title}
+            description={t.admin.users.empty.description}
+          />
+        ) : (
+          <div className="space-y-2">
+            {filteredUsers.map((u) => (
+              <ListItemCard
+                key={u.id}
+                icon={
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback
+                      className="text-xs font-semibold"
+                      style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
+                    >
+                      {getInitials(u.displayName)}
+                    </AvatarFallback>
+                  </Avatar>
+                }
+                iconClassName="p-0"
+                title={
+                  <span>
+                    {u.displayName}
+                    {u.id === user?.uid && (
+                      <span className="ml-1.5 text-xs text-muted-foreground font-normal">({t.admin.users.you})</span>
+                    )}
+                  </span>
+                }
+                subtitle={u.email}
+                right={
+                  <Badge
+                    variant="outline"
+                    className="text-xs font-normal border-transparent"
+                    style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
+                  >
+                    {t.admin.users.roles[u.role]}
+                  </Badge>
+                }
+                actions={
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" onClick={() => handleOpenEdit(u)}>
+                    {deleting === u.id
+                      ? <Loader2 className="h-4 w-4 animate-spin" />
+                      : <EllipsisVertical className="h-4 w-4" />}
+                  </Button>
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
       <ResponsiveConfirm
         open={confirmUser !== null}
@@ -339,6 +356,17 @@ const AdminUsers = () => {
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {t.admin.userForm.updateButton}
           </Button>
+          {editingUser && editingUser.id !== user?.uid && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full gap-2 text-destructive hover:text-destructive"
+              onClick={() => { setConfirmUser(editingUser); setEditingUser(null); }}
+            >
+              <Trash2 className="h-4 w-4" />
+              {t.common.delete}
+            </Button>
+          )}
         </form>
       </ResponsiveModal>
     </AdminLayout>

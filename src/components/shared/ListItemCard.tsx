@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 interface ListItemCardProps {
   icon?: React.ReactNode;
   iconClassName?: string;
+  iconStyle?: React.CSSProperties;
   title: React.ReactNode;
   titleClassName?: string;
   subtitle?: React.ReactNode;
@@ -20,6 +21,7 @@ interface ListItemCardProps {
 export function ListItemCard({
   icon,
   iconClassName,
+  iconStyle,
   title,
   titleClassName,
   subtitle,
@@ -37,6 +39,7 @@ export function ListItemCard({
         compact ? "p-2 rounded-lg" : "p-2.5 rounded-xl",
         iconClassName
       )}
+      style={iconStyle}
     >
       {icon}
     </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminEmptyState } from "@/components/admin/AdminEmptyState";
 import { ListItemCard } from "@/components/shared/ListItemCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +12,29 @@ import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { createTeam, deleteTeam, getTeamsByCoach } from "@/services/teamsService";
+import { createTeam, deleteTeam, getTeamsByCoach, updateTeamName, updateTeamColor } from "@/services/teamsService";
 import type { Team } from "@/types/team";
-import { Shield, Loader2, Trash2, ChevronRight } from "lucide-react";
+import { TEAM_COLORS, getTeamColor } from "@/lib/teamColors";
+import { Shield, Loader2, Trash2, Check, EllipsisVertical, Search } from "lucide-react";
+
+function ColorPicker({ value, onChange }: { value: string; onChange: (key: string) => void }) {
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {TEAM_COLORS.map((c) => (
+        <button
+          key={c.key}
+          type="button"
+          onClick={() => onChange(c.key)}
+          className="h-7 w-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-95 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          style={{ backgroundColor: c.color }}
+          aria-label={c.key}
+        >
+          {value === c.key && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function AdminTeams() {
   const { user } = useAuth();
@@ -23,9 +44,22 @@ export default function AdminTeams() {
 
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Create
   const [isNewTeamOpen, setIsNewTeamOpen] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
+  const [newTeamColor, setNewTeamColor] = useState(TEAM_COLORS[0].key);
   const [creating, setCreating] = useState(false);
+
+  // Edit
+  const [editTeam, setEditTeam] = useState<Team | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState(TEAM_COLORS[0].key);
+  const [saving, setSaving] = useState(false);
+
+  const [search, setSearch] = useState("");
+
+  // Delete
   const [confirmTeam, setConfirmTeam] = useState<Team | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -51,15 +85,43 @@ export default function AdminTeams() {
     if (!user || !newTeamName.trim()) return;
     setCreating(true);
     try {
-      const team = await createTeam(newTeamName.trim(), user.uid);
+      const team = await createTeam(newTeamName.trim(), user.uid, newTeamColor);
       setTeams((prev) => [team, ...prev]);
       setIsNewTeamOpen(false);
       setNewTeamName("");
+      setNewTeamColor(TEAM_COLORS[0].key);
       toast({ title: t.admin.teams.toast.created, description: t.admin.teams.toast.createdDescription.replace("{{name}}", team.name) });
     } catch {
       toast({ title: t.common.error, description: t.admin.teams.toast.createError, variant: "destructive" });
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleOpenEdit = (team: Team) => {
+    setEditTeam(team);
+    setEditName(team.name);
+    setEditColor(team.color ?? TEAM_COLORS[0].key);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTeam || !editName.trim()) return;
+    setSaving(true);
+    try {
+      const promises: Promise<void>[] = [];
+      if (editName.trim() !== editTeam.name) promises.push(updateTeamName(editTeam.id, editName.trim()));
+      if (editColor !== (editTeam.color ?? TEAM_COLORS[0].key)) promises.push(updateTeamColor(editTeam.id, editColor));
+      await Promise.all(promises);
+      setTeams((prev) => prev.map((t) =>
+        t.id === editTeam.id ? { ...t, name: editName.trim(), color: editColor } : t
+      ));
+      setEditTeam(null);
+      toast({ title: t.admin.teams.toast.updated });
+    } catch {
+      toast({ title: t.common.error, description: t.admin.teams.toast.updateError, variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -86,51 +148,61 @@ export default function AdminTeams() {
           action={{ label: t.admin.teams.newTeam, onClick: () => setIsNewTeamOpen(true) }}
         />
 
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder={t.admin.teams.searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8 h-8 text-sm rounded-full"
+          />
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center h-40">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : teams.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-center">
-            <Shield className="h-10 w-10 mb-3 opacity-30" />
-            <p className="font-medium">{t.admin.teams.noTeamsTitle}</p>
-            <p className="text-sm mt-1">{t.admin.teams.noTeamsDescription}</p>
-          </div>
+          <AdminEmptyState
+            illustration="/undraw_security.svg"
+            title={t.admin.teams.noTeamsTitle}
+            description={t.admin.teams.noTeamsDescription}
+          />
         ) : (
           <div className="space-y-2">
-            {teams.map((team) => (
-              <ListItemCard
-                key={team.id}
-                to={`/admin/teams/${team.id}`}
-                icon={<Shield className="h-5 w-5 text-violet-500" />}
-                iconClassName="bg-violet-500/10"
-                title={team.name}
-                subtitle={`${team.memberIds.length} ${team.memberIds.length !== 1 ? t.admin.teams.members : t.admin.teams.member}`}
-                right={<ChevronRight className="h-5 w-5 text-muted-foreground" />}
-                actions={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive ml-1 shrink-0"
-                    onClick={() => setConfirmTeam(team)}
-                    disabled={deleting === team.id}
-                  >
-                    {deleting === team.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </Button>
-                }
-              />
-            ))}
+            {(search ? teams.filter((t) => t.name.toLowerCase().includes(search.toLowerCase())) : teams).map((team) => {
+              const color = getTeamColor(team.color);
+              return (
+                <ListItemCard
+                  key={team.id}
+                  to={`/admin/teams/${team.id}`}
+                  icon={<Shield className="h-5 w-5" style={{ color: color.color }} />}
+                  iconClassName="shrink-0"
+                  iconStyle={{ backgroundColor: `${color.color}1a` }}
+                  title={team.name}
+                  subtitle={`${team.memberIds.length} ${team.memberIds.length !== 1 ? t.admin.teams.members : t.admin.teams.member}`}
+                  actions={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 shrink-0"
+                      onClick={() => handleOpenEdit(team)}
+                    >
+                      {deleting === team.id
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <EllipsisVertical className="h-4 w-4" />}
+                    </Button>
+                  }
+                />
+              );
+            })}
           </div>
         )}
 
         {/* New Team Modal */}
         <ResponsiveModal
           open={isNewTeamOpen}
-          onOpenChange={setIsNewTeamOpen}
+          onOpenChange={(open) => { setIsNewTeamOpen(open); if (!open) { setNewTeamName(""); setNewTeamColor(TEAM_COLORS[0].key); } }}
           title={t.admin.teams.newTeam}
         >
           <form onSubmit={handleCreate} className="space-y-4 p-2">
@@ -145,9 +217,50 @@ export default function AdminTeams() {
                 autoFocus
               />
             </div>
+            <div className="space-y-1.5">
+              <Label>{t.admin.teams.teamColor}</Label>
+              <ColorPicker value={newTeamColor} onChange={setNewTeamColor} />
+            </div>
             <Button type="submit" className="w-full" disabled={creating || !newTeamName.trim()}>
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t.admin.teams.createTeam}
+            </Button>
+          </form>
+        </ResponsiveModal>
+
+        {/* Edit Team Modal */}
+        <ResponsiveModal
+          open={!!editTeam}
+          onOpenChange={(open) => { if (!open) setEditTeam(null); }}
+          title={t.admin.teams.editTeam}
+        >
+          <form onSubmit={handleSaveEdit} className="space-y-4 p-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="editTeamName">{t.admin.teams.teamName}</Label>
+              <Input
+                id="editTeamName"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t.admin.teams.teamColor}</Label>
+              <ColorPicker value={editColor} onChange={setEditColor} />
+            </div>
+            <Button type="submit" className="w-full" disabled={saving || !editName.trim()}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t.admin.teams.saveTeam}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full gap-2 text-destructive hover:text-destructive"
+              onClick={() => { setConfirmTeam(editTeam); setEditTeam(null); }}
+            >
+              <Trash2 className="h-4 w-4" />
+              {t.common.delete}
             </Button>
           </form>
         </ResponsiveModal>

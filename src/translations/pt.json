@@ -436,6 +436,7 @@
     "users": {
       "title": "Utilizadores",
       "newUser": "Novo Utilizador",
+      "searchPlaceholder": "Pesquisar por nome ou email…",
       "you": "você",
       "columns": { "name": "Nome", "email": "Email", "role": "Função", "created": "Criado" },
       "roles": { "admin": "Admin", "editor": "Editor", "athlete": "Atleta" },
@@ -537,11 +538,15 @@
       "title": "Times",
       "description": "Gerencie os seus grupos de treino e convide atletas.",
       "newTeam": "Novo Grupo",
+      "searchPlaceholder": "Pesquisar grupos…",
+      "editTeam": "Editar Grupo",
       "member": "membro",
       "members": "membros",
       "teamName": "Nome do Grupo",
       "teamNamePlaceholder": "ex: Sub-17 Futebol",
+      "teamColor": "Cor",
       "createTeam": "Criar Grupo",
+      "saveTeam": "Salvar",
       "noTeamsTitle": "Ainda sem grupos",
       "noTeamsDescription": "Crie um grupo para começar a convidar atletas.",
       "delete": {
@@ -553,6 +558,8 @@
         "created": "Grupo criado",
         "createdDescription": "\"{{name}}\" está pronto.",
         "createError": "Erro ao criar grupo.",
+        "updated": "Grupo atualizado",
+        "updateError": "Erro ao atualizar grupo.",
         "deleted": "Grupo eliminado",
         "deletedDescription": "\"{{name}}\" foi eliminado.",
         "deleteError": "Erro ao eliminar grupo."
@@ -562,10 +569,15 @@
       "viewStats": "Ver Estatísticas",
       "renameTeam": "Renomear grupo",
       "membersTitle": "Membros ({{count}})",
-      "noMembers": "Ainda sem membros. Partilhe o link de convite abaixo.",
+      "membersSection": "Membros",
+      "noMembers": "Ainda sem membros.",
+      "noMembersDescription": "Adicione atletas para começar a usar este time.",
       "inviteLink": "Link de Convite",
       "dangerZone": "Zona de Perigo",
       "deleteTeam": "Eliminar Grupo",
+      "copyLink": "Copiar link",
+      "qrCode": "QR Code",
+      "fabAriaLabel": "Ações do time",
       "removeMember": {
         "title": "Remover Membro",
         "description": "Remover {{name}} deste grupo? As atribuições de treino não são afetadas.",
@@ -590,7 +602,9 @@
         "deleteError": "Erro ao eliminar grupo.",
         "athleteAdded": "Atleta adicionado",
         "athleteAddedDescription": "{{name}} adicionado ao grupo.",
-        "addAthleteError": "Erro ao adicionar atleta."
+        "addAthleteError": "Erro ao adicionar atleta.",
+        "linkCopied": "Link copiado!",
+        "linkCopiedDescription": "O link de convite foi copiado."
       }
     },
     "teamStats": {

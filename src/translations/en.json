@@ -436,6 +436,7 @@
     "users": {
       "title": "Users",
       "newUser": "New User",
+      "searchPlaceholder": "Search by name or email…",
       "you": "you",
       "columns": { "name": "Name", "email": "Email", "role": "Role", "created": "Created" },
       "roles": { "admin": "Admin", "editor": "Editor", "athlete": "Athlete" },
@@ -537,11 +538,15 @@
       "title": "Teams",
       "description": "Manage your training teams and invite athletes.",
       "newTeam": "New Team",
+      "searchPlaceholder": "Search teams…",
+      "editTeam": "Edit Team",
       "member": "member",
       "members": "members",
       "teamName": "Team Name",
       "teamNamePlaceholder": "e.g. U17 Football",
+      "teamColor": "Color",
       "createTeam": "Create Team",
+      "saveTeam": "Save",
       "noTeamsTitle": "No teams yet",
       "noTeamsDescription": "Create a team to start inviting athletes.",
       "delete": {
@@ -553,6 +558,8 @@
         "created": "Team created",
         "createdDescription": "\"{{name}}\" is ready.",
         "createError": "Failed to create team.",
+        "updated": "Team updated",
+        "updateError": "Failed to update team.",
         "deleted": "Team deleted",
         "deletedDescription": "\"{{name}}\" has been deleted.",
         "deleteError": "Failed to delete team."
@@ -562,10 +569,15 @@
       "viewStats": "View Stats",
       "renameTeam": "Rename team",
       "membersTitle": "Members ({{count}})",
-      "noMembers": "No members yet. Share the invite link below.",
+      "membersSection": "Members",
+      "noMembers": "No members yet.",
+      "noMembersDescription": "Add athletes to get started with this team.",
       "inviteLink": "Invite Link",
       "dangerZone": "Danger Zone",
       "deleteTeam": "Delete Team",
+      "copyLink": "Copy link",
+      "qrCode": "QR Code",
+      "fabAriaLabel": "Team actions",
       "removeMember": {
         "title": "Remove Member",
         "description": "Remove {{name}} from this team? Their workout assignments are not affected.",
@@ -590,7 +602,9 @@
         "deleteError": "Failed to delete team.",
         "athleteAdded": "Athlete added",
         "athleteAddedDescription": "{{name}} added to the team.",
-        "addAthleteError": "Failed to add athlete."
+        "addAthleteError": "Failed to add athlete.",
+        "linkCopied": "Link copied!",
+        "linkCopiedDescription": "The invite link has been copied."
       }
     },
     "teamStats": {

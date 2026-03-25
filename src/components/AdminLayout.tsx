@@ -15,9 +15,10 @@ interface AdminLayoutProps {
   children: React.ReactNode;
   fullHeight?: boolean;
   hideBottomNav?: boolean;
+  pageTitle?: string;
 }
 
-const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false }: AdminLayoutProps) => {
+const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, pageTitle }: AdminLayoutProps) => {
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -188,7 +189,7 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false }: Ad
 
   return (
     <div className={cn("bg-background", fullHeight ? "h-screen overflow-hidden" : "min-h-screen")}>
-      <AdminTopBar chatUnreadCount={chatUnreadCount} />
+      <AdminTopBar chatUnreadCount={chatUnreadCount} pageTitle={pageTitle} />
 
       <div className={cn("pt-[73px] flex", fullHeight ? "h-screen" : "min-h-[calc(100vh-73px)]")}>
         {/* Desktop Sidebar */}

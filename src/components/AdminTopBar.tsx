@@ -14,9 +14,10 @@ import { useState } from "react";
 
 interface AdminTopBarProps {
   chatUnreadCount?: number;
+  pageTitle?: string;
 }
 
-const AdminTopBar = ({ chatUnreadCount = 0 }: AdminTopBarProps) => {
+const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const { language, changeLanguage, t } = useLanguage();
@@ -33,7 +34,7 @@ const AdminTopBar = ({ chatUnreadCount = 0 }: AdminTopBarProps) => {
     { href: "/admin/chat", label: t.admin.nav.chat },
   ];
 
-  const currentTitle = navItems.find((item) =>
+  const currentTitle = pageTitle ?? navItems.find((item) =>
     item.exact ? location.pathname === item.href : location.pathname.startsWith(item.href)
   )?.label ?? "";
   const [isMenuOpen, setIsMenuOpen] = useState(false);

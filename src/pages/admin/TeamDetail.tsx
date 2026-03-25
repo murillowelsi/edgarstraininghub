@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
+import { AdminEmptyState } from "@/components/admin/AdminEmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -12,8 +13,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   getTeamById,
-  updateTeamName,
-  deleteTeam,
   removeMemberFromTeam,
   addMemberToTeam,
   autoAssignTeamWorkoutsToMember,
@@ -27,13 +26,13 @@ import {
   Loader2,
   Copy,
   Check,
-  Trash2,
   UserMinus,
   BarChart2,
-  Pencil,
-  X,
   UserPlus,
   MessageSquare,
+  QrCode,
+  Settings2,
+  ChevronLeft,
 } from "lucide-react";
 
 export default function AdminTeamDetail() {
@@ -47,21 +46,17 @@ export default function AdminTeamDetail() {
   const [members, setMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Name editing
-  const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState("");
-  const [savingName, setSavingName] = useState(false);
 
   // Copy link
   const [copied, setCopied] = useState(false);
 
+  // Speed dial FAB
+  const [fabOpen, setFabOpen] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+
   // Remove member
   const [confirmMember, setConfirmMember] = useState<User | null>(null);
   const [removingMember, setRemovingMember] = useState<string | null>(null);
-
-  // Delete team
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   // Group chat
   const [openingChat, setOpeningChat] = useState(false);
@@ -82,7 +77,6 @@ export default function AdminTeamDetail() {
         if (cancelled) return;
         if (!team) { navigate("/admin/teams"); return; }
         setTeam(team);
-        setNameInput(team.name);
         const memberUsers = await Promise.all(
           team.memberIds.map((uid) => getUserById(uid))
         );
@@ -111,28 +105,12 @@ export default function AdminTeamDetail() {
     navigator.clipboard.writeText(inviteUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      toast({ title: t.admin.teamDetail.toast.linkCopied, description: t.admin.teamDetail.toast.linkCopiedDescription });
     }).catch(() => {
       toast({ title: t.common.error, description: "Could not copy to clipboard.", variant: "destructive" });
     });
   };
 
-  const handleSaveName = async () => {
-    if (!team || !nameInput.trim() || nameInput === team.name) {
-      setEditingName(false);
-      return;
-    }
-    setSavingName(true);
-    try {
-      await updateTeamName(team.id, nameInput.trim());
-      setTeam((prev) => prev ? { ...prev, name: nameInput.trim() } : prev);
-      setEditingName(false);
-      toast({ title: t.admin.teamDetail.toast.teamRenamed });
-    } catch {
-      toast({ title: t.common.error, description: t.admin.teamDetail.toast.renameError, variant: "destructive" });
-    } finally {
-      setSavingName(false);
-    }
-  };
 
   const handleRemoveMember = async (member: User) => {
     if (!team) return;
@@ -153,19 +131,6 @@ export default function AdminTeamDetail() {
     }
   };
 
-  const handleDeleteTeam = async () => {
-    if (!team) return;
-    setDeleting(true);
-    try {
-      await deleteTeam(team.id);
-      toast({ title: t.admin.teamDetail.toast.teamDeleted });
-      navigate("/admin/teams");
-    } catch {
-      toast({ title: t.common.error, description: t.admin.teamDetail.toast.deleteError, variant: "destructive" });
-      setDeleting(false);
-      setConfirmDelete(false);
-    }
-  };
 
   const handleOpenGroupChat = async () => {
     if (!team || !user) return;
@@ -244,43 +209,22 @@ export default function AdminTeamDetail() {
 
   return (
     <AdminLayout>
-      <div className="p-4 md:p-8 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 mb-6 md:mb-8">
-          {editingName ? (
-            <div className="flex items-center gap-2">
-              <Input
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                className="max-w-xs h-8 text-lg font-bold"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSaveName();
-                  if (e.key === "Escape") setEditingName(false);
-                }}
-              />
-              <Button size="icon" variant="ghost" onClick={handleSaveName} disabled={savingName}>
-                {savingName ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              </Button>
-              <Button size="icon" variant="ghost" onClick={() => setEditingName(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <h1 className="text-xl md:text-2xl font-bold">{team.name}</h1>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                onClick={() => setEditingName(true)}
-                aria-label={t.admin.teamDetail.renameTeam}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          )}
-          <div className="hidden sm:flex items-center gap-2 shrink-0">
+      <div className="p-4 md:p-8 space-y-6">
+        {/* Header — back button + centered name + action buttons */}
+        <div className="relative flex items-center md:mb-8">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 shrink-0"
+            onClick={() => navigate("/admin/teams")}
+            aria-label="Voltar"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="absolute left-1/2 -translate-x-1/2 text-lg md:text-xl font-bold truncate max-w-[60%] text-center">
+            {team.name}
+          </h1>
+          <div className="hidden sm:flex items-center gap-2 shrink-0 ml-auto">
             <Button variant="outline" onClick={handleOpenGroupChat} disabled={openingChat}>
               {openingChat
                 ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -293,29 +237,78 @@ export default function AdminTeamDetail() {
             </Button>
           </div>
         </div>
-        {/* Mobile FAB for Stats */}
-        <button
-          onClick={() => navigate(`/admin/teams/${team.id}/stats`)}
-          className="fixed right-4 z-30 sm:hidden h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+
+        {/* Speed dial FAB — mobile only */}
+        {fabOpen && (
+          <div
+            className="fixed inset-0 z-20 sm:hidden"
+            onClick={() => setFabOpen(false)}
+          />
+        )}
+        <div
+          className="fixed right-4 z-30 sm:hidden flex flex-col items-end gap-3"
           style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-          aria-label={t.admin.teamDetail.viewStats}
         >
-          <BarChart2 className="h-6 w-6" />
-        </button>
+          {/* Speed dial items */}
+          {fabOpen && (
+            <div className="flex flex-col items-end gap-2">
+              {[
+                {
+                  icon: BarChart2,
+                  label: t.admin.teamDetail.viewStats,
+                  onClick: () => { navigate(`/admin/teams/${team.id}/stats`); setFabOpen(false); },
+                },
+                {
+                  icon: openingChat ? Loader2 : MessageSquare,
+                  label: t.admin.teamDetail.groupChat,
+                  onClick: () => { handleOpenGroupChat(); setFabOpen(false); },
+                },
+                {
+                  icon: UserPlus,
+                  label: t.admin.teamDetail.addAthlete,
+                  onClick: () => { handleOpenAddAthlete(); setFabOpen(false); },
+                },
+                {
+                  icon: QrCode,
+                  label: t.admin.teamDetail.qrCode,
+                  onClick: () => { setShowQRModal(true); setFabOpen(false); },
+                },
+              ].map(({ icon: Icon, label, onClick }) => (
+                <button
+                  key={label}
+                  onClick={onClick}
+                  className="flex items-center gap-2.5 bg-card border shadow-md rounded-full pl-3 pr-3.5 py-2 text-sm font-medium hover:bg-accent transition-colors active:scale-95"
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Main FAB */}
+          <button
+            onClick={() => setFabOpen((v) => !v)}
+            className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+            aria-label={t.admin.teamDetail.fabAriaLabel}
+          >
+            <Settings2 className={`h-6 w-6 transition-transform duration-300 ${fabOpen ? "rotate-90" : ""}`} />
+          </button>
+        </div>
 
         {/* Members */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t.admin.teamDetail.membersTitle.replace("{{count}}", String(members.length))}
-            </h2>
-            <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs" onClick={handleOpenAddAthlete}>
+            <Button size="sm" variant="outline" className="hidden sm:flex h-7 gap-1.5 text-xs" onClick={handleOpenAddAthlete}>
               <UserPlus className="h-3.5 w-3.5" />
               {t.admin.teamDetail.addAthlete}
             </Button>
           </div>
           {members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t.admin.teamDetail.noMembers}</p>
+            <AdminEmptyState
+              illustration="/undraw_team.svg"
+              title={t.admin.teamDetail.noMembers}
+              description={t.admin.teamDetail.noMembersDescription}
+            />
           ) : (
             <div className="space-y-2">
               {members.map((member) => (
@@ -346,37 +339,24 @@ export default function AdminTeamDetail() {
           )}
         </section>
 
-        {/* Invite section */}
-        <section>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            {t.admin.teamDetail.inviteLink}
-          </h2>
-          <div className="flex items-center gap-2 mb-4">
-            <Input value={inviteUrl} readOnly className="text-sm font-mono" />
-            <Button variant="outline" size="icon" onClick={handleCopyLink} className="shrink-0">
-              {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-            </Button>
-          </div>
-          <div className="p-4 bg-white rounded-lg inline-block border">
-            {inviteUrl && <QRCodeSVG value={inviteUrl} size={160} />}
-          </div>
-        </section>
-
-        {/* Danger zone */}
-        <section>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            {t.admin.teamDetail.dangerZone}
-          </h2>
-          <Button
-            variant="destructive"
-            onClick={() => setConfirmDelete(true)}
-            disabled={deleting}
-          >
-            {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-            {t.admin.teamDetail.deleteTeam}
-          </Button>
-        </section>
       </div>
+
+      {/* QR Code Modal — mobile FAB action */}
+      <ResponsiveModal
+        open={showQRModal}
+        onOpenChange={setShowQRModal}
+        title={t.admin.teamDetail.qrCode}
+      >
+        <div className="flex flex-col items-center gap-4 py-2">
+          <div className="p-4 bg-white rounded-lg border">
+            {inviteUrl && <QRCodeSVG value={inviteUrl} size={200} />}
+          </div>
+          <Button variant="outline" className="w-full" onClick={() => { handleCopyLink(); setShowQRModal(false); }}>
+            {copied ? <Check className="h-4 w-4 mr-2 text-green-500" /> : <Copy className="h-4 w-4 mr-2" />}
+            {t.admin.teamDetail.copyLink}
+          </Button>
+        </div>
+      </ResponsiveModal>
 
       {/* Add Athlete Modal */}
       <ResponsiveModal
@@ -384,7 +364,7 @@ export default function AdminTeamDetail() {
         onOpenChange={setAddAthleteOpen}
         title={t.admin.teamDetail.addAthleteTitle}
       >
-        <div className="space-y-3 p-1">
+        <div className="flex flex-col gap-3 p-1 min-h-0">
           <Input
             placeholder={t.admin.teamDetail.searchAthletes}
             value={athleteSearch}
@@ -400,7 +380,7 @@ export default function AdminTeamDetail() {
               {t.admin.teamDetail.noAthletesAvailable}
             </p>
           ) : (
-            <ScrollArea className="h-64">
+            <ScrollArea className="h-[50dvh] md:h-64">
               <div className="space-y-1 pr-1">
                 {filteredAthletes.map((athlete) => (
                   <div
@@ -450,17 +430,6 @@ export default function AdminTeamDetail() {
         onConfirm={() => confirmMember && handleRemoveMember(confirmMember)}
       />
 
-      {/* Delete team confirm */}
-      <ResponsiveConfirm
-        open={confirmDelete}
-        onOpenChange={(open) => { if (!open) setConfirmDelete(false); }}
-        title={t.admin.teamDetail.deleteTeam}
-        description={t.admin.teamDetail.deleteConfirm.description}
-        confirmLabel={t.common.delete}
-        destructive
-        onConfirm={handleDeleteTeam}
-        loading={deleting}
-      />
     </AdminLayout>
   );
 }

@@ -23,6 +23,7 @@ const TEAMS_COLLECTION = "teams";
 const docToTeam = (id: string, data: TeamDocument): Team => ({
   id,
   name: data.name,
+  color: data.color,
   coachId: data.coachId,
   inviteToken: data.inviteToken,
   memberIds: data.memberIds || [],
@@ -34,13 +35,14 @@ const docToTeam = (id: string, data: TeamDocument): Team => ({
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
 
-export const createTeam = async (name: string, coachId: string): Promise<Team> => {
+export const createTeam = async (name: string, coachId: string, color?: string): Promise<Team> => {
   const inviteToken = crypto.randomUUID();
   const ref = await addDoc(collection(db, TEAMS_COLLECTION), {
     name,
     coachId,
     inviteToken,
     memberIds: [],
+    ...(color && { color }),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -78,6 +80,13 @@ export const getTeamByInviteToken = async (token: string): Promise<Team | null> 
 export const updateTeamName = async (id: string, name: string): Promise<void> => {
   await updateDoc(doc(db, TEAMS_COLLECTION, id), {
     name,
+    updatedAt: serverTimestamp(),
+  });
+};
+
+export const updateTeamColor = async (id: string, color: string): Promise<void> => {
+  await updateDoc(doc(db, TEAMS_COLLECTION, id), {
+    color,
     updatedAt: serverTimestamp(),
   });
 };
