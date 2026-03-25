@@ -1,7 +1,6 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -102,53 +101,7 @@ const AthleteWorkoutsList = () => {
 
   return (
     <AthletePortalLayout title={t.athlete.workouts.title}>
-      <div className="p-4 space-y-6">
-        {/* Program Header */}
-        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-primary/20">
-                <Dumbbell className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-xl">{displayName}{t.athlete.workouts.program}</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {t.athlete.workouts.trainingSchedule}
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{t.athlete.workouts.progress}</span>
-                <span className="font-medium">
-                  {completedWorkouts} / {totalWorkouts} {t.athlete.workouts.completed}
-                </span>
-              </div>
-              <Progress value={completionRate} className="h-2" />
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-3 mt-4">
-              <div className="text-center p-3 rounded-xl bg-background/50">
-                <p className="text-2xl font-bold">{totalWorkouts}</p>
-                <p className="text-xs text-muted-foreground">{t.athlete.workouts.total}</p>
-              </div>
-              <div className="text-center p-3 rounded-xl bg-background/50">
-                <p className="text-2xl font-bold text-green-600">
-                  {completedWorkouts}
-                </p>
-                <p className="text-xs text-muted-foreground">{t.athlete.workouts.done}</p>
-              </div>
-              <div className="text-center p-3 rounded-xl bg-background/50">
-                <p className="text-2xl font-bold text-primary">{pendingWorkouts}</p>
-                <p className="text-xs text-muted-foreground">{t.athlete.workouts.pending}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="p-4 space-y-8">
         {/* Filter Tabs */}
         <Tabs
           value={filter}
@@ -183,7 +136,7 @@ const AthleteWorkoutsList = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-4">
             {filteredAssignments.map((assignment) => {
               const workout = assignment.workout;
               const Icon = workoutTypeIcons[workout.type] || PersonStanding;
@@ -193,6 +146,7 @@ const AthleteWorkoutsList = () => {
                 <Link
                   key={assignment.id}
                   to={`/athlete/workout/${assignment.id}`}
+                  className="block"
                 >
                   <Card
                     className={cn(

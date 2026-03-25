@@ -398,12 +398,30 @@
     "viewSite": "Ver Site",
     "collapse": "Recolher",
     "nav": {
+      "home": "Início",
       "posts": "Artigos",
       "users": "Utilizadores",
       "workouts": "Treinos",
       "calendar": "Calendário",
       "chat": "Chat",
       "teams": "Times"
+    },
+    "dashboard": {
+      "welcomeBack": "Bem-vindo de volta,",
+      "statAthletes": "Atletas",
+      "statTeams": "Times",
+      "statWorkouts": "Treinos",
+      "statTodayLabel": "Hoje",
+      "overallCompletion": "Conclusão Geral",
+      "assignmentsCompleted": "de {{total}} atribuições concluídas",
+      "teamsOverview": "Times",
+      "seeAll": "Ver todos",
+      "members": "membros",
+      "noTeams": "Nenhum time criado ainda.",
+      "todaysActivity": "Atividade de Hoje",
+      "noActivityToday": "Nenhuma atribuição para hoje.",
+      "completed": "Concluído",
+      "pending": "Pendente"
     },
     "posts": {
       "title": "Artigos",

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, LogOut, Menu, Shield, Users } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, Home, LogOut, Menu, Shield, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -22,6 +22,7 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false }: Ad
   const { t } = useLanguage();
 
   const navItems = [
+    { href: "/admin", label: t.admin.nav.home, icon: Home },
     { href: "/admin/posts", label: t.admin.nav.posts, icon: FileText },
     { href: "/admin/users", label: t.admin.nav.users, icon: Users },
     { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell },
@@ -114,7 +115,9 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false }: Ad
 
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = location.pathname.startsWith(item.href);
+          const isActive = item.href === "/admin"
+            ? location.pathname === "/admin"
+            : location.pathname.startsWith(item.href);
           const showBadge = item.href === "/admin/chat" && chatUnreadCount > 0;
           return (
             <Link key={item.href} to={item.href}>

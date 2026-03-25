@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { CalendarDays, Dumbbell, Shield, Users } from "lucide-react";
+import { CalendarDays, Dumbbell, Home, Shield, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -8,6 +8,7 @@ export function BottomNav() {
   const { t } = useLanguage();
 
   const navItems = [
+    { href: "/admin", label: t.admin.nav.home, icon: Home, exact: true },
     { href: "/admin/users", label: t.admin.nav.users, icon: Users },
     { href: "/admin/teams", label: t.admin.nav.teams, icon: Shield },
     { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
@@ -21,7 +22,9 @@ export function BottomNav() {
     >
       <div className="flex items-stretch h-16">
         {navItems.map((item) => {
-          const isActive = location.pathname.startsWith(item.href);
+          const isActive = item.exact
+            ? location.pathname === item.href
+            : location.pathname.startsWith(item.href);
 
           return (
             <Link

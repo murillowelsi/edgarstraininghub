@@ -22,6 +22,7 @@ const AdminTopBar = ({ chatUnreadCount = 0 }: AdminTopBarProps) => {
   const location = useLocation();
 
   const navItems = [
+    { href: "/admin", label: t.admin.nav.home, exact: true },
     { href: "/admin/posts", label: t.admin.nav.posts },
     { href: "/admin/users", label: t.admin.nav.users },
     { href: "/admin/workouts", label: t.admin.nav.workouts },
@@ -32,7 +33,7 @@ const AdminTopBar = ({ chatUnreadCount = 0 }: AdminTopBarProps) => {
   ];
 
   const currentTitle = navItems.find((item) =>
-    location.pathname.startsWith(item.href)
+    item.exact ? location.pathname === item.href : location.pathname.startsWith(item.href)
   )?.label ?? "";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 

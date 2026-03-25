@@ -155,63 +155,71 @@ const AthleteHome = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-primary/20">
-                  <Target className="h-5 w-5 text-primary" />
+          <Link to="/athlete/workouts">
+            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover:shadow-md transition-all hover:border-primary/40 cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-primary/20">
+                    <Target className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{completionRate}%</p>
+                    <p className="text-xs text-muted-foreground">{t.athlete.home.statCompletion}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{completionRate}%</p>
-                  <p className="text-xs text-muted-foreground">{t.athlete.home.statCompletion}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-200/50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-orange-500/20">
-                  <Flame className="h-5 w-5 text-orange-500" />
+          <Link to="/athlete/workouts">
+            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-200/50 hover:shadow-md transition-all hover:border-orange-400/50 cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-orange-500/20">
+                    <Flame className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{completedWorkouts}</p>
+                    <p className="text-xs text-muted-foreground">{t.athlete.home.statCompleted}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{completedWorkouts}</p>
-                  <p className="text-xs text-muted-foreground">{t.athlete.home.statCompleted}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-200/50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-blue-500/20">
-                  <CalendarCheck className="h-5 w-5 text-blue-500" />
+          <Link to="/athlete/workouts">
+            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-200/50 hover:shadow-md transition-all hover:border-blue-400/50 cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-blue-500/20">
+                    <CalendarCheck className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{totalWorkouts}</p>
+                    <p className="text-xs text-muted-foreground">{t.athlete.home.statTotal}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{totalWorkouts}</p>
-                  <p className="text-xs text-muted-foreground">{t.athlete.home.statTotal}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-200/50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-green-500/20">
-                  <TrendingUp className="h-5 w-5 text-green-500" />
+          <Link to="/athlete/calendar">
+            <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-200/50 hover:shadow-md transition-all hover:border-green-400/50 cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-green-500/20">
+                    <TrendingUp className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">
+                      {todaysCompleted}/{todaysWorkouts.length}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{t.athlete.home.statToday}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">
-                    {todaysCompleted}/{todaysWorkouts.length}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{t.athlete.home.statToday}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         {/* Progress Card */}

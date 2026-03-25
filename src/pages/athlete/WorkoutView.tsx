@@ -679,7 +679,7 @@ const AthleteWorkoutView = () => {
                 <div className="flex-1 min-w-0">
                   <h2
                     className={cn(
-                      "text-xl font-bold",
+                      "text-xl font-bold text-balance break-words",
                       isCompleted && "line-through text-muted-foreground"
                     )}
                   >

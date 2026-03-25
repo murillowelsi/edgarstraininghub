@@ -398,12 +398,30 @@
     "viewSite": "View Site",
     "collapse": "Collapse",
     "nav": {
+      "home": "Home",
       "posts": "Posts",
       "users": "Users",
       "workouts": "Workouts",
       "calendar": "Calendar",
       "chat": "Chat",
       "teams": "Teams"
+    },
+    "dashboard": {
+      "welcomeBack": "Welcome back,",
+      "statAthletes": "Athletes",
+      "statTeams": "Teams",
+      "statWorkouts": "Workouts",
+      "statTodayLabel": "Today",
+      "overallCompletion": "Overall Completion",
+      "assignmentsCompleted": "of {{total}} assignments completed",
+      "teamsOverview": "Teams",
+      "seeAll": "See all",
+      "members": "members",
+      "noTeams": "No teams created yet.",
+      "todaysActivity": "Today's Activity",
+      "noActivityToday": "No assignments for today.",
+      "completed": "Completed",
+      "pending": "Pending"
     },
     "posts": {
       "title": "Posts",

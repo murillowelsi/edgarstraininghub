@@ -719,7 +719,7 @@ const StrengthWorkoutSession = () => {
                   )}
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-xl font-bold">{workout.name}</h1>
+                  <h1 className="text-xl font-bold text-balance break-words">{workout.name}</h1>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Dumbbell className="h-4 w-4" />

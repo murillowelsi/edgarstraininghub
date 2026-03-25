@@ -16,6 +16,7 @@ import Contact from "./pages/Contact";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminCalendar from "./pages/admin/Calendar";
+import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLogin from "./pages/admin/Login";
 import AdminPostForm from "./pages/admin/PostForm";
 import AdminPosts from "./pages/admin/Posts";
@@ -66,6 +67,14 @@ const App = () => (
 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/admin/posts"
                   element={
