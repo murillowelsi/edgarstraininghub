@@ -6,6 +6,7 @@ import {
   DragStartEvent,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   closestCorners,
   useDroppable,
   useSensor,
@@ -21,12 +22,14 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import {
   createWorkout,
@@ -48,11 +51,12 @@ import {
   workoutTypeLabels,
 } from "@/types/workout";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Bike, ChevronDown, Clock, Flame, GripVertical, Heart, Loader2, Pencil, PersonStanding, Plus, Repeat, Save, Trash2, Waves, Wind, Zap } from "lucide-react";
+import { ArrowLeft, Bike, ChevronDown, Clock, Flame, GripVertical, Heart, Loader2, MoreVertical, Pencil, PersonStanding, Plus, Repeat, Trash2, Waves, Wind, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import StageEditor from "../../components/workout/StageEditor";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
 
@@ -141,6 +145,7 @@ const DraggableStage = ({
 }) => {
   const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -163,12 +168,36 @@ const DraggableStage = ({
 
   return (
     <div ref={setNodeRef} style={style}>
+      <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{stageLabels[stage.type]}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2">
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
+              onClick={() => { setMenuOpen(false); onEdit(); }}
+            >
+              <Pencil className="h-5 w-5" />
+              Edit
+            </button>
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium text-destructive"
+              onClick={() => { setMenuOpen(false); onDelete(); }}
+            >
+              <Trash2 className="h-5 w-5" />
+              Delete
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
       <div className={cn("rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden", isNested && "bg-muted/30")}>
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <div className={cn("flex items-center gap-3", isNested ? "p-3" : "p-4")}>
             <div
               {...attributes}
               {...listeners}
+              style={{ touchAction: 'none' }}
               className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0"
             >
               <GripVertical className="h-4 w-4" />
@@ -195,14 +224,14 @@ const DraggableStage = ({
               </button>
             </CollapsibleTrigger>
 
-            <div className="flex items-center gap-1 shrink-0">
-              <Button variant="ghost" size="sm" onClick={onEdit} className="text-primary h-8 px-2 text-xs">
-                Edit
-              </Button>
-              <Button variant="ghost" size="icon" onClick={onDelete} className="text-muted-foreground hover:text-destructive h-8 w-8">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground shrink-0"
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
           </div>
 
           <CollapsibleContent>
@@ -286,25 +315,18 @@ const RepeatBlock = ({
   onEdit,
   onDelete,
   onNestedStagesChange,
-  editingStageId,
   onEditNested,
   onDeleteNested,
-  onStageChange,
-  onDoneEditing,
-  workoutType = "running",
 }: {
   stage: WorkoutStage;
   onEdit: () => void;
   onDelete: () => void;
   onNestedStagesChange: (stages: WorkoutStage[]) => void;
-  editingStageId: string | null;
   onEditNested: (id: string) => void;
   onDeleteNested: (id: string) => void;
-  onStageChange: (stage: WorkoutStage) => void;
-  onDoneEditing: () => void;
-  workoutType?: WorkoutType;
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -325,12 +347,36 @@ const RepeatBlock = ({
 
   return (
     <div ref={setNodeRef} style={style}>
+      <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{stageLabels[stage.type]}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2">
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
+              onClick={() => { setMenuOpen(false); onEdit(); }}
+            >
+              <Pencil className="h-5 w-5" />
+              Edit
+            </button>
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium text-destructive"
+              onClick={() => { setMenuOpen(false); onDelete(); }}
+            >
+              <Trash2 className="h-5 w-5" />
+              Delete
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
       <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <div className="p-4 flex items-center gap-3">
             <div
               {...attributes}
               {...listeners}
+              style={{ touchAction: 'none' }}
               className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0"
             >
               <GripVertical className="h-4 w-4" />
@@ -352,14 +398,14 @@ const RepeatBlock = ({
               </button>
             </CollapsibleTrigger>
 
-            <div className="flex items-center gap-1 shrink-0">
-              <Button variant="ghost" size="sm" onClick={onEdit} className="text-primary h-8 px-2 text-xs">
-                Edit
-              </Button>
-              <Button variant="ghost" size="icon" onClick={onDelete} className="text-muted-foreground hover:text-destructive h-8 w-8">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground shrink-0"
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
           </div>
 
           <CollapsibleContent>
@@ -369,28 +415,13 @@ const RepeatBlock = ({
                 strategy={verticalListSortingStrategy}
               >
                 {nestedStages.map((nestedStage) => (
-                  editingStageId === nestedStage.id ? (
-                    <StageEditor
-                      key={nestedStage.id}
-                      stage={nestedStage}
-                      onChange={(updated) => {
-                        const newStages = nestedStages.map((s) =>
-                          s.id === updated.id ? updated : s
-                        );
-                        onNestedStagesChange(newStages);
-                      }}
-                      onDone={onDoneEditing}
-                      workoutType={workoutType}
-                    />
-                  ) : (
-                    <DraggableStage
-                      key={nestedStage.id}
-                      stage={nestedStage}
-                      onEdit={() => onEditNested(nestedStage.id)}
-                      onDelete={() => onDeleteNested(nestedStage.id)}
-                      isNested
-                    />
-                  )
+                  <DraggableStage
+                    key={nestedStage.id}
+                    stage={nestedStage}
+                    onEdit={() => onEditNested(nestedStage.id)}
+                    onDelete={() => onDeleteNested(nestedStage.id)}
+                    isNested
+                  />
                 ))}
               </SortableContext>
               {nestedStages.length === 0 && (
@@ -462,8 +493,8 @@ const WorkoutEditor = () => {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
-  const [editingName, setEditingName] = useState(false);
   const [editingStageId, setEditingStageId] = useState<string | null>(null);
+  const [fabOpen, setFabOpen] = useState(false);
   const [activeStage, setActiveStage] = useState<WorkoutStage | null>(null);
   const [formData, setFormData] = useState<WorkoutFormData>({
     name: `${workoutTypeLabels[urlWorkoutType]} Workout`,
@@ -475,6 +506,12 @@ const WorkoutEditor = () => {
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -628,6 +665,35 @@ const WorkoutEditor = () => {
         s.id === repeatId ? { ...s, stages: nestedStages } : s
       ),
     }));
+  };
+
+  // Resolve which stage is being edited and its onChange handler
+  const getEditingInfo = (): { stage: WorkoutStage; onChange: (s: WorkoutStage) => void } | null => {
+    if (!editingStageId) return null;
+
+    const topLevel = formData.stages.find((s) => s.id === editingStageId);
+    if (topLevel) {
+      return { stage: topLevel, onChange: handleStageChange };
+    }
+
+    for (const repeatStage of formData.stages) {
+      if (repeatStage.type === "repeat" && repeatStage.stages) {
+        const nested = repeatStage.stages.find((s) => s.id === editingStageId);
+        if (nested) {
+          return {
+            stage: nested,
+            onChange: (updated: WorkoutStage) => {
+              handleNestedStagesChange(
+                repeatStage.id,
+                repeatStage.stages!.map((s) => (s.id === updated.id ? updated : s))
+              );
+            },
+          };
+        }
+      }
+    }
+
+    return null;
   };
 
   // Find which container a stage belongs to
@@ -810,68 +876,24 @@ const WorkoutEditor = () => {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout fullHeight>
       <div className="h-full flex flex-col">
         {/* Header */}
-        <header className="border-b bg-card px-4 py-3 flex items-center gap-3 shrink-0">
-          <Link to="/admin/workouts">
-            <Button variant="ghost" size="icon" className="shrink-0">
+        <header className="border-b bg-card px-4 py-3 flex items-center gap-2 shrink-0">
+          <Link to="/admin/workouts" className="shrink-0">
+            <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-
-          {/* Type icon — desktop only */}
-          <div className="hidden md:flex h-9 w-9 rounded-full bg-muted items-center justify-center shrink-0">
-            {formData.type === "cycling" && <Bike className="h-4 w-4" />}
-            {formData.type === "running" && <PersonStanding className="h-4 w-4" />}
-            {formData.type === "swimming" && <Waves className="h-4 w-4" />}
-          </div>
-
-          {/* Editable name */}
-          <div className="flex-1 min-w-0">
-            {editingName ? (
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                onBlur={() => setEditingName(false)}
-                onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
-                autoFocus
-                className="font-semibold h-8 py-1 px-2 text-sm md:text-base"
-              />
-            ) : (
-              <button
-                onClick={() => setEditingName(true)}
-                className="flex items-center gap-1.5 font-semibold hover:text-primary text-sm md:text-base truncate w-full text-left"
-              >
-                <span className="truncate">{formData.name}</span>
-                <Pencil className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              </button>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Cancel — desktop only (mobile uses back arrow) */}
-            <Link to="/admin/workouts" className="hidden md:block">
-              <Button variant="outline" size="sm" disabled={saving}>
-                Cancel
-              </Button>
-            </Link>
-            <Button onClick={handleSubmit} disabled={saving} size="sm">
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  <span className="md:hidden">Save</span>
-                  <span className="hidden md:inline">Save Workout</span>
-                </>
-              )}
-            </Button>
-          </div>
+          <h1 className="font-semibold text-sm flex-1 min-w-0 truncate">
+            {isEditing
+              ? `Edit ${workoutTypeLabels[formData.type]} Workout`
+              : `New ${workoutTypeLabels[formData.type]} Workout`}
+          </h1>
+          <Button onClick={handleSubmit} disabled={saving} size="sm" variant="ghost" className="shrink-0 text-primary hover:text-primary">
+            {saving && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
+            {t.workout.editor.saveWorkout}
+          </Button>
         </header>
 
         {/* Content */}
@@ -881,6 +903,14 @@ const WorkoutEditor = () => {
               {/* Stages list */}
               <Card className="flex-1">
                 <div className="p-4 md:p-6">
+                  <div className="space-y-2 mb-6">
+                    <Label>{t.workout.editor.workoutName}</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                      placeholder={t.workout.editor.workoutNamePlaceholder}
+                    />
+                  </div>
                   <h2 className="font-semibold mb-4">Stages</h2>
                   <div className="space-y-3">
                     {formData.stages.length === 0 ? (
@@ -906,18 +936,6 @@ const WorkoutEditor = () => {
                           strategy={verticalListSortingStrategy}
                         >
                           {formData.stages.map((stage) => {
-                            if (editingStageId === stage.id) {
-                              return (
-                                <StageEditor
-                                  key={stage.id}
-                                  stage={stage}
-                                  onChange={handleStageChange}
-                                  onDone={() => setEditingStageId(null)}
-                                  workoutType={formData.type}
-                                />
-                              );
-                            }
-
                             if (stage.type === "repeat") {
                               return (
                                 <RepeatBlock
@@ -928,14 +946,10 @@ const WorkoutEditor = () => {
                                   onNestedStagesChange={(nestedStages) =>
                                     handleNestedStagesChange(stage.id, nestedStages)
                                   }
-                                  editingStageId={editingStageId}
                                   onEditNested={(nestedId) => setEditingStageId(nestedId)}
                                   onDeleteNested={(nestedId) =>
                                     handleDeleteNestedStage(stage.id, nestedId)
                                   }
-                                  onStageChange={handleStageChange}
-                                  onDoneEditing={() => setEditingStageId(null)}
-                                  workoutType={formData.type}
                                 />
                               );
                             }
@@ -986,29 +1000,71 @@ const WorkoutEditor = () => {
           </div>
         </div>
 
-        {/* Mobile action bar — shown below lg, above BottomNav */}
+        {/* Speed dial FAB — mobile only */}
+        {fabOpen && (
+          <div
+            className="fixed inset-0 z-20 lg:hidden"
+            onClick={() => setFabOpen(false)}
+          />
+        )}
         <div
-          className="lg:hidden fixed left-0 right-0 z-20 bg-background border-t flex gap-2 px-4 py-2"
-          style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}
+          className="fixed right-4 z-30 lg:hidden flex flex-col items-end gap-3"
+          style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
         >
-          <Button
-            onClick={handleAddStage}
-            className="flex-1"
-            size="sm"
+          {fabOpen && (
+            <div className="flex flex-col items-end gap-2">
+              {[
+                {
+                  icon: Plus,
+                  label: "Add Stage",
+                  onClick: () => { handleAddStage(); setFabOpen(false); },
+                },
+                {
+                  icon: Repeat,
+                  label: "Add Repetition",
+                  onClick: () => { handleAddRepetition(); setFabOpen(false); },
+                },
+              ].map(({ icon: Icon, label, onClick }) => (
+                <button
+                  key={label}
+                  onClick={onClick}
+                  className="flex items-center gap-2.5 bg-card border shadow-md rounded-full pl-3 pr-3.5 py-2 text-sm font-medium hover:bg-accent transition-colors active:scale-95"
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => setFabOpen((v) => !v)}
+            className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Stage
-          </Button>
-          <Button
-            onClick={handleAddRepetition}
-            variant="outline"
-            className="flex-1"
-            size="sm"
-          >
-            <Repeat className="h-4 w-4 mr-2" />
-            Add Repetition
-          </Button>
+            <Plus className={`h-6 w-6 transition-transform duration-300 ${fabOpen ? "rotate-45" : ""}`} />
+          </button>
         </div>
+
+        {/* Stage editor modal — renders outside DndContext so drag-and-drop is never disrupted */}
+        {(() => {
+          const editingInfo = getEditingInfo();
+          return (
+            <ResponsiveModal
+              open={!!editingStageId}
+              onOpenChange={(open) => !open && setEditingStageId(null)}
+              title={editingInfo?.stage.type === "repeat" ? "Edit repeat block" : "Edit stage"}
+              className="max-w-md"
+            >
+              {editingInfo && (
+                <StageEditor
+                  stage={editingInfo.stage}
+                  onChange={editingInfo.onChange}
+                  onDone={() => setEditingStageId(null)}
+                  workoutType={formData.type}
+                />
+              )}
+            </ResponsiveModal>
+          );
+        })()}
       </div>
     </AdminLayout>
   );

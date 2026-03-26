@@ -16,7 +16,6 @@ import {
   GripVertical,
   Library,
   Loader2,
-  Save,
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -144,6 +143,8 @@ const StrengthWorkoutEditor = () => {
   const [notes, setNotes] = useState("");
   const [workoutExercises, setWorkoutExercises] = useState<WorkoutExercise[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [mobileTab, setMobileTab] = useState("workout");
+  const [libraryTab, setLibraryTab] = useState("library");
 
   useEffect(() => {
     loadData();
@@ -325,20 +326,10 @@ const StrengthWorkoutEditor = () => {
     </>
   );
 
-  const exerciseBrowser = (
-    <Tabs defaultValue="library" className="flex flex-col h-full">
-      <div className="border-b px-4 pt-3 shrink-0">
-        <TabsList className="w-full">
-          <TabsTrigger value="library" className="flex-1 gap-1">
-            <Library className="h-3.5 w-3.5" />
-            {t.workout.library.myLibrary}
-          </TabsTrigger>
-          <TabsTrigger value="browse" className="flex-1 gap-1">
-            <Database className="h-3.5 w-3.5" />
-            {t.workout.library.browse}
-          </TabsTrigger>
-        </TabsList>
-      </div>
+  const tabBadgeClass = "gap-1.5 px-3 py-1 rounded-full text-xs font-medium border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=inactive]:bg-background data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-border data-[state=inactive]:shadow-none";
+
+  const exerciseBrowserContent = (
+    <Tabs value={libraryTab} onValueChange={setLibraryTab} className="flex flex-col h-full">
       <TabsContent value="library" className="flex-1 overflow-hidden m-0">
         <MyLibraryBrowser onExerciseSelected={handleAddExercise} />
       </TabsContent>
@@ -348,51 +339,78 @@ const StrengthWorkoutEditor = () => {
     </Tabs>
   );
 
+  const exerciseBrowser = (
+    <div className="flex flex-col h-full">
+      <div className="border-b px-4 py-3 shrink-0 flex gap-2">
+        <Tabs value={libraryTab} onValueChange={setLibraryTab} className="contents">
+          <TabsList className="bg-transparent p-0 h-auto gap-2">
+            <TabsTrigger value="library" className={tabBadgeClass}>
+              <Library className="h-3.5 w-3.5" />
+              {t.workout.library.myLibrary}
+            </TabsTrigger>
+            <TabsTrigger value="browse" className={tabBadgeClass}>
+              <Database className="h-3.5 w-3.5" />
+              {t.workout.library.browse}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+      {exerciseBrowserContent}
+    </div>
+  );
+
   return (
-    <AdminLayout>
-      <div className="h-[calc(100vh-73px)] flex flex-col">
+    <AdminLayout fullHeight>
+      <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="border-b bg-card px-4 py-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/admin/workouts")}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="font-semibold">
-              {isEditing ? t.workout.editor.editStrengthWorkout : t.workout.editor.newStrengthWorkout}
-            </h1>
-          </div>
-          <Button onClick={handleSave} disabled={!name.trim() || saving}>
-            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+        <div className="border-b bg-card px-4 py-3 flex items-center gap-2 shrink-0">
+          <Button variant="ghost" size="icon" className="shrink-0" onClick={() => navigate("/admin/workouts")}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="font-semibold text-sm flex-1 min-w-0 truncate">
+            {isEditing ? t.workout.editor.editStrengthWorkout : t.workout.editor.newStrengthWorkout}
+          </h1>
+          <Button onClick={handleSave} disabled={!name.trim() || saving} size="sm" variant="ghost" className="shrink-0 text-primary hover:text-primary">
+            {saving && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
             {t.workout.editor.saveWorkout}
           </Button>
         </div>
 
-        {/* Mobile: top-level tabs — Workout | Add Exercises */}
+        {/* Mobile: single tab bar with all tabs */}
         <div className="flex-1 flex flex-col overflow-hidden md:hidden">
-          <Tabs defaultValue="workout" className="flex flex-col h-full">
-            <div className="border-b bg-card px-4 pt-2 shrink-0">
-              <TabsList className="w-full">
-                <TabsTrigger value="workout" className="flex-1">
-                  {t.workout.editor.workoutDetails}
+          <div className="border-b px-4 py-3 shrink-0 flex items-center gap-2">
+            <Tabs value={mobileTab} onValueChange={setMobileTab} className="contents">
+              <TabsList className="bg-transparent p-0 h-auto gap-2 flex-1">
+                <TabsTrigger value="workout" className={`${tabBadgeClass} flex-1 justify-center`}>
+                  Details
                 </TabsTrigger>
-                <TabsTrigger value="add" className="flex-1 gap-1">
-                  <Dumbbell className="h-3.5 w-3.5" />
-                  {t.workout.common.exercises}
+                <TabsTrigger value="add" className={`${tabBadgeClass} flex-1 justify-center`}>
+                  Exercises
                   {workoutExercises.length > 0 && (
-                    <span className="ml-1 text-xs bg-primary text-primary-foreground rounded-full px-1.5">
-                      {workoutExercises.length}
-                    </span>
+                    <span className="ml-0.5 font-semibold">({workoutExercises.length})</span>
                   )}
                 </TabsTrigger>
               </TabsList>
-            </div>
-            <TabsContent value="workout" className="flex-1 overflow-auto m-0 p-4">
-              {workoutBuilder}
-            </TabsContent>
-            <TabsContent value="add" className="flex-1 overflow-hidden m-0">
-              {exerciseBrowser}
-            </TabsContent>
-          </Tabs>
+            </Tabs>
+            <div className="w-px h-4 bg-border shrink-0" />
+            <Tabs value={libraryTab} onValueChange={(v) => { setLibraryTab(v); setMobileTab("add"); }} className="contents">
+              <TabsList className="bg-transparent p-0 h-auto gap-2 flex-1">
+                <TabsTrigger value="library" disabled={mobileTab === "workout"} className={`${tabBadgeClass} flex-1 justify-center`}>
+                  Library
+                </TabsTrigger>
+                <TabsTrigger value="browse" disabled={mobileTab === "workout"} className={`${tabBadgeClass} flex-1 justify-center`}>
+                  Browse
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            {mobileTab === "workout" ? (
+              <div className="h-full overflow-auto p-4">{workoutBuilder}</div>
+            ) : (
+              <div className="h-full">{exerciseBrowserContent}</div>
+            )}
+          </div>
         </div>
 
         {/* Desktop: side-by-side panels */}

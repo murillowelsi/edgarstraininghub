@@ -10,13 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
   bodyPartLabels,
@@ -363,36 +356,40 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.workout.library.searchExercises}
-            className="pl-9"
+            className="pl-8 h-8 text-sm rounded-full"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
 
-        <Select value={selectedBodyPart} onValueChange={setSelectedBodyPart}>
-          <SelectTrigger>
-            <SelectValue placeholder={t.workout.library.filterByBodyPart} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t.workout.library.allBodyParts}</SelectItem>
-            {bodyParts.map((part) => (
-              <SelectItem key={part} value={part}>
-                {t.workout.bodyParts[part as keyof typeof t.workout.bodyParts] || bodyPartLabels[part] || part}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {["all", ...bodyParts].map((part) => (
+            <button
+              key={part}
+              onClick={() => setSelectedBodyPart(part)}
+              className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                selectedBodyPart === part
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+              }`}
+            >
+              {part === "all"
+                ? t.workout.library.allBodyParts
+                : t.workout.bodyParts[part as keyof typeof t.workout.bodyParts] || bodyPartLabels[part] || part}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Results */}
