@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Heart, MessageCircle, AtSign, Loader2 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { subscribeToActivityNotifications, markMentionsRead } from "@/services/timelineService";
 import type { ActivityNotification } from "@/services/timelineService";
@@ -165,12 +165,13 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
                     >
                       {/* Actor avatar with type icon */}
                       <div className="relative shrink-0">
-                        <Avatar className="h-11 w-11 ring-2 ring-[#e1b506]">
-                          {n.actorPhotoURL && <AvatarImage src={n.actorPhotoURL} alt={n.authorName} className="object-cover" />}
-                          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                            {n.authorName.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
+                        <CachedAvatar
+                          src={n.actorPhotoURL}
+                          alt={n.authorName}
+                          fallback={n.authorName.charAt(0).toUpperCase()}
+                          className="h-11 w-11 ring-2 ring-[#e1b506]"
+                          fallbackClassName="bg-primary text-primary-foreground text-sm font-semibold"
+                        />
                         <NotificationIcon type={n.type} />
                       </div>
 

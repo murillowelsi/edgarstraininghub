@@ -14,7 +14,7 @@ import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
@@ -222,10 +222,11 @@ export default function AthleteChat() {
                                                 onClick={() => handleStartChat(admin)}
                                                 className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
                                             >
-                                                <Avatar>
-                                                    {admin.photoURL && <AvatarImage src={admin.photoURL} alt={admin.displayName} className="object-cover" />}
-                                                    <AvatarFallback>{admin.displayName[0]?.toUpperCase()}</AvatarFallback>
-                                                </Avatar>
+                                                <CachedAvatar
+                                                    src={admin.photoURL}
+                                                    alt={admin.displayName}
+                                                    fallback={admin.displayName[0]?.toUpperCase()}
+                                                />
                                                 <div>
                                                     <p className="font-medium">{admin.displayName}</p>
                                                     <p className="text-xs text-muted-foreground">{admin.role}</p>
@@ -265,14 +266,13 @@ export default function AthleteChat() {
                                             selectedChat?.id === chat.id && "bg-muted/60"
                                         )}
                                     >
-                                        <Avatar className="h-12 w-12 shrink-0 ring-2 ring-[#e1b506]">
-                                            {!chat.isGroup && getChatPhotoURL(chat) && <AvatarImage src={getChatPhotoURL(chat)!} alt={displayName} className="object-cover" />}
-                                            <AvatarFallback className="text-base font-semibold">
-                                                {chat.isGroup
-                                                    ? <Users2 className="h-5 w-5" />
-                                                    : displayName[0]?.toUpperCase()}
-                                            </AvatarFallback>
-                                        </Avatar>
+                                        <CachedAvatar
+                                            src={!chat.isGroup ? getChatPhotoURL(chat) : undefined}
+                                            alt={displayName}
+                                            fallback={chat.isGroup ? <Users2 className="h-5 w-5" /> : displayName[0]?.toUpperCase()}
+                                            className="h-12 w-12 shrink-0 ring-2 ring-[#e1b506]"
+                                            fallbackClassName="text-base font-semibold"
+                                        />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline gap-2">
                                                 <span className={cn("font-semibold truncate", unreadCount > 0 && "text-foreground")}>

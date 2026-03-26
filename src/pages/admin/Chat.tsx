@@ -13,7 +13,7 @@ import { getAllUsers } from "@/services/usersService";
 import { getTeamsByCoach } from "@/services/teamsService";
 import { User } from "@/types/user";
 import { Team } from "@/types/team";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { cn } from "@/lib/utils";
@@ -248,10 +248,11 @@ export default function AdminChat() {
                                     onClick={() => handleStartChat(athlete)}
                                     className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
                                 >
-                                    <Avatar>
-                                        {athlete.photoURL && <AvatarImage src={athlete.photoURL} alt={athlete.displayName} className="object-cover" />}
-                                        <AvatarFallback>{athlete.displayName[0]?.toUpperCase()}</AvatarFallback>
-                                    </Avatar>
+                                    <CachedAvatar
+                                        src={athlete.photoURL}
+                                        alt={athlete.displayName}
+                                        fallback={athlete.displayName[0]?.toUpperCase()}
+                                    />
                                     <div>
                                         <p className="font-medium">{athlete.displayName}</p>
                                         <p className="text-xs text-muted-foreground">{athlete.email}</p>
@@ -277,13 +278,11 @@ export default function AdminChat() {
                                 disabled={openingGroupChat === team.id}
                                 className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left disabled:opacity-60"
                             >
-                                <Avatar>
-                                    <AvatarFallback>
-                                        {openingGroupChat === team.id
-                                            ? <Loader2 className="h-4 w-4 animate-spin" />
-                                            : <Users2 className="h-4 w-4" />}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <CachedAvatar
+                                    fallback={openingGroupChat === team.id
+                                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                                        : <Users2 className="h-4 w-4" />}
+                                />
                                 <div>
                                     <p className="font-medium">{team.name}</p>
                                     <p className="text-xs text-muted-foreground">{team.memberIds.length} {team.memberIds.length === 1 ? t.admin.teams.member : t.admin.teams.members}</p>
@@ -338,14 +337,13 @@ export default function AdminChat() {
                                             selectedChat?.id === chat.id && "bg-muted/60"
                                         )}
                                     >
-                                        <Avatar className="h-12 w-12 shrink-0 ring-2 ring-[#e1b506]">
-                                            {!chat.isGroup && getChatPhotoURL(chat) && <AvatarImage src={getChatPhotoURL(chat)!} alt={displayName} className="object-cover" />}
-                                            <AvatarFallback className="text-base font-semibold">
-                                                {chat.isGroup
-                                                    ? <Users2 className="h-5 w-5" />
-                                                    : displayName[0]?.toUpperCase()}
-                                            </AvatarFallback>
-                                        </Avatar>
+                                        <CachedAvatar
+                                            src={!chat.isGroup ? getChatPhotoURL(chat) : undefined}
+                                            alt={displayName}
+                                            fallback={chat.isGroup ? <Users2 className="h-5 w-5" /> : displayName[0]?.toUpperCase()}
+                                            className="h-12 w-12 shrink-0 ring-2 ring-[#e1b506]"
+                                            fallbackClassName="text-base font-semibold"
+                                        />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline gap-2">
                                                 <span className={cn("font-semibold truncate", unreadCount > 0 && "text-foreground")}>

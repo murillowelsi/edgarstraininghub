@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -329,12 +329,14 @@ export default function AdminTeamDetail() {
                 <ListItemCard
                   key={member.id}
                   icon={
-                    <Avatar className="h-9 w-9 ring-2 ring-[#e1b506]">
-                      {member.photoURL && <AvatarImage src={member.photoURL} alt={member.displayName} className="object-cover" />}
-                      <AvatarFallback className="text-xs font-semibold" style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}>
-                        {getInitials(member.displayName || "?")}
-                      </AvatarFallback>
-                    </Avatar>
+                    <CachedAvatar
+                      src={member.photoURL}
+                      alt={member.displayName}
+                      fallback={getInitials(member.displayName || "?")}
+                      className="h-9 w-9 ring-2 ring-[#e1b506]"
+                      fallbackClassName="text-xs font-semibold"
+                      fallbackStyle={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
+                    />
                   }
                   iconClassName="p-0"
                   title={member.displayName}
@@ -406,12 +408,13 @@ export default function AdminTeamDetail() {
                     className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Avatar className="h-8 w-8 shrink-0 ring-2 ring-[#e1b506]">
-                        {athlete.photoURL && <AvatarImage src={athlete.photoURL} alt={athlete.displayName} className="object-cover" />}
-                        <AvatarFallback className="text-xs">
-                          {athlete.displayName?.[0]?.toUpperCase() || "?"}
-                        </AvatarFallback>
-                      </Avatar>
+                      <CachedAvatar
+                        src={athlete.photoURL}
+                        alt={athlete.displayName}
+                        fallback={athlete.displayName?.[0]?.toUpperCase() || "?"}
+                        className="h-8 w-8 shrink-0 ring-2 ring-[#e1b506]"
+                        fallbackClassName="text-xs"
+                      />
                       <div className="min-w-0">
                         <p className="font-medium text-sm truncate">{athlete.displayName}</p>
                         <p className="text-xs text-muted-foreground truncate">{athlete.email}</p>

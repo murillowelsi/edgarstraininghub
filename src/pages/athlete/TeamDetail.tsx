@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { ListItemCard } from "@/components/shared/ListItemCard";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -129,12 +129,14 @@ export default function AthleteTeamDetail() {
                 <ListItemCard
                   key={member.id}
                   icon={
-                    <Avatar className="h-9 w-9 ring-2 ring-[#e1b506]">
-                      {member.photoURL && <AvatarImage src={member.photoURL} alt={member.displayName} className="object-cover" />}
-                      <AvatarFallback className="text-xs font-semibold" style={{ backgroundColor: `${color.color}18`, color: color.color }}>
-                        {getInitials(member.displayName || "?")}
-                      </AvatarFallback>
-                    </Avatar>
+                    <CachedAvatar
+                      src={member.photoURL}
+                      alt={member.displayName}
+                      fallback={getInitials(member.displayName || "?")}
+                      className="h-9 w-9 ring-2 ring-[#e1b506]"
+                      fallbackClassName="text-xs font-semibold"
+                      fallbackStyle={{ backgroundColor: `${color.color}18`, color: color.color }}
+                    />
                   }
                   iconClassName="p-0"
                   title={member.displayName}

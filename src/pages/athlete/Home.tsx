@@ -1,6 +1,6 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { ListItemCard } from "@/components/shared/ListItemCard";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -138,12 +138,13 @@ const AthleteHome = () => {
         {/* Welcome Section */}
         <div className="flex items-center gap-3">
           <button onClick={() => setIsMenuOpen(true)} className="rounded-full focus:outline-none">
-            <Avatar className="h-14 w-14 shrink-0 ring-2 ring-[#e1b506]">
-              {photoURL && <AvatarImage src={photoURL} alt={displayName} className="object-cover" />}
-              <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                {displayName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <CachedAvatar
+              src={photoURL}
+              alt={displayName}
+              fallback={displayName.charAt(0).toUpperCase()}
+              className="h-14 w-14 shrink-0 ring-2 ring-[#e1b506]"
+              fallbackClassName="bg-primary text-primary-foreground text-lg font-semibold"
+            />
           </button>
           <div>
             <p className="text-muted-foreground">{t.athlete.home.welcomeBack}</p>

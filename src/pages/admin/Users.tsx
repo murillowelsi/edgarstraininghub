@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { useToast } from "@/hooks/use-toast";
 import { createUser, deleteUser, getAllUsers, updateUser } from "@/services/usersService";
 import type { User, UserFormData, UserRole } from "@/types/user";
@@ -186,15 +186,14 @@ const AdminUsers = () => {
               <ListItemCard
                 key={u.id}
                 icon={
-                  <Avatar className="h-9 w-9 ring-2 ring-[#e1b506]">
-                    {u.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
-                    <AvatarFallback
-                      className="text-xs font-semibold"
-                      style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
-                    >
-                      {getInitials(u.displayName)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <CachedAvatar
+                    src={u.photoURL}
+                    alt={u.displayName}
+                    fallback={getInitials(u.displayName)}
+                    className="h-9 w-9 ring-2 ring-[#e1b506]"
+                    fallbackClassName="text-xs font-semibold"
+                    fallbackStyle={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
+                  />
                 }
                 iconClassName="p-0"
                 title={

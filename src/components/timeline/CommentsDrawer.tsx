@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Heart, Loader2, Send, Trash2, X } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { addComment, deleteComment, getComments, toggleCommentLike, createActivityNotification } from "@/services/timelineService";
 import { getAllUsers } from "@/services/usersService";
@@ -176,12 +176,13 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
       <div key={comment.id} className={cn("flex gap-3", isReply && "ml-10 mt-3")}>
         {/* Avatar */}
         <div className="shrink-0">
-          <Avatar className={cn(isReply ? "h-7 w-7" : "h-9 w-9", "ring-2 ring-[#e1b506]")}>
-            {comment.authorPhotoURL && <AvatarImage src={comment.authorPhotoURL} alt={comment.authorName} className="object-cover" />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-              {getInitials(comment.authorName)}
-            </AvatarFallback>
-          </Avatar>
+          <CachedAvatar
+            src={comment.authorPhotoURL}
+            alt={comment.authorName}
+            fallback={getInitials(comment.authorName)}
+            className={cn(isReply ? "h-7 w-7" : "h-9 w-9", "ring-2 ring-[#e1b506]")}
+            fallbackClassName="bg-primary text-primary-foreground text-xs font-semibold"
+          />
         </div>
 
         {/* Content */}
@@ -292,12 +293,13 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
 
         {/* Input */}
         <div className="shrink-0 border-t px-4 py-3 flex gap-3 items-center bg-background">
-          <Avatar className="h-9 w-9 shrink-0 ring-2 ring-[#e1b506]">
-            {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-              {getInitials(displayName || user?.email || "U")}
-            </AvatarFallback>
-          </Avatar>
+          <CachedAvatar
+            src={photoURL}
+            alt="Profile"
+            fallback={getInitials(displayName || user?.email || "U")}
+            className="h-9 w-9 shrink-0 ring-2 ring-[#e1b506]"
+            fallbackClassName="bg-primary text-primary-foreground text-xs font-semibold"
+          />
           <div className="flex-1 flex items-center bg-muted rounded-full px-4 py-2 gap-2">
             <input
               ref={inputRef}

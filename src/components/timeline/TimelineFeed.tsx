@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Image, Loader2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { TimelinePostCard } from "./TimelinePostCard";
 import { getTimelinePosts, subscribeToMentionCount, subscribeToTimelinePosts } from "@/services/timelineService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -163,12 +163,13 @@ export function TimelineFeed() {
     <div className="flex flex-col h-full">
       {/* Create post prompt — pinned, never scrolls */}
       <div className="shrink-0 border-b border-border/50 px-4 py-3 flex items-center gap-3 bg-background">
-        <Avatar className="h-10 w-10 shrink-0 ring-2 ring-[#e1b506]">
-          {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
-          <AvatarFallback className="bg-primary text-primary-foreground font-bold">
-            {authorName.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <CachedAvatar
+          src={photoURL}
+          alt="Profile"
+          fallback={authorName.charAt(0).toUpperCase()}
+          className="h-10 w-10 shrink-0 ring-2 ring-[#e1b506]"
+          fallbackClassName="bg-primary text-primary-foreground font-bold"
+        />
         <button
           onClick={() => setCreateOpen(true)}
           className="flex-1 text-left text-muted-foreground text-base py-1 hover:text-foreground transition-colors"

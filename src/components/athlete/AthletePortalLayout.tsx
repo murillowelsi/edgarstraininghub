@@ -9,7 +9,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { ChatService } from "@/services/chat";
 import { createMentionNotifications, createTimelinePost, subscribeToMentionCount } from "@/services/timelineService";
@@ -260,12 +260,13 @@ const AthletePortalLayout = ({
                   disabled={isUploadingPhoto}
                   className="relative group rounded-full focus:outline-none"
                 >
-                  <Avatar className="h-14 w-14 ring-2 ring-[#e1b506]">
-                    {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
-                    <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                      {getInitials(user?.email)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <CachedAvatar
+                    src={photoURL}
+                    alt="Profile"
+                    fallback={getInitials(user?.email)}
+                    className="h-14 w-14 ring-2 ring-[#e1b506]"
+                    fallbackClassName="bg-primary text-primary-foreground text-lg font-semibold"
+                  />
                   <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Camera className="h-5 w-5 text-white" />
                   </div>

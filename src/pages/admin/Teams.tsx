@@ -18,7 +18,7 @@ import type { Team } from "@/types/team";
 import { TEAM_COLORS, getTeamColor } from "@/lib/teamColors";
 import { getUserById } from "@/services/usersService";
 import type { User } from "@/types/user";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Shield, Loader2, Trash2, Check, EllipsisVertical, Search, Camera, X } from "lucide-react";
 
 function getInitials(name: string) {
@@ -33,12 +33,14 @@ function MemberAvatarStack({ memberIds, memberMap }: { memberIds: string[]; memb
       {preview.map((id) => {
         const u = memberMap.get(id);
         return (
-          <Avatar key={id} className="h-7 w-7 ring-2 ring-[#e1b506]">
-            {u?.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
-            <AvatarFallback className="text-[10px] font-semibold bg-muted">
-              {u ? getInitials(u.displayName) : "?"}
-            </AvatarFallback>
-          </Avatar>
+          <CachedAvatar
+            key={id}
+            src={u?.photoURL}
+            alt={u?.displayName}
+            fallback={u ? getInitials(u.displayName) : "?"}
+            className="h-7 w-7 ring-2 ring-[#e1b506]"
+            fallbackClassName="text-[10px] font-semibold bg-muted"
+          />
         );
       })}
       {overflow > 0 && (

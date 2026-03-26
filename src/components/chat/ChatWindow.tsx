@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Send, Check, CheckCheck, ChevronLeft, Trash2, Users2 } from "lucide-react";
 import { Message } from "@/types/chat";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -74,12 +74,13 @@ export default function ChatWindow({
                     </button>
                 )}
 
-                <Avatar className="h-9 w-9 shrink-0 ring-2 ring-[#e1b506]">
-                    {!isGroup && participantPhotoURL && <AvatarImage src={participantPhotoURL} alt={participantName} className="object-cover" />}
-                    <AvatarFallback className="text-sm font-semibold">
-                        {isGroup ? <Users2 className="h-4 w-4" /> : participantName[0]?.toUpperCase()}
-                    </AvatarFallback>
-                </Avatar>
+                <CachedAvatar
+                    src={!isGroup ? participantPhotoURL : undefined}
+                    alt={participantName}
+                    fallback={isGroup ? <Users2 className="h-4 w-4" /> : participantName[0]?.toUpperCase()}
+                    className="h-9 w-9 shrink-0 ring-2 ring-[#e1b506]"
+                    fallbackClassName="text-sm font-semibold"
+                />
 
                 <span className="flex-1 font-semibold text-sm truncate">{participantName}</span>
 

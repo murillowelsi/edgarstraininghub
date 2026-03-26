@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { toggleLike, deleteTimelinePost, createActivityNotification } from "@/services/timelineService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -90,12 +90,13 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8 ring-2 ring-[#e1b506]">
-              {post.authorPhotoURL && <AvatarImage src={post.authorPhotoURL} alt={post.authorName} className="object-cover" />}
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                {getInitials(post.authorName)}
-              </AvatarFallback>
-            </Avatar>
+            <CachedAvatar
+              src={post.authorPhotoURL}
+              alt={post.authorName}
+              fallback={getInitials(post.authorName)}
+              className="h-8 w-8 ring-2 ring-[#e1b506]"
+              fallbackClassName="bg-primary text-primary-foreground text-sm font-semibold"
+            />
             <p className="text-sm font-semibold">{post.authorName}</p>
           </div>
 
