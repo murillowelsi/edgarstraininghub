@@ -19,6 +19,7 @@ interface CommentsDrawerProps {
 
 interface ReplyingTo {
   commentId: string;
+  authorId: string;
   authorName: string;
 }
 
@@ -51,7 +52,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
   }, [comments.length]);
 
   const handleReply = (comment: TimelineComment) => {
-    setReplyingTo({ commentId: comment.id, authorName: comment.authorName });
+    setReplyingTo({ commentId: comment.id, authorId: comment.authorId, authorName: comment.authorName });
     inputRef.current?.focus();
   };
 
@@ -113,8 +114,16 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
       );
       setComments((prev) => [...prev, newComment]);
       onCommentsCountChange(1);
-      if (postAuthorId !== user.uid) {
-        createActivityNotification(postAuthorId, authorName, postId, "comment").catch(() => {});
+      // Collect unique user IDs to notify (post author + all previous commenters + reply target)
+      const notifySet = new Set<string>();
+      if (postAuthorId !== user.uid) notifySet.add(postAuthorId);
+      if (replyingTo && replyingTo.authorId !== user.uid) notifySet.add(replyingTo.authorId);
+      // Notify all other users who previously commented on this post
+      for (const c of comments) {
+        if (c.authorId !== user.uid) notifySet.add(c.authorId);
+      }
+      for (const uid of notifySet) {
+        createActivityNotification(uid, authorName, postId, "comment").catch((err) => console.error("[FeedBadge] comment notification failed:", err));
       }
       setText("");
       setReplyingTo(null);

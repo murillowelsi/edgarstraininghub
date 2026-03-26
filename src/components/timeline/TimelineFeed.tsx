@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Image, Loader2 } from "lucide-react";
+import { Heart, Image, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TimelinePostCard } from "./TimelinePostCard";
 import { CreatePostModal } from "./CreatePostModal";
-import { createMentionNotifications, createTimelinePost, getTimelinePosts, markMentionsRead, subscribeToTimelinePosts } from "@/services/timelineService";
+import { ActivityDrawer } from "./ActivityDrawer";
+import { createMentionNotifications, createTimelinePost, getTimelinePosts, subscribeToMentionCount, subscribeToTimelinePosts } from "@/services/timelineService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { TimelinePost } from "@/types/timeline";
@@ -21,6 +22,8 @@ export function TimelineFeed() {
   const [hasMore, setHasMore] = useState(false);
   const [lastTimestamp, setLastTimestamp] = useState<Timestamp | undefined>();
   const [createOpen, setCreateOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [pullY, setPullY] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -57,7 +60,8 @@ export function TimelineFeed() {
   }, []);
 
   useEffect(() => {
-    if (user) markMentionsRead(user.uid).catch(() => null);
+    if (!user) return;
+    return subscribeToMentionCount(user.uid, setUnreadCount);
   }, [user]);
 
   // Pull-to-refresh via document-level touch events
@@ -178,6 +182,15 @@ export function TimelineFeed() {
         >
           <Image className="h-6 w-6" />
         </button>
+        <button
+          onClick={() => setActivityOpen(true)}
+          className="relative p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground shrink-0"
+        >
+          <Heart className="h-6 w-6" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
+          )}
+        </button>
       </div>
 
       {/* Scrollable feed */}
@@ -224,6 +237,11 @@ export function TimelineFeed() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         onSubmit={handleCreate}
+      />
+
+      <ActivityDrawer
+        open={activityOpen}
+        onOpenChange={setActivityOpen}
       />
     </div>
   );

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { createUser, deleteUser, getAllUsers, updateUser } from "@/services/usersService";
 import type { User, UserFormData, UserRole } from "@/types/user";
@@ -187,6 +187,7 @@ const AdminUsers = () => {
                 key={u.id}
                 icon={
                   <Avatar className="h-9 w-9">
+                    {u.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
                     <AvatarFallback
                       className="text-xs font-semibold"
                       style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
@@ -209,7 +210,9 @@ const AdminUsers = () => {
                   <Badge
                     variant="outline"
                     className="text-xs font-normal border-transparent"
-                    style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
+                    style={u.role === "admin"
+                      ? { backgroundColor: "#f59e0b22", color: "#d97706" }
+                      : { backgroundColor: "#e0b50718", color: "#e0b507" }}
                   >
                     {t.admin.users.roles[u.role]}
                   </Badge>

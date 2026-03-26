@@ -5,6 +5,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   increment,
   limit,
@@ -256,7 +257,7 @@ export const subscribeToMentionCount = (
     collection(db, "users", userId, "timelineNotifications"),
     where("read", "==", false)
   );
-  return onSnapshot(q, (snap) => callback(snap.size));
+  return onSnapshot(q, (snap) => callback(snap.size), (err) => console.error("[FeedBadge] subscription error:", err));
 };
 
 export const markMentionsRead = async (userId: string): Promise<void> => {
@@ -266,4 +267,83 @@ export const markMentionsRead = async (userId: string): Promise<void> => {
   );
   const snap = await getDocs(q);
   await Promise.all(snap.docs.map((d) => updateDoc(d.ref, { read: true })));
+};
+
+// ─── Activity notifications list ─────────────────────────────────────────────
+
+export interface ActivityNotification {
+  id: string;
+  postId: string;
+  authorName: string;
+  type: "like" | "comment" | "mention";
+  caption?: string;
+  read: boolean;
+  createdAt: Date;
+  // Enriched fields (loaded after)
+  postImageUrl?: string;
+  actorPhotoURL?: string;
+}
+
+export const subscribeToActivityNotifications = (
+  userId: string,
+  callback: (notifications: ActivityNotification[]) => void
+): (() => void) => {
+  const q = query(
+    collection(db, "users", userId, "timelineNotifications"),
+    orderBy("createdAt", "desc"),
+    limit(50)
+  );
+  return onSnapshot(q, async (snap) => {
+    const notifications: ActivityNotification[] = snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        postId: data.postId,
+        authorName: data.authorName,
+        type: data.type || "mention",
+        caption: data.caption,
+        read: data.read,
+        createdAt: data.createdAt?.toDate?.() ?? new Date(),
+      };
+    });
+    callback(notifications);
+
+    // Enrich with post images and actor photos in background
+    const postIds = [...new Set(notifications.map((n) => n.postId))];
+    const postMap = new Map<string, string>();
+    await Promise.all(
+      postIds.map(async (pid) => {
+        try {
+          const postSnap = await getDoc(doc(db, COLLECTION, pid));
+          if (postSnap.exists()) {
+            const data = postSnap.data() as TimelinePostDocument;
+            if (data.imageUrl) postMap.set(pid, data.imageUrl);
+          }
+        } catch { /* ignore */ }
+      })
+    );
+
+    // Enrich actor photos by name lookup
+    const actorNames = [...new Set(notifications.map((n) => n.authorName))];
+    const actorPhotoMap = new Map<string, string>();
+    await Promise.all(
+      actorNames.map(async (name) => {
+        try {
+          const usersQ = query(collection(db, "users"), where("displayName", "==", name), limit(1));
+          const usersSnap = await getDocs(usersQ);
+          if (!usersSnap.empty) {
+            const userData = usersSnap.docs[0].data();
+            if (userData.photoURL) actorPhotoMap.set(name, userData.photoURL);
+          }
+        } catch { /* ignore */ }
+      })
+    );
+
+    const enriched = notifications.map((n) => ({
+      ...n,
+      postImageUrl: postMap.get(n.postId),
+      actorPhotoURL: actorPhotoMap.get(n.authorName),
+    }));
+    callback(enriched);
+  });
 };

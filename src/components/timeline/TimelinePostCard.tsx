@@ -54,7 +54,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
       await toggleLike(post.id, user.uid, wasLiked);
       if (!wasLiked && post.authorId !== user.uid) {
         const actorName = displayName || user.email || "Someone";
-        createActivityNotification(post.authorId, actorName, post.id, "like").catch(() => {});
+        createActivityNotification(post.authorId, actorName, post.id, "like").catch((err) => console.error("[FeedBadge] like notification failed:", err));
       }
     } catch {
       toast({ title: "Error", description: "Could not update like.", variant: "destructive" });

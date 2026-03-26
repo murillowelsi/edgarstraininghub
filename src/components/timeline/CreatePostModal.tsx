@@ -265,6 +265,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit }: CreatePostModa
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors text-left"
                 >
                   <Avatar className="h-10 w-10 shrink-0">
+                    {u.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
                     <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                       {u.displayName.charAt(0).toUpperCase()}
                     </AvatarFallback>

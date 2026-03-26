@@ -18,11 +18,7 @@ service cloud.firestore {
     // Users collection: authenticated users can read their own, admins can read all and manage
     // Users can also create their own document (self-registration via team invite)
     match /users/{userId} {
-      allow read: if request.auth != null && (
-        request.auth.uid == userId ||
-        isAdmin() ||
-        resource.data.role in ['admin', 'editor']
-      );
+      allow read: if request.auth != null;
       allow create: if isAdmin() ||
         (request.auth != null && request.auth.uid == userId);
       allow update: if isAdmin() ||
