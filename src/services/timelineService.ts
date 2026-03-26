@@ -65,18 +65,22 @@ export const subscribeToTimelinePosts = (
     limit(POSTS_PER_PAGE + 1)
   );
 
-  return onSnapshot(q, (snapshot) => {
-    const posts: TimelinePost[] = [];
-    let lastTimestamp: Timestamp | undefined;
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const posts: TimelinePost[] = [];
+      let lastTimestamp: Timestamp | undefined;
 
-    snapshot.docs.slice(0, POSTS_PER_PAGE).forEach((d) => {
-      const data = d.data() as TimelinePostDocument;
-      posts.push(docToPost(d.id, data));
-      lastTimestamp = data.createdAt;
-    });
+      snapshot.docs.slice(0, POSTS_PER_PAGE).forEach((d) => {
+        const data = d.data() as TimelinePostDocument;
+        posts.push(docToPost(d.id, data));
+        lastTimestamp = data.createdAt;
+      });
 
-    callback({ posts, hasMore: snapshot.docs.length > POSTS_PER_PAGE, lastTimestamp });
-  });
+      callback({ posts, hasMore: snapshot.docs.length > POSTS_PER_PAGE, lastTimestamp });
+    },
+    (error) => console.error("Timeline snapshot error:", error)
+  );
 };
 
 export const getTimelinePosts = async (

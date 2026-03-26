@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,18 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   const [commentsCount, setCommentsCount] = useState(post.commentsCount);
   const [showComments, setShowComments] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
+
+  // Sync with real-time updates from the subscription (skip during optimistic update)
+  useEffect(() => {
+    if (!likeLoading) {
+      setLiked(isLiked);
+      setLikesCount(post.likedBy.length);
+    }
+  }, [post.likedBy, isLiked, likeLoading]);
+
+  useEffect(() => {
+    setCommentsCount(post.commentsCount);
+  }, [post.commentsCount]);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
   const doubleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTapRef = useRef(0);
