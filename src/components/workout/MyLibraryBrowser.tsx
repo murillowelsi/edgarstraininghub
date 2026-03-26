@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { DialogFooter } from "@/components/ui/dialog";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { Input } from "@/components/ui/input";
@@ -64,55 +63,41 @@ const LibraryExerciseCard = ({
     (exercise.videoUrl ? getYouTubeThumbnail(getYouTubeVideoId(exercise.videoUrl) || "") : null);
 
   return (
-    <Card
-      className="cursor-pointer hover:border-primary/50 transition-all hover:shadow-md group overflow-hidden"
+    <div
+      className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer"
       onClick={onPreview}
     >
-      <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center">
+      <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted shrink-0 flex items-center justify-center relative">
         {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={exercise.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          <img src={thumbnailUrl} alt={exercise.name} className="w-full h-full object-cover" loading="lazy" />
         ) : (
-          <div className="text-center text-muted-foreground p-4">
-            <Dumbbell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-xs">{translations.workout.library.noImage}</p>
-          </div>
+          <Dumbbell className="h-5 w-5 text-muted-foreground opacity-50" />
         )}
         {exercise.videoUrl && (
-          <div className="absolute top-2 right-2">
-            <Youtube className="h-5 w-5 text-red-500" />
+          <div className="absolute bottom-0.5 right-0.5">
+            <Youtube className="h-3 w-3 text-red-500" />
           </div>
         )}
       </div>
-      <CardContent className="p-3">
-        <p className="font-medium text-sm line-clamp-2 capitalize">
-          {exercise.name}
-        </p>
-        <div className="flex flex-wrap gap-1 mt-1">
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm capitalize truncate">{exercise.name}</p>
+        <div className="flex gap-1 mt-0.5 flex-wrap">
           {exercise.muscleGroups.slice(0, 2).map((mg) => (
             <Badge key={mg} variant="secondary" className="text-xs">
               {translations.workout.muscleGroups[mg] || muscleGroupLabels[mg]}
             </Badge>
           ))}
         </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-7 text-xs w-full mt-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            onAdd();
-          }}
-        >
-          <Plus className="h-3 w-3 mr-1" />
-          {translations.workout.common.add}
-        </Button>
-      </CardContent>
-    </Card>
+      </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="shrink-0 h-8 w-8 text-muted-foreground hover:text-primary"
+        onClick={(e) => { e.stopPropagation(); onAdd(); }}
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+    </div>
   );
 };
 
@@ -221,27 +206,22 @@ const ExercisePreviewDialog = ({
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <div className="flex gap-2 mr-auto">
-            <Button variant="outline" size="sm" onClick={onEdit}>
-              <Edit className="h-4 w-4 mr-1" />
+        <div className="flex flex-col gap-2 mt-4">
+          <Button onClick={onAdd} className="w-full">
+            <Plus className="h-4 w-4 mr-2" />
+            {translations.workout.library.addToWorkout}
+          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={onEdit}>
+              <Edit className="h-4 w-4 mr-2" />
               {translations.workout.common.edit}
             </Button>
-            <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={onDelete}>
-              <Trash2 className="h-4 w-4 mr-1" />
+            <Button variant="outline" className="flex-1 text-destructive hover:text-destructive" onClick={onDelete}>
+              <Trash2 className="h-4 w-4 mr-2" />
               {translations.workout.common.delete}
             </Button>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {translations.workout.common.close}
-            </Button>
-            <Button onClick={onAdd}>
-              <Plus className="h-4 w-4 mr-2" />
-              {translations.workout.library.addToWorkout}
-            </Button>
-          </div>
-        </DialogFooter>
+        </div>
     </ResponsiveModal>
   );
 };
@@ -536,11 +516,9 @@ const ExerciseFormDialog = ({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {translations.workout.common.cancel}
-          </Button>
+        <div className="flex flex-col gap-2 mt-4">
           <Button
+            className="w-full"
             onClick={handleSave}
             disabled={!name.trim() || muscleGroups.length === 0 || saving}
           >
@@ -553,7 +531,10 @@ const ExerciseFormDialog = ({
             )}
             {isEditing ? translations.workout.exerciseForm.saveChanges : translations.workout.library.createExercise}
           </Button>
-        </DialogFooter>
+          <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
+            {translations.workout.common.cancel}
+          </Button>
+        </div>
     </ResponsiveModal>
   );
 };
@@ -753,7 +734,7 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : filteredExercises.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
               {filteredExercises.map((exercise) => (
                 <LibraryExerciseCard
                   key={exercise.id}
