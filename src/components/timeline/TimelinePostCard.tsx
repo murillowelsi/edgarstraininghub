@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -24,46 +24,40 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
 
-  const isLiked = user ? post.likedBy.includes(user.uid) : false;
-  const [liked, setLiked] = useState(isLiked);
-  const [likesCount, setLikesCount] = useState(post.likedBy.length);
-  const [commentsCount, setCommentsCount] = useState(post.commentsCount);
+  // Source of truth comes from the real-time subscription via `post` prop.
+  // pendingLike: null = no in-flight, true/false = optimistic override while request is running
+  const [pendingLike, setPendingLike] = useState<boolean | null>(null);
+  // commentsDelta: local offset applied on top of post.commentsCount until subscription confirms
+  const [commentsDelta, setCommentsDelta] = useState(0);
   const [showComments, setShowComments] = useState(false);
-  const [likeLoading, setLikeLoading] = useState(false);
-
-  // Sync with real-time updates from the subscription (skip during optimistic update)
-  useEffect(() => {
-    if (!likeLoading) {
-      setLiked(isLiked);
-      setLikesCount(post.likedBy.length);
-    }
-  }, [post.likedBy, isLiked, likeLoading]);
-
-  useEffect(() => {
-    setCommentsCount(post.commentsCount);
-  }, [post.commentsCount]);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
+
+  const isLiked = user ? post.likedBy.includes(user.uid) : false;
+  const liked = pendingLike ?? isLiked;
+  const likesCount = post.likedBy.length + (pendingLike !== null && pendingLike !== isLiked ? (pendingLike ? 1 : -1) : 0);
+  const commentsCount = post.commentsCount + commentsDelta;
+
+  // Reset commentsDelta once the subscription confirms the new count
+  useEffect(() => {
+    setCommentsDelta(0);
+  }, [post.commentsCount]);
   const doubleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTapRef = useRef(0);
 
   const canDelete = user?.uid === post.authorId || isAdmin;
 
-  const handleLike = async () => {
-    if (!user || likeLoading) return;
-    setLikeLoading(true);
-    const wasLiked = liked;
-    setLiked(!wasLiked);
-    setLikesCount((prev) => prev + (wasLiked ? -1 : 1));
+  const handleLike = useCallback(async () => {
+    if (!user || pendingLike !== null) return;
+    const wasLiked = isLiked;
+    setPendingLike(!wasLiked);
     try {
       await toggleLike(post.id, user.uid, wasLiked);
     } catch {
-      setLiked(wasLiked);
-      setLikesCount((prev) => prev + (wasLiked ? 1 : -1));
       toast({ title: "Error", description: "Could not update like.", variant: "destructive" });
     } finally {
-      setLikeLoading(false);
+      setPendingLike(null);
     }
-  };
+  }, [user, pendingLike, isLiked, post.id, toast]);
 
   const handleDoubleTap = () => {
     const now = Date.now();
@@ -146,7 +140,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         <div className="px-4 pt-3 pb-1 flex items-center gap-4">
           <button
             onClick={handleLike}
-            disabled={likeLoading}
+            disabled={pendingLike !== null}
             className={cn(
               "flex items-center gap-1.5 transition-transform active:scale-110",
               liked ? "text-red-500" : "text-foreground hover:text-muted-foreground"
@@ -182,7 +176,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         open={showComments}
         onOpenChange={setShowComments}
         postId={post.id}
-        onCommentsCountChange={(delta) => setCommentsCount((prev) => prev + delta)}
+        onCommentsCountChange={(delta) => setCommentsDelta((prev) => prev + delta)}
       />
     </>
   );
