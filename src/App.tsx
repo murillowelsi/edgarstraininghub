@@ -35,6 +35,8 @@ import AdminTeams from "./pages/admin/Teams";
 import AdminTeamDetail from "./pages/admin/TeamDetail";
 import AdminTeamStats from "./pages/admin/TeamStats";
 import AthleteChat from "./pages/athlete/Chat";
+import AthleteTeams from "./pages/athlete/Teams";
+import AthleteTeamDetail from "./pages/athlete/TeamDetail";
 import JoinTeam from "./pages/JoinTeam";
 import AdminTimeline from "./pages/admin/Timeline";
 import AthleteTimeline from "./pages/athlete/Timeline";
@@ -268,6 +270,22 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAthlete>
                       <AthleteTimeline />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/teams"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteTeams />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/teams/:teamId"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteTeamDetail />
                     </ProtectedRoute>
                   }
                 />

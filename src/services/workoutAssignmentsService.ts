@@ -4,6 +4,7 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  onSnapshot,
   query,
   serverTimestamp,
   Timestamp,
@@ -200,6 +201,42 @@ export const getAssignmentsWithWorkoutsByAthlete = async (
   return assignmentsWithWorkouts.sort(
     (a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime()
   );
+};
+
+// Real-time subscription to assignments for an athlete
+export const subscribeToAssignmentsByAthlete = (
+  athleteId: string,
+  callback: (assignments: AssignmentWithWorkout[]) => void
+): (() => void) => {
+  const q = query(
+    collection(db, ASSIGNMENTS_COLLECTION),
+    where("athleteId", "==", athleteId)
+  );
+
+  const workoutCache = new Map<string, import("../types/workout").Workout>();
+
+  const unsubscribe = onSnapshot(q, async (snapshot) => {
+    const assignments = snapshot.docs.map((d) =>
+      docToAssignment(d.id, d.data() as WorkoutAssignmentDocument)
+    );
+
+    const uniqueWorkoutIds = [...new Set(assignments.map((a) => a.workoutId))];
+    const uncachedIds = uniqueWorkoutIds.filter((id) => !workoutCache.has(id));
+
+    if (uncachedIds.length > 0) {
+      const fetched = await Promise.all(uncachedIds.map((id) => getWorkoutById(id)));
+      fetched.forEach((w) => { if (w) workoutCache.set(w.id, w); });
+    }
+
+    const withWorkouts = assignments
+      .filter((a) => workoutCache.has(a.workoutId))
+      .map((a) => ({ ...a, workout: workoutCache.get(a.workoutId)! }))
+      .sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime());
+
+    callback(withWorkouts);
+  });
+
+  return unsubscribe;
 };
 
 // Delete a single assignment

@@ -16,6 +16,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/contexts/AuthContext";
+import { CreatePostModal } from "@/components/timeline/CreatePostModal";
+import { createMentionNotifications, createTimelinePost } from "@/services/timelineService";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -492,7 +494,7 @@ const ExerciseItem = ({
 const AthleteWorkoutView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, displayName, photoURL, userRole } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   const [assignment, setAssignment] = useState<AssignmentWithWorkout | null>(
@@ -503,6 +505,8 @@ const AthleteWorkoutView = () => {
   const [resetting, setResetting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareCaption, setShareCaption] = useState("");
 
   useEffect(() => {
     const loadAssignment = async () => {
@@ -571,6 +575,10 @@ const AthleteWorkoutView = () => {
           ? t.athlete.workoutView.workoutCompletedDesc
           : t.athlete.workoutView.workoutUnmarkedDesc,
       });
+      if (newCompletedState && assignment) {
+        setShareCaption(`Treino concluído: ${assignment.workout.name} ✅`);
+        setShowShareModal(true);
+      }
     } catch (error) {
       console.error("Error updating workout:", error);
       toast({
@@ -630,14 +638,36 @@ const AthleteWorkoutView = () => {
   const Icon = workoutTypeIcons[workout.type] || PersonStanding;
   const isCompleted = !!assignment.completedAt;
 
+  const handleSharePost = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
+    if (!user) return;
+    const authorName = displayName || user.email || "Athlete";
+    const postId = await createTimelinePost(
+      { caption, imageUrl },
+      user.uid,
+      authorName,
+      userRole ?? "athlete",
+      photoURL
+    );
+    if (mentionedUserIds?.length) {
+      await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
+    }
+  };
+
   return (
-    <AthletePortalLayout title={t.athlete.nav.workouts}>
+    <>
+    <CreatePostModal
+      open={showShareModal}
+      onOpenChange={setShowShareModal}
+      onSubmit={handleSharePost}
+      initialCaption={shareCaption}
+    />
+    <AthletePortalLayout title={t.athlete.nav.workouts} hideBottomNav>
       {/* Content */}
       <div className="flex-1 overflow-auto pb-24">
         {/* Sub-header: back + centered workout name */}
         <div className="relative flex items-center px-4 py-3">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/athlete/calendar")}
             className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -859,6 +889,7 @@ const AthleteWorkoutView = () => {
       </Drawer>
 
     </AthletePortalLayout>
+    </>
   );
 };
 

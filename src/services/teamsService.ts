@@ -51,6 +51,15 @@ export const createTeam = async (name: string, coachId: string, color?: string):
   return docToTeam(snap.id, snap.data() as TeamDocument);
 };
 
+export const getTeamsByMember = async (uid: string): Promise<Team[]> => {
+  const q = query(
+    collection(db, TEAMS_COLLECTION),
+    where("memberIds", "array-contains", uid)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => docToTeam(d.id, d.data() as TeamDocument));
+};
+
 export const getTeamsByCoach = async (coachId: string): Promise<Team[]> => {
   const q = query(
     collection(db, TEAMS_COLLECTION),

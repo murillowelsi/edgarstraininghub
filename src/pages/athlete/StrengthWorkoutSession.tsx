@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { CreatePostModal } from "@/components/timeline/CreatePostModal";
+import { createMentionNotifications, createTimelinePost } from "@/services/timelineService";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -361,7 +363,7 @@ const ExerciseSessionCard = ({
 const StrengthWorkoutSession = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, displayName, photoURL, userRole } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
 
@@ -371,6 +373,8 @@ const StrengthWorkoutSession = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareCaption, setShareCaption] = useState("");
   // Workout session state
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
   const [totalElapsedTime, setTotalElapsedTime] = useState(0);
@@ -548,7 +552,9 @@ const StrengthWorkoutSession = () => {
           .replace("{{percentage}}", String(completionPercentage))
           .replace("{{time}}", formatTime(totalElapsedTime)),
       });
-      navigate("/athlete");
+      const workoutName = assignment.workout.name;
+      setShareCaption(`Treino concluído: ${workoutName} — ${completionPercentage}% em ${formatTime(totalElapsedTime)} 💪`);
+      setShowShareModal(true);
     } catch (error) {
       console.error("Error saving workout:", error);
       toast({
@@ -661,7 +667,32 @@ const StrengthWorkoutSession = () => {
   const workout = assignment.workout;
   const completionPercentage = getCompletionPercentage();
 
+  const handleSharePost = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
+    if (!user) return;
+    const authorName = displayName || user.email || "Athlete";
+    const postId = await createTimelinePost(
+      { caption, imageUrl },
+      user.uid,
+      authorName,
+      userRole ?? "athlete",
+      photoURL
+    );
+    if (mentionedUserIds?.length) {
+      await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
+    }
+  };
+
   return (
+    <>
+    <CreatePostModal
+      open={showShareModal}
+      onOpenChange={(open) => {
+        setShowShareModal(open);
+        if (!open) navigate("/athlete");
+      }}
+      onSubmit={handleSharePost}
+      initialCaption={shareCaption}
+    />
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background border-b border-border">
@@ -809,6 +840,7 @@ const StrengthWorkoutSession = () => {
       </Drawer>
 
     </div>
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { CalendarDays, Dumbbell, Home, LayoutGrid, Users } from "lucide-react";
+import { Calendar, Dumbbell, Home, LayoutGrid, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -21,7 +21,7 @@ export function BottomNav() {
     { href: "/admin", label: t.admin.nav.home, icon: Home, exact: true, featured: false },
     { href: "/admin/users", label: t.admin.nav.users, icon: Users, featured: false },
     { href: "/admin/timeline", label: "Feed", icon: LayoutGrid, featured: true },
-    { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays, featured: false },
+    { href: "/admin/calendar", label: t.admin.nav.calendar, icon: Calendar, featured: false },
     { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell, featured: false },
   ];
 

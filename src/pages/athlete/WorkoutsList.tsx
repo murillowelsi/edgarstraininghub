@@ -8,7 +8,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
-import { getAssignmentsWithWorkoutsByAthlete, markAssignmentSkipped, unmarkAssignmentSkipped } from "@/services/workoutAssignmentsService";
+import { subscribeToAssignmentsByAthlete, markAssignmentSkipped, unmarkAssignmentSkipped } from "@/services/workoutAssignmentsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { format } from "date-fns";
@@ -62,35 +62,19 @@ const AthleteWorkoutsList = () => {
   const [filter, setFilter] = useState<"all" | "pending" | "completed" | "skipped">(initialFilter);
 
   useEffect(() => {
-    const loadData = async () => {
-      if (!user) return;
+    if (!user) return;
 
-      try {
-        const [userData, assignmentsData] = await Promise.all([
-          getUserById(user.uid),
-          getAssignmentsWithWorkoutsByAthlete(user.uid),
-        ]);
+    getUserById(user.uid).then((userData) => {
+      if (userData) setDisplayName(userData.displayName || "Athlete");
+    });
 
-        if (userData) {
-          setDisplayName(userData.displayName || "Athlete");
-        }
-        setAssignments(assignmentsData);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast({
-          title: t.common.error,
-          description: t.athlete.toast.workoutsLoadError,
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    const unsubscribe = subscribeToAssignmentsByAthlete(user.uid, (data) => {
+      setAssignments(data);
+      setLoading(false);
+    });
 
-    if (user) {
-      loadData();
-    }
-  }, [user, toast]);
+    return unsubscribe;
+  }, [user]);
 
   const [search, setSearch] = useState("");
   const [actionAssignment, setActionAssignment] = useState<AssignmentWithWorkout | null>(null);

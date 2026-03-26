@@ -15,7 +15,39 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { createTeam, deleteTeam, getTeamsByCoach, updateTeamName, updateTeamColor } from "@/services/teamsService";
 import type { Team } from "@/types/team";
 import { TEAM_COLORS, getTeamColor } from "@/lib/teamColors";
+import { getUserById } from "@/services/usersService";
+import type { User } from "@/types/user";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Shield, Loader2, Trash2, Check, EllipsisVertical, Search } from "lucide-react";
+
+function getInitials(name: string) {
+  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+}
+
+function MemberAvatarStack({ memberIds, memberMap }: { memberIds: string[]; memberMap: Map<string, User> }) {
+  const preview = memberIds.slice(0, 3);
+  const overflow = memberIds.length - preview.length;
+  return (
+    <div className="flex items-center -space-x-2">
+      {preview.map((id) => {
+        const u = memberMap.get(id);
+        return (
+          <Avatar key={id} className="h-7 w-7 ring-2 ring-background">
+            {u?.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
+            <AvatarFallback className="text-[10px] font-semibold bg-muted">
+              {u ? getInitials(u.displayName) : "?"}
+            </AvatarFallback>
+          </Avatar>
+        );
+      })}
+      {overflow > 0 && (
+        <div className="h-7 w-7 ring-2 ring-background rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-muted-foreground">
+          +{overflow}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ColorPicker({ value, onChange }: { value: string; onChange: (key: string) => void }) {
   return (
@@ -43,6 +75,7 @@ export default function AdminTeams() {
   const { toast } = useToast();
 
   const [teams, setTeams] = useState<Team[]>([]);
+  const [memberMap, setMemberMap] = useState<Map<string, User>>(new Map());
   const [loading, setLoading] = useState(true);
 
   // Create
@@ -73,6 +106,14 @@ export default function AdminTeams() {
     try {
       const data = await getTeamsByCoach(user.uid);
       setTeams(data);
+
+      // Collect unique member IDs (first 4 per team) and fetch their data
+      const previewIds = new Set<string>();
+      data.forEach((team) => team.memberIds.slice(0, 4).forEach((id) => previewIds.add(id)));
+      const users = await Promise.all(Array.from(previewIds).map((id) => getUserById(id)));
+      const map = new Map<string, User>();
+      users.forEach((u) => { if (u) map.set(u.id, u); });
+      setMemberMap(map);
     } catch {
       toast({ title: t.common.error, description: t.admin.teams.toast.loadError, variant: "destructive" });
     } finally {
@@ -181,6 +222,7 @@ export default function AdminTeams() {
                   iconStyle={{ backgroundColor: `${color.color}1a` }}
                   title={team.name}
                   subtitle={`${team.memberIds.length} ${team.memberIds.length !== 1 ? t.admin.teams.members : t.admin.teams.member}`}
+                  right={team.memberIds.length > 0 ? <MemberAvatarStack memberIds={team.memberIds} memberMap={memberMap} /> : undefined}
                   actions={
                     <Button
                       variant="ghost"
