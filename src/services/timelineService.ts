@@ -135,6 +135,14 @@ export const createTimelinePost = async (
 };
 
 export const deleteTimelinePost = async (postId: string): Promise<void> => {
+  // Delete all activity notifications referencing this post
+  const refs = await getDocs(collection(db, COLLECTION, postId, "notificationRefs"));
+  await Promise.all(
+    refs.docs.map((r) => {
+      const { userId, notificationId } = r.data() as { userId: string; notificationId: string };
+      return deleteDoc(doc(db, "users", userId, "timelineNotifications", notificationId));
+    })
+  );
   await deleteDoc(doc(db, COLLECTION, postId));
 };
 
@@ -222,30 +230,39 @@ export const createMentionNotifications = async (
   captionPreview: string
 ): Promise<void> => {
   await Promise.all(
-    mentionedUserIds.map((uid) =>
-      addDoc(collection(db, "users", uid, "timelineNotifications"), {
+    mentionedUserIds.map(async (uid) => {
+      const notifRef = await addDoc(collection(db, "users", uid, "timelineNotifications"), {
         postId,
         authorName,
         caption: captionPreview.slice(0, 80),
+        type: "mention",
         read: false,
         createdAt: serverTimestamp(),
-      })
-    )
+      });
+      await addDoc(collection(db, COLLECTION, postId, "notificationRefs"), {
+        userId: uid,
+        notificationId: notifRef.id,
+      });
+    })
   );
 };
 
 export const createActivityNotification = async (
-  postAuthorId: string,
+  userId: string,
   actorName: string,
   postId: string,
-  type: "like" | "comment"
+  type: "like" | "comment" | "comment_mention"
 ): Promise<void> => {
-  await addDoc(collection(db, "users", postAuthorId, "timelineNotifications"), {
+  const notifRef = await addDoc(collection(db, "users", userId, "timelineNotifications"), {
     postId,
     authorName: actorName,
     type,
     read: false,
     createdAt: serverTimestamp(),
+  });
+  await addDoc(collection(db, COLLECTION, postId, "notificationRefs"), {
+    userId,
+    notificationId: notifRef.id,
   });
 };
 
@@ -275,7 +292,7 @@ export interface ActivityNotification {
   id: string;
   postId: string;
   authorName: string;
-  type: "like" | "comment" | "mention";
+  type: "like" | "comment" | "mention" | "comment_mention";
   caption?: string;
   read: boolean;
   createdAt: Date;

@@ -29,6 +29,7 @@ service cloud.firestore {
       match /timelineNotifications/{notifId} {
         allow read, update: if request.auth != null && request.auth.uid == userId;
         allow create: if request.auth != null;
+        allow delete: if request.auth != null;
       }
     }
 
@@ -146,6 +147,11 @@ service cloud.firestore {
         allow update: if request.auth != null;
         allow delete: if request.auth != null &&
           (resource.data.authorId == request.auth.uid || isAdmin());
+      }
+
+      match /notificationRefs/{refId} {
+        allow read, create: if request.auth != null;
+        allow delete: if request.auth != null;
       }
     }
 

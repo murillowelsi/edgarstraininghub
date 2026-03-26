@@ -27,20 +27,13 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   // Source of truth comes from the real-time subscription via `post` prop.
   // pendingLike: null = no in-flight, true/false = optimistic override while request is running
   const [pendingLike, setPendingLike] = useState<boolean | null>(null);
-  // commentsDelta: local offset applied on top of post.commentsCount until subscription confirms
-  const [commentsDelta, setCommentsDelta] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
 
   const isLiked = user ? post.likedBy.includes(user.uid) : false;
   const liked = pendingLike ?? isLiked;
   const likesCount = post.likedBy.length + (pendingLike !== null && pendingLike !== isLiked ? (pendingLike ? 1 : -1) : 0);
-  const commentsCount = post.commentsCount + commentsDelta;
-
-  // Reset commentsDelta once the subscription confirms the new count
-  useEffect(() => {
-    setCommentsDelta(0);
-  }, [post.commentsCount]);
+  const commentsCount = post.commentsCount;
   const doubleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTapRef = useRef(0);
 
@@ -181,7 +174,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         onOpenChange={setShowComments}
         postId={post.id}
         postAuthorId={post.authorId}
-        onCommentsCountChange={(delta) => setCommentsDelta((prev) => prev + delta)}
+        onCommentsCountChange={() => {}}
       />
     </>
   );

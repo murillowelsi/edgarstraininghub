@@ -10,6 +10,11 @@ import AdminTopBar from "./AdminTopBar";
 import { ChatService } from "../services/chat";
 import { NotificationService } from "../services/notifications";
 import { BottomNav } from "./admin/BottomNav";
+import { CreatePostModal } from "./timeline/CreatePostModal";
+import { ActivityDrawer } from "./timeline/ActivityDrawer";
+import { useTimelineActions } from "../contexts/TimelineActionsContext";
+import { createMentionNotifications, createTimelinePost } from "../services/timelineService";
+import { useToast } from "../hooks/use-toast";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -19,8 +24,20 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, pageTitle }: AdminLayoutProps) => {
-  const { user } = useAuth();
+  const { user, userRole, displayName, photoURL } = useAuth();
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const { createOpen, setCreateOpen, activityOpen, setActivityOpen } = useTimelineActions();
+
+  const handleCreate = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
+    if (!user || !userRole) return;
+    const authorName = displayName || user.email || "User";
+    const postId = await createTimelinePost({ caption, imageUrl }, user.uid, authorName, userRole, photoURL);
+    if (mentionedUserIds?.length) {
+      await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
+    }
+    toast({ title: "Post shared!" });
+  };
 
   const navItems = [
     { href: "/admin", label: t.admin.nav.home, icon: Home },
@@ -211,6 +228,16 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
         </main>
       </div>
       {!hideBottomNav && <BottomNav />}
+
+      <CreatePostModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+      />
+      <ActivityDrawer
+        open={activityOpen}
+        onOpenChange={setActivityOpen}
+      />
     </div>
   );
 };

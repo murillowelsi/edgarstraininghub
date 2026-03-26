@@ -46,7 +46,7 @@ function NotificationIcon({ type }: { type: ActivityNotification["type"] }) {
       <Heart className="h-3 w-3 text-white fill-white" />
     </div>
   );
-  if (type === "comment") return (
+  if (type === "comment" || type === "comment_mention") return (
     <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5">
       <MessageCircle className="h-3 w-3 text-white fill-white" />
     </div>
@@ -72,10 +72,16 @@ function NotificationText({ notification }: { notification: ActivityNotification
       <span className="text-muted-foreground"> comentou na sua publicacao.</span>
     </p>
   );
+  if (type === "comment_mention") return (
+    <p className="text-sm">
+      <span className="font-semibold">{authorName}</span>
+      <span className="text-muted-foreground"> mencionou voce em um comentario.</span>
+    </p>
+  );
   return (
     <p className="text-sm">
       <span className="font-semibold">{authorName}</span>
-      <span className="text-muted-foreground"> mencionou voce: </span>
+      <span className="text-muted-foreground"> mencionou voce em uma publicacao: </span>
       {caption && <span className="text-muted-foreground italic">{caption}</span>}
     </p>
   );
@@ -103,9 +109,10 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
   }, [open, user]);
 
   const handleClick = (notification: ActivityNotification) => {
-    if (notification.type === "comment" || notification.type === "mention") {
+    if (notification.type === "comment" || notification.type === "comment_mention") {
       setCommentsPostId(notification.postId);
     } else {
+      // "like" and "mention" (post mention) → navigate to the post
       onOpenChange(false);
       const isAdmin = window.location.pathname.startsWith("/admin");
       const basePath = isAdmin ? "/admin/timeline" : "/athlete/timeline";
