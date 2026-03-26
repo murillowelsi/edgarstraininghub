@@ -16,9 +16,11 @@ import {
   GripVertical,
   Library,
   Loader2,
+  MoreVertical,
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
@@ -40,11 +42,23 @@ const WorkoutExerciseRow = ({
   onRemove: () => void;
   translations: ReturnType<typeof useLanguage>["t"];
 }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [setsRaw, setSetsRaw] = useState(String(item.sets));
+  const [repsRaw, setRepsRaw] = useState(item.reps || "");
+  const [restRaw, setRestRaw] = useState(String(item.restSeconds));
+
+  // Sync local state when drawer opens so it reflects latest values
+  const handleOpenMenu = () => {
+    setSetsRaw(String(item.sets));
+    setRepsRaw(item.reps || "");
+    setRestRaw(String(item.restSeconds));
+    setMenuOpen(true);
+  };
+
   const exerciseName = exercise?.name || item.exerciseName || "Unknown Exercise";
   const gifUrl = exercise?.gifUrl || item.exerciseGifUrl;
   const videoUrl = exercise?.videoUrl || item.exerciseVideoUrl;
 
-  // Get thumbnail: prefer gifUrl, then YouTube thumbnail
   const getThumbnail = () => {
     if (gifUrl) return gifUrl;
     if (videoUrl) {
@@ -57,9 +71,8 @@ const WorkoutExerciseRow = ({
   const thumbnailUrl = getThumbnail();
 
   return (
-    <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
-      {/* Top row: grip + image + name + delete */}
-      <div className="flex items-center gap-3 p-4">
+    <>
+      <div className="flex items-center gap-3 p-4 rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all">
         <div className="cursor-grab text-muted-foreground shrink-0">
           <GripVertical className="h-4 w-4" />
         </div>
@@ -82,48 +95,72 @@ const WorkoutExerciseRow = ({
         <Button
           variant="ghost"
           size="icon"
-          className="shrink-0 text-muted-foreground hover:text-destructive"
-          onClick={onRemove}
+          className="shrink-0 text-muted-foreground"
+          onClick={handleOpenMenu}
         >
-          <Trash2 className="h-4 w-4" />
+          <MoreVertical className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Bottom row: sets × reps + rest */}
-      <div className="flex items-center gap-2 px-4 pb-4 border-t border-border/50 pt-3 bg-muted/20">
-        <div className="flex items-center gap-1">
-          <Input
-            type="number"
-            value={item.sets}
-            onChange={(e) => onUpdate({ sets: parseInt(e.target.value) || 1 })}
-            className="w-12 h-7 text-center text-sm"
-            min={1}
-          />
-          <span className="text-xs text-muted-foreground">{translations.workout.common.sets}</span>
-        </div>
-        <span className="text-muted-foreground text-sm">×</span>
-        <div className="flex items-center gap-1">
-          <Input
-            value={item.reps || ""}
-            onChange={(e) => onUpdate({ reps: e.target.value })}
-            className="w-16 h-7 text-sm"
-            placeholder="8-12"
-          />
-          <span className="text-xs text-muted-foreground">{translations.workout.common.reps}</span>
-        </div>
-        <div className="flex items-center gap-1 ml-auto">
-          <span className="text-xs text-muted-foreground">{translations.workout.common.rest}</span>
-          <Input
-            type="number"
-            value={item.restSeconds}
-            onChange={(e) => onUpdate({ restSeconds: parseInt(e.target.value) || 0 })}
-            className="w-12 h-7 text-center text-sm"
-            min={0}
-          />
-          <span className="text-xs text-muted-foreground">s</span>
-        </div>
-      </div>
-    </div>
+      <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle className="capitalize">{exerciseName}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-4">
+            {/* Sets */}
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">Sets</Label>
+              <Input
+                inputMode="numeric"
+                value={setsRaw}
+                onChange={(e) => setSetsRaw(e.target.value)}
+                onBlur={() => {
+                  const val = Math.max(1, parseInt(setsRaw) || 1);
+                  setSetsRaw(String(val));
+                  onUpdate({ sets: val });
+                }}
+                className="w-20 text-center"
+              />
+            </div>
+            {/* Reps */}
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">Reps</Label>
+              <Input
+                value={repsRaw}
+                onChange={(e) => setRepsRaw(e.target.value)}
+                onBlur={() => onUpdate({ reps: repsRaw })}
+                placeholder="8-12"
+                className="w-20 text-center"
+              />
+            </div>
+            {/* Rest */}
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">Rest</Label>
+              <Input
+                inputMode="numeric"
+                value={restRaw}
+                onChange={(e) => setRestRaw(e.target.value)}
+                onBlur={() => {
+                  const val = Math.max(0, parseInt(restRaw) || 0);
+                  setRestRaw(String(val));
+                  onUpdate({ restSeconds: val });
+                }}
+                className="w-20 text-center"
+              />
+            </div>
+            {/* Delete */}
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium text-destructive"
+              onClick={() => { setMenuOpen(false); onRemove(); }}
+            >
+              <Trash2 className="h-5 w-5" />
+              {translations.workout.common.delete || "Delete"}
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 };
 
