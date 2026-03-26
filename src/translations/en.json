@@ -409,21 +409,23 @@
       "timeline": "Feed"
     },
     "dashboard": {
+      "role": "Coach",
       "welcomeBack": "Welcome back,",
       "statAthletes": "Athletes",
       "statTeams": "Teams",
       "statWorkouts": "Workouts",
       "statTodayLabel": "Today",
       "overallCompletion": "Overall Completion",
-      "assignmentsCompleted": "of {{total}} assignments completed",
+      "assignmentsCompleted": "{{completed}} of {{total}} assignments completed",
       "teamsOverview": "Teams",
       "seeAll": "See all",
       "members": "members",
       "noTeams": "No teams created yet.",
       "todaysActivity": "Today's Activity",
-      "noActivityToday": "No assignments for today.",
+      "noActivityToday": "No assignments for this day.",
       "completed": "Completed",
-      "pending": "Pending"
+      "pending": "Pending",
+      "today": "Today"
     },
     "posts": {
       "title": "Posts",

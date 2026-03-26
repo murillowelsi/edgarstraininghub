@@ -409,21 +409,23 @@
       "timeline": "Feed"
     },
     "dashboard": {
+      "role": "Coach",
       "welcomeBack": "Bem-vindo de volta,",
       "statAthletes": "Atletas",
       "statTeams": "Times",
       "statWorkouts": "Treinos",
       "statTodayLabel": "Hoje",
       "overallCompletion": "Conclusão Geral",
-      "assignmentsCompleted": "de {{total}} atribuições concluídas",
+      "assignmentsCompleted": "{{completed}} de {{total}} atribuições concluídas",
       "teamsOverview": "Times",
       "seeAll": "Ver todos",
       "members": "membros",
       "noTeams": "Nenhum time criado ainda.",
       "todaysActivity": "Atividade de Hoje",
-      "noActivityToday": "Nenhuma atribuição para hoje.",
+      "noActivityToday": "Nenhuma atribuição para este dia.",
       "completed": "Concluído",
-      "pending": "Pendente"
+      "pending": "Pendente",
+      "today": "Hoje"
     },
     "posts": {
       "title": "Artigos",

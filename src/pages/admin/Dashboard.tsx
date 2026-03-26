@@ -14,7 +14,7 @@ import { getAllUsers, getUserById } from "@/services/usersService";
 import { getAllWorkouts } from "@/services/workoutsService";
 import type { AssignmentWithDetails } from "@/types/workoutAssignment";
 import type { Team } from "@/types/team";
-import { format, isSameDay } from "date-fns";
+import { addDays, format, isSameDay, isToday, startOfWeek } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   CalendarCheck,
@@ -26,7 +26,7 @@ import {
   Shield,
   Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 
@@ -57,6 +57,8 @@ const AdminDashboard = () => {
   const [workoutCount, setWorkoutCount] = useState(0);
   const [teams, setTeams] = useState<Team[]>([]);
   const [assignments, setAssignments] = useState<AssignmentWithDetails[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const weekScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -88,6 +90,14 @@ const AdminDashboard = () => {
     if (user) loadData();
   }, [user, toast]);
 
+  const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
+  const weekDays = Array.from({ length: 14 }, (_, i) => addDays(weekStart, i));
+
+  const hasWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date));
+  const hasIncompleteWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date) && !a.completedAt);
+
+  const selectedDateAssignments = assignments.filter((a) => isSameDay(a.scheduledDate, selectedDate));
+
   const completedCount = assignments.filter((a) => a.completedAt).length;
   const completionRate = assignments.length > 0
     ? Math.round((completedCount / assignments.length) * 100)
@@ -113,22 +123,22 @@ const AdminDashboard = () => {
       <div className="p-4 md:p-8 pb-24 md:pb-8 space-y-4 max-w-4xl mx-auto">
 
         {/* Welcome */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button onClick={() => setIsMenuOpen(true)} className="rounded-full focus:outline-none">
             <CachedAvatar
               src={photoURL}
               alt={displayName}
               fallback={displayName.charAt(0).toUpperCase()}
-              className="h-14 w-14 shrink-0 ring-2 ring-[#e1b506]"
-              fallbackClassName="bg-primary text-primary-foreground text-lg font-semibold"
+              className="h-11 w-11 shrink-0 ring-2 ring-[#e1b506]"
+              fallbackClassName="bg-primary text-primary-foreground text-base font-semibold"
             />
           </button>
           <div>
-            <p className="text-muted-foreground">{t.admin.dashboard.welcomeBack}</p>
-            <h1 className="flex items-center gap-2 text-3xl font-bold font-display">
-              {displayName}
-              <Crown className="h-4 w-4 fill-yellow-400 text-yellow-500 drop-shadow-sm" strokeWidth={1.5} />
-            </h1>
+            <p className="flex items-center gap-1 text-sm text-muted-foreground font-medium">
+              {t.admin.dashboard.role}
+              <Crown className="h-3 w-3 fill-yellow-400 text-yellow-500 drop-shadow-sm" strokeWidth={1.5} />
+            </p>
+            <h1 className="text-2xl font-bold font-display">{displayName}</h1>
           </div>
         </div>
 
@@ -213,8 +223,116 @@ const AdminDashboard = () => {
             <Progress value={completionRate} className="h-3" />
             <p className="text-xs text-muted-foreground mt-2">
               {t.admin.dashboard.assignmentsCompleted
+                .replace("{{completed}}", String(completedCount))
                 .replace("{{total}}", String(assignments.length))}
             </p>
+          </CardContent>
+        </Card>
+
+        {/* Activity Calendar */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">{format(selectedDate, "MMMM yyyy")}</CardTitle>
+              <button
+                onClick={() => setSelectedDate(new Date())}
+                className="text-sm text-primary font-medium hover:underline"
+              >
+                {t.admin.dashboard.today}
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="pb-4">
+            {/* Horizontal Week Calendar */}
+            <div ref={weekScrollRef} className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+              {weekDays.map((day) => {
+                const isSelected = isSameDay(day, selectedDate);
+                const isTodayDate = isToday(day);
+                const hasWorkout = hasWorkouts(day);
+                const hasIncomplete = hasIncompleteWorkouts(day);
+
+                return (
+                  <button
+                    key={day.toISOString()}
+                    onClick={() => setSelectedDate(day)}
+                    className={cn(
+                      "flex flex-col items-center justify-center min-w-[48px] h-[64px] rounded-xl transition-all border",
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105"
+                        : isTodayDate
+                          ? "bg-accent border-primary/30"
+                          : "bg-card border-border hover:border-primary/50",
+                    )}
+                  >
+                    <span className="text-xs font-medium opacity-70">{format(day, "EEE")}</span>
+                    <span className="text-lg font-bold">{format(day, "d")}</span>
+                    {hasWorkout && (
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isSelected ? "bg-primary-foreground" : hasIncomplete ? "bg-primary" : "bg-green-500")} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected Date Assignments */}
+            <div className="mt-4 space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                {isToday(selectedDate) ? t.admin.dashboard.todaysActivity : format(selectedDate, "EEEE, MMM d")}
+              </p>
+
+              {selectedDateAssignments.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  <p className="text-sm">{t.admin.dashboard.noActivityToday}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {selectedDateAssignments.map((a) => {
+                    const isCompleted = !!a.completedAt;
+                    const WorkoutIcon = workoutTypeIcons[a.workout.type] || Dumbbell;
+                    return (
+                      <ListItemCard
+                        key={a.id}
+                        to="/admin/calendar"
+                        compact
+                        icon={
+                          isCompleted ? (
+                            <Check className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <WorkoutIcon className="h-4 w-4" />
+                          )
+                        }
+                        iconClassName={
+                          isCompleted
+                            ? "bg-green-100 dark:bg-green-900/30"
+                            : workoutTypeColors[a.workout.type] || "bg-muted"
+                        }
+                        title={a.workout.name}
+                        titleClassName={isCompleted ? "line-through text-muted-foreground" : undefined}
+                        subtitle={a.athlete.displayName}
+                        right={
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              "text-xs",
+                              isCompleted
+                                ? "bg-green-100 text-green-700"
+                                : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {isCompleted ? t.admin.dashboard.completed : t.admin.dashboard.pending}
+                          </Badge>
+                        }
+                        className={
+                          isCompleted
+                            ? "bg-green-50 border-green-200 dark:bg-green-950/20"
+                            : undefined
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -252,70 +370,6 @@ const AdminDashboard = () => {
                   right={<ChevronRight className="h-4 w-4 text-muted-foreground" />}
                 />
               ))
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Today's Activity */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{t.admin.dashboard.todaysActivity}</CardTitle>
-              <span className="text-sm text-muted-foreground">
-                {format(new Date(), "MMM d")}
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {todaysAssignments.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {t.admin.dashboard.noActivityToday}
-              </p>
-            ) : (
-              todaysAssignments.map((a) => {
-                const isCompleted = !!a.completedAt;
-                const WorkoutIcon = workoutTypeIcons[a.workout.type] || Dumbbell;
-                return (
-                  <ListItemCard
-                    key={a.id}
-                    to="/admin/calendar"
-                    compact
-                    icon={
-                      isCompleted ? (
-                        <Check className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <WorkoutIcon className="h-4 w-4" />
-                      )
-                    }
-                    iconClassName={
-                      isCompleted
-                        ? "bg-green-100 dark:bg-green-900/30"
-                        : workoutTypeColors[a.workout.type] || "bg-muted"
-                    }
-                    title={a.workout.name}
-                    titleClassName={isCompleted ? "line-through text-muted-foreground" : undefined}
-                    subtitle={a.athlete.displayName}
-                    right={
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          "text-xs",
-                          isCompleted
-                            ? "bg-green-100 text-green-700"
-                            : "bg-muted text-muted-foreground"
-                        )}
-                      >
-                        {isCompleted ? t.admin.dashboard.completed : t.admin.dashboard.pending}
-                      </Badge>
-                    }
-                    className={
-                      isCompleted
-                        ? "bg-green-50 border-green-200 dark:bg-green-950/20"
-                        : undefined
-                    }
-                  />
-                );
-              })
             )}
           </CardContent>
         </Card>

@@ -12,28 +12,9 @@ import { cn } from "@/lib/utils";
 import { subscribeToAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import {
-  addDays,
-  format,
-  isAfter,
-  isBefore,
-  isSameDay,
-  isToday,
-  startOfDay,
-  startOfWeek,
-} from "date-fns";
+import { addDays, format, isAfter, isBefore, isSameDay, isToday, startOfDay, startOfWeek } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import {
-  Award,
-  CalendarCheck,
-  ChevronRight,
-  Dumbbell,
-  Flame,
-  Loader2,
-  PersonStanding,
-  Target,
-  TrendingUp,
-} from "lucide-react";
+import { CalendarCheck, ChevronRight, Dumbbell, Flame, Loader2, PersonStanding, Target, TrendingUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -86,37 +67,25 @@ const AthleteHome = () => {
   // Calculate stats
   const totalWorkouts = assignments.length;
   const completedWorkouts = assignments.filter((a) => a.completedAt).length;
-  const completionRate =
-    totalWorkouts > 0 ? Math.round((completedWorkouts / totalWorkouts) * 100) : 0;
+  const completionRate = totalWorkouts > 0 ? Math.round((completedWorkouts / totalWorkouts) * 100) : 0;
 
   // Get upcoming workouts (next 7 days, not completed)
   const upcomingWorkouts = assignments
-    .filter(
-      (a) =>
-        !a.completedAt &&
-        isAfter(a.scheduledDate, startOfDay(new Date())) &&
-        isBefore(a.scheduledDate, addDays(new Date(), 7))
-    )
+    .filter((a) => !a.completedAt && isAfter(a.scheduledDate, startOfDay(new Date())) && isBefore(a.scheduledDate, addDays(new Date(), 7)))
     .slice(0, 3);
 
   // Get today's workouts
-  const todaysWorkouts = assignments.filter((a) =>
-    isSameDay(a.scheduledDate, new Date())
-  );
+  const todaysWorkouts = assignments.filter((a) => isSameDay(a.scheduledDate, new Date()));
   const todaysCompleted = todaysWorkouts.filter((a) => a.completedAt).length;
 
   // Get workouts for selected date
-  const selectedDateAssignments = assignments.filter((a) =>
-    isSameDay(a.scheduledDate, selectedDate)
-  );
+  const selectedDateAssignments = assignments.filter((a) => isSameDay(a.scheduledDate, selectedDate));
 
   // Check if a date has workouts
-  const hasWorkouts = (date: Date) =>
-    assignments.some((a) => isSameDay(a.scheduledDate, date));
+  const hasWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date));
 
   // Check if a date has incomplete workouts
-  const hasIncompleteWorkouts = (date: Date) =>
-    assignments.some((a) => isSameDay(a.scheduledDate, date) && !a.completedAt);
+  const hasIncompleteWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date) && !a.completedAt);
 
   const handleTodayClick = () => {
     setSelectedDate(new Date());
@@ -136,19 +105,22 @@ const AthleteHome = () => {
     <AthletePortalLayout title={t.athlete.nav.home}>
       <div className="p-4 space-y-4">
         {/* Welcome Section */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button onClick={() => setIsMenuOpen(true)} className="rounded-full focus:outline-none">
             <CachedAvatar
               src={photoURL}
               alt={displayName}
               fallback={displayName.charAt(0).toUpperCase()}
-              className="h-14 w-14 shrink-0 ring-2 ring-[#e1b506]"
-              fallbackClassName="bg-primary text-primary-foreground text-lg font-semibold"
+              className="h-11 w-11 shrink-0 ring-2 ring-[#e1b506]"
+              fallbackClassName="bg-primary text-primary-foreground text-base font-semibold"
             />
           </button>
           <div>
-            <p className="text-muted-foreground">{t.athlete.home.welcomeBack}</p>
-            <h1 className="text-3xl font-bold font-display">{displayName}</h1>
+            <p className="flex items-center gap-1 text-sm text-muted-foreground font-medium">
+              {t.athlete.role}
+              <Flame className="h-3 w-3 fill-orange-400 text-orange-500" />
+            </p>
+            <h1 className="text-2xl font-bold font-display">{displayName}</h1>
           </div>
         </div>
 
@@ -225,10 +197,7 @@ const AthleteHome = () => {
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Award className="h-5 w-5 text-primary" />
-                {t.athlete.home.yourProgress}
-              </CardTitle>
+              <CardTitle className="text-base">{t.athlete.home.yourProgress}</CardTitle>
               <span className="text-sm text-muted-foreground">
                 {completedWorkouts} of {totalWorkouts}
               </span>
@@ -246,23 +215,15 @@ const AthleteHome = () => {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">
-                {format(selectedDate, "MMMM yyyy")}
-              </CardTitle>
-              <button
-                onClick={handleTodayClick}
-                className="text-sm text-primary font-medium hover:underline"
-              >
+              <CardTitle className="text-base">{format(selectedDate, "MMMM yyyy")}</CardTitle>
+              <button onClick={handleTodayClick} className="text-sm text-primary font-medium hover:underline">
                 {t.athlete.home.today}
               </button>
             </div>
           </CardHeader>
           <CardContent className="pb-4">
             {/* Horizontal Week Calendar */}
-            <div
-              ref={weekScrollRef}
-              className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide"
-            >
+            <div ref={weekScrollRef} className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
               {weekDays.map((day) => {
                 const isSelected = isSameDay(day, selectedDate);
                 const isTodayDate = isToday(day);
@@ -279,24 +240,13 @@ const AthleteHome = () => {
                         ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105"
                         : isTodayDate
                           ? "bg-accent border-primary/30"
-                          : "bg-card border-border hover:border-primary/50"
+                          : "bg-card border-border hover:border-primary/50",
                     )}
                   >
-                    <span className="text-xs font-medium opacity-70">
-                      {format(day, "EEE")}
-                    </span>
+                    <span className="text-xs font-medium opacity-70">{format(day, "EEE")}</span>
                     <span className="text-lg font-bold">{format(day, "d")}</span>
                     {hasWorkout && (
-                      <span
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          isSelected
-                            ? "bg-primary-foreground"
-                            : hasIncomplete
-                              ? "bg-primary"
-                              : "bg-green-500"
-                        )}
-                      />
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isSelected ? "bg-primary-foreground" : hasIncomplete ? "bg-primary" : "bg-green-500")} />
                     )}
                   </button>
                 );
@@ -306,9 +256,7 @@ const AthleteHome = () => {
             {/* Selected Date Workouts */}
             <div className="mt-4 space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
-                {isToday(selectedDate)
-                  ? t.athlete.home.todaysWorkouts
-                  : format(selectedDate, "EEEE, MMM d")}
+                {isToday(selectedDate) ? t.athlete.home.todaysWorkouts : format(selectedDate, "EEEE, MMM d")}
               </p>
 
               {selectedDateAssignments.length === 0 ? (
@@ -339,9 +287,7 @@ const AthleteHome = () => {
                         right={
                           isCompleted ? (
                             <Badge variant="secondary" className="bg-green-100 text-green-700">
-                              {assignment.completionPercentage !== undefined
-                                ? `${assignment.completionPercentage}%`
-                                : t.athlete.home.done}
+                              {assignment.completionPercentage !== undefined ? `${assignment.completionPercentage}%` : t.athlete.home.done}
                             </Badge>
                           ) : (
                             <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -363,10 +309,7 @@ const AthleteHome = () => {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{t.athlete.home.upcoming}</CardTitle>
-                <Link
-                  to="/athlete/calendar"
-                  className="text-sm text-primary font-medium hover:underline flex items-center gap-1"
-                >
+                <Link to="/athlete/calendar" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
                   {t.athlete.home.seeAll}
                   <ChevronRight className="h-4 w-4" />
                 </Link>
