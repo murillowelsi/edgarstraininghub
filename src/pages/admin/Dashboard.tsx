@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -48,6 +49,7 @@ const AdminDashboard = () => {
   const { user, photoURL } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { setIsMenuOpen } = useTopBarMenu();
 
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -113,12 +115,14 @@ const AdminDashboard = () => {
 
         {/* Welcome */}
         <div className="flex items-center gap-3">
-          <Avatar className="h-14 w-14 shrink-0 ring-2 ring-white">
-            {photoURL && <AvatarImage src={photoURL} alt={displayName} className="object-cover" />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-              {displayName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <button onClick={() => setIsMenuOpen(true)} className="rounded-full focus:outline-none">
+            <Avatar className="h-14 w-14 shrink-0 ring-2 ring-[#e1b506]">
+              {photoURL && <AvatarImage src={photoURL} alt={displayName} className="object-cover" />}
+              <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+                {displayName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </button>
           <div>
             <p className="text-muted-foreground">{t.admin.dashboard.welcomeBack}</p>
             <h1 className="text-3xl font-bold font-display">{displayName}</h1>
@@ -239,8 +243,10 @@ const AdminDashboard = () => {
                   key={team.id}
                   to={`/admin/teams/${team.id}`}
                   compact
-                  icon={<Shield className="h-4 w-4 text-violet-500" />}
-                  iconClassName="bg-violet-500/10"
+                  icon={team.photoURL
+                    ? <img src={team.photoURL} alt={team.name} className="h-8 w-8 object-cover rounded-full" />
+                    : <Shield className="h-4 w-4 text-violet-500" />}
+                  iconClassName={team.photoURL ? "!p-0" : "bg-violet-500/10"}
                   title={team.name}
                   subtitle={`${team.memberIds.length} ${t.admin.dashboard.members}`}
                   right={<ChevronRight className="h-4 w-4 text-muted-foreground" />}

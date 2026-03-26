@@ -13,6 +13,7 @@ import { uploadImageToCloudinary } from "../lib/cloudinary";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
 import { useRef, useState } from "react";
+import { useTopBarMenu } from "../contexts/TopBarMenuContext";
 
 interface AdminTopBarProps {
   chatUnreadCount?: number;
@@ -26,6 +27,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const { isMenuOpen, setIsMenuOpen } = useTopBarMenu();
 
   const navItems = [
     { href: "/admin", label: t.admin.nav.home, exact: true },
@@ -42,7 +44,6 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   const currentTitle = pageTitle ?? navItems.find((item) =>
     item.exact ? location.pathname === item.href : location.pathname.startsWith(item.href)
   )?.label ?? "";
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const getInitials = (email?: string | null) => {
     if (!email) return "A";

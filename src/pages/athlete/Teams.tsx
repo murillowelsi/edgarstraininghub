@@ -112,9 +112,11 @@ export default function AthleteTeams() {
                 <ListItemCard
                   key={team.id}
                   onClick={() => navigate(`/athlete/teams/${team.id}`)}
-                  icon={<Shield className="h-5 w-5" style={{ color: color.color }} />}
-                  iconClassName="shrink-0"
-                  iconStyle={{ backgroundColor: `${color.color}1a` }}
+                  icon={team.photoURL
+                    ? <img src={team.photoURL} alt={team.name} className="h-10 w-10 object-cover rounded-full" />
+                    : <Shield className="h-5 w-5" style={{ color: color.color }} />}
+                  iconClassName={team.photoURL ? "shrink-0 !p-0" : "shrink-0"}
+                  iconStyle={team.photoURL ? undefined : { backgroundColor: `${color.color}1a` }}
                   title={team.name}
                   subtitle={`${team.memberIds.length} ${team.memberIds.length !== 1 ? t.admin.teams.members : t.admin.teams.member}`}
                   right={team.memberIds.length > 0 ? <MemberAvatarStack memberIds={team.memberIds} memberMap={memberMap} /> : undefined}

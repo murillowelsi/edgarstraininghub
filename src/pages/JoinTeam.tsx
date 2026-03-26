@@ -190,6 +190,9 @@ export default function JoinTeam() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
+          {team.photoURL && (
+            <img src={team.photoURL} alt={team.name} className="h-16 w-16 object-cover rounded-full mx-auto mb-3" />
+          )}
           <h1 className="text-2xl font-bold">{t.joinTeam.joinTitle.replace("{{name}}", team.name)}</h1>
           <p className="text-muted-foreground mt-1">
             {mode === "register" ? t.joinTeam.registerSubtitle : t.joinTeam.loginSubtitle}

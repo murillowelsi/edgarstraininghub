@@ -16,6 +16,7 @@ import { subscribeToMentionCount } from "@/services/timelineService";
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
 import { useEffect, useRef, useState } from "react";
+import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 
 interface AthletePortalLayoutProps {
   children: React.ReactNode;
@@ -49,7 +50,7 @@ const AthletePortalLayout = ({
   ];
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [feedUnreadCount, setFeedUnreadCount] = useState(0);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isMenuOpen, setIsMenuOpen } = useTopBarMenu();
 
   const prevMessageTimes = useRef<Map<string, number>>(new Map());
   const isFirstLoad = useRef(true);

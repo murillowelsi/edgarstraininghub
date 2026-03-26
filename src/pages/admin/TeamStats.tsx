@@ -163,10 +163,15 @@ export default function AdminTeamStats() {
           </Button>
         </div>
 
-        <AdminPageHeader
-          title={`${team.name} — Stats`}
-          description={t.admin.teamStats.description}
-        />
+        <div className="flex items-center gap-3">
+          {team.photoURL && (
+            <img src={team.photoURL} alt={team.name} className="h-10 w-10 object-cover rounded-full shrink-0" />
+          )}
+          <AdminPageHeader
+            title={`${team.name} — Stats`}
+            description={t.admin.teamStats.description}
+          />
+        </div>
 
         {members.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t.admin.teamStats.noMembers}</p>

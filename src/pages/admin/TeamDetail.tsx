@@ -230,9 +230,14 @@ export default function AdminTeamDetail() {
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <h1 className="absolute left-1/2 -translate-x-1/2 text-lg md:text-xl font-bold truncate max-w-[60%] text-center">
-            {team.name}
-          </h1>
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 max-w-[60%]">
+            {team.photoURL && (
+              <img src={team.photoURL} alt={team.name} className="h-8 w-8 object-cover rounded-full shrink-0" />
+            )}
+            <h1 className="text-lg md:text-xl font-bold truncate text-center">
+              {team.name}
+            </h1>
+          </div>
           <div className="hidden sm:flex items-center gap-2 shrink-0 ml-auto">
             <Button variant="outline" onClick={handleOpenGroupChat} disabled={openingChat}>
               {openingChat
@@ -324,7 +329,7 @@ export default function AdminTeamDetail() {
                 <ListItemCard
                   key={member.id}
                   icon={
-                    <Avatar className="h-9 w-9 ring-2 ring-white">
+                    <Avatar className="h-9 w-9 ring-2 ring-[#e1b506]">
                       {member.photoURL && <AvatarImage src={member.photoURL} alt={member.displayName} className="object-cover" />}
                       <AvatarFallback className="text-xs font-semibold" style={{ backgroundColor: "#e0b50718", color: "#e0b507" }}>
                         {getInitials(member.displayName || "?")}
@@ -401,7 +406,7 @@ export default function AdminTeamDetail() {
                     className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Avatar className="h-8 w-8 shrink-0 ring-2 ring-white">
+                      <Avatar className="h-8 w-8 shrink-0 ring-2 ring-[#e1b506]">
                         {athlete.photoURL && <AvatarImage src={athlete.photoURL} alt={athlete.displayName} className="object-cover" />}
                         <AvatarFallback className="text-xs">
                           {athlete.displayName?.[0]?.toUpperCase() || "?"}

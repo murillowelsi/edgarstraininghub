@@ -8,6 +8,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { TopBarMenuProvider } from "./contexts/TopBarMenuContext";
 import About from "./pages/About";
 import AppEntry from "./pages/AppEntry";
 import BlogArticlePage from "./pages/BlogArticlePage";
@@ -49,6 +50,7 @@ const App = () => (
       <ThemeProvider>
         <AuthProvider>
           <LanguageProvider>
+            <TopBarMenuProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -294,6 +296,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+            </TopBarMenuProvider>
           </LanguageProvider>
         </AuthProvider>
       </ThemeProvider>

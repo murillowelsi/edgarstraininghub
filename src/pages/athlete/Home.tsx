@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { subscribeToAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
@@ -54,6 +55,7 @@ const AthleteHome = () => {
   const { user, photoURL } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { setIsMenuOpen } = useTopBarMenu();
   const [displayName, setDisplayName] = useState<string>("");
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,12 +137,14 @@ const AthleteHome = () => {
       <div className="p-4 space-y-4">
         {/* Welcome Section */}
         <div className="flex items-center gap-3">
-          <Avatar className="h-14 w-14 shrink-0 ring-2 ring-white">
-            {photoURL && <AvatarImage src={photoURL} alt={displayName} className="object-cover" />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-              {displayName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <button onClick={() => setIsMenuOpen(true)} className="rounded-full focus:outline-none">
+            <Avatar className="h-14 w-14 shrink-0 ring-2 ring-white">
+              {photoURL && <AvatarImage src={photoURL} alt={displayName} className="object-cover" />}
+              <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+                {displayName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </button>
           <div>
             <p className="text-muted-foreground">{t.athlete.home.welcomeBack}</p>
             <h1 className="text-3xl font-bold font-display">{displayName}</h1>

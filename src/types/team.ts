@@ -12,6 +12,7 @@ export interface Team {
   id: string;
   name: string;
   color?: string;
+  photoURL?: string;
   coachId: string;
   inviteToken: string;
   memberIds: string[];
@@ -23,6 +24,7 @@ export interface Team {
 export interface TeamDocument {
   name: string;
   color?: string;
+  photoURL?: string;
   coachId: string;
   inviteToken: string;
   memberIds: string[];

@@ -80,19 +80,28 @@ export default function AthleteTeamDetail() {
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-bold truncate max-w-[60%] text-center">
-            {team.name}
-          </h1>
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 max-w-[60%]">
+            {team.photoURL && (
+              <img src={team.photoURL} alt={team.name} className="h-8 w-8 object-cover rounded-full shrink-0" />
+            )}
+            <h1 className="text-lg font-bold truncate text-center">
+              {team.name}
+            </h1>
+          </div>
         </div>
 
         {/* Team badge */}
         <div className="flex items-center gap-3 px-1">
-          <div
-            className="p-3 rounded-xl shrink-0"
-            style={{ backgroundColor: `${color.color}1a` }}
-          >
-            <Shield className="h-6 w-6" style={{ color: color.color }} />
-          </div>
+          {team.photoURL ? (
+            <img src={team.photoURL} alt={team.name} className="h-12 w-12 object-cover rounded-full shrink-0" />
+          ) : (
+            <div
+              className="p-3 rounded-xl shrink-0"
+              style={{ backgroundColor: `${color.color}1a` }}
+            >
+              <Shield className="h-6 w-6" style={{ color: color.color }} />
+            </div>
+          )}
           <div>
             <p className="font-semibold text-base">{team.name}</p>
             <p className="text-sm text-muted-foreground">
@@ -120,7 +129,7 @@ export default function AthleteTeamDetail() {
                 <ListItemCard
                   key={member.id}
                   icon={
-                    <Avatar className="h-9 w-9 ring-2 ring-white">
+                    <Avatar className="h-9 w-9 ring-2 ring-[#e1b506]">
                       {member.photoURL && <AvatarImage src={member.photoURL} alt={member.displayName} className="object-cover" />}
                       <AvatarFallback className="text-xs font-semibold" style={{ backgroundColor: `${color.color}18`, color: color.color }}>
                         {getInitials(member.displayName || "?")}

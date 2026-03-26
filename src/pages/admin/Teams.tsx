@@ -12,13 +12,14 @@ import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { createTeam, deleteTeam, getTeamsByCoach, updateTeamName, updateTeamColor } from "@/services/teamsService";
+import { createTeam, deleteTeam, getTeamsByCoach, updateTeamName, updateTeamColor, updateTeamPhoto } from "@/services/teamsService";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import type { Team } from "@/types/team";
 import { TEAM_COLORS, getTeamColor } from "@/lib/teamColors";
 import { getUserById } from "@/services/usersService";
 import type { User } from "@/types/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Shield, Loader2, Trash2, Check, EllipsisVertical, Search } from "lucide-react";
+import { Shield, Loader2, Trash2, Check, EllipsisVertical, Search, Camera, X } from "lucide-react";
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -45,6 +46,67 @@ function MemberAvatarStack({ memberIds, memberMap }: { memberIds: string[]; memb
           +{overflow}
         </div>
       )}
+    </div>
+  );
+}
+
+function TeamPhotoUpload({
+  photoURL,
+  onUpload,
+  onRemove,
+  uploading,
+  label,
+  hint,
+  removeLabel,
+}: {
+  photoURL: string | null;
+  onUpload: (file: File) => void;
+  onRemove: () => void;
+  uploading: boolean;
+  label: string;
+  hint: string;
+  removeLabel: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      <div className="flex items-center gap-3">
+        <label className="relative cursor-pointer group">
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onUpload(file);
+              e.target.value = "";
+            }}
+            disabled={uploading}
+          />
+          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center overflow-hidden ring-2 ring-background">
+            {uploading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            ) : photoURL ? (
+              <img src={photoURL} alt="Team" className="h-full w-full object-cover" />
+            ) : (
+              <Camera className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            )}
+          </div>
+          {!uploading && !photoURL && (
+            <span className="text-xs text-muted-foreground mt-1 block text-center">{hint}</span>
+          )}
+        </label>
+        {photoURL && !uploading && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-1 transition-colors"
+          >
+            <X className="h-3 w-3" />
+            {removeLabel}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -82,12 +144,16 @@ export default function AdminTeams() {
   const [isNewTeamOpen, setIsNewTeamOpen] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [newTeamColor, setNewTeamColor] = useState(TEAM_COLORS[0].key);
+  const [newTeamPhoto, setNewTeamPhoto] = useState<string | null>(null);
+  const [uploadingNewPhoto, setUploadingNewPhoto] = useState(false);
   const [creating, setCreating] = useState(false);
 
   // Edit
   const [editTeam, setEditTeam] = useState<Team | null>(null);
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState(TEAM_COLORS[0].key);
+  const [editPhoto, setEditPhoto] = useState<string | null>(null);
+  const [uploadingEditPhoto, setUploadingEditPhoto] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [search, setSearch] = useState("");
@@ -121,16 +187,31 @@ export default function AdminTeams() {
     }
   };
 
+  const handlePhotoUpload = async (file: File, target: "new" | "edit") => {
+    const setUploading = target === "new" ? setUploadingNewPhoto : setUploadingEditPhoto;
+    const setPhoto = target === "new" ? setNewTeamPhoto : setEditPhoto;
+    setUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file, "team-photos");
+      setPhoto(url);
+    } catch {
+      toast({ title: t.common.error, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !newTeamName.trim()) return;
     setCreating(true);
     try {
-      const team = await createTeam(newTeamName.trim(), user.uid, newTeamColor);
+      const team = await createTeam(newTeamName.trim(), user.uid, newTeamColor, newTeamPhoto ?? undefined);
       setTeams((prev) => [team, ...prev]);
       setIsNewTeamOpen(false);
       setNewTeamName("");
       setNewTeamColor(TEAM_COLORS[0].key);
+      setNewTeamPhoto(null);
       toast({ title: t.admin.teams.toast.created, description: t.admin.teams.toast.createdDescription.replace("{{name}}", team.name) });
     } catch {
       toast({ title: t.common.error, description: t.admin.teams.toast.createError, variant: "destructive" });
@@ -143,6 +224,7 @@ export default function AdminTeams() {
     setEditTeam(team);
     setEditName(team.name);
     setEditColor(team.color ?? TEAM_COLORS[0].key);
+    setEditPhoto(team.photoURL ?? null);
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
@@ -153,9 +235,10 @@ export default function AdminTeams() {
       const promises: Promise<void>[] = [];
       if (editName.trim() !== editTeam.name) promises.push(updateTeamName(editTeam.id, editName.trim()));
       if (editColor !== (editTeam.color ?? TEAM_COLORS[0].key)) promises.push(updateTeamColor(editTeam.id, editColor));
+      if (editPhoto !== (editTeam.photoURL ?? null)) promises.push(updateTeamPhoto(editTeam.id, editPhoto));
       await Promise.all(promises);
       setTeams((prev) => prev.map((t) =>
-        t.id === editTeam.id ? { ...t, name: editName.trim(), color: editColor } : t
+        t.id === editTeam.id ? { ...t, name: editName.trim(), color: editColor, photoURL: editPhoto ?? undefined } : t
       ));
       setEditTeam(null);
       toast({ title: t.admin.teams.toast.updated });
@@ -217,9 +300,11 @@ export default function AdminTeams() {
                 <ListItemCard
                   key={team.id}
                   to={`/admin/teams/${team.id}`}
-                  icon={<Shield className="h-5 w-5" style={{ color: color.color }} />}
-                  iconClassName="shrink-0"
-                  iconStyle={{ backgroundColor: `${color.color}1a` }}
+                  icon={team.photoURL
+                    ? <img src={team.photoURL} alt={team.name} className="h-10 w-10 object-cover rounded-full" />
+                    : <Shield className="h-5 w-5" style={{ color: color.color }} />}
+                  iconClassName={team.photoURL ? "shrink-0 !p-0" : "shrink-0"}
+                  iconStyle={team.photoURL ? undefined : { backgroundColor: `${color.color}1a` }}
                   title={team.name}
                   subtitle={`${team.memberIds.length} ${team.memberIds.length !== 1 ? t.admin.teams.members : t.admin.teams.member}`}
                   right={team.memberIds.length > 0 ? <MemberAvatarStack memberIds={team.memberIds} memberMap={memberMap} /> : undefined}
@@ -244,10 +329,19 @@ export default function AdminTeams() {
         {/* New Team Modal */}
         <ResponsiveModal
           open={isNewTeamOpen}
-          onOpenChange={(open) => { setIsNewTeamOpen(open); if (!open) { setNewTeamName(""); setNewTeamColor(TEAM_COLORS[0].key); } }}
+          onOpenChange={(open) => { setIsNewTeamOpen(open); if (!open) { setNewTeamName(""); setNewTeamColor(TEAM_COLORS[0].key); setNewTeamPhoto(null); } }}
           title={t.admin.teams.newTeam}
         >
           <form onSubmit={handleCreate} className="space-y-4 p-2">
+            <TeamPhotoUpload
+              photoURL={newTeamPhoto}
+              onUpload={(file) => handlePhotoUpload(file, "new")}
+              onRemove={() => setNewTeamPhoto(null)}
+              uploading={uploadingNewPhoto}
+              label={t.admin.teams.teamPhoto}
+              hint={t.admin.teams.teamPhotoHint}
+              removeLabel={t.admin.teams.removePhoto}
+            />
             <div className="space-y-1.5">
               <Label htmlFor="teamName">{t.admin.teams.teamName}</Label>
               <Input
@@ -263,7 +357,7 @@ export default function AdminTeams() {
               <Label>{t.admin.teams.teamColor}</Label>
               <ColorPicker value={newTeamColor} onChange={setNewTeamColor} />
             </div>
-            <Button type="submit" className="w-full" disabled={creating || !newTeamName.trim()}>
+            <Button type="submit" className="w-full" disabled={creating || uploadingNewPhoto || !newTeamName.trim()}>
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t.admin.teams.createTeam}
             </Button>
@@ -277,6 +371,15 @@ export default function AdminTeams() {
           title={t.admin.teams.editTeam}
         >
           <form onSubmit={handleSaveEdit} className="space-y-4 p-2">
+            <TeamPhotoUpload
+              photoURL={editPhoto}
+              onUpload={(file) => handlePhotoUpload(file, "edit")}
+              onRemove={() => setEditPhoto(null)}
+              uploading={uploadingEditPhoto}
+              label={t.admin.teams.teamPhoto}
+              hint={t.admin.teams.teamPhotoHint}
+              removeLabel={t.admin.teams.removePhoto}
+            />
             <div className="space-y-1.5">
               <Label htmlFor="editTeamName">{t.admin.teams.teamName}</Label>
               <Input
@@ -291,7 +394,7 @@ export default function AdminTeams() {
               <Label>{t.admin.teams.teamColor}</Label>
               <ColorPicker value={editColor} onChange={setEditColor} />
             </div>
-            <Button type="submit" className="w-full" disabled={saving || !editName.trim()}>
+            <Button type="submit" className="w-full" disabled={saving || uploadingEditPhoto || !editName.trim()}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t.admin.teams.saveTeam}
             </Button>
