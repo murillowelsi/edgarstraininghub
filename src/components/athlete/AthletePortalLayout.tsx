@@ -42,8 +42,8 @@ const AthletePortalLayout = ({
 
   const navItems = [
     { href: "/athlete", label: t.athlete.nav.home, icon: Home, exact: true, featured: false },
-    { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar, featured: false },
     { href: "/athlete/timeline", label: "Feed", icon: LayoutGrid, featured: true },
+    { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar, featured: false },
     { href: "/athlete/workouts", label: t.athlete.nav.workouts, icon: Dumbbell, featured: false },
   ];
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
