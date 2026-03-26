@@ -94,7 +94,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8 ring-2 ring-white">
+            <Avatar className="h-8 w-8 ring-2 ring-[#e1b506]">
               {post.authorPhotoURL && <AvatarImage src={post.authorPhotoURL} alt={post.authorName} className="object-cover" />}
               <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                 {getInitials(post.authorName)}

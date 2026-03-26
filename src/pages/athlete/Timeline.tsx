@@ -3,7 +3,7 @@ import { TimelineFeed } from "@/components/timeline/TimelineFeed";
 
 const AthleteTimeline = () => {
   return (
-    <AthletePortalLayout title="Timeline" fullHeight>
+    <AthletePortalLayout title="Feed" fullHeight>
       <TimelineFeed />
     </AthletePortalLayout>
   );

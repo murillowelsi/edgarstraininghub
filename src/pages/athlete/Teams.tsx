@@ -26,7 +26,7 @@ function MemberAvatarStack({ memberIds, memberMap }: { memberIds: string[]; memb
       {preview.map((id) => {
         const u = memberMap.get(id);
         return (
-          <Avatar key={id} className="h-7 w-7 ring-2 ring-background">
+          <Avatar key={id} className="h-7 w-7 ring-2 ring-[#e1b506]">
             {u?.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
             <AvatarFallback className="text-[10px] font-semibold bg-muted">
               {u ? getInitials(u.displayName) : "?"}

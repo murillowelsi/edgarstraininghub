@@ -1,4 +1,4 @@
-import { Moon, Sun, LogOut, MessageSquare, Camera, X, MoreVertical } from "lucide-react";
+import { Moon, Sun, LogOut, MessageSquare, Camera, X, Heart, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
@@ -14,6 +14,7 @@ import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
 import { useRef, useState } from "react";
 import { useTopBarMenu } from "../contexts/TopBarMenuContext";
+import { useTimelineActions } from "../contexts/TimelineActionsContext";
 
 interface AdminTopBarProps {
   chatUnreadCount?: number;
@@ -28,6 +29,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const { isMenuOpen, setIsMenuOpen } = useTopBarMenu();
+  const { setCreateOpen, setActivityOpen, activityUnreadCount } = useTimelineActions();
 
   const navItems = [
     { href: "/admin", label: t.admin.nav.home, exact: true },
@@ -98,7 +100,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
           </h1>
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           <Link
             to="/admin/chat"
             className={cn(
@@ -117,10 +119,20 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
           </Link>
 
           <button
-            onClick={() => setIsMenuOpen(true)}
+            onClick={() => setActivityOpen(true)}
+            className="relative p-2 rounded-full hover:bg-accent transition-colors"
+          >
+            <Heart className="h-5 w-5" />
+            {activityUnreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setCreateOpen(true)}
             className="p-2 rounded-full hover:bg-accent transition-colors"
           >
-            <MoreVertical className="h-5 w-5" />
+            <Plus className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -137,7 +149,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
                   disabled={isUploadingPhoto}
                   className="relative group rounded-full focus:outline-none"
                 >
-                  <Avatar className="h-14 w-14 ring-2 ring-white">
+                  <Avatar className="h-14 w-14 ring-2 ring-[#e1b506]">
                     {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
                     <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
                       {getInitials(user?.email)}

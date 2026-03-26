@@ -74,7 +74,7 @@ export default function ChatWindow({
                     </button>
                 )}
 
-                <Avatar className="h-9 w-9 shrink-0 ring-2 ring-white">
+                <Avatar className="h-9 w-9 shrink-0 ring-2 ring-[#e1b506]">
                     {!isGroup && participantPhotoURL && <AvatarImage src={participantPhotoURL} alt={participantName} className="object-cover" />}
                     <AvatarFallback className="text-sm font-semibold">
                         {isGroup ? <Users2 className="h-4 w-4" /> : participantName[0]?.toUpperCase()}

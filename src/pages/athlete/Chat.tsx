@@ -265,7 +265,7 @@ export default function AthleteChat() {
                                             selectedChat?.id === chat.id && "bg-muted/60"
                                         )}
                                     >
-                                        <Avatar className="h-12 w-12 shrink-0 ring-2 ring-white">
+                                        <Avatar className="h-12 w-12 shrink-0 ring-2 ring-[#e1b506]">
                                             {!chat.isGroup && getChatPhotoURL(chat) && <AvatarImage src={getChatPhotoURL(chat)!} alt={displayName} className="object-cover" />}
                                             <AvatarFallback className="text-base font-semibold">
                                                 {chat.isGroup

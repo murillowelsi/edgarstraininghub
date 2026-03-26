@@ -9,6 +9,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TopBarMenuProvider } from "./contexts/TopBarMenuContext";
+import { TimelineActionsProvider } from "./contexts/TimelineActionsContext";
 import About from "./pages/About";
 import AppEntry from "./pages/AppEntry";
 import BlogArticlePage from "./pages/BlogArticlePage";
@@ -51,6 +52,7 @@ const App = () => (
         <AuthProvider>
           <LanguageProvider>
             <TopBarMenuProvider>
+            <TimelineActionsProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -296,6 +298,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+            </TimelineActionsProvider>
             </TopBarMenuProvider>
           </LanguageProvider>
         </AuthProvider>

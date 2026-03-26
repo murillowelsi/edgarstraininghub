@@ -138,7 +138,7 @@ const AthleteHome = () => {
         {/* Welcome Section */}
         <div className="flex items-center gap-3">
           <button onClick={() => setIsMenuOpen(true)} className="rounded-full focus:outline-none">
-            <Avatar className="h-14 w-14 shrink-0 ring-2 ring-white">
+            <Avatar className="h-14 w-14 shrink-0 ring-2 ring-[#e1b506]">
               {photoURL && <AvatarImage src={photoURL} alt={displayName} className="object-cover" />}
               <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
                 {displayName.charAt(0).toUpperCase()}

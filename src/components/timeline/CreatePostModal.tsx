@@ -152,7 +152,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
       <div className="flex-1 overflow-y-auto">
         {/* Author row */}
         <div className="flex items-center gap-3 px-4 py-4">
-          <Avatar className="h-12 w-12 shrink-0 ring-2 ring-white">
+          <Avatar className="h-12 w-12 shrink-0 ring-2 ring-[#e1b506]">
             {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
             <AvatarFallback className="bg-primary text-primary-foreground font-bold text-lg">
               {authorName.charAt(0).toUpperCase()}
@@ -266,7 +266,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
                   onClick={() => handleMention(u)}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors text-left"
                 >
-                  <Avatar className="h-10 w-10 shrink-0 ring-2 ring-white">
+                  <Avatar className="h-10 w-10 shrink-0 ring-2 ring-[#e1b506]">
                     {u.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
                     <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                       {u.displayName.charAt(0).toUpperCase()}

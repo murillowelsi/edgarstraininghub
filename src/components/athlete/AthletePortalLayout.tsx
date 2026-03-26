@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Calendar, Camera, Dumbbell, Home, LayoutGrid, LogOut, Moon, MoreVertical, Shield, Sun, MessageSquare, X } from "lucide-react";
+import { Calendar, Camera, Dumbbell, Heart, Home, LayoutGrid, LogOut, Moon, Plus, Shield, Sun, MessageSquare, X } from "lucide-react";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -12,11 +12,15 @@ import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { ChatService } from "@/services/chat";
-import { subscribeToMentionCount } from "@/services/timelineService";
+import { createMentionNotifications, createTimelinePost, subscribeToMentionCount } from "@/services/timelineService";
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
 import { useEffect, useRef, useState } from "react";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
+import { useTimelineActions } from "@/contexts/TimelineActionsContext";
+import { CreatePostModal } from "@/components/timeline/CreatePostModal";
+import { ActivityDrawer } from "@/components/timeline/ActivityDrawer";
+import { useToast } from "@/hooks/use-toast";
 
 interface AthletePortalLayoutProps {
   children: React.ReactNode;
@@ -35,7 +39,8 @@ const AthletePortalLayout = ({
 }: AthletePortalLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, photoURL, setPhotoURL } = useAuth();
+  const { user, photoURL, setPhotoURL, userRole, displayName } = useAuth();
+  const { toast } = useToast();
   const { t, language, changeLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +56,17 @@ const AthletePortalLayout = ({
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [feedUnreadCount, setFeedUnreadCount] = useState(0);
   const { isMenuOpen, setIsMenuOpen } = useTopBarMenu();
+  const { createOpen, setCreateOpen, activityOpen, setActivityOpen, activityUnreadCount } = useTimelineActions();
+
+  const handleCreate = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
+    if (!user || !userRole) return;
+    const authorName = displayName || user.email || "User";
+    const postId = await createTimelinePost({ caption, imageUrl }, user.uid, authorName, userRole, photoURL);
+    if (mentionedUserIds?.length) {
+      await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
+    }
+    toast({ title: "Post shared!" });
+  };
 
   const prevMessageTimes = useRef<Map<string, number>>(new Map());
   const isFirstLoad = useRef(true);
@@ -192,7 +208,7 @@ const AthletePortalLayout = ({
             )}
 
             {/* Right controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <Link
                 to="/athlete/chat"
                 className={cn(
@@ -211,10 +227,20 @@ const AthletePortalLayout = ({
               </Link>
 
               <button
-                onClick={() => setIsMenuOpen(true)}
+                onClick={() => setActivityOpen(true)}
+                className="relative p-2 rounded-full hover:bg-accent transition-colors"
+              >
+                <Heart className="h-5 w-5" />
+                {activityUnreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
+                )}
+              </button>
+
+              <button
+                onClick={() => setCreateOpen(true)}
                 className="p-2 rounded-full hover:bg-accent transition-colors"
               >
-                <MoreVertical className="h-5 w-5" />
+                <Plus className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -234,7 +260,7 @@ const AthletePortalLayout = ({
                   disabled={isUploadingPhoto}
                   className="relative group rounded-full focus:outline-none"
                 >
-                  <Avatar className="h-14 w-14 ring-2 ring-white">
+                  <Avatar className="h-14 w-14 ring-2 ring-[#e1b506]">
                     {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
                     <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
                       {getInitials(user?.email)}
@@ -348,6 +374,16 @@ const AthletePortalLayout = ({
           })}
         </div>
       </nav>
+
+      <CreatePostModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={handleCreate}
+      />
+      <ActivityDrawer
+        open={activityOpen}
+        onOpenChange={setActivityOpen}
+      />
     </div>
   );
 };

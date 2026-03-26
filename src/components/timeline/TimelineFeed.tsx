@@ -1,29 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Heart, Image, Loader2 } from "lucide-react";
+import { Image, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TimelinePostCard } from "./TimelinePostCard";
-import { CreatePostModal } from "./CreatePostModal";
-import { ActivityDrawer } from "./ActivityDrawer";
-import { createMentionNotifications, createTimelinePost, getTimelinePosts, subscribeToMentionCount, subscribeToTimelinePosts } from "@/services/timelineService";
+import { getTimelinePosts, subscribeToMentionCount, subscribeToTimelinePosts } from "@/services/timelineService";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 import type { TimelinePost } from "@/types/timeline";
 import { Timestamp } from "firebase/firestore";
+import { useTimelineActions } from "@/contexts/TimelineActionsContext";
 
 const PULL_THRESHOLD = 72;
 
 export function TimelineFeed() {
-  const { user, userRole, displayName, photoURL } = useAuth();
-  const { toast } = useToast();
+  const { user, photoURL } = useAuth();
   const [realtimePosts, setRealtimePosts] = useState<TimelinePost[]>([]);
   const [extraPosts, setExtraPosts] = useState<TimelinePost[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [lastTimestamp, setLastTimestamp] = useState<Timestamp | undefined>();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [activityOpen, setActivityOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { createOpen, setCreateOpen, activityOpen, setActivityOpen, setActivityUnreadCount } = useTimelineActions();
   const [pullY, setPullY] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -61,8 +56,8 @@ export function TimelineFeed() {
 
   useEffect(() => {
     if (!user) return;
-    return subscribeToMentionCount(user.uid, setUnreadCount);
-  }, [user]);
+    return subscribeToMentionCount(user.uid, setActivityUnreadCount);
+  }, [user, setActivityUnreadCount]);
 
   // Pull-to-refresh via document-level touch events
   useEffect(() => {
@@ -132,20 +127,8 @@ export function TimelineFeed() {
     return () => observer.disconnect();
   }, [loadMore]);
 
-  const handleCreate = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
-    if (!user || !userRole) return;
-    const authorName = displayName || user.email || "User";
-    const postId = await createTimelinePost({ caption, imageUrl }, user.uid, authorName, userRole, photoURL);
-    if (mentionedUserIds?.length) {
-      await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
-    }
-    // Real-time subscription will automatically show the new post
-    toast({ title: "Post shared!" });
-  };
-
   const handleDeleted = (postId: string) => {
     setExtraPosts((prev) => prev.filter((p) => p.id !== postId));
-    // Real-time subscription handles removal from first page automatically
   };
 
   if (loading) {
@@ -156,7 +139,7 @@ export function TimelineFeed() {
     );
   }
 
-  const authorName = displayName || user?.email || "User";
+  const authorName = user?.email || "User";
   const realtimeIds = new Set(realtimePosts.map((p) => p.id));
   const posts = [...realtimePosts, ...extraPosts.filter((p) => !realtimeIds.has(p.id))];
 
@@ -164,7 +147,7 @@ export function TimelineFeed() {
     <div className="flex flex-col h-full">
       {/* Create post prompt — pinned, never scrolls */}
       <div className="shrink-0 border-b border-border/50 px-4 py-3 flex items-center gap-3 bg-background">
-        <Avatar className="h-10 w-10 shrink-0 ring-2 ring-white">
+        <Avatar className="h-10 w-10 shrink-0 ring-2 ring-[#e1b506]">
           {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
           <AvatarFallback className="bg-primary text-primary-foreground font-bold">
             {authorName.charAt(0).toUpperCase()}
@@ -181,15 +164,6 @@ export function TimelineFeed() {
           className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground shrink-0"
         >
           <Image className="h-6 w-6" />
-        </button>
-        <button
-          onClick={() => setActivityOpen(true)}
-          className="relative p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground shrink-0"
-        >
-          <Heart className="h-6 w-6" />
-          {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
-          )}
         </button>
       </div>
 
@@ -233,16 +207,6 @@ export function TimelineFeed() {
         </div>
       </div>
 
-      <CreatePostModal
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSubmit={handleCreate}
-      />
-
-      <ActivityDrawer
-        open={activityOpen}
-        onOpenChange={setActivityOpen}
-      />
     </div>
   );
 }

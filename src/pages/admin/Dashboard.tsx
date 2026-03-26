@@ -21,6 +21,7 @@ import {
   CalendarCheck,
   Check,
   ChevronRight,
+  Crown,
   Dumbbell,
   Loader2,
   Shield,
@@ -125,7 +126,10 @@ const AdminDashboard = () => {
           </button>
           <div>
             <p className="text-muted-foreground">{t.admin.dashboard.welcomeBack}</p>
-            <h1 className="text-3xl font-bold font-display">{displayName}</h1>
+            <h1 className="flex items-center gap-2 text-3xl font-bold font-display">
+              {displayName}
+              <Crown className="h-4 w-4 fill-yellow-400 text-yellow-500 drop-shadow-sm" strokeWidth={1.5} />
+            </h1>
           </div>
         </div>
 
