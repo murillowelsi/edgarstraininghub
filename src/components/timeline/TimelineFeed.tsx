@@ -3,7 +3,7 @@ import { Image, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TimelinePostCard } from "./TimelinePostCard";
 import { CreatePostModal } from "./CreatePostModal";
-import { createMentionNotifications, createTimelinePost, getTimelinePosts, markMentionsRead } from "@/services/timelineService";
+import { createMentionNotifications, createTimelinePost, getTimelinePosts, markMentionsRead, subscribeToTimelinePosts } from "@/services/timelineService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { TimelinePost } from "@/types/timeline";
@@ -14,7 +14,8 @@ const PULL_THRESHOLD = 72;
 export function TimelineFeed() {
   const { user, userRole, displayName, photoURL } = useAuth();
   const { toast } = useToast();
-  const [posts, setPosts] = useState<TimelinePost[]>([]);
+  const [realtimePosts, setRealtimePosts] = useState<TimelinePost[]>([]);
+  const [extraPosts, setExtraPosts] = useState<TimelinePost[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -29,26 +30,12 @@ export function TimelineFeed() {
   const pullYRef = useRef(0);
   const refreshingRef = useRef(false);
 
-  const loadInitial = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await getTimelinePosts();
-      setPosts(result.posts);
-      setHasMore(result.hasMore);
-      setLastTimestamp(result.lastTimestamp);
-    } catch {
-      toast({ title: "Error", description: "Could not load timeline.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const loadMore = useCallback(async () => {
-    if (!hasMore || loadingMore) return;
+    if (!hasMore || loadingMore || !lastTimestamp) return;
     setLoadingMore(true);
     try {
       const result = await getTimelinePosts(lastTimestamp);
-      setPosts((prev) => [...prev, ...result.posts]);
+      setExtraPosts((prev) => [...prev, ...result.posts]);
       setHasMore(result.hasMore);
       setLastTimestamp(result.lastTimestamp);
     } catch {
@@ -58,10 +45,20 @@ export function TimelineFeed() {
     }
   }, [hasMore, loadingMore, lastTimestamp]);
 
+  // Real-time subscription for the first page
   useEffect(() => {
-    loadInitial();
+    const unsubscribe = subscribeToTimelinePosts(({ posts, hasMore: more, lastTimestamp: lastTs }) => {
+      setRealtimePosts(posts);
+      setHasMore(more);
+      setLastTimestamp(lastTs);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
     if (user) markMentionsRead(user.uid).catch(() => null);
-  }, [loadInitial, user]);
+  }, [user]);
 
   // Pull-to-refresh via document-level touch events
   useEffect(() => {
@@ -87,7 +84,7 @@ export function TimelineFeed() {
       }
     };
 
-    const onEnd = async () => {
+    const onEnd = () => {
       if (!isPulling.current) return;
       isPulling.current = false;
       if (pullYRef.current >= PULL_THRESHOLD && !refreshingRef.current) {
@@ -95,9 +92,12 @@ export function TimelineFeed() {
         setRefreshing(true);
         pullYRef.current = 0;
         setPullY(0);
-        await loadInitial();
-        refreshingRef.current = false;
-        setRefreshing(false);
+        // Reset extra pages — real-time subscription keeps first page live
+        setExtraPosts([]);
+        setTimeout(() => {
+          refreshingRef.current = false;
+          setRefreshing(false);
+        }, 600);
       } else {
         pullYRef.current = 0;
         setPullY(0);
@@ -114,7 +114,7 @@ export function TimelineFeed() {
       el.removeEventListener("touchmove", onMove);
       el.removeEventListener("touchend", onEnd);
     };
-  }, [loadInitial]);
+  }, []);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
@@ -135,12 +135,13 @@ export function TimelineFeed() {
     if (mentionedUserIds?.length) {
       await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
     }
-    await loadInitial();
+    // Real-time subscription will automatically show the new post
     toast({ title: "Post shared!" });
   };
 
   const handleDeleted = (postId: string) => {
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
+    setExtraPosts((prev) => prev.filter((p) => p.id !== postId));
+    // Real-time subscription handles removal from first page automatically
   };
 
   if (loading) {
@@ -152,6 +153,8 @@ export function TimelineFeed() {
   }
 
   const authorName = displayName || user?.email || "User";
+  const realtimeIds = new Set(realtimePosts.map((p) => p.id));
+  const posts = [...realtimePosts, ...extraPosts.filter((p) => !realtimeIds.has(p.id))];
 
   return (
     <div className="flex flex-col h-full">

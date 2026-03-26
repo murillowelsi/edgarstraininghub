@@ -56,23 +56,38 @@ const docToComment = (id: string, data: TimelineCommentDocument): TimelineCommen
   createdAt: data.createdAt?.toDate() || new Date(),
 });
 
-export const getTimelinePosts = async (
-  lastDoc?: Timestamp
-): Promise<{ posts: TimelinePost[]; hasMore: boolean; lastTimestamp?: Timestamp }> => {
-  let q = query(
+export const subscribeToTimelinePosts = (
+  callback: (result: { posts: TimelinePost[]; hasMore: boolean; lastTimestamp?: Timestamp }) => void
+): (() => void) => {
+  const q = query(
     collection(db, COLLECTION),
     orderBy("createdAt", "desc"),
     limit(POSTS_PER_PAGE + 1)
   );
 
-  if (lastDoc) {
-    q = query(
-      collection(db, COLLECTION),
-      orderBy("createdAt", "desc"),
-      startAfter(lastDoc),
-      limit(POSTS_PER_PAGE + 1)
-    );
-  }
+  return onSnapshot(q, (snapshot) => {
+    const posts: TimelinePost[] = [];
+    let lastTimestamp: Timestamp | undefined;
+
+    snapshot.docs.slice(0, POSTS_PER_PAGE).forEach((d) => {
+      const data = d.data() as TimelinePostDocument;
+      posts.push(docToPost(d.id, data));
+      lastTimestamp = data.createdAt;
+    });
+
+    callback({ posts, hasMore: snapshot.docs.length > POSTS_PER_PAGE, lastTimestamp });
+  });
+};
+
+export const getTimelinePosts = async (
+  lastDoc?: Timestamp
+): Promise<{ posts: TimelinePost[]; hasMore: boolean; lastTimestamp?: Timestamp }> => {
+  const q = query(
+    collection(db, COLLECTION),
+    orderBy("createdAt", "desc"),
+    startAfter(lastDoc),
+    limit(POSTS_PER_PAGE + 1)
+  );
 
   const snapshot = await getDocs(q);
   const posts: TimelinePost[] = [];
