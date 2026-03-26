@@ -146,6 +146,7 @@ const AthletePortalLayout = ({
   };
 
   const handleLogout = async () => {
+    setIsMenuOpen(false);
     await auth.signOut();
     navigate("/login");
   };

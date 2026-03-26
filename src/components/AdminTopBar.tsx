@@ -53,6 +53,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   };
 
   const handleLogout = async () => {
+    setIsMenuOpen(false);
     await signOut(auth);
   };
 
@@ -83,6 +84,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   };
 
   return (
+    <>
     <header className="bg-background/80 backdrop-blur-lg fixed w-full z-50 border-b border-border/50">
       <div className="px-4 py-4 flex items-center justify-between">
         <Link
@@ -136,6 +138,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
           </Link>
         </div>
       </div>
+    </header>
 
       <Drawer open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DrawerContent>
@@ -227,7 +230,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
           </div>
         </DrawerContent>
       </Drawer>
-    </header>
+    </>
   );
 };
 
