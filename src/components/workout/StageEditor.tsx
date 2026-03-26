@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -36,7 +35,20 @@ import {
   strokeLabels,
   swimmingDistancePresets,
 } from "@/types/workout";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
+import {
+  Bike,
+  Clock,
+  Flame,
+  GripVertical,
+  Heart,
+  PersonStanding,
+  Plus,
+  Repeat,
+  Trash2,
+  Waves,
+  Wind,
+  Zap,
+} from "lucide-react";
 
 interface StageEditorProps {
   stage: WorkoutStage;
@@ -45,9 +57,22 @@ interface StageEditorProps {
   workoutType?: WorkoutType;
 }
 
+const stageIcons: Record<string, React.ElementType> = {
+  warmup: Flame,
+  run: PersonStanding,
+  cooldown: Wind,
+  recovery: Heart,
+  interval: Zap,
+  repeat: Repeat,
+  bike: Bike,
+  rest: Clock,
+  swim: Waves,
+};
+
 const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: StageEditorProps) => {
   const color = stageColors[stage.type];
   const isRepeat = stage.type === "repeat";
+  const StageIcon = stageIcons[stage.type] || PersonStanding;
   const isSwimming = workoutType === "swimming";
 
   // Get available types based on workout type
@@ -268,21 +293,19 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
   const showPowerUnit = stage.duration.type === "power";
 
   return (
-    <Card className="relative overflow-hidden">
-      {/* Color indicator */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{ backgroundColor: color }}
-      />
-
-      <div className="p-6 pl-7">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b">
-          <GripVertical className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {isRepeat ? "Editing repeat block..." : "Editing stage..."}
-          </span>
+    <div className="rounded-xl border bg-card overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-3 p-4 border-b border-border/50">
+        <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div className="p-2 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: `${color}1a`, color }}>
+          <StageIcon className="h-4 w-4" />
         </div>
+        <span className="font-semibold text-sm">
+          {isRepeat ? "Editing repeat block..." : "Editing stage..."}
+        </span>
+      </div>
+
+      <div className="p-6">
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Left column - Details */}
@@ -648,12 +671,17 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
                   {(stage.stages || []).map((nestedStage, index) => (
                     <div
                       key={nestedStage.id}
-                      className="flex items-center gap-3 p-3 bg-muted/50 rounded-md"
+                      className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl"
                     >
-                      <div
-                        className="w-1 h-10 rounded-full"
-                        style={{ backgroundColor: stageColors[nestedStage.type] }}
-                      />
+                      {(() => {
+                        const NestedIcon = stageIcons[nestedStage.type] || PersonStanding;
+                        const nestedColor = stageColors[nestedStage.type];
+                        return (
+                          <div className="p-2 rounded-lg shrink-0 flex items-center justify-center" style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}>
+                            <NestedIcon className="h-3.5 w-3.5" />
+                          </div>
+                        );
+                      })()}
                       <div className="flex-1">
                         <Select
                           value={nestedStage.type}
@@ -724,7 +752,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
           <Button onClick={onDone}>Done</Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
