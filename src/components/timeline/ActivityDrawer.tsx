@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { CommentsDrawer } from "./CommentsDrawer";
 
 interface ActivityDrawerProps {
@@ -16,17 +17,17 @@ interface ActivityDrawerProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function groupByDate(notifications: ActivityNotification[]): { label: string; items: ActivityNotification[] }[] {
+function groupByDate(notifications: ActivityNotification[], labels: { today: string; yesterday: string; last7Days: string; older: string }): { label: string; items: ActivityNotification[] }[] {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterday = new Date(today.getTime() - 86400000);
   const weekAgo = new Date(today.getTime() - 7 * 86400000);
 
   const groups: { label: string; items: ActivityNotification[] }[] = [
-    { label: "Hoje", items: [] },
-    { label: "Ontem", items: [] },
-    { label: "Ultimos 7 dias", items: [] },
-    { label: "Anteriores", items: [] },
+    { label: labels.today, items: [] },
+    { label: labels.yesterday, items: [] },
+    { label: labels.last7Days, items: [] },
+    { label: labels.older, items: [] },
   ];
 
   for (const n of notifications) {
@@ -58,30 +59,30 @@ function NotificationIcon({ type }: { type: ActivityNotification["type"] }) {
   );
 }
 
-function NotificationText({ notification }: { notification: ActivityNotification }) {
+function NotificationText({ notification, translations }: { notification: ActivityNotification; translations: { liked: string; commented: string; mentionedComment: string; mentionedPost: string } }) {
   const { authorName, type, caption } = notification;
   if (type === "like") return (
     <p className="text-sm">
       <span className="font-semibold">{authorName}</span>
-      <span className="text-muted-foreground"> curtiu sua publicacao.</span>
+      <span className="text-muted-foreground"> {translations.liked}</span>
     </p>
   );
   if (type === "comment") return (
     <p className="text-sm">
       <span className="font-semibold">{authorName}</span>
-      <span className="text-muted-foreground"> comentou na sua publicacao.</span>
+      <span className="text-muted-foreground"> {translations.commented}</span>
     </p>
   );
   if (type === "comment_mention") return (
     <p className="text-sm">
       <span className="font-semibold">{authorName}</span>
-      <span className="text-muted-foreground"> mencionou voce em um comentario.</span>
+      <span className="text-muted-foreground"> {translations.mentionedComment}</span>
     </p>
   );
   return (
     <p className="text-sm">
       <span className="font-semibold">{authorName}</span>
-      <span className="text-muted-foreground"> mencionou voce em uma publicacao: </span>
+      <span className="text-muted-foreground"> {translations.mentionedPost}</span>
       {caption && <span className="text-muted-foreground italic">{caption}</span>}
     </p>
   );
@@ -89,6 +90,7 @@ function NotificationText({ notification }: { notification: ActivityNotification
 
 export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<ActivityNotification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,14 +122,19 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
     }
   };
 
-  const groups = groupByDate(notifications);
+  const groups = groupByDate(notifications, {
+    today: t.timeline.activity.today,
+    yesterday: t.timeline.activity.yesterday,
+    last7Days: t.timeline.activity.last7Days,
+    older: t.timeline.activity.older,
+  });
 
   return (
     <>
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[85dvh] flex flex-col">
         <DrawerHeader className="shrink-0 pb-3">
-          <DrawerTitle className="text-center text-base font-bold">Atividade</DrawerTitle>
+          <DrawerTitle className="text-center text-base font-bold">{t.timeline.activity.title}</DrawerTitle>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
@@ -138,8 +145,8 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
           ) : notifications.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Heart className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
-              <p className="text-sm font-medium">Nenhuma atividade ainda</p>
-              <p className="text-xs mt-1">Quando alguem interagir com seus posts, aparecera aqui.</p>
+              <p className="text-sm font-medium">{t.timeline.activity.noActivity}</p>
+              <p className="text-xs mt-1">{t.timeline.activity.noActivityDesc}</p>
             </div>
           ) : (
             groups.map((group) => (
@@ -169,9 +176,9 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
 
                       {/* Text */}
                       <div className="flex-1 min-w-0">
-                        <NotificationText notification={n} />
+                        <NotificationText notification={n} translations={t.timeline.activity} />
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {formatDistanceToNow(n.createdAt, { addSuffix: false, locale: ptBR })}
+                          {formatDistanceToNow(n.createdAt, { addSuffix: false, ...(language === "pt" ? { locale: ptBR } : {}) })}
                         </p>
                       </div>
 

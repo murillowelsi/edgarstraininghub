@@ -36,7 +36,7 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
     if (mentionedUserIds?.length) {
       await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
     }
-    toast({ title: "Post shared!" });
+    toast({ title: t.timeline.postShared });
   };
 
   const navItems = [
@@ -46,7 +46,7 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
     { href: "/admin/teams", label: t.admin.nav.teams, icon: Shield },
     { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
     { href: "/admin/posts", label: t.admin.nav.posts, icon: FileText },
-    { href: "/admin/timeline", label: "Feed", icon: LayoutGrid },
+    { href: "/admin/timeline", label: t.admin.nav.timeline, icon: LayoutGrid },
   ];
   const location = useLocation();
   const navigate = useNavigate();

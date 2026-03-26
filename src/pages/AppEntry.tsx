@@ -24,7 +24,7 @@ export default function AppEntry() {
     if (!user) {
       navigate("/login", { replace: true });
     } else if (isAdmin || isEditor) {
-      navigate("/admin/calendar", { replace: true });
+      navigate("/admin", { replace: true });
     } else if (isAthlete) {
       navigate("/athlete", { replace: true });
     } else {

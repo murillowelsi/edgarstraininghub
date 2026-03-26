@@ -20,7 +20,7 @@ export function BottomNav() {
   const navItems = [
     { href: "/admin", label: t.admin.nav.home, icon: Home, exact: true, featured: false },
     { href: "/admin/users", label: t.admin.nav.users, icon: Users, featured: false },
-    { href: "/admin/timeline", label: "Feed", icon: LayoutGrid, featured: true },
+    { href: "/admin/timeline", label: t.admin.nav.timeline, icon: LayoutGrid, featured: true },
     { href: "/admin/calendar", label: t.admin.nav.calendar, icon: Calendar, featured: false },
     { href: "/admin/workouts", label: t.admin.nav.workouts, icon: Dumbbell, featured: false },
   ];

@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { CommentsDrawer } from "./CommentsDrawer";
 import type { TimelinePost } from "@/types/timeline";
 import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +25,7 @@ interface TimelinePostCardProps {
 export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   const { user, isAdmin, displayName } = useAuth();
   const { toast } = useToast();
+  const { t, language } = useLanguage();
 
   // Source of truth comes from the real-time subscription via `post` prop.
   // pendingLike: null = no in-flight, true/false = optimistic override while request is running
@@ -50,7 +53,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         createActivityNotification(post.authorId, actorName, post.id, "like").catch((err) => console.error("[FeedBadge] like notification failed:", err));
       }
     } catch {
-      toast({ title: "Error", description: "Could not update like.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.timeline.post.likeError, variant: "destructive" });
     } finally {
       setPendingLike(null);
     }
@@ -73,9 +76,9 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
     try {
       await deleteTimelinePost(post.id);
       onDeleted(post.id);
-      toast({ title: "Post deleted" });
+      toast({ title: t.timeline.post.deleted });
     } catch {
-      toast({ title: "Error", description: "Could not delete post.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.timeline.post.deleteError, variant: "destructive" });
     }
   };
 
@@ -109,7 +112,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
                   onClick={handleDelete}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete post
+                  {t.timeline.post.delete}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -165,7 +168,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
 
         {/* Timestamp */}
         <p className="px-4 pt-1 pb-3 text-xs text-muted-foreground uppercase tracking-wide">
-          {formatDistanceToNow(post.createdAt, { addSuffix: true })}
+          {formatDistanceToNow(post.createdAt, { addSuffix: true, ...(language === "pt" ? { locale: ptBR } : {}) })}
         </p>
       </article>
 

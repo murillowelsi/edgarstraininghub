@@ -6,6 +6,7 @@ import { getAllUsers } from "@/services/usersService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { User } from "@/types/user";
 
 interface CreatePostModalProps {
@@ -18,6 +19,7 @@ interface CreatePostModalProps {
 export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }: CreatePostModalProps) {
   const { user, displayName, photoURL } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [caption, setCaption] = useState(initialCaption ?? "");
   const [imageUrl, setImageUrl] = useState<string | undefined>();
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -64,7 +66,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
         const all = await getAllUsers();
         setUsers(all.filter((u) => u.id !== user?.uid));
       } catch {
-        toast({ title: "Error", description: "Could not load users.", variant: "destructive" });
+        toast({ title: t.common.error, description: t.timeline.create.loadUsersError, variant: "destructive" });
       } finally {
         setLoadingUsers(false);
       }
@@ -96,7 +98,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
       const url = await uploadImageToCloudinary(file);
       setImageUrl(url);
     } catch {
-      toast({ title: "Upload failed", description: "Could not upload image.", variant: "destructive" });
+      toast({ title: t.timeline.create.uploadFailed, description: t.timeline.create.uploadError, variant: "destructive" });
     } finally {
       setUploadingImage(false);
     }
@@ -109,7 +111,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
       await onSubmit(caption.trim(), imageUrl, mentionedUserIds);
       onOpenChange(false);
     } catch {
-      toast({ title: "Error", description: "Failed to create post. Try again.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.timeline.create.createError, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -135,7 +137,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
         >
           <X className="h-6 w-6" />
         </button>
-        <span className="font-bold text-base">New post</span>
+        <span className="font-bold text-base">{t.timeline.create.title}</span>
         <button
           onClick={handleSubmit}
           disabled={!canPost}
@@ -144,7 +146,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
             canPost ? "text-primary hover:text-primary/80" : "text-muted-foreground"
           )}
         >
-          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Post"}
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t.timeline.create.post}
         </button>
       </div>
 
@@ -169,14 +171,14 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm font-medium whitespace-nowrap shrink-0 hover:bg-accent transition-colors"
             >
               <ImagePlus className="h-4 w-4" />
-              Photo
+              {t.timeline.create.photo}
             </button>
             <button
               onClick={openPicker}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm font-medium whitespace-nowrap shrink-0 hover:bg-accent transition-colors"
             >
               <UserPlus className="h-4 w-4" />
-              People
+              {t.timeline.create.people}
             </button>
           </div>
         </div>
@@ -187,7 +189,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
             ref={textareaRef}
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
-            placeholder="What are you thinking?"
+            placeholder={t.timeline.create.placeholder}
             rows={5}
             className="w-full bg-transparent text-base placeholder:text-muted-foreground resize-none outline-none border-none focus:ring-0"
           />
@@ -231,7 +233,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
             <button onClick={() => { setShowPicker(false); setSearch(""); }} className="p-1 rounded-full hover:bg-accent transition-colors">
               <X className="h-6 w-6" />
             </button>
-            <span className="font-bold text-base flex-1">Tag people</span>
+            <span className="font-bold text-base flex-1">{t.timeline.create.tagPeople}</span>
           </div>
 
           {/* Search */}
@@ -240,7 +242,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
               <Search className="h-4 w-4 text-muted-foreground shrink-0" />
               <input
                 autoFocus
-                placeholder="Search by name…"
+                placeholder={t.timeline.create.searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 autoCorrect="off"
@@ -258,7 +260,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : filteredUsers.length === 0 ? (
-              <p className="text-center text-sm text-muted-foreground py-12">No users found</p>
+              <p className="text-center text-sm text-muted-foreground py-12">{t.timeline.create.noUsers}</p>
             ) : (
               filteredUsers.map((u) => (
                 <button

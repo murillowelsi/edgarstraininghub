@@ -35,7 +35,7 @@ const AdminLogin = () => {
   // If already logged in, redirect based on role
   if (!authLoading && user && userRole) {
     if (isAdmin) {
-      return <Navigate to={from || "/admin/posts"} replace />;
+      return <Navigate to={from || "/admin"} replace />;
     }
     if (isAthlete) {
       return <Navigate to="/athlete" replace />;
@@ -71,12 +71,12 @@ const AdminLogin = () => {
 
       // Redirect based on role
       if (role === "admin") {
-        navigate(from || "/admin/posts", { replace: true });
+        navigate(from || "/admin", { replace: true });
       } else if (role === "athlete") {
         navigate("/athlete", { replace: true });
       } else {
         // Editor or other roles go to admin
-        navigate(from || "/admin/posts", { replace: true });
+        navigate(from || "/admin", { replace: true });
       }
     } catch (error: unknown) {
       console.error("Login error:", error);

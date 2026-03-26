@@ -404,7 +404,9 @@
       "workouts": "Treinos",
       "calendar": "Calendário",
       "chat": "Chat",
-      "teams": "Times"
+      "teams": "Times",
+      "subscriptions": "Assinaturas",
+      "timeline": "Feed"
     },
     "dashboard": {
       "welcomeBack": "Bem-vindo de volta,",
@@ -658,7 +660,8 @@
       "teams": "Times",
       "calendar": "Calendário",
       "workouts": "Treinos",
-      "chat": "Chat"
+      "chat": "Chat",
+      "timeline": "Feed"
     },
     "role": "Atleta",
     "logout": "Sair",
@@ -817,5 +820,57 @@
     "titleHighlight": "Artigos",
     "subtitle": "Dicas práticas sobre treino, nutrição e desempenho desportivo",
     "noPosts": "Ainda não há artigos publicados. Volte em breve!"
+  },
+  "timeline": {
+    "postShared": "Post partilhado!",
+    "activity": {
+      "title": "Atividade",
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "last7Days": "Últimos 7 dias",
+      "older": "Anteriores",
+      "noActivity": "Nenhuma atividade ainda",
+      "noActivityDesc": "Quando alguém interagir com os seus posts, aparecerá aqui.",
+      "liked": "curtiu a sua publicação.",
+      "commented": "comentou na sua publicação.",
+      "mentionedComment": "mencionou você num comentário.",
+      "mentionedPost": "mencionou você numa publicação: "
+    },
+    "comments": {
+      "title": "Comentários",
+      "empty": "Sem comentários ainda. Seja o primeiro!",
+      "reply": "Responder",
+      "replyingTo": "Respondendo a",
+      "replyPlaceholder": "Responder a @{{name}}…",
+      "placeholder": "Participe da conversa...",
+      "loadError": "Não foi possível carregar comentários.",
+      "postError": "Erro ao publicar comentário.",
+      "deleteError": "Erro ao eliminar comentário."
+    },
+    "post": {
+      "delete": "Eliminar post",
+      "deleted": "Post eliminado",
+      "likeError": "Não foi possível atualizar o like.",
+      "deleteError": "Não foi possível eliminar o post.",
+      "loadMoreError": "Não foi possível carregar mais posts."
+    },
+    "create": {
+      "title": "Novo post",
+      "post": "Publicar",
+      "photo": "Foto",
+      "people": "Pessoas",
+      "placeholder": "No que você está pensando?",
+      "tagPeople": "Marcar pessoas",
+      "searchPlaceholder": "Pesquisar por nome…",
+      "noUsers": "Nenhum utilizador encontrado",
+      "uploadFailed": "Falha no upload",
+      "uploadError": "Não foi possível carregar a imagem.",
+      "createError": "Erro ao criar post. Tente novamente.",
+      "loadUsersError": "Não foi possível carregar utilizadores."
+    },
+    "empty": {
+      "noPosts": "Sem posts ainda",
+      "beFirst": "Seja o primeiro a partilhar algo!"
+    }
   }
 }

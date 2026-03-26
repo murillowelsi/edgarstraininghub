@@ -404,7 +404,9 @@
       "workouts": "Workouts",
       "calendar": "Calendar",
       "chat": "Chat",
-      "teams": "Teams"
+      "teams": "Teams",
+      "subscriptions": "Subscriptions",
+      "timeline": "Feed"
     },
     "dashboard": {
       "welcomeBack": "Welcome back,",
@@ -658,7 +660,8 @@
       "teams": "Teams",
       "calendar": "Calendar",
       "workouts": "Workouts",
-      "chat": "Chat"
+      "chat": "Chat",
+      "timeline": "Feed"
     },
     "role": "Athlete",
     "logout": "Logout",
@@ -817,5 +820,57 @@
     "titleHighlight": "Articles",
     "subtitle": "Practical tips on training, nutrition, and athletic performance",
     "noPosts": "No posts published yet. Check back soon!"
+  },
+  "timeline": {
+    "postShared": "Post shared!",
+    "activity": {
+      "title": "Activity",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last7Days": "Last 7 days",
+      "older": "Older",
+      "noActivity": "No activity yet",
+      "noActivityDesc": "When someone interacts with your posts, it will appear here.",
+      "liked": "liked your post.",
+      "commented": "commented on your post.",
+      "mentionedComment": "mentioned you in a comment.",
+      "mentionedPost": "mentioned you in a post: "
+    },
+    "comments": {
+      "title": "Comments",
+      "empty": "No comments yet. Be the first!",
+      "reply": "Reply",
+      "replyingTo": "Replying to",
+      "replyPlaceholder": "Reply to @{{name}}…",
+      "placeholder": "Join the conversation...",
+      "loadError": "Could not load comments.",
+      "postError": "Failed to post comment.",
+      "deleteError": "Failed to delete comment."
+    },
+    "post": {
+      "delete": "Delete post",
+      "deleted": "Post deleted",
+      "likeError": "Could not update like.",
+      "deleteError": "Could not delete post.",
+      "loadMoreError": "Could not load more posts."
+    },
+    "create": {
+      "title": "New post",
+      "post": "Post",
+      "photo": "Photo",
+      "people": "People",
+      "placeholder": "What are you thinking?",
+      "tagPeople": "Tag people",
+      "searchPlaceholder": "Search by name…",
+      "noUsers": "No users found",
+      "uploadFailed": "Upload failed",
+      "uploadError": "Could not upload image.",
+      "createError": "Failed to create post. Try again.",
+      "loadUsersError": "Could not load users."
+    },
+    "empty": {
+      "noPosts": "No posts yet",
+      "beFirst": "Be the first to share something!"
+    }
   }
 }

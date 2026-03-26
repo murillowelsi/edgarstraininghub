@@ -50,7 +50,7 @@ export const ProtectedRoute = ({
   // Requires athlete but user is not athlete - redirect admins to admin panel
   if (requireAthlete && !isAthlete) {
     if (isAdmin) {
-      return <Navigate to="/admin/posts" replace />;
+      return <Navigate to="/admin" replace />;
     }
     return <Navigate to="/" replace />;
   }

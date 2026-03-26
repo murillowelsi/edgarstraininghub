@@ -7,12 +7,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { TimelinePost } from "@/types/timeline";
 import { Timestamp } from "firebase/firestore";
 import { useTimelineActions } from "@/contexts/TimelineActionsContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 
 const PULL_THRESHOLD = 72;
 
 export function TimelineFeed() {
   const { user, photoURL } = useAuth();
+  const { t } = useLanguage();
+  const { toast } = useToast();
   const location = useLocation();
   const scrollToPostId = (location.state as { scrollToPostId?: string })?.scrollToPostId;
   const [realtimePosts, setRealtimePosts] = useState<TimelinePost[]>([]);
@@ -40,7 +44,7 @@ export function TimelineFeed() {
       setHasMore(result.hasMore);
       setLastTimestamp(result.lastTimestamp);
     } catch {
-      toast({ title: "Error", description: "Could not load more posts.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.timeline.post.loadMoreError, variant: "destructive" });
     } finally {
       setLoadingMore(false);
     }
@@ -169,7 +173,7 @@ export function TimelineFeed() {
           onClick={() => setCreateOpen(true)}
           className="flex-1 text-left text-muted-foreground text-base py-1 hover:text-foreground transition-colors"
         >
-          What are you thinking?
+          {t.timeline.create.placeholder}
         </button>
         <button
           onClick={() => setCreateOpen(true)}
@@ -198,8 +202,8 @@ export function TimelineFeed() {
         <div className="max-w-lg mx-auto px-4 pt-4 pb-8">
           {posts.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
-              <p className="text-lg font-semibold mb-1">No posts yet</p>
-              <p className="text-sm">Be the first to share something!</p>
+              <p className="text-lg font-semibold mb-1">{t.timeline.empty.noPosts}</p>
+              <p className="text-sm">{t.timeline.empty.beFirst}</p>
             </div>
           ) : (
             <div className="space-y-6">

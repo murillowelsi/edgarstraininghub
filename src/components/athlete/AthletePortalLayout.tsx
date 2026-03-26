@@ -49,7 +49,7 @@ const AthletePortalLayout = ({
   const navItems = [
     { href: "/athlete", label: t.athlete.nav.home, icon: Home, exact: true, featured: false },
     { href: "/athlete/teams", label: t.athlete.nav.teams, icon: Shield, exact: false, featured: false },
-    { href: "/athlete/timeline", label: "Feed", icon: LayoutGrid, featured: true },
+    { href: "/athlete/timeline", label: t.athlete.nav.timeline, icon: LayoutGrid, featured: true },
     { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar, featured: false },
     { href: "/athlete/workouts", label: t.athlete.nav.workouts, icon: Dumbbell, featured: false },
   ];
@@ -65,7 +65,7 @@ const AthletePortalLayout = ({
     if (mentionedUserIds?.length) {
       await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
     }
-    toast({ title: "Post shared!" });
+    toast({ title: t.timeline.postShared });
   };
 
   const prevMessageTimes = useRef<Map<string, number>>(new Map());

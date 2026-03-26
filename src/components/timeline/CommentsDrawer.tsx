@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { TimelineComment } from "@/types/timeline";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CommentsDrawerProps {
   open: boolean;
@@ -29,6 +30,7 @@ const QUICK_EMOJIS = ["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", 
 export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCommentsCountChange }: CommentsDrawerProps) {
   const { user, userRole, isAdmin, displayName, photoURL } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [comments, setComments] = useState<TimelineComment[]>([]);
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
@@ -42,7 +44,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
     setLoading(true);
     getComments(postId)
       .then(setComments)
-      .catch(() => toast({ title: "Error", description: "Could not load comments.", variant: "destructive" }))
+      .catch(() => toast({ title: t.common.error, description: t.timeline.comments.loadError, variant: "destructive" }))
       .finally(() => setLoading(false));
   }, [open, postId]);
 
@@ -142,7 +144,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
       setText("");
       setReplyingTo(null);
     } catch {
-      toast({ title: "Error", description: "Failed to post comment.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.timeline.comments.postError, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -156,7 +158,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       onCommentsCountChange(-1);
     } catch {
-      toast({ title: "Error", description: "Failed to delete comment.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.timeline.comments.deleteError, variant: "destructive" });
     }
   };
 
@@ -202,7 +204,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
                 onClick={() => handleReply(comment)}
                 className="text-xs text-muted-foreground font-semibold hover:text-foreground transition-colors"
               >
-                Responder
+                {t.timeline.comments.reply}
               </button>
             )}
             {canDelete && (
@@ -239,7 +241,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[80dvh] flex flex-col">
         <DrawerHeader className="shrink-0 pb-3">
-          <DrawerTitle className="text-center text-base font-bold">Comentários</DrawerTitle>
+          <DrawerTitle className="text-center text-base font-bold">{t.timeline.comments.title}</DrawerTitle>
         </DrawerHeader>
 
         {/* Comments list */}
@@ -250,7 +252,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             </div>
           ) : comments.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-8">
-              Sem comentários ainda. Seja o primeiro!
+              {t.timeline.comments.empty}
             </p>
           ) : (
             topLevel.map((comment) => (
@@ -267,7 +269,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
         {replyingTo && (
           <div className="shrink-0 flex items-center justify-between px-4 py-2 bg-muted/50 border-t text-sm">
             <span className="text-muted-foreground">
-              Respondendo a <span className="font-semibold text-foreground">@{replyingTo.authorName}</span>
+              {t.timeline.comments.replyingTo} <span className="font-semibold text-foreground">@{replyingTo.authorName}</span>
             </span>
             <button onClick={cancelReply} className="text-muted-foreground hover:text-foreground">
               <X className="h-4 w-4" />
@@ -299,7 +301,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
           <div className="flex-1 flex items-center bg-muted rounded-full px-4 py-2 gap-2">
             <input
               ref={inputRef}
-              placeholder={replyingTo ? `Responder a @${replyingTo.authorName}…` : "Participe da conversa..."}
+              placeholder={replyingTo ? t.timeline.comments.replyPlaceholder.replace("{{name}}", replyingTo.authorName) : t.timeline.comments.placeholder}
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}

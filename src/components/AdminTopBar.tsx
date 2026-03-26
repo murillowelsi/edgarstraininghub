@@ -40,7 +40,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
     { href: "/admin/calendar", label: t.admin.nav.calendar },
     { href: "/admin/subscriptions", label: t.admin.nav.subscriptions },
     { href: "/admin/chat", label: t.admin.nav.chat },
-    { href: "/admin/timeline", label: "Feed" },
+    { href: "/admin/timeline", label: t.admin.nav.timeline },
   ];
 
   const currentTitle = pageTitle ?? navItems.find((item) =>
