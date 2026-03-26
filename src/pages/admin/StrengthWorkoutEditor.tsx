@@ -58,22 +58,28 @@ const WorkoutExerciseRow = ({
   const thumbnailUrl = getThumbnail();
 
   return (
-    <div className="bg-card border rounded-lg overflow-hidden">
+    <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
       {/* Top row: grip + image + name + delete */}
-      <div className="flex items-center gap-2 p-3">
+      <div className="flex items-center gap-3 p-4">
         <div className="cursor-grab text-muted-foreground shrink-0">
           <GripVertical className="h-4 w-4" />
         </div>
-        <div className="w-12 h-12 rounded overflow-hidden bg-muted shrink-0">
-          {thumbnailUrl ? (
+        {thumbnailUrl ? (
+          <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0">
             <img src={thumbnailUrl} alt={exerciseName} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Dumbbell className="h-4 w-4 text-muted-foreground" />
-            </div>
-          )}
+          </div>
+        ) : (
+          <div className="p-2.5 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: "#f59e0b1a", color: "#d97706" }}>
+            <Dumbbell className="h-4 w-4" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm capitalize truncate">{exerciseName}</p>
+          <p className="text-xs text-muted-foreground">
+            {item.sets} sets × {item.reps || "10"} reps
+            {item.restSeconds > 0 && ` · ${item.restSeconds}s rest`}
+          </p>
         </div>
-        <p className="flex-1 font-medium text-sm capitalize min-w-0 truncate">{exerciseName}</p>
         <Button
           variant="ghost"
           size="icon"
@@ -85,7 +91,7 @@ const WorkoutExerciseRow = ({
       </div>
 
       {/* Bottom row: sets × reps + rest */}
-      <div className="flex items-center gap-2 px-3 pb-3 border-t pt-2 bg-muted/20">
+      <div className="flex items-center gap-2 px-4 pb-4 border-t border-border/50 pt-3 bg-muted/20">
         <div className="flex items-center gap-1">
           <Input
             type="number"

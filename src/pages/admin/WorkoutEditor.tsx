@@ -47,7 +47,8 @@ import {
   durationLabels,
   workoutTypeLabels,
 } from "@/types/workout";
-import { ArrowLeft, Bike, ChevronDown, ChevronRight, GripVertical, Loader2, Pencil, Plus, PersonStanding, Repeat, Save, Trash2, Waves } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, Bike, ChevronDown, Clock, Flame, GripVertical, Heart, Loader2, Pencil, PersonStanding, Plus, Repeat, Save, Trash2, Waves, Wind, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -114,6 +115,18 @@ const formatSwimmingDetails = (stage: WorkoutStage): string[] => {
   return details;
 };
 
+const stageIcons: Record<string, React.ElementType> = {
+  warmup: Flame,
+  run: PersonStanding,
+  cooldown: Wind,
+  recovery: Heart,
+  interval: Zap,
+  repeat: Repeat,
+  bike: Bike,
+  rest: Clock,
+  swim: Waves,
+};
+
 // Draggable stage item component with collapsible details
 const DraggableStage = ({
   stage,
@@ -146,153 +159,100 @@ const DraggableStage = ({
   const color = stageColors[stage.type];
   const intensityDisplay = formatIntensity(stage);
   const swimmingDetails = formatSwimmingDetails(stage);
+  const StageIcon = stageIcons[stage.type] || PersonStanding;
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`relative overflow-hidden ${isNested ? 'bg-muted/30' : ''}`}>
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1"
-          style={{ backgroundColor: color }}
-        />
+      <div className={cn("rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden", isNested && "bg-muted/30")}>
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <div className={isNested ? 'p-3 pl-4' : 'p-4 pl-5'}>
-            {/* Header row - always visible */}
-            <div className="flex items-center gap-3">
-              {/* Drag handle */}
-              <div
-                {...attributes}
-                {...listeners}
-                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-              >
-                <GripVertical className={isNested ? "h-4 w-4" : "h-5 w-5"} />
-              </div>
-
-              {/* Expand/collapse toggle */}
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-center w-6 h-6 rounded hover:bg-muted transition-colors">
-                  {isExpanded ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-              </CollapsibleTrigger>
-
-              {/* Stage summary */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                  <p className={`font-medium ${isNested ? 'text-sm' : ''}`}>
-                    {stageLabels[stage.type]}
-                  </p>
-                  <span className={`text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
-                    {formatDuration(stage, t.admin.workoutEditor.pressLapButton)}
-                  </span>
-                  {!isExpanded && swimmingDetails.length > 0 && (
-                    <span className={`text-muted-foreground ${isNested ? 'text-xs' : 'text-sm'}`}>
-                      · {swimmingDetails[0]}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onEdit}
-                  className="text-primary h-8"
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onDelete}
-                  className="text-muted-foreground hover:text-destructive h-8 w-8"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+          <div className={cn("flex items-center gap-3", isNested ? "p-3" : "p-4")}>
+            <div
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0"
+            >
+              <GripVertical className="h-4 w-4" />
             </div>
 
-            {/* Expanded details */}
-            <CollapsibleContent>
-              <div className={`ml-9 mt-3 pt-3 border-t space-y-3 ${isNested ? 'text-xs' : 'text-sm'}`}>
-                {/* Duration & Intensity row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                      Duration
-                    </p>
-                    <p className="font-medium">{formatDuration(stage, t.admin.workoutEditor.pressLapButton)}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {durationLabels[stage.duration.type]}
-                    </p>
-                  </div>
+            <div
+              className="p-2 rounded-xl shrink-0 flex items-center justify-center"
+              style={{ backgroundColor: `${color}1a`, color }}
+            >
+              <StageIcon className="h-4 w-4" />
+            </div>
 
-                  {intensityDisplay && (
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                        Intensity
-                      </p>
-                      <p className="font-medium">{intensityDisplay}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {intensityLabels[stage.intensity.type]}
-                      </p>
-                    </div>
-                  )}
-
-                  {stage.strokeType && (
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                        Stroke
-                      </p>
-                      <p className="font-medium">{strokeLabels[stage.strokeType]}</p>
-                    </div>
-                  )}
+            <CollapsibleTrigger asChild>
+              <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">{stageLabels[stage.type]}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDuration(stage, t.admin.workoutEditor.pressLapButton)}
+                    {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
+                    {!isExpanded && intensityDisplay && ` · ${intensityDisplay}`}
+                  </p>
                 </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
+              </button>
+            </CollapsibleTrigger>
 
-                {/* Swimming-specific details */}
-                {((stage.drillType && stage.drillType !== "none") ||
-                  (stage.equipment && stage.equipment !== "none")) && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {stage.drillType && stage.drillType !== "none" && (
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                          Drill Type
-                        </p>
-                        <p className="font-medium">{drillLabels[stage.drillType]}</p>
-                      </div>
-                    )}
+            <div className="flex items-center gap-1 shrink-0">
+              <Button variant="ghost" size="sm" onClick={onEdit} className="text-primary h-8 px-2 text-xs">
+                Edit
+              </Button>
+              <Button variant="ghost" size="icon" onClick={onDelete} className="text-muted-foreground hover:text-destructive h-8 w-8">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
 
-                    {stage.equipment && stage.equipment !== "none" && (
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                          Equipment
-                        </p>
-                        <p className="font-medium">{equipmentLabels[stage.equipment]}</p>
-                      </div>
-                    )}
+          <CollapsibleContent>
+            <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-3 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Duration</p>
+                  <p className="font-medium">{formatDuration(stage, t.admin.workoutEditor.pressLapButton)}</p>
+                  <p className="text-xs text-muted-foreground">{durationLabels[stage.duration.type]}</p>
+                </div>
+                {intensityDisplay && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Intensity</p>
+                    <p className="font-medium">{intensityDisplay}</p>
+                    <p className="text-xs text-muted-foreground">{intensityLabels[stage.intensity.type]}</p>
                   </div>
                 )}
-
-                {/* Notes */}
-                {stage.notes && (
+                {stage.strokeType && (
                   <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                      Notes
-                    </p>
-                    <p className="text-muted-foreground bg-muted/50 p-2 rounded">
-                      {stage.notes}
-                    </p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Stroke</p>
+                    <p className="font-medium">{strokeLabels[stage.strokeType]}</p>
                   </div>
                 )}
               </div>
-            </CollapsibleContent>
-          </div>
+              {((stage.drillType && stage.drillType !== "none") || (stage.equipment && stage.equipment !== "none")) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {stage.drillType && stage.drillType !== "none" && (
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Drill Type</p>
+                      <p className="font-medium">{drillLabels[stage.drillType]}</p>
+                    </div>
+                  )}
+                  {stage.equipment && stage.equipment !== "none" && (
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Equipment</p>
+                      <p className="font-medium">{equipmentLabels[stage.equipment]}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {stage.notes && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Notes</p>
+                  <p className="text-muted-foreground bg-muted/50 p-2 rounded">{stage.notes}</p>
+                </div>
+              )}
+            </div>
+          </CollapsibleContent>
         </Collapsible>
-      </Card>
+      </div>
     </div>
   );
 };
@@ -365,105 +325,81 @@ const RepeatBlock = ({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className="relative overflow-hidden">
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1"
-          style={{ backgroundColor: color }}
-        />
+      <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <div className="p-4 pl-5">
-            {/* Header */}
-            <div className="flex items-center gap-3">
-              <div
-                {...attributes}
-                {...listeners}
-                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-              >
-                <GripVertical className="h-5 w-5" />
-              </div>
-
-              {/* Expand/collapse toggle */}
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-center w-6 h-6 rounded hover:bg-muted transition-colors">
-                  {isExpanded ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-              </CollapsibleTrigger>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <Repeat className="h-4 w-4 text-indigo-500" />
-                  <p className="font-medium">Repeat {stage.repeatCount || 2}x</p>
-                  {!isExpanded && nestedStages.length > 0 && (
-                    <span className="text-sm text-muted-foreground">
-                      ({nestedStages.length} stages)
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onEdit}
-                  className="text-primary h-8"
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onDelete}
-                  className="text-muted-foreground hover:text-destructive h-8 w-8"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+          <div className="p-4 flex items-center gap-3">
+            <div
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0"
+            >
+              <GripVertical className="h-4 w-4" />
             </div>
 
-            {/* Nested stages - collapsible droppable area */}
-            <CollapsibleContent>
-              <div className="ml-9 mt-3 space-y-2 border-l-2 border-indigo-200 dark:border-indigo-800 pl-4 min-h-[60px] py-2">
-                <SortableContext
-                  items={nestedStages.map((s) => s.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {nestedStages.map((nestedStage) => (
-                    editingStageId === nestedStage.id ? (
-                      <StageEditor
-                        key={nestedStage.id}
-                        stage={nestedStage}
-                        onChange={(updated) => {
-                          const newStages = nestedStages.map((s) =>
-                            s.id === updated.id ? updated : s
-                          );
-                          onNestedStagesChange(newStages);
-                        }}
-                        onDone={onDoneEditing}
-                        workoutType={workoutType}
-                      />
-                    ) : (
-                      <DraggableStage
-                        key={nestedStage.id}
-                        stage={nestedStage}
-                        onEdit={() => onEditNested(nestedStage.id)}
-                        onDelete={() => onDeleteNested(nestedStage.id)}
-                        isNested
-                      />
-                    )
-                  ))}
-                </SortableContext>
-                {nestedStages.length === 0 && (
-                  <EmptyRepeatDropZone repeatId={stage.id} />
-                )}
-              </div>
-            </CollapsibleContent>
+            <div className="p-2 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}>
+              <Repeat className="h-4 w-4" />
+            </div>
+
+            <CollapsibleTrigger asChild>
+              <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">Repeat {stage.repeatCount || 2}x</p>
+                  <p className="text-xs text-muted-foreground">
+                    {nestedStages.length} stages
+                  </p>
+                </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
+              </button>
+            </CollapsibleTrigger>
+
+            <div className="flex items-center gap-1 shrink-0">
+              <Button variant="ghost" size="sm" onClick={onEdit} className="text-primary h-8 px-2 text-xs">
+                Edit
+              </Button>
+              <Button variant="ghost" size="icon" onClick={onDelete} className="text-muted-foreground hover:text-destructive h-8 w-8">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
+
+          <CollapsibleContent>
+            <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-2 min-h-[60px]">
+              <SortableContext
+                items={nestedStages.map((s) => s.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {nestedStages.map((nestedStage) => (
+                  editingStageId === nestedStage.id ? (
+                    <StageEditor
+                      key={nestedStage.id}
+                      stage={nestedStage}
+                      onChange={(updated) => {
+                        const newStages = nestedStages.map((s) =>
+                          s.id === updated.id ? updated : s
+                        );
+                        onNestedStagesChange(newStages);
+                      }}
+                      onDone={onDoneEditing}
+                      workoutType={workoutType}
+                    />
+                  ) : (
+                    <DraggableStage
+                      key={nestedStage.id}
+                      stage={nestedStage}
+                      onEdit={() => onEditNested(nestedStage.id)}
+                      onDelete={() => onDeleteNested(nestedStage.id)}
+                      isNested
+                    />
+                  )
+                ))}
+              </SortableContext>
+              {nestedStages.length === 0 && (
+                <EmptyRepeatDropZone repeatId={stage.id} />
+              )}
+            </div>
+          </CollapsibleContent>
         </Collapsible>
-      </Card>
+      </div>
     </div>
   );
 };
@@ -474,45 +410,40 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
   const color = stageColors[stage.type];
   const intensityDisplay = formatIntensity(stage);
 
+  const StageIcon = stageIcons[stage.type] || PersonStanding;
+
   if (stage.type === "repeat") {
     return (
-      <Card className="relative overflow-hidden opacity-90 shadow-lg">
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1"
-          style={{ backgroundColor: color }}
-        />
-        <div className="p-4 pl-5">
-          <div className="flex items-center gap-3">
-            <GripVertical className="h-5 w-5 text-muted-foreground" />
-            <div className="flex items-center gap-2">
-              <Repeat className="h-4 w-4 text-indigo-500" />
-              <p className="font-medium">Repeat {stage.repeatCount || 2}x</p>
-            </div>
+      <div className="rounded-xl border bg-card opacity-90 shadow-lg overflow-hidden">
+        <div className="p-4 flex items-center gap-3">
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+          <div className="p-2 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}>
+            <Repeat className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="font-semibold text-sm">Repeat {stage.repeatCount || 2}x</p>
           </div>
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="relative overflow-hidden opacity-90 shadow-lg">
-      <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{ backgroundColor: color }}
-      />
-      <div className="flex items-center gap-3 p-4 pl-5">
-        <GripVertical className="h-5 w-5 text-muted-foreground" />
+    <div className="rounded-xl border bg-card opacity-90 shadow-lg overflow-hidden">
+      <div className="flex items-center gap-3 p-4">
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+        <div className="p-2 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}1a`, color }}>
+          <StageIcon className="h-4 w-4" />
+        </div>
         <div>
-          <p className="font-medium">{stageLabels[stage.type]}</p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>{formatDuration(stage, t.admin.workoutEditor.pressLapButton)}</span>
-            {intensityDisplay && (
-              <span className="text-primary/80">{intensityDisplay}</span>
-            )}
-          </div>
+          <p className="font-semibold text-sm">{stageLabels[stage.type]}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatDuration(stage, t.admin.workoutEditor.pressLapButton)}
+            {intensityDisplay && ` · ${intensityDisplay}`}
+          </p>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
