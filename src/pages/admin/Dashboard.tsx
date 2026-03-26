@@ -1,5 +1,6 @@
 import AdminLayout from "@/components/AdminLayout";
 import { ListItemCard } from "@/components/shared/ListItemCard";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -44,7 +45,7 @@ const workoutTypeColors: Record<string, string> = {
 };
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, photoURL } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
 
@@ -111,9 +112,17 @@ const AdminDashboard = () => {
       <div className="p-4 md:p-8 pb-24 md:pb-8 space-y-4 max-w-4xl mx-auto">
 
         {/* Welcome */}
-        <div>
-          <p className="text-muted-foreground">{t.admin.dashboard.welcomeBack}</p>
-          <h1 className="text-3xl font-bold font-display">{displayName}</h1>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-14 w-14 shrink-0 ring-2 ring-white">
+            {photoURL && <AvatarImage src={photoURL} alt={displayName} className="object-cover" />}
+            <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+              {displayName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-muted-foreground">{t.admin.dashboard.welcomeBack}</p>
+            <h1 className="text-3xl font-bold font-display">{displayName}</h1>
+          </div>
         </div>
 
         {/* Stats Cards */}

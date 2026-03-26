@@ -1,4 +1,4 @@
-import { Moon, Sun, LogOut, MessageSquare, Camera, X } from "lucide-react";
+import { Moon, Sun, LogOut, MessageSquare, Camera, X, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
@@ -119,12 +119,16 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
             onClick={() => setIsMenuOpen(true)}
             className="p-1 rounded-full hover:bg-accent transition-colors"
           >
-            <Avatar className="h-8 w-8">
-              {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                {getInitials(user?.email)}
-              </AvatarFallback>
-            </Avatar>
+            {location.pathname === "/admin" ? (
+              <MoreVertical className="h-5 w-5" />
+            ) : (
+              <Avatar className="h-8 w-8">
+                {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                  {getInitials(user?.email)}
+                </AvatarFallback>
+              </Avatar>
+            )}
           </button>
         </div>
       </div>

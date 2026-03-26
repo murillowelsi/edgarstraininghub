@@ -1,5 +1,6 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { ListItemCard } from "@/components/shared/ListItemCard";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmentsService";
+import { subscribeToAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import {
@@ -50,7 +51,7 @@ const workoutTypeColors: Record<string, string> = {
 };
 
 const AthleteHome = () => {
-  const { user } = useAuth();
+  const { user, photoURL } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState<string>("");
@@ -64,37 +65,21 @@ const AthleteHome = () => {
   const weekDays = Array.from({ length: 14 }, (_, i) => addDays(weekStart, i));
 
   useEffect(() => {
-    const loadData = async () => {
-      if (!user) return;
+    if (!user) return;
 
-      try {
-        const [userData, assignmentsData] = await Promise.all([
-          getUserById(user.uid),
-          getAssignmentsWithWorkoutsByAthlete(user.uid),
-        ]);
-
-        if (userData) {
-          setDisplayName(
-            userData.displayName || user.email?.split("@")[0] || "Athlete"
-          );
-        }
-        setAssignments(assignmentsData);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast({
-          title: t.common.error,
-          description: t.athlete.toast.loadError,
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+    getUserById(user.uid).then((userData) => {
+      if (userData) {
+        setDisplayName(userData.displayName || user.email?.split("@")[0] || "Athlete");
       }
-    };
+    });
 
-    if (user) {
-      loadData();
-    }
-  }, [user, toast]);
+    const unsubscribe = subscribeToAssignmentsByAthlete(user.uid, (data) => {
+      setAssignments(data);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, [user]);
 
   // Calculate stats
   const totalWorkouts = assignments.length;
@@ -149,9 +134,17 @@ const AthleteHome = () => {
     <AthletePortalLayout title={t.athlete.nav.home}>
       <div className="p-4 space-y-4">
         {/* Welcome Section */}
-        <div>
-          <p className="text-muted-foreground">{t.athlete.home.welcomeBack}</p>
-          <h1 className="text-3xl font-bold font-display">{displayName}</h1>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-14 w-14 shrink-0 ring-2 ring-white">
+            {photoURL && <AvatarImage src={photoURL} alt={displayName} className="object-cover" />}
+            <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+              {displayName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-muted-foreground">{t.athlete.home.welcomeBack}</p>
+            <h1 className="text-3xl font-bold font-display">{displayName}</h1>
+          </div>
         </div>
 
         {/* Stats Cards */}

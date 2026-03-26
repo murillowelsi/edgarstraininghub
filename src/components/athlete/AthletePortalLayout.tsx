@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Calendar, Camera, Dumbbell, Home, LayoutGrid, LogOut, Moon, Sun, MessageSquare, X } from "lucide-react";
+import { Calendar, Camera, Dumbbell, Home, LayoutGrid, LogOut, Moon, MoreVertical, Shield, Sun, MessageSquare, X } from "lucide-react";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -42,6 +42,7 @@ const AthletePortalLayout = ({
 
   const navItems = [
     { href: "/athlete", label: t.athlete.nav.home, icon: Home, exact: true, featured: false },
+    { href: "/athlete/teams", label: t.athlete.nav.teams, icon: Shield, exact: false, featured: false },
     { href: "/athlete/timeline", label: "Feed", icon: LayoutGrid, featured: true },
     { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar, featured: false },
     { href: "/athlete/workouts", label: t.athlete.nav.workouts, icon: Dumbbell, featured: false },
@@ -212,12 +213,16 @@ const AthletePortalLayout = ({
                 onClick={() => setIsMenuOpen(true)}
                 className="p-1 rounded-full hover:bg-accent transition-colors"
               >
-                <Avatar className="h-8 w-8">
-                  {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
-                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                    {getInitials(user?.email)}
-                  </AvatarFallback>
-                </Avatar>
+                {location.pathname === "/athlete" ? (
+                  <MoreVertical className="h-5 w-5" />
+                ) : (
+                  <Avatar className="h-8 w-8">
+                    {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                      {getInitials(user?.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
               </button>
             </div>
           </div>
