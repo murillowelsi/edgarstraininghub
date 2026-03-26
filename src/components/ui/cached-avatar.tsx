@@ -71,3 +71,36 @@ export function CachedAvatar({
 export function preloadAvatars(urls: (string | null | undefined)[]) {
   urls.forEach((url) => url && preload(url));
 }
+
+interface CachedImageProps {
+  src?: string | null;
+  alt?: string;
+  className?: string;
+}
+
+/**
+ * CachedImage — drop-in replacement for <img> that skips the loading flash
+ * for images already seen this session. Shows nothing while loading.
+ */
+export function CachedImage({ src, alt = "", className }: CachedImageProps) {
+  const isCached = src ? loadedUrls.has(src) : false;
+  const [ready, setReady] = React.useState(isCached);
+
+  React.useEffect(() => {
+    if (!src) return;
+    if (loadedUrls.has(src)) {
+      setReady(true);
+      return;
+    }
+    setReady(false);
+    const img = new Image();
+    img.onload = () => {
+      loadedUrls.add(src);
+      setReady(true);
+    };
+    img.src = src;
+  }, [src]);
+
+  if (!src || !ready) return null;
+  return <img src={src} alt={alt} className={className} />;
+}

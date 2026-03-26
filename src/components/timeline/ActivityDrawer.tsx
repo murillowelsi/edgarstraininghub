@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Heart, MessageCircle, AtSign, Loader2 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { CachedAvatar } from "@/components/ui/cached-avatar";
+import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { subscribeToActivityNotifications, markMentionsRead } from "@/services/timelineService";
 import type { ActivityNotification } from "@/services/timelineService";
@@ -185,8 +185,8 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
 
                       {/* Post thumbnail */}
                       {n.postImageUrl && (
-                        <div className="shrink-0 h-11 w-11 rounded-md overflow-hidden">
-                          <img src={n.postImageUrl} alt="" className="h-full w-full object-cover" />
+                        <div className="shrink-0 h-11 w-11 rounded-md overflow-hidden bg-muted">
+                          <CachedImage src={n.postImageUrl} className="h-full w-full object-cover" />
                         </div>
                       )}
                     </button>

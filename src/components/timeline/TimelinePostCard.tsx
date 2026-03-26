@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
-import { CachedAvatar } from "@/components/ui/cached-avatar";
+import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { toggleLike, deleteTimelinePost, createActivityNotification } from "@/services/timelineService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -123,11 +123,10 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         {/* Image */}
         {post.imageUrl && (
           <div className="w-full bg-muted relative" onClick={handleDoubleTap}>
-            <img
+            <CachedImage
               src={post.imageUrl}
               alt="Post"
               className="w-full object-cover max-h-[480px]"
-              loading="lazy"
             />
             {showHeartBurst && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
