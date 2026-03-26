@@ -276,7 +276,10 @@ export function CommentsDrawer({ open, onOpenChange, postId, onCommentsCountChan
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
+              className="flex-1 bg-transparent text-[16px] outline-none placeholder:text-muted-foreground"
             />
             {text.trim() && (
               <button
