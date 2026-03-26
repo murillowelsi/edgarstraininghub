@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { CommentsDrawer } from "./CommentsDrawer";
 
 interface ActivityDrawerProps {
   open: boolean;
@@ -85,6 +86,7 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<ActivityNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !user) return;
@@ -101,16 +103,20 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
   }, [open, user]);
 
   const handleClick = (notification: ActivityNotification) => {
-    onOpenChange(false);
-    // Navigate based on current path prefix
-    const isAdmin = window.location.pathname.startsWith("/admin");
-    const basePath = isAdmin ? "/admin/timeline" : "/athlete/timeline";
-    navigate(basePath, { state: { scrollToPostId: notification.postId } });
+    if (notification.type === "comment" || notification.type === "mention") {
+      setCommentsPostId(notification.postId);
+    } else {
+      onOpenChange(false);
+      const isAdmin = window.location.pathname.startsWith("/admin");
+      const basePath = isAdmin ? "/admin/timeline" : "/athlete/timeline";
+      navigate(basePath, { state: { scrollToPostId: notification.postId } });
+    }
   };
 
   const groups = groupByDate(notifications);
 
   return (
+    <>
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[85dvh] flex flex-col">
         <DrawerHeader className="shrink-0 pb-3">
@@ -177,5 +183,16 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
         </div>
       </DrawerContent>
     </Drawer>
+
+    {commentsPostId && user && (
+      <CommentsDrawer
+        open={!!commentsPostId}
+        onOpenChange={(o) => { if (!o) setCommentsPostId(null); }}
+        postId={commentsPostId}
+        postAuthorId={user.uid}
+        onCommentsCountChange={() => {}}
+      />
+    )}
+  </>
   );
 }

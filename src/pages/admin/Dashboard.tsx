@@ -17,7 +17,6 @@ import type { Team } from "@/types/team";
 import { format, isSameDay } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
-  Award,
   CalendarCheck,
   Check,
   ChevronRight,
@@ -25,7 +24,6 @@ import {
   Dumbbell,
   Loader2,
   Shield,
-  TrendingUp,
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -206,10 +204,7 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Award className="h-5 w-5 text-primary" />
-                {t.admin.dashboard.overallCompletion}
-              </CardTitle>
+              <CardTitle className="text-base">{t.admin.dashboard.overallCompletion}</CardTitle>
               <span className="text-sm text-muted-foreground">{completionRate}%</span>
             </div>
           </CardHeader>
@@ -264,10 +259,7 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                {t.admin.dashboard.todaysActivity}
-              </CardTitle>
+              <CardTitle className="text-base">{t.admin.dashboard.todaysActivity}</CardTitle>
               <span className="text-sm text-muted-foreground">
                 {format(new Date(), "MMM d")}
               </span>

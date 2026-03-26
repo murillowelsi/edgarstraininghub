@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminEmptyState } from "@/components/admin/AdminEmptyState";
@@ -134,6 +134,7 @@ export default function AdminTeams() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   const [teams, setTeams] = useState<Team[]>([]);
@@ -166,6 +167,13 @@ export default function AdminTeams() {
     if (!user) return;
     loadTeams();
   }, [user]);
+
+  useEffect(() => {
+    if ((location.state as { openCreate?: boolean })?.openCreate) {
+      setIsNewTeamOpen(true);
+      window.history.replaceState({}, "");
+    }
+  }, [location.state]);
 
   const loadTeams = async () => {
     if (!user) return;

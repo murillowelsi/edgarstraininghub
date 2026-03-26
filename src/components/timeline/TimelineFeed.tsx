@@ -7,11 +7,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { TimelinePost } from "@/types/timeline";
 import { Timestamp } from "firebase/firestore";
 import { useTimelineActions } from "@/contexts/TimelineActionsContext";
+import { useLocation } from "react-router-dom";
 
 const PULL_THRESHOLD = 72;
 
 export function TimelineFeed() {
   const { user, photoURL } = useAuth();
+  const location = useLocation();
+  const scrollToPostId = (location.state as { scrollToPostId?: string })?.scrollToPostId;
   const [realtimePosts, setRealtimePosts] = useState<TimelinePost[]>([]);
   const [extraPosts, setExtraPosts] = useState<TimelinePost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,6 +130,15 @@ export function TimelineFeed() {
     return () => observer.disconnect();
   }, [loadMore]);
 
+  useEffect(() => {
+    if (!scrollToPostId || loading) return;
+    const el = document.querySelector(`[data-post-id="${scrollToPostId}"]`);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+      window.history.replaceState({}, "");
+    }
+  }, [scrollToPostId, loading]);
+
   const handleDeleted = (postId: string) => {
     setExtraPosts((prev) => prev.filter((p) => p.id !== postId));
   };
@@ -192,7 +204,9 @@ export function TimelineFeed() {
           ) : (
             <div className="space-y-6">
               {posts.map((post) => (
-                <TimelinePostCard key={post.id} post={post} onDeleted={handleDeleted} />
+                <div key={post.id} data-post-id={post.id}>
+                  <TimelinePostCard post={post} onDeleted={handleDeleted} />
+                </div>
               ))}
             </div>
           )}
