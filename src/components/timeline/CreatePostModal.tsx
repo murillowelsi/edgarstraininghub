@@ -241,7 +241,10 @@ export function CreatePostModal({ open, onOpenChange, onSubmit }: CreatePostModa
                 placeholder="Search by name…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                autoCorrect="off"
+                autoComplete="off"
+                spellCheck={false}
+                className="flex-1 bg-transparent text-[16px] outline-none placeholder:text-muted-foreground"
               />
             </div>
           </div>
