@@ -233,6 +233,21 @@ export const createMentionNotifications = async (
   );
 };
 
+export const createActivityNotification = async (
+  postAuthorId: string,
+  actorName: string,
+  postId: string,
+  type: "like" | "comment"
+): Promise<void> => {
+  await addDoc(collection(db, "users", postAuthorId, "timelineNotifications"), {
+    postId,
+    authorName: actorName,
+    type,
+    read: false,
+    createdAt: serverTimestamp(),
+  });
+};
+
 export const subscribeToMentionCount = (
   userId: string,
   callback: (count: number) => void

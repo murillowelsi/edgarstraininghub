@@ -3,7 +3,7 @@ import { Heart, Loader2, Send, Trash2, X } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { addComment, deleteComment, getComments, toggleCommentLike } from "@/services/timelineService";
+import { addComment, deleteComment, getComments, toggleCommentLike, createActivityNotification } from "@/services/timelineService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { TimelineComment } from "@/types/timeline";
@@ -13,6 +13,7 @@ interface CommentsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   postId: string;
+  postAuthorId: string;
   onCommentsCountChange: (delta: number) => void;
 }
 
@@ -23,7 +24,7 @@ interface ReplyingTo {
 
 const QUICK_EMOJIS = ["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", "😂"];
 
-export function CommentsDrawer({ open, onOpenChange, postId, onCommentsCountChange }: CommentsDrawerProps) {
+export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCommentsCountChange }: CommentsDrawerProps) {
   const { user, userRole, isAdmin, displayName, photoURL } = useAuth();
   const { toast } = useToast();
   const [comments, setComments] = useState<TimelineComment[]>([]);
@@ -112,6 +113,9 @@ export function CommentsDrawer({ open, onOpenChange, postId, onCommentsCountChan
       );
       setComments((prev) => [...prev, newComment]);
       onCommentsCountChange(1);
+      if (postAuthorId !== user.uid) {
+        createActivityNotification(postAuthorId, authorName, postId, "comment").catch(() => {});
+      }
       setText("");
       setReplyingTo(null);
     } catch {

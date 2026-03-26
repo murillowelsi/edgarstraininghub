@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { toggleLike, deleteTimelinePost } from "@/services/timelineService";
+import { toggleLike, deleteTimelinePost, createActivityNotification } from "@/services/timelineService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { CommentsDrawer } from "./CommentsDrawer";
@@ -21,7 +21,7 @@ interface TimelinePostCardProps {
 }
 
 export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, displayName } = useAuth();
   const { toast } = useToast();
 
   // Source of truth comes from the real-time subscription via `post` prop.
@@ -52,6 +52,10 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
     setPendingLike(!wasLiked);
     try {
       await toggleLike(post.id, user.uid, wasLiked);
+      if (!wasLiked && post.authorId !== user.uid) {
+        const actorName = displayName || user.email || "Someone";
+        createActivityNotification(post.authorId, actorName, post.id, "like").catch(() => {});
+      }
     } catch {
       toast({ title: "Error", description: "Could not update like.", variant: "destructive" });
     } finally {
@@ -176,6 +180,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         open={showComments}
         onOpenChange={setShowComments}
         postId={post.id}
+        postAuthorId={post.authorId}
         onCommentsCountChange={(delta) => setCommentsDelta((prev) => prev + delta)}
       />
     </>
