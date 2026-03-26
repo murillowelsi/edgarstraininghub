@@ -14,7 +14,7 @@ import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
@@ -40,10 +40,10 @@ export default function AthleteChat() {
     const [searchQuery, setSearchQuery] = useState("");
     const [loadingAdmins, setLoadingAdmins] = useState(false);
 
-    // Admin lookup map for names
+    // Admin lookup map
     const adminMap = useMemo(() => {
-        const map: Record<string, string> = {};
-        admins.forEach(a => map[a.id] = a.displayName);
+        const map: Record<string, { name: string; photoURL?: string }> = {};
+        admins.forEach(a => { map[a.id] = { name: a.displayName, photoURL: a.photoURL }; });
         return map;
     }, [admins]);
 
@@ -158,9 +158,18 @@ export default function AthleteChat() {
         if (chat.isGroup) return chat.groupName || "Team";
         const otherId = chat.participantIds.find(id => id !== user?.uid);
         if (otherId && adminMap[otherId]) {
-            return adminMap[otherId];
+            return adminMap[otherId].name;
         }
         return t.athlete.chat.coachFallback;
+    };
+
+    const getChatPhotoURL = (chat: Chat): string | undefined => {
+        if (chat.isGroup) return undefined;
+        const otherId = chat.participantIds.find(id => id !== user?.uid);
+        if (otherId && adminMap[otherId]) {
+            return adminMap[otherId].photoURL;
+        }
+        return undefined;
     };
 
     const filteredAdmins = admins.filter(a =>
@@ -214,6 +223,7 @@ export default function AthleteChat() {
                                                 className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
                                             >
                                                 <Avatar>
+                                                    {admin.photoURL && <AvatarImage src={admin.photoURL} alt={admin.displayName} className="object-cover" />}
                                                     <AvatarFallback>{admin.displayName[0]?.toUpperCase()}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
@@ -256,6 +266,7 @@ export default function AthleteChat() {
                                         )}
                                     >
                                         <Avatar className="h-12 w-12 shrink-0">
+                                            {!chat.isGroup && getChatPhotoURL(chat) && <AvatarImage src={getChatPhotoURL(chat)!} alt={displayName} className="object-cover" />}
                                             <AvatarFallback className="text-base font-semibold">
                                                 {chat.isGroup
                                                     ? <Users2 className="h-5 w-5" />
@@ -305,6 +316,7 @@ export default function AthleteChat() {
                             currentUserId={user?.uid || ""}
                             onSendMessage={handleSendMessage}
                             participantName={getChatDisplayName(selectedChat)}
+                            participantPhotoURL={getChatPhotoURL(selectedChat)}
                             isGroup={selectedChat.isGroup}
                             onBack={() => setSelectedChat(null)}
                         />

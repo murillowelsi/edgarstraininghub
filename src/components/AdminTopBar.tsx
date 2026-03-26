@@ -1,16 +1,18 @@
-import { Moon, Sun, LogOut, MessageSquare } from "lucide-react";
+import { Moon, Sun, LogOut, MessageSquare, Camera, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
-import { auth } from "../lib/firebase";
+import { auth, db } from "../lib/firebase";
 import { signOut } from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
+import { uploadImageToCloudinary } from "../lib/cloudinary";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface AdminTopBarProps {
   chatUnreadCount?: number;
@@ -19,9 +21,11 @@ interface AdminTopBarProps {
 
 const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, photoURL, setPhotoURL } = useAuth();
   const { language, changeLanguage, t } = useLanguage();
   const location = useLocation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const navItems = [
     { href: "/admin", label: t.admin.nav.home, exact: true },
@@ -32,6 +36,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
     { href: "/admin/calendar", label: t.admin.nav.calendar },
     { href: "/admin/subscriptions", label: t.admin.nav.subscriptions },
     { href: "/admin/chat", label: t.admin.nav.chat },
+    { href: "/admin/timeline", label: "Feed" },
   ];
 
   const currentTitle = pageTitle ?? navItems.find((item) =>
@@ -46,6 +51,32 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
 
   const handleLogout = async () => {
     await signOut(auth);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setIsUploadingPhoto(true);
+    try {
+      const url = await uploadImageToCloudinary(file, "profile-photos");
+      await updateDoc(doc(db, "users", user.uid), { photoURL: url });
+      setPhotoURL(url);
+    } catch (err) {
+      console.error("Error uploading photo:", err);
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handlePhotoRemove = async () => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, "users", user.uid), { photoURL: null });
+      setPhotoURL(null);
+    } catch (err) {
+      console.error("Error removing photo:", err);
+    }
   };
 
   return (
@@ -89,6 +120,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
             className="p-1 rounded-full hover:bg-accent transition-colors"
           >
             <Avatar className="h-8 w-8">
+              {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
               <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                 {getInitials(user?.email)}
               </AvatarFallback>
@@ -103,16 +135,48 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
           <div className="px-4 pb-8 pt-2 space-y-4">
             {/* Profile info */}
             <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                  {getInitials(user?.email)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative shrink-0">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingPhoto}
+                  className="relative group rounded-full focus:outline-none"
+                >
+                  <Avatar className="h-14 w-14">
+                    {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
+                    <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+                      {getInitials(user?.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="h-5 w-5 text-white" />
+                  </div>
+                  {isUploadingPhoto && (
+                    <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </button>
+                {photoURL && !isUploadingPhoto && (
+                  <button
+                    onClick={handlePhotoRemove}
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive flex items-center justify-center"
+                  >
+                    <X className="h-3 w-3 text-white" />
+                  </button>
+                )}
+              </div>
               <div className="min-w-0">
                 <p className="font-medium truncate">{user?.email}</p>
                 <p className="text-sm text-muted-foreground capitalize">{t.admin.panel}</p>
               </div>
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
 
             <div className="border-t pt-4 space-y-2">
               {/* Language */}

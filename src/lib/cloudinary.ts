@@ -3,7 +3,7 @@
  * @param file - The image file to upload
  * @returns Promise with the uploaded image URL
  */
-export const uploadImageToCloudinary = async (file: File): Promise<string> => {
+export const uploadImageToCloudinary = async (file: File, folder = "blog-posts"): Promise<string> => {
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
@@ -14,7 +14,7 @@ export const uploadImageToCloudinary = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", uploadPreset || "ml_default");
-  formData.append("folder", "blog-posts");
+  formData.append("folder", folder);
 
   try {
     const response = await fetch(

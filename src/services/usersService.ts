@@ -39,6 +39,7 @@ const docToUser = async (id: string, data: UserDocument): Promise<User> => {
     email: email || "",
     displayName: data.displayName,
     role: data.role,
+    photoURL: data.photoURL,
     subscriptionStatus: data.subscriptionStatus || (data.role === "athlete" ? "inactive" : "active"),
     subscriptionPlan: data.subscriptionPlan || (data.role === "athlete" ? "none" : "yearly"),
     subscriptionStartDate: data.subscriptionStartDate?.toDate(),

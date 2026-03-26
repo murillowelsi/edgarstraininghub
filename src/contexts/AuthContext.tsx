@@ -11,6 +11,9 @@ interface AuthContextType {
   isEditor: boolean;
   isAthlete: boolean;
   userRole: UserRole | null;
+  displayName: string | null;
+  photoURL: string | null;
+  setPhotoURL: (url: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -20,33 +23,45 @@ const AuthContext = createContext<AuthContextType>({
   isEditor: false,
   isAthlete: false,
   userRole: null,
+  displayName: null,
+  photoURL: null,
+  setPhotoURL: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        // Check user role from Firestore
         try {
           const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setUserRole(userData?.role as UserRole || null);
+            setDisplayName(userData?.displayName || null);
+            setPhotoURL(userData?.photoURL || null);
           } else {
             setUserRole(null);
+            setDisplayName(null);
+            setPhotoURL(null);
           }
         } catch (error) {
           console.error("Error checking user role:", error);
           setUserRole(null);
+          setDisplayName(null);
+          setPhotoURL(null);
         }
       } else {
         setUserRole(null);
+        setDisplayName(null);
+        setPhotoURL(null);
       }
 
       setLoading(false);
@@ -60,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isAthlete = userRole === "athlete";
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, isEditor, isAthlete, userRole }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, isEditor, isAthlete, userRole, displayName, photoURL, setPhotoURL }}>
       {children}
     </AuthContext.Provider>
   );

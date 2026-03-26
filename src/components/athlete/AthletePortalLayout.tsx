@@ -1,15 +1,18 @@
 import { cn } from "@/lib/utils";
-import { Calendar, Dumbbell, Home, LogOut, Moon, Sun, MessageSquare } from "lucide-react";
+import { Calendar, Camera, Dumbbell, Home, LayoutGrid, LogOut, Moon, Sun, MessageSquare, X } from "lucide-react";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { auth } from "@/lib/firebase";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { auth, db } from "@/lib/firebase";
+import { doc, updateDoc } from "firebase/firestore";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { ChatService } from "@/services/chat";
+import { subscribeToMentionCount } from "@/services/timelineService";
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
 import { useEffect, useRef, useState } from "react";
@@ -31,20 +34,29 @@ const AthletePortalLayout = ({
 }: AthletePortalLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, photoURL, setPhotoURL } = useAuth();
   const { t, language, changeLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const navItems = [
-    { href: "/athlete", label: t.athlete.nav.home, icon: Home },
-    { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar },
-    { href: "/athlete/workouts", label: t.athlete.nav.workouts, icon: Dumbbell },
+    { href: "/athlete", label: t.athlete.nav.home, icon: Home, exact: true, featured: false },
+    { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar, featured: false },
+    { href: "/athlete/timeline", label: "Feed", icon: LayoutGrid, featured: true },
+    { href: "/athlete/workouts", label: t.athlete.nav.workouts, icon: Dumbbell, featured: false },
   ];
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const [feedUnreadCount, setFeedUnreadCount] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const prevMessageTimes = useRef<Map<string, number>>(new Map());
   const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    if (!user) return;
+    return subscribeToMentionCount(user.uid, setFeedUnreadCount);
+  }, [user]);
 
   // Register for push notifications and listen for FCM messages
   useEffect(() => {
@@ -110,16 +122,40 @@ const AthletePortalLayout = ({
     return () => unsubscribe();
   }, [user]);
 
-  const isActive = (href: string) => {
-    if (href === "/athlete") {
-      return location.pathname === "/athlete";
-    }
+  const isActive = (href: string, exact?: boolean) => {
+    if (exact) return location.pathname === href;
     return location.pathname.startsWith(href);
   };
 
   const handleLogout = async () => {
     await auth.signOut();
     navigate("/login");
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setIsUploadingPhoto(true);
+    try {
+      const url = await uploadImageToCloudinary(file, "profile-photos");
+      await updateDoc(doc(db, "users", user.uid), { photoURL: url });
+      setPhotoURL(url);
+    } catch (err) {
+      console.error("Error uploading photo:", err);
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handlePhotoRemove = async () => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, "users", user.uid), { photoURL: null });
+      setPhotoURL(null);
+    } catch (err) {
+      console.error("Error removing photo:", err);
+    }
   };
 
   const getInitials = (email: string | null | undefined) => {
@@ -177,6 +213,7 @@ const AthletePortalLayout = ({
                 className="p-1 rounded-full hover:bg-accent transition-colors"
               >
                 <Avatar className="h-8 w-8">
+                  {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
                   <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                     {getInitials(user?.email)}
                   </AvatarFallback>
@@ -194,16 +231,48 @@ const AthletePortalLayout = ({
           <div className="px-4 pb-8 pt-2 space-y-4">
             {/* Profile info */}
             <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                  {getInitials(user?.email)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative shrink-0">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingPhoto}
+                  className="relative group rounded-full focus:outline-none"
+                >
+                  <Avatar className="h-14 w-14">
+                    {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
+                    <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+                      {getInitials(user?.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="h-5 w-5 text-white" />
+                  </div>
+                  {isUploadingPhoto && (
+                    <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </button>
+                {photoURL && !isUploadingPhoto && (
+                  <button
+                    onClick={handlePhotoRemove}
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive flex items-center justify-center"
+                  >
+                    <X className="h-3 w-3 text-white" />
+                  </button>
+                )}
+              </div>
               <div className="min-w-0">
                 <p className="font-medium truncate">{user?.email}</p>
                 <p className="text-sm text-muted-foreground">{t.athlete.role}</p>
               </div>
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
 
             <div className="border-t pt-4 space-y-2">
               {/* Language */}
@@ -253,32 +322,28 @@ const AthletePortalLayout = ({
       <nav className={cn("fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-bottom z-50", hideBottomNav && "hidden")}>
         <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
           {navItems.map((item) => {
-            const active = isActive(item.href);
+            const active = isActive(item.href, item.exact);
+            const badgeCount = item.href === "/athlete/timeline" ? feedUnreadCount : 0;
             return (
               <Link
                 key={item.href}
                 to={item.href}
-                className={cn(
-                  "flex flex-col items-center justify-center flex-1 h-full transition-all relative",
-                  active
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
+                className="flex flex-col items-center justify-center flex-1 h-full transition-all"
               >
                 <div className="relative">
-                  <item.icon
-                    className={cn(
-                      "h-5 w-5 transition-transform",
-                      active && "scale-110"
-                    )}
-                  />
-                </div>
-                <span
-                  className={cn(
-                    "text-xs mt-1",
-                    active ? "font-semibold" : "font-medium"
+                  <div className={cn(
+                    "flex items-center justify-center transition-all",
+                    active ? "text-primary" : "text-muted-foreground"
+                  )}>
+                    <item.icon className={cn("h-5 w-5", active && "scale-110")} />
+                  </div>
+                  {badgeCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                      {badgeCount > 9 ? "9+" : badgeCount}
+                    </span>
                   )}
-                >
+                </div>
+                <span className={cn("text-xs mt-1", active ? "text-primary font-semibold" : "text-muted-foreground font-medium")}>
                   {item.label}
                 </span>
               </Link>

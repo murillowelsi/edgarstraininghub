@@ -13,7 +13,7 @@ import { getAllUsers } from "@/services/usersService";
 import { getTeamsByCoach } from "@/services/teamsService";
 import { User } from "@/types/user";
 import { Team } from "@/types/team";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { cn } from "@/lib/utils";
@@ -157,6 +157,15 @@ export default function AdminChat() {
         return chat.athleteName || t.admin.chat.athleteFallback;
     };
 
+    const getChatPhotoURL = (chat: Chat): string | undefined => {
+        if (chat.isGroup) return undefined;
+        const otherId = chat.participantIds.find(id => id !== user?.uid);
+        if (otherId) {
+            return allUsers.find(u => u.id === otherId)?.photoURL;
+        }
+        return undefined;
+    };
+
     const handleSendMessage = async (text: string) => {
         if (!selectedChat || !user) return;
         await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Coach");
@@ -240,6 +249,7 @@ export default function AdminChat() {
                                     className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
                                 >
                                     <Avatar>
+                                        {athlete.photoURL && <AvatarImage src={athlete.photoURL} alt={athlete.displayName} className="object-cover" />}
                                         <AvatarFallback>{athlete.displayName[0]?.toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <div>
@@ -329,6 +339,7 @@ export default function AdminChat() {
                                         )}
                                     >
                                         <Avatar className="h-12 w-12 shrink-0">
+                                            {!chat.isGroup && getChatPhotoURL(chat) && <AvatarImage src={getChatPhotoURL(chat)!} alt={displayName} className="object-cover" />}
                                             <AvatarFallback className="text-base font-semibold">
                                                 {chat.isGroup
                                                     ? <Users2 className="h-5 w-5" />
@@ -378,6 +389,7 @@ export default function AdminChat() {
                             currentUserId={user?.uid || ""}
                             onSendMessage={handleSendMessage}
                             participantName={getChatDisplayName(selectedChat)}
+                            participantPhotoURL={getChatPhotoURL(selectedChat)}
                             isGroup={selectedChat.isGroup}
                             onBack={() => {
                             if (openedViaDeepLink) {

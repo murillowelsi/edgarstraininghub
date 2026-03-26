@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Send, Check, CheckCheck, ChevronLeft, Trash2, Users2 } from "lucide-react";
 import { Message } from "@/types/chat";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,6 +12,7 @@ interface ChatWindowProps {
     onSendMessage: (text: string) => void;
     isLoading?: boolean;
     participantName: string;
+    participantPhotoURL?: string;
     isGroup?: boolean;
     onBack?: () => void;
     onDelete?: () => void;
@@ -33,6 +34,7 @@ export default function ChatWindow({
     onSendMessage,
     isLoading,
     participantName,
+    participantPhotoURL,
     isGroup,
     onBack,
     onDelete,
@@ -73,6 +75,7 @@ export default function ChatWindow({
                 )}
 
                 <Avatar className="h-9 w-9 shrink-0">
+                    {!isGroup && participantPhotoURL && <AvatarImage src={participantPhotoURL} alt={participantName} className="object-cover" />}
                     <AvatarFallback className="text-sm font-semibold">
                         {isGroup ? <Users2 className="h-4 w-4" /> : participantName[0]?.toUpperCase()}
                     </AvatarFallback>

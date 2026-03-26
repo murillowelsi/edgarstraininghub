@@ -13,6 +13,7 @@ export interface User {
   email: string;
   displayName: string;
   role: UserRole;
+  photoURL?: string;
   subscriptionStatus: SubscriptionStatus;
   subscriptionPlan: SubscriptionPlan;
   subscriptionStartDate?: Date;
@@ -38,6 +39,7 @@ export interface UserDocument {
   email: string;
   displayName: string;
   role: UserRole;
+  photoURL?: string;
   subscriptionStatus?: SubscriptionStatus;
   subscriptionPlan?: SubscriptionPlan;
   subscriptionStartDate?: import("firebase/firestore").Timestamp;

@@ -36,6 +36,8 @@ import AdminTeamDetail from "./pages/admin/TeamDetail";
 import AdminTeamStats from "./pages/admin/TeamStats";
 import AthleteChat from "./pages/athlete/Chat";
 import JoinTeam from "./pages/JoinTeam";
+import AdminTimeline from "./pages/admin/Timeline";
+import AthleteTimeline from "./pages/athlete/Timeline";
 
 const queryClient = new QueryClient();
 
@@ -203,6 +205,14 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/admin/timeline"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminTimeline />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Athlete Routes */}
                 <Route
@@ -250,6 +260,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAthlete>
                       <AthleteChat />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/timeline"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteTimeline />
                     </ProtectedRoute>
                   }
                 />
