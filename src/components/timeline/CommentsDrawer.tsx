@@ -160,7 +160,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
       <div key={comment.id} className={cn("flex gap-3", isReply && "ml-10 mt-3")}>
         {/* Avatar */}
         <div className="shrink-0">
-          <Avatar className={cn(isReply ? "h-7 w-7" : "h-9 w-9")}>
+          <Avatar className={cn(isReply ? "h-7 w-7" : "h-9 w-9", "ring-2 ring-white")}>
             {comment.authorPhotoURL && <AvatarImage src={comment.authorPhotoURL} alt={comment.authorName} className="object-cover" />}
             <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
               {getInitials(comment.authorName)}
@@ -276,7 +276,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
 
         {/* Input */}
         <div className="shrink-0 border-t px-4 py-3 flex gap-3 items-center bg-background">
-          <Avatar className="h-9 w-9 shrink-0">
+          <Avatar className="h-9 w-9 shrink-0 ring-2 ring-white">
             {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
             <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
               {getInitials(displayName || user?.email || "U")}

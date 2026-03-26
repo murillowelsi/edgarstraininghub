@@ -145,7 +145,7 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
                     >
                       {/* Actor avatar with type icon */}
                       <div className="relative shrink-0">
-                        <Avatar className="h-11 w-11">
+                        <Avatar className="h-11 w-11 ring-2 ring-white">
                           {n.actorPhotoURL && <AvatarImage src={n.actorPhotoURL} alt={n.authorName} className="object-cover" />}
                           <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                             {n.authorName.charAt(0).toUpperCase()}

@@ -186,7 +186,7 @@ const AdminUsers = () => {
               <ListItemCard
                 key={u.id}
                 icon={
-                  <Avatar className="h-9 w-9">
+                  <Avatar className="h-9 w-9 ring-2 ring-white">
                     {u.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
                     <AvatarFallback
                       className="text-xs font-semibold"

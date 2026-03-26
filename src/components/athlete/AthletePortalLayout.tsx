@@ -211,18 +211,9 @@ const AthletePortalLayout = ({
 
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="p-1 rounded-full hover:bg-accent transition-colors"
+                className="p-2 rounded-full hover:bg-accent transition-colors"
               >
-                {location.pathname === "/athlete" ? (
-                  <MoreVertical className="h-5 w-5" />
-                ) : (
-                  <Avatar className="h-8 w-8">
-                    {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
-                    <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                      {getInitials(user?.email)}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
+                <MoreVertical className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -242,7 +233,7 @@ const AthletePortalLayout = ({
                   disabled={isUploadingPhoto}
                   className="relative group rounded-full focus:outline-none"
                 >
-                  <Avatar className="h-14 w-14">
+                  <Avatar className="h-14 w-14 ring-2 ring-white">
                     {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
                     <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
                       {getInitials(user?.email)}

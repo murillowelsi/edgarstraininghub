@@ -12,12 +12,13 @@ interface CreatePostModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => Promise<void>;
+  initialCaption?: string;
 }
 
-export function CreatePostModal({ open, onOpenChange, onSubmit }: CreatePostModalProps) {
+export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }: CreatePostModalProps) {
   const { user, displayName, photoURL } = useAuth();
   const { toast } = useToast();
-  const [caption, setCaption] = useState("");
+  const [caption, setCaption] = useState(initialCaption ?? "");
   const [imageUrl, setImageUrl] = useState<string | undefined>();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -37,6 +38,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit }: CreatePostModa
 
   useEffect(() => {
     if (open) {
+      setCaption(initialCaption ?? "");
       setTimeout(() => textareaRef.current?.focus(), 100);
     } else {
       setCaption("");
@@ -45,7 +47,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit }: CreatePostModa
       setSearch("");
       setMentionedUserIds([]);
     }
-  }, [open]);
+  }, [open, initialCaption]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -150,7 +152,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit }: CreatePostModa
       <div className="flex-1 overflow-y-auto">
         {/* Author row */}
         <div className="flex items-center gap-3 px-4 py-4">
-          <Avatar className="h-12 w-12 shrink-0">
+          <Avatar className="h-12 w-12 shrink-0 ring-2 ring-white">
             {photoURL && <AvatarImage src={photoURL} alt="Profile" className="object-cover" />}
             <AvatarFallback className="bg-primary text-primary-foreground font-bold text-lg">
               {authorName.charAt(0).toUpperCase()}
@@ -264,7 +266,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit }: CreatePostModa
                   onClick={() => handleMention(u)}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors text-left"
                 >
-                  <Avatar className="h-10 w-10 shrink-0">
+                  <Avatar className="h-10 w-10 shrink-0 ring-2 ring-white">
                     {u.photoURL && <AvatarImage src={u.photoURL} alt={u.displayName} className="object-cover" />}
                     <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                       {u.displayName.charAt(0).toUpperCase()}
