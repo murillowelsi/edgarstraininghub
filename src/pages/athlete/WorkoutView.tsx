@@ -39,7 +39,9 @@ import {
   drillLabels,
   durationLabels,
   equipmentLabels,
+  heartRateZoneLabels,
   intensityLabels,
+  powerZoneLabels,
   stageColors,
   stageLabels,
   strokeLabels,
@@ -126,6 +128,12 @@ const formatIntensity = (stage: WorkoutStage): string | null => {
   }
   if (stage.intensity.type === "pace" && stage.intensity.value) {
     return `${stage.intensity.value} ${stage.intensity.unit || "min/km"}`;
+  }
+  if (stage.intensity.type === "heartRateZone" && stage.intensity.value !== undefined) {
+    return heartRateZoneLabels[stage.intensity.value] ?? `Zone ${stage.intensity.value}`;
+  }
+  if (stage.intensity.type === "powerZone" && stage.intensity.value !== undefined) {
+    return powerZoneLabels[stage.intensity.value] ?? `Zone ${stage.intensity.value}`;
   }
   if (stage.intensity.min !== undefined && stage.intensity.max !== undefined) {
     return `${stage.intensity.min}-${stage.intensity.max} ${stage.intensity.unit || ""}`;
@@ -661,9 +669,9 @@ const AthleteWorkoutView = () => {
       onSubmit={handleSharePost}
       initialCaption={shareCaption}
     />
-    <AthletePortalLayout title={t.athlete.nav.workouts} hideBottomNav>
+    <AthletePortalLayout title={t.athlete.nav.workouts} hideBottomNav fullHeight>
       {/* Content */}
-      <div className="flex-1 overflow-auto pb-24">
+      <div className="flex-1 overflow-auto pb-4">
         {/* Sub-header: back + centered workout name */}
         <div className="relative flex items-center px-4 py-3">
           <button
@@ -799,7 +807,7 @@ const AthleteWorkoutView = () => {
       </div>
 
       {/* Bottom Action Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-bottom">
+      <div className="p-4 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-bottom">
         {workout.type === "strength" && !isCompleted ? (
           <Link to={`/athlete/workout/${id}/session`} className="block">
             <Button

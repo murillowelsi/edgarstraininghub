@@ -156,6 +156,24 @@ export const equipmentLabels: Record<SwimmingEquipmentType, string> = {
   snorkel: "Snorkel",
 };
 
+export const heartRateZoneLabels: Record<number, string> = {
+  1: "Zone 1 (101-121 bpm)",
+  2: "Zone 2 (121-141 bpm)",
+  3: "Zone 3 (141-159 bpm)",
+  4: "Zone 4 (159-181 bpm)",
+  5: "Zone 5 (181-201 bpm)",
+};
+
+export const powerZoneLabels: Record<number, string> = {
+  1: "Zone 1 (0-110 W)",
+  2: "Zone 2 (110-150 W)",
+  3: "Zone 3 (150-185 W)",
+  4: "Zone 4 (185-220 W)",
+  5: "Zone 5 (220-260 W)",
+  6: "Zone 6 (260-310 W)",
+  7: "Zone 7 (310+ W)",
+};
+
 // Swimming distance presets (in meters)
 export const swimmingDistancePresets = [25, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500];
 
