@@ -17,7 +17,7 @@ export const formatDuration = (stage: WorkoutStage, lapButtonLabel = "Press Lap 
 
 export const formatIntensity = (stage: WorkoutStage): string | null => {
   if (stage.intensity.type === "none") return null;
-  if (stage.intensity.type === "pace" && stage.intensity.value) {
+  if (stage.intensity.type === "pace" && stage.intensity.value !== undefined) {
     return `${stage.intensity.value} ${stage.intensity.unit || "min/km"}`;
   }
   if (stage.intensity.type === "heartRateZone" && stage.intensity.value !== undefined) {
