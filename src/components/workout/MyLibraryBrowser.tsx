@@ -311,10 +311,10 @@ const ExerciseFormDialog = ({
 
       const exerciseData = {
         name: name.trim(),
-        description: description.trim() || undefined,
-        instructions: instructions.trim() || undefined,
-        videoUrl: videoUrl.trim() || undefined,
-        thumbnailUrl,
+        description: description.trim() || null,
+        instructions: instructions.trim() || null,
+        videoUrl: videoUrl.trim() || null,
+        thumbnailUrl: thumbnailUrl || null,
         muscleGroups,
         equipment,
       };
