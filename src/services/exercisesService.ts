@@ -187,8 +187,11 @@ export const updateExercise = async (
   data: Partial<ExerciseFormData>
 ): Promise<void> => {
   const docRef = doc(db, EXERCISES_COLLECTION, id);
+  const clean = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== undefined)
+  );
   await updateDoc(docRef, {
-    ...data,
+    ...clean,
     updatedAt: serverTimestamp(),
   });
 };
