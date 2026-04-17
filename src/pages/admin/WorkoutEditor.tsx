@@ -51,6 +51,11 @@ import {
   workoutTypeLabels,
 } from "@/types/workout";
 import { cn } from "@/lib/utils";
+import {
+  formatDuration,
+  formatIntensity,
+  formatSwimmingDetails,
+} from "@/utils/workoutFormatters";
 import { ArrowLeft, Bike, ChevronDown, Clock, Flame, GripVertical, Heart, Loader2, MoreVertical, Pencil, PersonStanding, Plus, Repeat, Trash2, Waves, Wind, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -60,63 +65,6 @@ import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
 
-// Helper to format duration for display
-const formatDuration = (stage: WorkoutStage, pressLapButtonLabel = "Press Lap Button") => {
-  if (stage.duration.type === "lapButton") {
-    return pressLapButtonLabel;
-  }
-  if (stage.duration.value !== undefined) {
-    const unit = stage.duration.unit || "";
-    return `${stage.duration.value} ${unit}`;
-  }
-  return durationLabels[stage.duration.type];
-};
-
-// Helper to format intensity for display
-const formatIntensity = (stage: WorkoutStage): string | null => {
-  const { intensity } = stage;
-
-  if (intensity.type === "none") {
-    return null;
-  }
-
-  // Zone-based intensity
-  if (intensity.type === "heartRateZone" && intensity.value) {
-    return `HR Zone ${intensity.value}`;
-  }
-  if (intensity.type === "powerZone" && intensity.value) {
-    return `Power Zone ${intensity.value}`;
-  }
-
-  // Range-based intensity (min-max)
-  if (intensity.min !== undefined && intensity.max !== undefined) {
-    const unit = intensity.unit || "";
-    return `${intensity.min}-${intensity.max} ${unit}`;
-  }
-
-  // Single value intensity
-  if (intensity.value !== undefined) {
-    const unit = intensity.unit || "";
-    return `${intensity.value} ${unit}`;
-  }
-
-  // Just show the type label if no values
-  return intensityLabels[intensity.type];
-};
-
-// Helper to format swimming details
-const formatSwimmingDetails = (stage: WorkoutStage): string[] => {
-  const details: string[] = [];
-  if (stage.strokeType) {
-    details.push(strokeLabels[stage.strokeType]);
-  }
-  if (stage.drillType && stage.drillType !== "none") {
-    details.push(drillLabels[stage.drillType]);
-  }
-  if (stage.equipment && stage.equipment !== "none") {
-    details.push(equipmentLabels[stage.equipment]);
-  }
-  return details;
 };
 
 const stageIcons: Record<string, React.ElementType> = {

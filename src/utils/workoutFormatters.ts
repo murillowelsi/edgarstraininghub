@@ -3,9 +3,7 @@ import {
   drillLabels,
   durationLabels,
   equipmentLabels,
-  heartRateZoneLabels,
   intensityLabels,
-  powerZoneLabels,
   strokeLabels,
 } from "@/types/workout";
 
@@ -23,13 +21,16 @@ export const formatIntensity = (stage: WorkoutStage): string | null => {
     return `${stage.intensity.value} ${stage.intensity.unit || "min/km"}`;
   }
   if (stage.intensity.type === "heartRateZone" && stage.intensity.value !== undefined) {
-    return heartRateZoneLabels[stage.intensity.value] ?? `Zone ${stage.intensity.value}`;
+    return `HR Zone ${stage.intensity.value}`;
   }
   if (stage.intensity.type === "powerZone" && stage.intensity.value !== undefined) {
-    return powerZoneLabels[stage.intensity.value] ?? `Zone ${stage.intensity.value}`;
+    return `Power Zone ${stage.intensity.value}`;
   }
   if (stage.intensity.min !== undefined && stage.intensity.max !== undefined) {
     return `${stage.intensity.min}-${stage.intensity.max} ${stage.intensity.unit || ""}`;
+  }
+  if (stage.intensity.value !== undefined) {
+    return `${stage.intensity.value} ${stage.intensity.unit || ""}`;
   }
   return intensityLabels[stage.intensity.type];
 };
