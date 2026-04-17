@@ -1,4 +1,5 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
+import WorkoutStageItem from "@/components/workout/WorkoutStageItem";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,18 +35,6 @@ import {
   muscleGroupLabels,
 } from "@/types/exercise";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import type { WorkoutStage } from "@/types/workout";
-import {
-  drillLabels,
-  durationLabels,
-  equipmentLabels,
-  heartRateZoneLabels,
-  intensityLabels,
-  powerZoneLabels,
-  stageColors,
-  stageLabels,
-  strokeLabels,
-} from "@/types/workout";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -57,17 +46,13 @@ import {
   Circle,
   Clock,
   Dumbbell,
-  Flame,
   Heart,
   Layers,
   Loader2,
   PersonStanding,
   Play,
-  Repeat,
   Waves,
-  Wind,
   X,
-  Zap,
 } from "lucide-react";
 
 // Format time as MM:SS or HH:MM:SS
@@ -91,210 +76,11 @@ const workoutTypeIcons: Record<string, React.ElementType> = {
   strength: Dumbbell,
 };
 
-const stageIcons: Record<string, React.ElementType> = {
-  warmup: Flame,
-  run: PersonStanding,
-  cooldown: Wind,
-  recovery: Heart,
-  interval: Zap,
-  repeat: Repeat,
-  bike: Bike,
-  rest: Clock,
-  swim: Waves,
-};
-
 const workoutTypeColors: Record<string, string> = {
   running: "bg-blue-500/10 text-blue-600 border-blue-200",
   cycling: "bg-green-500/10 text-green-600 border-green-200",
   swimming: "bg-cyan-500/10 text-cyan-600 border-cyan-200",
   strength: "bg-amber-500/10 text-amber-600 border-amber-200",
-};
-
-// Utility functions for formatting
-const formatDuration = (stage: WorkoutStage, lapLabel: string = "Press Lap Button"): string => {
-  if (stage.duration.type === "lapButton") {
-    return lapLabel;
-  }
-  if (stage.duration.value !== undefined) {
-    const unit = stage.duration.unit || "";
-    return `${stage.duration.value} ${unit}`;
-  }
-  return durationLabels[stage.duration.type];
-};
-
-const formatIntensity = (stage: WorkoutStage): string | null => {
-  if (stage.intensity.type === "none") {
-    return null;
-  }
-  if (stage.intensity.type === "pace" && stage.intensity.value) {
-    return `${stage.intensity.value} ${stage.intensity.unit || "min/km"}`;
-  }
-  if (stage.intensity.type === "heartRateZone" && stage.intensity.value !== undefined) {
-    return heartRateZoneLabels[stage.intensity.value] ?? `Zone ${stage.intensity.value}`;
-  }
-  if (stage.intensity.type === "powerZone" && stage.intensity.value !== undefined) {
-    return powerZoneLabels[stage.intensity.value] ?? `Zone ${stage.intensity.value}`;
-  }
-  if (stage.intensity.min !== undefined && stage.intensity.max !== undefined) {
-    return `${stage.intensity.min}-${stage.intensity.max} ${stage.intensity.unit || ""}`;
-  }
-  return intensityLabels[stage.intensity.type];
-};
-
-const formatSwimmingDetails = (stage: WorkoutStage): string[] => {
-  const details: string[] = [];
-  if (stage.strokeType) {
-    details.push(strokeLabels[stage.strokeType]);
-  }
-  if (stage.drillType && stage.drillType !== "none") {
-    details.push(drillLabels[stage.drillType]);
-  }
-  if (stage.equipment && stage.equipment !== "none") {
-    details.push(equipmentLabels[stage.equipment]);
-  }
-  return details;
-};
-
-// Stage display component
-const StageItem = ({
-  stage,
-  index: _index,
-  t,
-}: {
-  stage: WorkoutStage;
-  index: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const color = stageColors[stage.type];
-  const intensity = formatIntensity(stage);
-  const swimmingDetails = formatSwimmingDetails(stage);
-  const StageIcon = stageIcons[stage.type] || PersonStanding;
-
-  if (stage.type === "repeat") {
-    return (
-      <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
-        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <CollapsibleTrigger className="w-full">
-            <div className="p-4 flex items-center gap-3">
-              <div className="p-2.5 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}>
-                <Repeat className="h-4 w-4" />
-              </div>
-              <div className="flex-1 text-left min-w-0">
-                <p className="font-semibold text-sm">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}x</p>
-                <p className="text-xs text-muted-foreground">
-                  {stage.stages?.length || 0} {t.athlete.workoutView.stages}
-                </p>
-              </div>
-              <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
-            </div>
-          </CollapsibleTrigger>
-
-          <CollapsibleContent>
-            {stage.stages && stage.stages.length > 0 && (
-              <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-2">
-                {stage.stages.map((nestedStage, nestedIndex) => {
-                  const NestedIcon = stageIcons[nestedStage.type] || PersonStanding;
-                  const nestedColor = stageColors[nestedStage.type];
-                  return (
-                    <div key={nestedStage.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                      <div className="p-2 rounded-lg shrink-0 flex items-center justify-center" style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}>
-                        <NestedIcon className="h-3.5 w-3.5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-xs">{nestedIndex + 1}. {stageLabels[nestedStage.type]}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDuration(nestedStage, t.athlete.workoutView.pressLapButton)}
-                          {formatIntensity(nestedStage) && ` · ${formatIntensity(nestedStage)}`}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-    );
-  }
-
-  return (
-    <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
-      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CollapsibleTrigger className="w-full">
-          <div className="p-4 flex items-center gap-3">
-            <div className="p-2.5 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: `${color}1a`, color }}>
-              <StageIcon className="h-4 w-4" />
-            </div>
-            <div className="flex-1 text-left min-w-0">
-              <p className="font-semibold text-sm truncate">{stageLabels[stage.type]}</p>
-              <p className="text-xs text-muted-foreground">
-                {formatDuration(stage, t.athlete.workoutView.pressLapButton)}
-                {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
-                {intensity && ` · ${intensity}`}
-              </p>
-            </div>
-            <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
-          </div>
-        </CollapsibleTrigger>
-
-        <CollapsibleContent>
-          <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-3">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground uppercase font-medium">
-                  {t.athlete.workoutView.duration}
-                </p>
-                <p className="font-medium mt-1">{formatDuration(stage, t.athlete.workoutView.pressLapButton)}</p>
-              </div>
-              {intensity && (
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-xs text-muted-foreground uppercase font-medium">
-                    {t.athlete.workoutView.intensity}
-                  </p>
-                  <p className="font-medium mt-1">{intensity}</p>
-                </div>
-              )}
-              {stage.strokeType && (
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-xs text-muted-foreground uppercase font-medium">
-                    {t.athlete.workoutView.stroke}
-                  </p>
-                  <p className="font-medium mt-1">{strokeLabels[stage.strokeType]}</p>
-                </div>
-              )}
-              {stage.drillType && stage.drillType !== "none" && (
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-xs text-muted-foreground uppercase font-medium">
-                    {t.athlete.workoutView.drill}
-                  </p>
-                  <p className="font-medium mt-1">{drillLabels[stage.drillType]}</p>
-                </div>
-              )}
-              {stage.equipment && stage.equipment !== "none" && (
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-xs text-muted-foreground uppercase font-medium">
-                    {t.athlete.workoutView.equipment}
-                  </p>
-                  <p className="font-medium mt-1">{equipmentLabels[stage.equipment]}</p>
-                </div>
-              )}
-            </div>
-            {stage.notes && (
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="text-xs text-muted-foreground uppercase font-medium">
-                  {t.athlete.workoutView.notes}
-                </p>
-                <p className="text-sm mt-1">{stage.notes}</p>
-              </div>
-            )}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
-  );
 };
 
 // Exercise item component for strength workouts
@@ -798,7 +584,7 @@ const AthleteWorkoutView = () => {
               </h3>
               <div className="space-y-2">
                 {workout.stages.map((stage, index) => (
-                  <StageItem key={stage.id} stage={stage} index={index} t={t} />
+                  <WorkoutStageItem key={stage.id} stage={stage} index={index} t={t} />
                 ))}
               </div>
             </>

@@ -16,6 +16,11 @@ import {
   strokeLabels,
 } from "@/types/workout";
 import {
+  formatDuration,
+  formatIntensity,
+  formatSwimmingDetails,
+} from "@/utils/workoutFormatters";
+import {
   Bike,
   ChevronDown,
   Clock,
@@ -59,44 +64,6 @@ const StageCard = ({
 }: StageCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const color = stageColors[stage.type];
-
-  const formatDuration = (s: WorkoutStage) => {
-    if (s.duration.type === "lapButton") {
-      return "Press Lap Button";
-    }
-    if (s.duration.value !== undefined) {
-      const unit = s.duration.unit || "";
-      return `${s.duration.value} ${unit}`;
-    }
-    return durationLabels[s.duration.type];
-  };
-
-  const formatIntensity = (s: WorkoutStage) => {
-    if (s.intensity.type === "none") {
-      return null;
-    }
-    if (s.intensity.type === "pace" && s.intensity.value) {
-      return `${s.intensity.value} ${s.intensity.unit || "min/km"}`;
-    }
-    if (s.intensity.min !== undefined && s.intensity.max !== undefined) {
-      return `${s.intensity.min}-${s.intensity.max} ${s.intensity.unit || ""}`;
-    }
-    return intensityLabels[s.intensity.type];
-  };
-
-  const formatSwimmingDetails = (s: WorkoutStage) => {
-    const details: string[] = [];
-    if (s.strokeType) {
-      details.push(strokeLabels[s.strokeType]);
-    }
-    if (s.drillType && s.drillType !== "none") {
-      details.push(drillLabels[s.drillType]);
-    }
-    if (s.equipment && s.equipment !== "none") {
-      details.push(equipmentLabels[s.equipment]);
-    }
-    return details;
-  };
 
   // Render a repeat block
   if (stage.type === "repeat") {
