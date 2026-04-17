@@ -65,8 +65,6 @@ import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
 
-};
-
 const stageIcons: Record<string, React.ElementType> = {
   warmup: Flame,
   run: PersonStanding,
