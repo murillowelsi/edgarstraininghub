@@ -115,7 +115,14 @@ const formatDuration = (stage: WorkoutStage, lapLabel: string = "Press Lap Butto
   }
   if (stage.duration.value !== undefined) {
     const unit = stage.duration.unit || "";
-    return `${stage.duration.value} ${unit}`;
+    const value = stage.duration.value;
+    if ((unit === "min" || unit === "minutes") && value % 1 !== 0) {
+      const totalSeconds = Math.round(value * 60);
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
+      return `${mins}:${secs.toString().padStart(2, "0")} ${unit}`;
+    }
+    return `${value} ${unit}`;
   }
   return durationLabels[stage.duration.type];
 };
@@ -199,17 +206,25 @@ const StageItem = ({
                   const NestedIcon = stageIcons[nestedStage.type] || PersonStanding;
                   const nestedColor = stageColors[nestedStage.type];
                   return (
-                    <div key={nestedStage.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                      <div className="p-2 rounded-lg shrink-0 flex items-center justify-center" style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}>
-                        <NestedIcon className="h-3.5 w-3.5" />
+                    <div key={nestedStage.id} className="p-3 rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg shrink-0 flex items-center justify-center" style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}>
+                          <NestedIcon className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-xs">{nestedIndex + 1}. {stageLabels[nestedStage.type]}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDuration(nestedStage, t.athlete.workoutView.pressLapButton)}
+                            {formatIntensity(nestedStage) && ` · ${formatIntensity(nestedStage)}`}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-xs">{nestedIndex + 1}. {stageLabels[nestedStage.type]}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDuration(nestedStage, t.athlete.workoutView.pressLapButton)}
-                          {formatIntensity(nestedStage) && ` · ${formatIntensity(nestedStage)}`}
-                        </p>
-                      </div>
+                      {nestedStage.notes && (
+                        <div className="mt-2 ml-9 bg-background/60 p-2 rounded-md">
+                          <p className="text-xs text-muted-foreground uppercase font-medium mb-0.5">{t.athlete.workoutView.notes}</p>
+                          <p className="text-xs">{nestedStage.notes}</p>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
