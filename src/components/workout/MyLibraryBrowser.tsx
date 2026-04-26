@@ -13,7 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Drawer as DrawerPrimitive } from "vaul";
 import {
   createExercise,
   deleteExercise,
@@ -253,6 +256,7 @@ const ExerciseFormDialog = ({
   const [equipment, setEquipment] = useState<EquipmentType[]>([]);
 
   const isEditing = !!exerciseToEdit;
+  const isMobile = useIsMobile();
 
   // Populate form when editing
   useEffect(() => {
@@ -360,182 +364,209 @@ const ExerciseFormDialog = ({
     }
   };
 
+  const formContent = (
+    <>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>{translations.workout.exerciseForm.exerciseName} *</Label>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={translations.workout.exerciseForm.exerciseNamePlaceholder}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>{translations.workout.exerciseForm.description}</Label>
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={translations.workout.exerciseForm.descriptionPlaceholder}
+            rows={2}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>{translations.workout.exerciseForm.instructions}</Label>
+          <Textarea
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            placeholder={translations.workout.exerciseForm.instructionsPlaceholder}
+            rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <Youtube className="h-4 w-4 text-red-500" />
+            {translations.workout.exerciseForm.youtubeUrl}
+          </Label>
+          <Input
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder={translations.workout.exerciseForm.youtubeUrlPlaceholder}
+          />
+          {videoUrl && getYouTubeVideoId(videoUrl) && (
+            <div className="mt-2 aspect-video rounded overflow-hidden">
+              <img
+                src={getYouTubeThumbnail(getYouTubeVideoId(videoUrl)!)}
+                alt="Video thumbnail"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label>{translations.workout.exerciseForm.muscleGroups} *</Label>
+          <div className="flex gap-2">
+            <Select
+              value={selectedMuscleGroup}
+              onValueChange={(v) => setSelectedMuscleGroup(v as MuscleGroup)}
+            >
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder={translations.workout.exerciseForm.selectMuscleGroup} />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(muscleGroupLabels).map(([value, label]) => (
+                  <SelectItem
+                    key={value}
+                    value={value}
+                    disabled={muscleGroups.includes(value as MuscleGroup)}
+                  >
+                    {translations.workout.muscleGroups[value as MuscleGroup] || label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddMuscleGroup}
+              disabled={!selectedMuscleGroup}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          {muscleGroups.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {muscleGroups.map((mg) => (
+                <Badge
+                  key={mg}
+                  variant="secondary"
+                  className="cursor-pointer"
+                  onClick={() => handleRemoveMuscleGroup(mg)}
+                >
+                  {translations.workout.muscleGroups[mg] || muscleGroupLabels[mg]}
+                  <X className="h-3 w-3 ml-1" />
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label>{translations.workout.exerciseForm.equipment}</Label>
+          <div className="flex gap-2">
+            <Select
+              value={selectedEquipment}
+              onValueChange={(v) => setSelectedEquipment(v as EquipmentType)}
+            >
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder={translations.workout.exerciseForm.selectEquipment} />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(equipmentTypeLabels).map(([value, label]) => (
+                  <SelectItem
+                    key={value}
+                    value={value}
+                    disabled={equipment.includes(value as EquipmentType)}
+                  >
+                    {translations.workout.equipmentTypes[value as EquipmentType] || label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddEquipment}
+              disabled={!selectedEquipment}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          {equipment.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {equipment.map((eq) => (
+                <Badge
+                  key={eq}
+                  variant="outline"
+                  className="cursor-pointer"
+                  onClick={() => handleRemoveEquipment(eq)}
+                >
+                  {translations.workout.equipmentTypes[eq] || equipmentTypeLabels[eq]}
+                  <X className="h-3 w-3 ml-1" />
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 mt-4">
+        <Button
+          className="w-full"
+          onClick={handleSave}
+          disabled={!name.trim() || muscleGroups.length === 0 || saving}
+        >
+          {saving ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : isEditing ? (
+            <Save className="h-4 w-4 mr-2" />
+          ) : (
+            <Plus className="h-4 w-4 mr-2" />
+          )}
+          {isEditing ? translations.workout.exerciseForm.saveChanges : translations.workout.library.createExercise}
+        </Button>
+        <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
+          {translations.workout.common.cancel}
+        </Button>
+      </div>
+    </>
+  );
+
   return (
-    <ResponsiveModal
+    <DrawerPrimitive.Root
       open={open}
       onOpenChange={onOpenChange}
-      title={isEditing ? translations.workout.exerciseForm.editExercise : translations.workout.exerciseForm.createCustomExercise}
-      description={isEditing ? translations.workout.exerciseForm.updateExerciseDetails : translations.workout.exerciseForm.addNewExercise}
-      className="max-w-lg max-h-[90vh] overflow-auto"
+      direction={isMobile ? "bottom" : "right"}
     >
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>{translations.workout.exerciseForm.exerciseName} *</Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={translations.workout.exerciseForm.exerciseNamePlaceholder}
-            />
+      <DrawerPrimitive.Portal>
+        <DrawerPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80" />
+        <DrawerPrimitive.Content
+          className={cn(
+            "fixed z-50 flex flex-col bg-background",
+            isMobile
+              ? "inset-x-0 bottom-0 rounded-t-[10px] max-h-[90dvh]"
+              : "inset-y-0 right-0 h-full w-[480px] border-l"
+          )}
+        >
+          {isMobile && <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted shrink-0" />}
+          <div className="px-4 py-4 border-b shrink-0">
+            <DrawerPrimitive.Title className="text-lg font-semibold leading-none tracking-tight">
+              {isEditing ? translations.workout.exerciseForm.editExercise : translations.workout.exerciseForm.createCustomExercise}
+            </DrawerPrimitive.Title>
+            <DrawerPrimitive.Description className="text-sm text-muted-foreground mt-1">
+              {isEditing ? translations.workout.exerciseForm.updateExerciseDetails : translations.workout.exerciseForm.addNewExercise}
+            </DrawerPrimitive.Description>
           </div>
-
-          <div className="space-y-2">
-            <Label>{translations.workout.exerciseForm.description}</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={translations.workout.exerciseForm.descriptionPlaceholder}
-              rows={2}
-            />
+          <div className="px-4 py-4 overflow-y-auto flex-1">
+            {formContent}
           </div>
-
-          <div className="space-y-2">
-            <Label>{translations.workout.exerciseForm.instructions}</Label>
-            <Textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              placeholder={translations.workout.exerciseForm.instructionsPlaceholder}
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Youtube className="h-4 w-4 text-red-500" />
-              {translations.workout.exerciseForm.youtubeUrl}
-            </Label>
-            <Input
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder={translations.workout.exerciseForm.youtubeUrlPlaceholder}
-            />
-            {videoUrl && getYouTubeVideoId(videoUrl) && (
-              <div className="mt-2 aspect-video rounded overflow-hidden">
-                <img
-                  src={getYouTubeThumbnail(getYouTubeVideoId(videoUrl)!)}
-                  alt="Video thumbnail"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>{translations.workout.exerciseForm.muscleGroups} *</Label>
-            <div className="flex gap-2">
-              <Select
-                value={selectedMuscleGroup}
-                onValueChange={(v) => setSelectedMuscleGroup(v as MuscleGroup)}
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder={translations.workout.exerciseForm.selectMuscleGroup} />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(muscleGroupLabels).map(([value, label]) => (
-                    <SelectItem
-                      key={value}
-                      value={value}
-                      disabled={muscleGroups.includes(value as MuscleGroup)}
-                    >
-                      {translations.workout.muscleGroups[value as MuscleGroup] || label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddMuscleGroup}
-                disabled={!selectedMuscleGroup}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            {muscleGroups.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {muscleGroups.map((mg) => (
-                  <Badge
-                    key={mg}
-                    variant="secondary"
-                    className="cursor-pointer"
-                    onClick={() => handleRemoveMuscleGroup(mg)}
-                  >
-                    {translations.workout.muscleGroups[mg] || muscleGroupLabels[mg]}
-                    <X className="h-3 w-3 ml-1" />
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>{translations.workout.exerciseForm.equipment}</Label>
-            <div className="flex gap-2">
-              <Select
-                value={selectedEquipment}
-                onValueChange={(v) => setSelectedEquipment(v as EquipmentType)}
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder={translations.workout.exerciseForm.selectEquipment} />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(equipmentTypeLabels).map(([value, label]) => (
-                    <SelectItem
-                      key={value}
-                      value={value}
-                      disabled={equipment.includes(value as EquipmentType)}
-                    >
-                      {translations.workout.equipmentTypes[value as EquipmentType] || label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddEquipment}
-                disabled={!selectedEquipment}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            {equipment.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {equipment.map((eq) => (
-                  <Badge
-                    key={eq}
-                    variant="outline"
-                    className="cursor-pointer"
-                    onClick={() => handleRemoveEquipment(eq)}
-                  >
-                    {translations.workout.equipmentTypes[eq] || equipmentTypeLabels[eq]}
-                    <X className="h-3 w-3 ml-1" />
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2 mt-4">
-          <Button
-            className="w-full"
-            onClick={handleSave}
-            disabled={!name.trim() || muscleGroups.length === 0 || saving}
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : isEditing ? (
-              <Save className="h-4 w-4 mr-2" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
-            )}
-            {isEditing ? translations.workout.exerciseForm.saveChanges : translations.workout.library.createExercise}
-          </Button>
-          <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
-            {translations.workout.common.cancel}
-          </Button>
-        </div>
-    </ResponsiveModal>
+        </DrawerPrimitive.Content>
+      </DrawerPrimitive.Portal>
+    </DrawerPrimitive.Root>
   );
 };
 

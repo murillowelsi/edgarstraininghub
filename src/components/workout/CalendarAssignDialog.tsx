@@ -381,8 +381,8 @@ export const CalendarAssignDialog = ({
           </Button>
         </div>
       ) : (
-        <ScrollArea className="h-[280px]">
-          <div className="space-y-2 pr-4">
+        <div className="h-[280px] overflow-y-auto overflow-x-hidden">
+          <div className="space-y-2 pr-2">
             {filteredWorkouts.map((workout) => {
               const config = workoutTypeConfig[workout.type];
               const Icon = config.icon;
@@ -402,7 +402,7 @@ export const CalendarAssignDialog = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm truncate">{workout.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {workout.type === "strength" ? `${workout.exercises?.length || 0} exercises` : `${workout.stages.length} stages`} · {config.label}
                       </p>
                     </div>
@@ -411,7 +411,7 @@ export const CalendarAssignDialog = ({
               );
             })}
           </div>
-        </ScrollArea>
+        </div>
       )}
 
       {/* Create new option */}
@@ -444,8 +444,8 @@ export const CalendarAssignDialog = ({
               return <Icon className="h-4 w-4" />;
             })()}
           </div>
-          <div className="flex-1">
-            <p className="font-medium">{selectedWorkout.name}</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium truncate">{selectedWorkout.name}</p>
             <p className="text-sm text-muted-foreground">
               {format(selectedDate!, "EEEE, MMMM d, yyyy")}
             </p>
@@ -579,7 +579,7 @@ export const CalendarAssignDialog = ({
         )}
         {renderStepIndicator()}
 
-        <div className="py-2">
+        <div className="py-2 min-w-0">
           {step === "type" && renderTypeStep()}
           {step === "workout" && renderWorkoutStep()}
           {step === "athletes" && renderAthletesStep()}
