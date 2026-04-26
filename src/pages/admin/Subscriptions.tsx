@@ -14,13 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -850,14 +850,14 @@ const AdminSubscriptions = () => {
                 )}
 
                 {/* Edit Subscription Dialog (Super Admin / Manual) */}
-                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle>Edit Subscription Details</DialogTitle>
-                            <DialogDescription>
+                <Sheet open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                    <SheetContent className="overflow-y-auto">
+                        <SheetHeader>
+                            <SheetTitle>Edit Subscription Details</SheetTitle>
+                            <SheetDescription>
                                 Manually update details for {selectedAthlete?.displayName}.
-                            </DialogDescription>
-                        </DialogHeader>
+                            </SheetDescription>
+                        </SheetHeader>
                         {/* ... Keep form content ... */}
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
@@ -945,7 +945,7 @@ const AdminSubscriptions = () => {
                                 </Popover>
                             </div>
                         </div>
-                        <DialogFooter>
+                        <SheetFooter>
                             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
                                 Cancel
                             </Button>
@@ -955,19 +955,19 @@ const AdminSubscriptions = () => {
                                 ) : null}
                                 Save Changes
                             </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                        </SheetFooter>
+                    </SheetContent>
+                </Sheet>
 
                 {/* Register Payment Dialog (New Flow) */}
-                <Dialog open={registerPaymentOpen} onOpenChange={setRegisterPaymentOpen}>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle>Register Payment & Subscription</DialogTitle>
-                            <DialogDescription>
+                <Sheet open={registerPaymentOpen} onOpenChange={setRegisterPaymentOpen}>
+                    <SheetContent className="overflow-y-auto">
+                        <SheetHeader>
+                            <SheetTitle>Register Payment & Subscription</SheetTitle>
+                            <SheetDescription>
                                 Activate subscription and record payment for {athleteToActivate?.displayName}
-                            </DialogDescription>
-                        </DialogHeader>
+                            </SheetDescription>
+                        </SheetHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="pay-plan">Subscription Plan</Label>
@@ -1105,7 +1105,7 @@ const AdminSubscriptions = () => {
                                 />
                             </div>
                         </div>
-                        <DialogFooter>
+                        <SheetFooter>
                             <Button variant="ghost" onClick={() => setRegisterPaymentOpen(false)}>
                                 Cancel
                             </Button>
@@ -1115,22 +1115,22 @@ const AdminSubscriptions = () => {
                                 ) : null}
                                 Confirm Payment
                             </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                        </SheetFooter>
+                    </SheetContent>
+                </Sheet>
 
                 {/* Subscription History Report Dialog */}
-                <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-                    <DialogContent className="sm:max-w-[800px]">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
+                <Sheet open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+                    <SheetContent className="w-full sm:max-w-[800px] overflow-y-auto">
+                        <SheetHeader>
+                            <SheetTitle className="flex items-center gap-2">
                                 <FileText className="h-5 w-5" />
                                 Payment Report: {selectedAthlete?.displayName}
-                            </DialogTitle>
-                            <DialogDescription>
+                            </SheetTitle>
+                            <SheetDescription>
                                 History of all subscription payments and activations.
-                            </DialogDescription>
-                        </DialogHeader>
+                            </SheetDescription>
+                        </SheetHeader>
 
                         {/* Summary Header */}
                         <div className="bg-muted/30 p-4 rounded-lg flex items-center justify-between border">
@@ -1236,23 +1236,23 @@ const AdminSubscriptions = () => {
                                 </div>
                             )}
                         </div>
-                        <DialogFooter>
+                        <SheetFooter>
                             <Button variant="outline" onClick={() => setHistoryDialogOpen(false)}>
                                 Close Report
                             </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                        </SheetFooter>
+                    </SheetContent>
+                </Sheet>
 
                 {/* Edit History Entry Dialog */}
-                <Dialog open={editHistoryDialogOpen} onOpenChange={setEditHistoryDialogOpen}>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle>Edit Payment Record</DialogTitle>
-                            <DialogDescription>
+                <Sheet open={editHistoryDialogOpen} onOpenChange={setEditHistoryDialogOpen}>
+                    <SheetContent className="overflow-y-auto">
+                        <SheetHeader>
+                            <SheetTitle>Edit Payment Record</SheetTitle>
+                            <SheetDescription>
                                 Update payment details.
-                            </DialogDescription>
-                        </DialogHeader>
+                            </SheetDescription>
+                        </SheetHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
@@ -1341,7 +1341,7 @@ const AdminSubscriptions = () => {
                                 />
                             </div>
                         </div>
-                        <DialogFooter>
+                        <SheetFooter>
                             <Button variant="ghost" onClick={() => setEditHistoryDialogOpen(false)}>
                                 Cancel
                             </Button>
@@ -1351,9 +1351,9 @@ const AdminSubscriptions = () => {
                                 ) : null}
                                 Save Changes
                             </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                        </SheetFooter>
+                    </SheetContent>
+                </Sheet>
 
                 {/* Deactivate User Confirmation Dialog (Global for cleanliness) */}
                 <AlertDialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>

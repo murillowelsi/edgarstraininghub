@@ -2,13 +2,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -111,14 +111,14 @@ const ExerciseDbPreviewDialog = ({
   if (!exercise) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle className="capitalize">{exercise.name}</DialogTitle>
-          <DialogDescription>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="capitalize">{exercise.name}</SheetTitle>
+          <SheetDescription>
             {translations.workout.library.fromExerciseLibrary} - {translations.workout.bodyParts[exercise.bodyPart as keyof typeof translations.workout.bodyParts] || exercise.bodyPart}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* GIF Animation */}
@@ -191,7 +191,7 @@ const ExerciseDbPreviewDialog = ({
           </div>
         </div>
 
-        <DialogFooter>
+        <SheetFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {translations.workout.common.close}
           </Button>
@@ -203,9 +203,9 @@ const ExerciseDbPreviewDialog = ({
             )}
             {translations.workout.library.addToWorkout}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
 
