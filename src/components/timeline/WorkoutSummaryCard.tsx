@@ -1,5 +1,5 @@
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
-import { Dumbbell, Heart, MapPin, Repeat, Timer, Zap } from "lucide-react";
+import { Dumbbell, Heart, MapPin, Timer, Zap } from "lucide-react";
 import type { WorkoutSummary } from "@/types/timeline";
 
 const typeConfig: Record<string, { icon: React.ElementType; label: string; color: string; bg: string }> = {
@@ -43,8 +43,6 @@ export function WorkoutSummaryCard({ summary }: Props) {
 
   const cols = stats.length === 1 ? 1 : stats.length === 2 ? 2 : stats.length >= 4 ? 2 : 3;
 
-  const hasStageTimes = summary.stageTimes && summary.stageTimes.length > 0;
-
   return (
     <div className="mx-4 my-2 rounded-2xl overflow-hidden border border-border">
       {/* Header */}
@@ -80,60 +78,6 @@ export function WorkoutSummaryCard({ summary }: Props) {
         </div>
       )}
 
-      {/* Per-stage pace */}
-      {hasStageTimes && (
-        <div className="border-t border-border divide-y divide-border/50">
-          {summary.stageTimes!.map((st, i) => {
-            if (st.type === "regular") {
-              if (st.time === null || st.time === undefined) return null;
-              return (
-                <div key={i} className="flex items-center justify-between px-4 py-2 text-sm odd:bg-muted/20">
-                  <span className="text-muted-foreground">{st.label}</span>
-                  <span className="font-semibold tabular-nums">{formatTime(st.time)}</span>
-                </div>
-              );
-            }
-
-            // repeat block
-            const filledReps = st.reps?.filter((r) => r.times.some((t) => t !== null && t !== undefined)) ?? [];
-            if (filledReps.length === 0) return null;
-            const nestedLabels = st.nestedLabels ?? [];
-
-            return (
-              <div key={i}>
-                {/* repeat block header row */}
-                <div
-                  className="grid text-[10px] font-semibold uppercase tracking-wide text-muted-foreground px-4 py-1.5 bg-muted/40"
-                  style={{ gridTemplateColumns: `1.5rem repeat(${nestedLabels.length}, 1fr)` }}
-                >
-                  <span className="flex items-center"><Repeat className="h-3 w-3" /></span>
-                  {nestedLabels.map((lbl) => (
-                    <span key={lbl} className="text-center truncate">{lbl}</span>
-                  ))}
-                </div>
-                {st.reps!.map((rep, ri) => {
-                  const hasAny = rep.times.some((t) => t !== null && t !== undefined);
-                  if (!hasAny) return null;
-                  return (
-                    <div
-                      key={ri}
-                      className="grid items-center px-4 py-2 text-sm tabular-nums border-t border-border/40 odd:bg-muted/20"
-                      style={{ gridTemplateColumns: `1.5rem repeat(${nestedLabels.length}, 1fr)` }}
-                    >
-                      <span className="text-xs text-muted-foreground font-semibold">{ri + 1}</span>
-                      {rep.times.map((t, ti) => (
-                        <span key={ti} className="text-center font-medium">
-                          {t !== null && t !== undefined ? formatTime(t) : "—"}
-                        </span>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

@@ -552,6 +552,7 @@ const AthleteWorkoutView = () => {
   const [shareCaption, setShareCaption] = useState("");
   const [shareWorkoutSummary, setShareWorkoutSummary] = useState<import("@/types/timeline").WorkoutSummary | undefined>();
   const [showActivityDrawer, setShowActivityDrawer] = useState(false);
+  const [showIncompleteDrawer, setShowIncompleteDrawer] = useState(false);
   // stageInputs mirrors workout.stages:
   //   regular stage → { type: "regular", pace: "MM:SS" }
   //   repeat stage  → { type: "repeat", reps: string[][] } (reps[repIdx][nestedStageIdx] = pace "MM:SS")
@@ -688,6 +689,12 @@ const AthleteWorkoutView = () => {
 
     const newCompletedState = !assignment.completedAt;
 
+    // When un-completing an endurance workout, show options drawer
+    if (!newCompletedState && isEnduranceWorkout(assignment.workout.type)) {
+      setShowIncompleteDrawer(true);
+      return;
+    }
+
     // When completing an endurance workout, show the data drawer
     if (newCompletedState && isEnduranceWorkout(assignment.workout.type)) {
       const stageInputs = assignment.workout.stages.map((s) => {
@@ -737,6 +744,60 @@ const AthleteWorkoutView = () => {
         description: t.athlete.toast.workoutStatusError,
         variant: "destructive",
       });
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  // Format seconds back to HH:MM:SS for pre-filling elapsed time
+  const secsToHHMMSS = (secs: number): string => {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const handleEditActivityData = () => {
+    if (!assignment) return;
+    setShowIncompleteDrawer(false);
+    const existing = assignment.activityData ?? {};
+    const stageInputs = assignment.workout.stages.map((s) => {
+      if (s.type === "repeat") {
+        return {
+          type: "repeat" as const,
+          reps: Array.from({ length: s.repeatCount || 1 }, () =>
+            (s.stages ?? []).map((nested) => stageToPaceString(nested))
+          ),
+        };
+      }
+      return { type: "regular" as const, pace: stageToPaceString(s) };
+    });
+    setActivityForm({
+      elapsedTime: existing.elapsedTime ? secsToHHMMSS(existing.elapsedTime) : "",
+      distance: existing.distance !== undefined ? String(existing.distance) : "",
+      avgHeartRate: existing.avgHeartRate !== undefined ? String(existing.avgHeartRate) : "",
+      avgPace: existing.avgPace !== undefined ? formatPace(existing.avgPace) : "",
+      avgSpeed: existing.avgSpeed !== undefined ? String(existing.avgSpeed) : "",
+      paceManuallyEdited: !!existing.avgPace,
+      stageInputs,
+    });
+    setShowActivityDrawer(true);
+  };
+
+  const handleMarkIncomplete = async () => {
+    if (!assignment) return;
+    setShowIncompleteDrawer(false);
+    setCompleting(true);
+    try {
+      await toggleAssignmentComplete(assignment.id, false);
+      setAssignment({ ...assignment, completedAt: null, activityData: undefined });
+      toast({
+        title: t.athlete.toast.workoutUnmarked,
+        description: t.athlete.workoutView.workoutUnmarkedDesc,
+      });
+    } catch (error) {
+      console.error("Error updating workout:", error);
+      toast({ title: t.common.error, description: t.athlete.toast.workoutStatusError, variant: "destructive" });
     } finally {
       setCompleting(false);
     }
@@ -1252,106 +1313,6 @@ const AthleteWorkoutView = () => {
               </div>
             )}
 
-            {/* Per-stage time inputs */}
-            {assignment?.workout.stages.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="h-px flex-1 bg-border" />
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    {t.athlete.workoutView.stageTimesSection}
-                  </span>
-                  <div className="h-px flex-1 bg-border" />
-                </div>
-
-                {assignment.workout.stages.map((stage, stageIdx) => {
-                  const input = activityForm.stageInputs[stageIdx];
-                  if (!input) return null;
-
-                  if (stage.type === "repeat" && input.type === "repeat") {
-                    const nestedStages = stage.stages ?? [];
-                    if (nestedStages.length === 0) return null;
-                    return (
-                      <div key={stage.id} className="space-y-2">
-                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                          <Repeat className="h-3.5 w-3.5" />
-                          {t.athlete.workoutView.repeatLabel.replace("{{count}}", String(stage.repeatCount || 1))}
-                        </p>
-                        {/* Column headers */}
-                        <div className="grid gap-1.5" style={{ gridTemplateColumns: `1.5rem repeat(${nestedStages.length}, 1fr)` }}>
-                          <div />
-                          {nestedStages.map((ns, si) => (
-                            <div key={si} className="text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground truncate">
-                              {stageLabels[ns.type] ?? ns.type}
-                            </div>
-                          ))}
-                        </div>
-                        {input.reps.map((repVals, repIdx) => (
-                          <div key={repIdx} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: `1.5rem repeat(${nestedStages.length}, 1fr)` }}>
-                            <span className="text-xs font-bold text-center text-muted-foreground">{repIdx + 1}</span>
-                            {repVals.map((val, nestedIdx) => (
-                              <Input
-                                key={nestedIdx}
-                                className="text-center text-sm h-9"
-                                placeholder="MM:SS"
-                                inputMode="numeric"
-                                value={val}
-                                onChange={(e) => {
-                                  const masked = applyTimeMask(e.target.value);
-                                  setActivityForm((f) => {
-                                    const stageInputs = f.stageInputs.map((inp, si) => {
-                                      if (si !== stageIdx || inp.type !== "repeat") return inp;
-                                      return {
-                                        ...inp,
-                                        reps: inp.reps.map((r, ri) =>
-                                          ri !== repIdx ? r : r.map((v, ni) => ni === nestedIdx ? masked : v)
-                                        ),
-                                      };
-                                    });
-                                    return { ...f, stageInputs };
-                                  });
-                                }}
-                              />
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  }
-
-                  // Regular stage
-                  if (input.type === "regular") {
-                    const color = stageColors[stage.type] ?? "#6b7280";
-                    return (
-                      <div key={stage.id} className="flex items-center gap-3">
-                        <div className="shrink-0 flex items-center gap-1.5 min-w-0 flex-1">
-                          <div className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                          <span className="text-sm text-muted-foreground truncate">
-                            {stageLabels[stage.type] ?? stage.type}
-                          </span>
-                        </div>
-                        <Input
-                          className="text-center text-sm h-9 w-28 shrink-0"
-                          placeholder="MM:SS"
-                          inputMode="numeric"
-                          value={input.pace}
-                          onChange={(e) => {
-                            const masked = applyTimeMask(e.target.value);
-                            setActivityForm((f) => {
-                              const stageInputs = f.stageInputs.map((inp, si) =>
-                                si !== stageIdx || inp.type !== "regular" ? inp : { ...inp, pace: masked }
-                              );
-                              return { ...f, stageInputs };
-                            });
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-
-                  return null;
-                })}
-              </div>
-            )}
           </div>
           <DrawerFooter>
             <Button
@@ -1370,6 +1331,42 @@ const AthleteWorkoutView = () => {
               {t.athlete.workoutView.skipAndComplete}
             </Button>
           </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Mark Incomplete options drawer */}
+      <Drawer open={showIncompleteDrawer} onOpenChange={setShowIncompleteDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{t.athlete.workoutView.incompleteDrawerTitle}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2">
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
+              onClick={handleEditActivityData}
+            >
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-sm">{t.athlete.workoutView.incompleteDrawerEdit}</p>
+                <p className="text-xs text-muted-foreground">{t.athlete.workoutView.incompleteDrawerEditDesc}</p>
+              </div>
+            </button>
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
+              onClick={handleMarkIncomplete}
+              disabled={completing}
+            >
+              <div className="h-9 w-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
+                {completing ? <Loader2 className="h-5 w-5 animate-spin text-destructive" /> : <Circle className="h-5 w-5 text-destructive" />}
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-sm text-destructive">{t.athlete.workoutView.incompleteDrawerReset}</p>
+                <p className="text-xs text-muted-foreground">{t.athlete.workoutView.incompleteDrawerResetDesc}</p>
+              </div>
+            </button>
+          </div>
         </DrawerContent>
       </Drawer>
 

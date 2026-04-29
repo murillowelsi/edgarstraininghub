@@ -766,6 +766,11 @@
       "saveAndComplete": "Save & Complete",
       "skipAndComplete": "Complete without data",
       "activityDataSaved": "Data saved successfully!",
+      "incompleteDrawerTitle": "What would you like to do?",
+      "incompleteDrawerEdit": "Edit workout data",
+      "incompleteDrawerEditDesc": "Update the recorded time, distance and pace",
+      "incompleteDrawerReset": "Mark as incomplete",
+      "incompleteDrawerResetDesc": "Remove completion and recorded data",
       "paceCalculated": "calculated",
       "stageTimesSection": "Pace per stage",
       "repeatLabel": "Repeat {{count}}x"

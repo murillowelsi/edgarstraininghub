@@ -766,6 +766,11 @@
       "saveAndComplete": "Salvar e Concluir",
       "skipAndComplete": "Concluir sem dados",
       "activityDataSaved": "Dados salvos com sucesso!",
+      "incompleteDrawerTitle": "O que deseja fazer?",
+      "incompleteDrawerEdit": "Editar dados do treino",
+      "incompleteDrawerEditDesc": "Alterar tempo, distância e pace registrados",
+      "incompleteDrawerReset": "Marcar como incompleto",
+      "incompleteDrawerResetDesc": "Remover conclusão e dados registrados",
       "paceCalculated": "calculado",
       "stageTimesSection": "Pace por etapa",
       "repeatLabel": "Repetir {{count}}x"
