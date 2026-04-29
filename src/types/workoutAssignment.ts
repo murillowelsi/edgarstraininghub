@@ -16,6 +16,25 @@ export interface ExerciseProgressData {
   sets: SetProgressData[];
 }
 
+// Actual time recorded for one stage (regular or nested inside a repeat)
+// For regular stages: time in seconds
+// For repeat stages: one entry per repetition, each with times per nested stage
+export interface StageTimeData {
+  stageIndex: number; // index in workout.stages
+  time?: number | null; // for regular stages
+  reps?: Array<{ times: (number | null)[] }>; // for repeat stages
+}
+
+// Activity data for endurance workouts (running, cycling, swimming)
+export interface ActivityData {
+  elapsedTime?: number; // in seconds
+  distance?: number;    // km for running/cycling, m for swimming
+  avgHeartRate?: number; // bpm
+  avgPace?: number;     // seconds per km (running) or per 100m (swimming)
+  avgSpeed?: number;    // km/h (cycling)
+  stageTimes?: StageTimeData[]; // actual time per stage
+}
+
 // Workout assignment domain model
 export interface WorkoutAssignment {
   id: string;
@@ -27,6 +46,7 @@ export interface WorkoutAssignment {
   completionPercentage?: number;
   totalTime?: number; // in seconds
   progressData?: ExerciseProgressData[];
+  activityData?: ActivityData;
   skipped?: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -42,6 +62,7 @@ export interface WorkoutAssignmentDocument {
   completionPercentage?: number;
   totalTime?: number; // in seconds
   progressData?: ExerciseProgressData[];
+  activityData?: ActivityData;
   skipped?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;

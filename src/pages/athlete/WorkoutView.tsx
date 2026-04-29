@@ -26,7 +26,11 @@ import {
   getAssignmentsWithWorkoutsByAthlete,
   resetWorkoutAssignment,
   toggleAssignmentComplete,
+  completeEnduranceWorkout,
 } from "@/services/workoutAssignmentsService";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { ActivityData } from "@/types/workoutAssignment";
 import type { Exercise, WorkoutExercise } from "@/types/exercise";
 import {
   getYouTubeThumbnail,
@@ -127,12 +131,27 @@ const formatDuration = (stage: WorkoutStage, lapLabel: string = "Press Lap Butto
   return durationLabels[stage.duration.type];
 };
 
+// Convert decimal pace (e.g. 5.3 → "5:30", 5.45 → "5:45") to MM:SS
+const decimalToMMSS = (val: number): string => {
+  const mins = Math.floor(val);
+  const secs = Math.round((val - mins) * 100);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
+const isPaceType = (type: string) => type === "pace" || type === "targetPace" || type === "cssBasedPace";
+
 const formatIntensity = (stage: WorkoutStage): string | null => {
   if (stage.intensity.type === "none") {
     return null;
   }
-  if (stage.intensity.type === "pace" && stage.intensity.value !== undefined) {
-    return `${stage.intensity.value} ${stage.intensity.unit || "min/km"}`;
+  if (isPaceType(stage.intensity.type)) {
+    const unit = stage.intensity.unit || "min/km";
+    if (stage.intensity.min !== undefined && stage.intensity.max !== undefined) {
+      return `${decimalToMMSS(stage.intensity.min)}-${decimalToMMSS(stage.intensity.max)} ${unit}`;
+    }
+    if (stage.intensity.value !== undefined) {
+      return `${decimalToMMSS(stage.intensity.value)} ${unit}`;
+    }
   }
   if (stage.intensity.type === "heartRateZone" && stage.intensity.value !== undefined) {
     return `HR Zone ${stage.intensity.value}`;
@@ -531,6 +550,31 @@ const AthleteWorkoutView = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareCaption, setShareCaption] = useState("");
+  const [shareWorkoutSummary, setShareWorkoutSummary] = useState<import("@/types/timeline").WorkoutSummary | undefined>();
+  const [showActivityDrawer, setShowActivityDrawer] = useState(false);
+  // stageInputs mirrors workout.stages:
+  //   regular stage → { type: "regular", pace: "MM:SS" }
+  //   repeat stage  → { type: "repeat", reps: string[][] } (reps[repIdx][nestedStageIdx] = pace "MM:SS")
+  const [activityForm, setActivityForm] = useState<{
+    elapsedTime: string;
+    distance: string;
+    avgHeartRate: string;
+    avgPace: string;
+    avgSpeed: string;
+    paceManuallyEdited: boolean;
+    stageInputs: Array<
+      | { type: "regular"; pace: string }
+      | { type: "repeat"; reps: string[][] }
+    >;
+  }>({
+    elapsedTime: "",
+    distance: "",
+    avgHeartRate: "",
+    avgPace: "",
+    avgSpeed: "",
+    paceManuallyEdited: false,
+    stageInputs: [],
+  });
 
   useEffect(() => {
     const loadAssignment = async () => {
@@ -580,12 +624,90 @@ const AthleteWorkoutView = () => {
     return exercise;
   };
 
+  const isEnduranceWorkout = (type: string) =>
+    type === "running" || type === "cycling" || type === "swimming";
+
+  // Parse "MM:SS" string to seconds
+  const parsePaceInput = (val: string): number | undefined => {
+    const parts = val.trim().split(":").map(Number);
+    if (parts.length !== 2 || parts.some(isNaN)) return undefined;
+    return parts[0] * 60 + parts[1];
+  };
+
+  // Format seconds to "MM:SS"
+  const formatPace = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = Math.round(secs % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  // Parse "HH:MM:SS" or "MM:SS" to seconds
+  const parseElapsedTime = (val: string): number => {
+    const parts = val.trim().split(":").map(Number);
+    if (parts.some(isNaN)) return 0;
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    return 0;
+  };
+
+  // Derive pace from elapsed time string and distance
+  const derivePace = (elapsedTime: string, distance: string, type: string): string => {
+    const totalSecs = parseElapsedTime(elapsedTime);
+    const dist = parseFloat(distance);
+    if (!totalSecs || !dist || dist <= 0) return "";
+    if (type === "swimming") return formatPace(totalSecs / (dist / 100));
+    return formatPace(totalSecs / dist);
+  };
+
+  // Convert a decimal pace (e.g. 5.3 → "05:30") to "MM:SS" string
+  const decimalPaceToMMSS = (dec: number): string => {
+    const m = Math.floor(dec);
+    const s = Math.round((dec - m) * 100);
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  // Pre-fill pace "MM:SS" from a stage's coach-defined intensity.
+  // Uses min pace (fastest / lowest number) when a range is set.
+  const stageToPaceString = (stage: import("@/types/workout").WorkoutStage): string => {
+    if (!isPaceType(stage.intensity.type)) return "";
+    const paceDec = stage.intensity.min ?? stage.intensity.value;
+    if (!paceDec) return "";
+    return decimalPaceToMMSS(paceDec);
+  };
+
+  // Apply HH:MM:SS mask to raw input
+  const applyTimeMask = (raw: string): string => {
+    const digits = raw.replace(/\D/g, "").slice(0, 6);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+    return `${digits.slice(0, 2)}:${digits.slice(2, 4)}:${digits.slice(4)}`;
+  };
+
   const handleToggleComplete = async () => {
     if (!assignment) return;
 
+    const newCompletedState = !assignment.completedAt;
+
+    // When completing an endurance workout, show the data drawer
+    if (newCompletedState && isEnduranceWorkout(assignment.workout.type)) {
+      const stageInputs = assignment.workout.stages.map((s) => {
+        if (s.type === "repeat") {
+          return {
+            type: "repeat" as const,
+            reps: Array.from({ length: s.repeatCount || 1 }, () =>
+              (s.stages ?? []).map((nested) => stageToPaceString(nested))
+            ),
+          };
+        }
+        return { type: "regular" as const, pace: stageToPaceString(s) };
+      });
+      setActivityForm({ elapsedTime: "", distance: "", avgHeartRate: "", avgPace: "", avgSpeed: "", paceManuallyEdited: false, stageInputs });
+      setShowActivityDrawer(true);
+      return;
+    }
+
     setCompleting(true);
     try {
-      const newCompletedState = !assignment.completedAt;
       await toggleAssignmentComplete(assignment.id, newCompletedState);
 
       setAssignment({
@@ -601,10 +723,92 @@ const AthleteWorkoutView = () => {
       });
       if (newCompletedState && assignment) {
         setShareCaption(`Treino concluído: ${assignment.workout.name} ✅`);
+        setShareWorkoutSummary({
+          workoutName: assignment.workout.name,
+          workoutType: assignment.workout.type,
+          completionPercentage: assignment.completionPercentage,
+        });
         setShowShareModal(true);
       }
     } catch (error) {
       console.error("Error updating workout:", error);
+      toast({
+        title: t.common.error,
+        description: t.athlete.toast.workoutStatusError,
+        variant: "destructive",
+      });
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  const handleSaveActivityData = async (skip = false) => {
+    if (!assignment) return;
+    setCompleting(true);
+    setShowActivityDrawer(false);
+    try {
+      const activityData: ActivityData = {};
+      if (!skip) {
+        const elapsed = parseElapsedTime(activityForm.elapsedTime);
+        if (elapsed > 0) activityData.elapsedTime = elapsed;
+        const dist = parseFloat(activityForm.distance);
+        if (!isNaN(dist) && dist > 0) activityData.distance = dist;
+        const hr = parseInt(activityForm.avgHeartRate);
+        if (!isNaN(hr) && hr > 0) activityData.avgHeartRate = hr;
+        if (assignment.workout.type === "cycling") {
+          const speed = parseFloat(activityForm.avgSpeed);
+          if (!isNaN(speed) && speed > 0) activityData.avgSpeed = speed;
+        } else {
+          const pace = parsePaceInput(activityForm.avgPace);
+          if (pace !== undefined) activityData.avgPace = pace;
+        }
+        // Collect stage times
+        const stageTimes: import("@/types/workoutAssignment").StageTimeData[] = [];
+        activityForm.stageInputs.forEach((input, idx) => {
+          if (input.type === "regular") {
+            const secs = parsePaceInput(input.pace);
+            if (secs !== undefined) stageTimes.push({ stageIndex: idx, time: secs });
+          } else {
+            const reps = input.reps.map((stageVals) => ({
+              times: stageVals.map((v) => { const s = parsePaceInput(v); return s !== undefined ? s : null; }),
+            }));
+            const hasAny = reps.some((r) => r.times.some((t) => t !== null));
+            if (hasAny) stageTimes.push({ stageIndex: idx, reps });
+          }
+        });
+        if (stageTimes.length > 0) activityData.stageTimes = stageTimes;
+      }
+      await completeEnduranceWorkout(assignment.id, activityData);
+      setAssignment({ ...assignment, completedAt: new Date(), activityData });
+      toast({
+        title: t.athlete.toast.workoutCompleted,
+        description: t.athlete.workoutView.workoutCompletedDesc,
+      });
+      setShareCaption(`Treino concluído: ${assignment.workout.name} ✅`);
+      setShareWorkoutSummary({
+        workoutName: assignment.workout.name,
+        workoutType: assignment.workout.type,
+        ...activityData,
+        stageTimes: activityData.stageTimes?.map((st) => {
+          const workoutStage = assignment.workout.stages[st.stageIndex];
+          if (st.reps !== undefined) {
+            return {
+              label: `${workoutStage?.repeatCount ?? ""}x`,
+              type: "repeat" as const,
+              nestedLabels: (workoutStage?.stages ?? []).map((ns) => stageLabels[ns.type] ?? ns.type),
+              reps: st.reps,
+            };
+          }
+          return {
+            label: stageLabels[workoutStage?.type ?? "run"] ?? workoutStage?.type ?? "",
+            type: "regular" as const,
+            time: st.time,
+          };
+        }),
+      });
+      setShowShareModal(true);
+    } catch (error) {
+      console.error("Error completing workout:", error);
       toast({
         title: t.common.error,
         description: t.athlete.toast.workoutStatusError,
@@ -666,7 +870,7 @@ const AthleteWorkoutView = () => {
     if (!user) return;
     const authorName = displayName || user.email || "Athlete";
     const postId = await createTimelinePost(
-      { caption, imageUrl },
+      { caption, imageUrl, workoutSummary: shareWorkoutSummary },
       user.uid,
       authorName,
       userRole ?? "athlete",
@@ -684,6 +888,7 @@ const AthleteWorkoutView = () => {
       onOpenChange={setShowShareModal}
       onSubmit={handleSharePost}
       initialCaption={shareCaption}
+      workoutSummary={shareWorkoutSummary}
     />
     <AthletePortalLayout title={t.athlete.nav.workouts} hideBottomNav>
       {/* Content */}
@@ -775,6 +980,42 @@ const AthleteWorkoutView = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Activity data summary for completed endurance workouts */}
+              {isCompleted && assignment.activityData && Object.keys(assignment.activityData).length > 0 && (
+                <div className="mt-4 p-3 bg-muted/50 rounded-lg grid grid-cols-2 gap-2 text-sm">
+                  {assignment.activityData.elapsedTime !== undefined && (
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{formatTime(assignment.activityData.elapsedTime)}</span>
+                    </div>
+                  )}
+                  {assignment.activityData.distance !== undefined && (
+                    <div className="flex items-center gap-1.5">
+                      <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{assignment.activityData.distance}{workout.type === "swimming" ? "m" : "km"}</span>
+                    </div>
+                  )}
+                  {assignment.activityData.avgHeartRate !== undefined && (
+                    <div className="flex items-center gap-1.5">
+                      <Heart className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{assignment.activityData.avgHeartRate} bpm</span>
+                    </div>
+                  )}
+                  {assignment.activityData.avgPace !== undefined && (
+                    <div className="flex items-center gap-1.5">
+                      <Wind className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{formatTime(assignment.activityData.avgPace)}{workout.type === "swimming" ? "/100m" : "/km"}</span>
+                    </div>
+                  )}
+                  {assignment.activityData.avgSpeed !== undefined && (
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{assignment.activityData.avgSpeed} km/h</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {workout.notes && (
                 <div className="mt-4 p-3 bg-muted/50 rounded-lg">
@@ -907,6 +1148,226 @@ const AthleteWorkoutView = () => {
             </Button>
             <Button variant="outline" className="w-full" onClick={() => setShowResetConfirm(false)}>
               {t.athlete.workoutView.resetConfirmCancel}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Activity Data Drawer for endurance workouts */}
+      <Drawer open={showActivityDrawer} onOpenChange={setShowActivityDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{t.athlete.workoutView.activityDataTitle}</DrawerTitle>
+            <DrawerDescription>{t.athlete.workoutView.activityDataDesc}</DrawerDescription>
+          </DrawerHeader>
+          <div className="px-4 pb-2 space-y-4">
+            {/* HH:MM:SS time input */}
+            <div className="space-y-1.5">
+              <Label htmlFor="elapsed-time">{t.athlete.workoutView.elapsedTime}</Label>
+              <Input
+                id="elapsed-time"
+                placeholder="HH:MM:SS"
+                inputMode="numeric"
+                value={activityForm.elapsedTime}
+                onChange={(e) => {
+                  const elapsedTime = applyTimeMask(e.target.value);
+                  setActivityForm((f) => {
+                    const next = { ...f, elapsedTime };
+                    if (!next.paceManuallyEdited) next.avgPace = derivePace(elapsedTime, f.distance, assignment?.workout.type ?? "");
+                    return next;
+                  });
+                }}
+              />
+            </div>
+
+            {/* Distance */}
+            <div className="space-y-1.5">
+              <Label htmlFor="distance">
+                {assignment?.workout.type === "swimming"
+                  ? t.athlete.workoutView.distanceM
+                  : t.athlete.workoutView.distanceKm}
+              </Label>
+              <Input
+                id="distance"
+                type="number"
+                inputMode="decimal"
+                placeholder={assignment?.workout.type === "swimming" ? "Ex: 1500" : "Ex: 10.5"}
+                value={activityForm.distance}
+                onChange={(e) => {
+                  const distance = e.target.value;
+                  setActivityForm((f) => {
+                    const next = { ...f, distance };
+                    if (!next.paceManuallyEdited) next.avgPace = derivePace(f.elapsedTime, distance, assignment?.workout.type ?? "");
+                    return next;
+                  });
+                }}
+              />
+            </div>
+
+            {/* Heart Rate */}
+            <div className="space-y-1.5">
+              <Label htmlFor="avg-hr">{t.athlete.workoutView.avgHeartRate}</Label>
+              <Input
+                id="avg-hr"
+                type="number"
+                inputMode="numeric"
+                placeholder="Ex: 145"
+                value={activityForm.avgHeartRate}
+                onChange={(e) => setActivityForm((f) => ({ ...f, avgHeartRate: e.target.value }))}
+              />
+            </div>
+
+            {/* Speed (cycling) or Pace (running/swimming) */}
+            {assignment?.workout.type === "cycling" ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="avg-speed">{t.athlete.workoutView.avgSpeed}</Label>
+                <Input
+                  id="avg-speed"
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="Ex: 28.5"
+                  value={activityForm.avgSpeed}
+                  onChange={(e) => setActivityForm((f) => ({ ...f, avgSpeed: e.target.value }))}
+                />
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <Label htmlFor="avg-pace">
+                  {t.athlete.workoutView.avgPace}
+                  {activityForm.avgPace && !activityForm.paceManuallyEdited && (
+                    <span className="ml-2 text-xs text-muted-foreground font-normal">({t.athlete.workoutView.paceCalculated})</span>
+                  )}
+                </Label>
+                <Input
+                  id="avg-pace"
+                  placeholder={
+                    assignment?.workout.type === "swimming"
+                      ? t.athlete.workoutView.avgPaceSwimPlaceholder
+                      : t.athlete.workoutView.avgPaceRunPlaceholder
+                  }
+                  value={activityForm.avgPace}
+                  onChange={(e) => setActivityForm((f) => ({ ...f, avgPace: e.target.value, paceManuallyEdited: true }))}
+                  onFocus={() => setActivityForm((f) => ({ ...f, paceManuallyEdited: true }))}
+                />
+              </div>
+            )}
+
+            {/* Per-stage time inputs */}
+            {assignment?.workout.stages.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    {t.athlete.workoutView.stageTimesSection}
+                  </span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+
+                {assignment.workout.stages.map((stage, stageIdx) => {
+                  const input = activityForm.stageInputs[stageIdx];
+                  if (!input) return null;
+
+                  if (stage.type === "repeat" && input.type === "repeat") {
+                    const nestedStages = stage.stages ?? [];
+                    if (nestedStages.length === 0) return null;
+                    return (
+                      <div key={stage.id} className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                          <Repeat className="h-3.5 w-3.5" />
+                          {t.athlete.workoutView.repeatLabel.replace("{{count}}", String(stage.repeatCount || 1))}
+                        </p>
+                        {/* Column headers */}
+                        <div className="grid gap-1.5" style={{ gridTemplateColumns: `1.5rem repeat(${nestedStages.length}, 1fr)` }}>
+                          <div />
+                          {nestedStages.map((ns, si) => (
+                            <div key={si} className="text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground truncate">
+                              {stageLabels[ns.type] ?? ns.type}
+                            </div>
+                          ))}
+                        </div>
+                        {input.reps.map((repVals, repIdx) => (
+                          <div key={repIdx} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: `1.5rem repeat(${nestedStages.length}, 1fr)` }}>
+                            <span className="text-xs font-bold text-center text-muted-foreground">{repIdx + 1}</span>
+                            {repVals.map((val, nestedIdx) => (
+                              <Input
+                                key={nestedIdx}
+                                className="text-center text-sm h-9"
+                                placeholder="MM:SS"
+                                inputMode="numeric"
+                                value={val}
+                                onChange={(e) => {
+                                  const masked = applyTimeMask(e.target.value);
+                                  setActivityForm((f) => {
+                                    const stageInputs = f.stageInputs.map((inp, si) => {
+                                      if (si !== stageIdx || inp.type !== "repeat") return inp;
+                                      return {
+                                        ...inp,
+                                        reps: inp.reps.map((r, ri) =>
+                                          ri !== repIdx ? r : r.map((v, ni) => ni === nestedIdx ? masked : v)
+                                        ),
+                                      };
+                                    });
+                                    return { ...f, stageInputs };
+                                  });
+                                }}
+                              />
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+
+                  // Regular stage
+                  if (input.type === "regular") {
+                    const color = stageColors[stage.type] ?? "#6b7280";
+                    return (
+                      <div key={stage.id} className="flex items-center gap-3">
+                        <div className="shrink-0 flex items-center gap-1.5 min-w-0 flex-1">
+                          <div className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                          <span className="text-sm text-muted-foreground truncate">
+                            {stageLabels[stage.type] ?? stage.type}
+                          </span>
+                        </div>
+                        <Input
+                          className="text-center text-sm h-9 w-28 shrink-0"
+                          placeholder="MM:SS"
+                          inputMode="numeric"
+                          value={input.pace}
+                          onChange={(e) => {
+                            const masked = applyTimeMask(e.target.value);
+                            setActivityForm((f) => {
+                              const stageInputs = f.stageInputs.map((inp, si) =>
+                                si !== stageIdx || inp.type !== "regular" ? inp : { ...inp, pace: masked }
+                              );
+                              return { ...f, stageInputs };
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })}
+              </div>
+            )}
+          </div>
+          <DrawerFooter>
+            <Button
+              onClick={() => handleSaveActivityData(false)}
+              disabled={completing}
+              className="bg-primary text-primary-foreground"
+            >
+              {completing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {t.athlete.workoutView.saveAndComplete}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => handleSaveActivityData(true)}
+              disabled={completing}
+            >
+              {t.athlete.workoutView.skipAndComplete}
             </Button>
           </DrawerFooter>
         </DrawerContent>

@@ -8,15 +8,18 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { User } from "@/types/user";
+import type { WorkoutSummary } from "@/types/timeline";
+import { WorkoutSummaryCard } from "./WorkoutSummaryCard";
 
 interface CreatePostModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => Promise<void>;
   initialCaption?: string;
+  workoutSummary?: WorkoutSummary;
 }
 
-export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }: CreatePostModalProps) {
+export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption, workoutSummary }: CreatePostModalProps) {
   const { user, displayName, photoURL } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -195,6 +198,9 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption }
             className="w-full bg-transparent text-base placeholder:text-muted-foreground resize-none outline-none border-none focus:ring-0"
           />
         </div>
+
+        {/* Workout summary card */}
+        {workoutSummary && <WorkoutSummaryCard summary={workoutSummary} />}
 
         {/* Image preview */}
         {(imageUrl || uploadingImage) && (

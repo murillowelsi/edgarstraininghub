@@ -39,6 +39,7 @@ const docToAssignment = (
   completionPercentage: data.completionPercentage,
   totalTime: data.totalTime,
   progressData: data.progressData,
+  activityData: data.activityData,
   skipped: data.skipped ?? false,
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
@@ -106,6 +107,22 @@ export const createAssignments = async (
   }
 
   return ids;
+};
+
+// Complete endurance workout with activity data
+export const completeEnduranceWorkout = async (
+  id: string,
+  activityData: import("../types/workoutAssignment").ActivityData
+): Promise<void> => {
+  const docRef = doc(db, ASSIGNMENTS_COLLECTION, id);
+  const cleanData = Object.fromEntries(
+    Object.entries(activityData).filter(([, v]) => v !== undefined && v !== null && v !== "" && !Number.isNaN(v))
+  );
+  await updateDoc(docRef, {
+    completedAt: serverTimestamp(),
+    activityData: cleanData,
+    updatedAt: serverTimestamp(),
+  });
 };
 
 // Mark assignment as complete or incomplete

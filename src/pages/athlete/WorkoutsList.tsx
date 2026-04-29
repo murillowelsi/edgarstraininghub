@@ -18,15 +18,27 @@ import {
   ChevronRight,
   Dumbbell,
   EllipsisVertical,
+  Heart,
   Loader2,
+  MapPin,
   PersonStanding,
   PlayCircle,
   RotateCcw,
   Search,
+  Timer,
   XCircle,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+
+const formatTime = (seconds: number) => {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  if (hrs > 0) return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -213,14 +225,50 @@ const AthleteWorkoutsList = () => {
                   title={workout.name}
                   titleClassName={(isCompleted || isSkipped) ? "line-through text-muted-foreground" : undefined}
                   subtitle={
-                    <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-                      <span>{format(assignment.scheduledDate, "MMM d")}</span>
-                      <span>·</span>
-                      <span>
-                        {workout.type === "strength"
-                          ? `${workout.exercises?.length || 0} ${t.athlete.workouts.exercises}`
-                          : `${workout.stages.length} ${t.athlete.workouts.stages}`}
-                      </span>
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <span>{format(assignment.scheduledDate, "MMM d")}</span>
+                        <span>·</span>
+                        <span>
+                          {workout.type === "strength"
+                            ? `${workout.exercises?.length || 0} ${t.athlete.workouts.exercises}`
+                            : `${workout.stages.length} ${t.athlete.workouts.stages}`}
+                        </span>
+                      </div>
+                      {isCompleted && assignment.activityData && Object.keys(assignment.activityData).length > 0 && (
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">
+                          {assignment.activityData.elapsedTime !== undefined && (
+                            <span className="flex items-center gap-1">
+                              <Timer className="h-3 w-3" />
+                              {formatTime(assignment.activityData.elapsedTime)}
+                            </span>
+                          )}
+                          {assignment.activityData.distance !== undefined && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {assignment.activityData.distance}{workout.type === "swimming" ? "m" : "km"}
+                            </span>
+                          )}
+                          {assignment.activityData.avgHeartRate !== undefined && (
+                            <span className="flex items-center gap-1">
+                              <Heart className="h-3 w-3" />
+                              {assignment.activityData.avgHeartRate} bpm
+                            </span>
+                          )}
+                          {assignment.activityData.avgPace !== undefined && (
+                            <span className="flex items-center gap-1">
+                              <Timer className="h-3 w-3" />
+                              {formatTime(assignment.activityData.avgPace)}{workout.type === "swimming" ? "/100m" : "/km"}
+                            </span>
+                          )}
+                          {assignment.activityData.avgSpeed !== undefined && (
+                            <span className="flex items-center gap-1">
+                              <Zap className="h-3 w-3" />
+                              {assignment.activityData.avgSpeed} km/h
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   }
                   right={

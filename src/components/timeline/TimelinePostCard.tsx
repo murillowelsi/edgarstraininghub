@@ -3,6 +3,7 @@ import { Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { toggleLike, deleteTimelinePost, createActivityNotification } from "@/services/timelineService";
+import { WorkoutSummaryCard } from "./WorkoutSummaryCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { CommentsDrawer } from "./CommentsDrawer";
@@ -165,6 +166,9 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
             {post.caption}
           </p>
         )}
+
+        {/* Workout summary card */}
+        {post.workoutSummary && <WorkoutSummaryCard summary={post.workoutSummary} />}
 
         {/* Timestamp */}
         <p className="px-4 pt-1 pb-3 text-xs text-muted-foreground uppercase tracking-wide">
