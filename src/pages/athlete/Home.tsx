@@ -357,8 +357,7 @@ const AthleteHome = () => {
         {/* Events Section */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold flex items-center gap-2">
-              <Target className="h-4 w-4 text-primary" />
+            <h2 className="font-display text-lg font-bold">
               {t.athlete.events.title}
             </h2>
             <button
