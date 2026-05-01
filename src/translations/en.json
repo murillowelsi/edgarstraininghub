@@ -401,12 +401,24 @@
       "home": "Home",
       "posts": "Posts",
       "users": "Users",
+      "athletes": "Athletes",
       "workouts": "Workouts",
       "calendar": "Calendar",
       "chat": "Chat",
       "teams": "Teams",
       "subscriptions": "Subscriptions",
       "timeline": "Feed"
+    },
+    "athletes": {
+      "title": "Athletes",
+      "subtitle": "Track each athlete's history and weekly progress",
+      "searchPlaceholder": "Search athlete...",
+      "empty": "No athletes found.",
+      "noActivityThisWeek": "No activity this week.",
+      "backToList": "Back to users",
+      "tabAthletes": "Athletes",
+      "tabTeam": "Team",
+      "noTeamMembers": "No admins or editors."
     },
     "dashboard": {
       "role": "Coach",
@@ -518,6 +530,7 @@
       "workout": "workout",
       "workouts": "workouts",
       "legend": { "workoutTypes": "Workout types:", "completed": "= Completed" },
+      "upcomingAthleteEvents": "Upcoming athlete events",
       "toast": { "loadError": "Failed to load calendar data.", "assignmentDeleted": "Assignment deleted", "assignmentDeletedDescription": "The workout assignment has been removed.", "deleteError": "Failed to delete the assignment." }
     },
     "chat": {
@@ -660,6 +673,7 @@
     "nav": {
       "home": "Home",
       "teams": "Teams",
+      "profile": "You",
       "calendar": "Calendar",
       "workouts": "Workouts",
       "chat": "Chat",
@@ -750,6 +764,10 @@
       "workoutNotFound": "Workout not found",
       "goBack": "Go Back",
       "workoutCompletedDesc": "Great job on completing your workout!",
+      "shareToFeedTitle": "Post to feed?",
+      "shareToFeedDesc": "Want to share this activity with the feed?",
+      "shareToFeedYes": "Yes, post",
+      "shareToFeedNo": "Not now",
       "workoutUnmarkedDesc": "Workout marked as incomplete.",
       "activityDataTitle": "Workout Data",
       "activityDataDesc": "Add your activity data (optional)",
@@ -802,6 +820,118 @@
       "saveConfirmConfirm": "Save & Finish",
       "exercisesCount": "Exercises",
       "completePercent": "Complete"
+    },
+    "profile": {
+      "title": "You",
+      "tabs": {
+        "activities": "Activities",
+        "events": "Events",
+        "progress": "Progress"
+      },
+      "stats": {
+        "planned": "Planned",
+        "done": "Done",
+        "compliance": "Compliance",
+        "thisWeek": "this week"
+      },
+      "hoursByModality": "Hours by modality",
+      "noModalityActivity": "No scheduled or completed activities this week.",
+      "lifetimeSummary": "Lifetime summary",
+      "workoutsCompleted": "Workouts completed",
+      "upcomingEventsCount": "Upcoming events",
+      "noActivities": "No completed activities yet.",
+      "modalities": {
+        "running": "Running",
+        "cycling": "Cycling",
+        "swimming": "Swimming",
+        "strength": "Strength"
+      }
+    },
+    "events": {
+      "title": "Events",
+      "upcoming": "Upcoming events",
+      "past": "Past events",
+      "noEvents": "No events scheduled.",
+      "empty": "Add your next event or goal.",
+      "seeMore": "See more ({{count}})",
+      "addEvent": "Add event",
+      "editEvent": "Edit event",
+      "deleteEvent": "Delete event",
+      "addAriaLabel": "Add event",
+      "created": "Event created",
+      "updated": "Event updated",
+      "removed": "Event removed",
+      "saveFailed": "Save failed",
+      "saveChanges": "Save changes",
+      "addAction": "Add event",
+      "cancel": "Cancel",
+      "descAdd": "Add a race or goal.",
+      "descEdit": "Update the details of your event.",
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "e.g. IM 70.3",
+        "date": "Event date",
+        "datePlaceholder": "Pick a date",
+        "type": "Type",
+        "description": "Description",
+        "goals": "Goals",
+        "goalPlaceholder": "e.g. Sub 5h",
+        "addGoal": "Add"
+      },
+      "noGoals": "Add your goals for this event.",
+      "goalsCount": "{{done}}/{{total}} goals",
+      "types": {
+        "race": "Race",
+        "test": "Test",
+        "milestone": "Milestone",
+        "other": "Other"
+      },
+      "countdown": {
+        "today": "TODAY",
+        "tomorrow": "TOMORROW",
+        "days": "{{count}} DAYS TO EVENT",
+        "weeks": "{{count}} WEEKS TO EVENT",
+        "daysShort": "{{count}} DAYS",
+        "weeksShort": "{{count}} WEEKS",
+        "past": "Past"
+      },
+      "reminders": {
+        "today": "🏁 Today's the day! {{title}} — good luck!",
+        "tomorrow": "⏰ 1 day to go for {{title}}. You're ready!",
+        "days": "📍 {{count}} days until {{title}}."
+      }
+    },
+    "activity": {
+      "loading": "Loading...",
+      "edit": "Edit activity",
+      "save": "Save",
+      "updated": "Activity updated",
+      "saveFailed": "Save failed",
+      "remove": "Remove workout",
+      "removeAction": "Remove",
+      "removed": "Workout removed",
+      "removeFailed": "Delete failed",
+      "removeConfirm": "This cannot be undone. All data for this workout will be lost.",
+      "metrics": {
+        "distance": "Distance",
+        "time": "Time",
+        "totalTime": "Total time",
+        "pace": "Pace",
+        "avgPace": "Avg pace",
+        "speed": "Speed",
+        "avgSpeed": "Avg speed",
+        "avgHr": "Avg HR",
+        "avgPower": "Avg power",
+        "calories": "Calories",
+        "cadence": "Avg cadence",
+        "sets": "Sets",
+        "setsDone": "Sets done",
+        "volume": "Volume",
+        "completion": "Completion"
+      },
+      "notes": "Notes",
+      "stages": "Stages",
+      "reps": "reps"
     }
   },
   "chatComponent": {
@@ -875,6 +1005,12 @@
     "post": {
       "delete": "Delete post",
       "deleted": "Post deleted",
+      "edit": "Edit post",
+      "editTitle": "Edit post",
+      "editSubmit": "Save",
+      "edited": "Post updated",
+      "editError": "Could not update post.",
+      "actionsTitle": "Post options",
       "likeError": "Could not update like.",
       "deleteError": "Could not delete post.",
       "loadMoreError": "Could not load more posts."

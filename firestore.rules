@@ -52,9 +52,20 @@ service cloud.firestore {
       // Athletes can create their own assignment (e.g., auto-assign on team join)
       allow create: if isAdmin() ||
         (request.auth != null && request.resource.data.athleteId == request.auth.uid);
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() ||
+        (request.auth != null && resource.data.athleteId == request.auth.uid);
       allow update: if isAdmin() ||
         (request.auth != null && resource.data.athleteId == request.auth.uid);
+    }
+
+    // Athlete events: athlete owns their events; admins can read all
+    match /athleteEvents/{eventId} {
+      allow read: if request.auth != null &&
+        (isAdmin() || resource.data.athleteId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.athleteId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        (isAdmin() || resource.data.athleteId == request.auth.uid);
     }
 
     // Exercises collection: admins can CRUD, authenticated users can read

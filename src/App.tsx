@@ -24,6 +24,7 @@ import AdminPostForm from "./pages/admin/PostForm";
 import AdminPosts from "./pages/admin/Posts";
 import AdminUserForm from "./pages/admin/UserForm";
 import AdminUsers from "./pages/admin/Users";
+import AdminAthleteHistory from "./pages/admin/AthleteHistory";
 import AdminStrengthWorkoutEditor from "./pages/admin/StrengthWorkoutEditor";
 import AdminWorkoutEditor from "./pages/admin/WorkoutEditor";
 import AdminWorkouts from "./pages/admin/Workouts";
@@ -42,6 +43,8 @@ import AthleteTeamDetail from "./pages/athlete/TeamDetail";
 import JoinTeam from "./pages/JoinTeam";
 import AdminTimeline from "./pages/admin/Timeline";
 import AthleteTimeline from "./pages/athlete/Timeline";
+import AthleteProfile from "./pages/athlete/Profile";
+import AthleteActivityDetail from "./pages/athlete/ActivityDetail";
 
 const queryClient = new QueryClient();
 
@@ -112,6 +115,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAdmin>
                       <AdminUsers />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/athletes/:athleteId"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminAthleteHistory />
                     </ProtectedRoute>
                   }
                 />
@@ -290,6 +301,23 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAthlete>
                       <AthleteTeamDetail />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/athlete/profile"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteProfile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/activity/:id"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteActivityDetail />
                     </ProtectedRoute>
                   }
                 />

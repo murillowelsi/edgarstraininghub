@@ -125,6 +125,21 @@ export const completeEnduranceWorkout = async (
   });
 };
 
+// Update only the activity data (no completion change)
+export const updateAssignmentActivityData = async (
+  id: string,
+  activityData: import("../types/workoutAssignment").ActivityData
+): Promise<void> => {
+  const docRef = doc(db, ASSIGNMENTS_COLLECTION, id);
+  const cleanData = Object.fromEntries(
+    Object.entries(activityData).filter(([, v]) => v !== undefined && v !== null && v !== "" && !Number.isNaN(v))
+  );
+  await updateDoc(docRef, {
+    activityData: cleanData,
+    updatedAt: serverTimestamp(),
+  });
+};
+
 // Mark assignment as complete or incomplete
 export const toggleAssignmentComplete = async (
   id: string,

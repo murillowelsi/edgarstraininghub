@@ -11,12 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { useToast } from "@/hooks/use-toast";
 import { createUser, deleteUser, getAllUsers, updateUser } from "@/services/usersService";
+import { getAllAssignmentsWithDetails } from "@/services/workoutAssignmentsService";
 import type { User, UserFormData, UserRole } from "@/types/user";
+import type { AssignmentWithDetails } from "@/types/workoutAssignment";
+import type { WorkoutType } from "@/types/workout";
+import { actualDurationSec, estimateWorkoutDurationSec } from "@/utils/workoutDuration";
+import AthleteOverviewCard, { type AthleteAggregate } from "@/components/admin/AthleteOverviewCard";
+import { isThisWeek } from "date-fns";
 import { EllipsisVertical, Loader2, Plus, Save, Search, Trash2, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
@@ -30,6 +37,7 @@ function getInitials(name: string) {
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmUser, setConfirmUser] = useState<User | null>(null);
@@ -55,8 +63,12 @@ const AdminUsers = () => {
 
   const loadUsers = async () => {
     try {
-      const allUsers = await getAllUsers();
+      const [allUsers, allAssignments] = await Promise.all([
+        getAllUsers(),
+        getAllAssignmentsWithDetails().catch(() => [] as AssignmentWithDetails[]),
+      ]);
       setUsers(allUsers);
+      setAssignments(allAssignments);
     } catch (error) {
       console.error("Error loading users:", error);
       toast({
@@ -144,13 +156,41 @@ const AdminUsers = () => {
   };
 
   const query = search.toLowerCase();
-  const filteredUsers = query
-    ? users.filter(
-        (u) =>
-          u.displayName.toLowerCase().includes(query) ||
-          u.email.toLowerCase().includes(query)
-      )
-    : users;
+  const matchesQuery = (u: User) =>
+    !query || u.displayName.toLowerCase().includes(query) || u.email.toLowerCase().includes(query);
+
+  const athletes = useMemo(() => users.filter((u) => u.role === "athlete"), [users]);
+  const teamMembers = useMemo(
+    () => users.filter((u) => u.role === "admin" || u.role === "editor"),
+    [users]
+  );
+
+  const aggregates = useMemo<AthleteAggregate[]>(() => {
+    const weekly = assignments.filter((a) => isThisWeek(a.scheduledDate, { weekStartsOn: 1 }));
+    return athletes.map((athlete) => {
+      const items = weekly.filter((a) => a.athleteId === athlete.id);
+      const perType: Record<WorkoutType, { planned: number; completed: number }> = {
+        running: { planned: 0, completed: 0 },
+        cycling: { planned: 0, completed: 0 },
+        swimming: { planned: 0, completed: 0 },
+        strength: { planned: 0, completed: 0 },
+      };
+      let totalPlanned = 0;
+      let totalCompleted = 0;
+      for (const a of items) {
+        const planned = estimateWorkoutDurationSec(a.workout);
+        const completed = a.completedAt ? actualDurationSec(a) || planned : 0;
+        perType[a.workout.type].planned += planned;
+        perType[a.workout.type].completed += completed;
+        totalPlanned += planned;
+        totalCompleted += completed;
+      }
+      return { athlete, totalPlanned, totalCompleted, perType };
+    });
+  }, [athletes, assignments]);
+
+  const filteredAggregates = aggregates.filter((a) => matchesQuery(a.athlete));
+  const filteredTeam = teamMembers.filter(matchesQuery);
 
   return (
     <AdminLayout>
@@ -174,58 +214,114 @@ const AdminUsers = () => {
           <div className="flex items-center justify-center h-40">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : filteredUsers.length === 0 ? (
-          <AdminEmptyState
-            icon={Users}
-            title={t.admin.users.empty.title}
-            description={t.admin.users.empty.description}
-          />
         ) : (
-          <div className="space-y-2">
-            {filteredUsers.map((u) => (
-              <ListItemCard
-                key={u.id}
-                icon={
-                  <CachedAvatar
-                    src={u.photoURL}
-                    alt={u.displayName}
-                    fallback={getInitials(u.displayName)}
-                    className="h-9 w-9 ring-2 ring-[#e1b506]"
-                    fallbackClassName="text-xs font-semibold"
-                    fallbackStyle={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
+          <Tabs defaultValue="athletes" className="w-full">
+            <TabsList className="grid w-full sm:w-auto grid-cols-2 h-10 bg-muted/40 mb-4">
+              <TabsTrigger value="athletes" className="font-semibold text-sm sm:px-8">
+                {t.admin.athletes.tabAthletes}
+                <span className="ml-2 text-xs text-muted-foreground">({athletes.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="team" className="font-semibold text-sm sm:px-8">
+                {t.admin.athletes.tabTeam}
+                <span className="ml-2 text-xs text-muted-foreground">({teamMembers.length})</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="athletes" className="space-y-3 mt-0">
+              {filteredAggregates.length === 0 ? (
+                <AdminEmptyState
+                  icon={Users}
+                  title={t.admin.athletes.empty}
+                  description={t.admin.athletes.subtitle}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {filteredAggregates.map((agg) => (
+                    <div key={agg.athlete.id} className="relative">
+                      <AthleteOverviewCard agg={agg} />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-3 right-3 h-7 w-7 p-0 bg-background/80 backdrop-blur hover:bg-background z-10"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleOpenEdit(agg.athlete);
+                        }}
+                      >
+                        <EllipsisVertical className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="team" className="space-y-2 mt-0">
+              {filteredTeam.length === 0 ? (
+                <AdminEmptyState
+                  icon={Users}
+                  title={t.admin.athletes.noTeamMembers}
+                  description={t.admin.users.empty.description}
+                />
+              ) : (
+                filteredTeam.map((u) => (
+                  <ListItemCard
+                    key={u.id}
+                    icon={
+                      <CachedAvatar
+                        src={u.photoURL}
+                        alt={u.displayName}
+                        fallback={getInitials(u.displayName)}
+                        className="h-9 w-9 ring-2 ring-[#e1b506]"
+                        fallbackClassName="text-xs font-semibold"
+                        fallbackStyle={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
+                      />
+                    }
+                    iconClassName="p-0"
+                    title={
+                      <span>
+                        {u.displayName}
+                        {u.id === user?.uid && (
+                          <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+                            ({t.admin.users.you})
+                          </span>
+                        )}
+                      </span>
+                    }
+                    subtitle={u.email}
+                    right={
+                      <Badge
+                        variant="outline"
+                        className="text-xs font-normal border-transparent"
+                        style={
+                          u.role === "admin"
+                            ? { backgroundColor: "#f59e0b22", color: "#d97706" }
+                            : { backgroundColor: "#e0b50718", color: "#e0b507" }
+                        }
+                      >
+                        {t.admin.users.roles[u.role]}
+                      </Badge>
+                    }
+                    actions={
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 shrink-0"
+                        onClick={() => handleOpenEdit(u)}
+                      >
+                        {deleting === u.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <EllipsisVertical className="h-4 w-4" />
+                        )}
+                      </Button>
+                    }
                   />
-                }
-                iconClassName="p-0"
-                title={
-                  <span>
-                    {u.displayName}
-                    {u.id === user?.uid && (
-                      <span className="ml-1.5 text-xs text-muted-foreground font-normal">({t.admin.users.you})</span>
-                    )}
-                  </span>
-                }
-                subtitle={u.email}
-                right={
-                  <Badge
-                    variant="outline"
-                    className="text-xs font-normal border-transparent"
-                    style={u.role === "admin"
-                      ? { backgroundColor: "#f59e0b22", color: "#d97706" }
-                      : { backgroundColor: "#e0b50718", color: "#e0b507" }}
-                  >
-                    {t.admin.users.roles[u.role]}
-                  </Badge>
-                }
-                actions={
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" onClick={() => handleOpenEdit(u)}>
-                    {deleting === u.id
-                      ? <Loader2 className="h-4 w-4 animate-spin" />
-                      : <EllipsisVertical className="h-4 w-4" />}
-                  </Button>
-                }
-              />
-            ))}
-          </div>
+                ))
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
       <ResponsiveConfirm

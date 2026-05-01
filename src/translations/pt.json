@@ -401,12 +401,24 @@
       "home": "Início",
       "posts": "Artigos",
       "users": "Utilizadores",
+      "athletes": "Atletas",
       "workouts": "Treinos",
       "calendar": "Calendário",
       "chat": "Chat",
       "teams": "Times",
       "subscriptions": "Assinaturas",
       "timeline": "Feed"
+    },
+    "athletes": {
+      "title": "Atletas",
+      "subtitle": "Acompanhe o histórico e o progresso semanal de cada atleta",
+      "searchPlaceholder": "Buscar atleta...",
+      "empty": "Nenhum atleta encontrado.",
+      "noActivityThisWeek": "Sem atividade essa semana.",
+      "backToList": "Voltar para usuários",
+      "tabAthletes": "Atletas",
+      "tabTeam": "Equipe",
+      "noTeamMembers": "Nenhum admin ou editor."
     },
     "dashboard": {
       "role": "Coach",
@@ -518,6 +530,7 @@
       "workout": "treino",
       "workouts": "treinos",
       "legend": { "workoutTypes": "Tipos de treino:", "completed": "= Concluído" },
+      "upcomingAthleteEvents": "Próximos eventos dos atletas",
       "toast": { "loadError": "Erro ao carregar dados do calendário.", "assignmentDeleted": "Atribuição eliminada", "assignmentDeletedDescription": "A atribuição do treino foi removida.", "deleteError": "Erro ao eliminar a atribuição." }
     },
     "chat": {
@@ -660,6 +673,7 @@
     "nav": {
       "home": "Início",
       "teams": "Times",
+      "profile": "Você",
       "calendar": "Calendário",
       "workouts": "Treinos",
       "chat": "Chat",
@@ -750,6 +764,10 @@
       "workoutNotFound": "Treino não encontrado",
       "goBack": "Voltar",
       "workoutCompletedDesc": "Parabéns por concluir seu treino!",
+      "shareToFeedTitle": "Postar no feed?",
+      "shareToFeedDesc": "Quer compartilhar essa atividade com o feed?",
+      "shareToFeedYes": "Sim, postar",
+      "shareToFeedNo": "Agora não",
       "workoutUnmarkedDesc": "Treino marcado como incompleto.",
       "activityDataTitle": "Dados do Treino",
       "activityDataDesc": "Adicione os dados da sua atividade (opcional)",
@@ -802,6 +820,118 @@
       "saveConfirmConfirm": "Salvar e Encerrar",
       "exercisesCount": "Exercícios",
       "completePercent": "Completo"
+    },
+    "profile": {
+      "title": "Você",
+      "tabs": {
+        "activities": "Atividades",
+        "events": "Eventos",
+        "progress": "Progresso"
+      },
+      "stats": {
+        "planned": "Planejados",
+        "done": "Concluídos",
+        "compliance": "Conformidade",
+        "thisWeek": "essa semana"
+      },
+      "hoursByModality": "Horas por modalidade",
+      "noModalityActivity": "Nenhuma atividade agendada ou concluída esta semana.",
+      "lifetimeSummary": "Resumo total",
+      "workoutsCompleted": "Treinos completados",
+      "upcomingEventsCount": "Próximos eventos",
+      "noActivities": "Nenhuma atividade concluída ainda.",
+      "modalities": {
+        "running": "Corrida",
+        "cycling": "Ciclismo",
+        "swimming": "Natação",
+        "strength": "Força"
+      }
+    },
+    "events": {
+      "title": "Eventos",
+      "upcoming": "Próximos eventos",
+      "past": "Eventos passados",
+      "noEvents": "Nenhum evento agendado.",
+      "empty": "Adicione seu próximo evento ou objetivo.",
+      "seeMore": "Ver mais ({{count}})",
+      "addEvent": "Adicionar evento",
+      "editEvent": "Editar evento",
+      "deleteEvent": "Excluir evento",
+      "addAriaLabel": "Adicionar evento",
+      "created": "Evento criado",
+      "updated": "Evento atualizado",
+      "removed": "Evento removido",
+      "saveFailed": "Erro ao salvar",
+      "saveChanges": "Salvar alterações",
+      "addAction": "Adicionar evento",
+      "cancel": "Cancelar",
+      "descAdd": "Adicione uma competição ou objetivo.",
+      "descEdit": "Atualize os detalhes do seu evento.",
+      "fields": {
+        "title": "Título",
+        "titlePlaceholder": "Ex: IM 70.3",
+        "date": "Data do evento",
+        "datePlaceholder": "Selecione uma data",
+        "type": "Tipo",
+        "description": "Descrição",
+        "goals": "Metas",
+        "goalPlaceholder": "Ex: Sub 5h",
+        "addGoal": "Adicionar"
+      },
+      "noGoals": "Adicione suas metas para este evento.",
+      "goalsCount": "{{done}}/{{total}} metas",
+      "types": {
+        "race": "Competição",
+        "test": "Teste",
+        "milestone": "Marco",
+        "other": "Outro"
+      },
+      "countdown": {
+        "today": "HOJE",
+        "tomorrow": "AMANHÃ",
+        "days": "{{count}} DIAS ATÉ O EVENTO",
+        "weeks": "{{count}} SEMANAS ATÉ O EVENTO",
+        "daysShort": "{{count}} DIAS",
+        "weeksShort": "{{count}} SEMANAS",
+        "past": "Concluído"
+      },
+      "reminders": {
+        "today": "🏁 É hoje! {{title}} — boa sorte!",
+        "tomorrow": "⏰ Falta 1 dia para {{title}}. Você está pronto!",
+        "days": "📍 Faltam {{count}} dias para {{title}}."
+      }
+    },
+    "activity": {
+      "loading": "Carregando...",
+      "edit": "Editar atividade",
+      "save": "Salvar",
+      "updated": "Atividade atualizada",
+      "saveFailed": "Erro ao salvar",
+      "remove": "Remover treino",
+      "removeAction": "Remover",
+      "removed": "Treino removido",
+      "removeFailed": "Erro ao remover",
+      "removeConfirm": "Esta ação não pode ser desfeita. Os dados deste treino serão perdidos.",
+      "metrics": {
+        "distance": "Distância",
+        "time": "Tempo",
+        "totalTime": "Tempo total",
+        "pace": "Ritmo",
+        "avgPace": "Ritmo médio",
+        "speed": "Velocidade",
+        "avgSpeed": "Velocidade média",
+        "avgHr": "FC média",
+        "avgPower": "Potência média",
+        "calories": "Calorias",
+        "cadence": "Cadência média",
+        "sets": "Séries",
+        "setsDone": "Séries completas",
+        "volume": "Volume",
+        "completion": "Conclusão"
+      },
+      "notes": "Notas",
+      "stages": "Etapas",
+      "reps": "repetições"
     }
   },
   "chatComponent": {
@@ -875,6 +1005,12 @@
     "post": {
       "delete": "Eliminar post",
       "deleted": "Post eliminado",
+      "edit": "Editar post",
+      "editTitle": "Editar post",
+      "editSubmit": "Salvar",
+      "edited": "Post atualizado",
+      "editError": "Não foi possível atualizar o post.",
+      "actionsTitle": "Opções do post",
       "likeError": "Não foi possível atualizar o like.",
       "deleteError": "Não foi possível eliminar o post.",
       "loadMoreError": "Não foi possível carregar mais posts."

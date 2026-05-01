@@ -549,6 +549,7 @@ const AthleteWorkoutView = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showPostConfirm, setShowPostConfirm] = useState(false);
   const [shareCaption, setShareCaption] = useState("");
   const [shareWorkoutSummary, setShareWorkoutSummary] = useState<import("@/types/timeline").WorkoutSummary | undefined>();
   const [showActivityDrawer, setShowActivityDrawer] = useState(false);
@@ -562,6 +563,7 @@ const AthleteWorkoutView = () => {
     avgHeartRate: string;
     avgPace: string;
     avgSpeed: string;
+    avgPower: string;
     paceManuallyEdited: boolean;
     stageInputs: Array<
       | { type: "regular"; pace: string }
@@ -573,6 +575,7 @@ const AthleteWorkoutView = () => {
     avgHeartRate: "",
     avgPace: "",
     avgSpeed: "",
+    avgPower: "",
     paceManuallyEdited: false,
     stageInputs: [],
   });
@@ -660,6 +663,14 @@ const AthleteWorkoutView = () => {
     return formatPace(totalSecs / dist);
   };
 
+  // Derive avg speed (km/h) from elapsed time and distance (km)
+  const deriveSpeed = (elapsedTime: string, distance: string): string => {
+    const totalSecs = parseElapsedTime(elapsedTime);
+    const dist = parseFloat(distance);
+    if (!totalSecs || !dist || dist <= 0) return "";
+    return ((dist / totalSecs) * 3600).toFixed(1);
+  };
+
   // Convert a decimal pace (e.g. 5.3 → "05:30") to "MM:SS" string
   const decimalPaceToMMSS = (dec: number): string => {
     const m = Math.floor(dec);
@@ -708,7 +719,7 @@ const AthleteWorkoutView = () => {
         }
         return { type: "regular" as const, pace: stageToPaceString(s) };
       });
-      setActivityForm({ elapsedTime: "", distance: "", avgHeartRate: "", avgPace: "", avgSpeed: "", paceManuallyEdited: false, stageInputs });
+      setActivityForm({ elapsedTime: "", distance: "", avgHeartRate: "", avgPace: "", avgSpeed: "", avgPower: "", paceManuallyEdited: false, stageInputs });
       setShowActivityDrawer(true);
       return;
     }
@@ -735,7 +746,7 @@ const AthleteWorkoutView = () => {
           workoutType: assignment.workout.type,
           completionPercentage: assignment.completionPercentage,
         });
-        setShowShareModal(true);
+        setShowPostConfirm(true);
       }
     } catch (error) {
       console.error("Error updating workout:", error);
@@ -778,6 +789,7 @@ const AthleteWorkoutView = () => {
       avgHeartRate: existing.avgHeartRate !== undefined ? String(existing.avgHeartRate) : "",
       avgPace: existing.avgPace !== undefined ? formatPace(existing.avgPace) : "",
       avgSpeed: existing.avgSpeed !== undefined ? String(existing.avgSpeed) : "",
+      avgPower: existing.avgPower !== undefined ? String(existing.avgPower) : "",
       paceManuallyEdited: !!existing.avgPace,
       stageInputs,
     });
@@ -819,6 +831,8 @@ const AthleteWorkoutView = () => {
         if (assignment.workout.type === "cycling") {
           const speed = parseFloat(activityForm.avgSpeed);
           if (!isNaN(speed) && speed > 0) activityData.avgSpeed = speed;
+          const power = parseFloat(activityForm.avgPower);
+          if (!isNaN(power) && power > 0) activityData.avgPower = power;
         } else {
           const pace = parsePaceInput(activityForm.avgPace);
           if (pace !== undefined) activityData.avgPace = pace;
@@ -867,7 +881,7 @@ const AthleteWorkoutView = () => {
           };
         }),
       });
-      setShowShareModal(true);
+      setShowPostConfirm(true);
     } catch (error) {
       console.error("Error completing workout:", error);
       toast({
@@ -940,6 +954,8 @@ const AthleteWorkoutView = () => {
     if (mentionedUserIds?.length) {
       await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
     }
+    setShowShareModal(false);
+    navigate("/athlete/timeline");
   };
 
   return (
@@ -951,6 +967,41 @@ const AthleteWorkoutView = () => {
       initialCaption={shareCaption}
       workoutSummary={shareWorkoutSummary}
     />
+    <Drawer open={showPostConfirm} onOpenChange={setShowPostConfirm}>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>{t.athlete.workoutView.shareToFeedTitle}</DrawerTitle>
+          <DrawerDescription>{t.athlete.workoutView.shareToFeedDesc}</DrawerDescription>
+        </DrawerHeader>
+        <div className="px-4 pb-6 space-y-2">
+          <button
+            className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
+            onClick={() => {
+              setShowPostConfirm(false);
+              setShowShareModal(true);
+            }}
+          >
+            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-5 w-5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-sm">{t.athlete.workoutView.shareToFeedYes}</p>
+            </div>
+          </button>
+          <button
+            className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
+            onClick={() => setShowPostConfirm(false)}
+          >
+            <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <Circle className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-sm">{t.athlete.workoutView.shareToFeedNo}</p>
+            </div>
+          </button>
+        </div>
+      </DrawerContent>
+    </Drawer>
     <AthletePortalLayout title={t.athlete.nav.workouts} hideBottomNav>
       {/* Content */}
       <div className="flex-1 overflow-auto pb-24">
@@ -1234,7 +1285,13 @@ const AthleteWorkoutView = () => {
                   const elapsedTime = applyTimeMask(e.target.value);
                   setActivityForm((f) => {
                     const next = { ...f, elapsedTime };
-                    if (!next.paceManuallyEdited) next.avgPace = derivePace(elapsedTime, f.distance, assignment?.workout.type ?? "");
+                    if (!next.paceManuallyEdited) {
+                      if (assignment?.workout.type === "cycling") {
+                        next.avgSpeed = deriveSpeed(elapsedTime, f.distance);
+                      } else {
+                        next.avgPace = derivePace(elapsedTime, f.distance, assignment?.workout.type ?? "");
+                      }
+                    }
                     return next;
                   });
                 }}
@@ -1258,7 +1315,13 @@ const AthleteWorkoutView = () => {
                   const distance = e.target.value;
                   setActivityForm((f) => {
                     const next = { ...f, distance };
-                    if (!next.paceManuallyEdited) next.avgPace = derivePace(f.elapsedTime, distance, assignment?.workout.type ?? "");
+                    if (!next.paceManuallyEdited) {
+                      if (assignment?.workout.type === "cycling") {
+                        next.avgSpeed = deriveSpeed(f.elapsedTime, distance);
+                      } else {
+                        next.avgPace = derivePace(f.elapsedTime, distance, assignment?.workout.type ?? "");
+                      }
+                    }
                     return next;
                   });
                 }}
@@ -1281,15 +1344,32 @@ const AthleteWorkoutView = () => {
             {/* Speed (cycling) or Pace (running/swimming) */}
             {assignment?.workout.type === "cycling" ? (
               <div className="space-y-1.5">
-                <Label htmlFor="avg-speed">{t.athlete.workoutView.avgSpeed}</Label>
+                <Label htmlFor="avg-speed">
+                  {t.athlete.workoutView.avgSpeed}
+                  {activityForm.avgSpeed && !activityForm.paceManuallyEdited && (
+                    <span className="ml-2 text-xs text-muted-foreground font-normal">({t.athlete.workoutView.paceCalculated})</span>
+                  )}
+                </Label>
                 <Input
                   id="avg-speed"
                   type="number"
                   inputMode="decimal"
                   placeholder="Ex: 28.5"
                   value={activityForm.avgSpeed}
-                  onChange={(e) => setActivityForm((f) => ({ ...f, avgSpeed: e.target.value }))}
+                  onChange={(e) => setActivityForm((f) => ({ ...f, avgSpeed: e.target.value, paceManuallyEdited: true }))}
+                  onFocus={() => setActivityForm((f) => ({ ...f, paceManuallyEdited: true }))}
                 />
+                <div className="space-y-1.5 pt-3">
+                  <Label htmlFor="avg-power">{t.athlete.activity.metrics.avgPower} (W)</Label>
+                  <Input
+                    id="avg-power"
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Ex: 220"
+                    value={activityForm.avgPower}
+                    onChange={(e) => setActivityForm((f) => ({ ...f, avgPower: e.target.value }))}
+                  />
+                </div>
               </div>
             ) : (
               <div className="space-y-1.5">

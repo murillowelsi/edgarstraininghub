@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, Home, LayoutGrid, LogOut, Menu, Shield, Users } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, Home, LayoutGrid, LogOut, Menu, Shield, UserRound, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";

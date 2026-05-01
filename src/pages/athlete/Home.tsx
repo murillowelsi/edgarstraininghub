@@ -10,11 +10,17 @@ import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { subscribeToAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
+import { subscribeToEventsByAthlete } from "@/services/athleteEventsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
+import type { AthleteEvent } from "@/types/athleteEvent";
+import EventCard from "@/components/athlete/EventCard";
+import AddEventSheet from "@/components/athlete/AddEventSheet";
+import { useEventChatReminders } from "@/hooks/useEventChatReminders";
+import { differenceInCalendarDays } from "date-fns";
 import { addDays, format, isAfter, isBefore, isSameDay, isToday, startOfDay, startOfWeek } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import { CalendarCheck, ChevronRight, Dumbbell, Flame, Loader2, PersonStanding, Target, TrendingUp } from "lucide-react";
+import { CalendarCheck, ChevronRight, Dumbbell, Flame, Loader2, PersonStanding, Plus, Target, TrendingUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -34,11 +40,13 @@ const workoutTypeColors: Record<string, string> = {
 
 const AthleteHome = () => {
   const { user, photoURL } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const { setIsMenuOpen } = useTopBarMenu();
   const [displayName, setDisplayName] = useState<string>("");
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
+  const [events, setEvents] = useState<AthleteEvent[]>([]);
+  const [eventSheetOpen, setEventSheetOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const weekScrollRef = useRef<HTMLDivElement>(null);
@@ -60,9 +68,18 @@ const AthleteHome = () => {
       setAssignments(data);
       setLoading(false);
     });
+    const unsubEvents = subscribeToEventsByAthlete(user.uid, setEvents);
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      unsubEvents();
+    };
   }, [user]);
+
+  const upcomingEvents = events.filter((e) => differenceInCalendarDays(e.eventDate, new Date()) >= 0);
+  const nextEvent = upcomingEvents[0];
+
+  useEventChatReminders(user?.uid, upcomingEvents);
 
   // Calculate stats
   const totalWorkouts = assignments.length;
@@ -126,7 +143,7 @@ const AthleteHome = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/athlete/workouts?filter=all">
+          <Link to="/athlete/profile">
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover:shadow-md transition-all hover:border-primary/40 cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -142,7 +159,7 @@ const AthleteHome = () => {
             </Card>
           </Link>
 
-          <Link to="/athlete/workouts?filter=completed">
+          <Link to="/athlete/profile">
             <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-200/50 hover:shadow-md transition-all hover:border-orange-400/50 cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -158,7 +175,7 @@ const AthleteHome = () => {
             </Card>
           </Link>
 
-          <Link to="/athlete/workouts?filter=pending">
+          <Link to="/athlete/profile">
             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-200/50 hover:shadow-md transition-all hover:border-blue-400/50 cursor-pointer">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -336,7 +353,48 @@ const AthleteHome = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Events Section */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-bold flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              {t.athlete.events.title}
+            </h2>
+            <button
+              onClick={() => setEventSheetOpen(true)}
+              className="rounded-full p-1.5 hover:bg-muted transition"
+              aria-label={t.athlete.events.addAriaLabel}
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+          {nextEvent ? (
+            <Link to="/athlete/profile?tab=events" className="block">
+              <EventCard event={nextEvent} compact />
+            </Link>
+          ) : (
+            <button
+              onClick={() => setEventSheetOpen(true)}
+              className="w-full text-left rounded-2xl border border-dashed border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground hover:bg-muted/40 transition"
+            >
+              {t.athlete.events.empty}
+            </button>
+          )}
+          {upcomingEvents.length > 1 && (
+            <Link to="/athlete/profile?tab=events" className="block text-xs text-primary font-semibold pt-1">
+              {t.athlete.events.seeMore.replace("{{count}}", String(upcomingEvents.length - 1))}
+            </Link>
+          )}
+        </div>
       </div>
+      {user && (
+        <AddEventSheet
+          open={eventSheetOpen}
+          onOpenChange={setEventSheetOpen}
+          athleteId={user.uid}
+        />
+      )}
     </AthletePortalLayout>
   );
 };

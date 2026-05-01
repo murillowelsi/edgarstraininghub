@@ -1,6 +1,7 @@
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { Dumbbell, Heart, MapPin, Timer, Zap } from "lucide-react";
 import type { WorkoutSummary } from "@/types/timeline";
+import { cn } from "@/lib/utils";
 
 const typeConfig: Record<string, { icon: React.ElementType; label: string; color: string; bg: string }> = {
   running: { icon: GrRun,    label: "Corrida",  color: "#3b82f6", bg: "#3b82f610" },
@@ -19,9 +20,11 @@ const formatTime = (seconds: number) => {
 
 interface Props {
   summary: WorkoutSummary;
+  /** Render edge-to-edge (no horizontal margin), useful inside carousels. */
+  flush?: boolean;
 }
 
-export function WorkoutSummaryCard({ summary }: Props) {
+export function WorkoutSummaryCard({ summary, flush }: Props) {
   const cfg = typeConfig[summary.workoutType] ?? typeConfig.strength;
   const Icon = cfg.icon;
   const isSwimming = summary.workoutType === "swimming";
@@ -44,9 +47,9 @@ export function WorkoutSummaryCard({ summary }: Props) {
   const cols = stats.length === 1 ? 1 : stats.length === 2 ? 2 : stats.length >= 4 ? 2 : 3;
 
   return (
-    <div className="mx-4 my-2 rounded-2xl overflow-hidden border border-border">
+    <div className={flush ? "w-full h-full flex flex-col overflow-hidden" : "mx-4 my-2 rounded-2xl overflow-hidden border border-border"}>
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3" style={{ backgroundColor: cfg.bg }}>
+      <div className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ backgroundColor: cfg.bg }}>
         <div
           className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
           style={{ backgroundColor: cfg.color + "22", color: cfg.color }}
@@ -62,7 +65,7 @@ export function WorkoutSummaryCard({ summary }: Props) {
       {/* Stats grid */}
       {stats.length > 0 && (
         <div
-          className="grid gap-px bg-border"
+          className={cn("grid gap-px bg-border", flush && "flex-1")}
           style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
         >
           {stats.map((stat) => {

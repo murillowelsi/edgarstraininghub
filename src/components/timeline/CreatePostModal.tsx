@@ -16,15 +16,18 @@ interface CreatePostModalProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => Promise<void>;
   initialCaption?: string;
+  initialImageUrl?: string;
   workoutSummary?: WorkoutSummary;
+  title?: string;
+  submitLabel?: string;
 }
 
-export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption, workoutSummary }: CreatePostModalProps) {
+export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption, initialImageUrl, workoutSummary, title, submitLabel }: CreatePostModalProps) {
   const { user, displayName, photoURL } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
   const [caption, setCaption] = useState(initialCaption ?? "");
-  const [imageUrl, setImageUrl] = useState<string | undefined>();
+  const [imageUrl, setImageUrl] = useState<string | undefined>(initialImageUrl);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,6 +47,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption, 
   useEffect(() => {
     if (open) {
       setCaption(initialCaption ?? "");
+      setImageUrl(initialImageUrl);
       setTimeout(() => textareaRef.current?.focus(), 100);
     } else {
       setCaption("");
@@ -52,7 +56,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption, 
       setSearch("");
       setMentionedUserIds([]);
     }
-  }, [open, initialCaption]);
+  }, [open, initialCaption, initialImageUrl]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -140,7 +144,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption, 
         >
           <X className="h-6 w-6" />
         </button>
-        <span className="font-bold text-base">{t.timeline.create.title}</span>
+        <span className="font-bold text-base">{title ?? t.timeline.create.title}</span>
         <button
           onClick={handleSubmit}
           disabled={!canPost}
@@ -149,7 +153,7 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption, 
             canPost ? "text-primary hover:text-primary/80" : "text-muted-foreground"
           )}
         >
-          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t.timeline.create.post}
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (submitLabel ?? t.timeline.create.post)}
         </button>
       </div>
 

@@ -32,6 +32,7 @@ export interface ActivityData {
   avgHeartRate?: number; // bpm
   avgPace?: number;     // seconds per km (running) or per 100m (swimming)
   avgSpeed?: number;    // km/h (cycling)
+  avgPower?: number;    // watts (cycling, optional)
   stageTimes?: StageTimeData[]; // actual time per stage
 }
 

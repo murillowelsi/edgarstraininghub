@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { Heart, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
-import { toggleLike, deleteTimelinePost, createActivityNotification } from "@/services/timelineService";
+import { toggleLike, deleteTimelinePost, updateTimelinePost, createActivityNotification } from "@/services/timelineService";
 import { WorkoutSummaryCard } from "./WorkoutSummaryCard";
+import { CreatePostModal } from "./CreatePostModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { CommentsDrawer } from "./CommentsDrawer";
@@ -12,11 +19,11 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 interface TimelinePostCardProps {
   post: TimelinePost;
@@ -33,6 +40,8 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   const [pendingLike, setPendingLike] = useState<boolean | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
+  const [showActions, setShowActions] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const isLiked = user ? post.likedBy.includes(user.uid) : false;
   const liked = pendingLike ?? isLiked;
@@ -74,12 +83,23 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   };
 
   const handleDelete = async () => {
+    setShowActions(false);
     try {
       await deleteTimelinePost(post.id);
       onDeleted(post.id);
       toast({ title: t.timeline.post.deleted });
     } catch {
       toast({ title: t.common.error, description: t.timeline.post.deleteError, variant: "destructive" });
+    }
+  };
+
+  const handleEditSubmit = async (caption: string, imageUrl?: string) => {
+    try {
+      await updateTimelinePost(post.id, { caption, imageUrl });
+      toast({ title: t.timeline.post.edited });
+    } catch {
+      toast({ title: t.common.error, description: t.timeline.post.editError, variant: "destructive" });
+      throw new Error("update failed");
     }
   };
 
@@ -102,40 +122,21 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
           </div>
 
           {canDelete && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="p-1 rounded-full hover:bg-accent transition-colors">
-                  <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={handleDelete}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t.timeline.post.delete}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button
+              className="p-1 rounded-full hover:bg-accent transition-colors"
+              onClick={() => setShowActions(true)}
+            >
+              <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
+            </button>
           )}
         </div>
 
-        {/* Image */}
-        {post.imageUrl && (
-          <div className="w-full bg-muted relative" onClick={handleDoubleTap}>
-            <CachedImage
-              src={post.imageUrl}
-              alt="Post"
-              className="w-full object-cover max-h-[480px]"
-            />
-            {showHeartBurst && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <Heart className="h-24 w-24 text-white fill-white drop-shadow-lg animate-ping" />
-              </div>
-            )}
-          </div>
-        )}
+        {/* Media: workout summary card and/or image, swipeable when both */}
+        <PostMedia
+          post={post}
+          onDoubleTap={handleDoubleTap}
+          showHeartBurst={showHeartBurst}
+        />
 
         {/* Actions */}
         <div className="px-4 pt-3 pb-1 flex items-center gap-4">
@@ -167,9 +168,6 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
           </p>
         )}
 
-        {/* Workout summary card */}
-        {post.workoutSummary && <WorkoutSummaryCard summary={post.workoutSummary} />}
-
         {/* Timestamp */}
         <p className="px-4 pt-1 pb-3 text-xs text-muted-foreground uppercase tracking-wide">
           {formatDistanceToNow(post.createdAt, { addSuffix: true, ...(language === "pt" ? { locale: ptBR } : {}) })}
@@ -183,6 +181,133 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         postAuthorId={post.authorId}
         onCommentsCountChange={() => {}}
       />
+
+      <Drawer open={showActions} onOpenChange={setShowActions}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{t.timeline.post.actionsTitle}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2">
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
+              onClick={() => { setShowActions(false); setShowEdit(true); }}
+            >
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Pencil className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-sm">{t.timeline.post.edit}</p>
+              </div>
+            </button>
+            <button
+              className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
+              onClick={handleDelete}
+            >
+              <div className="h-9 w-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
+                <Trash2 className="h-5 w-5 text-destructive" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-sm text-destructive">{t.timeline.post.delete}</p>
+              </div>
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      <CreatePostModal
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        onSubmit={handleEditSubmit}
+        initialCaption={post.caption}
+        initialImageUrl={post.imageUrl}
+        workoutSummary={post.workoutSummary}
+        title={t.timeline.post.editTitle}
+        submitLabel={t.timeline.post.editSubmit}
+      />
     </>
+  );
+}
+
+interface PostMediaProps {
+  post: TimelinePost;
+  onDoubleTap: () => void;
+  showHeartBurst: boolean;
+}
+
+function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  type Slide = { kind: "summary" } | { kind: "image"; url: string };
+  const slides: Slide[] = [];
+  if (post.workoutSummary) slides.push({ kind: "summary" });
+  if (post.imageUrl) slides.push({ kind: "image", url: post.imageUrl });
+
+  useEffect(() => {
+    if (!api) return;
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
+    const onSelect = () => setCurrent(api.selectedScrollSnap());
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
+
+  if (slides.length === 0) return null;
+
+  const renderSlide = (s: Slide) => {
+    if (s.kind === "summary" && post.workoutSummary) {
+      return <WorkoutSummaryCard summary={post.workoutSummary} flush />;
+    }
+    if (s.kind === "image") {
+      return (
+        <div className="w-full h-full bg-muted relative" onClick={onDoubleTap}>
+          <CachedImage
+            src={s.url}
+            alt="Post"
+            className="w-full h-full object-cover max-h-[480px]"
+          />
+          {showHeartBurst && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <Heart className="h-24 w-24 text-white fill-white drop-shadow-lg animate-ping" />
+            </div>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  if (slides.length === 1) {
+    return <div className="w-full">{renderSlide(slides[0])}</div>;
+  }
+
+  return (
+    <div className="relative w-full">
+      <Carousel setApi={setApi} opts={{ loop: false }} className="w-full">
+        <CarouselContent className="ml-0">
+          {slides.map((s, i) => (
+            <CarouselItem key={i} className="pl-0 basis-full flex">
+              {renderSlide(s)}
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+      {count > 1 && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1">
+          {Array.from({ length: count }).map((_, i) => (
+            <span
+              key={i}
+              className={cn(
+                "h-1.5 w-1.5 rounded-full transition-all",
+                current === i ? "bg-white w-3" : "bg-white/60"
+              )}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Calendar, Camera, Dumbbell, Heart, Home, LayoutGrid, LogOut, Moon, Plus, Shield, Sun, MessageSquare, X } from "lucide-react";
+import { Calendar, Camera, Dumbbell, Heart, Home, LayoutGrid, LogOut, Moon, Plus, Shield, Sun, MessageSquare, User, X } from "lucide-react";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -51,7 +51,7 @@ const AthletePortalLayout = ({
     { href: "/athlete/teams", label: t.athlete.nav.teams, icon: Shield, exact: false, featured: false },
     { href: "/athlete/timeline", label: t.athlete.nav.timeline, icon: LayoutGrid, featured: true },
     { href: "/athlete/calendar", label: t.athlete.nav.calendar, icon: Calendar, featured: false },
-    { href: "/athlete/workouts", label: t.athlete.nav.workouts, icon: Dumbbell, featured: false },
+    { href: "/athlete/profile", label: t.athlete.nav.profile, icon: User, exact: false, featured: false },
   ];
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [feedUnreadCount, setFeedUnreadCount] = useState(0);

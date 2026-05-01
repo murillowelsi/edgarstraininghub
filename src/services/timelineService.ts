@@ -119,13 +119,21 @@ export const createTimelinePost = async (
   authorRole: UserRole,
   authorPhotoURL?: string | null
 ): Promise<string> => {
+  const cleanWorkoutSummary = data.workoutSummary
+    ? Object.fromEntries(
+        Object.entries(data.workoutSummary).filter(([, v]) => v !== undefined && v !== null)
+      )
+    : undefined;
+
   const payload: Record<string, unknown> = {
     authorId,
     authorName,
     authorRole,
     caption: data.caption,
     imageUrl: data.imageUrl || "",
-    ...(data.workoutSummary ? { workoutSummary: data.workoutSummary } : {}),
+    ...(cleanWorkoutSummary && Object.keys(cleanWorkoutSummary).length > 0
+      ? { workoutSummary: cleanWorkoutSummary }
+      : {}),
     likedBy: [],
     commentsCount: 0,
     createdAt: serverTimestamp(),
@@ -134,6 +142,17 @@ export const createTimelinePost = async (
   if (authorPhotoURL) payload.authorPhotoURL = authorPhotoURL;
   const docRef = await addDoc(collection(db, COLLECTION), payload);
   return docRef.id;
+};
+
+export const updateTimelinePost = async (
+  postId: string,
+  data: { caption: string; imageUrl?: string }
+): Promise<void> => {
+  await updateDoc(doc(db, COLLECTION, postId), {
+    caption: data.caption,
+    imageUrl: data.imageUrl ?? "",
+    updatedAt: serverTimestamp(),
+  });
 };
 
 export const deleteTimelinePost = async (postId: string): Promise<void> => {

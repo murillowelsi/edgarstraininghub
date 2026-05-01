@@ -53,6 +53,8 @@ interface CalendarAssignDialogProps {
   onSuccess?: () => void;
   preSelectedWorkoutId?: string | null;
   onClearPreSelectedWorkout?: () => void;
+  /** When set, athlete selection step is skipped — assignment goes directly to this athlete. */
+  preSelectedAthleteId?: string;
 }
 
 export const CalendarAssignDialog = ({
@@ -62,6 +64,7 @@ export const CalendarAssignDialog = ({
   onSuccess,
   preSelectedWorkoutId,
   onClearPreSelectedWorkout,
+  preSelectedAthleteId,
 }: CalendarAssignDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -154,8 +157,35 @@ export const CalendarAssignDialog = ({
     setStep("workout");
   };
 
-  const handleWorkoutSelect = (workout: Workout) => {
+  const handleWorkoutSelect = async (workout: Workout) => {
     setSelectedWorkout(workout);
+
+    if (preSelectedAthleteId && user && selectedDate) {
+      setLoading(true);
+      try {
+        await createAssignments(
+          {
+            workoutId: workout.id,
+            athleteIds: [preSelectedAthleteId],
+            scheduledDate: selectedDate,
+          },
+          user.uid
+        );
+        toast({
+          title: "Workout assigned",
+          description: `Successfully assigned "${workout.name}" on ${format(selectedDate, "PPP")}.`,
+        });
+        onOpenChange(false);
+        onSuccess?.();
+      } catch (error) {
+        console.error("Error assigning workout:", error);
+        toast({ title: "Error", description: "Failed to assign workout.", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     setStep("athletes");
   };
 
@@ -275,33 +305,28 @@ export const CalendarAssignDialog = ({
     }
   };
 
+  const stepsList: Step[] = preSelectedAthleteId ? ["type", "workout"] : ["type", "workout", "athletes"];
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center gap-2 mb-4">
-      {["type", "workout", "athletes"].map((s, i) => (
+      {stepsList.map((s, i) => (
         <div key={s} className="flex items-center">
           <div
             className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
               step === s
                 ? "bg-primary text-primary-foreground"
-                : ["type", "workout", "athletes"].indexOf(step) > i
+                : stepsList.indexOf(step) > i
                   ? "bg-primary/20 text-primary"
                   : "bg-muted text-muted-foreground"
             )}
           >
-            {["type", "workout", "athletes"].indexOf(step) > i ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              i + 1
-            )}
+            {stepsList.indexOf(step) > i ? <Check className="h-4 w-4" /> : i + 1}
           </div>
-          {i < 2 && (
+          {i < stepsList.length - 1 && (
             <div
               className={cn(
                 "w-8 h-0.5 mx-1",
-                ["type", "workout", "athletes"].indexOf(step) > i
-                  ? "bg-primary/20"
-                  : "bg-muted"
+                stepsList.indexOf(step) > i ? "bg-primary/20" : "bg-muted"
               )}
             />
           )}

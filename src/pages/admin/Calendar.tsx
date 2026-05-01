@@ -1,4 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
+import UpcomingEventsBanner from "@/components/admin/UpcomingEventsBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -452,6 +453,7 @@ const AdminCalendar = () => {
   return (
     <AdminLayout>
       <div className="h-full flex flex-col">
+        <UpcomingEventsBanner athleteIdFilter={selectedAthleteId} />
         {/* Header — desktop only on mobile */}
         <div ref={stickyHeaderRef} className="hidden md:block px-4 pt-4 pb-3 border-b bg-background md:sticky md:top-0 z-10 space-y-3">
           {/* Row 1: Title + month navigation */}
