@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { type WorkoutType } from "@/types/workout";
 import type { User } from "@/types/user";
 import { formatHours } from "@/utils/workoutDuration";
+import { modalityAccent } from "@/utils/modalityColors";
 import { Dumbbell } from "lucide-react";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { Link } from "react-router-dom";
@@ -15,13 +16,6 @@ const modalityIcons = {
   swimming: GrSwim,
   strength: Dumbbell,
 } as const;
-
-const modalityAccent: Record<WorkoutType, string> = {
-  running: "#3b82f6",   // Blue
-  cycling: "#22c55e",   // Green
-  swimming: "#06b6d4",  // Cyan
-  strength: "#f59e0b",  // Amber
-};
 
 export interface AthleteAggregate {
   athlete: User;
@@ -71,7 +65,7 @@ const AthleteOverviewCard = ({ agg }: Props) => {
           <div className="space-y-2">
             {(["running", "cycling", "swimming", "strength"] as WorkoutType[]).map((type) => {
               const Icon = modalityIcons[type];
-              const accent = modalityAccent[type];
+              const accent = modalityAccent(type);
               const { planned, completed } = agg.perType[type];
               const hasData = planned > 0 || completed > 0;
               const pct = planned > 0 ? Math.min(100, Math.round((completed / planned) * 100)) : 0;

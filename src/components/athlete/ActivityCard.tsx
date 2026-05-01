@@ -2,7 +2,7 @@ import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { AssignmentWithWorkout, ExerciseProgressData } from "@/types/workoutAssignment";
-import { stageColors } from "@/types/workout";
+import { modalityAccent } from "@/utils/modalityColors";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dumbbell } from "lucide-react";
@@ -51,11 +51,7 @@ const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href }: Props)
     language === "pt" ? "dd 'de' MMMM 'de' yyyy 'às' HH:mm" : "MMMM d, yyyy 'at' HH:mm",
     { locale: dateLocale }
   );
-  const accentColor =
-    type === "running" ? stageColors.run
-    : type === "cycling" ? stageColors.bike
-    : type === "swimming" ? stageColors.swim
-    : "hsl(var(--primary))";
+  const accentColor = modalityAccent(type);
 
   let metrics: { label: string; value: string }[] = [];
   if (type === "strength") {

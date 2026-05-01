@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { stageColors } from "@/types/workout";
+import { modalityAccent } from "@/utils/modalityColors";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { addDays, format, isAfter, isSameDay, isToday, isTomorrow, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -15,12 +15,6 @@ const icons = {
   strength: Dumbbell,
 } as const;
 
-const accentFor = (type: keyof typeof icons): string => {
-  if (type === "running") return stageColors.run;
-  if (type === "cycling") return stageColors.bike;
-  if (type === "swimming") return stageColors.swim;
-  return "hsl(var(--primary))";
-};
 
 interface Props {
   assignments: AssignmentWithWorkout[];
@@ -67,7 +61,7 @@ const UpcomingWorkoutsList = ({ assignments, language }: Props) => {
         <div className="space-y-2">
           {items.map((a) => {
             const Icon = icons[a.workout.type];
-            const accent = accentFor(a.workout.type);
+            const accent = modalityAccent(a.workout.type);
             const isOverdue = a.scheduledDate < today && !isSameDay(a.scheduledDate, now);
             const dayLabel = isToday(a.scheduledDate)
               ? t("Hoje", "Today")

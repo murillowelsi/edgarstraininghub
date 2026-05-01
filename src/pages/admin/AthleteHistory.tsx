@@ -8,7 +8,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { subscribeToAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
 import { subscribeToEventsByAthlete } from "@/services/athleteEventsService";
 import { getUserById } from "@/services/usersService";
-import { stageColors, type WorkoutType } from "@/types/workout";
+import { type WorkoutType } from "@/types/workout";
+import { modalityAccent } from "@/utils/modalityColors";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { AthleteEvent } from "@/types/athleteEvent";
 import type { User } from "@/types/user";
@@ -32,12 +33,6 @@ const modalityIcons = {
   strength: Dumbbell,
 } as const;
 
-const modalityAccent = (type: WorkoutType) => {
-  if (type === "running") return stageColors.run;
-  if (type === "cycling") return stageColors.bike;
-  if (type === "swimming") return stageColors.swim;
-  return "hsl(var(--primary))";
-};
 
 const AdminAthleteHistory = () => {
   const { athleteId } = useParams<{ athleteId: string }>();

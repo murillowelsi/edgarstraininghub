@@ -17,7 +17,7 @@ import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import { stageColors } from "@/types/workout";
+import { modalityAccent } from "@/utils/modalityColors";
 import {
   formatDistance,
   formatHeartRate,
@@ -87,11 +87,7 @@ const ActivityDetail = () => {
 
   const type = assignment.workout.type;
   const Icon = icons[type];
-  const color =
-    type === "cycling" ? stageColors.bike
-    : type === "swimming" ? stageColors.swim
-    : type === "strength" ? "hsl(var(--primary))"
-    : stageColors.run;
+  const color = modalityAccent(type);
   const data = assignment.activityData;
   const dateStr = format(
     assignment.completedAt || assignment.scheduledDate,

@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dumbbell, Loader2, Plus } from "lucide-react";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
-import { stageColors, type WorkoutType } from "@/types/workout";
+import { type WorkoutType } from "@/types/workout";
+import { modalityAccent } from "@/utils/modalityColors";
 import { estimateWorkoutDurationSec, actualDurationSec, formatHours } from "@/utils/workoutDuration";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -279,12 +280,6 @@ const modalityIcons = {
   strength: Dumbbell,
 } as const;
 
-const modalityAccent = (type: WorkoutType) => {
-  if (type === "running") return stageColors.run;
-  if (type === "cycling") return stageColors.bike;
-  if (type === "swimming") return stageColors.swim;
-  return "hsl(var(--primary))";
-};
 
 const ModalityBar = ({
   type,
