@@ -45,6 +45,7 @@ import AdminTimeline from "./pages/admin/Timeline";
 import AthleteTimeline from "./pages/athlete/Timeline";
 import AthleteProfile from "./pages/athlete/Profile";
 import AthleteActivityDetail from "./pages/athlete/ActivityDetail";
+import AthleteEventDetail from "./pages/athlete/EventDetail";
 
 const queryClient = new QueryClient();
 
@@ -310,6 +311,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAthlete>
                       <AthleteProfile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/events/:id"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteEventDetail />
                     </ProtectedRoute>
                   }
                 />

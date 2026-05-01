@@ -68,6 +68,39 @@ service cloud.firestore {
         (isAdmin() || resource.data.athleteId == request.auth.uid);
     }
 
+    // User checklist templates (per-modality workout checklist defaults)
+    // Doc id format: {userId}_{workoutType}
+    match /userChecklistTemplates/{templateId} {
+      allow read: if request.auth != null &&
+        (resource == null || isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        (isAdmin() || resource.data.userId == request.auth.uid);
+    }
+
+    // Workout checklist instances (per assignment)
+    // Doc id = assignmentId
+    match /workoutChecklistInstances/{assignmentId} {
+      allow read: if request.auth != null &&
+        (resource == null || isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        (isAdmin() || resource.data.userId == request.auth.uid);
+    }
+
+    // Event checklists (per athlete event)
+    // Doc id = eventId
+    match /eventChecklists/{eventId} {
+      allow read: if request.auth != null &&
+        (resource == null || isAdmin() || resource.data.athleteId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.athleteId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        (isAdmin() || resource.data.athleteId == request.auth.uid);
+    }
+
     // Exercises collection: admins can CRUD, authenticated users can read
     match /exercises/{exerciseId} {
       allow read: if request.auth != null;

@@ -19,12 +19,13 @@ import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { AthleteEvent } from "@/types/athleteEvent";
 import { differenceInCalendarDays, isThisWeek } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const AthleteProfile = () => {
   const { user, photoURL } = useAuth();
   const { t, language } = useLanguage();
   const lang = (language === "pt" ? "pt" : "en") as "pt" | "en";
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const validTabs = ["activities", "events", "progress"];
@@ -201,10 +202,7 @@ const AthleteProfile = () => {
                   <EventCard
                     key={e.id}
                     event={e}
-                    onClick={() => {
-                      setEditingEvent(e);
-                      setEventSheetOpen(true);
-                    }}
+                    onClick={() => navigate(`/athlete/events/${e.id}`)}
                   />
                 ))}
               </div>
@@ -217,10 +215,7 @@ const AthleteProfile = () => {
                   <EventCard
                     key={e.id}
                     event={e}
-                    onClick={() => {
-                      setEditingEvent(e);
-                      setEventSheetOpen(true);
-                    }}
+                    onClick={() => navigate(`/athlete/events/${e.id}`)}
                   />
                 ))}
               </div>

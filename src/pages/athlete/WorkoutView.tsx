@@ -1,4 +1,5 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
+import WorkoutChecklistDrawer from "@/components/athlete/WorkoutChecklistDrawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,6 +58,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Circle,
+  ClipboardList,
   Clock,
   Dumbbell,
   Flame,
@@ -553,6 +555,7 @@ const AthleteWorkoutView = () => {
   const [shareCaption, setShareCaption] = useState("");
   const [shareWorkoutSummary, setShareWorkoutSummary] = useState<import("@/types/timeline").WorkoutSummary | undefined>();
   const [showActivityDrawer, setShowActivityDrawer] = useState(false);
+  const [showChecklistDrawer, setShowChecklistDrawer] = useState(false);
   const [showIncompleteDrawer, setShowIncompleteDrawer] = useState(false);
   // stageInputs mirrors workout.stages:
   //   regular stage → { type: "regular", pace: "MM:SS" }
@@ -1016,6 +1019,14 @@ const AthleteWorkoutView = () => {
           <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-bold truncate max-w-[60%] text-center">
             {workout.name}
           </h1>
+          <button
+            onClick={() => setShowChecklistDrawer(true)}
+            className="ml-auto p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            aria-label="Checklist"
+            title="Checklist"
+          >
+            <ClipboardList className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Workout Header Card */}
@@ -1450,6 +1461,15 @@ const AthleteWorkoutView = () => {
         </DrawerContent>
       </Drawer>
 
+    {user && (
+      <WorkoutChecklistDrawer
+        open={showChecklistDrawer}
+        onOpenChange={setShowChecklistDrawer}
+        assignmentId={assignment.id}
+        userId={user.uid}
+        workoutType={workout.type}
+      />
+    )}
     </AthletePortalLayout>
     </>
   );

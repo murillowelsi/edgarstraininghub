@@ -16,8 +16,9 @@ import {
 import type { AthleteEvent, AthleteEventType, EventGoal } from "@/types/athleteEvent";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Loader2, Plus, Trash2, X } from "lucide-react";
+import { CalendarIcon, ClipboardList, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import EventChecklistDrawer from "./EventChecklistDrawer";
 import { Drawer as DrawerPrimitive } from "vaul";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -45,6 +46,7 @@ const AddEventSheet = ({ open, onOpenChange, athleteId, event }: Props) => {
   const [description, setDescription] = useState("");
   const [goals, setGoals] = useState<EventGoal[]>([]);
   const [saving, setSaving] = useState(false);
+  const [checklistOpen, setChecklistOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -211,6 +213,17 @@ const AddEventSheet = ({ open, onOpenChange, athleteId, event }: Props) => {
       </div>
 
       <div className="flex flex-col gap-2 pt-2">
+        {isEdit && event && (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => setChecklistOpen(true)}
+          >
+            <ClipboardList className="h-4 w-4 mr-2" />
+            Checklist da prova
+          </Button>
+        )}
         <Button onClick={handleSave} disabled={!canSave} className="w-full">
           {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           {isEdit ? te.saveChanges : te.addAction}
@@ -261,6 +274,14 @@ const AddEventSheet = ({ open, onOpenChange, athleteId, event }: Props) => {
           <div className="px-4 py-4 overflow-y-auto flex-1">{formContent}</div>
         </DrawerPrimitive.Content>
       </DrawerPrimitive.Portal>
+      {isEdit && event && (
+        <EventChecklistDrawer
+          open={checklistOpen}
+          onOpenChange={setChecklistOpen}
+          eventId={event.id}
+          athleteId={athleteId}
+        />
+      )}
     </DrawerPrimitive.Root>
   );
 };

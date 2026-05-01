@@ -4,6 +4,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   orderBy,
@@ -98,6 +99,12 @@ export const subscribeToEventsByAthlete = (
 export const getAllEvents = async (): Promise<AthleteEvent[]> => {
   const snap = await getDocs(query(collection(db, EVENTS_COLLECTION), orderBy("eventDate", "asc")));
   return snap.docs.map((d) => docToEvent(d.id, d.data() as AthleteEventDocument));
+};
+
+export const getAthleteEventById = async (id: string): Promise<AthleteEvent | null> => {
+  const snap = await getDoc(doc(db, EVENTS_COLLECTION, id));
+  if (!snap.exists()) return null;
+  return docToEvent(snap.id, snap.data() as AthleteEventDocument);
 };
 
 export const getEventsByAthlete = async (athleteId: string): Promise<AthleteEvent[]> => {
