@@ -113,24 +113,24 @@ export const ProgressSummaryChart = ({
       <CardContent className="p-4 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h3 className="font-display font-bold">{tp.progressSummary}</h3>
-          <SegmentedControl<RangeKey>
+          <SegmentedControl
             value={range}
             onChange={setRange}
             options={[
-              { value: "4w", label: tp.ranges.fourWeeks },
-              { value: "12w", label: tp.ranges.twelveWeeks },
-              { value: "1y", label: tp.ranges.oneYear },
+              { value: "4w" as RangeKey, label: tp.ranges.fourWeeks },
+              { value: "12w" as RangeKey, label: tp.ranges.twelveWeeks },
+              { value: "1y" as RangeKey, label: tp.ranges.oneYear },
             ]}
           />
         </div>
 
-        <SegmentedControl<MetricKey>
+        <SegmentedControl
           value={metric}
           onChange={setMetric}
           fullWidth
           options={[
-            { value: "time", label: tp.metrics.time },
-            { value: "distance", label: tp.metrics.distance },
+            { value: "time" as MetricKey, label: tp.metrics.time },
+            { value: "distance" as MetricKey, label: tp.metrics.distance },
           ]}
         />
 
@@ -191,17 +191,18 @@ export const ProgressSummaryChart = ({
   );
 };
 
-const SegmentedControl = <T extends string>({
+function SegmentedControl({
   value,
   onChange,
   options,
   fullWidth,
 }: {
-  value: T;
-  onChange: (v: T) => void;
-  options: { value: T; label: string }[];
+  value: string;
+  onChange: (v: never) => void;
+  options: { value: string; label: string }[];
   fullWidth?: boolean;
-}) => (
+}) {
+  return (
   <div
     className={cn(
       "inline-flex bg-muted/50 rounded-lg p-0.5 text-xs",
@@ -211,7 +212,7 @@ const SegmentedControl = <T extends string>({
     {options.map((opt) => (
       <button
         key={opt.value}
-        onClick={() => onChange(opt.value)}
+        onClick={() => onChange(opt.value as never)}
         className={cn(
           "px-3 py-1.5 rounded-md font-medium transition-colors",
           fullWidth && "flex-1",
@@ -220,8 +221,9 @@ const SegmentedControl = <T extends string>({
             : "text-muted-foreground hover:text-foreground",
         )}
       >
-        {opt.label}
-      </button>
-    ))}
-  </div>
-);
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
