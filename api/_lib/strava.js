@@ -33,13 +33,16 @@ const fingerprint = (v) => {
   return `len=${v.length} head=${head}… tail=…${tail}${trimmedWarn}`;
 };
 
+const getClientId = () => process.env.VITE_STRAVA_CLIENT_ID;
+const getClientSecret = () => process.env.VITE_STRAVA_CLIENT_SECRET;
+
 const exchangeCodeForToken = async (code) => {
-  const clientId = process.env.STRAVA_CLIENT_ID;
-  const clientSecret = process.env.STRAVA_CLIENT_SECRET;
+  const clientId = getClientId();
+  const clientSecret = getClientSecret();
 
   console.log('[strava] token exchange env:', {
-    STRAVA_CLIENT_ID: fingerprint(clientId),
-    STRAVA_CLIENT_SECRET: fingerprint(clientSecret),
+    VITE_STRAVA_CLIENT_ID: fingerprint(clientId),
+    VITE_STRAVA_CLIENT_SECRET: fingerprint(clientSecret),
     code: fingerprint(code),
   });
 
@@ -65,8 +68,8 @@ const refreshAccessToken = async (refreshToken) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      client_id: process.env.STRAVA_CLIENT_ID,
-      client_secret: process.env.STRAVA_CLIENT_SECRET,
+      client_id: getClientId(),
+      client_secret: getClientSecret(),
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
     }),
