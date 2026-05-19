@@ -83,6 +83,33 @@ const getValidAccessToken = async (userId, integration) => {
   return refreshed.access_token;
 };
 
+const fetchActivityById = async (accessToken, activityId) => {
+  const res = await fetch(`https://www.strava.com/api/v3/activities/${activityId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Strava activity fetch failed: ${res.status} ${text}`);
+  }
+  return res.json();
+};
+
+// Locate the app user whose Strava athleteId matches the incoming webhook event.
+// Returns { userId, integration } or null if no connected user is found.
+const findUserByStravaAthleteId = async (athleteId) => {
+  const snap = await db
+    .collectionGroup('integrations')
+    .where('athleteId', '==', Number(athleteId))
+    .limit(1)
+    .get();
+  if (snap.empty) return null;
+  const docSnap = snap.docs[0];
+  const userRef = docSnap.ref.parent.parent;
+  if (!userRef) return null;
+  return { userId: userRef.id, integration: docSnap.data() };
+};
+
 const fetchRecentActivities = async (accessToken, afterEpochSec) => {
   const url = new URL(ACTIVITIES_URL);
   url.searchParams.set('per_page', '30');
@@ -133,6 +160,9 @@ const buildActivityData = (activity, workoutType) => {
   if (typeof activity.average_heartrate === 'number') {
     data.avgHeartRate = Math.round(activity.average_heartrate);
   }
+  if (typeof activity.max_heartrate === 'number') {
+    data.maxHeartRate = Math.round(activity.max_heartrate);
+  }
   if (typeof activity.average_speed === 'number' && activity.average_speed > 0) {
     if (workoutType === 'running') {
       data.avgPace = Math.round(1000 / activity.average_speed); // sec / km
@@ -142,8 +172,26 @@ const buildActivityData = (activity, workoutType) => {
       data.avgSpeed = Number((activity.average_speed * 3.6).toFixed(2)); // km/h
     }
   }
+  if (workoutType === 'cycling' && typeof activity.max_speed === 'number') {
+    data.maxSpeed = Number((activity.max_speed * 3.6).toFixed(2));
+  }
   if (workoutType === 'cycling' && typeof activity.average_watts === 'number') {
     data.avgPower = Math.round(activity.average_watts);
+  }
+  if (typeof activity.average_cadence === 'number') {
+    // Strava reports running cadence as strides/min — double it for steps/min.
+    data.avgCadence = workoutType === 'running'
+      ? Math.round(activity.average_cadence * 2)
+      : Math.round(activity.average_cadence);
+  }
+  if (typeof activity.total_elevation_gain === 'number' && activity.total_elevation_gain > 0) {
+    data.elevationGain = Math.round(activity.total_elevation_gain);
+  }
+  if (typeof activity.calories === 'number') {
+    data.calories = Math.round(activity.calories);
+  } else if (typeof activity.kilojoules === 'number') {
+    // kJ → kcal (1 kJ ≈ 0.239 kcal). Mostly cycling; running summary doesn't include it.
+    data.calories = Math.round(activity.kilojoules * 0.239);
   }
   return data;
 };
@@ -236,7 +284,9 @@ module.exports = {
   exchangeCodeForToken,
   refreshAccessToken,
   getValidAccessToken,
+  fetchActivityById,
   fetchRecentActivities,
+  findUserByStravaAthleteId,
   deauthorize,
   mapSportType,
   syncActivitiesForUser,

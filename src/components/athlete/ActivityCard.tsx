@@ -104,7 +104,20 @@ const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href }: Props)
             </div>
           </div>
 
-          <h3 className="font-display font-bold text-lg leading-tight">{assignment.workout.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-display font-bold text-lg leading-tight">{assignment.workout.name}</h3>
+            {assignment.stravaActivityId != null && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-[#FC4C02]/10 px-2 py-0.5 text-[10px] font-semibold text-[#FC4C02] uppercase tracking-wide"
+                title="Synced from Strava"
+              >
+                <svg viewBox="0 0 24 24" className="h-2.5 w-2.5" fill="currentColor" aria-hidden>
+                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.599h4.172L10.463 0l-7 13.828h4.172" />
+                </svg>
+                Strava
+              </span>
+            )}
+          </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
             {metrics.map((row, i) => (

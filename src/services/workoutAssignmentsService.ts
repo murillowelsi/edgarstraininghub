@@ -41,6 +41,7 @@ const docToAssignment = (
   progressData: data.progressData,
   activityData: data.activityData,
   skipped: data.skipped ?? false,
+  stravaActivityId: data.stravaActivityId,
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
