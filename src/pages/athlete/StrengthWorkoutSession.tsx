@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageSpinner, Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
 import { createMentionNotifications, createTimelinePost } from "@/services/timelineService";
@@ -35,13 +36,12 @@ import {
   ChevronDown,
   Clock,
   Dumbbell,
-  Loader2,
+  Minus,
   MoreVertical,
-  Pause,
   Play,
   Plus,
-  StopCircle,
-  Timer,
+  RotateCcw,
+  Square,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -53,12 +53,17 @@ interface SetProgress {
   reps: string;
   weight: string;
   completed: boolean;
+  time: number; // Time spent on this set in seconds
 }
 
 interface ExerciseProgress {
   exerciseId: string;
   sets: SetProgress[];
-  exerciseTime: number; // Time spent on this exercise in seconds
+}
+
+interface ActiveSet {
+  exerciseId: string;
+  setIndex: number;
 }
 
 // Format time as MM:SS
@@ -74,11 +79,13 @@ const ExerciseSessionCard = ({
   exercise,
   index,
   progress,
-  isActive,
-  onStartTimer,
-  onStopTimer,
+  activeSetIndex,
+  onStartSetTimer,
+  onStopSetTimer,
+  onResetSetTimer,
   onUpdateSet,
   onAddSet,
+  onRemoveLastSet,
   onToggleSetComplete,
   t,
 }: {
@@ -86,15 +93,18 @@ const ExerciseSessionCard = ({
   exercise?: Exercise;
   index: number;
   progress: ExerciseProgress;
-  isActive: boolean;
-  onStartTimer: () => void;
-  onStopTimer: () => void;
+  activeSetIndex: number | null;
+  onStartSetTimer: (setIndex: number) => void;
+  onStopSetTimer: () => void;
+  onResetSetTimer: (setIndex: number) => void;
   onUpdateSet: (setIndex: number, field: "reps" | "weight", value: string) => void;
   onAddSet: () => void;
+  onRemoveLastSet: () => void;
   onToggleSetComplete: (setIndex: number) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any;
 }) => {
+  const isActive = activeSetIndex !== null;
   const [isPlaying, setIsPlaying] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
@@ -116,20 +126,12 @@ const ExerciseSessionCard = ({
   return (
     <Card
       className={cn(
-        "overflow-hidden relative",
+        "overflow-hidden",
         isActive && "ring-2 ring-primary border-primary",
-        allComplete && !isActive && "border-green-300 bg-green-50/30 dark:bg-green-950/10"
+        allComplete && !isActive && "border-primary/40 bg-primary/5"
       )}
     >
-      {/* Left color bar */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{
-          backgroundColor: isActive ? "#3b82f6" : allComplete ? "#22c55e" : "#f97316",
-        }}
-      />
-
-      <CardContent className="p-4 pl-5">
+      <CardContent className="p-4">
         {/* Exercise Header */}
         <div className="flex items-start justify-between mb-3">
           <div>
@@ -138,17 +140,12 @@ const ExerciseSessionCard = ({
               {workoutExercise.sets} sets × {workoutExercise.reps || "10"} reps
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            {allComplete && (
-              <Badge className="bg-green-100 text-green-700 dark:bg-green-900/50">
-                <Check className="h-3 w-3 mr-1" />
-                {t.athlete.session.complete}
-              </Badge>
-            )}
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </div>
+          {allComplete && (
+            <Badge className="bg-primary/15 text-primary border-primary/30">
+              <Check className="h-3 w-3 mr-1" />
+              {t.athlete.session.complete}
+            </Badge>
+          )}
         </div>
 
         {/* Media - Inline Player or Thumbnail */}
@@ -242,50 +239,6 @@ const ExerciseSessionCard = ({
           </div>
         )}
 
-        {/* Exercise Timer Control */}
-        <div
-          className={cn(
-            "flex items-center justify-between p-3 rounded-lg border mb-4",
-            isActive
-              ? "bg-blue-50 dark:bg-blue-950/30 border-blue-300"
-              : "bg-muted/50 border-border"
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <Timer className={cn("h-5 w-5", isActive ? "text-blue-600" : "text-muted-foreground")} />
-            <div>
-              <p className={cn("text-sm font-medium", isActive && "text-blue-600")}>
-                {t.athlete.session.exerciseTimer}
-              </p>
-              <p className={cn("text-2xl font-mono font-bold", isActive && "text-blue-600")}>
-                {formatTime(progress.exerciseTime)}
-              </p>
-            </div>
-          </div>
-
-          {isActive ? (
-            <Button
-              onClick={onStopTimer}
-              variant="destructive"
-              size="sm"
-              className="gap-2"
-            >
-              <StopCircle className="h-4 w-4" />
-              {t.athlete.session.stop}
-            </Button>
-          ) : (
-            <Button
-              onClick={onStartTimer}
-              variant="default"
-              size="sm"
-              className="gap-2 bg-blue-600 hover:bg-blue-700"
-            >
-              <Play className="h-4 w-4" />
-              {t.athlete.session.start}
-            </Button>
-          )}
-        </div>
-
         {/* Rest Time Info */}
         {workoutExercise.restSeconds > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 p-2 bg-muted/30 rounded">
@@ -296,64 +249,111 @@ const ExerciseSessionCard = ({
 
         {/* Sets Table */}
         <div>
-          <div className="grid grid-cols-[40px_1fr_80px_80px_40px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
+          <div className="grid grid-cols-[32px_1fr_64px_64px_36px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
             <span>{t.athlete.session.setHeader}</span>
-            <span>{t.athlete.session.previousHeader}</span>
+            <span>{t.athlete.session.exerciseTimer}</span>
             <span className="text-center">{t.athlete.session.repsHeader}</span>
             <span className="text-center">{t.athlete.session.kgHeader}</span>
             <span></span>
           </div>
 
           <div className="space-y-2">
-            {progress.sets.map((set, setIndex) => (
-              <div
-                key={setIndex}
-                className={cn(
-                  "grid grid-cols-[40px_1fr_80px_80px_40px] gap-2 items-center",
-                  set.completed && "opacity-60"
-                )}
-              >
-                <span className="text-sm font-medium text-center">{set.setNumber}</span>
-                <span className="text-sm text-muted-foreground">-</span>
-                <Input
-                  type="text"
-                                    value={set.reps}
-                  onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
-                  placeholder={workoutExercise.reps || "10"}
-                  className="h-10 text-center text-base"
-                  disabled={set.completed}
-                />
-                <Input
-                  type="text"
-                                    value={set.weight}
-                  onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
-                  placeholder="0"
-                  className="h-10 text-center text-base"
-                  disabled={set.completed}
-                />
-                <button
-                  onClick={() => onToggleSetComplete(setIndex)}
+            {progress.sets.map((set, setIndex) => {
+              const isSetActive = activeSetIndex === setIndex;
+              return (
+                <div
+                  key={setIndex}
                   className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                    set.completed
-                      ? "bg-green-500 text-white shadow-md"
-                      : "bg-muted hover:bg-green-100 hover:text-green-600 border-2 border-dashed border-muted-foreground/30"
+                    "grid grid-cols-[32px_1fr_64px_64px_36px] gap-2 items-center",
+                    set.completed && "opacity-60"
                   )}
                 >
-                  <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
-                </button>
-              </div>
-            ))}
+                  <span className="text-sm font-medium text-center">{set.setNumber}</span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => (isSetActive ? onStopSetTimer() : onStartSetTimer(setIndex))}
+                      disabled={set.completed}
+                      className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
+                        isSetActive
+                          ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          : "bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
+                      )}
+                      aria-label={isSetActive ? t.athlete.session.stop : t.athlete.session.start}
+                    >
+                      {isSetActive ? <Square className="h-3 w-3" fill="currentColor" /> : <Play className="h-4 w-4 ml-0.5" />}
+                    </button>
+                    <span
+                      className={cn(
+                        "text-sm font-mono tabular-nums",
+                        isSetActive ? "text-primary font-semibold" : "text-muted-foreground"
+                      )}
+                    >
+                      {formatTime(set.time)}
+                    </span>
+                    {set.time > 0 && !set.completed && (
+                      <button
+                        onClick={() => onResetSetTimer(setIndex)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground flex-shrink-0"
+                        aria-label={t.athlete.session.reset ?? "Reset"}
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    type="text"
+                    value={set.reps}
+                    onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
+                    placeholder={workoutExercise.reps || "10"}
+                    className="h-10 text-center text-base"
+                    disabled={set.completed}
+                  />
+                  <Input
+                    type="text"
+                    value={set.weight}
+                    onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
+                    placeholder="0"
+                    className="h-10 text-center text-base"
+                    disabled={set.completed}
+                  />
+                  <button
+                    onClick={() => onToggleSetComplete(setIndex)}
+                    className={cn(
+                      "w-9 h-9 rounded-full flex items-center justify-center transition-all",
+                      set.completed
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
+                    )}
+                  >
+                    <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Add Set Button */}
-          <button
-            onClick={onAddSet}
-            className="flex items-center gap-2 text-sm text-primary font-medium mt-4 hover:underline"
-          >
-            <Plus className="h-4 w-4" />
-            {t.athlete.session.addNewSet}
-          </button>
+          {/* Add / Remove Set Buttons */}
+          <div className="flex items-center justify-between mt-4">
+            {progress.sets.length > 1 ? (
+              <button
+                onClick={onRemoveLastSet}
+                className="flex items-center gap-2 text-sm text-muted-foreground font-medium hover:text-destructive hover:underline"
+              >
+                <Minus className="h-4 w-4" />
+                {t.athlete.session.removeLastSet}
+              </button>
+            ) : (
+              <span />
+            )}
+            <button
+              onClick={onAddSet}
+              className="flex items-center gap-2 text-sm text-primary font-medium hover:underline"
+            >
+              <Plus className="h-4 w-4" />
+              {t.athlete.session.addNewSet}
+            </button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -378,14 +378,14 @@ const StrengthWorkoutSession = () => {
   // Workout session state
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
   const [totalElapsedTime, setTotalElapsedTime] = useState(0);
-  const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
+  const [activeSet, setActiveSet] = useState<ActiveSet | null>(null);
   const [exerciseProgress, setExerciseProgress] = useState<Map<string, ExerciseProgress>>(
     new Map()
   );
 
   // Timer refs
   const totalTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const exerciseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const setTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Start workout function
   const startWorkout = useCallback(() => {
@@ -425,17 +425,18 @@ const StrengthWorkoutSession = () => {
                   reps: s.reps,
                   weight: s.weight,
                   completed: s.completed,
+                  time: s.time ?? 0,
                 }))
               : Array.from({ length: we.sets }, (_, i) => ({
                   setNumber: i + 1,
                   reps: "",
                   weight: "",
                   completed: false,
+                  time: 0,
                 }));
             initialProgress.set(we.id, {
               exerciseId: we.exerciseId,
               sets,
-              exerciseTime: 0,
             });
           });
           setExerciseProgress(initialProgress);
@@ -462,7 +463,7 @@ const StrengthWorkoutSession = () => {
     return () => {
       // Cleanup timers
       if (totalTimerRef.current) clearInterval(totalTimerRef.current);
-      if (exerciseTimerRef.current) clearInterval(exerciseTimerRef.current);
+      if (setTimerRef.current) clearInterval(setTimerRef.current);
     };
   }, [user, id, toast]);
 
@@ -473,44 +474,72 @@ const StrengthWorkoutSession = () => {
     }
   }, [loading, assignment, isWorkoutStarted, startWorkout]);
 
-  // Start exercise timer
-  const handleStartExerciseTimer = useCallback((exerciseId: string) => {
-    // Stop any existing exercise timer
-    if (exerciseTimerRef.current) {
-      clearInterval(exerciseTimerRef.current);
+  // Start set timer (auto-stops any other running set timer)
+  const handleStartSetTimer = useCallback((exerciseId: string, setIndex: number) => {
+    if (setTimerRef.current) {
+      clearInterval(setTimerRef.current);
     }
 
-    setActiveExerciseId(exerciseId);
+    setActiveSet({ exerciseId, setIndex });
 
-    // Start new timer for this exercise
-    exerciseTimerRef.current = setInterval(() => {
+    setTimerRef.current = setInterval(() => {
       setExerciseProgress((prev) => {
         const newMap = new Map(prev);
         const progress = newMap.get(exerciseId);
-        if (progress) {
-          newMap.set(exerciseId, {
-            ...progress,
-            exerciseTime: progress.exerciseTime + 1,
-          });
+        if (progress && progress.sets[setIndex]) {
+          const newSets = [...progress.sets];
+          newSets[setIndex] = {
+            ...newSets[setIndex],
+            time: newSets[setIndex].time + 1,
+          };
+          newMap.set(exerciseId, { ...progress, sets: newSets });
         }
         return newMap;
       });
     }, 1000);
   }, []);
 
-  // Stop exercise timer
-  const handleStopExerciseTimer = useCallback(() => {
-    if (exerciseTimerRef.current) {
-      clearInterval(exerciseTimerRef.current);
-      exerciseTimerRef.current = null;
+  // Stop set timer
+  const handleStopSetTimer = useCallback(() => {
+    if (setTimerRef.current) {
+      clearInterval(setTimerRef.current);
+      setTimerRef.current = null;
     }
-    setActiveExerciseId(null);
+    setActiveSet(null);
   }, []);
+
+  // Reset a set's timer to zero (also stops it if currently running)
+  const handleResetSetTimer = useCallback(
+    (exerciseId: string, setIndex: number) => {
+      if (
+        activeSet &&
+        activeSet.exerciseId === exerciseId &&
+        activeSet.setIndex === setIndex
+      ) {
+        if (setTimerRef.current) {
+          clearInterval(setTimerRef.current);
+          setTimerRef.current = null;
+        }
+        setActiveSet(null);
+      }
+      setExerciseProgress((prev) => {
+        const newMap = new Map(prev);
+        const progress = newMap.get(exerciseId);
+        if (progress && progress.sets[setIndex]) {
+          const newSets = [...progress.sets];
+          newSets[setIndex] = { ...newSets[setIndex], time: 0 };
+          newMap.set(exerciseId, { ...progress, sets: newSets });
+        }
+        return newMap;
+      });
+    },
+    [activeSet]
+  );
 
   // Cancel workout
   const handleCancel = () => {
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
-    if (exerciseTimerRef.current) clearInterval(exerciseTimerRef.current);
+    if (setTimerRef.current) clearInterval(setTimerRef.current);
     navigate(`/athlete/workout/${id}`);
   };
 
@@ -520,7 +549,7 @@ const StrengthWorkoutSession = () => {
 
     // Stop all timers
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
-    if (exerciseTimerRef.current) clearInterval(exerciseTimerRef.current);
+    if (setTimerRef.current) clearInterval(setTimerRef.current);
 
     setSaving(true);
     try {
@@ -533,6 +562,7 @@ const StrengthWorkoutSession = () => {
             reps: set.reps,
             weight: set.weight,
             completed: set.completed,
+            time: set.time,
           })),
         })
       );
@@ -587,6 +617,18 @@ const StrengthWorkoutSession = () => {
   // Toggle set complete
   const handleToggleSetComplete = useCallback(
     (exerciseId: string, setIndex: number) => {
+      // Stop set timer if the toggled set is currently active
+      if (
+        activeSet &&
+        activeSet.exerciseId === exerciseId &&
+        activeSet.setIndex === setIndex
+      ) {
+        if (setTimerRef.current) {
+          clearInterval(setTimerRef.current);
+          setTimerRef.current = null;
+        }
+        setActiveSet(null);
+      }
       setExerciseProgress((prev) => {
         const newMap = new Map(prev);
         const progress = newMap.get(exerciseId);
@@ -601,7 +643,37 @@ const StrengthWorkoutSession = () => {
         return newMap;
       });
     },
-    []
+    [activeSet]
+  );
+
+  // Remove last set (also stops timer if that set was active)
+  const handleRemoveLastSet = useCallback(
+    (exerciseId: string) => {
+      setExerciseProgress((prev) => {
+        const newMap = new Map(prev);
+        const progress = newMap.get(exerciseId);
+        if (progress && progress.sets.length > 1) {
+          const lastIndex = progress.sets.length - 1;
+          if (
+            activeSet &&
+            activeSet.exerciseId === exerciseId &&
+            activeSet.setIndex === lastIndex
+          ) {
+            if (setTimerRef.current) {
+              clearInterval(setTimerRef.current);
+              setTimerRef.current = null;
+            }
+            setActiveSet(null);
+          }
+          newMap.set(exerciseId, {
+            ...progress,
+            sets: progress.sets.slice(0, -1),
+          });
+        }
+        return newMap;
+      });
+    },
+    [activeSet]
   );
 
   // Add set
@@ -615,6 +687,7 @@ const StrengthWorkoutSession = () => {
           reps: "",
           weight: "",
           completed: false,
+          time: 0,
         };
         newMap.set(exerciseId, {
           ...progress,
@@ -648,11 +721,7 @@ const StrengthWorkoutSession = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   if (!assignment || assignment.workout.type !== "strength") {
@@ -715,7 +784,7 @@ const StrengthWorkoutSession = () => {
               <div className="flex items-center gap-2">
                 <Button onClick={() => setShowSaveConfirm(true)} disabled={saving}>
                   {saving ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Spinner size="xs" className="mr-2" />
                   ) : null}
                   {t.athlete.session.save}
                 </Button>
@@ -751,12 +820,12 @@ const StrengthWorkoutSession = () => {
                   className={cn(
                     "w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0",
                     completionPercentage === 100
-                      ? "border-green-500 bg-green-500"
+                      ? "border-primary bg-primary"
                       : "border-muted-foreground"
                   )}
                 >
                   {completionPercentage === 100 && (
-                    <Check className="h-5 w-5 text-white" />
+                    <Check className="h-5 w-5 text-primary-foreground" />
                   )}
                 </div>
                 <div className="flex-1">
@@ -779,7 +848,7 @@ const StrengthWorkoutSession = () => {
               {/* Progress bar */}
               <div className="mt-4 h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-green-500 transition-all duration-300"
+                  className="h-full bg-primary transition-all duration-300"
                   style={{ width: `${completionPercentage}%` }}
                 />
               </div>
@@ -794,6 +863,9 @@ const StrengthWorkoutSession = () => {
 
               if (!progress) return null;
 
+              const activeSetIndex =
+                activeSet?.exerciseId === workoutExercise.id ? activeSet.setIndex : null;
+
               return (
                 <ExerciseSessionCard
                   key={workoutExercise.id}
@@ -801,13 +873,19 @@ const StrengthWorkoutSession = () => {
                   exercise={exercise}
                   index={index}
                   progress={progress}
-                  isActive={activeExerciseId === workoutExercise.id}
-                  onStartTimer={() => handleStartExerciseTimer(workoutExercise.id)}
-                  onStopTimer={handleStopExerciseTimer}
+                  activeSetIndex={activeSetIndex}
+                  onStartSetTimer={(setIndex) =>
+                    handleStartSetTimer(workoutExercise.id, setIndex)
+                  }
+                  onStopSetTimer={handleStopSetTimer}
+                  onResetSetTimer={(setIndex) =>
+                    handleResetSetTimer(workoutExercise.id, setIndex)
+                  }
                   onUpdateSet={(setIndex, field, value) =>
                     handleUpdateSet(workoutExercise.id, setIndex, field, value)
                   }
                   onAddSet={() => handleAddSet(workoutExercise.id)}
+                  onRemoveLastSet={() => handleRemoveLastSet(workoutExercise.id)}
                   onToggleSetComplete={(setIndex) =>
                     handleToggleSetComplete(workoutExercise.id, setIndex)
                   }
@@ -829,7 +907,7 @@ const StrengthWorkoutSession = () => {
           </DrawerHeader>
           <DrawerFooter>
             <Button onClick={handleSave} disabled={saving} className="w-full">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {saving ? <Spinner size="xs" className="mr-2" /> : null}
               {t.athlete.session.saveConfirmConfirm}
             </Button>
             <Button variant="outline" className="w-full" onClick={() => setShowSaveConfirm(false)}>

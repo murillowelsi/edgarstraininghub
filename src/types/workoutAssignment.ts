@@ -8,6 +8,7 @@ export interface SetProgressData {
   reps: string;
   weight: string;
   completed: boolean;
+  time?: number; // seconds tracked by the per-set timer
 }
 
 // Progress data for a single exercise

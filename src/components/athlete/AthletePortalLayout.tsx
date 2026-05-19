@@ -10,6 +10,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
+import { Spinner } from "@/components/ui/spinner";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { ChatService } from "@/services/chat";
 import { createMentionNotifications, createTimelinePost, subscribeToMentionCount } from "@/services/timelineService";
@@ -273,7 +274,7 @@ const AthletePortalLayout = ({
                   </div>
                   {isUploadingPhoto && (
                     <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <Spinner size="xs" className="text-white" />
                     </div>
                   )}
                 </button>

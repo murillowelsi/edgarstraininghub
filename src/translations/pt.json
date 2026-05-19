@@ -809,6 +809,7 @@
       "repsHeader": "Reps",
       "kgHeader": "Kg",
       "addNewSet": "Adicionar série",
+      "removeLastSet": "Remover última",
       "workoutNotFound": "Treino não encontrado",
       "goBack": "Voltar",
       "totalTime": "Tempo Total",

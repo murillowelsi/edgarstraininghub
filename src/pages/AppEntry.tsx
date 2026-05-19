@@ -9,10 +9,10 @@
  *
  * The public website stays at / for desktop browsers.
  */
-import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { PageSpinner } from "@/components/ui/spinner";
 
 export default function AppEntry() {
   const { user, loading, isAdmin, isEditor, isAthlete } = useAuth();
@@ -32,9 +32,5 @@ export default function AppEntry() {
     }
   }, [user, loading, isAdmin, isEditor, isAthlete, navigate]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
-  );
+  return <PageSpinner />;
 }

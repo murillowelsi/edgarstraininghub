@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
+import { Spinner } from "@/components/ui/spinner";
 import { auth, db } from "../lib/firebase";
 import { signOut } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
@@ -164,7 +165,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
                   </div>
                   {isUploadingPhoto && (
                     <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <Spinner size="xs" className="text-white" />
                     </div>
                   )}
                 </button>
