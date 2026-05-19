@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { PullToRefresh } from "./components/PullToRefresh";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -61,6 +62,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <PullToRefresh />
               <Routes>
                 {/* PWA entry point — redirects to app based on auth state */}
                 <Route path="/app" element={<AppEntry />} />
