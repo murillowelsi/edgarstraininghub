@@ -47,6 +47,7 @@ import AthleteTimeline from "./pages/athlete/Timeline";
 import AthleteProfile from "./pages/athlete/Profile";
 import AthleteActivityDetail from "./pages/athlete/ActivityDetail";
 import AthleteEventDetail from "./pages/athlete/EventDetail";
+import StravaCallback from "./pages/athlete/StravaCallback";
 
 const queryClient = new QueryClient();
 
@@ -329,6 +330,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAthlete>
                       <AthleteActivityDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/strava/callback"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <StravaCallback />
                     </ProtectedRoute>
                   }
                 />
