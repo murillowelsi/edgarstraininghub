@@ -78,12 +78,12 @@ const AthleteHome = () => {
     sc.scrollTo({ left: target, behavior: smooth ? "smooth" : "auto" });
   };
 
-  // Center today on first render
+  // Snap today to the leading edge once the date strip is mounted (after loading)
   useLayoutEffect(() => {
-    if (didInitialScrollRef.current) return;
+    if (loading || didInitialScrollRef.current) return;
     scrollDayIntoView(new Date(), false);
     didInitialScrollRef.current = true;
-  }, []);
+  }, [loading]);
 
   // After prepending, restore visual scroll position
   useLayoutEffect(() => {
