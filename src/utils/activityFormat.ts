@@ -43,22 +43,6 @@ export const formatHeartRate = (bpm?: number | null): string => {
   return `${Math.round(bpm)} bpm`;
 };
 
-export const formatElevation = (meters?: number | null): string => {
-  if (meters == null) return "—";
-  return `${Math.round(meters)} m`;
-};
-
-export const formatCalories = (kcal?: number | null): string => {
-  if (kcal == null) return "—";
-  return `${Math.round(kcal)} kcal`;
-};
-
-export const formatCadence = (value?: number | null, type?: WorkoutType): string => {
-  if (value == null) return "—";
-  const unit = type === "cycling" ? "rpm" : "spm";
-  return `${Math.round(value)} ${unit}`;
-};
-
 export const getActivityHeadline = (
   type: WorkoutType,
   data?: ActivityData

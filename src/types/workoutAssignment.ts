@@ -31,14 +31,9 @@ export interface ActivityData {
   elapsedTime?: number; // in seconds
   distance?: number;    // km for running/cycling, m for swimming
   avgHeartRate?: number; // bpm
-  maxHeartRate?: number; // bpm
   avgPace?: number;     // seconds per km (running) or per 100m (swimming)
   avgSpeed?: number;    // km/h (cycling)
-  maxSpeed?: number;    // km/h (cycling)
   avgPower?: number;    // watts (cycling, optional)
-  avgCadence?: number;  // rpm (cycling) or steps per minute (running)
-  elevationGain?: number; // meters
-  calories?: number;    // kcal
   stageTimes?: StageTimeData[]; // actual time per stage
 }
 
@@ -55,7 +50,6 @@ export interface WorkoutAssignment {
   progressData?: ExerciseProgressData[];
   activityData?: ActivityData;
   skipped?: boolean;
-  stravaActivityId?: number; // set when activity was imported from Strava
   createdAt: Date;
   updatedAt: Date;
 }
@@ -72,7 +66,6 @@ export interface WorkoutAssignmentDocument {
   progressData?: ExerciseProgressData[];
   activityData?: ActivityData;
   skipped?: boolean;
-  stravaActivityId?: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

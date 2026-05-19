@@ -19,10 +19,7 @@ import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { modalityAccent } from "@/utils/modalityColors";
 import {
-  formatCadence,
-  formatCalories,
   formatDistance,
-  formatElevation,
   formatHeartRate,
   formatPace,
   formatSpeed,
@@ -30,7 +27,7 @@ import {
 } from "@/utils/activityFormat";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, Dumbbell, ExternalLink, Flame, Footprints, Gauge, HeartPulse, Mountain, MoreHorizontal, Pencil, Repeat, Timer, Trash2, Zap } from "lucide-react";
+import { ChevronLeft, Dumbbell, Flame, Footprints, Gauge, HeartPulse, MoreHorizontal, Pencil, Timer, Trash2, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { useNavigate, useParams } from "react-router-dom";
@@ -124,23 +121,8 @@ const ActivityDetail = () => {
           : { icon: Gauge, label: ta.metrics.avgPace, value: formatPace(data?.avgPace, type) },
         { icon: Timer, label: ta.metrics.time, value: formatTimeShort(data?.elapsedTime) },
         { icon: HeartPulse, label: ta.metrics.avgHr, value: formatHeartRate(data?.avgHeartRate) },
-        ...(data?.maxHeartRate != null
-          ? [{ icon: HeartPulse, label: "Max HR", value: formatHeartRate(data.maxHeartRate) }]
-          : []),
-        ...(isCycle && data?.maxSpeed != null
-          ? [{ icon: Gauge, label: "Max speed", value: formatSpeed(data.maxSpeed) }]
-          : []),
         ...(isCycle && data?.avgPower != null
           ? [{ icon: Zap, label: ta.metrics.avgPower, value: `${Math.round(data.avgPower)} W` }]
-          : []),
-        ...(data?.avgCadence != null
-          ? [{ icon: Repeat, label: "Cadence", value: formatCadence(data.avgCadence, type) }]
-          : []),
-        ...(data?.elevationGain != null
-          ? [{ icon: Mountain, label: "Elevation", value: formatElevation(data.elevationGain) }]
-          : []),
-        ...(data?.calories != null
-          ? [{ icon: Flame, label: "Calories", value: formatCalories(data.calories) }]
           : []),
       ];
 
@@ -213,18 +195,6 @@ const ActivityDetail = () => {
             </Card>
           ))}
         </div>
-
-        {assignment.stravaActivityId != null && (
-          <a
-            href={`https://www.strava.com/activities/${assignment.stravaActivityId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 rounded-full bg-[#FC4C02] text-white font-semibold py-2.5 hover:opacity-90 transition"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Open in Strava
-          </a>
-        )}
 
         {assignment.workout.notes && (
           <>

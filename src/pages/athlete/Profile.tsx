@@ -2,7 +2,6 @@ import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import ActivityCard from "@/components/athlete/ActivityCard";
 import EventCard from "@/components/athlete/EventCard";
 import AddEventSheet from "@/components/athlete/AddEventSheet";
-import StravaIntegration from "@/components/athlete/StravaIntegration";
 import { ProgressSummaryChart } from "@/components/athlete/ProgressSummaryChart";
 import { TrainingLogCalendar } from "@/components/athlete/TrainingLogCalendar";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
@@ -183,8 +182,6 @@ const AthleteProfile = () => {
                 </div>
               </CardContent>
             </Card>
-
-            <StravaIntegration />
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4 mt-5">
