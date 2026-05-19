@@ -68,15 +68,14 @@ const AthleteHome = () => {
   });
 
   const scrollDayIntoView = (date: Date, smooth: boolean) => {
+    const sc = weekScrollRef.current;
     const key = startOfDay(date).toISOString();
     const btn = dayBtnRefs.current.get(key);
-    if (btn) {
-      btn.scrollIntoView({
-        inline: "center",
-        block: "nearest",
-        behavior: smooth ? "smooth" : "auto",
-      });
-    }
+    if (!sc || !btn) return;
+    const scRect = sc.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    const target = sc.scrollLeft + (btnRect.left - scRect.left);
+    sc.scrollTo({ left: target, behavior: smooth ? "smooth" : "auto" });
   };
 
   // Center today on first render
