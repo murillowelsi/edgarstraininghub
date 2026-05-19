@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
-    const expected = process.env.STRAVA_WEBHOOK_VERIFY_TOKEN;
+    const expected = process.env.VITE_STRAVA_WEBHOOK_VERIFY_TOKEN;
 
     if (mode === 'subscribe' && expected && token === expected && challenge) {
       return res.status(200).json({ 'hub.challenge': challenge });
