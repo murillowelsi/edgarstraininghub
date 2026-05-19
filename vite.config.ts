@@ -48,11 +48,11 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
-      injectManifestOptions: {
+      injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
         // Never precache service worker files themselves
         globIgnores: ["**/lovable-uploads/**", "**/sw.js", "**/firebase-messaging-sw.js"],
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
     }),
   ].filter(Boolean),
