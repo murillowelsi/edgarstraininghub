@@ -22,29 +22,12 @@ const SPORT_MAP = {
 
 const mapSportType = (sportType) => SPORT_MAP[sportType] || null;
 
-const fingerprint = (v) => {
-  if (v === undefined) return 'UNDEFINED';
-  if (v === null) return 'NULL';
-  if (v === '') return 'EMPTY';
-  const trimmed = v.trim();
-  const trimmedWarn = trimmed.length !== v.length ? ' [HAS_WHITESPACE]' : '';
-  const head = v.slice(0, 3);
-  const tail = v.slice(-2);
-  return `len=${v.length} head=${head}… tail=…${tail}${trimmedWarn}`;
-};
-
 const getClientId = () => process.env.VITE_STRAVA_CLIENT_ID;
 const getClientSecret = () => process.env.VITE_STRAVA_CLIENT_SECRET;
 
 const exchangeCodeForToken = async (code) => {
   const clientId = getClientId();
   const clientSecret = getClientSecret();
-
-  console.log('[strava] token exchange env:', {
-    VITE_STRAVA_CLIENT_ID: fingerprint(clientId),
-    VITE_STRAVA_CLIENT_SECRET: fingerprint(clientSecret),
-    code: fingerprint(code),
-  });
 
   const res = await fetch(TOKEN_URL, {
     method: 'POST',
