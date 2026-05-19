@@ -249,9 +249,9 @@ const ExerciseSessionCard = ({
 
         {/* Sets Table */}
         <div>
-          <div className="grid grid-cols-[32px_1fr_64px_64px_36px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
+          <div className="grid grid-cols-[24px_minmax(0,1fr)_52px_52px_32px] gap-1.5 text-xs font-medium text-muted-foreground mb-2 px-1">
             <span>{t.athlete.session.setHeader}</span>
-            <span>{t.athlete.session.exerciseTimer}</span>
+            <span className="truncate">{t.athlete.session.exerciseTimer}</span>
             <span className="text-center">{t.athlete.session.repsHeader}</span>
             <span className="text-center">{t.athlete.session.kgHeader}</span>
             <span></span>
@@ -264,40 +264,40 @@ const ExerciseSessionCard = ({
                 <div
                   key={setIndex}
                   className={cn(
-                    "grid grid-cols-[32px_1fr_64px_64px_36px] gap-2 items-center",
+                    "grid grid-cols-[24px_minmax(0,1fr)_52px_52px_32px] gap-1.5 items-center",
                     set.completed && "opacity-60"
                   )}
                 >
                   <span className="text-sm font-medium text-center">{set.setNumber}</span>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1 min-w-0">
                     <button
                       onClick={() => (isSetActive ? onStopSetTimer() : onStartSetTimer(setIndex))}
                       disabled={set.completed}
                       className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
+                        "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
                         isSetActive
                           ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           : "bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
                       )}
                       aria-label={isSetActive ? t.athlete.session.stop : t.athlete.session.start}
                     >
-                      {isSetActive ? <Square className="h-3 w-3" fill="currentColor" /> : <Play className="h-4 w-4 ml-0.5" />}
+                      {isSetActive ? <Square className="h-2.5 w-2.5" fill="currentColor" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
                     </button>
                     <span
                       className={cn(
-                        "text-sm font-mono tabular-nums",
+                        "text-xs font-mono tabular-nums truncate",
                         isSetActive ? "text-primary font-semibold" : "text-muted-foreground"
                       )}
                     >
                       {formatTime(set.time)}
                     </span>
-                    {set.time > 0 && !set.completed && (
+                    {set.time > 0 && !set.completed && !isSetActive && (
                       <button
                         onClick={() => onResetSetTimer(setIndex)}
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground flex-shrink-0"
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground flex-shrink-0"
                         aria-label={t.athlete.session.reset ?? "Reset"}
                       >
-                        <RotateCcw className="h-3.5 w-3.5" />
+                        <RotateCcw className="h-3 w-3" />
                       </button>
                     )}
                   </div>
@@ -306,7 +306,7 @@ const ExerciseSessionCard = ({
                     value={set.reps}
                     onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
                     placeholder={workoutExercise.reps || "10"}
-                    className="h-10 text-center text-base"
+                    className="h-10 text-center text-sm px-1 min-w-0"
                     disabled={set.completed}
                   />
                   <Input
@@ -314,19 +314,19 @@ const ExerciseSessionCard = ({
                     value={set.weight}
                     onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
                     placeholder="0"
-                    className="h-10 text-center text-base"
+                    className="h-10 text-center text-sm px-1 min-w-0"
                     disabled={set.completed}
                   />
                   <button
                     onClick={() => onToggleSetComplete(setIndex)}
                     className={cn(
-                      "w-9 h-9 rounded-full flex items-center justify-center transition-all",
+                      "w-8 h-8 rounded-full flex items-center justify-center transition-all",
                       set.completed
                         ? "bg-primary text-primary-foreground shadow-md"
                         : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
                     )}
                   >
-                    <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
+                    <Check className={cn("h-4 w-4", !set.completed && "opacity-50")} />
                   </button>
                 </div>
               );
