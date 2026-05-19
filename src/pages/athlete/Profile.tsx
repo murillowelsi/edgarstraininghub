@@ -2,6 +2,8 @@ import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import ActivityCard from "@/components/athlete/ActivityCard";
 import EventCard from "@/components/athlete/EventCard";
 import AddEventSheet from "@/components/athlete/AddEventSheet";
+import { ProgressSummaryChart } from "@/components/athlete/ProgressSummaryChart";
+import { TrainingLogCalendar } from "@/components/athlete/TrainingLogCalendar";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -166,6 +168,10 @@ const AthleteProfile = () => {
                 )}
               </CardContent>
             </Card>
+
+            <ProgressSummaryChart assignments={assignments} />
+
+            <TrainingLogCalendar assignments={assignments} />
 
             <Card className="border-border/50">
               <CardContent className="p-4 space-y-3">

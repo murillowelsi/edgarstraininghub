@@ -841,6 +841,18 @@
       "workoutsCompleted": "Workouts completed",
       "upcomingEventsCount": "Upcoming events",
       "noActivities": "No completed activities yet.",
+      "progressSummary": "Progress summary",
+      "trainingLog": "Training log",
+      "noActivity": "No activity in this range yet.",
+      "ranges": {
+        "fourWeeks": "4 weeks",
+        "twelveWeeks": "12 weeks",
+        "oneYear": "1 year"
+      },
+      "metrics": {
+        "distance": "Distance",
+        "time": "Time"
+      },
       "modalities": {
         "running": "Running",
         "cycling": "Cycling",

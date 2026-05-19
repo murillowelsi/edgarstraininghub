@@ -311,22 +311,25 @@ const AthleteHome = () => {
         </div>
 
         {/* Progress Card */}
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{t.athlete.home.yourProgress}</CardTitle>
-              <span className="text-sm text-muted-foreground">
-                {completedWorkouts} of {totalWorkouts}
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Progress value={completionRate} className="h-3" />
-            <p className="text-xs text-muted-foreground mt-2">
-              {t.athlete.home.workoutsRemaining.replace("{{count}}", String(totalWorkouts - completedWorkouts))}
-            </p>
-          </CardContent>
-        </Card>
+        <Link to="/athlete/profile?tab=progress" className="block">
+          <Card className="hover:border-primary/40 hover:shadow-md transition-all">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">{t.athlete.home.yourProgress}</CardTitle>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <span>{completedWorkouts} of {totalWorkouts}</span>
+                  <ChevronRight className="h-4 w-4" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Progress value={completionRate} className="h-3" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {t.athlete.home.workoutsRemaining.replace("{{count}}", String(totalWorkouts - completedWorkouts))}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Week Calendar */}
         <Card>
