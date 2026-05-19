@@ -12,7 +12,8 @@ import { getUserById } from "@/services/usersService";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import { getTeamColor } from "@/lib/teamColors";
-import { Loader2, Search, Shield } from "lucide-react";
+import { Search, Shield } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -96,9 +97,7 @@ export default function AthleteTeams() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-40">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <SectionSpinner />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-2 text-center">
             <Shield className="h-10 w-10 text-muted-foreground/40" />

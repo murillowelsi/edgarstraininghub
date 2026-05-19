@@ -13,7 +13,8 @@ import { getUserById } from "@/services/usersService";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import { getTeamColor } from "@/lib/teamColors";
-import { ChevronLeft, Loader2, Shield, Users } from "lucide-react";
+import { ChevronLeft, Shield, Users } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -55,9 +56,7 @@ export default function AthleteTeamDetail() {
   if (loading) {
     return (
       <AthletePortalLayout title={t.athlete.nav.teams}>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <SectionSpinner />
       </AthletePortalLayout>
     );
   }

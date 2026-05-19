@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Image, Loader2 } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { TimelinePostCard } from "./TimelinePostCard";
 import { getTimelinePosts, subscribeToMentionCount, subscribeToTimelinePosts } from "@/services/timelineService";
@@ -148,11 +149,7 @@ export function TimelineFeed() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <SectionSpinner />;
   }
 
   const authorName = user?.email || "User";

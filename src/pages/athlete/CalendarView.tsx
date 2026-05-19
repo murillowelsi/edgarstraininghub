@@ -13,9 +13,9 @@ import {
   Check,
   ChevronRight,
   Dumbbell,
-  Loader2,
   PersonStanding,
 } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -91,9 +91,7 @@ const AthleteCalendarView = () => {
   if (loading) {
     return (
       <AthletePortalLayout title={t.athlete.calendar.title}>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <SectionSpinner />
       </AthletePortalLayout>
     );
   }

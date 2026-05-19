@@ -4,7 +4,8 @@ import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
-import { Loader2, Plus, Search, MessageSquare, Users2 } from "lucide-react";
+import { Plus, Search, MessageSquare, Users2 } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
@@ -180,9 +181,7 @@ export default function AthleteChat() {
     if (loading) {
         return (
             <AthletePortalLayout title="Chat">
-                <div className="flex items-center justify-center h-[60vh]">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
+                <SectionSpinner />
             </AthletePortalLayout>
         );
     }

@@ -5,7 +5,8 @@ import AddEventSheet from "@/components/athlete/AddEventSheet";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dumbbell, Loader2, Plus } from "lucide-react";
+import { Dumbbell, Plus } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { type WorkoutType } from "@/types/workout";
 import { modalityAccent } from "@/utils/modalityColors";
@@ -97,9 +98,7 @@ const AthleteProfile = () => {
   if (loading) {
     return (
       <AthletePortalLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <SectionSpinner />
       </AthletePortalLayout>
     );
   }

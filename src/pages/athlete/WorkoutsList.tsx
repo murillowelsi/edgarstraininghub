@@ -29,6 +29,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -144,9 +145,7 @@ const AthleteWorkoutsList = () => {
   if (loading) {
     return (
       <AthletePortalLayout title={t.athlete.workouts.title}>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <SectionSpinner />
       </AthletePortalLayout>
     );
   }

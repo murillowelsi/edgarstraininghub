@@ -25,3 +25,9 @@ export const PageSpinner = () => (
     <Spinner size="lg" />
   </div>
 );
+
+export const SectionSpinner = () => (
+  <div className="flex items-center justify-center h-[60vh]">
+    <Spinner size="lg" />
+  </div>
+);

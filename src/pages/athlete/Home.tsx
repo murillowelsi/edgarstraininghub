@@ -20,7 +20,8 @@ import { useEventChatReminders } from "@/hooks/useEventChatReminders";
 import { differenceInCalendarDays } from "date-fns";
 import { addDays, format, isAfter, isBefore, isSameDay, isToday, startOfDay, startOfWeek } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import { CalendarCheck, ChevronRight, Dumbbell, Flame, Loader2, PersonStanding, Plus, Target, TrendingUp } from "lucide-react";
+import { CalendarCheck, ChevronRight, Dumbbell, Flame, PersonStanding, Plus, Target, TrendingUp } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -111,9 +112,7 @@ const AthleteHome = () => {
   if (loading) {
     return (
       <AthletePortalLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <SectionSpinner />
       </AthletePortalLayout>
     );
   }

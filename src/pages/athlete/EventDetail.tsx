@@ -14,12 +14,12 @@ import {
   ArrowLeft,
   Calendar,
   Flag,
-  Loader2,
   Pencil,
   Sparkles,
   Target,
   Trophy,
 } from "lucide-react";
+import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -75,9 +75,7 @@ const EventDetail = () => {
   if (loading || !event || !user) {
     return (
       <AthletePortalLayout title="Evento" hideBottomNav>
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <SectionSpinner />
       </AthletePortalLayout>
     );
   }
