@@ -142,11 +142,7 @@ const AthleteHome = () => {
           </div>
         </div>
 
-        <LeaveTestimonialBanner
-          mode="home"
-          displayName={displayName}
-          photoURL={photoURL ?? undefined}
-        />
+        <LeaveTestimonialBanner mode="home" />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">

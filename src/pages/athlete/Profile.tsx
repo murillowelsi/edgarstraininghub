@@ -126,11 +126,7 @@ const AthleteProfile = () => {
           </div>
         </div>
 
-        <LeaveTestimonialBanner
-          mode="profile"
-          displayName={displayName}
-          photoURL={photoURL ?? undefined}
-        />
+        <LeaveTestimonialBanner mode="profile" />
 
         <Tabs
           value={activeTab}

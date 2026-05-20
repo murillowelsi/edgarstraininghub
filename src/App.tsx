@@ -46,6 +46,7 @@ import AdminTimeline from "./pages/admin/Timeline";
 import AdminTestimonials from "./pages/admin/Testimonials";
 import AthleteTimeline from "./pages/athlete/Timeline";
 import AthleteProfile from "./pages/athlete/Profile";
+import AthleteTestimonial from "./pages/athlete/Testimonial";
 import AthleteActivityDetail from "./pages/athlete/ActivityDetail";
 import AthleteEventDetail from "./pages/athlete/EventDetail";
 
@@ -322,6 +323,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAthlete>
                       <AthleteProfile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/athlete/testimonial"
+                  element={
+                    <ProtectedRoute requireAthlete>
+                      <AthleteTestimonial />
                     </ProtectedRoute>
                   }
                 />
