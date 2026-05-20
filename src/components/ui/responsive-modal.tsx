@@ -16,7 +16,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 
 interface ResponsiveModalProps {
   open: boolean;
@@ -28,44 +28,6 @@ interface ResponsiveModalProps {
   children: ReactNode;
 }
 
-/**
- * Tracks the on-screen keyboard height via the VisualViewport API.
- * On iOS Safari, focusing an input inside a `position:fixed` drawer makes the
- * browser shift the whole layout viewport up to keep the input visible, which
- * pushes the drawer off-screen. By anchoring the drawer above the keyboard
- * ourselves, iOS no longer needs to do that shift.
- */
-function useKeyboardViewport(active: boolean) {
-  const [state, setState] = useState({ keyboardInset: 0, visualHeight: 0 });
-
-  useEffect(() => {
-    if (!active) {
-      setState({ keyboardInset: 0, visualHeight: 0 });
-      return;
-    }
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    const update = () => {
-      const inset = window.innerHeight - vv.height - vv.offsetTop;
-      setState({
-        keyboardInset: Math.max(0, Math.round(inset)),
-        visualHeight: Math.round(vv.height),
-      });
-    };
-
-    update();
-    vv.addEventListener("resize", update);
-    vv.addEventListener("scroll", update);
-    return () => {
-      vv.removeEventListener("resize", update);
-      vv.removeEventListener("scroll", update);
-    };
-  }, [active]);
-
-  return state;
-}
-
 export function ResponsiveModal({
   open,
   onOpenChange,
@@ -75,29 +37,22 @@ export function ResponsiveModal({
   children,
 }: ResponsiveModalProps) {
   const isMobile = useIsMobile();
-  const { keyboardInset, visualHeight } = useKeyboardViewport(isMobile && open);
 
   if (isMobile) {
-    const mobileStyle =
-      keyboardInset > 0
-        ? {
-            bottom: keyboardInset,
-            maxHeight: Math.round(visualHeight * 0.95),
-          }
-        : undefined;
-
+    // Note: `repositionInputs` (vaul default = true) is what enables vaul's
+    // `preventScrollMobileSafari` helper, which uses the `translateY(-2000px)`
+    // trick to stop iOS Safari from auto-scrolling the layout viewport when an
+    // input inside a fixed-position drawer gains focus. Without it, focusing
+    // the textarea launches the whole drawer off-screen. `shouldScaleBackground`
+    // is left disabled because its body-transform conflicts with Radix Select's
+    // scroll-lock toggles inside the drawer.
     return (
       <Drawer
         open={open}
         onOpenChange={onOpenChange}
-        repositionInputs={false}
         shouldScaleBackground={false}
       >
-        <DrawerContent
-          direction="bottom"
-          className="max-h-[90dvh] flex flex-col"
-          style={mobileStyle}
-        >
+        <DrawerContent direction="bottom" className="max-h-[90dvh] flex flex-col">
           <DrawerHeader className="text-left shrink-0">
             <DrawerTitle>{title}</DrawerTitle>
             {description && <DrawerDescription>{description}</DrawerDescription>}
