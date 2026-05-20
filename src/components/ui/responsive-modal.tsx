@@ -16,7 +16,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 interface ResponsiveModalProps {
   open: boolean;
@@ -28,6 +28,44 @@ interface ResponsiveModalProps {
   children: ReactNode;
 }
 
+/**
+ * Tracks the on-screen keyboard height via the VisualViewport API.
+ * On iOS Safari, focusing an input inside a `position:fixed` drawer makes the
+ * browser shift the whole layout viewport up to keep the input visible, which
+ * pushes the drawer off-screen. By anchoring the drawer above the keyboard
+ * ourselves, iOS no longer needs to do that shift.
+ */
+function useKeyboardViewport(active: boolean) {
+  const [state, setState] = useState({ keyboardInset: 0, visualHeight: 0 });
+
+  useEffect(() => {
+    if (!active) {
+      setState({ keyboardInset: 0, visualHeight: 0 });
+      return;
+    }
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const update = () => {
+      const inset = window.innerHeight - vv.height - vv.offsetTop;
+      setState({
+        keyboardInset: Math.max(0, Math.round(inset)),
+        visualHeight: Math.round(vv.height),
+      });
+    };
+
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, [active]);
+
+  return state;
+}
+
 export function ResponsiveModal({
   open,
   onOpenChange,
@@ -37,8 +75,17 @@ export function ResponsiveModal({
   children,
 }: ResponsiveModalProps) {
   const isMobile = useIsMobile();
+  const { keyboardInset, visualHeight } = useKeyboardViewport(isMobile && open);
 
   if (isMobile) {
+    const mobileStyle =
+      keyboardInset > 0
+        ? {
+            bottom: keyboardInset,
+            maxHeight: Math.round(visualHeight * 0.95),
+          }
+        : undefined;
+
     return (
       <Drawer
         open={open}
@@ -46,7 +93,11 @@ export function ResponsiveModal({
         repositionInputs={false}
         shouldScaleBackground={false}
       >
-        <DrawerContent direction="bottom" className="max-h-[90dvh] flex flex-col">
+        <DrawerContent
+          direction="bottom"
+          className="max-h-[90dvh] flex flex-col"
+          style={mobileStyle}
+        >
           <DrawerHeader className="text-left shrink-0">
             <DrawerTitle>{title}</DrawerTitle>
             {description && <DrawerDescription>{description}</DrawerDescription>}
