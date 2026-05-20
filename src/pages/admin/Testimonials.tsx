@@ -202,7 +202,6 @@ const AdminTestimonials = () => {
             icon={MessageSquareQuote}
             title={tt.empty.title}
             description={tt.empty.description}
-            action={{ label: tt.addAction, onClick: openNew }}
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
