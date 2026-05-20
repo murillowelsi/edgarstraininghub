@@ -1,4 +1,5 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
+import { InfiniteDateStrip, type InfiniteDateStripHandle } from "@/components/shared/InfiniteDateStrip";
 import { ListItemCard } from "@/components/shared/ListItemCard";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,7 @@ import { addDays, format, isAfter, isBefore, isSameDay, isToday, startOfDay } fr
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { CalendarCheck, ChevronRight, Dumbbell, Flame, PersonStanding, Plus, Target, TrendingUp } from "lucide-react";
 import { SectionSpinner } from "@/components/ui/spinner";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
@@ -51,97 +52,7 @@ const AthleteHome = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
   const [centerDate, setCenterDate] = useState(() => startOfDay(new Date()));
-  const weekScrollRef = useRef<HTMLDivElement>(null);
-  const dayBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const prependedCountRef = useRef(0);
-  const didInitialScrollRef = useRef(false);
-
-  const INITIAL_RADIUS = 30;
-  const PAGE_SIZE = 30;
-  const EDGE_THRESHOLD_PX = 240;
-
-  const [weekDays, setWeekDays] = useState<Date[]>(() => {
-    const today = startOfDay(new Date());
-    return Array.from({ length: INITIAL_RADIUS * 2 + 1 }, (_, i) =>
-      addDays(today, i - INITIAL_RADIUS),
-    );
-  });
-
-  const scrollDayIntoView = (date: Date, smooth: boolean) => {
-    const sc = weekScrollRef.current;
-    const key = startOfDay(date).toISOString();
-    const btn = dayBtnRefs.current.get(key);
-    if (!sc || !btn) return;
-    const scRect = sc.getBoundingClientRect();
-    const btnRect = btn.getBoundingClientRect();
-    const target = sc.scrollLeft + (btnRect.left - scRect.left);
-    sc.scrollTo({ left: target, behavior: smooth ? "smooth" : "auto" });
-  };
-
-  // Snap today to the leading edge once the date strip is mounted (after loading)
-  useLayoutEffect(() => {
-    if (loading || didInitialScrollRef.current) return;
-    scrollDayIntoView(new Date(), false);
-    didInitialScrollRef.current = true;
-  }, [loading]);
-
-  // After prepending, restore visual scroll position
-  useLayoutEffect(() => {
-    if (prependedCountRef.current > 0 && weekScrollRef.current) {
-      const first = weekDays[0];
-      const probe = dayBtnRefs.current.get(first.toISOString());
-      if (probe) {
-        const shift = probe.offsetWidth * prependedCountRef.current;
-        const gapWidth = 8;
-        weekScrollRef.current.scrollLeft += shift + gapWidth * prependedCountRef.current;
-      }
-      prependedCountRef.current = 0;
-    }
-  }, [weekDays]);
-
-  const handleWeekScroll = () => {
-    const sc = weekScrollRef.current;
-    if (!sc) return;
-
-    const containerRect = sc.getBoundingClientRect();
-    const containerCenter = containerRect.left + containerRect.width / 2;
-    let closestDate: Date | null = null;
-    let closestDist = Infinity;
-    dayBtnRefs.current.forEach((btn, key) => {
-      const r = btn.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const d = Math.abs(cx - containerCenter);
-      if (d < closestDist) {
-        closestDist = d;
-        closestDate = new Date(key);
-      }
-    });
-    if (closestDate && !isSameDay(closestDate, centerDate)) {
-      setCenterDate(closestDate);
-    }
-
-    if (sc.scrollLeft < EDGE_THRESHOLD_PX) {
-      setWeekDays((prev) => {
-        const first = prev[0];
-        const extra = Array.from({ length: PAGE_SIZE }, (_, i) =>
-          addDays(first, -PAGE_SIZE + i),
-        );
-        prependedCountRef.current = PAGE_SIZE;
-        return [...extra, ...prev];
-      });
-    } else if (
-      sc.scrollLeft + sc.clientWidth >
-      sc.scrollWidth - EDGE_THRESHOLD_PX
-    ) {
-      setWeekDays((prev) => {
-        const last = prev[prev.length - 1];
-        const extra = Array.from({ length: PAGE_SIZE }, (_, i) =>
-          addDays(last, i + 1),
-        );
-        return [...prev, ...extra];
-      });
-    }
-  };
+  const dateStripRef = useRef<InfiniteDateStripHandle>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -196,18 +107,7 @@ const AthleteHome = () => {
     const today = startOfDay(new Date());
     setSelectedDate(today);
     setCenterDate(today);
-
-    const inRange = weekDays.some((d) => isSameDay(d, today));
-    if (!inRange) {
-      setWeekDays(
-        Array.from({ length: INITIAL_RADIUS * 2 + 1 }, (_, i) =>
-          addDays(today, i - INITIAL_RADIUS),
-        ),
-      );
-      requestAnimationFrame(() => scrollDayIntoView(today, false));
-    } else {
-      scrollDayIntoView(today, true);
-    }
+    requestAnimationFrame(() => dateStripRef.current?.scrollToToday(true));
   };
 
   if (loading) {
@@ -342,45 +242,15 @@ const AthleteHome = () => {
             </div>
           </CardHeader>
           <CardContent className="pb-4">
-            {/* Horizontal Week Calendar */}
-            <div
-              ref={weekScrollRef}
-              onScroll={handleWeekScroll}
-              className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide"
-            >
-              {weekDays.map((day) => {
-                const isSelected = isSameDay(day, selectedDate);
-                const isTodayDate = isToday(day);
-                const hasWorkout = hasWorkouts(day);
-                const hasIncomplete = hasIncompleteWorkouts(day);
-                const key = day.toISOString();
-
-                return (
-                  <button
-                    key={key}
-                    ref={(el) => {
-                      if (el) dayBtnRefs.current.set(key, el);
-                      else dayBtnRefs.current.delete(key);
-                    }}
-                    onClick={() => setSelectedDate(day)}
-                    className={cn(
-                      "flex flex-col items-center justify-center min-w-[48px] h-[64px] rounded-xl transition-all border flex-shrink-0",
-                      isSelected
-                        ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105"
-                        : isTodayDate
-                          ? "bg-accent border-primary/30"
-                          : "bg-card border-border hover:border-primary/50",
-                    )}
-                  >
-                    <span className="text-xs font-medium opacity-70">{format(day, "EEE")}</span>
-                    <span className="text-lg font-bold">{format(day, "d")}</span>
-                    {hasWorkout && (
-                      <span className={cn("w-1.5 h-1.5 rounded-full", isSelected ? "bg-primary-foreground" : hasIncomplete ? "bg-primary" : "bg-green-500")} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+            <InfiniteDateStrip
+              ref={dateStripRef}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              onCenterDateChange={setCenterDate}
+              isReady={!loading}
+              hasWorkouts={hasWorkouts}
+              hasIncompleteWorkouts={hasIncompleteWorkouts}
+            />
 
             {/* Selected Date Workouts */}
             <div className="mt-4 space-y-2">
