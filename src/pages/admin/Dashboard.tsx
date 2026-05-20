@@ -19,8 +19,10 @@ import { getTeamsByCoach } from "@/services/teamsService";
 import { getAllUsers, getUserById } from "@/services/usersService";
 import { getAllWorkouts } from "@/services/workoutsService";
 import { getAllEvents } from "@/services/athleteEventsService";
+import { subscribeToAllTestimonials } from "@/services/testimonialsService";
 import type { AssignmentWithDetails } from "@/types/workoutAssignment";
 import type { AthleteEvent } from "@/types/athleteEvent";
+import type { Testimonial } from "@/types/testimonial";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import {
@@ -58,6 +60,7 @@ import {
   Dumbbell,
   Flag,
   Loader2,
+  MessageSquareQuote,
   Plus,
   Shield,
   Sunrise,
@@ -98,6 +101,7 @@ const AdminDashboard = () => {
   const [assignments, setAssignments] = useState<AssignmentWithDetails[]>([]);
   const [allAthletes, setAllAthletes] = useState<User[]>([]);
   const [events, setEvents] = useState<AthleteEvent[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
   const [centerDate, setCenterDate] = useState(() => startOfDay(new Date()));
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -138,6 +142,11 @@ const AdminDashboard = () => {
 
     if (user) loadData();
   }, [user, toast]);
+
+  useEffect(() => {
+    const unsub = subscribeToAllTestimonials(setTestimonials);
+    return unsub;
+  }, []);
 
   const hasWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date));
   const hasIncompleteWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date) && !a.completedAt);
@@ -214,6 +223,37 @@ const AdminDashboard = () => {
       .map((x) => ({ ...x, compliance: Math.round((x.done / x.planned) * 100) }))
       .sort((a, b) => b.compliance - a.compliance || b.done - a.done)
       .slice(0, 5);
+  })();
+
+  const reviewStatus = (() => {
+    const byAthlete = new Map<string, Testimonial>();
+    for (const t of testimonials) {
+      if (t.source === "athlete" && t.athleteId) {
+        const prev = byAthlete.get(t.athleteId);
+        if (!prev || prev.updatedAt < t.updatedAt) byAthlete.set(t.athleteId, t);
+      }
+    }
+    const rows = allAthletes.map((a) => {
+      const t = byAthlete.get(a.id);
+      const state: "approved" | "pending" | "none" = !t
+        ? "none"
+        : t.approved
+          ? "approved"
+          : "pending";
+      return { athlete: a, state, testimonial: t };
+    });
+    const order = { approved: 0, pending: 1, none: 2 } as const;
+    rows.sort(
+      (a, b) =>
+        order[a.state] - order[b.state] ||
+        a.athlete.displayName.localeCompare(b.athlete.displayName),
+    );
+    return {
+      rows,
+      approvedCount: rows.filter((r) => r.state === "approved").length,
+      pendingCount: rows.filter((r) => r.state === "pending").length,
+      noneCount: rows.filter((r) => r.state === "none").length,
+    };
   })();
 
   const upcomingEvents = events
@@ -952,6 +992,84 @@ const AdminDashboard = () => {
                     </Link>
                   ))
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Testimonial status */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MessageSquareQuote className="h-4 w-4 text-yellow-600" />
+                    <CardTitle className="text-base">
+                      {t.admin.dashboard.reviewsStatus}
+                    </CardTitle>
+                  </div>
+                  <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                    {reviewStatus.approvedCount + reviewStatus.pendingCount}/
+                    {reviewStatus.rows.length}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {reviewStatus.pendingCount > 0 && (
+                  <Link
+                    to="/admin/testimonials"
+                    className="flex items-center gap-2 text-xs font-semibold text-amber-700 bg-amber-500/10 rounded-md px-2 py-1.5 hover:bg-amber-500/20 transition"
+                  >
+                    <span>
+                      {reviewStatus.pendingCount}{" "}
+                      {t.admin.dashboard.pendingReviews}
+                    </span>
+                    <ChevronRight className="h-3.5 w-3.5 ml-auto" />
+                  </Link>
+                )}
+                <div className="max-h-72 overflow-y-auto space-y-1.5 pr-1">
+                  {reviewStatus.rows.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      {t.admin.athletes.empty}
+                    </p>
+                  ) : (
+                    reviewStatus.rows.map((row) => (
+                      <Link
+                        key={row.athlete.id}
+                        to={`/admin/athletes/${row.athlete.id}`}
+                        className="flex items-center gap-2 p-1.5 rounded-md hover:bg-muted/60 transition"
+                      >
+                        <CachedAvatar
+                          src={row.athlete.photoURL}
+                          alt={row.athlete.displayName}
+                          fallback={row.athlete.displayName
+                            .charAt(0)
+                            .toUpperCase()}
+                          className="h-7 w-7 shrink-0"
+                          fallbackClassName="bg-primary/15 text-primary text-[10px] font-semibold"
+                        />
+                        <span className="text-sm font-medium truncate min-w-0 flex-1">
+                          {row.athlete.displayName}
+                        </span>
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            "text-[10px] tabular-nums shrink-0",
+                            row.state === "approved" &&
+                              "bg-green-500/15 text-green-700",
+                            row.state === "pending" &&
+                              "bg-amber-500/15 text-amber-700",
+                            row.state === "none" &&
+                              "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {row.state === "approved"
+                            ? t.admin.dashboard.reviewed
+                            : row.state === "pending"
+                              ? t.admin.dashboard.reviewPending
+                              : t.admin.dashboard.notReviewed}
+                        </Badge>
+                      </Link>
+                    ))
+                  )}
+                </div>
               </CardContent>
             </Card>
 

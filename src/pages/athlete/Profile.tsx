@@ -8,6 +8,7 @@ import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dumbbell, Plus } from "lucide-react";
+import { LeaveTestimonialBanner } from "@/components/athlete/LeaveTestimonialBanner";
 import { SectionSpinner } from "@/components/ui/spinner";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { type WorkoutType } from "@/types/workout";
@@ -124,6 +125,12 @@ const AthleteProfile = () => {
             <p className="text-sm text-muted-foreground">{t.athlete.role}</p>
           </div>
         </div>
+
+        <LeaveTestimonialBanner
+          mode="profile"
+          displayName={displayName}
+          photoURL={photoURL ?? undefined}
+        />
 
         <Tabs
           value={activeTab}
@@ -252,6 +259,7 @@ const AthleteProfile = () => {
           event={editingEvent}
         />
       )}
+
     </AthletePortalLayout>
   );
 };

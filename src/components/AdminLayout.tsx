@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, Home, LayoutGrid, LogOut, Menu, Shield, UserRound, Users } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, Home, LayoutGrid, LogOut, Menu, MessageSquareQuote, Shield, UserRound, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -47,6 +47,7 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
     { href: "/admin/calendar", label: t.admin.nav.calendar, icon: CalendarDays },
     { href: "/admin/posts", label: t.admin.nav.posts, icon: FileText },
     { href: "/admin/timeline", label: t.admin.nav.timeline, icon: LayoutGrid },
+    { href: "/admin/testimonials", label: t.admin.nav.testimonials, icon: MessageSquareQuote },
   ];
   const location = useLocation();
   const navigate = useNavigate();

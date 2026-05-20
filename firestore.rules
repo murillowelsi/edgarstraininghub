@@ -107,6 +107,26 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Testimonials: public reads only approved ones; athletes can read & submit
+    // their own (always created unapproved); admins can manage everything.
+    match /testimonials/{testimonialId} {
+      allow read: if resource.data.approved == true ||
+        isAdmin() ||
+        (request.auth != null && resource.data.athleteId == request.auth.uid);
+      allow create: if isAdmin() ||
+        (request.auth != null
+          && request.resource.data.source == "athlete"
+          && request.resource.data.athleteId == request.auth.uid
+          && request.resource.data.approved == false);
+      allow update: if isAdmin() ||
+        (request.auth != null
+          && resource.data.athleteId == request.auth.uid
+          && request.resource.data.athleteId == resource.data.athleteId
+          && request.resource.data.source == resource.data.source
+          && request.resource.data.approved == false);
+      allow delete: if isAdmin();
+    }
+
     // Chat rules: Admin can read/write any chat. Participants can read/write their own.
     match /chats/{chatId} {
       allow read: if request.auth != null && (

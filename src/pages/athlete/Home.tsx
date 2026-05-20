@@ -1,6 +1,7 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { InfiniteDateStrip, type InfiniteDateStripHandle } from "@/components/shared/InfiniteDateStrip";
 import { ListItemCard } from "@/components/shared/ListItemCard";
+import { LeaveTestimonialBanner } from "@/components/athlete/LeaveTestimonialBanner";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -140,6 +141,12 @@ const AthleteHome = () => {
             <h1 className="text-2xl font-bold font-display">{displayName}</h1>
           </div>
         </div>
+
+        <LeaveTestimonialBanner
+          mode="home"
+          displayName={displayName}
+          photoURL={photoURL ?? undefined}
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
