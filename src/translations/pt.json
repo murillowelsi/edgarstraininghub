@@ -519,7 +519,7 @@
       "title": "Calendário",
       "allAthletes": "Todos os Atletas",
       "today": "Hoje",
-      "days": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+      "days": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
       "noWorkouts": "Sem treinos",
       "completedOn": "Concluído em",
       "deleteAssignment": "Eliminar Atribuição",
@@ -833,7 +833,8 @@
         "planned": "Planejados",
         "done": "Concluídos",
         "compliance": "Conformidade",
-        "thisWeek": "essa semana"
+        "thisWeek": "essa semana",
+        "total": "Total"
       },
       "hoursByModality": "Horas por modalidade",
       "noModalityActivity": "Nenhuma atividade agendada ou concluída esta semana.",

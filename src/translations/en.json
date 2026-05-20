@@ -519,7 +519,7 @@
       "title": "Calendar",
       "allAthletes": "All Athletes",
       "today": "Today",
-      "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
       "noWorkouts": "No workouts",
       "completedOn": "Completed on",
       "deleteAssignment": "Delete Assignment",
@@ -833,7 +833,8 @@
         "planned": "Planned",
         "done": "Done",
         "compliance": "Compliance",
-        "thisWeek": "this week"
+        "thisWeek": "this week",
+        "total": "Total"
       },
       "hoursByModality": "Hours by modality",
       "noModalityActivity": "No scheduled or completed activities this week.",

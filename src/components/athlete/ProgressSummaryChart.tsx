@@ -56,7 +56,7 @@ interface Bucket {
   start: Date;
   end: Date;
   done: Record<WorkoutType, number>;
-  planned: number;
+  planned: Record<WorkoutType, number>;
 }
 
 const buildBuckets = (range: RangeKey): Bucket[] => {
@@ -70,7 +70,7 @@ const buildBuckets = (range: RangeKey): Bucket[] => {
         start: s,
         end: endOfMonth(s),
         done: { running: 0, cycling: 0, swimming: 0, strength: 0 },
-        planned: 0,
+        planned: { running: 0, cycling: 0, swimming: 0, strength: 0 },
       };
     });
   }
@@ -83,7 +83,7 @@ const buildBuckets = (range: RangeKey): Bucket[] => {
       start: s,
       end: endOfWeek(s, { weekStartsOn: 1 }),
       done: { running: 0, cycling: 0, swimming: 0, strength: 0 },
-      planned: 0,
+      planned: { running: 0, cycling: 0, swimming: 0, strength: 0 },
     };
   });
 };
@@ -108,7 +108,8 @@ export const ProgressSummaryChart = ({
       if (plannedBucket) {
         const plannedValue =
           metric === "distance" ? plannedDistanceKm(a) : plannedTimeHours(a);
-        if (plannedValue) plannedBucket.planned += plannedValue;
+        if (plannedValue)
+          plannedBucket.planned[a.workout.type as WorkoutType] += plannedValue;
       }
       if (a.completedAt) {
         const doneBucket = buckets.find((b) =>
@@ -122,7 +123,16 @@ export const ProgressSummaryChart = ({
     }
     return buckets.map((b) => ({
       label: b.label,
-      planned: b.planned,
+      rangeLabel:
+        range === "1y"
+          ? format(b.start, "MMMM yyyy")
+          : `${format(b.start, "d MMM")} – ${format(b.end, "d MMM")}`,
+      planned:
+        b.planned.running + b.planned.cycling + b.planned.swimming + b.planned.strength,
+      planned_running: b.planned.running,
+      planned_cycling: b.planned.cycling,
+      planned_swimming: b.planned.swimming,
+      planned_strength: b.planned.strength,
       done_running: b.done.running,
       done_cycling: b.done.cycling,
       done_swimming: b.done.swimming,
@@ -193,17 +203,72 @@ export const ProgressSummaryChart = ({
                   />
                   <Tooltip
                     cursor={{ fill: "hsl(var(--muted) / 0.4)" }}
-                    contentStyle={{
-                      borderRadius: 8,
-                      border: "1px solid hsl(var(--border))",
-                      background: "hsl(var(--background))",
-                      fontSize: 12,
-                    }}
-                    formatter={(value: number, name: string) => {
-                      if (name === "planned")
-                        return [`${value.toFixed(1)} ${unit}`, tp.stats.planned];
-                      const sport = name.replace("done_", "") as WorkoutType;
-                      return [`${value.toFixed(1)} ${unit}`, tp.modalities[sport]];
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const d = payload[0].payload as {
+                        rangeLabel: string;
+                        planned: number;
+                      } & Record<string, number | string>;
+                      const rows = sportsForMetric
+                        .map((s) => ({
+                          sport: s,
+                          planned: (d[`planned_${s}`] as number) ?? 0,
+                          done: (d[`done_${s}`] as number) ?? 0,
+                        }))
+                        .filter((r) => r.planned > 0 || r.done > 0);
+                      const totalDone = rows.reduce((acc, r) => acc + r.done, 0);
+                      const totalPlanned = rows.reduce((acc, r) => acc + r.planned, 0);
+                      return (
+                        <div
+                          className="rounded-lg border bg-background text-xs shadow-md"
+                          style={{
+                            borderColor: "hsl(var(--border))",
+                            padding: "8px 10px",
+                            minWidth: 180,
+                          }}
+                        >
+                          <div className="font-semibold mb-1.5">{d.rangeLabel}</div>
+                          <div className="grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-1 items-center">
+                            <div />
+                            <div className="text-[10px] uppercase tracking-wide text-muted-foreground text-right">
+                              {tp.stats.planned}
+                            </div>
+                            <div className="text-[10px] uppercase tracking-wide text-muted-foreground text-right">
+                              {tp.stats.done}
+                            </div>
+                            {rows.map((r) => (
+                              <div key={r.sport} className="contents">
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className="h-2 w-2 rounded-sm"
+                                    style={{ backgroundColor: modalityAccent(r.sport) }}
+                                  />
+                                  <span>{tp.modalities[r.sport]}</span>
+                                </div>
+                                <div className="text-right tabular-nums text-muted-foreground">
+                                  {r.planned.toFixed(1)} {unit}
+                                </div>
+                                <div className="text-right tabular-nums font-semibold">
+                                  {r.done.toFixed(1)} {unit}
+                                </div>
+                              </div>
+                            ))}
+                            {rows.length > 1 && (
+                              <>
+                                <div className="border-t border-border/60 pt-1 mt-0.5 font-semibold">
+                                  {tp.stats.total}
+                                </div>
+                                <div className="border-t border-border/60 pt-1 mt-0.5 text-right tabular-nums text-muted-foreground">
+                                  {totalPlanned.toFixed(1)} {unit}
+                                </div>
+                                <div className="border-t border-border/60 pt-1 mt-0.5 text-right tabular-nums font-semibold">
+                                  {totalDone.toFixed(1)} {unit}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
                     }}
                   />
                   <Bar
