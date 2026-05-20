@@ -40,7 +40,12 @@ export function ResponsiveModal({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false}>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        repositionInputs={false}
+        shouldScaleBackground={false}
+      >
         <DrawerContent direction="bottom" className="max-h-[90dvh] flex flex-col">
           <DrawerHeader className="text-left shrink-0">
             <DrawerTitle>{title}</DrawerTitle>

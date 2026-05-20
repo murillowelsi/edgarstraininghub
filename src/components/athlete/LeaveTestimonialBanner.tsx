@@ -161,7 +161,7 @@ export function LeaveTestimonialBanner({
               <SelectTrigger id="tt-banner-role">
                 <SelectValue placeholder={tt.rolePlaceholder} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
                 {(Object.entries(tt.roleOptions) as [string, string][]).map(
                   ([key, label]) => (
                     <SelectItem key={key} value={label}>
