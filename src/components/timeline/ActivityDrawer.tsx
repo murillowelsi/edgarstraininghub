@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Heart, MessageCircle, AtSign, Loader2 } from "lucide-react";
+import { Flame, MessageCircle, AtSign, Loader2 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
@@ -43,8 +43,8 @@ function groupByDate(notifications: ActivityNotification[], labels: { today: str
 
 function NotificationIcon({ type }: { type: ActivityNotification["type"] }) {
   if (type === "like") return (
-    <div className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-0.5">
-      <Heart className="h-3 w-3 text-white fill-white" />
+    <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full p-0.5">
+      <Flame className="h-3 w-3 text-white fill-white" />
     </div>
   );
   if (type === "comment" || type === "comment_mention") return (
@@ -144,7 +144,7 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <Heart className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
+              <Flame className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
               <p className="text-sm font-medium">{t.timeline.activity.noActivity}</p>
               <p className="text-xs mt-1">{t.timeline.activity.noActivityDesc}</p>
             </div>

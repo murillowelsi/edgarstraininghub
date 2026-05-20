@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Heart, Loader2, Send, Trash2, X } from "lucide-react";
+import { Flame, Loader2, Send, Trash2, X } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
@@ -225,10 +225,10 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             onClick={() => handleCommentLike(comment.id)}
             className={cn(
               "transition-transform active:scale-125",
-              isLiked ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+              isLiked ? "text-orange-500" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
+            <Flame className={cn("h-4 w-4", isLiked && "fill-current")} />
           </button>
           {likes > 0 && (
             <span className="text-[10px] text-muted-foreground">{likes}</span>

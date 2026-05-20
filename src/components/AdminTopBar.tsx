@@ -1,4 +1,4 @@
-import { Moon, Sun, LogOut, MessageSquare, Camera, X, Heart, Plus } from "lucide-react";
+import { Moon, Sun, LogOut, MessageSquare, Camera, X, Flame, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
@@ -115,7 +115,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
             onClick={() => setActivityOpen(true)}
             className="relative p-2 rounded-full hover:bg-accent transition-colors"
           >
-            <Heart className="h-5 w-5" />
+            <Flame className="h-5 w-5" />
             {activityUnreadCount > 0 && (
               <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
             )}

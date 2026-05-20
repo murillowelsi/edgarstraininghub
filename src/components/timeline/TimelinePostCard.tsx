@@ -5,7 +5,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Heart, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Flame, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { toggleLike, deleteTimelinePost, updateTimelinePost, createActivityNotification } from "@/services/timelineService";
@@ -148,7 +148,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
               liked ? "text-red-500" : "text-foreground hover:text-muted-foreground"
             )}
           >
-            <Heart className={cn("h-6 w-6", liked && "fill-current")} />
+            <Flame className={cn("h-6 w-6", liked && "fill-current text-orange-500")} />
             {likesCount > 0 && <span className="text-sm font-semibold text-foreground">{likesCount}</span>}
           </button>
           <button
@@ -274,7 +274,7 @@ function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
           />
           {showHeartBurst && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <Heart className="h-24 w-24 text-white fill-white drop-shadow-lg animate-ping" />
+              <Flame className="h-24 w-24 text-orange-400 fill-orange-400 drop-shadow-lg animate-ping" />
             </div>
           )}
         </div>

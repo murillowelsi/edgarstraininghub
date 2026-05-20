@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Calendar, Camera, Dumbbell, Heart, Home, LayoutGrid, LogOut, Moon, Plus, Shield, Sun, MessageSquare, User, X } from "lucide-react";
+import { Calendar, Camera, Dumbbell, Flame, Home, LayoutGrid, LogOut, Moon, Plus, Shield, Sun, MessageSquare, User, X } from "lucide-react";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -222,7 +222,7 @@ const AthletePortalLayout = ({
                 onClick={() => setActivityOpen(true)}
                 className="relative p-2 rounded-full hover:bg-accent transition-colors"
               >
-                <Heart className="h-5 w-5" />
+                <Flame className="h-5 w-5" />
                 {activityUnreadCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
                 )}
