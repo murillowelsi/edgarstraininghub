@@ -749,6 +749,7 @@
     "role": "Athlete",
     "logout": "Logout",
     "testimonial": {
+      "pageTitle": "Testimonial",
       "cta": "Leave a testimonial",
       "editCta": "Edit your testimonial",
       "subtitle": "Tell us how training is going — your review may show up on the public site.",

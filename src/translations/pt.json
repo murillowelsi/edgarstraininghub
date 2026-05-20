@@ -749,6 +749,7 @@
     "role": "Atleta",
     "logout": "Sair",
     "testimonial": {
+      "pageTitle": "Depoimento",
       "cta": "Deixar depoimento",
       "editCta": "Editar seu depoimento",
       "subtitle": "Conte como tem sido o treino — sua avaliação pode aparecer no site público.",

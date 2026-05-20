@@ -74,7 +74,7 @@ const AthleteTestimonial = () => {
     }
   };
 
-  const title = myTestimonial ? tt.editTitle : tt.modalTitle;
+  const heading = myTestimonial ? tt.editTitle : tt.modalTitle;
   const description = myTestimonial?.approved
     ? tt.editApprovedHint
     : myTestimonial
@@ -82,7 +82,7 @@ const AthleteTestimonial = () => {
       : tt.modalDescription;
 
   return (
-    <AthletePortalLayout title={title} hideBottomNav>
+    <AthletePortalLayout title={tt.pageTitle} hideBottomNav>
       {loading ? (
         <SectionSpinner />
       ) : (
@@ -96,7 +96,7 @@ const AthleteTestimonial = () => {
               <ArrowLeft className="h-5 w-5" />
             </button>
             <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-bold truncate max-w-[70%] text-center">
-              {title}
+              {heading}
             </h1>
           </div>
 
