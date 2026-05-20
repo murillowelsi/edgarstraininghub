@@ -1,5 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import ActivityCard from "@/components/athlete/ActivityCard";
+import { ProgressSummaryChart } from "@/components/athlete/ProgressSummaryChart";
+import { TrainingLogCalendar } from "@/components/athlete/TrainingLogCalendar";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -185,6 +187,10 @@ const AdminAthleteHistory = () => {
                 )}
               </CardContent>
             </Card>
+
+            <ProgressSummaryChart assignments={assignments} />
+
+            <TrainingLogCalendar assignments={assignments} />
 
             <Card className="border-border/50">
               <CardContent className="p-4 space-y-3">

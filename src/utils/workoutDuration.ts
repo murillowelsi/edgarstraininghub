@@ -31,6 +31,26 @@ export const estimateWorkoutDurationSec = (workout: Workout): number => {
   return (workout.stages ?? []).reduce((acc, s) => acc + stageDurationSec(s), 0);
 };
 
+const stageDistanceKm = (s: WorkoutStage): number => {
+  if (s.type === "repeat" && s.stages) {
+    const inner = s.stages.reduce((acc, x) => acc + stageDistanceKm(x), 0);
+    return inner * (s.repeatCount ?? 1);
+  }
+  if (s.duration?.type === "distance" && typeof s.duration.value === "number") {
+    const v = s.duration.value;
+    if (s.duration.unit === "km") return v;
+    if (s.duration.unit === "m") return v / 1000;
+    if (s.duration.unit === "mi") return v * 1.60934;
+    return v;
+  }
+  return 0;
+};
+
+export const estimateWorkoutDistanceKm = (workout: Workout): number => {
+  if (workout.type === "strength") return 0;
+  return (workout.stages ?? []).reduce((acc, s) => acc + stageDistanceKm(s), 0);
+};
+
 export const actualDurationSec = (a: AssignmentWithWorkout): number => {
   if (a.workout.type === "strength") return a.totalTime ?? 0;
   return a.activityData?.elapsedTime ?? a.totalTime ?? 0;

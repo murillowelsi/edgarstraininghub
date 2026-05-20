@@ -2,7 +2,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { modalityAccent } from "@/utils/modalityColors";
-import { actualDurationSec } from "@/utils/workoutDuration";
+import {
+  actualDurationSec,
+  estimateWorkoutDistanceKm,
+  estimateWorkoutDurationSec,
+} from "@/utils/workoutDuration";
 import type { WorkoutType } from "@/types/workout";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import {
@@ -41,11 +45,18 @@ const distanceKm = (a: AssignmentWithWorkout): number => {
 
 const timeHours = (a: AssignmentWithWorkout): number => actualDurationSec(a) / 3600;
 
+const plannedTimeHours = (a: AssignmentWithWorkout): number =>
+  estimateWorkoutDurationSec(a.workout) / 3600;
+
+const plannedDistanceKm = (a: AssignmentWithWorkout): number =>
+  estimateWorkoutDistanceKm(a.workout);
+
 interface Bucket {
   label: string;
   start: Date;
   end: Date;
-  values: Record<WorkoutType, number>;
+  done: Record<WorkoutType, number>;
+  planned: number;
 }
 
 const buildBuckets = (range: RangeKey): Bucket[] => {
@@ -58,7 +69,8 @@ const buildBuckets = (range: RangeKey): Bucket[] => {
         label: format(s, "MMM"),
         start: s,
         end: endOfMonth(s),
-        values: { running: 0, cycling: 0, swimming: 0, strength: 0 },
+        done: { running: 0, cycling: 0, swimming: 0, strength: 0 },
+        planned: 0,
       };
     });
   }
@@ -70,7 +82,8 @@ const buildBuckets = (range: RangeKey): Bucket[] => {
       label: format(s, "d MMM"),
       start: s,
       end: endOfWeek(s, { weekStartsOn: 1 }),
-      values: { running: 0, cycling: 0, swimming: 0, strength: 0 },
+      done: { running: 0, cycling: 0, swimming: 0, strength: 0 },
+      planned: 0,
     };
   });
 };
@@ -87,20 +100,46 @@ export const ProgressSummaryChart = ({
 
   const data = useMemo(() => {
     const buckets = buildBuckets(range);
-    const completed = assignments.filter((a) => a.completedAt);
-    for (const a of completed) {
-      const date = a.completedAt!;
-      const bucket = buckets.find((b) => isWithinInterval(date, { start: b.start, end: b.end }));
-      if (!bucket) continue;
-      const value = metric === "distance" ? distanceKm(a) : timeHours(a);
-      if (!value) continue;
-      bucket.values[a.workout.type as WorkoutType] += value;
+    for (const a of assignments) {
+      const plannedDate = a.scheduledDate;
+      const plannedBucket = buckets.find((b) =>
+        isWithinInterval(plannedDate, { start: b.start, end: b.end }),
+      );
+      if (plannedBucket) {
+        const plannedValue =
+          metric === "distance" ? plannedDistanceKm(a) : plannedTimeHours(a);
+        if (plannedValue) plannedBucket.planned += plannedValue;
+      }
+      if (a.completedAt) {
+        const doneBucket = buckets.find((b) =>
+          isWithinInterval(a.completedAt!, { start: b.start, end: b.end }),
+        );
+        if (doneBucket) {
+          const doneValue = metric === "distance" ? distanceKm(a) : timeHours(a);
+          if (doneValue) doneBucket.done[a.workout.type as WorkoutType] += doneValue;
+        }
+      }
     }
-    return buckets.map((b) => ({ label: b.label, ...b.values }));
+    return buckets.map((b) => ({
+      label: b.label,
+      planned: b.planned,
+      done_running: b.done.running,
+      done_cycling: b.done.cycling,
+      done_swimming: b.done.swimming,
+      done_strength: b.done.strength,
+    }));
   }, [assignments, range, metric]);
 
   const hasAnyData = useMemo(
-    () => data.some((d) => SPORTS.some((s) => (d[s] as number) > 0)),
+    () =>
+      data.some(
+        (d) =>
+          d.planned > 0 ||
+          d.done_running > 0 ||
+          d.done_cycling > 0 ||
+          d.done_swimming > 0 ||
+          d.done_strength > 0,
+      ),
     [data],
   );
 
@@ -160,18 +199,39 @@ export const ProgressSummaryChart = ({
                       background: "hsl(var(--background))",
                       fontSize: 12,
                     }}
-                    formatter={(value: number, name: string) => [
-                      `${value.toFixed(1)} ${unit}`,
-                      tp.modalities[name as WorkoutType],
-                    ]}
+                    formatter={(value: number, name: string) => {
+                      if (name === "planned")
+                        return [`${value.toFixed(1)} ${unit}`, tp.stats.planned];
+                      const sport = name.replace("done_", "") as WorkoutType;
+                      return [`${value.toFixed(1)} ${unit}`, tp.modalities[sport]];
+                    }}
                   />
-                  {sportsForMetric.map((s) => (
-                    <Bar key={s} dataKey={s} stackId="total" fill={modalityAccent(s)} radius={[2, 2, 0, 0]} />
+                  <Bar
+                    dataKey="planned"
+                    stackId="planned"
+                    fill="hsl(var(--muted-foreground) / 0.35)"
+                    radius={[2, 2, 0, 0]}
+                  />
+                  {sportsForMetric.map((s, i) => (
+                    <Bar
+                      key={s}
+                      dataKey={`done_${s}`}
+                      stackId="done"
+                      fill={modalityAccent(s)}
+                      radius={i === sportsForMetric.length - 1 ? [2, 2, 0, 0] : 0}
+                    />
                   ))}
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-sm"
+                  style={{ backgroundColor: "hsl(var(--muted-foreground) / 0.35)" }}
+                />
+                <span className="text-muted-foreground">{tp.stats.planned}</span>
+              </div>
               {sportsForMetric.map((s) => (
                 <div key={s} className="flex items-center gap-1.5">
                   <span
