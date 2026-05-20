@@ -8,13 +8,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   getTestimonialByAthlete,
@@ -153,24 +146,31 @@ export function LeaveTestimonialBanner({
       >
         <div className="space-y-4">
           <div>
-            <Label htmlFor="tt-banner-role">{tt.role}</Label>
-            <Select
-              value={form.role}
-              onValueChange={(v) => setForm((f) => ({ ...f, role: v }))}
-            >
-              <SelectTrigger id="tt-banner-role">
-                <SelectValue placeholder={tt.rolePlaceholder} />
-              </SelectTrigger>
-              <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
-                {(Object.entries(tt.roleOptions) as [string, string][]).map(
-                  ([key, label]) => (
-                    <SelectItem key={key} value={label}>
+            <Label>{tt.role}</Label>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              {(Object.entries(tt.roleOptions) as [string, string][]).map(
+                ([key, label]) => {
+                  const selected = form.role === label;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({ ...f, role: label }))
+                      }
+                      className={cn(
+                        "px-3 py-2 rounded-md border text-sm font-medium transition",
+                        selected
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-foreground border-input hover:bg-accent",
+                      )}
+                    >
                       {label}
-                    </SelectItem>
-                  ),
-                )}
-              </SelectContent>
-            </Select>
+                    </button>
+                  );
+                },
+              )}
+            </div>
           </div>
           <div>
             <Label>{tt.rating}</Label>
