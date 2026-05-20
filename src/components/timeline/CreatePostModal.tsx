@@ -214,8 +214,12 @@ export function CreatePostModal({ open, onOpenChange, onSubmit, initialCaption, 
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : imageUrl ? (
-              <div className="relative rounded-2xl overflow-hidden">
-                <img src={imageUrl} alt="Preview" className="w-full max-h-80 object-cover" />
+              <div className="relative rounded-2xl overflow-hidden bg-muted flex items-center justify-center">
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="w-full max-h-80 object-contain"
+                />
                 <button
                   onClick={() => setImageUrl(undefined)}
                   className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1.5 hover:bg-black/80 transition-colors"

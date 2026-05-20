@@ -263,11 +263,14 @@ function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
     }
     if (s.kind === "image") {
       return (
-        <div className="w-full h-full bg-muted relative" onClick={onDoubleTap}>
+        <div
+          className="w-full bg-muted relative flex items-center justify-center"
+          onClick={onDoubleTap}
+        >
           <CachedImage
             src={s.url}
             alt="Post"
-            className="w-full h-full object-cover max-h-[480px]"
+            className="w-full max-h-[600px] object-contain"
           />
           {showHeartBurst && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
