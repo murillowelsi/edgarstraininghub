@@ -200,9 +200,8 @@ const CalendarDay = ({
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-2" align="start">
-                <ScrollArea className="max-h-[200px]">
-                  <div className="space-y-1">
-                    {dayAssignments.map((assignment) => {
+                <div className="max-h-[320px] overflow-y-auto space-y-1 pr-1">
+                  {dayAssignments.map((assignment) => {
                       const Icon = workoutTypeIcons[assignment.workout.type];
                       const isCompleted = !!assignment.completedAt;
 
@@ -237,8 +236,7 @@ const CalendarDay = ({
                         </button>
                       );
                     })}
-                  </div>
-                </ScrollArea>
+                </div>
               </PopoverContent>
             </Popover>
           )}
