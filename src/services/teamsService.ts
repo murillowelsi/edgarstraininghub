@@ -16,6 +16,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import type { Team, TeamAssignmentDocument, TeamDocument } from "../types/team";
+import { resolveScheduledDate, toDayString } from "../utils/scheduledDay";
 import { createAssignments } from "./workoutAssignmentsService";
 
 const TEAMS_COLLECTION = "teams";
@@ -30,7 +31,7 @@ const docToTeam = (id: string, data: TeamDocument): Team => ({
   memberIds: data.memberIds || [],
   assignedWorkouts: (data.assignedWorkouts || []).map((a) => ({
     workoutId: a.workoutId,
-    scheduledDate: a.scheduledDate?.toDate() || new Date(),
+    scheduledDate: resolveScheduledDate(a.scheduledDay, a.scheduledDate),
   })),
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
@@ -156,6 +157,7 @@ export const addTeamWorkoutAssignment = async (
   const entry: TeamAssignmentDocument = {
     workoutId,
     scheduledDate: Timestamp.fromDate(scheduledDate),
+    scheduledDay: toDayString(scheduledDate),
   };
   await updateDoc(doc(db, TEAMS_COLLECTION, teamId), {
     assignedWorkouts: arrayUnion(entry),

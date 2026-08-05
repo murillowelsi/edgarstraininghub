@@ -20,6 +20,11 @@ import type {
   WorkoutAssignmentDocument,
   WorkoutAssignmentFormData,
 } from "../types/workoutAssignment";
+import {
+  legacyTimestampToDayString,
+  resolveScheduledDate,
+  toDayString,
+} from "../utils/scheduledDay";
 import { getUserById } from "./usersService";
 import { getAllWorkouts, getWorkoutById } from "./workoutsService";
 
@@ -33,7 +38,7 @@ const docToAssignment = (
   id,
   workoutId: data.workoutId,
   athleteId: data.athleteId,
-  scheduledDate: data.scheduledDate?.toDate() || new Date(),
+  scheduledDate: resolveScheduledDate(data.scheduledDay, data.scheduledDate),
   assignedBy: data.assignedBy,
   completedAt: data.completedAt?.toDate() || null,
   completionPercentage: data.completionPercentage,
@@ -51,11 +56,7 @@ const assignmentExists = async (
   athleteId: string,
   scheduledDate: Date
 ): Promise<boolean> => {
-  // Get the start and end of the scheduled date to match any time on that day
-  const startOfDay = new Date(scheduledDate);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(scheduledDate);
-  endOfDay.setHours(23, 59, 59, 999);
+  const day = toDayString(scheduledDate);
 
   const q = query(
     collection(db, ASSIGNMENTS_COLLECTION),
@@ -64,12 +65,15 @@ const assignmentExists = async (
   );
   const snapshot = await getDocs(q);
 
-  // Check if any existing assignment is on the same date
+  // Check if any existing assignment is on the same calendar day
   return snapshot.docs.some((doc) => {
     const data = doc.data() as WorkoutAssignmentDocument;
-    const assignmentDate = data.scheduledDate?.toDate();
-    if (!assignmentDate) return false;
-    return assignmentDate >= startOfDay && assignmentDate <= endOfDay;
+    const docDay =
+      data.scheduledDay ??
+      (data.scheduledDate
+        ? legacyTimestampToDayString(data.scheduledDate.toDate())
+        : null);
+    return docDay === day;
   });
 };
 
@@ -98,6 +102,7 @@ export const createAssignments = async (
       workoutId: data.workoutId,
       athleteId,
       scheduledDate: Timestamp.fromDate(data.scheduledDate),
+      scheduledDay: toDayString(data.scheduledDate),
       assignedBy,
       completedAt: null,
       createdAt: serverTimestamp(),
@@ -308,7 +313,7 @@ export const removeDuplicateAssignments = async (): Promise<number> => {
   const groups = new Map<string, WorkoutAssignment[]>();
 
   for (const assignment of allAssignments) {
-    const dateStr = assignment.scheduledDate.toISOString().split("T")[0];
+    const dateStr = toDayString(assignment.scheduledDate);
     const key = `${assignment.workoutId}-${assignment.athleteId}-${dateStr}`;
 
     if (!groups.has(key)) {

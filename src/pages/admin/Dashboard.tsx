@@ -15,6 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAllAssignmentsWithDetails } from "@/services/workoutAssignmentsService";
+import { runScheduledDayBackfillOnce } from "@/services/scheduledDayMigration";
 import { getTeamsByCoach } from "@/services/teamsService";
 import { getAllUsers, getUserById } from "@/services/usersService";
 import { getAllWorkouts } from "@/services/workoutsService";
@@ -142,6 +143,11 @@ const AdminDashboard = () => {
 
     if (user) loadData();
   }, [user, toast]);
+
+  // One-time backfill of the timezone-safe scheduledDay field on legacy documents
+  useEffect(() => {
+    if (user) runScheduledDayBackfillOnce(user.uid);
+  }, [user]);
 
   useEffect(() => {
     const unsub = subscribeToAllTestimonials(setTestimonials);

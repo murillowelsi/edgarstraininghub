@@ -12,6 +12,7 @@ import { getWorkoutById } from "@/services/workoutsService";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import type { Workout } from "@/types/workout";
+import { resolveScheduledDate } from "@/utils/scheduledDay";
 import type { WorkoutAssignment, WorkoutAssignmentDocument } from "@/types/workoutAssignment";
 import { format, startOfDay } from "date-fns";
 import { Loader2, ChevronLeft, CheckCircle2, XCircle } from "lucide-react";
@@ -81,7 +82,7 @@ export default function AdminTeamStats() {
             id: d.id,
             workoutId: data.workoutId,
             athleteId: data.athleteId,
-            scheduledDate: data.scheduledDate?.toDate() || new Date(),
+            scheduledDate: resolveScheduledDate(data.scheduledDay, data.scheduledDate),
             assignedBy: data.assignedBy,
             completedAt: data.completedAt?.toDate() || null,
             completionPercentage: data.completionPercentage,

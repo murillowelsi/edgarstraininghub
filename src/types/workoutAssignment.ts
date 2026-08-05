@@ -59,6 +59,9 @@ export interface WorkoutAssignmentDocument {
   workoutId: string;
   athleteId: string;
   scheduledDate: Timestamp;
+  // Timezone-safe calendar day ("YYYY-MM-DD") — source of truth for the
+  // scheduled day. Optional because legacy documents only have the Timestamp.
+  scheduledDay?: string;
   assignedBy: string;
   completedAt: Timestamp | null;
   completionPercentage?: number;

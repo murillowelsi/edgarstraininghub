@@ -6,6 +6,9 @@ export interface TeamAssignment {
 export interface TeamAssignmentDocument {
   workoutId: string;
   scheduledDate: import("firebase/firestore").Timestamp;
+  // Timezone-safe calendar day ("YYYY-MM-DD") — source of truth for the
+  // scheduled day. Optional because legacy entries only have the Timestamp.
+  scheduledDay?: string;
 }
 
 export interface Team {
