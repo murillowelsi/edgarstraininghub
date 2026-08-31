@@ -232,7 +232,7 @@ const About = () => {
                     <p className="text-xs text-muted-foreground mb-2 font-medium">
                       {t.hero.records["5k"]}
                     </p>
-                    <p className="font-bold text-2xl text-primary">19:16</p>
+                    <p className="font-bold text-2xl text-primary">18:41</p>
                   </div>
                   <div className="card-modern p-4 bg-gradient-to-br from-primary/10 to-transparent border-t-4 border-primary hover:scale-105 transition-transform">
                     <p className="text-xs text-muted-foreground mb-2 font-medium">
