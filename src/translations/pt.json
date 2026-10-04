@@ -623,6 +623,9 @@
     },
     "workoutEditor": {
       "pressLapButton": "Pressionar Botão Lap",
+      "editTitle": "Editar Treino de {{type}}",
+      "newTitle": "Novo Treino de {{type}}",
+      "defaultName": "Treino de {{type}}",
       "dragHere": "Arraste etapas para aqui",
       "dropHere": "Soltar aqui",
       "noStages": "Sem etapas. Adicione a sua primeira etapa para começar.",
@@ -1005,6 +1008,8 @@
       "noActivities": "Nenhuma atividade concluída ainda.",
       "progressSummary": "Resumo de progresso",
       "trainingLog": "Calendário de treinos",
+      "prevMonth": "Mês anterior",
+      "nextMonth": "Próximo mês",
       "noActivity": "Sem atividade neste período ainda.",
       "ranges": {
         "fourWeeks": "4 sem",

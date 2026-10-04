@@ -9,15 +9,15 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   getWorkoutChecklistInstance,
-  getWorkoutChecklistTemplate,
   saveWorkoutChecklistInstance,
   saveWorkoutChecklistTemplate,
 } from "@/services/checklistService";
 import {
-  defaultChecklistByType,
+  defaultChecklistFor,
   generateChecklistItemId,
   type ChecklistItem,
 } from "@/types/checklist";
@@ -41,6 +41,8 @@ export const WorkoutChecklistDrawer = ({
   workoutType,
 }: Props) => {
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const tc = t.athlete.checklist;
   const [items, setItems] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -51,15 +53,15 @@ export const WorkoutChecklistDrawer = ({
     if (!open) return;
     let cancelled = false;
     setLoading(true);
-    getWorkoutChecklistInstance(assignmentId, userId, workoutType)
+    getWorkoutChecklistInstance(assignmentId, userId, workoutType, tc.defaults)
       .then((inst) => {
         if (!cancelled) setItems(inst.items);
       })
       .catch((err) => {
         console.error(err);
         toast({
-          title: "Erro",
-          description: "Não foi possível carregar o checklist.",
+          title: t.common.error,
+          description: tc.loadError,
           variant: "destructive",
         });
       })
@@ -69,7 +71,8 @@ export const WorkoutChecklistDrawer = ({
     return () => {
       cancelled = true;
     };
-  }, [open, assignmentId, userId, workoutType, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, assignmentId, userId, workoutType]);
 
   const toggle = (id: string) => {
     setItems((prev) =>
@@ -96,7 +99,7 @@ export const WorkoutChecklistDrawer = ({
   };
 
   const resetToDefault = () => {
-    setItems(defaultChecklistByType[workoutType]().map((it) => ({ ...it, checked: false })));
+    setItems(defaultChecklistFor(workoutType, tc.defaults));
   };
 
   const handleSave = async (alsoSaveAsTemplate: boolean) => {
@@ -107,17 +110,15 @@ export const WorkoutChecklistDrawer = ({
         await saveWorkoutChecklistTemplate(userId, workoutType, items);
       }
       toast({
-        title: "Checklist salvo",
-        description: alsoSaveAsTemplate
-          ? "Salvo neste treino e como seu padrão para próximos."
-          : "Salvo neste treino.",
+        title: tc.saved,
+        description: alsoSaveAsTemplate ? tc.savedHereAndDefault : tc.savedHere,
       });
       onOpenChange(false);
     } catch (err) {
       console.error(err);
       toast({
-        title: "Erro",
-        description: "Não foi possível salvar.",
+        title: t.common.error,
+        description: tc.saveError,
         variant: "destructive",
       });
     } finally {
@@ -131,11 +132,13 @@ export const WorkoutChecklistDrawer = ({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[90vh]">
         <DrawerHeader>
-          <DrawerTitle>Checklist do treino</DrawerTitle>
+          <DrawerTitle>{tc.title}</DrawerTitle>
           <DrawerDescription>
             {loading
-              ? "Carregando..."
-              : `${checkedCount}/${items.length} itens conferidos`}
+              ? t.common.loading
+              : tc.itemsChecked
+                  .replace("{{checked}}", String(checkedCount))
+                  .replace("{{total}}", String(items.length))}
           </DrawerDescription>
         </DrawerHeader>
 
@@ -146,12 +149,12 @@ export const WorkoutChecklistDrawer = ({
             onClick={() => setEditMode((v) => !v)}
           >
             <Pencil className="h-4 w-4 mr-1" />
-            {editMode ? "Concluir edição" : "Editar"}
+            {editMode ? tc.doneEditing : tc.edit}
           </Button>
           {editMode && (
             <Button variant="ghost" size="sm" onClick={resetToDefault}>
               <RotateCcw className="h-4 w-4 mr-1" />
-              Restaurar padrão
+              {tc.restoreDefault}
             </Button>
           )}
         </div>
@@ -163,7 +166,7 @@ export const WorkoutChecklistDrawer = ({
             </div>
           ) : items.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
-              Nenhum item. Adicione abaixo.
+              {tc.empty}
             </p>
           ) : (
             items.map((item) => (
@@ -214,7 +217,7 @@ export const WorkoutChecklistDrawer = ({
           {editMode && (
             <div className="flex items-center gap-2 pt-2">
               <Input
-                placeholder="Novo item..."
+                placeholder={tc.newItemPlaceholder}
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 onKeyDown={(e) => {
@@ -238,14 +241,14 @@ export const WorkoutChecklistDrawer = ({
             variant="outline"
           >
             {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-            Salvar e definir como padrão
+            {tc.saveAsDefault}
           </Button>
           <Button
             onClick={() => handleSave(false)}
             disabled={saving || loading}
           >
             {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-            Salvar
+            {tc.save}
           </Button>
         </DrawerFooter>
       </DrawerContent>

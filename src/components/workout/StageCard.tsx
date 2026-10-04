@@ -6,15 +6,9 @@ import {
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import type { WorkoutStage } from "@/types/workout";
-import {
-  drillLabels,
-  durationLabels,
-  equipmentLabels,
-  intensityLabels,
-  stageColors,
-  stageLabels,
-  strokeLabels,
-} from "@/types/workout";
+import { stageColors } from "@/types/workout";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { workoutLabels } from "@/utils/workoutLabels";
 import {
   Bike,
   ChevronDown,
@@ -58,17 +52,19 @@ const StageCard = ({
   dragHandleProps,
 }: StageCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { t } = useLanguage();
+  const L = workoutLabels(t);
   const color = stageColors[stage.type];
 
   const formatDuration = (s: WorkoutStage) => {
     if (s.duration.type === "lapButton") {
-      return "Press Lap Button";
+      return t.workoutMeta.durations.lapButton;
     }
     if (s.duration.value !== undefined) {
       const unit = s.duration.unit || "";
       return `${s.duration.value} ${unit}`;
     }
-    return durationLabels[s.duration.type];
+    return L.duration(s.duration.type);
   };
 
   const formatIntensity = (s: WorkoutStage) => {
@@ -81,19 +77,19 @@ const StageCard = ({
     if (s.intensity.min !== undefined && s.intensity.max !== undefined) {
       return `${s.intensity.min}-${s.intensity.max} ${s.intensity.unit || ""}`;
     }
-    return intensityLabels[s.intensity.type];
+    return L.intensity(s.intensity.type);
   };
 
   const formatSwimmingDetails = (s: WorkoutStage) => {
     const details: string[] = [];
     if (s.strokeType) {
-      details.push(strokeLabels[s.strokeType]);
+      details.push(L.stroke(s.strokeType));
     }
     if (s.drillType && s.drillType !== "none") {
-      details.push(drillLabels[s.drillType]);
+      details.push(L.drill(s.drillType));
     }
     if (s.equipment && s.equipment !== "none") {
-      details.push(equipmentLabels[s.equipment]);
+      details.push(L.swimEquipment(s.equipment));
     }
     return details;
   };
@@ -178,7 +174,7 @@ const StageCard = ({
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-xs">
-                          {stageLabels[nestedStage.type]}
+                          {L.stage(nestedStage.type)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {formatDuration(nestedStage)}
@@ -226,7 +222,7 @@ const StageCard = ({
           <CollapsibleTrigger asChild>
             <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm">{stageLabels[stage.type]}</p>
+                <p className="font-semibold text-sm">{L.stage(stage.type)}</p>
                 <p className="text-xs text-muted-foreground">
                   {formatDuration(stage)}
                   {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
@@ -271,7 +267,7 @@ const StageCard = ({
                 </p>
                 <p className="font-medium">{formatDuration(stage)}</p>
                 <p className="text-xs text-muted-foreground">
-                  {durationLabels[stage.duration.type]}
+                  {L.duration(stage.duration.type)}
                 </p>
               </div>
 
@@ -282,7 +278,7 @@ const StageCard = ({
                   </p>
                   <p className="font-medium">{intensity}</p>
                   <p className="text-xs text-muted-foreground">
-                    {intensityLabels[stage.intensity.type]}
+                    {L.intensity(stage.intensity.type)}
                   </p>
                 </div>
               )}
@@ -292,7 +288,7 @@ const StageCard = ({
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                     Stroke
                   </p>
-                  <p className="font-medium">{strokeLabels[stage.strokeType]}</p>
+                  <p className="font-medium">{L.stroke(stage.strokeType)}</p>
                 </div>
               )}
             </div>
@@ -305,7 +301,7 @@ const StageCard = ({
                     <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                       Drill Type
                     </p>
-                    <p className="font-medium">{drillLabels[stage.drillType]}</p>
+                    <p className="font-medium">{L.drill(stage.drillType)}</p>
                   </div>
                 )}
 
@@ -314,7 +310,7 @@ const StageCard = ({
                     <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                       Equipment
                     </p>
-                    <p className="font-medium">{equipmentLabels[stage.equipment]}</p>
+                    <p className="font-medium">{L.swimEquipment(stage.equipment)}</p>
                   </div>
                 )}
               </div>

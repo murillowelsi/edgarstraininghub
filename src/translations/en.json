@@ -623,6 +623,9 @@
     },
     "workoutEditor": {
       "pressLapButton": "Press Lap Button",
+      "editTitle": "Edit {{type}} Workout",
+      "newTitle": "New {{type}} Workout",
+      "defaultName": "{{type}} Workout",
       "dragHere": "Drag stages here",
       "dropHere": "Drop here",
       "noStages": "No stages yet. Add your first stage to get started.",
@@ -1005,6 +1008,8 @@
       "noActivities": "No completed activities yet.",
       "progressSummary": "Progress summary",
       "trainingLog": "Training log",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
       "noActivity": "No activity in this range yet.",
       "ranges": {
         "fourWeeks": "4 weeks",

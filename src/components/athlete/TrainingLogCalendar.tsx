@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { modalityAccent } from "@/utils/modalityColors";
 import type { WorkoutType } from "@/types/workout";
@@ -35,14 +36,15 @@ export const TrainingLogCalendar = ({
 }: {
   assignments: AssignmentWithWorkout[];
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const dateLocale = language === "pt" ? ptBR : undefined;
   const tp = t.athlete.profile;
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
 
   const weekdayLabels = useMemo(() => {
     const ref = startOfWeek(new Date(), { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) =>
-      format(new Date(ref.getTime() + i * 86400000), "EEEEE"),
+      format(new Date(ref.getTime() + i * 86400000), "EEEEE", { locale: dateLocale }),
     );
   }, []);
 
@@ -98,17 +100,17 @@ export const TrainingLogCalendar = ({
             <button
               onClick={() => setCursor((c) => addMonths(c, -1))}
               className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted"
-              aria-label="Previous month"
+              aria-label={t.athlete.profile.prevMonth}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <span className="text-sm font-semibold w-28 text-center capitalize">
-              {format(cursor, "MMMM yyyy")}
+              {format(cursor, "MMMM yyyy", { locale: dateLocale })}
             </span>
             <button
               onClick={() => setCursor((c) => addMonths(c, 1))}
               className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted"
-              aria-label="Next month"
+              aria-label={t.athlete.profile.nextMonth}
             >
               <ChevronRight className="h-4 w-4" />
             </button>

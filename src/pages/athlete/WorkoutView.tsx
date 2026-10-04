@@ -36,19 +36,11 @@ import type { Exercise, WorkoutExercise } from "@/types/exercise";
 import {
   getYouTubeThumbnail,
   getYouTubeVideoId,
-  muscleGroupLabels,
 } from "@/types/exercise";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { WorkoutStage } from "@/types/workout";
-import {
-  drillLabels,
-  durationLabels,
-  equipmentLabels,
-  intensityLabels,
-  stageColors,
-  stageLabels,
-  strokeLabels,
-} from "@/types/workout";
+import { stageColors } from "@/types/workout";
+import { workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -115,7 +107,7 @@ const workoutTypeColors: Record<string, string> = {
 };
 
 // Utility functions for formatting
-const formatDuration = (stage: WorkoutStage, lapLabel: string = "Press Lap Button"): string => {
+const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, lapLabel: string): string => {
   if (stage.duration.type === "lapButton") {
     return lapLabel;
   }
@@ -130,7 +122,7 @@ const formatDuration = (stage: WorkoutStage, lapLabel: string = "Press Lap Butto
     }
     return `${value} ${unit}`;
   }
-  return durationLabels[stage.duration.type];
+  return L.duration(stage.duration.type);
 };
 
 // Convert decimal pace (e.g. 5.3 → "5:30", 5.45 → "5:45") to MM:SS
@@ -142,7 +134,7 @@ const decimalToMMSS = (val: number): string => {
 
 const isPaceType = (type: string) => type === "pace" || type === "targetPace" || type === "cssBasedPace";
 
-const formatIntensity = (stage: WorkoutStage): string | null => {
+const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: any): string | null => {
   if (stage.intensity.type === "none") {
     return null;
   }
@@ -156,10 +148,10 @@ const formatIntensity = (stage: WorkoutStage): string | null => {
     }
   }
   if (stage.intensity.type === "heartRateZone" && stage.intensity.value !== undefined) {
-    return `HR Zone ${stage.intensity.value}`;
+    return `${t.workoutMeta.hrZone} ${stage.intensity.value}`;
   }
   if (stage.intensity.type === "powerZone" && stage.intensity.value !== undefined) {
-    return `Power Zone ${stage.intensity.value}`;
+    return `${t.workoutMeta.powerZoneShort} ${stage.intensity.value}`;
   }
   if (stage.intensity.min !== undefined && stage.intensity.max !== undefined) {
     return `${stage.intensity.min}-${stage.intensity.max} ${stage.intensity.unit || ""}`;
@@ -167,19 +159,19 @@ const formatIntensity = (stage: WorkoutStage): string | null => {
   if (stage.intensity.value !== undefined) {
     return `${stage.intensity.value} ${stage.intensity.unit || ""}`;
   }
-  return intensityLabels[stage.intensity.type];
+  return L.intensity(stage.intensity.type);
 };
 
-const formatSwimmingDetails = (stage: WorkoutStage): string[] => {
+const formatSwimmingDetails = (stage: WorkoutStage, L: WorkoutLabels): string[] => {
   const details: string[] = [];
   if (stage.strokeType) {
-    details.push(strokeLabels[stage.strokeType]);
+    details.push(L.stroke(stage.strokeType));
   }
   if (stage.drillType && stage.drillType !== "none") {
-    details.push(drillLabels[stage.drillType]);
+    details.push(L.drill(stage.drillType));
   }
   if (stage.equipment && stage.equipment !== "none") {
-    details.push(equipmentLabels[stage.equipment]);
+    details.push(L.swimEquipment(stage.equipment));
   }
   return details;
 };
@@ -196,9 +188,10 @@ const StageItem = ({
   t: any;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const L = workoutLabels(t);
   const color = stageColors[stage.type];
-  const intensity = formatIntensity(stage);
-  const swimmingDetails = formatSwimmingDetails(stage);
+  const intensity = formatIntensity(stage, L, t);
+  const swimmingDetails = formatSwimmingDetails(stage, L);
   const StageIcon = stageIcons[stage.type] || PersonStanding;
 
   if (stage.type === "repeat") {
@@ -233,10 +226,10 @@ const StageItem = ({
                           <NestedIcon className="h-3.5 w-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-xs">{nestedIndex + 1}. {stageLabels[nestedStage.type]}</p>
+                          <p className="font-semibold text-xs">{nestedIndex + 1}. {L.stage(nestedStage.type)}</p>
                           <p className="text-xs text-muted-foreground">
-                            {formatDuration(nestedStage, t.athlete.workoutView.pressLapButton)}
-                            {formatIntensity(nestedStage) && ` · ${formatIntensity(nestedStage)}`}
+                            {formatDuration(nestedStage, L, t.athlete.workoutView.pressLapButton)}
+                            {formatIntensity(nestedStage, L, t) && ` · ${formatIntensity(nestedStage, L, t)}`}
                           </p>
                         </div>
                       </div>
@@ -266,9 +259,9 @@ const StageItem = ({
               <StageIcon className="h-4 w-4" />
             </div>
             <div className="flex-1 text-left min-w-0">
-              <p className="font-semibold text-sm truncate">{stageLabels[stage.type]}</p>
+              <p className="font-semibold text-sm truncate">{L.stage(stage.type)}</p>
               <p className="text-xs text-muted-foreground">
-                {formatDuration(stage, t.athlete.workoutView.pressLapButton)}
+                {formatDuration(stage, L, t.athlete.workoutView.pressLapButton)}
                 {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
                 {intensity && ` · ${intensity}`}
               </p>
@@ -284,7 +277,7 @@ const StageItem = ({
                 <p className="text-xs text-muted-foreground uppercase font-medium">
                   {t.athlete.workoutView.duration}
                 </p>
-                <p className="font-medium mt-1">{formatDuration(stage, t.athlete.workoutView.pressLapButton)}</p>
+                <p className="font-medium mt-1">{formatDuration(stage, L, t.athlete.workoutView.pressLapButton)}</p>
               </div>
               {intensity && (
                 <div className="bg-muted/50 p-3 rounded-lg">
@@ -299,7 +292,7 @@ const StageItem = ({
                   <p className="text-xs text-muted-foreground uppercase font-medium">
                     {t.athlete.workoutView.stroke}
                   </p>
-                  <p className="font-medium mt-1">{strokeLabels[stage.strokeType]}</p>
+                  <p className="font-medium mt-1">{L.stroke(stage.strokeType)}</p>
                 </div>
               )}
               {stage.drillType && stage.drillType !== "none" && (
@@ -307,7 +300,7 @@ const StageItem = ({
                   <p className="text-xs text-muted-foreground uppercase font-medium">
                     {t.athlete.workoutView.drill}
                   </p>
-                  <p className="font-medium mt-1">{drillLabels[stage.drillType]}</p>
+                  <p className="font-medium mt-1">{L.drill(stage.drillType)}</p>
                 </div>
               )}
               {stage.equipment && stage.equipment !== "none" && (
@@ -315,7 +308,7 @@ const StageItem = ({
                   <p className="text-xs text-muted-foreground uppercase font-medium">
                     {t.athlete.workoutView.equipment}
                   </p>
-                  <p className="font-medium mt-1">{equipmentLabels[stage.equipment]}</p>
+                  <p className="font-medium mt-1">{L.swimEquipment(stage.equipment)}</p>
                 </div>
               )}
             </div>
@@ -483,7 +476,7 @@ const ExerciseItem = ({
               <div className="flex flex-wrap gap-1">
                 {muscleGroups.map((mg) => (
                   <Badge key={mg} variant="secondary" className="text-xs">
-                    {muscleGroupLabels[mg] || mg}
+                    {t.workout.muscleGroups[mg] || mg}
                   </Badge>
                 ))}
               </div>
@@ -743,7 +736,7 @@ const AthleteWorkoutView = () => {
           : t.athlete.workoutView.workoutUnmarkedDesc,
       });
       if (newCompletedState && assignment) {
-        setShareCaption(`Treino concluído: ${assignment.workout.name} ✅`);
+        setShareCaption(t.athlete.workoutView.shareCaption.replace("{{name}}", assignment.workout.name));
         setShareWorkoutSummary({
           workoutName: assignment.workout.name,
           workoutType: assignment.workout.type,
@@ -862,7 +855,7 @@ const AthleteWorkoutView = () => {
         title: t.athlete.toast.workoutCompleted,
         description: t.athlete.workoutView.workoutCompletedDesc,
       });
-      setShareCaption(`Treino concluído: ${assignment.workout.name} ✅`);
+      setShareCaption(t.athlete.workoutView.shareCaption.replace("{{name}}", assignment.workout.name));
       setShareWorkoutSummary({
         workoutName: assignment.workout.name,
         workoutType: assignment.workout.type,
@@ -873,12 +866,12 @@ const AthleteWorkoutView = () => {
             return {
               label: `${workoutStage?.repeatCount ?? ""}x`,
               type: "repeat" as const,
-              nestedLabels: (workoutStage?.stages ?? []).map((ns) => stageLabels[ns.type] ?? ns.type),
+              nestedLabels: (workoutStage?.stages ?? []).map((ns) => workoutLabels(t).stage(ns.type)),
               reps: st.reps,
             };
           }
           return {
-            label: stageLabels[workoutStage?.type ?? "run"] ?? workoutStage?.type ?? "",
+            label: workoutLabels(t).stage(workoutStage?.type ?? "run"),
             type: "regular" as const,
             time: st.time,
           };
@@ -1022,8 +1015,8 @@ const AthleteWorkoutView = () => {
           <button
             onClick={() => setShowChecklistDrawer(true)}
             className="ml-auto p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            aria-label="Checklist"
-            title="Checklist"
+            aria-label={t.athlete.workoutView.checklist}
+            title={t.athlete.workoutView.checklist}
           >
             <ClipboardList className="h-5 w-5" />
           </button>
@@ -1320,7 +1313,7 @@ const AthleteWorkoutView = () => {
                 id="distance"
                 type="number"
                 inputMode="decimal"
-                placeholder={assignment?.workout.type === "swimming" ? "Ex: 1500" : "Ex: 10.5"}
+                placeholder={assignment?.workout.type === "swimming" ? t.athlete.workoutView.distanceSwimPlaceholder : t.athlete.workoutView.distancePlaceholder}
                 value={activityForm.distance}
                 onChange={(e) => {
                   const distance = e.target.value;
@@ -1346,7 +1339,7 @@ const AthleteWorkoutView = () => {
                 id="avg-hr"
                 type="number"
                 inputMode="numeric"
-                placeholder="Ex: 145"
+                placeholder={t.athlete.workoutView.avgHeartRatePlaceholder}
                 value={activityForm.avgHeartRate}
                 onChange={(e) => setActivityForm((f) => ({ ...f, avgHeartRate: e.target.value }))}
               />
@@ -1365,7 +1358,7 @@ const AthleteWorkoutView = () => {
                   id="avg-speed"
                   type="number"
                   inputMode="decimal"
-                  placeholder="Ex: 28.5"
+                  placeholder={t.athlete.workoutView.avgSpeedPlaceholder}
                   value={activityForm.avgSpeed}
                   onChange={(e) => setActivityForm((f) => ({ ...f, avgSpeed: e.target.value, paceManuallyEdited: true }))}
                   onFocus={() => setActivityForm((f) => ({ ...f, paceManuallyEdited: true }))}
@@ -1376,7 +1369,7 @@ const AthleteWorkoutView = () => {
                     id="avg-power"
                     type="number"
                     inputMode="numeric"
-                    placeholder="Ex: 220"
+                    placeholder={t.athlete.workoutView.avgPowerPlaceholder}
                     value={activityForm.avgPower}
                     onChange={(e) => setActivityForm((f) => ({ ...f, avgPower: e.target.value }))}
                   />

@@ -48,14 +48,14 @@ const EventDetail = () => {
     try {
       const data = await getAthleteEventById(id);
       if (!data) {
-        toast({ title: "Evento não encontrado", variant: "destructive" });
+        toast({ title: t.athlete.events.notFound, variant: "destructive" });
         navigate("/athlete/profile");
         return;
       }
       setEvent(data);
     } catch (err) {
       console.error(err);
-      toast({ title: "Erro ao carregar evento", variant: "destructive" });
+      toast({ title: t.athlete.events.loadError, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ const EventDetail = () => {
 
   if (loading || !event || !user) {
     return (
-      <AthletePortalLayout title="Evento" hideBottomNav>
+      <AthletePortalLayout title={t.athlete.events.title} hideBottomNav>
         <SectionSpinner />
       </AthletePortalLayout>
     );
@@ -82,14 +82,15 @@ const EventDetail = () => {
 
   const Icon = typeIcon[event.type];
   const daysUntil = differenceInCalendarDays(event.eventDate, new Date());
+  const cd = t.athlete.events.countdown;
   const countdown =
     daysUntil < 0
-      ? `há ${Math.abs(daysUntil)} dias`
+      ? cd.daysAgo.replace("{{count}}", String(Math.abs(daysUntil)))
       : daysUntil === 0
-      ? "hoje"
+      ? cd.todayShort
       : daysUntil === 1
-      ? "amanhã"
-      : `em ${daysUntil} dias`;
+      ? cd.tomorrowShort
+      : cd.inDays.replace("{{count}}", String(daysUntil));
 
   return (
     <AthletePortalLayout title={event.title} hideBottomNav>
@@ -107,8 +108,8 @@ const EventDetail = () => {
           <button
             onClick={() => setEditOpen(true)}
             className="ml-auto p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            aria-label="Editar evento"
-            title="Editar"
+            aria-label={t.athlete.events.editAriaLabel}
+            title={t.common.edit}
           >
             <Pencil className="h-5 w-5" />
           </button>
@@ -147,7 +148,7 @@ const EventDetail = () => {
               {event.goals.length > 0 && (
                 <div className="mt-4 space-y-2">
                   <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Objetivos
+                    {t.athlete.events.goalsTitle}
                   </h3>
                   <ul className="space-y-1">
                     {event.goals.map((g) => (

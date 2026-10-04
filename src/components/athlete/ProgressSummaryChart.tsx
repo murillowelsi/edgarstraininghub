@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ptBR } from "date-fns/locale";
+import type { Locale } from "date-fns";
 import { cn } from "@/lib/utils";
 import { modalityAccent } from "@/utils/modalityColors";
 import {
@@ -59,14 +61,14 @@ interface Bucket {
   planned: Record<WorkoutType, number>;
 }
 
-const buildBuckets = (range: RangeKey): Bucket[] => {
+const buildBuckets = (range: RangeKey, dateLocale?: Locale): Bucket[] => {
   const now = new Date();
   if (range === "1y") {
     const start = startOfMonth(subMonths(now, 11));
     return Array.from({ length: 12 }, (_, i) => {
       const s = addMonths(start, i);
       return {
-        label: format(s, "MMM"),
+        label: format(s, "MMM", { locale: dateLocale }),
         start: s,
         end: endOfMonth(s),
         done: { running: 0, cycling: 0, swimming: 0, strength: 0 },
@@ -79,7 +81,7 @@ const buildBuckets = (range: RangeKey): Bucket[] => {
   return Array.from({ length: weeks }, (_, i) => {
     const s = addWeeks(start, i);
     return {
-      label: format(s, "d MMM"),
+      label: format(s, "d MMM", { locale: dateLocale }),
       start: s,
       end: endOfWeek(s, { weekStartsOn: 1 }),
       done: { running: 0, cycling: 0, swimming: 0, strength: 0 },
@@ -93,13 +95,14 @@ export const ProgressSummaryChart = ({
 }: {
   assignments: AssignmentWithWorkout[];
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const dateLocale = language === "pt" ? ptBR : undefined;
   const tp = t.athlete.profile;
   const [range, setRange] = useState<RangeKey>("12w");
   const [metric, setMetric] = useState<MetricKey>("time");
 
   const data = useMemo(() => {
-    const buckets = buildBuckets(range);
+    const buckets = buildBuckets(range, dateLocale);
     for (const a of assignments) {
       const plannedDate = a.scheduledDate;
       const plannedBucket = buckets.find((b) =>
@@ -125,8 +128,8 @@ export const ProgressSummaryChart = ({
       label: b.label,
       rangeLabel:
         range === "1y"
-          ? format(b.start, "MMMM yyyy")
-          : `${format(b.start, "d MMM")} – ${format(b.end, "d MMM")}`,
+          ? format(b.start, "MMMM yyyy", { locale: dateLocale })
+          : `${format(b.start, "d MMM", { locale: dateLocale })} – ${format(b.end, "d MMM", { locale: dateLocale })}`,
       planned:
         b.planned.running + b.planned.cycling + b.planned.swimming + b.planned.strength,
       planned_running: b.planned.running,

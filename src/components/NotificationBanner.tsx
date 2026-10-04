@@ -2,6 +2,7 @@ import { Bell, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
 
@@ -9,6 +10,7 @@ type BannerState = "prompt" | "denied" | "hidden";
 
 export function NotificationBanner() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [state, setState] = useState<BannerState>("hidden");
 
   useEffect(() => {
@@ -30,12 +32,12 @@ export function NotificationBanner() {
       <div className="flex items-center gap-3 px-4 py-2.5 bg-destructive/10 border-b text-sm">
         <Bell className="h-4 w-4 text-destructive shrink-0" />
         <span className="flex-1 text-foreground">
-          Notificações bloqueadas. Para ativar, clique no cadeado na barra do browser e permita notificações.
+          {t.notifications.blocked}
         </span>
         <button
           onClick={() => setState("hidden")}
           className="shrink-0 text-muted-foreground hover:text-foreground"
-          aria-label="Fechar"
+          aria-label={t.notifications.dismiss}
         >
           <X className="h-4 w-4" />
         </button>
@@ -57,7 +59,7 @@ export function NotificationBanner() {
     <div className="flex items-center gap-3 px-4 py-2.5 bg-primary/10 border-b text-sm">
       <Bell className="h-4 w-4 text-primary shrink-0" />
       <span className="flex-1 text-foreground">
-        Ative as notificações para receber alertas de novas mensagens
+        {t.notifications.enablePrompt}
       </span>
       <Button
         size="sm"
@@ -65,12 +67,12 @@ export function NotificationBanner() {
         className="shrink-0 h-7 px-3 text-xs"
         onClick={handleEnable}
       >
-        Ativar
+        {t.notifications.enable}
       </Button>
       <button
         onClick={() => setState("hidden")}
         className="shrink-0 text-muted-foreground hover:text-foreground"
-        aria-label="Fechar"
+        aria-label={t.notifications.dismiss}
       >
         <X className="h-4 w-4" />
       </button>

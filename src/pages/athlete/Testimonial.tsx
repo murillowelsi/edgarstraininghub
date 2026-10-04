@@ -91,7 +91,7 @@ const AthleteTestimonial = () => {
             <button
               onClick={() => navigate(-1)}
               className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              aria-label="Back"
+              aria-label={t.common.back}
             >
               <ArrowLeft className="h-5 w-5" />
             </button>

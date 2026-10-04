@@ -40,15 +40,8 @@ import type { WorkoutFormData, WorkoutStage, WorkoutType } from "@/types/workout
 import {
   createDefaultStage,
   createRepeatBlock,
-  drillLabels,
-  equipmentLabels,
   getDefaultStageType,
-  intensityLabels,
   stageColors,
-  stageLabels,
-  strokeLabels,
-  durationLabels,
-  workoutTypeLabels,
 } from "@/types/workout";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Bike, ChevronDown, Clock, Flame, GripVertical, Heart, Loader2, MoreVertical, Pencil, PersonStanding, Plus, Repeat, Trash2, Waves, Wind, Zap } from "lucide-react";
@@ -59,9 +52,10 @@ import StageEditor from "../../components/workout/StageEditor";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
 
 // Helper to format duration for display
-const formatDuration = (stage: WorkoutStage, pressLapButtonLabel = "Press Lap Button") => {
+const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, pressLapButtonLabel: string) => {
   if (stage.duration.type === "lapButton") {
     return pressLapButtonLabel;
   }
@@ -69,11 +63,11 @@ const formatDuration = (stage: WorkoutStage, pressLapButtonLabel = "Press Lap Bu
     const unit = stage.duration.unit || "";
     return `${stage.duration.value} ${unit}`;
   }
-  return durationLabels[stage.duration.type];
+  return L.duration(stage.duration.type);
 };
 
 // Helper to format intensity for display
-const formatIntensity = (stage: WorkoutStage): string | null => {
+const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: any): string | null => {
   const { intensity } = stage;
 
   if (intensity.type === "none") {
@@ -82,10 +76,10 @@ const formatIntensity = (stage: WorkoutStage): string | null => {
 
   // Zone-based intensity
   if (intensity.type === "heartRateZone" && intensity.value) {
-    return `HR Zone ${intensity.value}`;
+    return `${t.workoutMeta.hrZone} ${intensity.value}`;
   }
   if (intensity.type === "powerZone" && intensity.value) {
-    return `Power Zone ${intensity.value}`;
+    return `${t.workoutMeta.powerZoneShort} ${intensity.value}`;
   }
 
   // Range-based intensity (min-max)
@@ -101,20 +95,20 @@ const formatIntensity = (stage: WorkoutStage): string | null => {
   }
 
   // Just show the type label if no values
-  return intensityLabels[intensity.type];
+  return L.intensity(intensity.type);
 };
 
 // Helper to format swimming details
-const formatSwimmingDetails = (stage: WorkoutStage): string[] => {
+const formatSwimmingDetails = (stage: WorkoutStage, L: WorkoutLabels): string[] => {
   const details: string[] = [];
   if (stage.strokeType) {
-    details.push(strokeLabels[stage.strokeType]);
+    details.push(L.stroke(stage.strokeType));
   }
   if (stage.drillType && stage.drillType !== "none") {
-    details.push(drillLabels[stage.drillType]);
+    details.push(L.drill(stage.drillType));
   }
   if (stage.equipment && stage.equipment !== "none") {
-    details.push(equipmentLabels[stage.equipment]);
+    details.push(L.swimEquipment(stage.equipment));
   }
   return details;
 };
@@ -144,6 +138,7 @@ const DraggableStage = ({
   isNested?: boolean;
 }) => {
   const { t } = useLanguage();
+  const L = workoutLabels(t);
   const [isExpanded, setIsExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const {
@@ -162,8 +157,8 @@ const DraggableStage = ({
   };
 
   const color = stageColors[stage.type];
-  const intensityDisplay = formatIntensity(stage);
-  const swimmingDetails = formatSwimmingDetails(stage);
+  const intensityDisplay = formatIntensity(stage, L, t);
+  const swimmingDetails = formatSwimmingDetails(stage, L);
   const StageIcon = stageIcons[stage.type] || PersonStanding;
 
   return (
@@ -171,7 +166,7 @@ const DraggableStage = ({
       <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>{stageLabels[stage.type]}</DrawerTitle>
+            <DrawerTitle>{L.stage(stage.type)}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6 space-y-2">
             <button
@@ -213,9 +208,9 @@ const DraggableStage = ({
             <CollapsibleTrigger asChild>
               <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{stageLabels[stage.type]}</p>
+                  <p className="font-semibold text-sm">{L.stage(stage.type)}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatDuration(stage, t.admin.workoutEditor.pressLapButton)}
+                    {formatDuration(stage, L, t.admin.workoutEditor.pressLapButton)}
                     {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
                     {!isExpanded && intensityDisplay && ` · ${intensityDisplay}`}
                   </p>
@@ -239,20 +234,20 @@ const DraggableStage = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Duration</p>
-                  <p className="font-medium">{formatDuration(stage, t.admin.workoutEditor.pressLapButton)}</p>
-                  <p className="text-xs text-muted-foreground">{durationLabels[stage.duration.type]}</p>
+                  <p className="font-medium">{formatDuration(stage, L, t.admin.workoutEditor.pressLapButton)}</p>
+                  <p className="text-xs text-muted-foreground">{L.duration(stage.duration.type)}</p>
                 </div>
                 {intensityDisplay && (
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Intensity</p>
                     <p className="font-medium">{intensityDisplay}</p>
-                    <p className="text-xs text-muted-foreground">{intensityLabels[stage.intensity.type]}</p>
+                    <p className="text-xs text-muted-foreground">{L.intensity(stage.intensity.type)}</p>
                   </div>
                 )}
                 {stage.strokeType && (
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Stroke</p>
-                    <p className="font-medium">{strokeLabels[stage.strokeType]}</p>
+                    <p className="font-medium">{L.stroke(stage.strokeType)}</p>
                   </div>
                 )}
               </div>
@@ -261,13 +256,13 @@ const DraggableStage = ({
                   {stage.drillType && stage.drillType !== "none" && (
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Drill Type</p>
-                      <p className="font-medium">{drillLabels[stage.drillType]}</p>
+                      <p className="font-medium">{L.drill(stage.drillType)}</p>
                     </div>
                   )}
                   {stage.equipment && stage.equipment !== "none" && (
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Equipment</p>
-                      <p className="font-medium">{equipmentLabels[stage.equipment]}</p>
+                      <p className="font-medium">{L.swimEquipment(stage.equipment)}</p>
                     </div>
                   )}
                 </div>
@@ -290,6 +285,7 @@ const DraggableStage = ({
 // Empty drop zone for repeat blocks
 const EmptyRepeatDropZone = ({ repeatId }: { repeatId: string }) => {
   const { t } = useLanguage();
+  const L = workoutLabels(t);
   const { setNodeRef, isOver } = useDroppable({
     id: `empty-${repeatId}`,
     data: {
@@ -325,6 +321,8 @@ const RepeatBlock = ({
   onEditNested: (id: string) => void;
   onDeleteNested: (id: string) => void;
 }) => {
+  const { t } = useLanguage();
+  const L = workoutLabels(t);
   const [isExpanded, setIsExpanded] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const {
@@ -350,7 +348,7 @@ const RepeatBlock = ({
       <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>{stageLabels[stage.type]}</DrawerTitle>
+            <DrawerTitle>{L.stage(stage.type)}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6 space-y-2">
             <button
@@ -438,8 +436,9 @@ const RepeatBlock = ({
 // Stage overlay for drag preview
 const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
   const { t } = useLanguage();
+  const L = workoutLabels(t);
   const color = stageColors[stage.type];
-  const intensityDisplay = formatIntensity(stage);
+  const intensityDisplay = formatIntensity(stage, L, t);
 
   const StageIcon = stageIcons[stage.type] || PersonStanding;
 
@@ -467,9 +466,9 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
           <StageIcon className="h-4 w-4" />
         </div>
         <div>
-          <p className="font-semibold text-sm">{stageLabels[stage.type]}</p>
+          <p className="font-semibold text-sm">{L.stage(stage.type)}</p>
           <p className="text-xs text-muted-foreground">
-            {formatDuration(stage, t.admin.workoutEditor.pressLapButton)}
+            {formatDuration(stage, L, t.admin.workoutEditor.pressLapButton)}
             {intensityDisplay && ` · ${intensityDisplay}`}
           </p>
         </div>
@@ -480,6 +479,7 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
 
 const WorkoutEditor = () => {
   const { t } = useLanguage();
+  const L = workoutLabels(t);
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const isEditing = Boolean(id);
@@ -497,7 +497,7 @@ const WorkoutEditor = () => {
   const [fabOpen, setFabOpen] = useState(false);
   const [activeStage, setActiveStage] = useState<WorkoutStage | null>(null);
   const [formData, setFormData] = useState<WorkoutFormData>({
-    name: `${workoutTypeLabels[urlWorkoutType]} Workout`,
+    name: t.admin.workoutEditor.defaultName.replace("{{type}}", t.workoutMeta.types[urlWorkoutType]),
     type: urlWorkoutType,
     stages: [],
   });
@@ -886,9 +886,8 @@ const WorkoutEditor = () => {
             </Button>
           </Link>
           <h1 className="font-semibold text-sm flex-1 min-w-0 truncate">
-            {isEditing
-              ? `Edit ${workoutTypeLabels[formData.type]} Workout`
-              : `New ${workoutTypeLabels[formData.type]} Workout`}
+            {(isEditing ? t.admin.workoutEditor.editTitle : t.admin.workoutEditor.newTitle)
+              .replace("{{type}}", t.workoutMeta.types[formData.type])}
           </h1>
           <Button onClick={handleSubmit} disabled={saving} size="sm" variant="ghost" className="shrink-0 text-primary hover:text-primary">
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}

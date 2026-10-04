@@ -137,13 +137,13 @@ export default function AthleteChat() {
             setIsNewChatOpen(false);
         } catch (error) {
             console.error("Error starting chat:", error);
-            toast.error("Failed to start chat. Please try again.");
+            toast.error(t.athlete.chat.startChatError);
         }
     };
 
     const handleSendMessage = async (text: string) => {
         if (!selectedChat || !user) {
-            toast.error("Unable to send message.");
+            toast.error(t.athlete.chat.noActiveChat);
             return;
         }
 
@@ -151,7 +151,7 @@ export default function AthleteChat() {
             await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Athlete");
         } catch (error) {
             console.error("Error sending message:", error);
-            toast.error("Failed to send message.");
+            toast.error(t.athlete.chat.sendError);
         }
     };
 
@@ -180,14 +180,14 @@ export default function AthleteChat() {
 
     if (loading) {
         return (
-            <AthletePortalLayout title="Chat">
+            <AthletePortalLayout title={t.athlete.chat.title}>
                 <SectionSpinner />
             </AthletePortalLayout>
         );
     }
 
     return (
-        <AthletePortalLayout title="Chat" showHeader={true} fullHeight={true} hideBottomNav={!!selectedChat}>
+        <AthletePortalLayout title={t.athlete.chat.title} showHeader={true} fullHeight={true} hideBottomNav={!!selectedChat}>
             <NotificationBanner />
             <div className="flex flex-col md:flex-row flex-1 min-h-0 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
 
@@ -288,7 +288,7 @@ export default function AthleteChat() {
                                                     "text-sm truncate",
                                                     unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"
                                                 )}>
-                                                    {chat.lastMessage || "No messages"}
+                                                    {chat.lastMessage || t.athlete.chat.noMessages}
                                                 </p>
                                                 {unreadCount > 0 && (
                                                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
@@ -322,7 +322,7 @@ export default function AthleteChat() {
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
                             <MessageSquare className="h-12 w-12 mb-4 opacity-20" />
-                            <p className="text-lg font-medium">Select a conversation</p>
+                            <p className="text-lg font-medium">{t.athlete.chat.selectConversation}</p>
                             <p className="text-sm">{t.athlete.chat.selectConversationDescription}</p>
                         </div>
                     )}

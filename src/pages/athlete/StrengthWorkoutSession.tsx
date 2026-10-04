@@ -583,7 +583,12 @@ const StrengthWorkoutSession = () => {
           .replace("{{time}}", formatTime(totalElapsedTime)),
       });
       const workoutName = assignment.workout.name;
-      setShareCaption(`Treino concluído: ${workoutName} — ${completionPercentage}% em ${formatTime(totalElapsedTime)} 💪`);
+      setShareCaption(
+        t.athlete.session.shareCaption
+          .replace("{{name}}", workoutName)
+          .replace("{{percentage}}", String(completionPercentage))
+          .replace("{{time}}", formatTime(totalElapsedTime))
+      );
       setShowShareModal(true);
     } catch (error) {
       console.error("Error saving workout:", error);

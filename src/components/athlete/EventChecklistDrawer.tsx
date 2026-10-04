@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -16,8 +17,7 @@ import {
   saveEventChecklist,
 } from "@/services/eventChecklistService";
 import {
-  eventChecklistPresets,
-  eventPresetLabels,
+  buildEventChecklistPreset,
   generateId,
   type EventChecklistPreset,
   type EventChecklistSection,
@@ -49,6 +49,8 @@ export const EventChecklistDrawer = ({
   athleteId,
 }: Props) => {
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const tec = t.athlete.eventChecklist;
   const isMobile = useIsMobile();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -77,17 +79,18 @@ export const EventChecklistDrawer = ({
       })
       .catch((err) => {
         console.error(err);
-        toast({ title: "Erro ao carregar", variant: "destructive" });
+        toast({ title: tec.loadError, variant: "destructive" });
       })
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [open, eventId, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, eventId]);
 
   const applyPreset = (p: EventChecklistPreset) => {
     setPreset(p);
-    setSections(eventChecklistPresets[p]());
+    setSections(buildEventChecklistPreset(p, tec));
     setNeedsPreset(false);
     setEditMode(p === "blank");
   };
@@ -148,7 +151,7 @@ export const EventChecklistDrawer = ({
               ...s,
               items: [
                 ...s.items,
-                { id: generateId(), label: "Novo item", checked: false },
+                { id: generateId(), label: tec.newItem, checked: false },
               ],
             }
       )
@@ -168,7 +171,7 @@ export const EventChecklistDrawer = ({
   const addSection = () => {
     setSections((prev) => [
       ...prev,
-      { id: generateId(), title: "Nova seção", items: [] },
+      { id: generateId(), title: tec.newSection, items: [] },
     ]);
   };
 
@@ -176,11 +179,11 @@ export const EventChecklistDrawer = ({
     setSaving(true);
     try {
       await saveEventChecklist(eventId, athleteId, sections, preset);
-      toast({ title: "Checklist salvo" });
+      toast({ title: tec.saved });
       onOpenChange(false);
     } catch (err) {
       console.error(err);
-      toast({ title: "Erro ao salvar", variant: "destructive" });
+      toast({ title: tec.saveError, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -207,14 +210,16 @@ export const EventChecklistDrawer = ({
           )}
           <div className="px-4 py-4 border-b shrink-0">
             <DrawerPrimitive.Title className="text-lg font-semibold leading-none tracking-tight">
-              Checklist da prova
+              {tec.title}
             </DrawerPrimitive.Title>
             <DrawerPrimitive.Description className="text-sm text-muted-foreground mt-1">
               {loading
-                ? "Carregando..."
+                ? t.common.loading
                 : needsPreset
-                ? "Escolha um modelo para começar"
-                : `${totals.checked}/${totals.total} itens conferidos`}
+                ? tec.startHint
+                : tec.itemsChecked
+                    .replace("{{checked}}", String(totals.checked))
+                    .replace("{{total}}", String(totals.total))}
             </DrawerPrimitive.Description>
           </div>
 
@@ -225,17 +230,15 @@ export const EventChecklistDrawer = ({
               </div>
             ) : needsPreset ? (
               <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Selecione um modelo. Você poderá editar livremente depois.
-                </p>
+                <p className="text-sm text-muted-foreground">{tec.templateHint}</p>
                 <Select onValueChange={(v) => applyPreset(v as EventChecklistPreset)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Escolha um modelo" />
+                    <SelectValue placeholder={tec.templatePlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
                     {presetOrder.map((p) => (
                       <SelectItem key={p} value={p}>
-                        {eventPresetLabels[p]}
+                        {tec.presets[p]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -250,14 +253,14 @@ export const EventChecklistDrawer = ({
                     onClick={() => setEditMode((v) => !v)}
                   >
                     <Pencil className="h-4 w-4 mr-1" />
-                    {editMode ? "Concluir edição" : "Editar"}
+                    {editMode ? tec.doneEditing : tec.edit}
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setNeedsPreset(true)}
                   >
-                    Trocar modelo
+                    {tec.changeTemplate}
                   </Button>
                 </div>
 
@@ -330,7 +333,7 @@ export const EventChecklistDrawer = ({
                         onClick={() => addItem(section.id)}
                       >
                         <Plus className="h-4 w-4 mr-1" />
-                        Adicionar item
+                        {tec.addItem}
                       </Button>
                     )}
                   </div>
@@ -339,7 +342,7 @@ export const EventChecklistDrawer = ({
                 {editMode && (
                   <Button variant="outline" onClick={addSection} className="w-full">
                     <Plus className="h-4 w-4 mr-1" />
-                    Adicionar seção
+                    {tec.addSection}
                   </Button>
                 )}
               </>
@@ -352,10 +355,10 @@ export const EventChecklistDrawer = ({
               disabled={saving || loading || needsPreset}
             >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Salvar
+              {t.common.save}
             </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Fechar
+              {t.common.close}
             </Button>
           </div>
         </DrawerPrimitive.Content>

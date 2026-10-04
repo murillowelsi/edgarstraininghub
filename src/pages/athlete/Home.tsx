@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ptBR } from "date-fns/locale";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -44,6 +45,7 @@ const workoutTypeColors: Record<string, string> = {
 const AthleteHome = () => {
   const { user, photoURL } = useAuth();
   const { t, language } = useLanguage();
+  const dateLocale = language === "pt" ? ptBR : undefined;
   const { toast } = useToast();
   const { setIsMenuOpen } = useTopBarMenu();
   const [displayName, setDisplayName] = useState<string>("");
@@ -238,7 +240,7 @@ const AthleteHome = () => {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base capitalize">{format(centerDate, "MMMM yyyy")}</CardTitle>
+              <CardTitle className="text-base capitalize">{format(centerDate, "MMMM yyyy", { locale: dateLocale })}</CardTitle>
               <button onClick={handleTodayClick} className="text-sm text-primary font-medium hover:underline">
                 {t.athlete.home.today}
               </button>
@@ -330,7 +332,7 @@ const AthleteHome = () => {
                     icon={<Icon className="h-5 w-5" />}
                     iconClassName={workoutTypeColors[workout.type] || "bg-muted text-foreground"}
                     title={workout.name}
-                    subtitle={format(assignment.scheduledDate, "EEE, MMM d")}
+                    subtitle={format(assignment.scheduledDate, language === "pt" ? "EEE, d MMM" : "EEE, MMM d", { locale: dateLocale })}
                     right={<ChevronRight className="h-5 w-5 text-muted-foreground" />}
                   />
                 );

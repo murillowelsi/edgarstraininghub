@@ -102,7 +102,7 @@ export default function AthleteTeams() {
           <div className="flex flex-col items-center justify-center h-40 gap-2 text-center">
             <Shield className="h-10 w-10 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">
-              {search ? t.admin.teams.noTeamsTitle : t.admin.teams.noTeamsTitle}
+              {t.admin.teams.noTeamsTitle}
             </p>
           </div>
         ) : (

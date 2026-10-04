@@ -68,7 +68,7 @@ export default function ChatWindow({
                     <button
                         onClick={onBack}
                         className="md:hidden p-1.5 rounded-full hover:bg-accent transition-colors shrink-0"
-                        aria-label="Voltar"
+                        aria-label={t.athlete.chat.back}
                     >
                         <ChevronLeft className="h-5 w-5" />
                     </button>
@@ -88,7 +88,7 @@ export default function ChatWindow({
                     <button
                         onClick={onDelete}
                         className="p-1.5 rounded-full hover:bg-accent transition-colors text-destructive shrink-0"
-                        aria-label="Apagar conversa"
+                        aria-label={t.athlete.chat.deleteConversation}
                     >
                         <Trash2 className="h-4 w-4" />
                     </button>
@@ -165,7 +165,7 @@ export default function ChatWindow({
                 <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-muted rounded-full px-4 py-1">
                     <input
                         name="message"
-                        placeholder={t.chatComponent.placeholder ?? "Enviar uma mensagem"}
+                        placeholder={t.chatComponent.placeholder}
                         disabled={isLoading}
                         autoComplete="off"
                         className="flex-1 bg-transparent text-[16px] outline-none py-2 text-foreground placeholder:text-muted-foreground"
@@ -174,7 +174,7 @@ export default function ChatWindow({
                         type="submit"
                         disabled={isLoading}
                         className="shrink-0 text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
-                        aria-label="Send"
+                        aria-label={t.athlete.chat.send}
                     >
                         <Send className="h-4 w-4" />
                     </button>

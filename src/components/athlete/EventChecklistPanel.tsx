@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   deleteEventChecklist,
@@ -24,8 +25,7 @@ import {
   saveEventChecklist,
 } from "@/services/eventChecklistService";
 import {
-  eventChecklistPresets,
-  eventPresetLabels,
+  buildEventChecklistPreset,
   generateId,
   type EventChecklistCategory,
   type EventChecklistPreset,
@@ -84,6 +84,8 @@ const categoryColor: Record<EventChecklistCategory, string> = {
 
 export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const tec = t.athlete.eventChecklist;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -112,16 +114,17 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
       })
       .catch((err) => {
         console.error(err);
-        toast({ title: "Erro ao carregar", variant: "destructive" });
+        toast({ title: tec.loadError, variant: "destructive" });
       })
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [eventId, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId]);
 
   const applyPreset = async (p: EventChecklistPreset) => {
-    const newSections = eventChecklistPresets[p]();
+    const newSections = buildEventChecklistPreset(p, tec);
     setPreset(p);
     setSections(newSections);
     setNeedsPreset(false);
@@ -138,7 +141,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
       setHasSavedChecklist(true);
     } catch (err) {
       console.error(err);
-      toast({ title: "Erro ao salvar modelo", variant: "destructive" });
+      toast({ title: tec.savePresetError, variant: "destructive" });
       setDirty(true);
     } finally {
       setSaving(false);
@@ -187,7 +190,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
       prev.map((s) =>
         s.id !== sId
           ? s
-          : { ...s, items: [...s.items, { id: generateId(), label: "Novo item", checked: false }] }
+          : { ...s, items: [...s.items, { id: generateId(), label: tec.newItem, checked: false }] }
       )
     );
 
@@ -200,7 +203,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
   const addSection = () =>
     mutate((prev) => [
       ...prev,
-      { id: generateId(), title: "Nova seção", category: "custom", items: [] },
+      { id: generateId(), title: tec.newSection, category: "custom", items: [] },
     ]);
 
   const handleDelete = async () => {
@@ -216,10 +219,10 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
       setEditMode(false);
       setNeedsPreset(true);
       setConfirmDelete(false);
-      toast({ title: "Checklist removido" });
+      toast({ title: tec.removed });
     } catch (err) {
       console.error(err);
-      toast({ title: "Erro ao remover", variant: "destructive" });
+      toast({ title: tec.removeError, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -229,12 +232,12 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
     setSaving(true);
     try {
       await saveEventChecklist(eventId, athleteId, sections, preset);
-      toast({ title: "Checklist salvo" });
+      toast({ title: tec.saved });
       setDirty(false);
       setHasSavedChecklist(true);
     } catch (err) {
       console.error(err);
-      toast({ title: "Erro ao salvar", variant: "destructive" });
+      toast({ title: tec.saveError, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -253,19 +256,17 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
       <div className="space-y-3 rounded-lg border p-4">
         <div className="flex items-center gap-2">
           <ClipboardList className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold">Checklist da prova</h3>
+          <h3 className="font-semibold">{tec.title}</h3>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Selecione um modelo. Você poderá editar livremente depois.
-        </p>
+        <p className="text-sm text-muted-foreground">{tec.templateHint}</p>
         <Select onValueChange={(v) => applyPreset(v as EventChecklistPreset)}>
           <SelectTrigger>
-            <SelectValue placeholder="Escolha um modelo" />
+            <SelectValue placeholder={tec.templatePlaceholder} />
           </SelectTrigger>
           <SelectContent>
             {presetOrder.map((p) => (
               <SelectItem key={p} value={p}>
-                {eventPresetLabels[p]}
+                {tec.presets[p]}
               </SelectItem>
             ))}
           </SelectContent>
@@ -280,7 +281,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">Checklist da prova</h3>
+            <h3 className="font-semibold">{tec.title}</h3>
           </div>
           <span className="text-sm text-muted-foreground">
             {totals.checked}/{totals.total}
@@ -296,11 +297,11 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
             onClick={() => setEditMode((v) => !v)}
           >
             <Pencil className="h-4 w-4 mr-1.5" />
-            {editMode ? "Concluir" : "Editar"}
+            {editMode ? tec.done : tec.edit}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setNeedsPreset(true)}>
             <RefreshCw className="h-4 w-4 mr-1.5" />
-            Modelo
+            {tec.template}
           </Button>
           <Button
             variant="outline"
@@ -309,7 +310,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
             onClick={() => setConfirmDelete(true)}
           >
             <Trash2 className="h-4 w-4 mr-1.5" />
-            Remover
+            {tec.remove}
           </Button>
         </div>
       </div>
@@ -317,11 +318,8 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
       <Drawer open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Remover checklist?</DrawerTitle>
-            <DrawerDescription>
-              O checklist deste evento será apagado. Você poderá criar um novo
-              a partir de qualquer modelo depois.
-            </DrawerDescription>
+            <DrawerTitle>{tec.removeTitle}</DrawerTitle>
+            <DrawerDescription>{tec.removeDesc}</DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
             <Button
@@ -331,7 +329,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
               disabled={saving}
             >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Remover
+              {tec.remove}
             </Button>
             <Button
               variant="outline"
@@ -339,7 +337,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
               onClick={() => setConfirmDelete(false)}
               disabled={saving}
             >
-              Cancelar
+              {t.common.cancel}
             </Button>
           </DrawerFooter>
         </DrawerContent>
@@ -429,7 +427,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
                 onClick={() => addItem(section.id)}
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Adicionar item
+                {tec.addItem}
               </Button>
             )}
           </div>
@@ -439,7 +437,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
       {editMode && (
         <Button variant="outline" onClick={addSection} className="w-full">
           <Plus className="h-4 w-4 mr-1" />
-          Adicionar seção
+          {tec.addSection}
         </Button>
       )}
 
@@ -456,7 +454,7 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Salvar checklist
+            {tec.save}
           </Button>
         </div>
       )}

@@ -2,12 +2,14 @@ import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { Dumbbell, Heart, MapPin, Timer, Zap } from "lucide-react";
 import type { WorkoutSummary } from "@/types/timeline";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { WorkoutType } from "@/types/workout";
 
-const typeConfig: Record<string, { icon: React.ElementType; label: string; color: string; bg: string }> = {
-  running: { icon: GrRun,    label: "Corrida",  color: "#3b82f6", bg: "#3b82f610" },
-  cycling: { icon: GrBike,   label: "Ciclismo", color: "#f59e0b", bg: "#f59e0b10" },
-  swimming:{ icon: GrSwim,   label: "Natação",  color: "#06b6d4", bg: "#06b6d410" },
-  strength:{ icon: Dumbbell, label: "Força",    color: "#a855f7", bg: "#a855f710" },
+const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+  running: { icon: GrRun,    color: "#3b82f6", bg: "#3b82f610" },
+  cycling: { icon: GrBike,   color: "#f59e0b", bg: "#f59e0b10" },
+  swimming:{ icon: GrSwim,   color: "#06b6d4", bg: "#06b6d410" },
+  strength:{ icon: Dumbbell, color: "#a855f7", bg: "#a855f710" },
 };
 
 const formatTime = (seconds: number) => {
@@ -25,24 +27,28 @@ interface Props {
 }
 
 export function WorkoutSummaryCard({ summary, flush }: Props) {
+  const { t } = useLanguage();
+  const ts = t.timeline.summary;
   const cfg = typeConfig[summary.workoutType] ?? typeConfig.strength;
+  const typeLabel =
+    t.workoutMeta.types[summary.workoutType as WorkoutType] ?? summary.workoutType;
   const Icon = cfg.icon;
   const isSwimming = summary.workoutType === "swimming";
 
   const stats: { icon: React.ElementType; value: string; label: string }[] = [];
 
   if (summary.elapsedTime !== undefined)
-    stats.push({ icon: Timer, value: formatTime(summary.elapsedTime), label: "Tempo" });
+    stats.push({ icon: Timer, value: formatTime(summary.elapsedTime), label: ts.time });
   if (summary.distance !== undefined)
-    stats.push({ icon: MapPin, value: `${summary.distance}${isSwimming ? "m" : "km"}`, label: "Distância" });
+    stats.push({ icon: MapPin, value: `${summary.distance}${isSwimming ? "m" : "km"}`, label: ts.distance });
   if (summary.avgHeartRate !== undefined)
-    stats.push({ icon: Heart, value: `${summary.avgHeartRate}`, label: "FC Média (bpm)" });
+    stats.push({ icon: Heart, value: `${summary.avgHeartRate}`, label: ts.avgHeartRate });
   if (summary.avgPace !== undefined)
-    stats.push({ icon: Timer, value: `${formatTime(summary.avgPace)}${isSwimming ? "/100m" : "/km"}`, label: "Pace Médio" });
+    stats.push({ icon: Timer, value: `${formatTime(summary.avgPace)}${isSwimming ? "/100m" : "/km"}`, label: ts.avgPace });
   if (summary.avgSpeed !== undefined)
-    stats.push({ icon: Zap, value: `${summary.avgSpeed}`, label: "Vel. Média (km/h)" });
+    stats.push({ icon: Zap, value: `${summary.avgSpeed}`, label: ts.avgSpeed });
   if (summary.completionPercentage !== undefined)
-    stats.push({ icon: Dumbbell, value: `${summary.completionPercentage}%`, label: "Concluído" });
+    stats.push({ icon: Dumbbell, value: `${summary.completionPercentage}%`, label: ts.completed });
 
   const cols = stats.length === 1 ? 1 : stats.length === 2 ? 2 : stats.length >= 4 ? 2 : 3;
 
@@ -58,7 +64,7 @@ export function WorkoutSummaryCard({ summary, flush }: Props) {
         </div>
         <div className="min-w-0">
           <p className="font-semibold text-sm truncate">{summary.workoutName}</p>
-          <p className="text-xs" style={{ color: cfg.color }}>{cfg.label}</p>
+          <p className="text-xs" style={{ color: cfg.color }}>{typeLabel}</p>
         </div>
       </div>
 

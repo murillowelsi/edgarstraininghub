@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Calendar, Camera, Dumbbell, Flame, Home, LayoutGrid, LogOut, Moon, Plus, Shield, Sun, MessageSquare, User, X } from "lucide-react";
-import GB from "country-flag-icons/react/3x2/GB";
-import PT from "country-flag-icons/react/3x2/PT";
+import LanguageChoice from "@/components/LanguageChoice";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -42,7 +41,7 @@ const AthletePortalLayout = ({
   const navigate = useNavigate();
   const { user, photoURL, setPhotoURL, userRole, displayName } = useAuth();
   const { toast } = useToast();
-  const { t, language, changeLanguage } = useLanguage();
+  const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
@@ -302,22 +301,7 @@ const AthletePortalLayout = ({
 
             <div className="border-t pt-4 space-y-2">
               {/* Language */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => changeLanguage("en")}
-                  className={`flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${language === "en" ? "bg-accent border-primary/30" : "border-border text-muted-foreground hover:bg-accent/50"}`}
-                >
-                  <GB className="w-5 h-4 rounded-sm shrink-0" />
-                  English
-                </button>
-                <button
-                  onClick={() => changeLanguage("pt")}
-                  className={`flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${language === "pt" ? "bg-accent border-primary/30" : "border-border text-muted-foreground hover:bg-accent/50"}`}
-                >
-                  <PT className="w-5 h-4 rounded-sm shrink-0" />
-                  Português
-                </button>
-              </div>
+              <LanguageChoice />
 
               {/* Theme */}
               <button
@@ -325,7 +309,7 @@ const AthletePortalLayout = ({
                 className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-border hover:bg-accent/50 transition-colors text-sm"
               >
                 {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-                <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
+                <span>{theme === "light" ? t.settings.darkMode : t.settings.lightMode}</span>
               </button>
 
               {/* Logout */}

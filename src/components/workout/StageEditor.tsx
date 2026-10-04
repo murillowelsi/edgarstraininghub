@@ -22,19 +22,15 @@ import type {
 } from "@/types/workout";
 import {
   createDefaultStage,
-  drillLabels,
-  durationLabels,
   durationTypesByWorkout,
-  equipmentLabels,
   getDefaultIntervalType,
-  intensityLabels,
   intensityTypesByWorkout,
   stageColors,
-  stageLabels,
   stageTypesByWorkout,
-  strokeLabels,
   swimmingDistancePresets,
 } from "@/types/workout";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { workoutLabels } from "@/utils/workoutLabels";
 import {
   Bike,
   Clock,
@@ -69,6 +65,8 @@ const stageIcons: Record<string, React.ElementType> = {
 };
 
 const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: StageEditorProps) => {
+  const { t } = useLanguage();
+  const L = workoutLabels(t);
   const isRepeat = stage.type === "repeat";
   const isSwimming = workoutType === "swimming";
 
@@ -237,10 +235,10 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
             <SelectContent>
               {availableStageTypes.map((type) => (
                 <SelectItem key={type} value={type}>
-                  {stageLabels[type]}
+                  {L.stage(type)}
                 </SelectItem>
               ))}
-              <SelectItem value="repeat">{stageLabels.repeat}</SelectItem>
+              <SelectItem value="repeat">{L.stage("repeat")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -277,7 +275,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
               <SelectContent>
                 {availableDurationTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {durationLabels[type]}
+                    {L.duration(type)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -382,9 +380,9 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(strokeLabels) as SwimmingStrokeType[]).map((stroke) => (
+                {(Object.keys(t.workoutMeta.strokes) as SwimmingStrokeType[]).map((stroke) => (
                   <SelectItem key={stroke} value={stroke}>
-                    {strokeLabels[stroke]}
+                    {L.stroke(stroke)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -401,9 +399,9 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(drillLabels) as SwimmingDrillType[]).map((drill) => (
+                {(Object.keys(t.workoutMeta.drills) as SwimmingDrillType[]).map((drill) => (
                   <SelectItem key={drill} value={drill}>
-                    {drillLabels[drill]}
+                    {L.drill(drill)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -420,9 +418,9 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(equipmentLabels) as SwimmingEquipmentType[]).map((equip) => (
+                {(Object.keys(t.workoutMeta.swimEquipment) as SwimmingEquipmentType[]).map((equip) => (
                   <SelectItem key={equip} value={equip}>
-                    {equipmentLabels[equip]}
+                    {L.swimEquipment(equip)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -445,7 +443,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
               <SelectContent>
                 {availableIntensityTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {intensityLabels[type]}
+                    {L.intensity(type)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -552,7 +550,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
                     <SelectContent>
                       {availableStageTypes.map((type) => (
                         <SelectItem key={type} value={type}>
-                          {stageLabels[type]}
+                          {L.stage(type)}
                         </SelectItem>
                       ))}
                     </SelectContent>

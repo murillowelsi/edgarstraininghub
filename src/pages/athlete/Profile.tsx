@@ -7,7 +7,8 @@ import { TrainingLogCalendar } from "@/components/athlete/TrainingLogCalendar";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dumbbell, Plus } from "lucide-react";
+import { Dumbbell, Plus, Settings } from "lucide-react";
+import LanguageChoice from "@/components/LanguageChoice";
 import { LeaveTestimonialBanner } from "@/components/athlete/LeaveTestimonialBanner";
 import { SectionSpinner } from "@/components/ui/spinner";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
@@ -16,6 +17,7 @@ import { modalityAccent } from "@/utils/modalityColors";
 import { estimateWorkoutDurationSec, actualDurationSec, formatHours } from "@/utils/workoutDuration";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { subscribeToAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
 import { subscribeToEventsByAthlete } from "@/services/athleteEventsService";
 import { getUserById } from "@/services/usersService";
@@ -27,8 +29,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 const AthleteProfile = () => {
   const { user, photoURL } = useAuth();
-  const { t, language } = useLanguage();
-  const lang = (language === "pt" ? "pt" : "en") as "pt" | "en";
+  const { t } = useLanguage();
+  const { setIsMenuOpen } = useTopBarMenu();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
@@ -124,7 +126,23 @@ const AthleteProfile = () => {
             <h1 className="font-display text-2xl font-extrabold leading-tight truncate">{displayName}</h1>
             <p className="text-sm text-muted-foreground">{t.athlete.role}</p>
           </div>
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="shrink-0 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            aria-label={t.settings.title}
+          >
+            <Settings className="h-5 w-5" />
+          </button>
         </div>
+
+        <Card className="border-border/50">
+          <CardContent className="p-4 space-y-2">
+            <h3 className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+              {t.settings.language}
+            </h3>
+            <LanguageChoice />
+          </CardContent>
+        </Card>
 
         <LeaveTestimonialBanner mode="profile" />
 

@@ -75,7 +75,7 @@ export default function AthleteTeamDetail() {
             variant="ghost"
             className="h-8 w-8 shrink-0"
             onClick={() => navigate("/athlete/teams")}
-            aria-label="Voltar"
+            aria-label={t.common.back}
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -114,7 +114,7 @@ export default function AthleteTeamDetail() {
           <div className="flex items-center gap-2 mb-3">
             <Users className="h-4 w-4 text-muted-foreground" />
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t.admin.teamDetail.members ?? "Members"}
+              {t.admin.teamDetail.membersSection}
             </h2>
           </div>
 
@@ -143,7 +143,7 @@ export default function AthleteTeamDetail() {
                   right={
                     member.id === user?.uid ? (
                       <Badge variant="outline" className="text-xs font-normal">
-                        Você
+                        {t.athlete.teams.you}
                       </Badge>
                     ) : undefined
                   }
