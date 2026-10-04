@@ -354,6 +354,50 @@
       "waist": "Waist/Core"
     }
   },
+  "workoutMeta": {
+    "types": { "running": "Running", "cycling": "Cycling", "swimming": "Swimming", "strength": "Strength" },
+    "stages": {
+      "warmup": "Warmup", "run": "Run", "cooldown": "Cooldown", "recovery": "Recovery",
+      "interval": "Interval", "repeat": "Repeat", "bike": "Bike", "rest": "Rest", "swim": "Swim"
+    },
+    "durations": {
+      "time": "Time", "distance": "Distance", "lapButton": "Press Lap Button",
+      "calories": "Calories", "heartRate": "Heart Rate", "power": "Power"
+    },
+    "intensities": {
+      "none": "No Target", "pace": "Pace", "cadence": "Cadence", "heartRateZone": "Heart Rate Zone",
+      "customHeartRate": "Custom Heart Rate", "powerZone": "Power Zone", "customPower": "Custom Power",
+      "speed": "Speed", "bikeCadence": "Bike Cadence", "effortBased": "Effort Based",
+      "targetPace": "Target Pace", "cssBasedPace": "CSS Based Pace"
+    },
+    "strokes": {
+      "freestyle": "Freestyle", "breaststroke": "Breaststroke", "backstroke": "Backstroke",
+      "butterfly": "Butterfly", "choice": "Choice", "im": "Individual Medley (IM)",
+      "imByRound": "IM by Round", "reverseIm": "Reverse IM (RIMO)", "mixed": "Mixed"
+    },
+    "drills": { "none": "None", "kick": "Kick", "arms": "Arms", "drill": "Drill" },
+    "swimEquipment": {
+      "none": "None", "fins": "Fins", "kickboard": "Kickboard",
+      "paddles": "Paddles", "pullBuoy": "Pull Buoy", "snorkel": "Snorkel"
+    },
+    "hrZone": "HR Zone",
+    "powerZoneShort": "Power Zone"
+  },
+  "notifications": {
+    "blocked": "Notifications are blocked. To enable them, click the padlock in the browser bar and allow notifications.",
+    "enablePrompt": "Turn on notifications to get alerts about new messages",
+    "enable": "Turn on",
+    "dismiss": "Dismiss"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "appearance": "Appearance",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "english": "English",
+    "portuguese": "Portuguese"
+  },
   "common": {
     "cancel": "Cancel",
     "save": "Save",
@@ -363,6 +407,8 @@
     "loading": "Loading...",
     "saving": "Saving...",
     "error": "Error",
+    "close": "Close",
+    "remove": "Remove",
     "back": "Back",
     "today": "Today",
     "search": "Search",
@@ -735,7 +781,17 @@
       "startChat": "Start a chat",
       "selectConversation": "Select a conversation",
       "selectConversationDescription": "Choose a coach from the list or start a new chat.",
-      "coachFallback": "Coach"
+      "coachFallback": "Coach",
+      "noMessages": "No messages",
+      "back": "Back",
+      "deleteConversation": "Delete conversation",
+      "send": "Send",
+      "startChatError": "Failed to start chat. Please try again.",
+      "sendError": "Failed to send message.",
+      "noActiveChat": "Unable to send message."
+    },
+    "teams": {
+      "you": "You"
     },
     "nav": {
       "home": "Home",
@@ -888,7 +944,14 @@
       "incompleteDrawerResetDesc": "Remove completion and recorded data",
       "paceCalculated": "calculated",
       "stageTimesSection": "Pace per stage",
-      "repeatLabel": "Repeat {{count}}x"
+      "repeatLabel": "Repeat {{count}}x",
+      "checklist": "Checklist",
+      "distanceSwimPlaceholder": "e.g. 1500",
+      "distancePlaceholder": "e.g. 10.5",
+      "avgHeartRatePlaceholder": "e.g. 145",
+      "avgSpeedPlaceholder": "e.g. 28.5",
+      "avgPowerPlaceholder": "e.g. 220",
+      "shareCaption": "Workout complete: {{name}} ✅"
     },
     "session": {
       "exerciseFallback": "Exercise",
@@ -917,7 +980,8 @@
       "saveConfirmCancel": "Keep Training",
       "saveConfirmConfirm": "Save & Finish",
       "exercisesCount": "Exercises",
-      "completePercent": "Complete"
+      "completePercent": "Complete",
+      "shareCaption": "Workout complete: {{name}} — {{percentage}}% in {{time}} 💪"
     },
     "profile": {
       "title": "You",
@@ -1004,8 +1068,16 @@
         "weeks": "{{count}} WEEKS TO EVENT",
         "daysShort": "{{count}} DAYS",
         "weeksShort": "{{count}} WEEKS",
-        "past": "Past"
+        "past": "Past",
+        "inDays": "in {{count}} days",
+        "daysAgo": "{{count}} days ago",
+        "todayShort": "today",
+        "tomorrowShort": "tomorrow"
       },
+      "notFound": "Event not found",
+      "loadError": "Failed to load event",
+      "editAriaLabel": "Edit event",
+      "goalsTitle": "Goals",
       "reminders": {
         "today": "🏁 Today's the day! {{title}} — good luck!",
         "tomorrow": "⏰ 1 day to go for {{title}}. You're ready!",
@@ -1043,6 +1115,110 @@
       "notes": "Notes",
       "stages": "Stages",
       "reps": "reps"
+    },
+    "checklist": {
+      "title": "Workout checklist",
+      "itemsChecked": "{{checked}}/{{total}} items checked",
+      "edit": "Edit",
+      "doneEditing": "Done editing",
+      "restoreDefault": "Restore default",
+      "empty": "No items yet. Add one below.",
+      "newItemPlaceholder": "New item...",
+      "save": "Save",
+      "saveAsDefault": "Save and set as default",
+      "saved": "Checklist saved",
+      "savedHere": "Saved to this workout.",
+      "savedHereAndDefault": "Saved to this workout and as your default for the next ones.",
+      "loadError": "Could not load the checklist.",
+      "saveError": "Could not save.",
+      "defaults": {
+        "running": [
+          "Running shoes", "Socks", "Running outfit", "Water bottle", "Gel / nutrition",
+          "Charged watch", "Heart rate strap", "Cap / visor", "Sunscreen"
+        ],
+        "cycling": [
+          "Bike serviced", "Helmet", "Cycling shoes", "Spare tube", "Pump / CO2", "Multitool",
+          "Bottles (water / sports drink)", "Sunglasses", "Gloves", "Gel / bar", "Charged phone"
+        ],
+        "swimming": [
+          "Swimsuit", "Swim cap", "Goggles", "Towel", "Flip-flops", "Water bottle",
+          "Pull buoy / paddles (if needed)"
+        ],
+        "strength": [
+          "Training outfit", "Trainers", "Water bottle", "Towel",
+          "Gloves / straps (if you use them)", "Headphones"
+        ]
+      }
+    },
+    "eventChecklist": {
+      "title": "Race checklist",
+      "templateHint": "Pick a template. You can edit it freely afterwards.",
+      "templatePlaceholder": "Choose a template",
+      "startHint": "Choose a template to get started",
+      "itemsChecked": "{{checked}}/{{total}} items checked",
+      "edit": "Edit",
+      "done": "Done",
+      "doneEditing": "Done editing",
+      "template": "Template",
+      "changeTemplate": "Change template",
+      "remove": "Remove",
+      "removeTitle": "Remove checklist?",
+      "removeDesc": "This event's checklist will be deleted. You can create a new one from any template later.",
+      "addItem": "Add item",
+      "addSection": "Add section",
+      "newItem": "New item",
+      "newSection": "New section",
+      "save": "Save checklist",
+      "saved": "Checklist saved",
+      "removed": "Checklist removed",
+      "loadError": "Failed to load",
+      "saveError": "Failed to save",
+      "removeError": "Failed to remove",
+      "savePresetError": "Failed to save template",
+      "presets": {
+        "running": "Running race",
+        "cycling": "Cycling race",
+        "swimming": "Swim race / open water",
+        "triathlon-sprint": "Sprint / Olympic triathlon",
+        "triathlon-long": "70.3 / Ironman triathlon",
+        "blank": "Blank"
+      },
+      "sections": {
+        "docs": "Documents",
+        "running": "Run",
+        "cycling": "Bike",
+        "swimming": "Swim",
+        "transition": "Transition",
+        "post": "Post-race"
+      },
+      "items": {
+        "docs": [
+          "Photo ID", "Entry confirmation", "Race kit / bib number", "Timing chip",
+          "Medical certificate (if required)", "Health card / insurance"
+        ],
+        "running": [
+          "Race shoes", "Socks", "Running outfit", "Cap / visor", "Sunglasses", "Charged watch",
+          "Heart rate strap", "Gels / nutrition", "Salt / capsules", "Sunscreen", "Body glide"
+        ],
+        "cycling": [
+          "Bike serviced", "Helmet", "Cycling shoes", "Spare tubes (x2)", "Pump / CO2", "Multitool",
+          "Bottles (water / sports drink)", "Gels / bars", "Sunglasses", "Gloves", "Bike kit / skinsuit"
+        ],
+        "swimming": [
+          "Wetsuit (if allowed)", "Race swim cap", "Spare cap", "Goggles", "Spare goggles",
+          "Body glide", "Race kit / trisuit"
+        ],
+        "transition": [
+          "Transition bag / box", "Towel", "Talc", "Elastic laces",
+          "Bottle to rinse feet", "Bag for wet kit"
+        ],
+        "post": [
+          "Dry clothes", "Flip-flops", "Recovery / shake", "Extra water / sports drink",
+          "Cash / card", "Charger / power bank", "Rubbish bag"
+        ],
+        "longBike": ["Bike special needs (bag)", "Aerobars / bike hydration"],
+        "longRun": ["Run special needs (bag)", "Headlamp (if it gets dark)"]
+      }
     }
   },
   "chatComponent": {
@@ -1089,6 +1265,14 @@
   },
   "timeline": {
     "postShared": "Post shared!",
+    "summary": {
+      "time": "Time",
+      "distance": "Distance",
+      "avgHeartRate": "Avg HR (bpm)",
+      "avgPace": "Avg Pace",
+      "avgSpeed": "Avg Speed (km/h)",
+      "completed": "Completed"
+    },
     "activity": {
       "title": "Activity",
       "today": "Today",

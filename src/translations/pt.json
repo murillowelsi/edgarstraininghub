@@ -4,7 +4,7 @@
     "about": "Sobre",
     "services": "Serviços",
     "achievements": "Conquistas",
-    "contact": "Contacto",
+    "contact": "Contato",
     "getStarted": "Começar"
   },
   "hero": {
@@ -66,7 +66,7 @@
     "cta": {
       "title": "Pronto para Transformar seu Condicionamento Físico?",
       "description": "Ofereço treinos personalizados 1-a-1 tanto presencialmente em Bournemouth quanto online para clientes em todo o mundo. Cada programa é especialmente desenvolvido para se adequar aos seus objetivos específicos, nível de condicionamento físico e agenda.",
-      "button": "Entre em Contacto"
+      "button": "Entre em Contato"
     }
   },
   "achievements": {
@@ -109,7 +109,7 @@
     "description": "Personal Trainer & Triatleta baseado no Bournemouth, Inglaterra, especializado em treino de resistência e otimização de desempenho.",
     "quickLinks": "Links Rápidos",
     "services": "Serviços",
-    "getInTouch": "Entre em Contacto",
+    "getInTouch": "Entre em Contato",
     "rights": "Todos os direitos reservados.",
     "privacy": "Política de Privacidade",
     "terms": "Termos de Serviço"
@@ -175,10 +175,10 @@
   },
   "contact": {
     "title": "Entre em",
-    "titleHighlight": "Contacto",
+    "titleHighlight": "Contato",
     "subtitle": "Vamos conversar sobre seus objetivos fitness. Estou aqui para ajudar você a alcançar seus melhores resultados.",
     "info": {
-      "title": "Informações de Contacto",
+      "title": "Informações de Contato",
       "phone": "Telefone",
       "whatsapp": "WhatsApp",
       "email": "Email",
@@ -214,7 +214,7 @@
       "messagePlaceholder": "Estou interessado em treino personalizado...",
       "send": "Enviar Mensagem",
       "success": "Mensagem Enviada!",
-      "successDescription": "Obrigado por entrar em contacto. Responderei em breve."
+      "successDescription": "Obrigado por entrar em contato. Responderei em breve."
     },
     "cta": {
       "title": "Pronto para começar sua jornada fitness?",
@@ -354,15 +354,61 @@
       "waist": "Abdômen/Core"
     }
   },
+  "workoutMeta": {
+    "types": { "running": "Corrida", "cycling": "Ciclismo", "swimming": "Natação", "strength": "Força" },
+    "stages": {
+      "warmup": "Aquecimento", "run": "Corrida", "cooldown": "Desaquecimento", "recovery": "Recuperação",
+      "interval": "Intervalado", "repeat": "Repetir", "bike": "Bike", "rest": "Descanso", "swim": "Natação"
+    },
+    "durations": {
+      "time": "Tempo", "distance": "Distância", "lapButton": "Pressione o Botão de Volta",
+      "calories": "Calorias", "heartRate": "Frequência Cardíaca", "power": "Potência"
+    },
+    "intensities": {
+      "none": "Sem Alvo", "pace": "Pace", "cadence": "Cadência", "heartRateZone": "Zona de FC",
+      "customHeartRate": "FC Personalizada", "powerZone": "Zona de Potência", "customPower": "Potência Personalizada",
+      "speed": "Velocidade", "bikeCadence": "Cadência na Bike", "effortBased": "Por Esforço",
+      "targetPace": "Pace Alvo", "cssBasedPace": "Pace Baseado no CSS"
+    },
+    "strokes": {
+      "freestyle": "Crawl", "breaststroke": "Peito", "backstroke": "Costas",
+      "butterfly": "Borboleta", "choice": "Livre escolha", "im": "Medley (IM)",
+      "imByRound": "Medley por Série", "reverseIm": "Medley Invertido (RIMO)", "mixed": "Misto"
+    },
+    "drills": { "none": "Nenhum", "kick": "Pernada", "arms": "Braçada", "drill": "Educativo" },
+    "swimEquipment": {
+      "none": "Nenhum", "fins": "Nadadeiras", "kickboard": "Prancha",
+      "paddles": "Palmares", "pullBuoy": "Pull Buoy", "snorkel": "Snorkel"
+    },
+    "hrZone": "Zona FC",
+    "powerZoneShort": "Zona de Potência"
+  },
+  "notifications": {
+    "blocked": "Notificações bloqueadas. Para ativar, clique no cadeado na barra do navegador e permita as notificações.",
+    "enablePrompt": "Ative as notificações para receber alertas de novas mensagens",
+    "enable": "Ativar",
+    "dismiss": "Fechar"
+  },
+  "settings": {
+    "title": "Configurações",
+    "language": "Idioma",
+    "appearance": "Aparência",
+    "darkMode": "Modo escuro",
+    "lightMode": "Modo claro",
+    "english": "Inglês",
+    "portuguese": "Português"
+  },
   "common": {
     "cancel": "Cancelar",
-    "save": "Guardar",
-    "delete": "Eliminar",
+    "save": "Salvar",
+    "delete": "Excluir",
     "edit": "Editar",
     "create": "Criar",
-    "loading": "A carregar...",
-    "saving": "A guardar...",
+    "loading": "Carregando...",
+    "saving": "Salvando...",
     "error": "Erro",
+    "close": "Fechar",
+    "remove": "Remover",
     "back": "Voltar",
     "today": "Hoje",
     "search": "Pesquisar",
@@ -382,16 +428,16 @@
     "login": "Entrar",
     "logout": "Sair",
     "signIn": "Entrar",
-    "signingIn": "A entrar...",
+    "signingIn": "Entrando...",
     "emailPlaceholder": "admin@exemplo.com",
-    "passwordPlaceholder": "Introduza a sua palavra-passe",
-    "signInDescription": "Entre para aceder à sua conta",
+    "passwordPlaceholder": "Digite sua senha",
+    "signInDescription": "Entre para acessar sua conta",
     "accessDenied": "Acesso Negado",
-    "userNotFound": "Conta de utilizador não encontrada.",
+    "userNotFound": "Conta de usuário não encontrada.",
     "welcomeBack": "Bem-vindo de volta!",
     "loggedIn": "Sessão iniciada com sucesso.",
     "loginFailed": "Falha no Login",
-    "invalidCredentials": "Email ou palavra-passe inválidos."
+    "invalidCredentials": "Email ou senha inválidos."
   },
   "admin": {
     "panel": "Painel Admin",
@@ -400,7 +446,7 @@
     "nav": {
       "home": "Início",
       "posts": "Artigos",
-      "users": "Utilizadores",
+      "users": "Usuários",
       "athletes": "Atletas",
       "workouts": "Treinos",
       "calendar": "Calendário",
@@ -472,9 +518,9 @@
       "columns": { "title": "Título", "status": "Estado", "created": "Criado" },
       "published": "Publicado",
       "draft": "Rascunho",
-      "empty": { "title": "Sem artigos", "description": "Crie o seu primeiro artigo para começar." },
-      "delete": { "title": "Eliminar Artigo", "description": "Tem a certeza que quer eliminar \"{{name}}\"?" },
-      "toast": { "loadError": "Erro ao carregar artigos.", "deleted": "Artigo eliminado", "deletedDescription": "O artigo foi eliminado permanentemente.", "deleteError": "Erro ao eliminar artigo." }
+      "empty": { "title": "Sem artigos", "description": "Crie seu primeiro artigo para começar." },
+      "delete": { "title": "Excluir Artigo", "description": "Tem certeza que quer excluir \"{{name}}\"?" },
+      "toast": { "loadError": "Erro ao carregar artigos.", "deleted": "Artigo excluído", "deletedDescription": "O artigo foi excluído permanentemente.", "deleteError": "Erro ao excluir artigo." }
     },
     "testimonials": {
       "title": "Depoimentos",
@@ -517,15 +563,15 @@
       }
     },
     "users": {
-      "title": "Utilizadores",
-      "newUser": "Novo Utilizador",
+      "title": "Usuários",
+      "newUser": "Novo Usuário",
       "searchPlaceholder": "Pesquisar por nome ou email…",
       "you": "você",
       "columns": { "name": "Nome", "email": "Email", "role": "Função", "created": "Criado" },
       "roles": { "admin": "Admin", "editor": "Editor", "athlete": "Atleta" },
-      "empty": { "title": "Sem utilizadores", "description": "Adicione o seu primeiro utilizador para começar." },
-      "delete": { "title": "Eliminar Utilizador", "description": "Tem a certeza que quer eliminar \"{{name}}\"?", "selfDeleteError": "Não pode eliminar a sua própria conta." },
-      "toast": { "loadError": "Erro ao carregar utilizadores.", "deleted": "Utilizador eliminado", "deletedDescription": "O utilizador foi removido.", "deleteError": "Erro ao eliminar utilizador." }
+      "empty": { "title": "Sem usuários", "description": "Adicione seu primeiro usuário para começar." },
+      "delete": { "title": "Excluir Usuário", "description": "Tem certeza que quer excluir \"{{name}}\"?", "selfDeleteError": "Não pode excluir sua própria conta." },
+      "toast": { "loadError": "Erro ao carregar usuários.", "deleted": "Usuário excluído", "deletedDescription": "O usuário foi removido.", "deleteError": "Erro ao excluir usuário." }
     },
     "workouts": {
       "title": "Treinos",
@@ -538,27 +584,27 @@
       "assignToAthletes": "Atribuir a atletas",
       "stagesCount": "{{count}} etapas",
       "exercisesCount": "{{count}} exercícios",
-      "empty": { "title": "Sem treinos", "description": "Crie o seu primeiro treino para começar." },
-      "delete": { "title": "Eliminar Treino", "description": "Tem a certeza que quer eliminar \"{{name}}\"?" },
-      "toast": { "loadError": "Erro ao carregar treinos.", "deleted": "Treino eliminado", "deletedDescription": "O treino e as suas atribuições foram eliminados permanentemente.", "deleteError": "Erro ao eliminar treino." }
+      "empty": { "title": "Sem treinos", "description": "Crie seu primeiro treino para começar." },
+      "delete": { "title": "Excluir Treino", "description": "Tem certeza que quer excluir \"{{name}}\"?" },
+      "toast": { "loadError": "Erro ao carregar treinos.", "deleted": "Treino excluído", "deletedDescription": "O treino e suas atribuições foram excluídos permanentemente.", "deleteError": "Erro ao excluir treino." }
     },
     "userForm": {
-      "createTitle": "Criar Novo Utilizador",
-      "editTitle": "Editar Utilizador",
-      "createDescription": "Adicione um novo utilizador ao sistema com email e palavra-passe.",
-      "editDescription": "Atualize as informações e função do utilizador.",
+      "createTitle": "Criar Novo Usuário",
+      "editTitle": "Editar Usuário",
+      "createDescription": "Adicione um novo usuário ao sistema com email e senha.",
+      "editDescription": "Atualize as informações e função do usuário.",
       "displayName": "Nome de Exibição",
       "displayNamePlaceholder": "João Silva",
       "emailPlaceholder": "joao@exemplo.com",
-      "password": "Palavra-passe",
+      "password": "Senha",
       "passwordPlaceholder": "Mínimo 6 caracteres",
       "passwordHint": "Deve ter pelo menos 6 caracteres.",
       "rolePlaceholder": "Selecione uma função",
-      "roleDescriptions": { "admin": "Acesso total para gerir utilizadores e artigos", "editor": "Pode criar e editar artigos do blog", "athlete": "Acesso ao painel do atleta" },
-      "editNote": "O email e a palavra-passe não podem ser alterados aqui. Contacte o administrador do sistema.",
-      "createButton": "Criar Utilizador",
-      "updateButton": "Atualizar Utilizador",
-      "toast": { "notFound": "Utilizador não encontrado", "notFoundDescription": "O utilizador que está a tentar editar não existe.", "loadError": "Erro ao carregar utilizador.", "displayNameRequired": "O nome de exibição é obrigatório.", "emailRequired": "O email é obrigatório.", "passwordTooShort": "A palavra-passe deve ter pelo menos 6 caracteres.", "updated": "Utilizador atualizado", "updatedDescription": "As informações do utilizador foram guardadas.", "created": "Utilizador criado", "createdDescription": "O novo utilizador foi criado com sucesso." }
+      "roleDescriptions": { "admin": "Acesso total para gerir usuários e artigos", "editor": "Pode criar e editar artigos do blog", "athlete": "Acesso ao painel do atleta" },
+      "editNote": "O email e a senha não podem ser alterados aqui. Contate o administrador do sistema.",
+      "createButton": "Criar Usuário",
+      "updateButton": "Atualizar Usuário",
+      "toast": { "notFound": "Usuário não encontrado", "notFoundDescription": "O usuário que está tentando editar não existe.", "loadError": "Erro ao carregar usuário.", "displayNameRequired": "O nome de exibição é obrigatório.", "emailRequired": "O email é obrigatório.", "passwordTooShort": "A senha deve ter pelo menos 6 caracteres.", "updated": "Usuário atualizado", "updatedDescription": "As informações do usuário foram salvas.", "created": "Usuário criado", "createdDescription": "O novo usuário foi criado com sucesso." }
     },
     "postForm": {
       "createTitle": "Criar Novo Artigo",
@@ -566,21 +612,21 @@
       "createDescription": "Escreva e publique um novo artigo do blog.",
       "editDescription": "Atualize o conteúdo e as configurações do artigo.",
       "titleLabel": "Título",
-      "titlePlaceholder": "Introduza o título do artigo",
+      "titlePlaceholder": "Digite o título do artigo",
       "excerptLabel": "Resumo",
       "excerptPlaceholder": "Breve resumo do artigo (exibido nas listagens do blog)",
       "featuredImage": "Imagem em Destaque",
       "publishLabel": "Publicar este artigo",
-      "savePublish": "Guardar e Publicar",
-      "saveDraft": "Guardar como Rascunho",
-      "toast": { "imageUploaded": "Imagem carregada", "imageUploadedDescription": "A sua imagem foi carregada com sucesso.", "uploadFailed": "Falha no carregamento", "uploadFailedDescription": "Erro ao carregar imagem. Tente novamente.", "notFound": "Artigo não encontrado", "notFoundDescription": "O artigo que está a tentar editar não existe.", "loadError": "Erro ao carregar artigo.", "titleRequired": "O título é obrigatório.", "contentRequired": "O conteúdo é obrigatório.", "updated": "Artigo atualizado", "updatedDescription": "As suas alterações foram guardadas.", "createdPublished": "O seu artigo foi publicado.", "createdDraft": "O seu artigo foi guardado como rascunho.", "invalidFile": "Por favor carregue um ficheiro de imagem." }
+      "savePublish": "Salvar e Publicar",
+      "saveDraft": "Salvar como Rascunho",
+      "toast": { "imageUploaded": "Imagem enviada", "imageUploadedDescription": "A sua imagem foi enviada com sucesso.", "uploadFailed": "Falha no envio", "uploadFailedDescription": "Erro ao enviar imagem. Tente novamente.", "notFound": "Artigo não encontrado", "notFoundDescription": "O artigo que está tentando editar não existe.", "loadError": "Erro ao carregar artigo.", "titleRequired": "O título é obrigatório.", "contentRequired": "O conteúdo é obrigatório.", "updated": "Artigo atualizado", "updatedDescription": "Suas alterações foram salvas.", "createdPublished": "Seu artigo foi publicado.", "createdDraft": "Seu artigo foi salvo como rascunho.", "invalidFile": "Por favor, envie um arquivo de imagem." }
     },
     "workoutEditor": {
       "pressLapButton": "Pressionar Botão Lap",
       "dragHere": "Arraste etapas para aqui",
       "dropHere": "Soltar aqui",
       "noStages": "Sem etapas. Adicione a sua primeira etapa para começar.",
-      "toast": { "notFound": "Treino não encontrado", "notFoundDescription": "O treino que está a tentar editar não existe.", "loadError": "Erro ao carregar treino.", "nameRequired": "O nome do treino é obrigatório.", "updated": "Treino atualizado", "updatedDescription": "As suas alterações foram guardadas.", "created": "Treino criado", "createdDescription": "O seu treino foi criado com sucesso.", "saveError": "Erro ao guardar treino." }
+      "toast": { "notFound": "Treino não encontrado", "notFoundDescription": "O treino que está tentando editar não existe.", "loadError": "Erro ao carregar treino.", "nameRequired": "O nome do treino é obrigatório.", "updated": "Treino atualizado", "updatedDescription": "Suas alterações foram salvas.", "created": "Treino criado", "createdDescription": "Seu treino foi criado com sucesso.", "saveError": "Erro ao salvar treino." }
     },
     "calendar": {
       "title": "Calendário",
@@ -589,8 +635,8 @@
       "days": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
       "noWorkouts": "Sem treinos",
       "completedOn": "Concluído em",
-      "deleteAssignment": "Eliminar Atribuição",
-      "deleteAssignmentDescription": "Tem a certeza que quer eliminar esta atribuição? Esta ação não pode ser desfeita.",
+      "deleteAssignment": "Excluir Atribuição",
+      "deleteAssignmentDescription": "Tem certeza que quer excluir esta atribuição? Esta ação não pode ser desfeita.",
       "editWorkout": "Editar Treino",
       "add": "Adicionar",
       "tomorrow": "Amanhã",
@@ -598,7 +644,7 @@
       "workouts": "treinos",
       "legend": { "workoutTypes": "Tipos de treino:", "completed": "= Concluído" },
       "upcomingAthleteEvents": "Próximos eventos dos atletas",
-      "toast": { "loadError": "Erro ao carregar dados do calendário.", "assignmentDeleted": "Atribuição eliminada", "assignmentDeletedDescription": "A atribuição do treino foi removida.", "deleteError": "Erro ao eliminar a atribuição." }
+      "toast": { "loadError": "Erro ao carregar dados do calendário.", "assignmentDeleted": "Atribuição excluída", "assignmentDeletedDescription": "A atribuição do treino foi removida.", "deleteError": "Erro ao excluir a atribuição." }
     },
     "chat": {
       "title": "Mensagens",
@@ -611,17 +657,17 @@
       "selectConversationDescription": "Escolha um atleta da lista ou inicie uma nova conversa.",
       "athleteFallback": "Atleta",
       "noMessages": "Sem mensagens",
-      "deleteChat": "Eliminar Chat",
-      "deleteConversation": "Eliminar Conversa",
-      "deleteConversationDescription": "Tem a certeza que quer eliminar esta conversa com {{name}}? Todas as mensagens serão eliminadas permanentemente.",
+      "deleteChat": "Excluir Chat",
+      "deleteConversation": "Excluir Conversa",
+      "deleteConversationDescription": "Tem certeza que quer excluir esta conversa com {{name}}? Todas as mensagens serão excluídas permanentemente.",
       "tabDirect": "Direto",
       "tabGroup": "Grupo",
       "noTeams": "Nenhum time encontrado.",
-      "toast": { "deleteSuccess": "Chat eliminado com sucesso", "deleteError": "Erro ao eliminar o chat. Tente novamente." }
+      "toast": { "deleteSuccess": "Chat excluído com sucesso", "deleteError": "Erro ao excluir o chat. Tente novamente." }
     },
     "teams": {
       "title": "Times",
-      "description": "Gerencie os seus grupos de treino e convide atletas.",
+      "description": "Gerencie seus grupos de treino e convide atletas.",
       "newTeam": "Novo Grupo",
       "searchPlaceholder": "Pesquisar grupos…",
       "editTeam": "Editar Grupo",
@@ -638,8 +684,8 @@
       "noTeamsTitle": "Ainda sem grupos",
       "noTeamsDescription": "Crie um grupo para começar a convidar atletas.",
       "delete": {
-        "title": "Eliminar Grupo",
-        "description": "Tem a certeza que quer eliminar \"{{name}}\"? Os membros e as suas atribuições de treino não são afetados."
+        "title": "Excluir Grupo",
+        "description": "Tem certeza que quer excluir \"{{name}}\"? Os membros e suas atribuições de treino não são afetados."
       },
       "toast": {
         "loadError": "Erro ao carregar grupos.",
@@ -648,9 +694,9 @@
         "createError": "Erro ao criar grupo.",
         "updated": "Grupo atualizado",
         "updateError": "Erro ao atualizar grupo.",
-        "deleted": "Grupo eliminado",
-        "deletedDescription": "\"{{name}}\" foi eliminado.",
-        "deleteError": "Erro ao eliminar grupo."
+        "deleted": "Grupo excluído",
+        "deletedDescription": "\"{{name}}\" foi excluído.",
+        "deleteError": "Erro ao excluir grupo."
       }
     },
     "teamDetail": {
@@ -662,7 +708,7 @@
       "noMembersDescription": "Adicione atletas para começar a usar este time.",
       "inviteLink": "Link de Convite",
       "dangerZone": "Zona de Perigo",
-      "deleteTeam": "Eliminar Grupo",
+      "deleteTeam": "Excluir Grupo",
       "copyLink": "Copiar link",
       "qrCode": "QR Code",
       "fabAriaLabel": "Ações do time",
@@ -672,7 +718,7 @@
         "confirm": "Remover"
       },
       "deleteConfirm": {
-        "description": "Tem a certeza que quer eliminar este grupo? Os membros e as suas atribuições de treino não são afetados."
+        "description": "Tem certeza que quer excluir este grupo? Os membros e suas atribuições de treino não são afetados."
       },
       "addAthlete": "Adicionar Atleta",
       "addAthleteTitle": "Adicionar Atleta ao Grupo",
@@ -686,8 +732,8 @@
         "memberRemoved": "Membro removido",
         "memberRemovedDescription": "{{name}} removido do grupo.",
         "removeError": "Erro ao remover membro.",
-        "teamDeleted": "Grupo eliminado",
-        "deleteError": "Erro ao eliminar grupo.",
+        "teamDeleted": "Grupo excluído",
+        "deleteError": "Erro ao excluir grupo.",
         "athleteAdded": "Atleta adicionado",
         "athleteAddedDescription": "{{name}} adicionado ao grupo.",
         "addAthleteError": "Erro ao adicionar atleta.",
@@ -724,7 +770,7 @@
       "sessionLoadError": "Erro ao carregar o treino.",
       "sessionCompleted": "Treino concluído!",
       "sessionCompletedDescription": "Excelente! {{percentage}}% concluído em {{time}}",
-      "sessionSaveError": "Erro ao guardar o treino."
+      "sessionSaveError": "Erro ao salvar o treino."
     },
     "chat": {
       "title": "Mensagens",
@@ -735,7 +781,17 @@
       "startChat": "Iniciar conversa",
       "selectConversation": "Selecione uma conversa",
       "selectConversationDescription": "Escolha um coach da lista ou inicie uma nova conversa.",
-      "coachFallback": "Coach"
+      "coachFallback": "Coach",
+      "noMessages": "Sem mensagens",
+      "back": "Voltar",
+      "deleteConversation": "Apagar conversa",
+      "send": "Enviar",
+      "startChatError": "Erro ao iniciar a conversa. Tente novamente.",
+      "sendError": "Erro ao enviar a mensagem.",
+      "noActiveChat": "Não foi possível enviar a mensagem."
+    },
+    "teams": {
+      "you": "Você"
     },
     "nav": {
       "home": "Início",
@@ -862,7 +918,7 @@
       "goBack": "Voltar",
       "workoutCompletedDesc": "Parabéns por concluir seu treino!",
       "shareToFeedTitle": "Postar no feed?",
-      "shareToFeedDesc": "Quer compartilhar essa atividade com o feed?",
+      "shareToFeedDesc": "Quer comcompartilhar essa atividade com o feed?",
       "shareToFeedYes": "Sim, postar",
       "shareToFeedNo": "Agora não",
       "workoutUnmarkedDesc": "Treino marcado como incompleto.",
@@ -888,7 +944,14 @@
       "incompleteDrawerResetDesc": "Remover conclusão e dados registrados",
       "paceCalculated": "calculado",
       "stageTimesSection": "Pace por etapa",
-      "repeatLabel": "Repetir {{count}}x"
+      "repeatLabel": "Repetir {{count}}x",
+      "checklist": "Checklist",
+      "distanceSwimPlaceholder": "Ex: 1500",
+      "distancePlaceholder": "Ex: 10.5",
+      "avgHeartRatePlaceholder": "Ex: 145",
+      "avgSpeedPlaceholder": "Ex: 28.5",
+      "avgPowerPlaceholder": "Ex: 220",
+      "shareCaption": "Treino concluído: {{name}} ✅"
     },
     "session": {
       "exerciseFallback": "Exercício",
@@ -917,7 +980,8 @@
       "saveConfirmCancel": "Continuar Treinando",
       "saveConfirmConfirm": "Salvar e Encerrar",
       "exercisesCount": "Exercícios",
-      "completePercent": "Completo"
+      "completePercent": "Completo",
+      "shareCaption": "Treino concluído: {{name}} — {{percentage}}% em {{time}} 💪"
     },
     "profile": {
       "title": "Você",
@@ -1004,8 +1068,16 @@
         "weeks": "{{count}} SEMANAS ATÉ O EVENTO",
         "daysShort": "{{count}} DIAS",
         "weeksShort": "{{count}} SEMANAS",
-        "past": "Concluído"
+        "past": "Concluído",
+        "inDays": "em {{count}} dias",
+        "daysAgo": "há {{count}} dias",
+        "todayShort": "hoje",
+        "tomorrowShort": "amanhã"
       },
+      "notFound": "Evento não encontrado",
+      "loadError": "Erro ao carregar o evento",
+      "editAriaLabel": "Editar evento",
+      "goalsTitle": "Objetivos",
       "reminders": {
         "today": "🏁 É hoje! {{title}} — boa sorte!",
         "tomorrow": "⏰ Falta 1 dia para {{title}}. Você está pronto!",
@@ -1043,6 +1115,110 @@
       "notes": "Notas",
       "stages": "Etapas",
       "reps": "repetições"
+    },
+    "checklist": {
+      "title": "Checklist do treino",
+      "itemsChecked": "{{checked}}/{{total}} itens conferidos",
+      "edit": "Editar",
+      "doneEditing": "Concluir edição",
+      "restoreDefault": "Restaurar padrão",
+      "empty": "Nenhum item. Adicione abaixo.",
+      "newItemPlaceholder": "Novo item...",
+      "save": "Salvar",
+      "saveAsDefault": "Salvar e definir como padrão",
+      "saved": "Checklist salvo",
+      "savedHere": "Salvo neste treino.",
+      "savedHereAndDefault": "Salvo neste treino e como seu padrão para os próximos.",
+      "loadError": "Não foi possível carregar o checklist.",
+      "saveError": "Não foi possível salvar.",
+      "defaults": {
+        "running": [
+          "Tênis de corrida", "Meias", "Roupa de corrida", "Garrafa de água", "Gel / nutrição",
+          "Relógio carregado", "Cinta cardíaca", "Boné / viseira", "Protetor solar"
+        ],
+        "cycling": [
+          "Bike revisada", "Capacete", "Sapatilha", "Câmara reserva", "Bomba / CO2", "Multitool",
+          "Garrafas (água / isotônico)", "Óculos", "Luvas", "Gel / barra", "Celular carregado"
+        ],
+        "swimming": [
+          "Sunga / maiô", "Touca", "Óculos de natação", "Toalha", "Chinelo", "Garrafa de água",
+          "Pull buoy / palmar (se aplicável)"
+        ],
+        "strength": [
+          "Roupa de treino", "Tênis", "Garrafa de água", "Toalha",
+          "Luvas / strap (se usar)", "Fone de ouvido"
+        ]
+      }
+    },
+    "eventChecklist": {
+      "title": "Checklist da prova",
+      "templateHint": "Selecione um modelo. Você poderá editar livremente depois.",
+      "templatePlaceholder": "Escolha um modelo",
+      "startHint": "Escolha um modelo para começar",
+      "itemsChecked": "{{checked}}/{{total}} itens conferidos",
+      "edit": "Editar",
+      "done": "Concluir",
+      "doneEditing": "Concluir edição",
+      "template": "Modelo",
+      "changeTemplate": "Trocar modelo",
+      "remove": "Remover",
+      "removeTitle": "Remover checklist?",
+      "removeDesc": "O checklist deste evento será apagado. Você poderá criar um novo a partir de qualquer modelo depois.",
+      "addItem": "Adicionar item",
+      "addSection": "Adicionar seção",
+      "newItem": "Novo item",
+      "newSection": "Nova seção",
+      "save": "Salvar checklist",
+      "saved": "Checklist salvo",
+      "removed": "Checklist removido",
+      "loadError": "Erro ao carregar",
+      "saveError": "Erro ao salvar",
+      "removeError": "Erro ao remover",
+      "savePresetError": "Erro ao salvar modelo",
+      "presets": {
+        "running": "Prova de corrida",
+        "cycling": "Prova de ciclismo",
+        "swimming": "Prova / travessia de natação",
+        "triathlon-sprint": "Triatlo Sprint / Olímpico",
+        "triathlon-long": "Triatlo 70.3 / Ironman",
+        "blank": "Em branco"
+      },
+      "sections": {
+        "docs": "Documentação",
+        "running": "Corrida",
+        "cycling": "Ciclismo",
+        "swimming": "Natação",
+        "transition": "Transição",
+        "post": "Pós-prova"
+      },
+      "items": {
+        "docs": [
+          "RG / documento com foto", "Confirmação de inscrição", "Kit do atleta / numeração",
+          "Chip de cronometragem", "Atestado médico (se exigido)", "Cartão de saúde / seguro"
+        ],
+        "running": [
+          "Tênis de prova", "Meias", "Roupa de corrida", "Boné / viseira", "Óculos", "Relógio carregado",
+          "Cinta cardíaca", "Géis / nutrição", "Sal / cápsulas", "Protetor solar", "Vaselina / body glide"
+        ],
+        "cycling": [
+          "Bike revisada", "Capacete", "Sapatilha", "Câmara reserva (x2)", "Bomba / CO2", "Multitool",
+          "Garrafas (água / isotônico)", "Géis / barras", "Óculos", "Luvas", "Roupa de bike / macaquinho"
+        ],
+        "swimming": [
+          "Wetsuit (se permitido)", "Touca da prova", "Touca extra", "Óculos de natação",
+          "Óculos extra", "Body glide / vaselina", "Roupa de prova / trisuit"
+        ],
+        "transition": [
+          "Mochila / caixa de transição", "Toalha", "Talco", "Elástico de cadarço",
+          "Garrafa para enxaguar pés", "Saco para roupa molhada"
+        ],
+        "post": [
+          "Roupa seca", "Chinelo", "Recovery / shake", "Água / isotônico extra",
+          "Dinheiro / cartão", "Carregador / power bank", "Sacola para lixo"
+        ],
+        "longBike": ["Special needs bike (sacola)", "Aerobar / hidratação na bike"],
+        "longRun": ["Special needs corrida (sacola)", "Lanterna / headlamp (se anoitecer)"]
+      }
     }
   },
   "chatComponent": {
@@ -1066,19 +1242,19 @@
     "goToDashboard": "Ir para o Dashboard",
     "joinTitle": "Entrar no {{name}}",
     "registerSubtitle": "Crie uma conta para entrar neste grupo.",
-    "loginSubtitle": "Entre na sua conta para se juntar ao grupo.",
+    "loginSubtitle": "Entre nsua conta para se juntar ao grupo.",
     "name": "Nome",
-    "namePlaceholder": "O seu nome completo",
-    "password": "Palavra-passe",
-    "createPasswordPlaceholder": "Crie uma palavra-passe",
-    "yourPasswordPlaceholder": "A sua palavra-passe",
+    "namePlaceholder": "Seu nome completo",
+    "password": "Senha",
+    "createPasswordPlaceholder": "Crie uma senha",
+    "yourPasswordPlaceholder": "Sua senha",
     "createAccountJoin": "Criar Conta e Entrar",
     "logInJoin": "Entrar e Juntar-se",
     "alreadyHaveAccount": "Já tem uma conta?",
     "logIn": "Entrar",
     "newHere": "Novo aqui?",
     "createAccount": "Criar conta",
-    "registrationFailed": "Erro no registo.",
+    "registrationFailed": "Erro no cadastro.",
     "loginFailed": "Erro no login."
   },
   "blog": {
@@ -1088,7 +1264,15 @@
     "noPosts": "Ainda não há artigos publicados. Volte em breve!"
   },
   "timeline": {
-    "postShared": "Post partilhado!",
+    "postShared": "Post comcompartilhado!",
+    "summary": {
+      "time": "Tempo",
+      "distance": "Distância",
+      "avgHeartRate": "FC Média (bpm)",
+      "avgPace": "Pace Médio",
+      "avgSpeed": "Vel. Média (km/h)",
+      "completed": "Concluído"
+    },
     "activity": {
       "title": "Atividade",
       "today": "Hoje",
@@ -1111,11 +1295,11 @@
       "placeholder": "Participe da conversa...",
       "loadError": "Não foi possível carregar comentários.",
       "postError": "Erro ao publicar comentário.",
-      "deleteError": "Erro ao eliminar comentário."
+      "deleteError": "Erro ao excluir comentário."
     },
     "post": {
-      "delete": "Eliminar post",
-      "deleted": "Post eliminado",
+      "delete": "Excluir post",
+      "deleted": "Post excluído",
       "edit": "Editar post",
       "editTitle": "Editar post",
       "editSubmit": "Salvar",
@@ -1123,7 +1307,7 @@
       "editError": "Não foi possível atualizar o post.",
       "actionsTitle": "Opções do post",
       "likeError": "Não foi possível atualizar o like.",
-      "deleteError": "Não foi possível eliminar o post.",
+      "deleteError": "Não foi possível excluir o post.",
       "loadMoreError": "Não foi possível carregar mais posts."
     },
     "create": {
@@ -1134,15 +1318,15 @@
       "placeholder": "No que você está pensando?",
       "tagPeople": "Marcar pessoas",
       "searchPlaceholder": "Pesquisar por nome…",
-      "noUsers": "Nenhum utilizador encontrado",
+      "noUsers": "Nenhum usuário encontrado",
       "uploadFailed": "Falha no upload",
       "uploadError": "Não foi possível carregar a imagem.",
       "createError": "Erro ao criar post. Tente novamente.",
-      "loadUsersError": "Não foi possível carregar utilizadores."
+      "loadUsersError": "Não foi possível carregar usuários."
     },
     "empty": {
       "noPosts": "Sem posts ainda",
-      "beFirst": "Seja o primeiro a partilhar algo!"
+      "beFirst": "Seja o primeiro a compartilhar algo!"
     }
   }
 }

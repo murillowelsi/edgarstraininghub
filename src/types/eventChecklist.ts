@@ -46,25 +46,31 @@ export type EventChecklistPreset =
   | "triathlon-long"
   | "blank";
 
-export const eventPresetLabels: Record<EventChecklistPreset, string> = {
-  running: "Prova de corrida",
-  cycling: "Prova de ciclismo",
-  swimming: "Prova / travessia de natação",
-  "triathlon-sprint": "Triatlo Sprint / Olímpico",
-  "triathlon-long": "Triatlo 70.3 / Ironman",
-  blank: "Em branco",
-};
-
 export const generateId = (): string =>
   `eci_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
-const mkItems = (labels: string[]): EventChecklistItem[] =>
+/** Section titles and item labels for the active language, supplied by the caller. */
+export interface EventChecklistStrings {
+  sections: Record<"docs" | "running" | "cycling" | "swimming" | "transition" | "post", string>;
+  items: {
+    docs: readonly string[];
+    running: readonly string[];
+    cycling: readonly string[];
+    swimming: readonly string[];
+    transition: readonly string[];
+    post: readonly string[];
+    longBike: readonly string[];
+    longRun: readonly string[];
+  };
+}
+
+const mkItems = (labels: readonly string[]): EventChecklistItem[] =>
   labels.map((label) => ({ id: generateId(), label, checked: false }));
 
 const mkSection = (
   title: string,
   category: EventChecklistCategory,
-  labels: string[]
+  labels: readonly string[]
 ): EventChecklistSection => ({
   id: generateId(),
   title,
@@ -72,95 +78,39 @@ const mkSection = (
   items: mkItems(labels),
 });
 
-const docs = () =>
-  mkSection("Documentação", "docs", [
-    "RG / documento com foto",
-    "Confirmação de inscrição",
-    "Kit do atleta / numeração",
-    "Chip de cronometragem",
-    "Atestado médico (se exigido)",
-    "Cartão de saúde / seguro",
-  ]);
+/**
+ * Build the sections for a preset in the caller's active language. Sections are
+ * persisted on save, so an existing checklist keeps the wording it was created with.
+ */
+export const buildEventChecklistPreset = (
+  preset: EventChecklistPreset,
+  s: EventChecklistStrings
+): EventChecklistSection[] => {
+  const docs = () => mkSection(s.sections.docs, "docs", s.items.docs);
+  const run = () => mkSection(s.sections.running, "running", s.items.running);
+  const bike = () => mkSection(s.sections.cycling, "cycling", s.items.cycling);
+  const swim = () => mkSection(s.sections.swimming, "swimming", s.items.swimming);
+  const transition = () => mkSection(s.sections.transition, "transition", s.items.transition);
+  const post = () => mkSection(s.sections.post, "post", s.items.post);
 
-const runItems = () =>
-  mkSection("Corrida", "running", [
-    "Tênis de prova",
-    "Meias",
-    "Roupa de corrida",
-    "Boné / viseira",
-    "Óculos",
-    "Relógio carregado",
-    "Cinta cardíaca",
-    "Géis / nutrição",
-    "Sal / cápsulas",
-    "Protetor solar",
-    "Vaselina / body glide",
-  ]);
-
-const bikeItems = () =>
-  mkSection("Ciclismo", "cycling", [
-    "Bike revisada",
-    "Capacete",
-    "Sapatilha",
-    "Câmara reserva (x2)",
-    "Bomba / CO2",
-    "Multitool",
-    "Garrafas (água / isotônico)",
-    "Géis / barras",
-    "Óculos",
-    "Luvas",
-    "Roupa de bike / macaquinho",
-  ]);
-
-const swimItems = () =>
-  mkSection("Natação", "swimming", [
-    "Wetsuit (se permitido)",
-    "Touca da prova",
-    "Touca extra",
-    "Óculos de natação",
-    "Óculos extra",
-    "Body glide / vaselina",
-    "Roupa de prova / trisuit",
-  ]);
-
-const transitionItems = () =>
-  mkSection("Transição", "transition", [
-    "Mochila / caixa de transição",
-    "Toalha",
-    "Talco",
-    "Elástico de cadarço",
-    "Garrafa para enxaguar pés",
-    "Saco para roupa molhada",
-  ]);
-
-const postRace = () =>
-  mkSection("Pós-prova", "post", [
-    "Roupa seca",
-    "Chinelo",
-    "Recovery / shake",
-    "Água / isotônico extra",
-    "Dinheiro / cartão",
-    "Carregador / power bank",
-    "Sacola para lixo",
-  ]);
-
-export const eventChecklistPresets: Record<EventChecklistPreset, () => EventChecklistSection[]> = {
-  running: () => [docs(), runItems(), postRace()],
-  cycling: () => [docs(), bikeItems(), postRace()],
-  swimming: () => [docs(), swimItems(), postRace()],
-  "triathlon-sprint": () => [docs(), swimItems(), bikeItems(), runItems(), transitionItems(), postRace()],
-  "triathlon-long": () => {
-    const sections = [docs(), swimItems(), bikeItems(), runItems(), transitionItems(), postRace()];
-    // For long distance, append extra items where it matters
-    sections[2].items.push(
-      { id: generateId(), label: "Special needs bike (sacola)", checked: false },
-      { id: generateId(), label: "Aerobar / hidratação na bike", checked: false }
-    );
-    sections[3].items.push(
-      { id: generateId(), label: "Special needs corrida (sacola)", checked: false },
-      { id: generateId(), label: "Lanterna / headlamp (se anoitecer)", checked: false }
-    );
-    return sections;
-  },
-  blank: () => [],
+  switch (preset) {
+    case "running":
+      return [docs(), run(), post()];
+    case "cycling":
+      return [docs(), bike(), post()];
+    case "swimming":
+      return [docs(), swim(), post()];
+    case "triathlon-sprint":
+      return [docs(), swim(), bike(), run(), transition(), post()];
+    case "triathlon-long": {
+      const sections = [docs(), swim(), bike(), run(), transition(), post()];
+      // Long distance carries extra kit on the bike and run legs.
+      sections[2].items.push(...mkItems(s.items.longBike));
+      sections[3].items.push(...mkItems(s.items.longRun));
+      return sections;
+    }
+    case "blank":
+    default:
+      return [];
+  }
 };
