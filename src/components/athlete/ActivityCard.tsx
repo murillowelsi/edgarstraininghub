@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -104,7 +105,12 @@ const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href }: Props)
             </div>
           </div>
 
-          <h3 className="font-display font-bold text-lg leading-tight">{assignment.workout.name}</h3>
+          <h3 className="font-display font-bold text-lg leading-tight flex items-center gap-2">
+            <span>{assignment.workout.name}</span>
+            {assignment.selfLogged && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-sans font-medium">{t.athlete.home.extra}</Badge>
+            )}
+          </h3>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
             {metrics.map((row, i) => (

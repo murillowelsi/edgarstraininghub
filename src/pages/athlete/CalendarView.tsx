@@ -202,6 +202,11 @@ const AthleteCalendarView = () => {
                                   <span className="capitalize">
                                     {workout.type}
                                   </span>
+                                  {assignment.selfLogged && (
+                                    <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">
+                                      {t.athlete.home.extra}
+                                    </Badge>
+                                  )}
                                 </p>
                               </div>
                               {isCompleted ? (

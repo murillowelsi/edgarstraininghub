@@ -852,7 +852,15 @@
       "today": "Hoje",
       "exercises": "exercícios",
       "stages": "etapas",
-      "done": "Feito"
+      "done": "Feito",
+      "logExtra": "Registrar treino de força",
+      "logExtraTitle": "Registrar sessão extra de força",
+      "logExtraDescription": "Treinou num dia que o coach não marcou? Escolha o treino que você fez em {{date}}.",
+      "logExtraEmpty": "Nenhum treino de força atribuído ainda. Quando o coach atribuir um, você pode repeti-lo aqui.",
+      "logExtraLastDone": "Feito por último em {{date}}",
+      "logExtraNeverDone": "Ainda não feito",
+      "logExtraError": "Não foi possível registrar a sessão. Tente de novo.",
+      "extra": "Extra"
     },
     "workouts": {
       "title": "Treinos",
@@ -878,7 +886,10 @@
       "markAsNotDone": "Marcar como não feito",
       "markAsPending": "Marcar como pendente",
       "markedNotDone": "Treino marcado como não feito",
-      "reopened": "Treino marcado como pendente"
+      "reopened": "Treino marcado como pendente",
+      "removeExtra": "Remover sessão extra",
+      "extraRemoved": "Sessão extra removida",
+      "removeExtraDescription": "\"{{name}}\" e as séries registradas nele serão removidos. Esta ação não pode ser desfeita."
     },
     "calendar": {
       "title": "Calendário",

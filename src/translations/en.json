@@ -852,7 +852,15 @@
       "today": "Today",
       "exercises": "exercises",
       "stages": "stages",
-      "done": "Done"
+      "done": "Done",
+      "logExtra": "Log strength workout",
+      "logExtraTitle": "Log extra strength session",
+      "logExtraDescription": "Trained on a day your coach didn't schedule? Pick the workout you did on {{date}}.",
+      "logExtraEmpty": "No strength workouts assigned yet. Once your coach assigns one, you can repeat it here.",
+      "logExtraLastDone": "Last done {{date}}",
+      "logExtraNeverDone": "Not done yet",
+      "logExtraError": "Couldn't log the session. Try again.",
+      "extra": "Extra"
     },
     "workouts": {
       "title": "Workouts",
@@ -878,7 +886,10 @@
       "markAsNotDone": "Mark as not done",
       "markAsPending": "Mark as pending",
       "markedNotDone": "Workout marked as not done",
-      "reopened": "Workout marked as pending"
+      "reopened": "Workout marked as pending",
+      "removeExtra": "Remove extra session",
+      "extraRemoved": "Extra session removed",
+      "removeExtraDescription": "\"{{name}}\" and any sets you logged in it will be removed. This can't be undone."
     },
     "calendar": {
       "title": "Calendar",

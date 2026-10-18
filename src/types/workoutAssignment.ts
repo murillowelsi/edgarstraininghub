@@ -50,6 +50,8 @@ export interface WorkoutAssignment {
   progressData?: ExerciseProgressData[];
   activityData?: ActivityData;
   skipped?: boolean;
+  // Logged by the athlete on a day the coach didn't schedule
+  selfLogged?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -69,6 +71,7 @@ export interface WorkoutAssignmentDocument {
   progressData?: ExerciseProgressData[];
   activityData?: ActivityData;
   skipped?: boolean;
+  selfLogged?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

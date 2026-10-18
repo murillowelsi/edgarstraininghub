@@ -5,6 +5,7 @@ import { LeaveTestimonialBanner } from "@/components/athlete/LeaveTestimonialBan
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,18 +13,19 @@ import { ptBR } from "date-fns/locale";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { subscribeToAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
+import { deleteAssignment, subscribeToAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
 import { subscribeToEventsByAthlete } from "@/services/athleteEventsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { AthleteEvent } from "@/types/athleteEvent";
 import EventCard from "@/components/athlete/EventCard";
 import AddEventSheet from "@/components/athlete/AddEventSheet";
+import LogExtraWorkoutSheet from "@/components/athlete/LogExtraWorkoutSheet";
 import { useEventChatReminders } from "@/hooks/useEventChatReminders";
 import { differenceInCalendarDays } from "date-fns";
 import { addDays, format, isAfter, isBefore, isSameDay, isToday, startOfDay } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import { CalendarCheck, ChevronRight, Dumbbell, Flame, PersonStanding, Plus, Target, TrendingUp } from "lucide-react";
+import { CalendarCheck, ChevronRight, Dumbbell, Flame, PersonStanding, Plus, Target, Trash2, TrendingUp } from "lucide-react";
 import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -52,6 +54,9 @@ const AthleteHome = () => {
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
   const [events, setEvents] = useState<AthleteEvent[]>([]);
   const [eventSheetOpen, setEventSheetOpen] = useState(false);
+  const [logExtraOpen, setLogExtraOpen] = useState(false);
+  const [extraToRemove, setExtraToRemove] = useState<AssignmentWithWorkout | null>(null);
+  const [removingExtra, setRemovingExtra] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
   const [centerDate, setCenterDate] = useState(() => startOfDay(new Date()));
@@ -99,6 +104,23 @@ const AthleteHome = () => {
 
   // Get workouts for selected date
   const selectedDateAssignments = assignments.filter((a) => isSameDay(a.scheduledDate, selectedDate));
+
+  const handleRemoveExtra = async () => {
+    if (!extraToRemove) return;
+    setRemovingExtra(true);
+    try {
+      await deleteAssignment(extraToRemove.id);
+      toast({ title: t.athlete.workouts.extraRemoved });
+      setExtraToRemove(null);
+    } catch {
+      toast({ title: t.common.error, variant: "destructive" });
+    } finally {
+      setRemovingExtra(false);
+    }
+  };
+
+  // Extra sessions can only be logged for today or past days
+  const canLogExtra = !isAfter(selectedDate, startOfDay(new Date()));
 
   // Check if a date has workouts
   const hasWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date));
@@ -281,7 +303,14 @@ const AthleteHome = () => {
                         compact
                         icon={<Icon className="h-5 w-5" />}
                         iconClassName={workoutTypeColors[workout.type] || "bg-muted text-foreground"}
-                        title={workout.name}
+                        title={
+                          assignment.selfLogged ? (
+                            <span className="flex items-center gap-1.5 min-w-0">
+                              <span className="truncate">{workout.name}</span>
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">{t.athlete.home.extra}</Badge>
+                            </span>
+                          ) : workout.name
+                        }
                         titleClassName={isCompleted ? "line-through text-muted-foreground" : undefined}
                         subtitle={
                           workout.type === "strength"
@@ -297,11 +326,32 @@ const AthleteHome = () => {
                             <ChevronRight className="h-5 w-5 text-muted-foreground" />
                           )
                         }
+                        actions={
+                          assignment.selfLogged ? (
+                            <button
+                              onClick={() => setExtraToRemove(assignment)}
+                              className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-muted shrink-0 ml-1"
+                              aria-label={t.athlete.workouts.removeExtra}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          ) : undefined
+                        }
                         className={isCompleted ? "bg-green-50 border-green-200 dark:bg-green-950/20" : undefined}
                       />
                     );
                   })}
                 </div>
+              )}
+
+              {canLogExtra && (
+                <button
+                  onClick={() => setLogExtraOpen(true)}
+                  className="flex items-center justify-center gap-2 w-full h-10 rounded-xl border border-dashed text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t.athlete.home.logExtra}
+                </button>
               )}
             </div>
           </CardContent>
@@ -379,6 +429,26 @@ const AthleteHome = () => {
           open={eventSheetOpen}
           onOpenChange={setEventSheetOpen}
           athleteId={user.uid}
+        />
+      )}
+      <ResponsiveConfirm
+        open={!!extraToRemove}
+        onOpenChange={(open) => { if (!open) setExtraToRemove(null); }}
+        title={t.athlete.workouts.removeExtra}
+        description={t.athlete.workouts.removeExtraDescription.replace("{{name}}", extraToRemove?.workout.name ?? "")}
+        confirmLabel={t.common.remove}
+        cancelLabel={t.common.cancel}
+        destructive
+        loading={removingExtra}
+        onConfirm={handleRemoveExtra}
+      />
+      {user && (
+        <LogExtraWorkoutSheet
+          open={logExtraOpen}
+          onOpenChange={setLogExtraOpen}
+          athleteId={user.uid}
+          date={selectedDate}
+          assignments={assignments}
         />
       )}
     </AthletePortalLayout>

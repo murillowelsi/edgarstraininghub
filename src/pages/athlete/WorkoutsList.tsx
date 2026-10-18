@@ -8,7 +8,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
-import { subscribeToAssignmentsByAthlete, markAssignmentSkipped, unmarkAssignmentSkipped } from "@/services/workoutAssignmentsService";
+import { subscribeToAssignmentsByAthlete, markAssignmentSkipped, unmarkAssignmentSkipped, deleteAssignment } from "@/services/workoutAssignmentsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { format } from "date-fns";
@@ -26,6 +26,7 @@ import {
   RotateCcw,
   Search,
   Timer,
+  Trash2,
   XCircle,
   Zap,
 } from "lucide-react";
@@ -117,6 +118,20 @@ const AthleteWorkoutsList = () => {
         a.id === assignment.id ? { ...a, skipped: false } : a
       ));
       toast({ title: t.athlete.workouts.reopened });
+    } catch {
+      toast({ title: t.common.error, variant: "destructive" });
+    } finally {
+      setActioning(null);
+      setActionAssignment(null);
+    }
+  };
+
+  const handleRemoveExtra = async (assignment: AssignmentWithWorkout) => {
+    setActioning(assignment.id);
+    try {
+      await deleteAssignment(assignment.id);
+      setAssignments((prev) => prev.filter((a) => a.id !== assignment.id));
+      toast({ title: t.athlete.workouts.extraRemoved });
     } catch {
       toast({ title: t.common.error, variant: "destructive" });
     } finally {
@@ -227,6 +242,9 @@ const AthleteWorkoutsList = () => {
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <span>{format(assignment.scheduledDate, "MMM d")}</span>
+                        {assignment.selfLogged && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">{t.athlete.home.extra}</Badge>
+                        )}
                         <span>·</span>
                         <span>
                           {workout.type === "strength"
@@ -313,7 +331,16 @@ const AthleteWorkoutsList = () => {
               {t.athlete.workouts.resumeWorkout}
             </button>
             {/* Mark as not done — shown for pending and completed */}
-            {!actionAssignment?.skipped && (
+            {actionAssignment?.selfLogged && (
+              <button
+                className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium text-destructive"
+                onClick={() => actionAssignment && handleRemoveExtra(actionAssignment)}
+              >
+                {actioning === actionAssignment?.id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
+                {t.athlete.workouts.removeExtra}
+              </button>
+            )}
+            {!actionAssignment?.skipped && !actionAssignment?.selfLogged && (
               <button
                 className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
                 onClick={() => actionAssignment && handleMarkSkipped(actionAssignment)}

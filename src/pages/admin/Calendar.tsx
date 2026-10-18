@@ -176,7 +176,12 @@ const CalendarDay = ({
                 </TooltipTrigger>
                 <TooltipContent side="right" className="max-w-[250px]">
                   <div className="space-y-1">
-                    <p className="font-medium">{assignment.workout.name}</p>
+                    <p className="font-medium">
+                      {assignment.workout.name}
+                      {assignment.selfLogged && (
+                        <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">Extra</Badge>
+                      )}
+                    </p>
                     <p className="text-muted-foreground">
                       {assignment.athlete.displayName}
                     </p>
@@ -634,6 +639,9 @@ const AdminCalendar = () => {
                                       )}
                                     >
                                       {assignment.workout.name}
+                                      {assignment.selfLogged && (
+                                        <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">Extra</Badge>
+                                      )}
                                     </p>
                                     <p className="text-xs text-muted-foreground truncate">
                                       {assignment.athlete.displayName} ·{" "}

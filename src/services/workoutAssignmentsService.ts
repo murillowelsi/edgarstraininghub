@@ -46,6 +46,7 @@ const docToAssignment = (
   progressData: data.progressData,
   activityData: data.activityData,
   skipped: data.skipped ?? false,
+  selfLogged: data.selfLogged ?? false,
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
@@ -112,6 +113,26 @@ export const createAssignments = async (
   }
 
   return ids;
+};
+
+// Athlete logs an extra session of a workout on a day the coach didn't schedule
+export const createSelfLoggedAssignment = async (
+  workoutId: string,
+  athleteId: string,
+  date: Date
+): Promise<string> => {
+  const docRef = await addDoc(collection(db, ASSIGNMENTS_COLLECTION), {
+    workoutId,
+    athleteId,
+    scheduledDate: Timestamp.fromDate(date),
+    scheduledDay: toDayString(date),
+    assignedBy: athleteId,
+    selfLogged: true,
+    completedAt: null,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return docRef.id;
 };
 
 // Complete endurance workout with activity data

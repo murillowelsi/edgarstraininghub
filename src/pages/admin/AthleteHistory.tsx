@@ -78,7 +78,8 @@ const AdminAthleteHistory = () => {
   );
 
   const weekStats = useMemo(() => {
-    const week = assignments.filter((a) => isThisWeek(a.scheduledDate, { weekStartsOn: 1 }));
+    // Extra sessions logged by the athlete aren't part of the plan, so they don't count towards compliance
+    const week = assignments.filter((a) => !a.selfLogged && isThisWeek(a.scheduledDate, { weekStartsOn: 1 }));
     return { planned: week.length, done: week.filter((a) => a.completedAt).length };
   }, [assignments]);
 
@@ -89,7 +90,7 @@ const AdminAthleteHistory = () => {
     const weekly = assignments.filter((a) => isThisWeek(a.scheduledDate, { weekStartsOn: 1 }));
     return types.map((type) => {
       const items = weekly.filter((a) => a.workout.type === type);
-      const planned = items.reduce((acc, a) => acc + estimateWorkoutDurationSec(a.workout), 0);
+      const planned = items.filter((a) => !a.selfLogged).reduce((acc, a) => acc + estimateWorkoutDurationSec(a.workout), 0);
       const completedSec = items
         .filter((a) => a.completedAt)
         .reduce((acc, a) => acc + (actualDurationSec(a) || estimateWorkoutDurationSec(a.workout)), 0);
