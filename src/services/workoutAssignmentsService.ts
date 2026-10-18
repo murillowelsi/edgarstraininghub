@@ -10,6 +10,7 @@ import {
   Timestamp,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import type {
@@ -116,6 +117,108 @@ export const createAssignments = async (
   }
 
   return ids;
+};
+
+export interface AssignResult {
+  created: number;
+  /** athlete+day pairs that already had this workout */
+  skipped: number;
+}
+
+/**
+ * Assign a workout to several athletes on several days in one go. Existing
+ * athlete+day pairs for this workout are skipped (and counted), and all new
+ * assignments are written in batches.
+ */
+export const assignWorkoutToMany = async (
+  params: { workoutId: string; athleteIds: string[]; dates: Date[] },
+  assignedBy: string
+): Promise<AssignResult> => {
+  const days = [...new Map(params.dates.map((d) => [toDayString(d), d])).entries()];
+  let created = 0;
+  let skipped = 0;
+  const pending: Record<string, unknown>[] = [];
+
+  await Promise.all(
+    params.athleteIds.map(async (athleteId) => {
+      const existing = await getDocs(
+        query(
+          collection(db, ASSIGNMENTS_COLLECTION),
+          where("workoutId", "==", params.workoutId),
+          where("athleteId", "==", athleteId)
+        )
+      );
+      const taken = new Set(
+        existing.docs.map((d) => {
+          const data = d.data() as WorkoutAssignmentDocument;
+          return (
+            data.scheduledDay ??
+            (data.scheduledDate ? legacyTimestampToDayString(data.scheduledDate.toDate()) : "")
+          );
+        })
+      );
+      for (const [day, date] of days) {
+        if (taken.has(day)) {
+          skipped += 1;
+          continue;
+        }
+        pending.push({
+          workoutId: params.workoutId,
+          athleteId,
+          scheduledDate: Timestamp.fromDate(date),
+          scheduledDay: day,
+          assignedBy,
+          completedAt: null,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+    })
+  );
+
+  // Firestore batches hold up to 500 writes
+  for (let i = 0; i < pending.length; i += 450) {
+    const batch = writeBatch(db);
+    pending.slice(i, i + 450).forEach((data) => batch.set(doc(collection(db, ASSIGNMENTS_COLLECTION)), data));
+    await batch.commit();
+    created += Math.min(450, pending.length - i);
+  }
+  return { created, skipped };
+};
+
+/** Move an assignment to another day. Returns false if the athlete already has this workout that day. */
+export const rescheduleAssignment = async (
+  assignment: Pick<WorkoutAssignment, "id" | "workoutId" | "athleteId">,
+  date: Date
+): Promise<boolean> => {
+  const day = toDayString(date);
+  const existing = await getDocs(
+    query(
+      collection(db, ASSIGNMENTS_COLLECTION),
+      where("workoutId", "==", assignment.workoutId),
+      where("athleteId", "==", assignment.athleteId)
+    )
+  );
+  const clash = existing.docs.some((d) => {
+    if (d.id === assignment.id) return false;
+    const data = d.data() as WorkoutAssignmentDocument;
+    return (data.scheduledDay ?? legacyTimestampToDayString(data.scheduledDate.toDate())) === day;
+  });
+  if (clash) return false;
+  await updateDoc(doc(db, ASSIGNMENTS_COLLECTION, assignment.id), {
+    scheduledDate: Timestamp.fromDate(date),
+    scheduledDay: day,
+    updatedAt: serverTimestamp(),
+  });
+  return true;
+};
+
+/** Point one assignment at another workout (used for "edit only for this athlete"). */
+export const setAssignmentWorkout = async (assignmentId: string, workoutId: string): Promise<void> => {
+  await updateDoc(doc(db, ASSIGNMENTS_COLLECTION, assignmentId), {
+    workoutId,
+    updatedAt: serverTimestamp(),
+  });
 };
 
 // Athlete logs an extra session of a workout on a day the coach didn't schedule

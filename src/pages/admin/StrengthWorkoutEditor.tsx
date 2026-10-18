@@ -22,7 +22,7 @@ import {
 import { useEffect, useState } from "react";
 import { WorkoutLoadError } from "@/components/admin/WorkoutLoadError";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { useNavigate, useParams } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -201,6 +201,7 @@ const StrengthWorkoutEditor = () => {
 
   // State
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
   // Editing and the workout couldn't be loaded — never show a saveable empty form
   const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -267,12 +268,17 @@ const StrengthWorkoutEditor = () => {
       if (isEditing && id) {
         await updateWorkout(id, workoutData);
         toast({ title: t.workout.toast.workoutUpdated });
+        navigate("/admin/workouts");
       } else {
-        await createWorkout(workoutData, user.uid);
+        const newWorkoutId = await createWorkout(workoutData, user.uid);
         toast({ title: t.workout.toast.workoutCreated });
+        // Back to the calendar with the new workout, else offer to assign it right away
+        navigate(
+          searchParams.get("fromCalendar") === "true"
+            ? `/admin/calendar?newWorkoutId=${newWorkoutId}`
+            : `/admin/workouts?assign=${newWorkoutId}`
+        );
       }
-
-      navigate("/admin/workouts");
     } catch (error) {
       console.error("Error saving workout:", error);
       toast({

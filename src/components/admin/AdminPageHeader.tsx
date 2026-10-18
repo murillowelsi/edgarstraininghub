@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { GlassFab } from "@/components/glass/GlassFab";
 import type { LucideIcon } from "lucide-react";
 import { Plus } from "lucide-react";
 import { ReactNode } from "react";
@@ -38,19 +39,12 @@ export function AdminPageHeader({ title, description, action, actions, mobileFab
       {mobileFab ? (
         <div
           className="fixed right-4 z-30 sm:hidden"
-          style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+          style={{ bottom: "calc(5.75rem + env(safe-area-inset-bottom))" }}
         >
           {mobileFab}
         </div>
       ) : action ? (
-        <button
-          onClick={action.onClick}
-          className="fixed right-4 z-30 sm:hidden h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-          style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-          aria-label={action.label}
-        >
-          {ActionIcon ? <ActionIcon className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
-        </button>
+        <GlassFab label={action.label} onClick={action.onClick} icon={ActionIcon ?? Plus} />
       ) : null}
     </>
   );

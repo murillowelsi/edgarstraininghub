@@ -27,6 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
   deleteAssignment,
+  rescheduleAssignment,
+  setAssignmentWorkout,
   getAllAssignmentsWithDetails,
 } from "@/services/workoutAssignmentsService";
 import { getUsersByRole } from "@/services/usersService";
@@ -55,6 +57,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Dumbbell,
+  CalendarClock,
   Loader2,
   Pencil,
   Plus,
@@ -65,6 +68,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { CalendarAssignDialog } from "@/components/workout/CalendarAssignDialog";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { getWorkoutEditPath } from "@/utils/workoutPaths";
+import { workoutLabels } from "@/utils/workoutLabels";
+import { Calendar as DayPickerCalendar } from "@/components/ui/calendar";
+import { useAuth } from "@/contexts/AuthContext";
+import { duplicateWorkoutForAthlete } from "@/services/workoutsService";
+import { enUS, ptBR } from "date-fns/locale";
 import {
   athleteAccentTextClass,
   athleteChipClass,
@@ -251,7 +259,9 @@ const CalendarDay = ({
 };
 
 const AdminCalendar = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const dateFnsLocale = language === "pt" ? ptBR : enUS;
+  const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -265,6 +275,8 @@ const AdminCalendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [preSelectedWorkoutId, setPreSelectedWorkoutId] = useState<string | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [copyingWorkout, setCopyingWorkout] = useState(false);
   const [selectedAssignment, setSelectedAssignment] =
     useState<AssignmentWithDetails | null>(null);
   const [deletingAssignment, setDeletingAssignment] = useState(false);
@@ -408,6 +420,51 @@ const AdminCalendar = () => {
     if (selectedAssignment) {
       setDetailsDialogOpen(false);
       navigate(getWorkoutEditPath(selectedAssignment.workout));
+    }
+  };
+
+  // Copy the workout for this athlete only and point the assignment at the copy
+  const handleEditForAthlete = async () => {
+    if (!selectedAssignment || !currentUser) return;
+    setCopyingWorkout(true);
+    try {
+      const copyId = await duplicateWorkoutForAthlete(
+        selectedAssignment.workout,
+        selectedAssignment.athlete.displayName,
+        currentUser.uid
+      );
+      await setAssignmentWorkout(selectedAssignment.id, copyId);
+      toast({ title: t.admin.calendar.copyCreated });
+      setDetailsDialogOpen(false);
+      navigate(getWorkoutEditPath({ id: copyId, type: selectedAssignment.workout.type }));
+    } catch (error) {
+      console.error("Error copying workout:", error);
+      toast({ title: t.common.error, variant: "destructive" });
+    } finally {
+      setCopyingWorkout(false);
+    }
+  };
+
+  const handleReschedule = async (date: Date | undefined) => {
+    if (!selectedAssignment || !date) return;
+    setRescheduleOpen(false);
+    try {
+      const moved = await rescheduleAssignment(selectedAssignment, date);
+      if (!moved) {
+        toast({ title: t.admin.calendar.dateClash, variant: "destructive" });
+        return;
+      }
+      toast({
+        title: t.admin.calendar.dateChanged.replace(
+          "{{date}}",
+          format(date, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMMM d", { locale: dateFnsLocale })
+        ),
+      });
+      setSelectedAssignment({ ...selectedAssignment, scheduledDate: date });
+      loadData();
+    } catch (error) {
+      console.error("Error rescheduling:", error);
+      toast({ title: t.common.error, variant: "destructive" });
     }
   };
 
@@ -717,7 +774,11 @@ const AdminCalendar = () => {
         title={selectedAssignment?.workout.name ?? ""}
         description={
           selectedAssignment
-            ? `${selectedAssignment.workout.stages.length} stages · ${selectedAssignment.workout.type}`
+            ? `${
+                selectedAssignment.workout.type === "strength"
+                  ? t.admin.assign.exercisesCount.replace("{{n}}", String(selectedAssignment.workout.exercises?.length || 0))
+                  : t.admin.assign.stagesCount.replace("{{n}}", String(selectedAssignment.workout.stages.length))
+              } · ${workoutLabels(t).type(selectedAssignment.workout.type)}`
             : undefined
         }
         className="sm:max-w-[425px]"
@@ -741,16 +802,32 @@ const AdminCalendar = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Athlete</p>
+                <p className="text-sm text-muted-foreground">{t.admin.calendar.athlete}</p>
                 <p className="font-medium">
                   {selectedAssignment.athlete.displayName}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Scheduled</p>
-                <p className="font-medium">
-                  {format(selectedAssignment.scheduledDate, "PPP")}
-                </p>
+                <p className="text-sm text-muted-foreground">{t.admin.calendar.scheduled}</p>
+                <Popover open={rescheduleOpen} onOpenChange={setRescheduleOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="font-medium inline-flex items-center gap-1.5 rounded-md hover:text-primary transition-colors text-left">
+                      {format(selectedAssignment.scheduledDate, language === "pt" ? "d 'de' MMM yyyy" : "MMM d, yyyy", { locale: dateFnsLocale })}
+                      <CalendarClock className="h-3.5 w-3.5 text-primary" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <p className="px-3 pt-3 text-xs font-medium text-muted-foreground">{t.admin.calendar.changeDate}</p>
+                    <DayPickerCalendar
+                      mode="single"
+                      selected={selectedAssignment.scheduledDate}
+                      onSelect={handleReschedule}
+                      locale={dateFnsLocale}
+                      weekStartsOn={1}
+                      defaultMonth={selectedAssignment.scheduledDate}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
@@ -758,14 +835,15 @@ const AdminCalendar = () => {
               <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
                 <Check className="h-4 w-4" />
                 <span className="text-sm">
-                  {t.admin.calendar.completedOn} {format(selectedAssignment.completedAt, "PPp")}
+                  {t.admin.calendar.completedOn}{" "}
+                  {format(selectedAssignment.completedAt, language === "pt" ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: dateFnsLocale })}
                 </span>
               </div>
             )}
 
             {selectedAssignment.workout.notes && (
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Notes</p>
+                <p className="text-sm text-muted-foreground mb-1">{t.admin.calendar.notes}</p>
                 <p className="text-sm bg-muted p-2 rounded">
                   {selectedAssignment.workout.notes}
                 </p>
@@ -781,14 +859,22 @@ const AdminCalendar = () => {
                 <Trash2 className="h-4 w-4 mr-2" />
                 {t.admin.calendar.deleteAssignment}
               </Button>
+            </div>
+            {/* Editing the library workout changes it for everyone — make the choice explicit */}
+            <div className="rounded-xl border p-3 space-y-2">
               <Button
-                variant="outline"
-                onClick={handleEditWorkout}
-                className="w-full sm:w-auto"
+                onClick={handleEditForAthlete}
+                disabled={copyingWorkout}
+                className="w-full justify-start"
               >
-                <Pencil className="h-4 w-4 mr-2" />
-                {t.admin.calendar.editWorkout}
+                {copyingWorkout ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Pencil className="h-4 w-4 mr-2" />}
+                {t.admin.calendar.editForAthlete.replace("{{name}}", selectedAssignment.athlete.displayName.split(" ")[0])}
               </Button>
+              <Button variant="outline" onClick={handleEditWorkout} className="w-full justify-start">
+                <Pencil className="h-4 w-4 mr-2" />
+                {t.admin.calendar.editForAll}
+              </Button>
+              <p className="text-xs text-muted-foreground">{t.admin.calendar.editForAllHint}</p>
             </div>
           </div>
         )}

@@ -199,6 +199,26 @@ export const updateWorkout = async (
 };
 
 // Delete workout
+/**
+ * Personal copy of a workout for one athlete ("edit only for this athlete"),
+ * so changing it doesn't affect everyone else who has the original.
+ */
+export const duplicateWorkoutForAthlete = async (
+  workout: Workout,
+  athleteName: string,
+  authorId: string
+): Promise<string> =>
+  createWorkout(
+    {
+      name: `${workout.name} · ${athleteName.split(" ")[0]}`,
+      type: workout.type,
+      stages: workout.stages,
+      exercises: workout.exercises,
+      notes: workout.notes,
+    },
+    authorId
+  );
+
 /** Hide a workout from the library without breaking completed assignments that use it. */
 export const archiveWorkout = async (id: string): Promise<void> => {
   await updateDoc(doc(db, WORKOUTS_COLLECTION, id), {

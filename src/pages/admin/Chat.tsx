@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { GlassFab } from "@/components/glass/GlassFab";
 import { useLocation, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import ChatWindow from "@/components/chat/ChatWindow";
@@ -411,14 +412,7 @@ export default function AdminChat() {
 
             {/* Mobile FAB */}
             {!selectedChat && (
-                <button
-                    onClick={() => setIsNewChatOpen(true)}
-                    className="fixed right-4 z-30 sm:hidden h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-                    style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-                    aria-label={t.admin.chat.newMessage}
-                >
-                    <Plus className="h-6 w-6" />
-                </button>
+                <GlassFab label={t.admin.chat.newMessage} onClick={() => setIsNewChatOpen(true)} />
             )}
 
             {/* New Chat Modal */}

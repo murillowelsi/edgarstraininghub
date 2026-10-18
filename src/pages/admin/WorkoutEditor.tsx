@@ -12,6 +12,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { GlassFab } from "@/components/glass/GlassFab";
 import { WorkoutLoadError } from "@/components/admin/WorkoutLoadError";
 import {
   SortableContext,
@@ -497,7 +498,6 @@ const WorkoutEditor = () => {
   const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingStageId, setEditingStageId] = useState<string | null>(null);
-  const [fabOpen, setFabOpen] = useState(false);
   const [activeStage, setActiveStage] = useState<WorkoutStage | null>(null);
   const [formData, setFormData] = useState<WorkoutFormData>({
     name: t.admin.workoutEditor.defaultName.replace("{{type}}", t.workoutMeta.types[urlWorkoutType]),
@@ -589,11 +589,11 @@ const WorkoutEditor = () => {
           description: t.admin.workoutEditor.toast.createdDescription,
         });
 
-        // If we came from the calendar, redirect back with the new workout ID
+        // Back to the calendar with the new workout, else offer to assign it right away
         if (fromCalendar) {
           navigate(`/admin/calendar?newWorkoutId=${newWorkoutId}`);
         } else {
-          navigate("/admin/workouts");
+          navigate(`/admin/workouts?assign=${newWorkoutId}`);
         }
       }
     } catch (error: unknown) {
@@ -934,7 +934,7 @@ const WorkoutEditor = () => {
                         </p>
                         <Button onClick={handleAddStage} size="sm" className="hidden lg:inline-flex">
                           <Plus className="h-4 w-4 mr-2" />
-                          Add Stage
+                          {t.admin.workoutEditor.addStage}
                         </Button>
                       </div>
                     ) : (
@@ -997,7 +997,7 @@ const WorkoutEditor = () => {
                     variant="default"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Stage
+                    {t.admin.workoutEditor.addStage}
                   </Button>
 
                   <Button
@@ -1006,7 +1006,7 @@ const WorkoutEditor = () => {
                     onClick={handleAddRepetition}
                   >
                     <Repeat className="h-4 w-4 mr-2" />
-                    Add Repetition
+                    {t.admin.workoutEditor.addRepetition}
                   </Button>
                 </div>
               </div>
@@ -1015,48 +1015,14 @@ const WorkoutEditor = () => {
         </div>
 
         {/* Speed dial FAB — mobile only */}
-        {fabOpen && (
-          <div
-            className="fixed inset-0 z-20 lg:hidden"
-            onClick={() => setFabOpen(false)}
-          />
-        )}
-        <div
-          className="fixed right-4 z-30 lg:hidden flex flex-col items-end gap-3"
-          style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-        >
-          {fabOpen && (
-            <div className="flex flex-col items-end gap-2">
-              {[
-                {
-                  icon: Plus,
-                  label: "Add Stage",
-                  onClick: () => { handleAddStage(); setFabOpen(false); },
-                },
-                {
-                  icon: Repeat,
-                  label: "Add Repetition",
-                  onClick: () => { handleAddRepetition(); setFabOpen(false); },
-                },
-              ].map(({ icon: Icon, label, onClick }) => (
-                <button
-                  key={label}
-                  onClick={onClick}
-                  className="flex items-center gap-2.5 bg-card border shadow-md rounded-full pl-3 pr-3.5 py-2 text-sm font-medium hover:bg-accent transition-colors active:scale-95"
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-          <button
-            onClick={() => setFabOpen((v) => !v)}
-            className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <Plus className={`h-6 w-6 transition-transform duration-300 ${fabOpen ? "rotate-45" : ""}`} />
-          </button>
-        </div>
+        <GlassFab
+          label={t.admin.workoutEditor.addStage}
+          hideFrom="lg"
+          actions={[
+            { icon: Plus, label: t.admin.workoutEditor.addStage, onClick: handleAddStage },
+            { icon: Repeat, label: t.admin.workoutEditor.addRepetition, onClick: handleAddRepetition },
+          ]}
+        />
 
         {/* Stage editor modal — renders outside DndContext so drag-and-drop is never disrupted */}
         {(() => {

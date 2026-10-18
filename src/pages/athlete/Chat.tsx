@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { GlassFab } from "@/components/glass/GlassFab";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
@@ -330,14 +331,7 @@ export default function AthleteChat() {
             </div>
         {/* Mobile FAB — only shown on chat list view */}
         {!selectedChat && (
-            <button
-                onClick={() => setIsNewChatOpen(true)}
-                className="fixed right-4 z-30 sm:hidden h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-                style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-                aria-label={t.athlete.chat.newMessage}
-            >
-                <Plus className="h-6 w-6" />
-            </button>
+            <GlassFab label={t.athlete.chat.newMessage} onClick={() => setIsNewChatOpen(true)} />
         )}
         </AthletePortalLayout>
     );

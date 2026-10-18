@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { GlassFab } from "@/components/glass/GlassFab";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import { AdminEmptyState } from "@/components/admin/AdminEmptyState";
@@ -59,7 +60,6 @@ export default function AdminTeamDetail() {
   const [copied, setCopied] = useState(false);
 
   // Speed dial FAB
-  const [fabOpen, setFabOpen] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
 
   // Remove member
@@ -253,61 +253,16 @@ export default function AdminTeamDetail() {
         </div>
 
         {/* Speed dial FAB — mobile only */}
-        {fabOpen && (
-          <div
-            className="fixed inset-0 z-20 sm:hidden"
-            onClick={() => setFabOpen(false)}
-          />
-        )}
-        <div
-          className="fixed right-4 z-30 sm:hidden flex flex-col items-end gap-3"
-          style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
-        >
-          {/* Speed dial items */}
-          {fabOpen && (
-            <div className="flex flex-col items-end gap-2">
-              {[
-                {
-                  icon: BarChart2,
-                  label: t.admin.teamDetail.viewStats,
-                  onClick: () => { navigate(`/admin/teams/${team.id}/stats`); setFabOpen(false); },
-                },
-                {
-                  icon: openingChat ? Loader2 : MessageSquare,
-                  label: t.admin.teamDetail.groupChat,
-                  onClick: () => { handleOpenGroupChat(); setFabOpen(false); },
-                },
-                {
-                  icon: UserPlus,
-                  label: t.admin.teamDetail.addAthlete,
-                  onClick: () => { handleOpenAddAthlete(); setFabOpen(false); },
-                },
-                {
-                  icon: QrCode,
-                  label: t.admin.teamDetail.qrCode,
-                  onClick: () => { setShowQRModal(true); setFabOpen(false); },
-                },
-              ].map(({ icon: Icon, label, onClick }) => (
-                <button
-                  key={label}
-                  onClick={onClick}
-                  className="flex items-center gap-2.5 bg-card border shadow-md rounded-full pl-3 pr-3.5 py-2 text-sm font-medium hover:bg-accent transition-colors active:scale-95"
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-          {/* Main FAB */}
-          <button
-            onClick={() => setFabOpen((v) => !v)}
-            className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-            aria-label={t.admin.teamDetail.fabAriaLabel}
-          >
-            <Settings2 className={`h-6 w-6 transition-transform duration-300 ${fabOpen ? "rotate-90" : ""}`} />
-          </button>
-        </div>
+        <GlassFab
+          label={t.admin.teamDetail.fabAriaLabel}
+          icon={Settings2}
+          actions={[
+            { icon: BarChart2, label: t.admin.teamDetail.viewStats, onClick: () => navigate(`/admin/teams/${team.id}/stats`) },
+            { icon: openingChat ? Loader2 : MessageSquare, label: t.admin.teamDetail.groupChat, onClick: handleOpenGroupChat },
+            { icon: UserPlus, label: t.admin.teamDetail.addAthlete, onClick: handleOpenAddAthlete },
+            { icon: QrCode, label: t.admin.teamDetail.qrCode, onClick: () => setShowQRModal(true) },
+          ]}
+        />
 
         {/* Members */}
         <section>

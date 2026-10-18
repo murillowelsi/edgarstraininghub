@@ -16,7 +16,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { AdminEmptyState } from "../../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
@@ -47,6 +47,7 @@ const AdminWorkouts = () => {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [confirmWorkout, setConfirmWorkout] = useState<Workout | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   // Assignments of the workout being deleted, so the confirm says what happens to them
   const [deleteCounts, setDeleteCounts] = useState<{ completed: number; pending: number } | null>(null);
 
@@ -89,6 +90,18 @@ const AdminWorkouts = () => {
     try {
       const allWorkouts = await getAllWorkouts();
       setWorkouts(allWorkouts);
+      // Just created a workout (?assign=<id>): open the assign dialog for it
+      const assignId = searchParams.get("assign");
+      const justCreated = assignId ? allWorkouts.find((w) => w.id === assignId) : undefined;
+      if (justCreated) {
+        setSelectedWorkout(justCreated);
+        setAssignDialogOpen(true);
+        setSearchParams((prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete("assign");
+          return next;
+        }, { replace: true });
+      }
     } catch (error) {
       console.error("Error loading workouts:", error);
       toast({
@@ -144,15 +157,6 @@ const AdminWorkouts = () => {
         <AdminPageHeader
           title={t.admin.workouts.title}
           action={{ label: t.admin.workouts.newWorkout, onClick: () => setNewWorkoutDrawerOpen(true) }}
-          mobileFab={
-            <button
-              onClick={() => setNewWorkoutDrawerOpen(true)}
-              className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-              aria-label={t.admin.workouts.newWorkout}
-            >
-              <Plus className="h-6 w-6" />
-            </button>
-          }
         />
 
         <div className="relative mb-3">
