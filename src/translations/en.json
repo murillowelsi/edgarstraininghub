@@ -970,6 +970,24 @@
       "avgPowerPlaceholder": "e.g. 220",
       "shareCaption": "Workout complete: {{name}} ✅"
     },
+    "share": {
+      "title": "Share workout",
+      "description": "Post it on the app feed or create an image for other apps — any time.",
+      "postToFeed": "Post on the feed",
+      "postToFeedHint": "Visible to your team and your coach",
+      "postAgain": "Post on the feed again",
+      "alreadyPosted": "You already posted this workout",
+      "createImage": "Create image",
+      "createImageHint": "For Instagram, WhatsApp, Strava…",
+      "formatStory": "Stories 9:16",
+      "formatPost": "Post 4:5",
+      "addPhoto": "Add photo",
+      "photoHint": "Optional: use your own photo as background",
+      "photoAdded": "Background photo added",
+      "changePhoto": "Change photo",
+      "shareImage": "Share image",
+      "button": "Share"
+    },
     "strengthProgress": {
       "title": "Strength progress",
       "subtitle": "Heaviest working set per session",
@@ -1027,7 +1045,8 @@
       "saveIncomplete": "You completed {{done}} of {{total}} sets. Finish the workout anyway?",
       "savedOffline": "Saved on your phone — it will sync when you're back online",
       "summary": {
-        "title": "Workout done!",
+        "title": "Workout saved!",
+        "savedHint": "It's in your history and your coach can already see it.",
         "time": "Time",
         "sets": "Sets",
         "volume": "Volume",
@@ -1038,8 +1057,8 @@
         "rpeMax": "Max effort",
         "notesLabel": "Note for your coach",
         "notesPlaceholder": "How did it feel? Any pain, machine taken, load too light…",
-        "finish": "Done",
-        "share": "Share on the feed"
+        "finish": "Close",
+        "share": "Share"
       }
     },
     "profile": {

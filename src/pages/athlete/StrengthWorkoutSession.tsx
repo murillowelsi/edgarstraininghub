@@ -24,6 +24,7 @@ import {
   updateAssignmentFeedback,
 } from "@/services/workoutAssignmentsService";
 import SessionSummary, { type SessionSummaryData } from "@/components/athlete/SessionSummary";
+import ShareWorkoutSheet from "@/components/athlete/ShareWorkoutSheet";
 import type { ComposerResult, SummaryHighlight, WorkoutSummary } from "@/types/timeline";
 import type { Exercise, WorkoutExercise } from "@/types/exercise";
 import {
@@ -500,6 +501,8 @@ const StrengthWorkoutSession = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareCaption, setShareCaption] = useState("");
   const [shareSummary, setShareSummary] = useState<WorkoutSummary | undefined>();
+  const [showShareSheet, setShowShareSheet] = useState(false);
+  const postedRef = useRef(false);
   // Workout session state. Time is derived from timestamps (not counted with
   // setInterval) so it stays correct when iOS freezes the page while the
   // screen is locked or the app is in the background.
@@ -860,7 +863,7 @@ const StrengthWorkoutSession = () => {
     saveFeedback(feedback);
     // Effort shows on the card; the note is private, for the coach only
     setShareSummary((prev) => (prev && feedback.rpe !== undefined ? { ...prev, rpe: feedback.rpe } : prev));
-    setShowShareModal(true);
+    setShowShareSheet(true);
   };
 
   // Update set
@@ -1164,7 +1167,7 @@ const StrengthWorkoutSession = () => {
     if (!user) return;
     const authorName = displayName || user.email || "Athlete";
     const postId = await createTimelinePost(
-      { caption, imageUrls, mentions, workoutSummary: shareSummary },
+      { caption, imageUrls, mentions, workoutSummary: shareSummary, assignmentId: assignment?.id },
       user.uid,
       authorName,
       userRole ?? "athlete",
@@ -1173,6 +1176,7 @@ const StrengthWorkoutSession = () => {
     if (mentions.length) {
       await createMentionNotifications(postId, mentions.map((m) => m.id), authorName, caption);
     }
+    postedRef.current = true;
     toast({ title: t.timeline.postShared });
   };
 
@@ -1182,13 +1186,25 @@ const StrengthWorkoutSession = () => {
       open={showShareModal}
       onOpenChange={(open) => {
         setShowShareModal(open);
-        if (!open) navigate("/athlete");
+        // Posted → done; closed without posting → back to the recap
+        if (!open && postedRef.current) navigate("/athlete");
       }}
       onSubmit={handleSharePost}
       initialCaption={shareCaption}
       workoutSummary={shareSummary}
     />
-    {summary && !showShareModal && (
+    {shareSummary && (
+      <ShareWorkoutSheet
+        open={showShareSheet}
+        onOpenChange={setShowShareSheet}
+        summary={shareSummary}
+        onPostToFeed={() => {
+          setShowShareSheet(false);
+          setShowShareModal(true);
+        }}
+      />
+    )}
+    {summary && !showShareModal && !showShareSheet && (
       <SessionSummary
         data={summary}
         t={t}

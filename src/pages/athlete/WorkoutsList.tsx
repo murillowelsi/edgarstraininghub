@@ -244,7 +244,7 @@ const AthleteWorkoutsList = () => {
               const isSkipped = !!assignment.skipped;
               const color = isCompleted ? "#22c55e" : isSkipped ? "#ef4444" : (workoutTypeColors[workout.type] ?? "#8b5cf6");
               const badgeLabel = isCompleted
-                ? (assignment.completionPercentage !== undefined ? `${assignment.completionPercentage}%` : t.athlete.workouts.done)
+                ? (assignment.completionPercentage != null ? `${assignment.completionPercentage}%` : t.athlete.workouts.done)
                 : isSkipped ? t.athlete.workouts.notDone : workoutLabels(t).type(workout.type);
               return (
                 <Fragment key={assignment.id}>

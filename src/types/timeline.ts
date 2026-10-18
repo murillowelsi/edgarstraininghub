@@ -69,6 +69,7 @@ export interface TimelinePostDocument {
   imageUrls?: string[];
   mentions?: PostMention[];
   workoutSummary?: WorkoutSummary;
+  assignmentId?: string;
   likedBy: string[];
   commentsCount: number;
   createdAt: Timestamp;
@@ -108,6 +109,8 @@ export interface TimelinePostFormData {
   imageUrls?: string[];
   mentions?: PostMention[];
   workoutSummary?: WorkoutSummary;
+  /** The workout assignment this post shares, so the workout can show "already posted" */
+  assignmentId?: string;
 }
 
 /** What the post composer hands back to its caller. */

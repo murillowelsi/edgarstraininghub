@@ -164,20 +164,25 @@ export const uploadPostImage = (
     xhr.send(formData);
   });
 
+export type ShareImageFormat = "story" | "post";
+
 export interface StoryContent extends OverlayContent {
   highlightsTitle: string;
   footer: string;
   authorName: string;
   photoUrl?: string;
+  /** "story" = 1080×1920 (Instagram/WhatsApp Stories), "post" = 1080×1350 (feed 4:5) */
+  format?: ShareImageFormat;
 }
 
 /**
- * 1080×1920 image for Instagram Stories: photo (or modality gradient) in the
- * background, big numbers, the session's highlights and the EZ brand.
+ * Shareable workout image (Stories 9:16 or feed 4:5): photo (or modality
+ * gradient) in the background, big numbers, the session's highlights and the
+ * EZ brand.
  */
 export const renderStoryImage = async (content: StoryContent): Promise<Blob> => {
   const W = 1080;
-  const H = 1920;
+  const H = content.format === "post" ? 1350 : 1920;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -226,8 +231,8 @@ export const renderStoryImage = async (content: StoryContent): Promise<Blob> => 
   ctx.font = `600 36px ${FONT}`;
   ctx.fillText(content.authorName, pad, 290, W - pad * 2);
 
-  // Workout title
-  let y = H - 980;
+  // Workout title (content block anchored to the bottom)
+  let y = H - (content.format === "post" ? 940 : 980);
   ctx.fillStyle = palette.accent;
   ctx.font = `800 40px ${FONT}`;
   ctx.fillText(content.typeLabel.toUpperCase(), pad, y);
@@ -277,7 +282,7 @@ export const renderStoryImage = async (content: StoryContent): Promise<Blob> => 
   ctx.fillStyle = "rgba(255,255,255,0.6)";
   ctx.font = `600 32px ${FONT}`;
   ctx.textAlign = "center";
-  ctx.fillText(content.footer, W / 2, H - 110);
+  ctx.fillText(content.footer, W / 2, H - (content.format === "post" ? 60 : 110));
   ctx.textAlign = "left";
 
   return canvasToBlob(canvas, "image/png");

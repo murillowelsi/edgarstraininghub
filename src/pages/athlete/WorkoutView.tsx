@@ -18,11 +18,13 @@ import {
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/contexts/AuthContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
-import { createMentionNotifications, createTimelinePost } from "@/services/timelineService";
+import { createMentionNotifications, createTimelinePost, hasPostForAssignment } from "@/services/timelineService";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { clearSessionDraft } from "@/lib/sessionDraft";
+import ShareWorkoutSheet from "@/components/athlete/ShareWorkoutSheet";
+import { buildWorkoutSummary } from "@/utils/buildWorkoutSummary";
 import { getAllExercises } from "@/services/exercisesService";
 import {
   getAssignmentsWithWorkoutsByAthlete,
@@ -66,6 +68,7 @@ import {
   Wind,
   X,
   Zap,
+  Share2,
 } from "lucide-react";
 
 // Format time as MM:SS or HH:MM:SS
@@ -546,9 +549,12 @@ const AthleteWorkoutView = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showPostConfirm, setShowPostConfirm] = useState(false);
   const [shareCaption, setShareCaption] = useState("");
   const [shareWorkoutSummary, setShareWorkoutSummary] = useState<import("@/types/timeline").WorkoutSummary | undefined>();
+  const [showShareSheet, setShowShareSheet] = useState(false);
+  const [alreadyPosted, setAlreadyPosted] = useState(false);
+  // All of the athlete's assignments — PRs of a past session are measured against earlier ones
+  const [allAssignments, setAllAssignments] = useState<AssignmentWithWorkout[]>([]);
   const [showActivityDrawer, setShowActivityDrawer] = useState(false);
   const [showChecklistDrawer, setShowChecklistDrawer] = useState(false);
   const [showIncompleteDrawer, setShowIncompleteDrawer] = useState(false);
@@ -587,6 +593,12 @@ const AthleteWorkoutView = () => {
         const found = assignments.find((a) => a.id === id);
         if (found) {
           setAssignment(found);
+          setAllAssignments(assignments);
+          if (found.completedAt) {
+            hasPostForAssignment(user.uid, found.id)
+              .then(setAlreadyPosted)
+              .catch(() => {});
+          }
           // Load exercises if it's a strength workout
           if (found.workout.type === "strength") {
             try {
@@ -744,7 +756,7 @@ const AthleteWorkoutView = () => {
           workoutType: assignment.workout.type,
           completionPercentage: assignment.completionPercentage,
         });
-        setShowPostConfirm(true);
+        setShowShareSheet(true);
       }
     } catch (error) {
       console.error("Error updating workout:", error);
@@ -879,7 +891,7 @@ const AthleteWorkoutView = () => {
           };
         }),
       });
-      setShowPostConfirm(true);
+      setShowShareSheet(true);
     } catch (error) {
       console.error("Error completing workout:", error);
       toast({
@@ -940,12 +952,20 @@ const AthleteWorkoutView = () => {
   const Icon = workoutTypeIcons[workout.type] || PersonStanding;
   const isCompleted = !!assignment.completedAt;
 
+  // Share any completed workout, any time (feed post or image)
+  const handleOpenShare = () => {
+    if (!assignment) return;
+    setShareWorkoutSummary(buildWorkoutSummary(assignment, allAssignments));
+    setShareCaption(t.athlete.workoutView.shareCaption.replace("{{name}}", assignment.workout.name));
+    setShowShareSheet(true);
+  };
+
   const handleSharePost = async ({ caption, imageUrls, mentions }: import("@/types/timeline").ComposerResult) => {
     if (!user) return;
     const authorName = displayName || user.email || "Athlete";
     const mentionedUserIds = mentions.map((m) => m.id);
     const postId = await createTimelinePost(
-      { caption, imageUrls, mentions, workoutSummary: shareWorkoutSummary },
+      { caption, imageUrls, mentions, workoutSummary: shareWorkoutSummary, assignmentId: assignment?.id },
       user.uid,
       authorName,
       userRole ?? "athlete",
@@ -955,6 +975,7 @@ const AthleteWorkoutView = () => {
       await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
     }
     setShowShareModal(false);
+    setAlreadyPosted(true);
     navigate("/athlete/timeline");
   };
 
@@ -967,41 +988,18 @@ const AthleteWorkoutView = () => {
       initialCaption={shareCaption}
       workoutSummary={shareWorkoutSummary}
     />
-    <Drawer open={showPostConfirm} onOpenChange={setShowPostConfirm}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>{t.athlete.workoutView.shareToFeedTitle}</DrawerTitle>
-          <DrawerDescription>{t.athlete.workoutView.shareToFeedDesc}</DrawerDescription>
-        </DrawerHeader>
-        <div className="px-4 pb-6 space-y-2">
-          <button
-            className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
-            onClick={() => {
-              setShowPostConfirm(false);
-              setShowShareModal(true);
-            }}
-          >
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="h-5 w-5 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-semibold text-sm">{t.athlete.workoutView.shareToFeedYes}</p>
-            </div>
-          </button>
-          <button
-            className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
-            onClick={() => setShowPostConfirm(false)}
-          >
-            <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-              <Circle className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-semibold text-sm">{t.athlete.workoutView.shareToFeedNo}</p>
-            </div>
-          </button>
-        </div>
-      </DrawerContent>
-    </Drawer>
+    {shareWorkoutSummary && (
+      <ShareWorkoutSheet
+        open={showShareSheet}
+        onOpenChange={setShowShareSheet}
+        summary={shareWorkoutSummary}
+        alreadyPosted={alreadyPosted}
+        onPostToFeed={() => {
+          setShowShareSheet(false);
+          setShowShareModal(true);
+        }}
+      />
+    )}
     <AthletePortalLayout title={t.athlete.nav.workouts} hideBottomNav>
       {/* Content */}
       <div className="flex-1 overflow-auto pb-24">
@@ -1186,6 +1184,17 @@ const AthleteWorkoutView = () => {
 
       {/* Bottom Action Button */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-bottom">
+        {isCompleted && (
+          <Button
+            onClick={handleOpenShare}
+            size="lg"
+            variant="outline"
+            className="w-full h-12 mb-2 text-base font-semibold rounded-xl"
+          >
+            <Share2 className="h-5 w-5 mr-2" />
+            {t.athlete.share.button}
+          </Button>
+        )}
         {workout.type === "strength" && !isCompleted ? (
           <Link to={`/athlete/workout/${id}/session`} className="block">
             <Button

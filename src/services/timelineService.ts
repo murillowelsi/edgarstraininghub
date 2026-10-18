@@ -159,6 +159,7 @@ export const createTimelinePost = async (
     imageUrl: data.imageUrls?.[0] || "",
     imageUrls: data.imageUrls ?? [],
     mentions: data.mentions ?? [],
+    ...(data.assignmentId ? { assignmentId: data.assignmentId } : {}),
     ...(cleanWorkoutSummary && Object.keys(cleanWorkoutSummary).length > 0
       ? { workoutSummary: cleanWorkoutSummary }
       : {}),
@@ -170,6 +171,19 @@ export const createTimelinePost = async (
   if (authorPhotoURL) payload.authorPhotoURL = authorPhotoURL;
   const docRef = await addDoc(collection(db, COLLECTION), payload);
   return docRef.id;
+};
+
+/** Whether the athlete already shared this workout on the feed. */
+export const hasPostForAssignment = async (authorId: string, assignmentId: string): Promise<boolean> => {
+  const snapshot = await getDocs(
+    query(
+      collection(db, COLLECTION),
+      where("authorId", "==", authorId),
+      where("assignmentId", "==", assignmentId),
+      limit(1)
+    )
+  );
+  return !snapshot.empty;
 };
 
 export const updateTimelinePost = async (

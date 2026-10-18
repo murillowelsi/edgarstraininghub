@@ -41,9 +41,10 @@ const docToAssignment = (
   scheduledDate: resolveScheduledDate(data.scheduledDay, data.scheduledDate),
   assignedBy: data.assignedBy,
   completedAt: data.completedAt?.toDate() || null,
-  completionPercentage: data.completionPercentage,
-  totalTime: data.totalTime,
-  progressData: data.progressData,
+  // Reset assignments store null; treat it as "not set"
+  completionPercentage: data.completionPercentage ?? undefined,
+  totalTime: data.totalTime ?? undefined,
+  progressData: data.progressData ?? undefined,
   activityData: data.activityData,
   skipped: data.skipped ?? false,
   selfLogged: data.selfLogged ?? false,

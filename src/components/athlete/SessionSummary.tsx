@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
-import { Share2, Trophy } from "lucide-react";
+import { CheckCircle2, Share2, Trophy } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -50,9 +50,13 @@ const SessionSummary = ({ data, t, finishing, onFinish, onShare }: Props) => {
         className="max-w-lg mx-auto px-4 pt-10 pb-10 space-y-6"
       >
         <div className="text-center space-y-1">
-          <div className="text-5xl">💪</div>
+          <div className="mx-auto mb-2 h-16 w-16 rounded-full bg-green-500/15 text-green-500 flex items-center justify-center">
+            <CheckCircle2 className="h-9 w-9" />
+          </div>
           <h1 className="text-2xl font-bold">{ts.title}</h1>
           <p className="text-muted-foreground text-balance">{data.workoutName}</p>
+          {/* Make it explicit that nothing else is needed to "finish" */}
+          <p className="text-xs text-muted-foreground">{ts.savedHint}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -119,13 +123,13 @@ const SessionSummary = ({ data, t, finishing, onFinish, onShare }: Props) => {
         </div>
 
         <div className="space-y-2">
-          <Button className="w-full h-12 text-base" onClick={() => onFinish({ rpe, notes })} disabled={finishing}>
-            {finishing && <Spinner size="xs" className="mr-2" />}
-            {ts.finish}
-          </Button>
-          <Button variant="outline" className="w-full h-12" onClick={() => onShare({ rpe, notes })} disabled={finishing}>
+          <Button className="w-full h-12 text-base" onClick={() => onShare({ rpe, notes })} disabled={finishing}>
             <Share2 className="h-4 w-4 mr-2" />
             {ts.share}
+          </Button>
+          <Button variant="ghost" className="w-full h-12" onClick={() => onFinish({ rpe, notes })} disabled={finishing}>
+            {finishing && <Spinner size="xs" className="mr-2" />}
+            {ts.finish}
           </Button>
         </div>
       </motion.div>

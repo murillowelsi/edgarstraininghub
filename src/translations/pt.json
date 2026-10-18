@@ -970,6 +970,24 @@
       "avgPowerPlaceholder": "Ex: 220",
       "shareCaption": "Treino concluído: {{name}} ✅"
     },
+    "share": {
+      "title": "Compartilhar treino",
+      "description": "Poste no feed do app ou gere uma imagem para outras redes — quando quiser.",
+      "postToFeed": "Postar no feed",
+      "postToFeedHint": "Aparece para seu time e seu coach",
+      "postAgain": "Postar no feed de novo",
+      "alreadyPosted": "Você já postou este treino",
+      "createImage": "Gerar imagem",
+      "createImageHint": "Para Instagram, WhatsApp, Strava…",
+      "formatStory": "Stories 9:16",
+      "formatPost": "Post 4:5",
+      "addPhoto": "Adicionar foto",
+      "photoHint": "Opcional: use uma foto sua de fundo",
+      "photoAdded": "Foto de fundo adicionada",
+      "changePhoto": "Trocar foto",
+      "shareImage": "Compartilhar imagem",
+      "button": "Compartilhar"
+    },
     "strengthProgress": {
       "title": "Evolução de carga",
       "subtitle": "Maior carga por sessão",
@@ -1027,7 +1045,8 @@
       "saveIncomplete": "Você completou {{done}} de {{total}} séries. Finalizar o treino mesmo assim?",
       "savedOffline": "Salvo no celular — sincroniza quando a internet voltar",
       "summary": {
-        "title": "Treino concluído!",
+        "title": "Treino salvo!",
+        "savedHint": "Já está no seu histórico e o coach já pode ver.",
         "time": "Tempo",
         "sets": "Séries",
         "volume": "Volume",
@@ -1038,8 +1057,8 @@
         "rpeMax": "Esforço máximo",
         "notesLabel": "Nota para o coach",
         "notesPlaceholder": "Como se sentiu? Alguma dor, aparelho ocupado, carga leve…",
-        "finish": "Concluir",
-        "share": "Compartilhar no feed"
+        "finish": "Fechar",
+        "share": "Compartilhar"
       }
     },
     "profile": {
