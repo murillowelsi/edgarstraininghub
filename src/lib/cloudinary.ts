@@ -74,3 +74,26 @@ export const uploadImageToCloudinary = async (file: File, folder = "blog-posts")
   const data = await response.json();
   return data.secure_url;
 };
+
+/**
+ * Copy an image that already lives on the web into our Cloudinary account —
+ * Cloudinary fetches the URL itself, so nothing is downloaded in the browser.
+ */
+export const uploadRemoteImageToCloudinary = async (url: string, folder: string): Promise<string> => {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  if (!cloudName) throw new Error("Cloudinary cloud name is not configured");
+
+  const formData = new FormData();
+  formData.append("file", url);
+  formData.append("upload_preset", uploadPreset || "ml_default");
+  formData.append("folder", folder);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!response.ok) throw new Error(`Cloudinary remote upload failed: ${response.status}`);
+  const data = await response.json();
+  return data.secure_url;
+};

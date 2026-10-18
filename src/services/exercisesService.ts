@@ -10,6 +10,8 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { uploadRemoteImageToCloudinary } from "@/lib/cloudinary";
+import type { CatalogExercise } from "./exerciseCatalogService";
 import { db } from "../lib/firebase";
 import type {
   Exercise,
@@ -28,6 +30,7 @@ const docToExercise = (id: string, data: ExerciseDocument): Exercise => ({
   videoUrl: data.videoUrl,
   thumbnailUrl: data.thumbnailUrl,
   gifUrl: data.gifUrl,
+  imageUrls: data.imageUrls,
   muscleGroups: data.muscleGroups || [],
   equipment: data.equipment || [],
   targetMuscle: data.targetMuscle,
@@ -87,84 +90,47 @@ export const createExercise = async (
   return docRef.id;
 };
 
-// Import exercise from ExerciseDB API
-export const importExerciseFromDb = async (
-  exerciseDbData: {
-    id: string;
-    name: string;
-    bodyPart: string;
-    equipment: string;
-    gifUrl: string;
-    target: string;
-    secondaryMuscles: string[];
-    instructions: string[];
-  },
-  createdBy: string
-): Promise<string> => {
-  // Check if already imported
-  const existing = await getExerciseByExerciseDbId(exerciseDbData.id);
-  if (existing) {
-    return existing.id;
-  }
+/** Catalog imports are tagged so they never clash with old ExerciseDB ids */
+export const catalogExerciseDbId = (catalogId: string) => `fed:${catalogId}`;
 
-  // Map ExerciseDB equipment to our equipment types
-  const equipmentMap: Record<string, string> = {
-    "body weight": "bodyweight",
-    dumbbell: "dumbbell",
-    barbell: "barbell",
-    kettlebell: "kettlebell",
-    cable: "cable",
-    "leverage machine": "machine",
-    "smith machine": "machine",
-    "resistance band": "resistanceBand",
-    "medicine ball": "medicineBall",
-    roller: "foamRoller",
-    band: "resistanceBand",
-    assisted: "machine",
-  };
+// Import an exercise from the free exercise catalog, copying its photos to our Cloudinary
+export const importExerciseFromCatalog = async (item: CatalogExercise, createdBy: string): Promise<Exercise> => {
+  const exerciseDbId = catalogExerciseDbId(item.id);
+  const existing = await getExerciseByExerciseDbId(exerciseDbId);
+  if (existing) return existing;
 
-  // Map ExerciseDB body parts to our muscle groups
-  const bodyPartToMuscleGroup: Record<string, string[]> = {
-    back: ["back"],
-    chest: ["chest"],
-    shoulders: ["shoulders"],
-    "upper arms": ["biceps", "triceps"],
-    "lower arms": ["forearms"],
-    waist: ["core"],
-    "upper legs": ["quadriceps", "hamstrings", "glutes"],
-    "lower legs": ["calves"],
-    cardio: ["fullBody"],
-    neck: ["back"],
-  };
+  // Our own copy, so the exercise keeps working if the source moves.
+  // If Cloudinary isn't reachable, keep the source URL rather than failing the import.
+  const imageUrls = await Promise.all(
+    item.images.slice(0, 2).map((url) =>
+      uploadRemoteImageToCloudinary(url, "exercises").catch((error) => {
+        console.warn("Exercise photo copy failed, using the source URL", error);
+        return url;
+      })
+    )
+  );
 
-  const equipment = equipmentMap[exerciseDbData.equipment] || "other";
-  const muscleGroups = bodyPartToMuscleGroup[exerciseDbData.bodyPart] || ["fullBody"];
-
-  // Build document data, only including defined values
-  const docData: Record<string, unknown> = {
-    name: exerciseDbData.name,
-    description: `Target: ${exerciseDbData.target}`,
-    instructions: exerciseDbData.instructions?.join("\n") || "",
-    muscleGroups,
-    equipment: [equipment],
-    targetMuscle: exerciseDbData.target,
-    secondaryMuscles: exerciseDbData.secondaryMuscles || [],
-    bodyPart: exerciseDbData.bodyPart,
+  const base = {
+    name: item.name,
+    description: item.primaryMuscles.join(", "),
+    instructions: item.instructions.join("\n"),
+    muscleGroups: item.muscleGroups,
+    equipment: [item.equipment],
+    targetMuscle: item.primaryMuscles[0] ?? "",
+    secondaryMuscles: item.secondaryMuscles,
+    bodyPart: item.primaryMuscles[0] ?? "",
     isCustom: false,
-    exerciseDbId: exerciseDbData.id,
+    exerciseDbId,
     createdBy,
+    ...(imageUrls[0] ? { gifUrl: imageUrls[0], thumbnailUrl: imageUrls[0], imageUrls } : {}),
+  };
+
+  const docRef = await addDoc(collection(db, EXERCISES_COLLECTION), {
+    ...base,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-  };
-
-  // Only add gifUrl if it exists
-  if (exerciseDbData.gifUrl) {
-    docData.gifUrl = exerciseDbData.gifUrl;
-  }
-
-  const docRef = await addDoc(collection(db, EXERCISES_COLLECTION), docData);
-
-  return docRef.id;
+  });
+  return { id: docRef.id, ...base, createdAt: new Date(), updatedAt: new Date() };
 };
 
 // Get exercise by ExerciseDB ID

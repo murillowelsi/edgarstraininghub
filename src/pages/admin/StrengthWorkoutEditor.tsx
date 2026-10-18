@@ -25,7 +25,7 @@ import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
-import ExerciseDbBrowser from "@/components/workout/ExerciseDbBrowser";
+import ExerciseCatalogBrowser from "@/components/workout/ExerciseCatalogBrowser";
 import MyLibraryBrowser from "@/components/workout/MyLibraryBrowser";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -404,6 +404,7 @@ const StrengthWorkoutEditor = () => {
         // Denormalized for offline access
         exerciseName: exercise.name,
         exerciseGifUrl: exercise.gifUrl,
+        exerciseImageUrls: exercise.imageUrls,
         exerciseVideoUrl: exercise.videoUrl,
         exerciseThumbnailUrl: exercise.thumbnailUrl,
         exerciseMuscleGroups: exercise.muscleGroups,
@@ -657,7 +658,7 @@ const StrengthWorkoutEditor = () => {
               {(
                 [
                   { key: "library", icon: Library, label: t.workout.library.myLibrary },
-                  { key: "browse", icon: Database, label: "ExerciseDB" },
+                  { key: "browse", icon: Database, label: t.workout.library.catalog },
                 ] as const
               ).map((tab) => (
                 <button
@@ -679,7 +680,7 @@ const StrengthWorkoutEditor = () => {
             {libraryTab === "library" ? (
               <MyLibraryBrowser onExerciseSelected={addExercise} addedCounts={addedCounts} />
             ) : (
-              <ExerciseDbBrowser onExerciseImported={addExercise} addedCounts={addedDbCounts} />
+              <ExerciseCatalogBrowser onExerciseImported={addExercise} addedCounts={addedDbCounts} />
             )}
           </div>
         </ResponsiveModal>

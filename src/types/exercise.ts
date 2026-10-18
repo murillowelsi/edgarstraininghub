@@ -68,7 +68,9 @@ export interface Exercise {
   instructions?: string;
   videoUrl?: string; // YouTube URL
   thumbnailUrl?: string;
-  gifUrl?: string; // GIF URL from ExerciseDB
+  gifUrl?: string; // GIF URL from ExerciseDB (catalog imports: the first photo)
+  /** Catalog imports: start/end photos, played as a two-frame animation */
+  imageUrls?: string[];
   muscleGroups: MuscleGroup[];
   equipment: EquipmentType[];
   targetMuscle?: string; // Primary target muscle from ExerciseDB
@@ -89,6 +91,7 @@ export interface ExerciseDocument {
   videoUrl?: string;
   thumbnailUrl?: string;
   gifUrl?: string;
+  imageUrls?: string[];
   muscleGroups: MuscleGroup[];
   equipment: EquipmentType[];
   targetMuscle?: string;
@@ -129,6 +132,7 @@ export interface WorkoutExercise {
   exerciseVideoUrl?: string;
   exerciseThumbnailUrl?: string;
   exerciseGifUrl?: string; // GIF URL from ExerciseDB
+  exerciseImageUrls?: string[]; // Catalog start/end photos
   exerciseMuscleGroups?: MuscleGroup[];
   exerciseInstructions?: string;
 }

@@ -6,6 +6,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { ExerciseFrames } from "@/components/workout/ExerciseFrames";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -216,6 +217,7 @@ const ExerciseSessionCard = ({
   const exerciseName = exercise?.name || workoutExercise.exerciseName || t.athlete.session.exerciseFallback;
   const videoUrl = exercise?.videoUrl || workoutExercise.exerciseVideoUrl;
   const gifUrl = exercise?.gifUrl || workoutExercise.exerciseGifUrl;
+  const frames = exercise?.imageUrls ?? workoutExercise.exerciseImageUrls ?? [];
   const instructions = exercise?.instructions || workoutExercise.exerciseInstructions;
   const videoId = videoUrl ? getYouTubeVideoId(videoUrl) : null;
   const thumbnail = videoId ? getYouTubeThumbnail(videoId) : null;
@@ -299,7 +301,9 @@ const ExerciseSessionCard = ({
                     "relative rounded-xl overflow-hidden mb-4 shadow-lg",
                     hasGif ? "aspect-square max-w-xs mx-auto" : "aspect-video"
                   )}>
-                    {hasGif ? (
+                    {frames.length > 1 ? (
+                      <ExerciseFrames images={frames} alt={exerciseName} className="w-full h-full" />
+                    ) : hasGif ? (
                       <img src={gifUrl} alt={exerciseName} className="w-full h-full object-cover" />
                     ) : videoId ? (
                       <iframe

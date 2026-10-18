@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { ExerciseFrames } from "./ExerciseFrames";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
@@ -142,6 +143,8 @@ const ExercisePreviewDialog = ({
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               />
+            ) : (exercise.imageUrls?.length ?? 0) > 1 ? (
+              <ExerciseFrames images={exercise.imageUrls!} alt={exercise.name} className="w-full h-full" />
             ) : exercise.gifUrl ? (
               <img
                 src={exercise.gifUrl}
