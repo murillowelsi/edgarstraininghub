@@ -43,7 +43,6 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  Clock,
   Dumbbell,
   History,
   Minus,
@@ -98,6 +97,18 @@ const buildPreviousSets = (assignments: AssignmentWithWorkout[], currentId: stri
   return previous;
 };
 
+// "8 to 12" / "8-12" / "10" are rep counts; anything else ("10 minutos 3% inclinação") is shown as written
+const REP_RANGE = /^\s*\d+(\s*(-|–|to|a|até)\s*\d+)?\s*$/i;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatPrescription = (we: WorkoutExercise, t: any) => {
+  const reps = (we.reps || "10").trim();
+  const repsText = REP_RANGE.test(reps) ? `${reps.replace(/\s*(-|–|to|a|até)\s*/i, "–")} reps` : reps;
+  const parts = [`${we.sets} × ${repsText}`];
+  if (we.restSeconds > 0) parts.push(`${we.restSeconds}s ${String(t.athlete.session.rest).toLowerCase()}`);
+  return parts.join(" · ");
+};
+
 const isPlainNumber = (value: string) => /^\d+([.,]\d+)?$/.test(value.trim());
 
 // Short double beep for the end of a rest. The AudioContext must be created
@@ -131,6 +142,8 @@ const ExerciseSessionCard = ({
   index,
   progress,
   isCurrent,
+  isOpen,
+  onToggleOpen,
   suggestions,
   onUseSuggestion,
   onUpdateSet,
@@ -145,6 +158,8 @@ const ExerciseSessionCard = ({
   progress: ExerciseProgress;
   /** The exercise the athlete is on (next set after a rest) */
   isCurrent: boolean;
+  isOpen: boolean;
+  onToggleOpen: () => void;
   /** Per set: what to prefill (last session > previous set > coach target) */
   suggestions: (SetSuggestion | null)[];
   onUseSuggestion: (setIndex: number) => void;
@@ -174,230 +189,230 @@ const ExerciseSessionCard = ({
   const totalSets = progress.sets.length;
   const allComplete = completedSets === totalSets;
 
+  const summary = progress.sets
+    .filter((set) => set.completed)
+    .map((set) => [set.weight && `${set.weight}kg`, set.reps && `×${set.reps}`].filter(Boolean).join(""))
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <Card
+      id={`exercise-${workoutExercise.id}`}
       className={cn(
-        "overflow-hidden",
+        "overflow-hidden scroll-mt-4 transition-colors",
         isActive && "ring-2 ring-primary border-primary",
         allComplete && !isActive && "border-primary/40 bg-primary/5"
       )}
     >
-      <CardContent className="p-4">
-        {/* Exercise Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h3 className="font-semibold text-lg">{exerciseName}</h3>
-            <p className="text-sm text-muted-foreground">
-              {workoutExercise.sets} sets × {workoutExercise.reps || "10"} reps
-            </p>
-          </div>
-          {allComplete && (
-            <Badge className="bg-primary/15 text-primary border-primary/30">
-              <Check className="h-3 w-3 mr-1" />
-              {t.athlete.session.complete}
-            </Badge>
+      {/* Header — always visible, toggles the card */}
+      <button
+        onClick={onToggleOpen}
+        aria-expanded={isOpen}
+        className="w-full flex items-center gap-3 p-4 text-left [-webkit-tap-highlight-color:transparent]"
+      >
+        <div
+          className={cn(
+            "h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-sm font-bold tabular-nums",
+            allComplete ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/70"
           )}
+        >
+          {allComplete ? <Check className="h-4 w-4" /> : index + 1}
         </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-base leading-tight truncate">{exerciseName}</h3>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            {!isOpen && summary ? summary : formatPrescription(workoutExercise, t)}
+          </p>
+        </div>
+        <span
+          className={cn(
+            "shrink-0 text-xs font-semibold tabular-nums px-2 py-1 rounded-full",
+            allComplete ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+          )}
+        >
+          {completedSets}/{totalSets}
+        </span>
+        <ChevronDown
+          className={cn("h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200", isOpen && "rotate-180")}
+        />
+      </button>
 
-        {/* Media - Inline Player or Thumbnail */}
-        {hasMedia && (
-          isPlaying ? (
-            <div className={cn(
-              "relative rounded-xl overflow-hidden mb-4 shadow-lg",
-              hasGif ? "aspect-square max-w-xs mx-auto" : "aspect-video"
-            )}>
-              {hasGif ? (
-                <img
-                  src={gifUrl}
-                  alt={exerciseName}
-                  className="w-full h-full object-cover"
-                />
-              ) : videoId ? (
-                <iframe
-                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`}
-                  title={exerciseName}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
-              ) : null}
-              <button
-                onClick={() => setIsPlaying(false)}
-                className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black/90"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsPlaying(true)}
-              className={cn(
-                "w-full rounded-xl overflow-hidden bg-black relative group mb-4 shadow-lg",
-                hasGif ? "aspect-square max-w-xs mx-auto" : "aspect-video"
-              )}
-            >
-              {mediaUrl && (
-                <img
-                  src={mediaUrl}
-                  alt={exerciseName}
-                  className="w-full h-full object-cover"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              {!hasGif && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                    <Play className="h-7 w-7 text-black ml-1" />
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key="body"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 36 }}
+            className="overflow-hidden"
+          >
+            <CardContent className="px-4 pb-4 pt-0">
+              {/* Media — compact row; opens the player/GIF on demand */}
+              {hasMedia && (
+                isPlaying ? (
+                  <div className={cn(
+                    "relative rounded-xl overflow-hidden mb-4 shadow-lg",
+                    hasGif ? "aspect-square max-w-xs mx-auto" : "aspect-video"
+                  )}>
+                    {hasGif ? (
+                      <img src={gifUrl} alt={exerciseName} className="w-full h-full object-cover" />
+                    ) : videoId ? (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`}
+                        title={exerciseName}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        className="w-full h-full"
+                      />
+                    ) : null}
+                    <button
+                      onClick={() => setIsPlaying(false)}
+                      className="absolute top-2 right-2 z-10 w-9 h-9 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black/90"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
-                </div>
-              )}
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                <span className="text-white text-sm font-medium">
-                  {hasGif ? t.athlete.session.viewFullAnimation : t.athlete.session.watchHowTo}
-                </span>
-                <Badge className={hasGif ? "bg-green-600 text-white border-0" : "bg-red-600 text-white border-0"}>
-                  <Play className="h-3 w-3 mr-1" />
-                  {hasGif ? "GIF" : "Video"}
-                </Badge>
-              </div>
-            </button>
-          )
-        )}
-
-        {/* Instructions */}
-        {instructions && (
-          <div className="bg-muted/50 rounded-lg mb-4 overflow-hidden">
-            <button
-              className="flex items-center justify-between w-full p-3 text-left"
-              onClick={() => setInstructionsOpen((v) => !v)}
-            >
-              <p className="text-xs text-muted-foreground uppercase font-medium">{t.athlete.session.howToPerform}</p>
-              <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", instructionsOpen && "rotate-180")} />
-            </button>
-            {instructionsOpen && (
-              <p className="text-sm px-3 pb-3 leading-relaxed whitespace-pre-wrap">{instructions}</p>
-            )}
-          </div>
-        )}
-
-        {/* No media placeholder */}
-        {!hasMedia && (
-          <div className="w-full aspect-[3/1] rounded-xl bg-muted/50 flex items-center justify-center mb-4 border-2 border-dashed border-muted-foreground/20">
-            <div className="text-center text-muted-foreground">
-              <Dumbbell className="h-8 w-8 mx-auto mb-2" />
-              <p className="text-sm">{t.athlete.session.noVideoAvailable}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Rest Time Info */}
-        {workoutExercise.restSeconds > 0 && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 p-2 bg-muted/30 rounded">
-            <Clock className="h-4 w-4" />
-            <span>{t.athlete.session.restBetweenSets.replace("{{seconds}}", String(workoutExercise.restSeconds))}</span>
-          </div>
-        )}
-
-        {/* Sets Table */}
-        <div>
-          <div className="grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
-            <span className="text-center">{t.athlete.session.setHeader}</span>
-            <span className="text-center">{t.athlete.session.repsHeader}</span>
-            <span className="text-center">{t.athlete.session.kgHeader}</span>
-            <span></span>
-          </div>
-
-          <div className="space-y-2">
-            {progress.sets.map((set, setIndex) => {
-              const suggestion = suggestions[setIndex];
-              const showHistory =
-                !!suggestion?.fromHistory && !set.completed && !set.reps && !set.weight;
-              return (
-                <div key={setIndex}>
-                  <div
-                    className={cn(
-                      "grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 items-center",
-                      set.completed && "opacity-60"
-                    )}
+                ) : (
+                  <button
+                    onClick={() => setIsPlaying(true)}
+                    className="w-full flex items-center gap-3 rounded-xl bg-muted/50 hover:bg-muted p-2 mb-3 text-left transition-colors"
                   >
-                    <span className="text-base font-semibold text-center tabular-nums">{set.setNumber}</span>
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      enterKeyHint="next"
-                      value={set.reps}
-                      onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
-                      placeholder={suggestion?.reps || workoutExercise.reps || "10"}
-                      className="h-12 text-center text-base px-1 min-w-0"
-                      disabled={set.completed}
-                    />
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      enterKeyHint="done"
-                      value={set.weight}
-                      onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
-                      placeholder={suggestion?.weight || "0"}
-                      className="h-12 text-center text-base px-1 min-w-0"
-                      disabled={set.completed}
-                    />
-                    <button
-                      onClick={() => onToggleSetComplete(setIndex)}
-                      aria-label={t.athlete.session.complete}
-                      className={cn(
-                        "h-12 w-12 rounded-full flex items-center justify-center transition-all",
-                        set.completed
-                          ? "bg-primary text-primary-foreground shadow-md"
-                          : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
-                      )}
-                    >
-                      <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
-                    </button>
-                  </div>
-                  {showHistory && (
-                    <button
-                      onClick={() => onUseSuggestion(setIndex)}
-                      className="ml-12 mt-1 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
-                    >
-                      <History className="h-3.5 w-3.5" />
-                      <span>
-                        {t.athlete.session.previousHeader}:{" "}
-                        <span className="font-semibold tabular-nums text-foreground/80">
-                          {[suggestion.weight && `${suggestion.weight} kg`, suggestion.reps && `× ${suggestion.reps}`]
-                            .filter(Boolean)
-                            .join(" ")}
-                        </span>
-                      </span>
-                    </button>
+                    <div className="relative h-12 w-16 shrink-0 rounded-lg overflow-hidden bg-black">
+                      {mediaUrl && <img src={mediaUrl} alt="" className="w-full h-full object-cover" />}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <Play className="h-4 w-4 text-white" fill="currentColor" />
+                      </div>
+                    </div>
+                    <span className="flex-1 text-sm font-medium">
+                      {hasGif ? t.athlete.session.viewFullAnimation : t.athlete.session.watchHowTo}
+                    </span>
+                    <Badge className={hasGif ? "bg-green-600 text-white border-0" : "bg-red-600 text-white border-0"}>
+                      {hasGif ? "GIF" : "Video"}
+                    </Badge>
+                  </button>
+                )
+              )}
+
+              {/* Instructions */}
+              {instructions && (
+                <div className="bg-muted/50 rounded-lg mb-3 overflow-hidden">
+                  <button
+                    className="flex items-center justify-between w-full p-3 text-left"
+                    onClick={() => setInstructionsOpen((v) => !v)}
+                  >
+                    <p className="text-xs text-muted-foreground uppercase font-medium">{t.athlete.session.howToPerform}</p>
+                    <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", instructionsOpen && "rotate-180")} />
+                  </button>
+                  {instructionsOpen && (
+                    <p className="text-sm px-3 pb-3 leading-relaxed whitespace-pre-wrap">{instructions}</p>
                   )}
                 </div>
-              );
-            })}
-          </div>
+              )}
 
-          {/* Add / Remove Set Buttons */}
-          <div className="flex items-center justify-between mt-4">
-            {progress.sets.length > 1 ? (
-              <button
-                onClick={onRemoveLastSet}
-                className="flex items-center gap-2 text-sm text-muted-foreground font-medium hover:text-destructive hover:underline"
-              >
-                <Minus className="h-4 w-4" />
-                {t.athlete.session.removeLastSet}
-              </button>
-            ) : (
-              <span />
-            )}
-            <button
-              onClick={onAddSet}
-              className="flex items-center gap-2 text-sm text-primary font-medium hover:underline"
-            >
-              <Plus className="h-4 w-4" />
-              {t.athlete.session.addNewSet}
-            </button>
-          </div>
-        </div>
-      </CardContent>
+              {/* Sets Table */}
+              <div>
+                <div className="grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
+                  <span className="text-center">{t.athlete.session.setHeader}</span>
+                  <span className="text-center">{t.athlete.session.repsHeader}</span>
+                  <span className="text-center">{t.athlete.session.kgHeader}</span>
+                  <span></span>
+                </div>
+
+                <div className="space-y-2">
+                  {progress.sets.map((set, setIndex) => {
+                    const suggestion = suggestions[setIndex];
+                    const showHistory =
+                      !!suggestion?.fromHistory && !set.completed && !set.reps && !set.weight;
+                    return (
+                      <div key={setIndex}>
+                        <div
+                          className={cn(
+                            "grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 items-center",
+                            set.completed && "opacity-60"
+                          )}
+                        >
+                          <span className="text-base font-semibold text-center tabular-nums">{set.setNumber}</span>
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            enterKeyHint="next"
+                            value={set.reps}
+                            onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
+                            placeholder={suggestion?.reps || workoutExercise.reps || "10"}
+                            className="h-12 text-center text-base px-1 min-w-0"
+                            disabled={set.completed}
+                          />
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            enterKeyHint="done"
+                            value={set.weight}
+                            onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
+                            placeholder={suggestion?.weight || "0"}
+                            className="h-12 text-center text-base px-1 min-w-0"
+                            disabled={set.completed}
+                          />
+                          <button
+                            onClick={() => onToggleSetComplete(setIndex)}
+                            aria-label={t.athlete.session.complete}
+                            className={cn(
+                              "h-12 w-12 rounded-full flex items-center justify-center transition-all",
+                              set.completed
+                                ? "bg-primary text-primary-foreground shadow-md"
+                                : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
+                            )}
+                          >
+                            <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
+                          </button>
+                        </div>
+                        {showHistory && (
+                          <button
+                            onClick={() => onUseSuggestion(setIndex)}
+                            className="ml-12 mt-1 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                          >
+                            <History className="h-3.5 w-3.5" />
+                            <span>
+                              {t.athlete.session.previousHeader}:{" "}
+                              <span className="font-semibold tabular-nums text-foreground/80">
+                                {[suggestion.weight && `${suggestion.weight} kg`, suggestion.reps && `× ${suggestion.reps}`]
+                                  .filter(Boolean)
+                                  .join(" ")}
+                              </span>
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Add / Remove Set Buttons */}
+                <div className="flex items-center justify-between mt-4">
+                  {progress.sets.length > 1 ? (
+                    <button
+                      onClick={onRemoveLastSet}
+                      className="flex items-center gap-2 text-sm text-muted-foreground font-medium hover:text-destructive hover:underline"
+                    >
+                      <Minus className="h-4 w-4" />
+                      {t.athlete.session.removeLastSet}
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                  <button
+                    onClick={onAddSet}
+                    className="flex items-center gap-2 text-sm text-primary font-medium hover:underline"
+                  >
+                    <Plus className="h-4 w-4" />
+                    {t.athlete.session.addNewSet}
+                  </button>
+                </div>
+              </div>
+            </CardContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };
@@ -425,6 +440,8 @@ const StrengthWorkoutSession = () => {
   const [rest, setRest] = useState<RestState | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   // Last logged sets per exerciseId from the athlete's other completed sessions
+  // Exercise cards currently expanded (workoutExercise.id). Only the current one opens by default.
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const [previousSets, setPreviousSets] = useState<Map<string, SetProgressData[]>>(new Map());
   const [exerciseProgress, setExerciseProgress] = useState<Map<string, ExerciseProgress>>(
     new Map()
@@ -496,6 +513,10 @@ const StrengthWorkoutSession = () => {
             });
           });
           setExerciseProgress(initialProgress);
+          const firstOpen =
+            found.workout.exercises?.find((we) => initialProgress.get(we.id)?.sets.some((s) => !s.completed)) ??
+            found.workout.exercises?.[0];
+          setOpenIds(new Set(firstOpen ? [firstOpen.id] : []));
 
           // Start (or resume) the clock
           if (useDraft) {
@@ -680,6 +701,43 @@ const StrengthWorkoutSession = () => {
     [assignment]
   );
 
+  const toggleOpen = useCallback((workoutExerciseId: string) => {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(workoutExerciseId)) next.delete(workoutExerciseId);
+      else next.add(workoutExerciseId);
+      return next;
+    });
+  }, []);
+
+  // Finished exercise → collapse it, open the next one and bring it into view
+  const advanceTo = useCallback((finishedId: string, nextId: string) => {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      next.delete(finishedId);
+      next.add(nextId);
+      return next;
+    });
+    // The finished card collapses while the next one expands, which keeps
+    // moving the target; scroll once its position has stopped changing.
+    let lastTop: number | null = null;
+    let stableTicks = 0;
+    let attempts = 0;
+    const settle = () => {
+      const el = document.getElementById(`exercise-${nextId}`);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      stableTicks = lastTop !== null && Math.abs(top - lastTop) < 1 ? stableTicks + 1 : 0;
+      lastTop = top;
+      if (stableTicks >= 2 || ++attempts > 20) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.setTimeout(settle, 80);
+      }
+    };
+    window.setTimeout(settle, 80);
+  }, []);
+
   // What to prefill for a set: the same set from the last session, else the
   // last filled set of this session, else the coach's target reps.
   const getSuggestion = useCallback(
@@ -754,6 +812,15 @@ const StrengthWorkoutSession = () => {
 
       if (!nowCompleted) return;
       const next = findNextSet(newMap, exerciseId, setIndex);
+      const exerciseDone = newSets.every((set) => set.completed);
+      if (exerciseDone) {
+        if (next && next.exerciseId !== exerciseId) advanceTo(exerciseId, next.exerciseId);
+        else setOpenIds((prev) => {
+          const updated = new Set(prev);
+          updated.delete(exerciseId);
+          return updated;
+        });
+      }
       if (!next) {
         setRest(null);
         return;
@@ -769,7 +836,7 @@ const StrengthWorkoutSession = () => {
         nextSetIndex: next.setIndex,
       });
     },
-    [exerciseProgress, findNextSet, assignment, getSuggestion]
+    [exerciseProgress, findNextSet, assignment, getSuggestion, advanceTo]
   );
 
   // Remove last set
@@ -1031,6 +1098,8 @@ const StrengthWorkoutSession = () => {
                   index={index}
                   progress={progress}
                   isCurrent={rest?.nextExerciseId === workoutExercise.id}
+                  isOpen={openIds.has(workoutExercise.id)}
+                  onToggleOpen={() => toggleOpen(workoutExercise.id)}
                   suggestions={progress.sets.map((_, setIndex) =>
                     getSuggestion(exerciseProgress, workoutExercise.id, setIndex)
                   )}

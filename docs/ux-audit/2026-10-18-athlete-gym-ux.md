@@ -135,3 +135,22 @@ Pesados em 4G fraco. Preferir GIF/thumbnail leve na sessão e vídeo só sob dem
 4. Confirmação ao cancelar, aviso de incompleto, tela de resumo (1.8–1.10).
 5. Cache offline do Firestore (2.1).
 6. Demais itens médios e polimento.
+
+---
+
+## Rodada 2 — após autosave, descanso, valores anteriores e cards colapsáveis
+
+**Já resolvido:** 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8 e o comprimento da página (8 exercícios: de 4.887 px para 1.214 px; só o exercício atual fica aberto, o concluído fecha e o próximo abre com rolagem automática).
+
+### Próximos pontos da sessão de treino
+
+- 🟠 **R2.1 Reps do coach em faixa ("8 a 12") não autopreenchem.** Ao marcar ✓ sem histórico, a série fica com reps vazio. Sugestão: usar o maior número da faixa, ou abrir um seletor rápido de reps (8 · 9 · 10 · 11 · 12) ao tocar ✓.
+- 🟠 **R2.2 Steppers de carga.** Botões −2,5 / +2,5 kg ao lado do campo Kg evitam abrir o teclado entre séries.
+- 🟡 **R2.3 Editar série concluída** sem desmarcar (1.11 continua aberto).
+- 🟡 **R2.4 Aviso de treino incompleto + tela de resumo** (1.9 e 1.10 continuam abertos).
+- 🟡 **R2.5 Exercícios por tempo** (esteira, prancha): trocar Reps/Kg por Tempo/Inclinação e um cronômetro regressivo do tempo-alvo (1.12).
+- 🟡 **R2.6 Trocar / pular / reordenar exercício** e nota por exercício (1.13).
+- 🟡 **R2.7 Supersets/bi-sets.** Hoje cada exercício é independente; o descanso deveria vir só depois do par.
+- ⚪ **R2.8 Card "atual" sem descanso ativo** não tem destaque (o anel amarelo só aparece durante o descanso).
+- ⚪ **R2.9 Resumo do card fechado** só aparece quando há carga/reps; séries marcadas vazias mostram só a prescrição.
+- ⚪ **R2.10 Rascunho só no aparelho.** Sincronizar com o Firestore (sem marcar concluído) permitiria continuar em outro celular e o coach acompanhar ao vivo.
