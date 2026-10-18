@@ -16,11 +16,18 @@ import { createMentionNotifications, createTimelinePost, subscribeToMentionCount
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
 import { useEffect, useRef, useState } from "react";
+import { MotionConfig, motion } from "motion/react";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useTimelineActions } from "@/contexts/TimelineActionsContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
 import { ActivityDrawer } from "@/components/timeline/ActivityDrawer";
 import { useToast } from "@/hooks/use-toast";
+
+// Each page mounts its own layout, so the nav remounts on every route change.
+// Remember the last active tab so the lens can slide from it horizontally
+// (a layoutId shared animation measures page coordinates and jumps vertically
+// when the previous page was scrolled).
+let lastActiveNavIndex: number | null = null;
 
 interface AthletePortalLayoutProps {
   children: React.ReactNode;
@@ -144,6 +151,12 @@ const AthletePortalLayout = ({
     if (exact) return location.pathname === href;
     return location.pathname.startsWith(href);
   };
+
+  const activeNavIndex = navItems.findIndex((item) => isActive(item.href, item.exact));
+  const [lensFromIndex] = useState(() => lastActiveNavIndex ?? activeNavIndex);
+  useEffect(() => {
+    if (activeNavIndex >= 0) lastActiveNavIndex = activeNavIndex;
+  }, [activeNavIndex]);
 
   const handleLogout = async () => {
     setIsMenuOpen(false);
@@ -326,41 +339,79 @@ const AthletePortalLayout = ({
       </Drawer>
 
       {/* Main content area */}
-      <main className={fullHeight ? (hideBottomNav ? "h-[calc(100vh-4rem)] overflow-hidden flex flex-col" : "h-[calc(100vh-8rem)] overflow-hidden flex flex-col") : "flex-1 overflow-auto pb-20"}>{children}</main>
+      <main className={fullHeight ? (hideBottomNav ? "h-[calc(100vh-4rem)] overflow-hidden flex flex-col" : "h-[calc(100vh-9.5rem)] overflow-hidden flex flex-col") : cn("flex-1 overflow-auto", hideBottomNav ? "pb-6" : "pb-28")}>{children}</main>
 
-      {/* Bottom navigation - fixed */}
-      <nav className={cn("fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-bottom z-50", hideBottomNav && "hidden")}>
-        <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
-          {navItems.map((item) => {
-            const active = isActive(item.href, item.exact);
-            const badgeCount = item.href === "/athlete/timeline" ? feedUnreadCount : 0;
-            return (
-              <Link
-                key={item.href}
-                to={item.href}
-                className="flex flex-col items-center justify-center flex-1 h-full transition-all"
-              >
-                <div className="relative">
-                  <div className={cn(
-                    "flex items-center justify-center transition-all",
-                    active ? "text-primary" : "text-muted-foreground"
-                  )}>
-                    <item.icon className={cn("h-5 w-5", active && "scale-110")} />
-                  </div>
-                  {badgeCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                      {badgeCount > 9 ? "9+" : badgeCount}
-                    </span>
-                  )}
-                </div>
-                <span className={cn("text-xs mt-1", active ? "text-primary font-semibold" : "text-muted-foreground font-medium")}>
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      {/* Bottom navigation — floating liquid-glass pill */}
+      {!hideBottomNav && (
+        <MotionConfig reducedMotion="user">
+          <nav
+            className="fixed inset-x-3 z-50 mx-auto max-w-lg"
+            style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+          >
+            <div className="glass flex items-center h-16 p-1.5 rounded-full">
+              <div className="absolute inset-1.5 pointer-events-none">
+                {activeNavIndex >= 0 && (
+                  <motion.span
+                    className="glass-lens absolute inset-y-0 left-0 rounded-full"
+                    style={{ width: `${100 / navItems.length}%` }}
+                    initial={{ x: `${(lensFromIndex >= 0 ? lensFromIndex : activeNavIndex) * 100}%` }}
+                    animate={{
+                      x: `${activeNavIndex * 100}%`,
+                      // Brief stretch while travelling, like the iOS tab bar
+                      scaleX: lensFromIndex >= 0 && lensFromIndex !== activeNavIndex ? [1, 1.18, 1] : 1,
+                    }}
+                    transition={{
+                      x: { type: "spring", stiffness: 420, damping: 32, mass: 0.9 },
+                      scaleX: { duration: 0.35, ease: "easeOut" },
+                    }}
+                  />
+                )}
+              </div>
+              {navItems.map((item) => {
+                const active = isActive(item.href, item.exact);
+                const badgeCount = item.href === "/athlete/timeline" ? feedUnreadCount : 0;
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className="relative flex-1 h-full rounded-full [-webkit-tap-highlight-color:transparent]"
+                  >
+                    <motion.div
+                      whileTap={{ scale: 0.86 }}
+                      transition={{ type: "spring", stiffness: 600, damping: 22 }}
+                      className="relative z-10 flex flex-col items-center justify-center h-full"
+                    >
+                      <div className="relative">
+                        <motion.div
+                          animate={{ scale: active ? 1.12 : 1, y: active ? -1 : 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 18 }}
+                          className={cn(
+                            "flex items-center justify-center transition-colors duration-200",
+                            active ? "text-primary" : "text-foreground/60"
+                          )}
+                        >
+                          <item.icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} />
+                        </motion.div>
+                        {badgeCount > 0 && (
+                          <span className="absolute -top-1 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                            {badgeCount > 9 ? "9+" : badgeCount}
+                          </span>
+                        )}
+                      </div>
+                      <span className={cn(
+                        "text-[10px] mt-0.5 transition-colors duration-200",
+                        active ? "text-primary font-semibold" : "text-foreground/60 font-medium"
+                      )}>
+                        {item.label}
+                      </span>
+                    </motion.div>
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        </MotionConfig>
+      )}
 
       <CreatePostModal
         open={createOpen}
