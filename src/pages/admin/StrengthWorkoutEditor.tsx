@@ -20,6 +20,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { WorkoutLoadError } from "@/components/admin/WorkoutLoadError";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -46,6 +47,31 @@ const WorkoutExerciseRow = ({
   const [setsRaw, setSetsRaw] = useState(String(item.sets));
   const [repsRaw, setRepsRaw] = useState(item.reps || "");
   const [restRaw, setRestRaw] = useState(String(item.restSeconds));
+
+  // Apply the typed values. Runs on every keystroke and again when the drawer
+  // closes — closing with Esc or tapping outside used to drop unblurred edits.
+  const commit = (next: { sets?: string; reps?: string; rest?: string } = {}) => {
+    const sets = next.sets ?? setsRaw;
+    const reps = next.reps ?? repsRaw;
+    const rest = next.rest ?? restRaw;
+    const updates: Partial<WorkoutExercise> = {};
+    const setsNum = parseInt(sets, 10);
+    if (setsNum >= 1 && setsNum !== item.sets) updates.sets = setsNum;
+    if (reps !== (item.reps || "")) updates.reps = reps;
+    const restNum = parseInt(rest, 10);
+    if (rest.trim() !== "" && restNum >= 0 && restNum !== item.restSeconds) updates.restSeconds = restNum;
+    if (Object.keys(updates).length) onUpdate(updates);
+  };
+
+  const handleMenuOpenChange = (open: boolean) => {
+    if (!open) {
+      commit();
+      // Show normalized values next time (e.g. empty sets falls back to the saved value)
+      setSetsRaw(String(Math.max(1, parseInt(setsRaw, 10) || item.sets)));
+      setRestRaw(String(Math.max(0, parseInt(restRaw, 10) || 0)));
+    }
+    setMenuOpen(open);
+  };
 
   // Sync local state when drawer opens so it reflects latest values
   const handleOpenMenu = () => {
@@ -102,7 +128,7 @@ const WorkoutExerciseRow = ({
         </Button>
       </div>
 
-      <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
+      <Drawer open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle className="capitalize">{exerciseName}</DrawerTitle>
@@ -114,12 +140,11 @@ const WorkoutExerciseRow = ({
               <Input
                 inputMode="numeric"
                 value={setsRaw}
-                onChange={(e) => setSetsRaw(e.target.value)}
-                onBlur={() => {
-                  const val = Math.max(1, parseInt(setsRaw) || 1);
-                  setSetsRaw(String(val));
-                  onUpdate({ sets: val });
+                onChange={(e) => {
+                  setSetsRaw(e.target.value);
+                  commit({ sets: e.target.value });
                 }}
+                onBlur={() => setSetsRaw(String(Math.max(1, parseInt(setsRaw, 10) || item.sets)))}
                 className="w-20 text-center"
               />
             </div>
@@ -128,8 +153,10 @@ const WorkoutExerciseRow = ({
               <Label className="text-sm">Reps</Label>
               <Input
                 value={repsRaw}
-                onChange={(e) => setRepsRaw(e.target.value)}
-                onBlur={() => onUpdate({ reps: repsRaw })}
+                onChange={(e) => {
+                  setRepsRaw(e.target.value);
+                  commit({ reps: e.target.value });
+                }}
                 placeholder="8-12"
                 className="w-20 text-center"
               />
@@ -140,12 +167,11 @@ const WorkoutExerciseRow = ({
               <Input
                 inputMode="numeric"
                 value={restRaw}
-                onChange={(e) => setRestRaw(e.target.value)}
-                onBlur={() => {
-                  const val = Math.max(0, parseInt(restRaw) || 0);
-                  setRestRaw(String(val));
-                  onUpdate({ restSeconds: val });
+                onChange={(e) => {
+                  setRestRaw(e.target.value);
+                  commit({ rest: e.target.value });
                 }}
+                onBlur={() => setRestRaw(String(Math.max(0, parseInt(restRaw, 10) || 0)))}
                 className="w-20 text-center"
               />
             </div>
@@ -175,6 +201,8 @@ const StrengthWorkoutEditor = () => {
 
   // State
   const [loading, setLoading] = useState(true);
+  // Editing and the workout couldn't be loaded — never show a saveable empty form
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
@@ -188,6 +216,8 @@ const StrengthWorkoutEditor = () => {
   }, [id]);
 
   const loadData = async () => {
+    setLoading(true);
+    setLoadFailed(false);
     try {
       // Load exercises from Firestore (for looking up existing workout exercises)
       const loadedExercises = await getAllExercises();
@@ -196,6 +226,7 @@ const StrengthWorkoutEditor = () => {
       // Load workout if editing
       if (id) {
         const workout = await getWorkoutById(id);
+        if (!workout) setLoadFailed(true);
         if (workout) {
           setName(workout.name);
           setNotes(workout.notes || "");
@@ -214,13 +245,14 @@ const StrengthWorkoutEditor = () => {
       }
     } catch (error) {
       console.error("Error loading data:", error);
+      if (id) setLoadFailed(true);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSave = async () => {
-    if (!name.trim() || !user) return;
+    if (!name.trim() || !user || loadFailed) return;
 
     setSaving(true);
     try {
@@ -290,6 +322,14 @@ const StrengthWorkoutEditor = () => {
         <div className="flex items-center justify-center h-[50vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      </AdminLayout>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <AdminLayout>
+        <WorkoutLoadError onRetry={loadData} onBack={() => navigate("/admin/workouts")} />
       </AdminLayout>
     );
   }

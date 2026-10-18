@@ -132,6 +132,14 @@ const App = () => (
                   }
                 />
                 <Route
+                  path="/admin/athletes/:athleteId/activity/:id"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AthleteActivityDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/admin/users/new"
                   element={
                     <ProtectedRoute requireAdmin>

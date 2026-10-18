@@ -37,6 +37,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2 } from "lucide-react";
 import { ReactNode } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ResponsiveConfirmProps {
   open: boolean;
@@ -55,13 +56,17 @@ export function ResponsiveConfirm({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   destructive = false,
   loading = false,
 }: ResponsiveConfirmProps) {
   const isMobile = useIsMobile();
+  // Default labels follow the app language (callers rarely pass them)
+  const { t } = useLanguage();
+  confirmLabel ??= t.common.confirm;
+  cancelLabel ??= t.common.cancel;
 
   if (isMobile) {
     return (

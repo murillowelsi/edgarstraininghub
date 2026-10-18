@@ -2,8 +2,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
-import { deleteAssignmentsByWorkout } from "@/services/workoutAssignmentsService";
-import { deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
+import { deleteAssignmentsByWorkout, deletePendingAssignmentsByWorkout, getAssignmentCountsForWorkout } from "@/services/workoutAssignmentsService";
+import { archiveWorkout, deleteWorkout, getAllWorkouts } from "@/services/workoutsService";
+import { getWorkoutEditPath } from "@/utils/workoutPaths";
 import type { Workout } from "@/types/workout";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
@@ -46,6 +47,16 @@ const AdminWorkouts = () => {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [confirmWorkout, setConfirmWorkout] = useState<Workout | null>(null);
+  // Assignments of the workout being deleted, so the confirm says what happens to them
+  const [deleteCounts, setDeleteCounts] = useState<{ completed: number; pending: number } | null>(null);
+
+  useEffect(() => {
+    setDeleteCounts(null);
+    if (!confirmWorkout) return;
+    getAssignmentCountsForWorkout(confirmWorkout.id)
+      .then(setDeleteCounts)
+      .catch(() => setDeleteCounts({ completed: 0, pending: 0 }));
+  }, [confirmWorkout]);
   const [newWorkoutDrawerOpen, setNewWorkoutDrawerOpen] = useState(false);
   const [actionWorkout, setActionWorkout] = useState<Workout | null>(null);
   const [search, setSearch] = useState("");
@@ -93,13 +104,22 @@ const AdminWorkouts = () => {
   const handleDelete = async (id: string) => {
     setDeleting(id);
     try {
-      // Delete associated assignments first (cascade delete)
-      await deleteAssignmentsByWorkout(id);
-      await deleteWorkout(id);
+      const counts = deleteCounts ?? (await getAssignmentCountsForWorkout(id));
+      if (counts.completed > 0) {
+        // Athletes already did it: keep their sessions, just take it out of the library
+        await deletePendingAssignmentsByWorkout(id);
+        await archiveWorkout(id);
+      } else {
+        await deleteAssignmentsByWorkout(id);
+        await deleteWorkout(id);
+      }
       setWorkouts(workouts.filter((w) => w.id !== id));
       toast({
         title: t.admin.workouts.toast.deleted,
-        description: t.admin.workouts.toast.deletedDescription,
+        description:
+          counts.completed > 0
+            ? t.admin.workouts.toast.archivedDescription.replace("{{completed}}", String(counts.completed))
+            : t.admin.workouts.toast.deletedDescription,
       });
     } catch (error) {
       console.error("Error deleting workout:", error);
@@ -199,9 +219,7 @@ const AdminWorkouts = () => {
                 return (
                   <ListItemCard
                     key={workout.id}
-                    to={workout.type === "strength"
-                      ? `/admin/workouts/strength/${workout.id}/edit`
-                      : `/admin/workouts/${workout.id}/edit`}
+                    to={getWorkoutEditPath(workout)}
                     icon={<WorkoutIcon type={workout.type} />}
                     iconStyle={{ backgroundColor: `${color}1a`, color }}
                     title={workout.name}
@@ -285,9 +303,7 @@ const AdminWorkouts = () => {
             <button
               className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
               onClick={() => {
-                navigate(actionWorkout!.type === "strength"
-                  ? `/admin/workouts/strength/${actionWorkout!.id}/edit`
-                  : `/admin/workouts/${actionWorkout!.id}/edit`);
+                navigate(getWorkoutEditPath(actionWorkout!));
                 setActionWorkout(null);
               }}
             >
@@ -315,10 +331,23 @@ const AdminWorkouts = () => {
         open={!!confirmWorkout}
         onOpenChange={(open) => { if (!open) setConfirmWorkout(null); }}
         title={t.admin.workouts.delete.title}
-        description={t.admin.workouts.delete.description.replace("{{name}}", confirmWorkout?.name || "")}
+        description={
+          !deleteCounts
+            ? t.admin.workouts.delete.description.replace("{{name}}", confirmWorkout?.name || "")
+            : deleteCounts.completed > 0
+              ? t.admin.workouts.delete.descriptionArchive
+                  .replace("{{name}}", confirmWorkout?.name || "")
+                  .replace("{{pending}}", String(deleteCounts.pending))
+                  .replace("{{completed}}", String(deleteCounts.completed))
+              : deleteCounts.pending > 0
+                ? t.admin.workouts.delete.descriptionPending
+                    .replace("{{name}}", confirmWorkout?.name || "")
+                    .replace("{{pending}}", String(deleteCounts.pending))
+                : t.admin.workouts.delete.description.replace("{{name}}", confirmWorkout?.name || "")
+        }
         confirmLabel={t.common.delete}
         destructive
-        loading={deleting === confirmWorkout?.id}
+        loading={deleting === confirmWorkout?.id || (!!confirmWorkout && !deleteCounts)}
         onConfirm={() => {
           if (confirmWorkout) {
             handleDelete(confirmWorkout.id).then(() => setConfirmWorkout(null));

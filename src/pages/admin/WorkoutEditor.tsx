@@ -12,6 +12,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { WorkoutLoadError } from "@/components/admin/WorkoutLoadError";
 import {
   SortableContext,
   arrayMove,
@@ -492,6 +493,8 @@ const WorkoutEditor = () => {
   const fromCalendar = searchParams.get("fromCalendar") === "true";
 
   const [loading, setLoading] = useState(isEditing);
+  // Editing and the workout couldn't be loaded — never show a saveable empty form
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingStageId, setEditingStageId] = useState<string | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
@@ -526,6 +529,8 @@ const WorkoutEditor = () => {
   }, [id, isEditing]);
 
   const loadWorkout = async (workoutId: string) => {
+    setLoading(true);
+    setLoadFailed(false);
     try {
       const workout = await getWorkoutById(workoutId);
       if (!workout) {
@@ -545,6 +550,7 @@ const WorkoutEditor = () => {
       });
     } catch (error) {
       console.error("Error loading workout:", error);
+      setLoadFailed(true);
       toast({
         title: t.common.error,
         description: t.admin.workoutEditor.toast.loadError,
@@ -556,6 +562,7 @@ const WorkoutEditor = () => {
   };
 
   const handleSubmit = async () => {
+    if (loadFailed) return;
     if (!formData.name.trim()) {
       toast({
         title: t.common.error,
@@ -871,6 +878,14 @@ const WorkoutEditor = () => {
         <div className="flex items-center justify-center h-full">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
+      </AdminLayout>
+    );
+  }
+
+  if (loadFailed && id) {
+    return (
+      <AdminLayout>
+        <WorkoutLoadError onRetry={() => loadWorkout(id)} onBack={() => navigate("/admin/workouts")} />
       </AdminLayout>
     );
   }

@@ -64,6 +64,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CalendarAssignDialog } from "@/components/workout/CalendarAssignDialog";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { getWorkoutEditPath } from "@/utils/workoutPaths";
 import {
   athleteAccentTextClass,
   athleteChipClass,
@@ -406,7 +407,7 @@ const AdminCalendar = () => {
   const handleEditWorkout = () => {
     if (selectedAssignment) {
       setDetailsDialogOpen(false);
-      navigate(`/admin/workouts/${selectedAssignment.workoutId}/edit`);
+      navigate(getWorkoutEditPath(selectedAssignment.workout));
     }
   };
 

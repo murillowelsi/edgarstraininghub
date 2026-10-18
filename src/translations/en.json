@@ -400,6 +400,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
@@ -585,8 +586,8 @@
       "stagesCount": "{{count}} stages",
       "exercisesCount": "{{count}} exercises",
       "empty": { "title": "No workouts yet", "description": "Create your first workout to get started." },
-      "delete": { "title": "Delete Workout", "description": "Are you sure you want to delete \"{{name}}\"?" },
-      "toast": { "loadError": "Failed to load workouts.", "deleted": "Workout deleted", "deletedDescription": "The workout and its assignments have been permanently deleted.", "deleteError": "Failed to delete workout." }
+      "delete": { "descriptionPending": "Delete “{{name}}”? {{pending}} assignment(s) not done yet will also be removed from athletes.", "descriptionArchive": "“{{name}}” leaves the library. {{pending}} assignment(s) not done will be removed; {{completed}} completed session(s) stay in athletes’ history.", "title": "Delete Workout", "description": "Are you sure you want to delete \"{{name}}\"?" },
+      "toast": { "archivedDescription": "Removed from the library. {{completed}} completed session(s) stay in athletes’ history.", "loadError": "Failed to load workouts.", "deleted": "Workout deleted", "deletedDescription": "The workout and its assignments have been permanently deleted.", "deleteError": "Failed to delete workout." }
     },
     "userForm": {
       "createTitle": "Create New User",
@@ -622,6 +623,10 @@
       "toast": { "imageUploaded": "Image uploaded", "imageUploadedDescription": "Your image has been successfully uploaded.", "uploadFailed": "Upload failed", "uploadFailedDescription": "Failed to upload image. Please try again.", "notFound": "Post not found", "notFoundDescription": "The post you're trying to edit doesn't exist.", "loadError": "Failed to load post.", "titleRequired": "Title is required.", "contentRequired": "Content is required.", "updated": "Post updated", "updatedDescription": "Your changes have been saved.", "createdPublished": "Your post has been published.", "createdDraft": "Your post has been saved as a draft.", "invalidFile": "Please upload an image file." }
     },
     "workoutEditor": {
+      "loadFailedTitle": "Couldn't load the workout",
+      "loadFailedDescription": "Check your connection and try again. Nothing was changed.",
+      "backToWorkouts": "Back to workouts",
+      "retry": "Try again",
       "pressLapButton": "Press Lap Button",
       "editTitle": "Edit {{type}} Workout",
       "newTitle": "New {{type}} Workout",

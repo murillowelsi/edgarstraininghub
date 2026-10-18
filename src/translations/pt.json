@@ -400,6 +400,7 @@
   },
   "common": {
     "cancel": "Cancelar",
+    "confirm": "Confirmar",
     "save": "Salvar",
     "delete": "Excluir",
     "edit": "Editar",
@@ -585,8 +586,8 @@
       "stagesCount": "{{count}} etapas",
       "exercisesCount": "{{count}} exercícios",
       "empty": { "title": "Sem treinos", "description": "Crie seu primeiro treino para começar." },
-      "delete": { "title": "Excluir Treino", "description": "Tem certeza que quer excluir \"{{name}}\"?" },
-      "toast": { "loadError": "Erro ao carregar treinos.", "deleted": "Treino excluído", "deletedDescription": "O treino e suas atribuições foram excluídos permanentemente.", "deleteError": "Erro ao excluir treino." }
+      "delete": { "descriptionPending": "Excluir “{{name}}”? {{pending}} atribuição(ões) ainda não feita(s) também serão removidas dos atletas.", "descriptionArchive": "“{{name}}” sai da biblioteca. {{pending}} atribuição(ões) não feita(s) serão removidas; {{completed}} sessão(ões) concluída(s) continuam no histórico dos atletas.", "title": "Excluir Treino", "description": "Tem certeza que quer excluir \"{{name}}\"?" },
+      "toast": { "archivedDescription": "Removido da biblioteca. {{completed}} sessão(ões) concluída(s) continuam no histórico dos atletas.", "loadError": "Erro ao carregar treinos.", "deleted": "Treino excluído", "deletedDescription": "O treino e suas atribuições foram excluídos permanentemente.", "deleteError": "Erro ao excluir treino." }
     },
     "userForm": {
       "createTitle": "Criar Novo Usuário",
@@ -622,6 +623,10 @@
       "toast": { "imageUploaded": "Imagem enviada", "imageUploadedDescription": "A sua imagem foi enviada com sucesso.", "uploadFailed": "Falha no envio", "uploadFailedDescription": "Erro ao enviar imagem. Tente novamente.", "notFound": "Artigo não encontrado", "notFoundDescription": "O artigo que está tentando editar não existe.", "loadError": "Erro ao carregar artigo.", "titleRequired": "O título é obrigatório.", "contentRequired": "O conteúdo é obrigatório.", "updated": "Artigo atualizado", "updatedDescription": "Suas alterações foram salvas.", "createdPublished": "Seu artigo foi publicado.", "createdDraft": "Seu artigo foi salvo como rascunho.", "invalidFile": "Por favor, envie um arquivo de imagem." }
     },
     "workoutEditor": {
+      "loadFailedTitle": "Não foi possível carregar o treino",
+      "loadFailedDescription": "Verifique sua conexão e tente de novo. Nada foi alterado.",
+      "backToWorkouts": "Voltar aos treinos",
+      "retry": "Tentar de novo",
       "pressLapButton": "Pressionar Botão Lap",
       "editTitle": "Editar Treino de {{type}}",
       "newTitle": "Novo Treino de {{type}}",

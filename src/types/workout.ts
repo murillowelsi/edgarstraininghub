@@ -200,6 +200,8 @@ export interface Workout {
   exercises?: WorkoutExercise[]; // For strength workouts
   notes?: string;
   authorId: string;
+  /** Removed from the library but kept so athletes' completed sessions stay in their history */
+  archived?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -221,6 +223,7 @@ export interface WorkoutDocument {
   exercises?: WorkoutExercise[]; // For strength workouts
   notes?: string;
   authorId: string;
+  archived?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

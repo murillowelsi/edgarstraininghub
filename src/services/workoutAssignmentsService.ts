@@ -321,6 +321,32 @@ export const deleteAssignment = async (id: string): Promise<void> => {
   await deleteDoc(docRef);
 };
 
+/** How many assignments use a workout, split by whether the athlete already did it. */
+export const getAssignmentCountsForWorkout = async (
+  workoutId: string
+): Promise<{ completed: number; pending: number }> => {
+  const snapshot = await getDocs(
+    query(collection(db, ASSIGNMENTS_COLLECTION), where("workoutId", "==", workoutId))
+  );
+  let completed = 0;
+  snapshot.docs.forEach((d) => {
+    if ((d.data() as WorkoutAssignmentDocument).completedAt) completed += 1;
+  });
+  return { completed, pending: snapshot.size - completed };
+};
+
+/** Removes the assignments of a workout that weren't done yet; completed ones stay as history. */
+export const deletePendingAssignmentsByWorkout = async (workoutId: string): Promise<void> => {
+  const snapshot = await getDocs(
+    query(collection(db, ASSIGNMENTS_COLLECTION), where("workoutId", "==", workoutId))
+  );
+  await Promise.all(
+    snapshot.docs
+      .filter((d) => !(d.data() as WorkoutAssignmentDocument).completedAt)
+      .map((d) => deleteDoc(d.ref))
+  );
+};
+
 // Delete all assignments for a specific workout (cascade delete)
 export const deleteAssignmentsByWorkout = async (
   workoutId: string
@@ -388,7 +414,8 @@ export const getAllAssignmentsWithDetails = async (): Promise<
 > => {
   const [assignments, workouts] = await Promise.all([
     getAllAssignments(),
-    getAllWorkouts(),
+    // Archived workouts still back completed sessions in the calendar/history
+    getAllWorkouts({ includeArchived: true }),
   ]);
 
   // Create a map of workouts by ID for quick lookup

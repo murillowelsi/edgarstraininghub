@@ -1,4 +1,6 @@
+import AdminLayout from "@/components/AdminLayout";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
+import { cn } from "@/lib/utils";
 import EditActivitySheet from "@/components/athlete/EditActivitySheet";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,9 +42,15 @@ const icons = {
 } as const;
 
 const ActivityDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  // Coach route (/admin/athletes/:athleteId/activity/:id) shows an athlete's
+  // session read-only inside the admin layout; the athlete route shows their own.
+  const { id, athleteId } = useParams<{ id: string; athleteId?: string }>();
+  const isCoachView = !!athleteId;
   const navigate = useNavigate();
-  const { user, photoURL } = useAuth();
+  const { user, photoURL: ownPhotoURL } = useAuth();
+  const [athletePhotoURL, setAthletePhotoURL] = useState<string | null>(null);
+  const photoURL = isCoachView ? athletePhotoURL : ownPhotoURL;
+  const Layout = isCoachView ? CoachLayout : AthletePortalLayout;
   const { t, language } = useLanguage();
   const ta = t.athlete.activity;
   const lang = language === "pt" ? "pt" : "en";
@@ -70,18 +78,23 @@ const ActivityDetail = () => {
 
   useEffect(() => {
     if (!user) return;
-    getUserById(user.uid).then((u) => u && setDisplayName(u.displayName || "Athlete"));
-    const unsub = subscribeToAssignmentsByAthlete(user.uid, (data) => {
+    const ownerId = athleteId ?? user.uid;
+    getUserById(ownerId).then((u) => {
+      if (!u) return;
+      setDisplayName(u.displayName || "Athlete");
+      setAthletePhotoURL(u.photoURL ?? null);
+    });
+    const unsub = subscribeToAssignmentsByAthlete(ownerId, (data) => {
       setAssignment(data.find((a) => a.id === id) || null);
     });
     return unsub;
-  }, [user, id]);
+  }, [user, id, athleteId]);
 
   if (!assignment) {
     return (
-      <AthletePortalLayout showHeader={false}>
+      <Layout showHeader={false}>
         <div className="p-6 text-center text-muted-foreground">{ta.loading}</div>
-      </AthletePortalLayout>
+      </Layout>
     );
   }
 
@@ -127,7 +140,7 @@ const ActivityDetail = () => {
       ];
 
   return (
-    <AthletePortalLayout showHeader={false}>
+    <Layout showHeader={false}>
       <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-border/50">
         <div className="flex items-center justify-between px-3 py-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -137,7 +150,7 @@ const ActivityDetail = () => {
             <Icon className="h-5 w-5" style={{ color }} />
             {assignment.workout.name}
           </h1>
-          <div className="flex items-center">
+          <div className={cn("flex items-center", isCoachView && "invisible")}>
             {!isStrength && (
               <Button variant="ghost" size="icon" onClick={() => setEditOpen(true)}>
                 <Pencil className="h-4 w-4" />
@@ -253,8 +266,15 @@ const ActivityDetail = () => {
           initial={data}
         />
       )}
-    </AthletePortalLayout>
+    </Layout>
   );
 };
+
+// AdminLayout with the same props shape as AthletePortalLayout
+const CoachLayout = ({ children }: { children: React.ReactNode; showHeader?: boolean }) => (
+  <AdminLayout>
+    <div className="max-w-2xl mx-auto w-full">{children}</div>
+  </AdminLayout>
+);
 
 export default ActivityDetail;

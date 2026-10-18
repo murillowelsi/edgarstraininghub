@@ -104,14 +104,20 @@ const docToWorkout = (id: string, data: WorkoutDocument): Workout => ({
   exercises: data.exercises || [],
   notes: data.notes,
   authorId: data.authorId,
+  archived: data.archived ?? false,
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
 
 // Get all workouts
-export const getAllWorkouts = async (): Promise<Workout[]> => {
+// Library workouts. Archived ones are hidden unless asked for (e.g. to show
+// the history of assignments that point to them).
+export const getAllWorkouts = async (
+  options: { includeArchived?: boolean } = {}
+): Promise<Workout[]> => {
+  const visible = (list: Workout[]) => (options.includeArchived ? list : list.filter((w) => !w.archived));
   if (allWorkoutsCache && Date.now() - allWorkoutsCache.ts < CACHE_TTL) {
-    return allWorkoutsCache.data;
+    return visible(allWorkoutsCache.data);
   }
   const q = query(
     collection(db, WORKOUTS_COLLECTION),
@@ -124,7 +130,7 @@ export const getAllWorkouts = async (): Promise<Workout[]> => {
   allWorkoutsCache = { data, ts: Date.now() };
   // Populate per-ID cache too
   data.forEach((w) => workoutByIdCache.set(w.id, { data: w, ts: Date.now() }));
-  return data;
+  return visible(data);
 };
 
 // Get single workout by ID
@@ -193,6 +199,15 @@ export const updateWorkout = async (
 };
 
 // Delete workout
+/** Hide a workout from the library without breaking completed assignments that use it. */
+export const archiveWorkout = async (id: string): Promise<void> => {
+  await updateDoc(doc(db, WORKOUTS_COLLECTION, id), {
+    archived: true,
+    updatedAt: serverTimestamp(),
+  });
+  invalidateWorkoutsCache();
+};
+
 export const deleteWorkout = async (id: string): Promise<void> => {
   const docRef = doc(db, WORKOUTS_COLLECTION, id);
   await deleteDoc(docRef);
