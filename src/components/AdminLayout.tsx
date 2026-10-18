@@ -222,7 +222,7 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
         {/* Main content */}
         <main className={cn(
           "flex-1 transition-all duration-300",
-          fullHeight ? (hideBottomNav ? "overflow-hidden flex flex-col min-h-0" : "overflow-hidden flex flex-col min-h-0 pb-16 md:pb-0") : "overflow-auto pb-16 md:pb-0",
+          fullHeight ? (hideBottomNav ? "overflow-hidden flex flex-col min-h-0" : "overflow-hidden flex flex-col min-h-0 pb-[5.5rem] md:pb-0") : cn("overflow-auto md:pb-0", hideBottomNav ? "pb-6" : "pb-28"),
           sidebarCollapsed ? "md:ml-20" : "md:ml-64"
         )}>
           {children}

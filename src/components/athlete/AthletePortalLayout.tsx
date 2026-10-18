@@ -16,18 +16,13 @@ import { createMentionNotifications, createTimelinePost, subscribeToMentionCount
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
 import { useEffect, useRef, useState } from "react";
-import { MotionConfig, motion } from "motion/react";
+import { GlassTabBar } from "@/components/glass/GlassTabBar";
+import { GlassIconButton, GlassIconLink, GlassToolbar } from "@/components/glass/GlassToolbar";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useTimelineActions } from "@/contexts/TimelineActionsContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
 import { ActivityDrawer } from "@/components/timeline/ActivityDrawer";
 import { useToast } from "@/hooks/use-toast";
-
-// Each page mounts its own layout, so the nav remounts on every route change.
-// Remember the last active tab so the lens can slide from it horizontally
-// (a layoutId shared animation measures page coordinates and jumps vertically
-// when the previous page was scrolled).
-let lastActiveNavIndex: number | null = null;
 
 interface AthletePortalLayoutProps {
   children: React.ReactNode;
@@ -147,17 +142,6 @@ const AthletePortalLayout = ({
     return () => unsubscribe();
   }, [user]);
 
-  const isActive = (href: string, exact?: boolean) => {
-    if (exact) return location.pathname === href;
-    return location.pathname.startsWith(href);
-  };
-
-  const activeNavIndex = navItems.findIndex((item) => isActive(item.href, item.exact));
-  const [lensFromIndex] = useState(() => lastActiveNavIndex ?? activeNavIndex);
-  useEffect(() => {
-    if (activeNavIndex >= 0) lastActiveNavIndex = activeNavIndex;
-  }, [activeNavIndex]);
-
   const handleLogout = async () => {
     setIsMenuOpen(false);
     await auth.signOut();
@@ -223,49 +207,27 @@ const AthletePortalLayout = ({
             )}
 
             {/* Right controls — grouped in a glass capsule like iOS toolbars */}
-            <MotionConfig reducedMotion="user">
-              <div className="glass flex items-center gap-0.5 p-1 rounded-full">
-                <motion.button
-                  whileTap={{ scale: 0.85 }}
-                  transition={{ type: "spring", stiffness: 600, damping: 22 }}
-                  onClick={() => setCreateOpen(true)}
-                  className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-foreground/5 transition-colors"
-                >
-                  <Plus className="h-5 w-5" />
-                </motion.button>
+            <GlassToolbar>
+              <GlassIconButton onClick={() => setCreateOpen(true)}>
+                <Plus className="h-5 w-5" />
+              </GlassIconButton>
 
-                <motion.button
-                  whileTap={{ scale: 0.85 }}
-                  transition={{ type: "spring", stiffness: 600, damping: 22 }}
-                  onClick={() => setActivityOpen(true)}
-                  className="relative h-9 w-9 flex items-center justify-center rounded-full hover:bg-foreground/5 transition-colors"
-                >
-                  <Flame className="h-5 w-5" />
-                  {activityUnreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
-                  )}
-                </motion.button>
+              <GlassIconButton onClick={() => setActivityOpen(true)}>
+                <Flame className="h-5 w-5" />
+                {activityUnreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
+                )}
+              </GlassIconButton>
 
-                <motion.div whileTap={{ scale: 0.85 }} transition={{ type: "spring", stiffness: 600, damping: 22 }}>
-                  <Link
-                    to="/athlete/chat"
-                    className={cn(
-                      "relative h-9 w-9 flex items-center justify-center rounded-full transition-colors",
-                      location.pathname.startsWith("/athlete/chat")
-                        ? "text-primary glass-lens"
-                        : "hover:bg-foreground/5"
-                    )}
-                  >
-                    <MessageSquare className="h-5 w-5" />
-                    {chatUnreadCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                        {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
-                      </span>
-                    )}
-                  </Link>
-                </motion.div>
-              </div>
-            </MotionConfig>
+              <GlassIconLink to="/athlete/chat" active={location.pathname.startsWith("/athlete/chat")}>
+                <MessageSquare className="h-5 w-5" />
+                {chatUnreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                    {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
+                  </span>
+                )}
+              </GlassIconLink>
+            </GlassToolbar>
           </div>
         </header>
       )}
@@ -352,74 +314,13 @@ const AthletePortalLayout = ({
 
       {/* Bottom navigation — floating liquid-glass pill */}
       {!hideBottomNav && (
-        <MotionConfig reducedMotion="user">
-          <nav
-            className="fixed inset-x-3 z-50 mx-auto max-w-lg"
-            style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
-          >
-            <div className="glass flex items-center h-16 p-1.5 rounded-full">
-              <div className="absolute inset-1.5 pointer-events-none">
-                {activeNavIndex >= 0 && (
-                  <motion.span
-                    className="glass-lens absolute inset-y-0 left-0 rounded-full"
-                    style={{ width: `${100 / navItems.length}%` }}
-                    initial={{ x: `${(lensFromIndex >= 0 ? lensFromIndex : activeNavIndex) * 100}%` }}
-                    animate={{
-                      x: `${activeNavIndex * 100}%`,
-                      // Brief stretch while travelling, like the iOS tab bar
-                      scaleX: lensFromIndex >= 0 && lensFromIndex !== activeNavIndex ? [1, 1.18, 1] : 1,
-                    }}
-                    transition={{
-                      x: { type: "spring", stiffness: 420, damping: 32, mass: 0.9 },
-                      scaleX: { duration: 0.35, ease: "easeOut" },
-                    }}
-                  />
-                )}
-              </div>
-              {navItems.map((item) => {
-                const active = isActive(item.href, item.exact);
-                const badgeCount = item.href === "/athlete/timeline" ? feedUnreadCount : 0;
-                return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className="relative flex-1 h-full rounded-full [-webkit-tap-highlight-color:transparent]"
-                  >
-                    <motion.div
-                      whileTap={{ scale: 0.86 }}
-                      transition={{ type: "spring", stiffness: 600, damping: 22 }}
-                      className="relative z-10 flex flex-col items-center justify-center h-full"
-                    >
-                      <div className="relative">
-                        <motion.div
-                          animate={{ scale: active ? 1.12 : 1, y: active ? -1 : 0 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 18 }}
-                          className={cn(
-                            "flex items-center justify-center transition-colors duration-200",
-                            active ? "text-primary" : "text-foreground/60"
-                          )}
-                        >
-                          <item.icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} />
-                        </motion.div>
-                        {badgeCount > 0 && (
-                          <span className="absolute -top-1 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                            {badgeCount > 9 ? "9+" : badgeCount}
-                          </span>
-                        )}
-                      </div>
-                      <span className={cn(
-                        "text-[10px] mt-0.5 transition-colors duration-200",
-                        active ? "text-primary font-semibold" : "text-foreground/60 font-medium"
-                      )}>
-                        {item.label}
-                      </span>
-                    </motion.div>
-                  </Link>
-                );
-              })}
-            </div>
-          </nav>
-        </MotionConfig>
+        <GlassTabBar
+          id="athlete"
+          items={navItems.map((item) => ({
+            ...item,
+            badge: item.href === "/athlete/timeline" ? feedUnreadCount : undefined,
+          }))}
+        />
       )}
 
       <CreatePostModal

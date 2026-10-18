@@ -16,6 +16,7 @@ import PT from "country-flag-icons/react/3x2/PT";
 import { useRef, useState } from "react";
 import { useTopBarMenu } from "../contexts/TopBarMenuContext";
 import { useTimelineActions } from "../contexts/TimelineActionsContext";
+import { GlassIconButton, GlassIconLink, GlassToolbar } from "@/components/glass/GlassToolbar";
 
 interface AdminTopBarProps {
   chatUnreadCount?: number;
@@ -86,8 +87,9 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
 
   return (
     <>
-    <header className="bg-background/80 backdrop-blur-lg fixed w-full z-50 border-b border-border/50">
-      <div className="px-4 py-4 flex items-center justify-between">
+    <header className="fixed w-full z-50">
+      <div aria-hidden className="glass-fade absolute inset-x-0 top-0 -bottom-4 pointer-events-none" />
+      <div className="relative px-4 py-4 flex items-center justify-between">
         <Link
           to="/admin"
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -103,41 +105,27 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
           </h1>
         )}
 
-        <div className="flex items-center">
-          <button
-            onClick={() => setCreateOpen(true)}
-            className="p-2 rounded-full hover:bg-accent transition-colors"
-          >
+        <GlassToolbar>
+          <GlassIconButton onClick={() => setCreateOpen(true)}>
             <Plus className="h-5 w-5" />
-          </button>
+          </GlassIconButton>
 
-          <button
-            onClick={() => setActivityOpen(true)}
-            className="relative p-2 rounded-full hover:bg-accent transition-colors"
-          >
+          <GlassIconButton onClick={() => setActivityOpen(true)}>
             <Flame className="h-5 w-5" />
             {activityUnreadCount > 0 && (
               <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
             )}
-          </button>
+          </GlassIconButton>
 
-          <Link
-            to="/admin/chat"
-            className={cn(
-              "relative p-2 rounded-full transition-colors",
-              location.pathname.startsWith("/admin/chat")
-                ? "text-primary bg-primary/10"
-                : "hover:bg-accent"
-            )}
-          >
+          <GlassIconLink to="/admin/chat" active={location.pathname.startsWith("/admin/chat")}>
             <MessageSquare className="h-5 w-5" />
             {chatUnreadCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
                 {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
               </span>
             )}
-          </Link>
-        </div>
+          </GlassIconLink>
+        </GlassToolbar>
       </div>
     </header>
 
