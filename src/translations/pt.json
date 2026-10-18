@@ -526,6 +526,7 @@
       "stepWorkout": "Escolha o treino",
       "stepTargets": "Atletas e dias",
       "schedulingFor": "Agendando a partir de {{date}}",
+      "allTypes": "Todos",
       "viewAll": "Ver todos os treinos",
       "createNew": "Criar novo treino",
       "searchWorkouts": "Buscar treino…",
@@ -566,6 +567,16 @@
       "noTeamMembers": "Nenhum admin ou editor."
     },
     "dashboard": {
+      "attention": {
+        "overdue": "{{n}} atrasado(s)",
+        "skipped": "{{n}} não feito(s)",
+        "highEffort": "Esforço {{n}}/10",
+        "noPlan": "Nada nos próximos 7 dias",
+        "plan": "Planejar",
+        "showAll": "Ver todos ({{n}})",
+        "showLess": "Ver menos",
+        "allGood": "Tudo em dia. Ninguém precisa de atenção agora."
+      },
       "role": "Coach",
       "welcomeBack": "Bem-vindo de volta,",
       "statAthletes": "Atletas",
@@ -573,7 +584,7 @@
       "statWorkouts": "Treinos",
       "statTodayLabel": "Hoje",
       "overallCompletion": "Conclusão Geral",
-      "assignmentsCompleted": "{{completed}} de {{total}} atribuições concluídas",
+      "assignmentsCompleted": "{{completed}} de {{total}} treinos previstos até hoje concluídos",
       "teamsOverview": "Times",
       "seeAll": "Ver todos",
       "members": "membros",

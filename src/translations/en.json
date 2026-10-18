@@ -526,6 +526,7 @@
       "stepWorkout": "Choose the workout",
       "stepTargets": "Athletes and days",
       "schedulingFor": "Scheduling from {{date}}",
+      "allTypes": "All",
       "viewAll": "View all workouts",
       "createNew": "Create new workout",
       "searchWorkouts": "Search workout…",
@@ -566,6 +567,16 @@
       "noTeamMembers": "No admins or editors."
     },
     "dashboard": {
+      "attention": {
+        "overdue": "{{n}} overdue",
+        "skipped": "{{n}} not done",
+        "highEffort": "Effort {{n}}/10",
+        "noPlan": "Nothing in the next 7 days",
+        "plan": "Plan",
+        "showAll": "Show all ({{n}})",
+        "showLess": "Show less",
+        "allGood": "All caught up. Nobody needs attention right now."
+      },
       "role": "Coach",
       "welcomeBack": "Welcome back,",
       "statAthletes": "Athletes",
@@ -573,7 +584,7 @@
       "statWorkouts": "Workouts",
       "statTodayLabel": "Today",
       "overallCompletion": "Overall Completion",
-      "assignmentsCompleted": "{{completed}} of {{total}} assignments completed",
+      "assignmentsCompleted": "{{completed}} of {{total}} workouts due so far completed",
       "teamsOverview": "Teams",
       "seeAll": "See all",
       "members": "members",

@@ -29,6 +29,7 @@ import type { User } from "@/types/user";
 import {
   addDays,
   differenceInCalendarDays,
+  endOfDay,
   endOfWeek,
   format,
   formatDistanceToNowStrict,
@@ -37,6 +38,7 @@ import {
   isToday,
   startOfDay,
   startOfWeek,
+  subDays,
   subWeeks,
 } from "date-fns";
 import {
@@ -89,6 +91,7 @@ const workoutTypeColors: Record<string, string> = {
 const AdminDashboard = () => {
   const { user, photoURL } = useAuth();
   const { t, language } = useLanguage();
+  const ta = t.admin.dashboard.attention;
   const dateLocale = language === "pt" ? ptBR : enUS;
   const { toast } = useToast();
   const { setIsMenuOpen } = useTopBarMenu();
@@ -107,6 +110,8 @@ const AdminDashboard = () => {
   const [centerDate, setCenterDate] = useState(() => startOfDay(new Date()));
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [assignDate, setAssignDate] = useState<Date>(new Date());
+  const [assignAthleteId, setAssignAthleteId] = useState<string | undefined>();
+  const [reloadKey, setReloadKey] = useState(0);
   const dateStripRef = useRef<InfiniteDateStripHandle>(null);
 
   useEffect(() => {
@@ -142,7 +147,8 @@ const AdminDashboard = () => {
     };
 
     if (user) loadData();
-  }, [user, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, toast, reloadKey]);
 
   // One-time backfill of the timezone-safe scheduledDay field on legacy documents
   useEffect(() => {
@@ -159,9 +165,15 @@ const AdminDashboard = () => {
 
   const selectedDateAssignments = assignments.filter((a) => isSameDay(a.scheduledDate, selectedDate));
 
-  const completedCount = assignments.filter((a) => a.completedAt).length;
-  const completionRate = assignments.length > 0
-    ? Math.round((completedCount / assignments.length) * 100)
+  // Compliance only counts what the coach planned (not the athlete's own extra
+  // sessions) and what was already due — future days aren't "missed" yet
+  const todayEnd = endOfDay(new Date());
+  const isPlanned = (a: AssignmentWithDetails) => !a.selfLogged;
+  const isDue = (a: AssignmentWithDetails) => a.scheduledDate <= todayEnd;
+  const dueAssignments = assignments.filter((a) => isPlanned(a) && isDue(a));
+  const completedCount = dueAssignments.filter((a) => a.completedAt).length;
+  const completionRate = dueAssignments.length > 0
+    ? Math.round((completedCount / dueAssignments.length) * 100)
     : 0;
 
   const todaysAssignments = assignments.filter((a) =>
@@ -174,34 +186,47 @@ const AdminDashboard = () => {
     end: endOfWeek(new Date(), { weekStartsOn: 1 }),
   };
 
-  const atRiskAthletes = (() => {
-    const byAthlete = new Map<
-      string,
-      { athlete: AssignmentWithDetails["athlete"]; planned: number; done: number; overdue: number }
-    >();
-    const now = new Date();
-    for (const a of assignments) {
-      if (!isThisWeek(a.scheduledDate, { weekStartsOn: 1 })) continue;
-      const cur = byAthlete.get(a.athleteId) ?? {
-        athlete: a.athlete,
-        planned: 0,
-        done: 0,
-        overdue: 0,
-      };
-      cur.planned += 1;
-      if (a.completedAt) cur.done += 1;
-      else if (a.scheduledDate < now && !isSameDay(a.scheduledDate, now)) cur.overdue += 1;
-      byAthlete.set(a.athleteId, cur);
-    }
-    return Array.from(byAthlete.values())
-      .map((x) => ({
-        ...x,
-        compliance: x.planned > 0 ? Math.round((x.done / x.planned) * 100) : 100,
-      }))
-      .filter((x) => x.overdue > 0 || x.compliance < 60)
-      .sort((a, b) => b.overdue - a.overdue || a.compliance - b.compliance)
-      .slice(0, 5);
+  // Athletes the coach should look at now, each with the reason why (last 7 days + next 7 days)
+  type AttentionReason =
+    | { kind: "overdue"; count: number }
+    | { kind: "skipped"; count: number }
+    | { kind: "highEffort"; rpe: number; assignmentId: string }
+    | { kind: "note"; text: string; assignmentId: string }
+    | { kind: "noPlan" };
+  const attention = (() => {
+    const todayStart = startOfDay(new Date());
+    const weekAgo = subDays(todayStart, 7);
+    const nextWeekEnd = endOfDay(addDays(todayStart, 6));
+    const reasonWeight: Record<AttentionReason["kind"], number> = { overdue: 3, skipped: 2, highEffort: 2, noPlan: 2, note: 1 };
+    return allAthletes
+      .map((athlete) => {
+        // Subscription status isn't kept up to date, so it only mutes the "nothing planned" nudge
+        const lapsed = athlete.subscriptionStatus === "inactive" || athlete.subscriptionStatus === "expired";
+        const mine = assignments.filter((a) => a.athleteId === athlete.id);
+        const recent = mine.filter((a) => a.scheduledDate >= weekAgo && a.scheduledDate < todayStart);
+        const recentlyDone = mine
+          .filter((a) => a.completedAt && a.completedAt >= weekAgo)
+          .sort((x, y) => y.completedAt!.getTime() - x.completedAt!.getTime());
+        const reasons: AttentionReason[] = [];
+
+        const overdue = recent.filter((a) => isPlanned(a) && !a.completedAt && !a.skipped).length;
+        if (overdue) reasons.push({ kind: "overdue", count: overdue });
+        const skipped = recent.filter((a) => a.skipped).length;
+        if (skipped) reasons.push({ kind: "skipped", count: skipped });
+        const hard = recentlyDone.find((a) => (a.rpe ?? 0) >= 9);
+        if (hard) reasons.push({ kind: "highEffort", rpe: hard.rpe!, assignmentId: hard.id });
+        const noted = recentlyDone.find((a) => a.athleteNotes?.trim());
+        if (noted) reasons.push({ kind: "note", text: noted.athleteNotes!.trim(), assignmentId: noted.id });
+        const planned = mine.some((a) => isPlanned(a) && a.scheduledDate >= todayStart && a.scheduledDate <= nextWeekEnd);
+        if (!planned && !lapsed) reasons.push({ kind: "noPlan" });
+
+        return { athlete, reasons, score: reasons.reduce((sum, r) => sum + reasonWeight[r.kind], 0) };
+      })
+      .filter((x) => x.reasons.length > 0)
+      .sort((x, y) => y.score - x.score || x.athlete.displayName.localeCompare(y.athlete.displayName));
   })();
+  const [showAllAttention, setShowAllAttention] = useState(false);
+  const visibleAttention = showAllAttention ? attention : attention.slice(0, 6);
 
   const recentActivity = assignments
     .filter((a) => a.completedAt)
@@ -214,7 +239,7 @@ const AdminDashboard = () => {
       { athlete: AssignmentWithDetails["athlete"]; planned: number; done: number }
     >();
     for (const a of assignments) {
-      if (!isThisWeek(a.scheduledDate, { weekStartsOn: 1 })) continue;
+      if (!isThisWeek(a.scheduledDate, { weekStartsOn: 1 }) || !isPlanned(a) || !isDue(a)) continue;
       const cur = byAthlete.get(a.athleteId) ?? {
         athlete: a.athlete,
         planned: 0,
@@ -225,7 +250,7 @@ const AdminDashboard = () => {
       byAthlete.set(a.athleteId, cur);
     }
     return Array.from(byAthlete.values())
-      .filter((x) => x.planned >= 2)
+      .filter((x) => x.planned >= 2 && x.done > 0)
       .map((x) => ({ ...x, compliance: Math.round((x.done / x.planned) * 100) }))
       .sort((a, b) => b.compliance - a.compliance || b.done - a.done)
       .slice(0, 5);
@@ -322,15 +347,18 @@ const AdminDashboard = () => {
     return Array.from({ length: 8 }, (_, i) => {
       const ws = startOfWeek(subWeeks(new Date(), 7 - i), { weekStartsOn: 1 });
       const we = endOfWeek(ws, { weekStartsOn: 1 });
+      // The current week only counts the days that have already happened
+      const until = we < todayEnd ? we : todayEnd;
       const items = assignments.filter(
-        (a) => a.scheduledDate >= ws && a.scheduledDate <= we,
+        (a) => isPlanned(a) && a.scheduledDate >= ws && a.scheduledDate <= until,
       );
       const planned = items.length;
       const done = items.filter((a) => a.completedAt).length;
       return {
-        label: format(ws, "d MMM"),
-        rangeLabel: `${format(ws, "d MMM")} – ${format(we, "d MMM")}`,
-        compliance: planned > 0 ? Math.round((done / planned) * 100) : 0,
+        label: format(ws, "d MMM", { locale: dateLocale }),
+        rangeLabel: `${format(ws, "d MMM", { locale: dateLocale })} – ${format(we, "d MMM", { locale: dateLocale })}`,
+        // No workouts planned that week: a gap in the line, not a fake 0%
+        compliance: planned > 0 ? Math.round((done / planned) * 100) : null,
         planned,
         done,
         hasData: planned > 0,
@@ -467,7 +495,7 @@ const AdminDashboard = () => {
             <p className="text-xs text-muted-foreground mt-2">
               {t.admin.dashboard.assignmentsCompleted
                 .replace("{{completed}}", String(completedCount))
-                .replace("{{total}}", String(assignments.length))}
+                .replace("{{total}}", String(dueAssignments.length))}
             </p>
           </CardContent>
         </Card>
@@ -489,7 +517,8 @@ const AdminDashboard = () => {
               </div>
               <div className="text-right shrink-0">
                 <p className="text-2xl font-bold tabular-nums leading-none">
-                  {complianceTrend[complianceTrend.length - 1]?.compliance ?? 0}%
+                  {complianceTrend[complianceTrend.length - 1]?.compliance ?? "—"}
+                  {complianceTrend[complianceTrend.length - 1]?.compliance != null && "%"}
                 </p>
                 <p className="text-[10px] uppercase text-muted-foreground tracking-wide mt-0.5">
                   {language === "pt" ? "essa semana" : "this week"}
@@ -527,7 +556,7 @@ const AdminDashboard = () => {
                       (payload?.[0]?.payload as { rangeLabel?: string } | undefined)
                         ?.rangeLabel ?? ""
                     }
-                    formatter={(value: number, _name, item) => {
+                    formatter={(value: number | null, _name, item) => {
                       const p = item.payload as { planned: number; done: number };
                       return [
                         `${value}% — ${p.done}/${p.planned}`,
@@ -842,54 +871,102 @@ const AdminDashboard = () => {
 
           {/* Sidebar */}
           <aside className="space-y-4">
-            {/* Athletes needing attention */}
+            {/* Athletes needing attention — each row says why */}
             <Card>
               <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                  <CardTitle className="text-base">
-                    {t.admin.dashboard.needsAttention}
-                  </CardTitle>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                    <CardTitle className="text-base">{t.admin.dashboard.needsAttention}</CardTitle>
+                  </div>
+                  {attention.length > 0 && (
+                    <Badge variant="secondary" className="tabular-nums">{attention.length}</Badge>
+                  )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
-                {atRiskAthletes.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    {t.admin.dashboard.noAtRisk}
-                  </p>
+              <CardContent className="space-y-1">
+                {attention.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">{ta.allGood}</p>
                 ) : (
-                  atRiskAthletes.map((a) => (
-                    <Link
-                      key={a.athlete.id}
-                      to={`/admin/athletes/${a.athlete.id}`}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/60 transition"
-                    >
-                      <CachedAvatar
-                        src={a.athlete.photoURL}
-                        alt={a.athlete.displayName}
-                        fallback={a.athlete.displayName.charAt(0).toUpperCase()}
-                        className="h-9 w-9 shrink-0"
-                        fallbackClassName="bg-primary/15 text-primary text-sm font-semibold"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate">
-                          {a.athlete.displayName}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {a.done}/{a.planned} •{" "}
-                          {t.admin.dashboard.compliance.replace(
-                            "{{value}}",
-                            String(a.compliance),
-                          )}
-                        </p>
-                      </div>
-                      {a.overdue > 0 && (
-                        <Badge variant="destructive" className="text-[10px] px-1.5">
-                          {a.overdue}
-                        </Badge>
-                      )}
-                    </Link>
-                  ))
+                  <>
+                    {visibleAttention.map(({ athlete, reasons }) => {
+                      const note = reasons.find((r) => r.kind === "note") as Extract<AttentionReason, { kind: "note" }> | undefined;
+                      const noPlan = reasons.some((r) => r.kind === "noPlan");
+                      return (
+                        <div key={athlete.id} className="rounded-lg p-2 hover:bg-muted/60 transition">
+                          <div className="flex items-start gap-3">
+                            <Link to={`/admin/athletes/${athlete.id}`} className="shrink-0">
+                              <CachedAvatar
+                                src={athlete.photoURL}
+                                alt={athlete.displayName}
+                                fallback={athlete.displayName.charAt(0).toUpperCase()}
+                                className="h-9 w-9"
+                                fallbackClassName="bg-primary/15 text-primary text-sm font-semibold"
+                              />
+                            </Link>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <Link to={`/admin/athletes/${athlete.id}`} className="text-sm font-medium truncate hover:underline">
+                                  {athlete.displayName}
+                                </Link>
+                                {noPlan && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 rounded-full px-2.5 text-xs shrink-0"
+                                    onClick={() => {
+                                      setAssignAthleteId(athlete.id);
+                                      setAssignDate(startOfDay(new Date()));
+                                      setAssignDialogOpen(true);
+                                    }}
+                                  >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    {ta.plan}
+                                  </Button>
+                                )}
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {reasons.map((r) => {
+                                  const chip = "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium";
+                                  if (r.kind === "overdue")
+                                    return <span key={r.kind} className={cn(chip, "bg-red-500/15 text-red-500")}>{ta.overdue.replace("{{n}}", String(r.count))}</span>;
+                                  if (r.kind === "skipped")
+                                    return <span key={r.kind} className={cn(chip, "bg-muted text-muted-foreground")}>{ta.skipped.replace("{{n}}", String(r.count))}</span>;
+                                  if (r.kind === "highEffort")
+                                    return (
+                                      <Link key={r.kind} to={`/admin/athletes/${athlete.id}/activity/${r.assignmentId}`} className={cn(chip, "bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:underline")}>
+                                        {ta.highEffort.replace("{{n}}", String(r.rpe))}
+                                      </Link>
+                                    );
+                                  if (r.kind === "noPlan")
+                                    return <span key={r.kind} className={cn(chip, "bg-blue-500/15 text-blue-500")}>{ta.noPlan}</span>;
+                                  return null;
+                                })}
+                              </div>
+                              {note && (
+                                <Link
+                                  to={`/admin/athletes/${athlete.id}/activity/${note.assignmentId}`}
+                                  className="mt-1.5 flex gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                                >
+                                  <MessageSquareQuote className="h-3.5 w-3.5 shrink-0 text-primary mt-px" />
+                                  <span className="line-clamp-2 italic">“{note.text}”</span>
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {attention.length > 6 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllAttention((v) => !v)}
+                        className="w-full pt-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                      >
+                        {showAllAttention ? ta.showLess : ta.showAll.replace("{{n}}", String(attention.length))}
+                      </button>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -1172,8 +1249,13 @@ const AdminDashboard = () => {
 
       <CalendarAssignDialog
         open={assignDialogOpen}
-        onOpenChange={setAssignDialogOpen}
+        onOpenChange={(open) => {
+          setAssignDialogOpen(open);
+          if (!open) setAssignAthleteId(undefined);
+        }}
         selectedDate={assignDate}
+        preSelectedAthleteId={assignAthleteId}
+        onSuccess={() => setReloadKey((k) => k + 1)}
       />
     </AdminLayout>
   );

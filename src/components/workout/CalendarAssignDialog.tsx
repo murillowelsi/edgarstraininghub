@@ -6,25 +6,24 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAllWorkouts } from "@/services/workoutsService";
 import type { Workout, WorkoutType } from "@/types/workout";
+import { modalityColors } from "@/utils/modalityColors";
 import { workoutLabels } from "@/utils/workoutLabels";
 import { format } from "date-fns";
 import { enUS, ptBR } from "date-fns/locale";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
-import { ArrowLeft, Check, Dumbbell, Loader2, Plus, Search } from "lucide-react";
+import { ArrowLeft, ChevronRight, Dumbbell, Loader2, Plus, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AssignmentForm } from "./AssignmentForm";
 
-const workoutTypeConfig: Record<WorkoutType, { icon: React.ElementType; hex: string }> = {
-  swimming: { icon: GrSwim, hex: "#06b6d4" },
-  cycling: { icon: GrBike, hex: "#22c55e" },
-  running: { icon: GrRun, hex: "#3b82f6" },
-  strength: { icon: Dumbbell, hex: "#f97316" },
+const typeIcons: Record<WorkoutType, React.ElementType> = {
+  running: GrRun,
+  cycling: GrBike,
+  swimming: GrSwim,
+  strength: Dumbbell,
 };
 
-const workoutTypeOrder: WorkoutType[] = ["swimming", "cycling", "running", "strength"];
-
-type Step = "type" | "workout" | "targets";
+const typeOrder: WorkoutType[] = ["running", "cycling", "swimming", "strength"];
 
 interface CalendarAssignDialogProps {
   selectedDate: Date | null;
@@ -37,7 +36,10 @@ interface CalendarAssignDialogProps {
   preSelectedAthleteId?: string;
 }
 
-/** Calendar / dashboard / athlete-page entry point: pick a workout, then who and when. */
+/**
+ * Calendar / dashboard / athlete-page entry point: pick a workout (filter +
+ * search, like the exercise library), then who and when.
+ */
 export const CalendarAssignDialog = ({
   selectedDate,
   open,
@@ -54,9 +56,8 @@ export const CalendarAssignDialog = ({
   const navigate = useNavigate();
   const locale = language === "pt" ? ptBR : enUS;
 
-  const [step, setStep] = useState<Step>("type");
-  const [selectedType, setSelectedType] = useState<WorkoutType | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [selectedType, setSelectedType] = useState<WorkoutType | "all">("all");
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingData, setLoadingData] = useState(false);
@@ -67,8 +68,7 @@ export const CalendarAssignDialog = ({
 
   useEffect(() => {
     if (!open) return;
-    setStep("type");
-    setSelectedType(null);
+    setSelectedType("all");
     setSelectedWorkout(null);
     setSearchQuery("");
     setLoadingData(true);
@@ -78,11 +78,7 @@ export const CalendarAssignDialog = ({
         // Coming back after creating a workout: jump straight to who/when
         if (preSelectedWorkoutId) {
           const found = list.find((w) => w.id === preSelectedWorkoutId);
-          if (found) {
-            setSelectedWorkout(found);
-            setSelectedType(found.type);
-            setStep("targets");
-          }
+          if (found) setSelectedWorkout(found);
           clearPreSelectedRef.current?.();
         }
       })
@@ -91,217 +87,184 @@ export const CalendarAssignDialog = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, preSelectedWorkoutId]);
 
+  const query = searchQuery.trim().toLowerCase();
   const filteredWorkouts = workouts.filter(
-    (w) =>
-      (!selectedType || w.type === selectedType) && w.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+    (w) => (selectedType === "all" || w.type === selectedType) && w.name.toLowerCase().includes(query)
   );
 
   const handleCreateNewWorkout = () => {
+    const type = selectedType === "all" ? null : selectedType;
     if (selectedDate) {
-      sessionStorage.setItem(
-        "calendarAssignState",
-        JSON.stringify({ date: selectedDate.toISOString(), type: selectedType })
-      );
+      sessionStorage.setItem("calendarAssignState", JSON.stringify({ date: selectedDate.toISOString(), type }));
     }
     onOpenChange(false);
-    const params = new URLSearchParams();
-    params.set("fromCalendar", "true");
-    if (selectedType === "strength") {
+    const params = new URLSearchParams({ fromCalendar: "true" });
+    if (type === "strength") {
       navigate(`/admin/workouts/strength/new?${params.toString()}`);
     } else {
-      if (selectedType) params.set("type", selectedType);
+      if (type) params.set("type", type);
       navigate(`/admin/workouts/new?${params.toString()}`);
     }
   };
-
-  const handleBack = () => {
-    if (step === "targets") {
-      setStep("workout");
-      setSelectedWorkout(null);
-    } else if (step === "workout") {
-      setStep("type");
-      setSelectedType(null);
-      setSearchQuery("");
-    }
-  };
-
-  const steps: Step[] = ["type", "workout", "targets"];
-  const stepTitle = step === "type" ? ta.stepType : step === "workout" ? ta.stepWorkout : ta.stepTargets;
-
-  const renderStepIndicator = () => (
-    <div className="flex items-center gap-2 mb-4">
-      {steps.map((s, i) => {
-        const done = steps.indexOf(step) > i;
-        return (
-          <div key={s} className="flex items-center">
-            <div
-              className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold",
-                step === s ? "bg-primary text-primary-foreground" : done ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-              )}
-            >
-              {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
-            </div>
-            {i < steps.length - 1 && <div className={cn("w-6 h-0.5 mx-1", done ? "bg-primary/20" : "bg-muted")} />}
-          </div>
-        );
-      })}
-      <span className="ml-2 text-sm font-medium">{stepTitle}</span>
-    </div>
-  );
 
   const workoutMeta = (w: Workout) =>
     w.type === "strength"
       ? ta.exercisesCount.replace("{{n}}", String(w.exercises?.length || 0))
       : ta.stagesCount.replace("{{n}}", String(w.stages.length));
 
-  const renderTypeStep = () => (
-    <div className="space-y-2">
-      {workoutTypeOrder.map((type) => {
-        const { icon: Icon, hex } = workoutTypeConfig[type];
-        const count = workouts.filter((w) => w.type === type).length;
-        return (
-          <button
-            key={type}
-            onClick={() => {
-              setSelectedType(type);
-              setStep("workout");
-            }}
-            className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:border-primary/40 hover:shadow-sm transition-all text-left"
-          >
-            <div className="p-2.5 rounded-xl shrink-0" style={{ backgroundColor: `${hex}1a`, color: hex }}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">{L.type(type)}</p>
-              <p className="text-xs text-muted-foreground">{ta.workoutsCount.replace("{{n}}", String(count))}</p>
-            </div>
-          </button>
-        );
-      })}
-      <button
-        className="w-full text-center text-xs text-muted-foreground py-2 hover:text-foreground transition-colors"
-        onClick={() => {
-          setSelectedType(null);
-          setStep("workout");
-        }}
+  const WorkoutIcon = ({ type, size = "md" }: { type: WorkoutType; size?: "md" | "sm" }) => {
+    const Icon = typeIcons[type];
+    const hex = modalityColors[type];
+    return (
+      <div
+        className={cn("shrink-0 rounded-xl flex items-center justify-center", size === "md" ? "h-10 w-10" : "h-9 w-9")}
+        style={{ backgroundColor: `${hex}1a`, color: hex }}
       >
-        {ta.viewAll}
-      </button>
-    </div>
-  );
-
-  const renderWorkoutStep = () => (
-    <div className="space-y-3">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <Input
-          autoFocus
-          placeholder={ta.searchWorkouts}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 h-10"
-        />
+        <Icon className="h-4 w-4" />
       </div>
-      {loadingData ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      ) : filteredWorkouts.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground py-8">{ta.noWorkouts}</p>
-      ) : (
-        <div className="max-h-[340px] overflow-y-auto space-y-2 pr-1">
-          {filteredWorkouts.map((workout) => {
-            const { icon: Icon, hex } = workoutTypeConfig[workout.type];
-            return (
-              <button
-                key={workout.id}
-                onClick={() => {
-                  setSelectedWorkout(workout);
-                  setStep("targets");
-                }}
-                className="w-full text-left p-3 rounded-xl border transition-all hover:border-primary/40 hover:shadow-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: `${hex}1a`, color: hex }}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">{workout.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {workoutMeta(workout)} · {L.type(workout.type)}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-      <Button variant="outline" className="w-full" onClick={handleCreateNewWorkout}>
-        <Plus className="h-4 w-4 mr-2" />
-        {ta.createNew}
-      </Button>
-    </div>
-  );
+    );
+  };
 
+  const description = selectedDate
+    ? ta.schedulingFor.replace(
+        "{{date}}",
+        format(selectedDate, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMMM d", { locale })
+      )
+    : undefined;
+
+  // One drawer for both steps, so switching steps doesn't re-open it
+  const picking = !selectedWorkout;
   return (
     <ResponsiveModal
       open={open}
       onOpenChange={onOpenChange}
-      title={ta.title}
-      description={
-        selectedDate
-          ? ta.schedulingFor.replace(
-              "{{date}}",
-              format(selectedDate, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMMM d", { locale })
-            )
-          : undefined
+      title={picking ? ta.title : ta.stepTargets}
+      description={description}
+      className="sm:w-[560px]"
+      bodyClassName={picking ? "flex-1 flex flex-col overflow-hidden" : undefined}
+      fullHeight={picking}
+      footer={
+        picking ? (
+          <Button variant="outline" className="w-full rounded-full h-11" onClick={handleCreateNewWorkout}>
+            <Plus className="h-4 w-4 mr-2" />
+            {ta.createNew}
+          </Button>
+        ) : undefined
       }
-      className="sm:w-[680px]"
     >
-      {step !== "type" && step !== "targets" && (
-        <Button variant="ghost" size="sm" onClick={handleBack} className="-ml-2 mb-2">
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          {ta.back}
-        </Button>
-      )}
-      {renderStepIndicator()}
-      <div className="min-w-0">
-        {step === "type" && renderTypeStep()}
-        {step === "workout" && renderWorkoutStep()}
-        {step === "targets" && selectedWorkout && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 rounded-xl border p-3">
-              {(() => {
-                const { icon: Icon, hex } = workoutTypeConfig[selectedWorkout.type];
-                return (
-                  <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: `${hex}1a`, color: hex }}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                );
-              })()}
-              <div className="min-w-0">
-                <p className="font-semibold text-sm truncate">{selectedWorkout.name}</p>
-                <p className="text-xs text-muted-foreground">{workoutMeta(selectedWorkout)}</p>
-              </div>
+      {selectedWorkout ? (
+        <div className="space-y-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-ml-2 rounded-full text-muted-foreground"
+            onClick={() => setSelectedWorkout(null)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            {ta.stepWorkout}
+          </Button>
+          <div className="flex items-center gap-3 rounded-2xl border bg-card p-3">
+            <WorkoutIcon type={selectedWorkout.type} size="sm" />
+            <div className="min-w-0">
+              <p className="font-semibold text-sm truncate">{selectedWorkout.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {workoutMeta(selectedWorkout)} · {L.type(selectedWorkout.type)}
+              </p>
             </div>
-            <AssignmentForm
-              workout={selectedWorkout}
-              initialDates={selectedDate ? [selectedDate] : []}
-              preSelectedAthleteIds={preSelectedAthleteId ? [preSelectedAthleteId] : undefined}
-              onCancel={() => onOpenChange(false)}
-              onBack={handleBack}
-              onDone={(result) => {
-                if (result.created > 0) {
-                  onOpenChange(false);
-                  onSuccess?.();
-                }
-              }}
-            />
+          </div>
+          <AssignmentForm
+            workout={selectedWorkout}
+            initialDates={selectedDate ? [selectedDate] : []}
+            preSelectedAthleteIds={preSelectedAthleteId ? [preSelectedAthleteId] : undefined}
+            onCancel={() => onOpenChange(false)}
+            onBack={() => setSelectedWorkout(null)}
+            onDone={(result) => {
+              if (result.created > 0) {
+                onOpenChange(false);
+                onSuccess?.();
+              }
+            }}
+          />
+        </div>
+      ) : (
+        <>
+      <div className="px-4 pb-3 space-y-3 shrink-0">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder={ta.searchWorkouts}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 pr-9 h-10 rounded-full"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label={ta.clearAll}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        {/* Modality filter — same chips as the workouts list */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {(["all", ...typeOrder] as const).map((type) => {
+            const count = type === "all" ? workouts.length : workouts.filter((w) => w.type === type).length;
+            const Icon = type === "all" ? null : typeIcons[type];
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setSelectedType(type)}
+                className={cn(
+                  "shrink-0 h-8 px-3 rounded-full border text-xs font-medium flex items-center gap-1.5 transition-colors",
+                  selectedType === type
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/50"
+                )}
+              >
+                {Icon && <Icon className="h-3.5 w-3.5" />}
+                {type === "all" ? ta.allTypes : L.type(type)}
+                <span className="tabular-nums opacity-70">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+        {loadingData ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredWorkouts.length === 0 ? (
+          <p className="text-center text-sm text-muted-foreground py-12">{ta.noWorkouts}</p>
+        ) : (
+          <div className="space-y-2">
+            {filteredWorkouts.map((workout) => (
+              <button
+                key={workout.id}
+                type="button"
+                onClick={() => setSelectedWorkout(workout)}
+                className="w-full flex items-center gap-3 rounded-2xl border bg-card p-3 text-left transition-colors hover:border-primary/50"
+              >
+                <WorkoutIcon type={workout.type} />
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm truncate">{workout.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {workoutMeta(workout)} · {L.type(workout.type)}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+              </button>
+            ))}
           </div>
         )}
       </div>
+        </>
+      )}
     </ResponsiveModal>
   );
 };

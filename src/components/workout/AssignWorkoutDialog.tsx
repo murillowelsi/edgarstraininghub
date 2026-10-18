@@ -21,7 +21,7 @@ export const AssignWorkoutDialog = ({ workout, open, onOpenChange, onSuccess }: 
       onOpenChange={onOpenChange}
       title={ta.title}
       description={workout ? ta.subtitle.replace("{{name}}", workout.name) : undefined}
-      className="sm:w-[680px]"
+      className="sm:w-[560px]"
     >
       {workout && open && (
         <AssignmentForm
