@@ -28,7 +28,7 @@ import {
   getYouTubeVideoId,
   muscleGroupLabels,
 } from "@/types/exercise";
-import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
+import type { AssignmentWithWorkout, SetProgressData } from "@/types/workoutAssignment";
 import { format } from "date-fns";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import RestTimerPill from "@/components/athlete/RestTimerPill";
@@ -45,6 +45,7 @@ import {
   ChevronDown,
   Clock,
   Dumbbell,
+  History,
   Minus,
   MoreVertical,
   Play,
@@ -69,6 +70,35 @@ interface ExerciseProgress {
 }
 
 const DEFAULT_REST_SECONDS = 60;
+
+interface SetSuggestion {
+  reps: string;
+  weight: string;
+  /** Values come from the athlete's last session (vs. the coach target / previous set) */
+  fromHistory: boolean;
+}
+
+/**
+ * Most recent logged sets per exercise from the athlete's other completed
+ * sessions. Only sets with reps or weight count, so empty ticks don't hide
+ * older real data.
+ */
+const buildPreviousSets = (assignments: AssignmentWithWorkout[], currentId: string) => {
+  const previous = new Map<string, SetProgressData[]>();
+  const done = assignments
+    .filter((a) => a.id !== currentId && a.completedAt && a.progressData?.length)
+    .sort((a, b) => b.completedAt!.getTime() - a.completedAt!.getTime());
+  for (const a of done) {
+    for (const p of a.progressData ?? []) {
+      if (previous.has(p.exerciseId)) continue;
+      const logged = p.sets.filter((s) => s.reps.trim() || s.weight.trim());
+      if (logged.length) previous.set(p.exerciseId, logged);
+    }
+  }
+  return previous;
+};
+
+const isPlainNumber = (value: string) => /^\d+([.,]\d+)?$/.test(value.trim());
 
 // Short double beep for the end of a rest. The AudioContext must be created
 // from a user gesture on iOS, so it's unlocked when a set is ticked.
@@ -101,6 +131,8 @@ const ExerciseSessionCard = ({
   index,
   progress,
   isCurrent,
+  suggestions,
+  onUseSuggestion,
   onUpdateSet,
   onAddSet,
   onRemoveLastSet,
@@ -113,6 +145,9 @@ const ExerciseSessionCard = ({
   progress: ExerciseProgress;
   /** The exercise the athlete is on (next set after a rest) */
   isCurrent: boolean;
+  /** Per set: what to prefill (last session > previous set > coach target) */
+  suggestions: (SetSuggestion | null)[];
+  onUseSuggestion: (setIndex: number) => void;
   onUpdateSet: (setIndex: number, field: "reps" | "weight", value: string) => void;
   onAddSet: () => void;
   onRemoveLastSet: () => void;
@@ -273,49 +308,71 @@ const ExerciseSessionCard = ({
           </div>
 
           <div className="space-y-2">
-            {progress.sets.map((set, setIndex) => (
-              <div
-                key={setIndex}
-                className={cn(
-                  "grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 items-center",
-                  set.completed && "opacity-60"
-                )}
-              >
-                <span className="text-base font-semibold text-center tabular-nums">{set.setNumber}</span>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  enterKeyHint="next"
-                  value={set.reps}
-                  onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
-                  placeholder={workoutExercise.reps || "10"}
-                  className="h-12 text-center text-base px-1 min-w-0"
-                  disabled={set.completed}
-                />
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  enterKeyHint="done"
-                  value={set.weight}
-                  onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
-                  placeholder="0"
-                  className="h-12 text-center text-base px-1 min-w-0"
-                  disabled={set.completed}
-                />
-                <button
-                  onClick={() => onToggleSetComplete(setIndex)}
-                  aria-label={t.athlete.session.complete}
-                  className={cn(
-                    "h-12 w-12 rounded-full flex items-center justify-center transition-all",
-                    set.completed
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
+            {progress.sets.map((set, setIndex) => {
+              const suggestion = suggestions[setIndex];
+              const showHistory =
+                !!suggestion?.fromHistory && !set.completed && !set.reps && !set.weight;
+              return (
+                <div key={setIndex}>
+                  <div
+                    className={cn(
+                      "grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 items-center",
+                      set.completed && "opacity-60"
+                    )}
+                  >
+                    <span className="text-base font-semibold text-center tabular-nums">{set.setNumber}</span>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      enterKeyHint="next"
+                      value={set.reps}
+                      onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
+                      placeholder={suggestion?.reps || workoutExercise.reps || "10"}
+                      className="h-12 text-center text-base px-1 min-w-0"
+                      disabled={set.completed}
+                    />
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      enterKeyHint="done"
+                      value={set.weight}
+                      onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
+                      placeholder={suggestion?.weight || "0"}
+                      className="h-12 text-center text-base px-1 min-w-0"
+                      disabled={set.completed}
+                    />
+                    <button
+                      onClick={() => onToggleSetComplete(setIndex)}
+                      aria-label={t.athlete.session.complete}
+                      className={cn(
+                        "h-12 w-12 rounded-full flex items-center justify-center transition-all",
+                        set.completed
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
+                      )}
+                    >
+                      <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
+                    </button>
+                  </div>
+                  {showHistory && (
+                    <button
+                      onClick={() => onUseSuggestion(setIndex)}
+                      className="ml-12 mt-1 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                    >
+                      <History className="h-3.5 w-3.5" />
+                      <span>
+                        {t.athlete.session.previousHeader}:{" "}
+                        <span className="font-semibold tabular-nums text-foreground/80">
+                          {[suggestion.weight && `${suggestion.weight} kg`, suggestion.reps && `× ${suggestion.reps}`]
+                            .filter(Boolean)
+                            .join(" ")}
+                        </span>
+                      </span>
+                    </button>
                   )}
-                >
-                  <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
-                </button>
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
 
           {/* Add / Remove Set Buttons */}
@@ -367,6 +424,8 @@ const StrengthWorkoutSession = () => {
   const [now, setNow] = useState(() => Date.now());
   const [rest, setRest] = useState<RestState | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  // Last logged sets per exerciseId from the athlete's other completed sessions
+  const [previousSets, setPreviousSets] = useState<Map<string, SetProgressData[]>>(new Map());
   const [exerciseProgress, setExerciseProgress] = useState<Map<string, ExerciseProgress>>(
     new Map()
   );
@@ -389,6 +448,7 @@ const StrengthWorkoutSession = () => {
         const found = assignments.find((a) => a.id === id);
         if (found && found.workout.type === "strength") {
           setAssignment(found);
+          setPreviousSets(buildPreviousSets(assignments, id));
 
           // Load exercises
           try {
@@ -620,6 +680,43 @@ const StrengthWorkoutSession = () => {
     [assignment]
   );
 
+  // What to prefill for a set: the same set from the last session, else the
+  // last filled set of this session, else the coach's target reps.
+  const getSuggestion = useCallback(
+    (progressMap: Map<string, ExerciseProgress>, workoutExerciseId: string, setIndex: number): SetSuggestion | null => {
+      const progress = progressMap.get(workoutExerciseId);
+      if (!progress) return null;
+      const history = previousSets.get(progress.exerciseId);
+      if (history?.length) {
+        const prev = history[Math.min(setIndex, history.length - 1)];
+        return { reps: prev.reps, weight: prev.weight, fromHistory: true };
+      }
+      const earlier = progress.sets.slice(0, setIndex).reverse().find((s) => s.reps || s.weight);
+      if (earlier) return { reps: earlier.reps, weight: earlier.weight, fromHistory: false };
+      const target = assignment?.workout.exercises?.find((we) => we.id === workoutExerciseId)?.reps ?? "";
+      return isPlainNumber(target) ? { reps: target.trim(), weight: "", fromHistory: false } : null;
+    },
+    [previousSets, assignment]
+  );
+
+  const handleUseSuggestion = useCallback(
+    (workoutExerciseId: string, setIndex: number) => {
+      const suggestion = getSuggestion(exerciseProgress, workoutExerciseId, setIndex);
+      if (!suggestion) return;
+      setExerciseProgress((prev) => {
+        const newMap = new Map(prev);
+        const progress = newMap.get(workoutExerciseId);
+        if (progress?.sets[setIndex]) {
+          const newSets = [...progress.sets];
+          newSets[setIndex] = { ...newSets[setIndex], reps: suggestion.reps, weight: suggestion.weight };
+          newMap.set(workoutExerciseId, { ...progress, sets: newSets });
+        }
+        return newMap;
+      });
+    },
+    [exerciseProgress, getSuggestion]
+  );
+
   // Toggle set complete — ticking a set starts the rest countdown
   const handleToggleSetComplete = useCallback(
     (exerciseId: string, setIndex: number) => {
@@ -639,7 +736,19 @@ const StrengthWorkoutSession = () => {
 
       const newMap = new Map(exerciseProgress);
       const newSets = [...current.sets];
-      newSets[setIndex] = { ...newSets[setIndex], completed: nowCompleted };
+      let ticked = { ...newSets[setIndex], completed: nowCompleted };
+      // One-tap logging: an empty set takes the suggested values instead of being saved blank
+      if (nowCompleted && (!ticked.reps || !ticked.weight)) {
+        const suggestion = getSuggestion(exerciseProgress, exerciseId, setIndex);
+        if (suggestion) {
+          ticked = {
+            ...ticked,
+            reps: ticked.reps || suggestion.reps,
+            weight: ticked.weight || suggestion.weight,
+          };
+        }
+      }
+      newSets[setIndex] = ticked;
       newMap.set(exerciseId, { ...current, sets: newSets });
       setExerciseProgress(newMap);
 
@@ -660,7 +769,7 @@ const StrengthWorkoutSession = () => {
         nextSetIndex: next.setIndex,
       });
     },
-    [exerciseProgress, findNextSet, assignment]
+    [exerciseProgress, findNextSet, assignment, getSuggestion]
   );
 
   // Remove last set
@@ -922,6 +1031,10 @@ const StrengthWorkoutSession = () => {
                   index={index}
                   progress={progress}
                   isCurrent={rest?.nextExerciseId === workoutExercise.id}
+                  suggestions={progress.sets.map((_, setIndex) =>
+                    getSuggestion(exerciseProgress, workoutExercise.id, setIndex)
+                  )}
+                  onUseSuggestion={(setIndex) => handleUseSuggestion(workoutExercise.id, setIndex)}
                   onUpdateSet={(setIndex, field, value) =>
                     handleUpdateSet(workoutExercise.id, setIndex, field, value)
                   }
