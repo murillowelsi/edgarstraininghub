@@ -30,6 +30,7 @@ import {
 } from "@/types/exercise";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { format } from "date-fns";
+import { MotionConfig, motion } from "motion/react";
 import {
   Check,
   CheckCircle2,
@@ -768,54 +769,83 @@ const StrengthWorkoutSession = () => {
       initialCaption={shareCaption}
     />
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
-        {/* Total Timer Bar (when workout started) */}
-        {isWorkoutStarted && (
-          <div className="bg-primary/10 py-3 text-center border-b">
-            <p className="text-xs text-muted-foreground mb-1">{t.athlete.session.totalTime}</p>
-            <div className="text-3xl font-mono font-bold text-primary">
-              {formatTime(totalElapsedTime)}
-            </div>
+      {/* Header — before start only; once started the controls live in the floating glass bar */}
+      {!isWorkoutStarted && (
+        <header className="sticky top-0 z-50 bg-background border-b border-border">
+          <div className="px-4 h-14 flex items-center justify-between">
+            <Link
+              to={`/athlete/workout/${id}`}
+              className="p-2 -ml-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </Link>
+            <span className="font-medium">
+              {format(assignment.scheduledDate, "d MMM yyyy")}
+            </span>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
           </div>
-        )}
+        </header>
+      )}
 
-        <div className="px-4 h-14 flex items-center justify-between">
-          {isWorkoutStarted ? (
-            <>
-              <Button variant="ghost" onClick={handleCancel}>
-                {t.athlete.session.cancel}
-              </Button>
-              <div className="flex items-center gap-2">
-                <Button onClick={() => setShowSaveConfirm(true)} disabled={saving}>
-                  {saving ? (
-                    <Spinner size="xs" className="mr-2" />
-                  ) : null}
-                  {t.athlete.session.save}
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link
-                to={`/athlete/workout/${id}`}
-                className="p-2 -ml-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+      {/* Floating glass session bar: cancel · total time + progress · save */}
+      {isWorkoutStarted && (
+        <MotionConfig reducedMotion="user">
+          <motion.div
+            initial={{ y: 96, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            className="fixed inset-x-3 z-50 mx-auto max-w-lg"
+            style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+          >
+            <div className="glass flex items-center gap-2 h-16 p-1.5 rounded-full">
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                transition={{ type: "spring", stiffness: 600, damping: 22 }}
+                onClick={handleCancel}
+                aria-label={t.athlete.session.cancel}
+                className="glass-lens h-[52px] w-[52px] shrink-0 flex items-center justify-center rounded-full text-foreground/70"
               >
                 <X className="h-5 w-5" />
-              </Link>
-              <span className="font-medium">
-                {format(assignment.scheduledDate, "d MMM yyyy")}
-              </span>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-5 w-5" />
-              </Button>
-            </>
-          )}
-        </div>
-      </header>
+              </motion.button>
+
+              <div className="flex-1 min-w-0 flex flex-col items-center justify-center">
+                <span className="sr-only">{t.athlete.session.totalTime}</span>
+                <span className="text-xl font-mono font-bold text-primary leading-none tabular-nums">
+                  {formatTime(totalElapsedTime)}
+                </span>
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <div className="h-1 w-20 rounded-full bg-foreground/10 overflow-hidden">
+                    <motion.div
+                      className="h-full bg-primary rounded-full"
+                      animate={{ width: `${completionPercentage}%` }}
+                      transition={{ type: "spring", stiffness: 200, damping: 26 }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
+                    {completionPercentage}%
+                  </span>
+                </div>
+              </div>
+
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                transition={{ type: "spring", stiffness: 600, damping: 22 }}
+                onClick={() => setShowSaveConfirm(true)}
+                disabled={saving}
+                className="h-[52px] shrink-0 px-6 flex items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold shadow-md disabled:opacity-60"
+              >
+                {saving ? <Spinner size="xs" className="mr-2" /> : null}
+                {t.athlete.session.save}
+              </motion.button>
+            </div>
+          </motion.div>
+        </MotionConfig>
+      )}
 
       {/* Content */}
-      <div className="flex-1 overflow-auto pb-24">
+      <div className="flex-1 overflow-auto pb-28">
         <div className="p-4 space-y-4">
           {/* Workout Info Card */}
           <Card>

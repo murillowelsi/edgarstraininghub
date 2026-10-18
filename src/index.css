@@ -253,13 +253,41 @@
       0 1px 6px hsl(0 0% 0% / 0.3);
   }
 
+  /* Denser glass for sheets/drawers that hold forms and text */
+  .glass-sheet {
+    background: hsl(0 0% 100% / 0.8);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid hsl(0 0% 100% / 0.7);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.9),
+      0 -8px 40px hsl(220 30% 10% / 0.18);
+  }
+
+  .dark .glass-sheet {
+    background: hsl(220 15% 10% / 0.78);
+    border-color: hsl(0 0% 100% / 0.1);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.12),
+      0 -8px 40px hsl(0 0% 0% / 0.5);
+  }
+
+  /* Blurred top bar that fades out at its bottom edge instead of a hard border */
+  .glass-fade {
+    background: hsl(var(--background) / 0.7);
+    -webkit-backdrop-filter: blur(16px) saturate(170%);
+    backdrop-filter: blur(16px) saturate(170%);
+    -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent);
+    mask-image: linear-gradient(to bottom, black 65%, transparent);
+  }
+
   /* Opaque fallback for browsers without backdrop-filter or when the user asks for less transparency */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass { background: hsl(var(--background) / 0.96); }
+    .glass, .glass-sheet, .glass-fade { background: hsl(var(--background) / 0.96); }
   }
 
   @media (prefers-reduced-transparency: reduce) {
-    .glass { background: hsl(var(--background) / 0.96); }
+    .glass, .glass-sheet, .glass-fade { background: hsl(var(--background) / 0.96); }
   }
 
   /* Safe area insets for iOS devices with notches */

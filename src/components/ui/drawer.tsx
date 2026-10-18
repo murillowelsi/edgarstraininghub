@@ -26,7 +26,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn("fixed inset-0 z-50 bg-black/80", className)}
+    className={cn("fixed inset-0 z-50 bg-black/40", className)}
     {...props}
   />
 ))
@@ -45,8 +45,11 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 flex flex-col border bg-background",
-        direction === "bottom" && "inset-x-0 bottom-0 mt-24 h-auto rounded-t-[10px]",
+        "fixed z-50 flex flex-col",
+        // Bottom sheets float as liquid-glass cards; side/top drawers stay solid
+        direction === "bottom"
+          ? "glass-sheet inset-x-2 bottom-2 mt-24 h-auto rounded-[28px] mb-[env(safe-area-inset-bottom)] overflow-hidden"
+          : "border bg-background",
         direction === "right" && "inset-y-0 right-0 h-full w-full sm:w-[480px] rounded-l-[10px]",
         direction === "left" && "inset-y-0 left-0 h-full w-full sm:w-[480px] rounded-r-[10px]",
         direction === "top" && "inset-x-0 top-0 h-auto rounded-b-[10px]",
@@ -55,7 +58,7 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       {direction === "bottom" && (
-        <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+        <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-foreground/20" />
       )}
       {children}
     </DrawerPrimitive.Content>

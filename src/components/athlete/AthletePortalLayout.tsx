@@ -199,8 +199,9 @@ const AthletePortalLayout = ({
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top Header */}
       {showHeader && (
-        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
-          <div className="px-4 h-16 flex items-center justify-between">
+        <header className="sticky top-0 z-50">
+          <div aria-hidden className="glass-fade absolute inset-x-0 top-0 -bottom-4 pointer-events-none" />
+          <div className="relative px-4 h-16 flex items-center justify-between">
             {/* Logo */}
             <Link
               to="/athlete"
@@ -221,42 +222,50 @@ const AthletePortalLayout = ({
               </h1>
             )}
 
-            {/* Right controls */}
-            <div className="flex items-center">
-              <button
-                onClick={() => setCreateOpen(true)}
-                className="p-2 rounded-full hover:bg-accent transition-colors"
-              >
-                <Plus className="h-5 w-5" />
-              </button>
+            {/* Right controls — grouped in a glass capsule like iOS toolbars */}
+            <MotionConfig reducedMotion="user">
+              <div className="glass flex items-center gap-0.5 p-1 rounded-full">
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  transition={{ type: "spring", stiffness: 600, damping: 22 }}
+                  onClick={() => setCreateOpen(true)}
+                  className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-foreground/5 transition-colors"
+                >
+                  <Plus className="h-5 w-5" />
+                </motion.button>
 
-              <button
-                onClick={() => setActivityOpen(true)}
-                className="relative p-2 rounded-full hover:bg-accent transition-colors"
-              >
-                <Flame className="h-5 w-5" />
-                {activityUnreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
-                )}
-              </button>
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  transition={{ type: "spring", stiffness: 600, damping: 22 }}
+                  onClick={() => setActivityOpen(true)}
+                  className="relative h-9 w-9 flex items-center justify-center rounded-full hover:bg-foreground/5 transition-colors"
+                >
+                  <Flame className="h-5 w-5" />
+                  {activityUnreadCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
+                  )}
+                </motion.button>
 
-              <Link
-                to="/athlete/chat"
-                className={cn(
-                  "relative p-2 rounded-full transition-colors",
-                  location.pathname.startsWith("/athlete/chat")
-                    ? "text-primary bg-primary/10"
-                    : "hover:bg-accent"
-                )}
-              >
-                <MessageSquare className="h-5 w-5" />
-                {chatUnreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                    {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
-                  </span>
-                )}
-              </Link>
-            </div>
+                <motion.div whileTap={{ scale: 0.85 }} transition={{ type: "spring", stiffness: 600, damping: 22 }}>
+                  <Link
+                    to="/athlete/chat"
+                    className={cn(
+                      "relative h-9 w-9 flex items-center justify-center rounded-full transition-colors",
+                      location.pathname.startsWith("/athlete/chat")
+                        ? "text-primary glass-lens"
+                        : "hover:bg-foreground/5"
+                    )}
+                  >
+                    <MessageSquare className="h-5 w-5" />
+                    {chatUnreadCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                        {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
+                      </span>
+                    )}
+                  </Link>
+                </motion.div>
+              </div>
+            </MotionConfig>
           </div>
         </header>
       )}
