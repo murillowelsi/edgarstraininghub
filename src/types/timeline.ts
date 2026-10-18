@@ -51,6 +51,8 @@ export interface TimelinePost {
   imageUrls: string[];
   mentions: PostMention[];
   workoutSummary?: WorkoutSummary;
+  /** Old strength post whose caption only repeated the stats now shown in the card */
+  captionIsSummary?: boolean;
   likedBy: string[];
   commentsCount: number;
   createdAt: Date;

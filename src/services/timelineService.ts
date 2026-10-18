@@ -21,6 +21,7 @@ import {
 import { db } from "../lib/firebase";
 import type {
   PostMention,
+  WorkoutSummary,
   TimelineComment,
   TimelineCommentDocument,
   TimelinePost,
@@ -32,22 +33,44 @@ import type { UserRole } from "../types/user";
 const COLLECTION = "timeline_posts";
 const POSTS_PER_PAGE = 10;
 
-const docToPost = (id: string, data: TimelinePostDocument): TimelinePost => ({
-  id,
-  authorId: data.authorId,
-  authorName: data.authorName,
-  authorRole: data.authorRole,
-  authorPhotoURL: data.authorPhotoURL,
-  caption: data.caption,
-  imageUrl: data.imageUrl,
-  imageUrls: data.imageUrls?.length ? data.imageUrls : data.imageUrl ? [data.imageUrl] : [],
-  mentions: data.mentions ?? [],
-  workoutSummary: data.workoutSummary,
-  likedBy: data.likedBy || [],
-  commentsCount: data.commentsCount || 0,
-  createdAt: data.createdAt?.toDate() || new Date(),
-  updatedAt: data.updatedAt?.toDate() || new Date(),
-});
+// Strength sessions used to post only a text caption ("Treino concluído: X — 45% em 28:30 💪").
+// Rebuild a workout card from it so old posts match the new layout; the
+// stored document is left untouched.
+const LEGACY_STRENGTH_CAPTION =
+  /^(?:Treino concluído|Workout complete): (.+) — (\d{1,3})% (?:em|in) (\d+):(\d{2}) 💪$/;
+
+const legacyStrengthSummary = (caption: string): WorkoutSummary | undefined => {
+  const match = caption.trim().match(LEGACY_STRENGTH_CAPTION);
+  if (!match) return undefined;
+  const [, workoutName, percentage, minutes, seconds] = match;
+  return {
+    workoutName,
+    workoutType: "strength",
+    completionPercentage: Number(percentage),
+    elapsedTime: Number(minutes) * 60 + Number(seconds),
+  };
+};
+
+const docToPost = (id: string, data: TimelinePostDocument): TimelinePost => {
+  const legacySummary = data.workoutSummary ? undefined : legacyStrengthSummary(data.caption ?? "");
+  return {
+    id,
+    authorId: data.authorId,
+    authorName: data.authorName,
+    authorRole: data.authorRole,
+    authorPhotoURL: data.authorPhotoURL,
+    caption: data.caption,
+    imageUrl: data.imageUrl,
+    imageUrls: data.imageUrls?.length ? data.imageUrls : data.imageUrl ? [data.imageUrl] : [],
+    mentions: data.mentions ?? [],
+    workoutSummary: data.workoutSummary ?? legacySummary,
+    captionIsSummary: !!legacySummary,
+    likedBy: data.likedBy || [],
+    commentsCount: data.commentsCount || 0,
+    createdAt: data.createdAt?.toDate() || new Date(),
+    updatedAt: data.updatedAt?.toDate() || new Date(),
+  };
+};
 
 const docToComment = (id: string, data: TimelineCommentDocument): TimelineComment => ({
   id,

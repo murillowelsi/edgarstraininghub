@@ -192,7 +192,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         </div>
 
         {/* Caption */}
-        {post.caption && (
+        {post.caption && !post.captionIsSummary && (
           <PostCaption
             authorName={post.authorName}
             caption={post.caption}
