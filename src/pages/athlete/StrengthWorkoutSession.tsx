@@ -21,7 +21,9 @@ import { getAllExercises } from "@/services/exercisesService";
 import {
   completeWorkoutWithProgress,
   getAssignmentsWithWorkoutsByAthlete,
+  updateAssignmentFeedback,
 } from "@/services/workoutAssignmentsService";
+import SessionSummary, { type SessionSummaryData } from "@/components/athlete/SessionSummary";
 import type { Exercise, WorkoutExercise } from "@/types/exercise";
 import {
   getYouTubeThumbnail,
@@ -29,10 +31,20 @@ import {
   muscleGroupLabels,
 } from "@/types/exercise";
 import type { AssignmentWithWorkout, SetProgressData } from "@/types/workoutAssignment";
+import {
+  buildBestByExercise,
+  computeStrengthVolume,
+  formatWeight,
+  isPersonalRecord,
+  isWorkingSet,
+  parseNum,
+  type ExerciseBest,
+} from "@/utils/strengthStats";
 import { format } from "date-fns";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import RestTimerPill from "@/components/athlete/RestTimerPill";
 import { useWakeLock } from "@/hooks/useWakeLock";
+import { cancelRestPush, scheduleRestPush } from "@/services/restTimerPush";
 import {
   clearSessionDraft,
   loadSessionDraft,
@@ -61,6 +73,7 @@ interface SetProgress {
   weight: string;
   completed: boolean;
   time: number; // Legacy per-set stopwatch; kept so saved data keeps its shape
+  warmup?: boolean;
 }
 
 interface ExerciseProgress {
@@ -69,6 +82,15 @@ interface ExerciseProgress {
 }
 
 const DEFAULT_REST_SECONDS = 60;
+const SAVE_TIMEOUT_MS = 4000;
+
+/** Resolves "done" if the promise settles in time, else "pending" (it keeps running). */
+const settleWithin = (promise: Promise<unknown>, ms: number): Promise<"done" | "pending"> =>
+  Promise.race([
+    promise.then(() => "done" as const),
+    new Promise<"pending">((resolve) => setTimeout(() => resolve("pending"), ms)),
+  ]);
+const WEIGHT_STEP = 2.5;
 
 interface SetSuggestion {
   reps: string;
@@ -90,7 +112,7 @@ const buildPreviousSets = (assignments: AssignmentWithWorkout[], currentId: stri
   for (const a of done) {
     for (const p of a.progressData ?? []) {
       if (previous.has(p.exerciseId)) continue;
-      const logged = p.sets.filter((s) => s.reps.trim() || s.weight.trim());
+      const logged = p.sets.filter((s) => !s.warmup && (s.reps.trim() || s.weight.trim()));
       if (logged.length) previous.set(p.exerciseId, logged);
     }
   }
@@ -109,7 +131,12 @@ const formatPrescription = (we: WorkoutExercise, t: any) => {
   return parts.join(" · ");
 };
 
-const isPlainNumber = (value: string) => /^\d+([.,]\d+)?$/.test(value.trim());
+// Coach target as a rep count: "10" → "10", "8 a 12" → "12" (top of the range is the goal)
+const repsFromTarget = (target: string): string => {
+  if (!REP_RANGE.test(target)) return "";
+  const numbers = target.match(/\d+/g) ?? [];
+  return numbers.length ? numbers[numbers.length - 1] : "";
+};
 
 // Short double beep for the end of a rest. The AudioContext must be created
 // from a user gesture on iOS, so it's unlocked when a set is ticked.
@@ -145,7 +172,10 @@ const ExerciseSessionCard = ({
   isOpen,
   onToggleOpen,
   suggestions,
+  best,
   onUseSuggestion,
+  onStepWeight,
+  onToggleWarmup,
   onUpdateSet,
   onAddSet,
   onRemoveLastSet,
@@ -163,6 +193,10 @@ const ExerciseSessionCard = ({
   /** Per set: what to prefill (last session > previous set > coach target) */
   suggestions: (SetSuggestion | null)[];
   onUseSuggestion: (setIndex: number) => void;
+  /** Heaviest previous working set for this exercise, for 🏆 PR badges */
+  best?: ExerciseBest;
+  onStepWeight: (setIndex: number, delta: number) => void;
+  onToggleWarmup: (setIndex: number) => void;
   onUpdateSet: (setIndex: number, field: "reps" | "weight", value: string) => void;
   onAddSet: () => void;
   onRemoveLastSet: () => void;
@@ -190,7 +224,7 @@ const ExerciseSessionCard = ({
   const allComplete = completedSets === totalSets;
 
   const summary = progress.sets
-    .filter((set) => set.completed)
+    .filter(isWorkingSet)
     .map((set) => [set.weight && `${set.weight}kg`, set.reps && `×${set.reps}`].filter(Boolean).join(""))
     .filter(Boolean)
     .join(" · ");
@@ -324,15 +358,32 @@ const ExerciseSessionCard = ({
                     const suggestion = suggestions[setIndex];
                     const showHistory =
                       !!suggestion?.fromHistory && !set.completed && !set.reps && !set.weight;
+                    const isPR = isPersonalRecord(set, best);
                     return (
                       <div key={setIndex}>
                         <div
                           className={cn(
-                            "grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 items-center",
-                            set.completed && "opacity-60"
+                            "grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1.25fr)_48px] gap-2 items-center rounded-xl transition-colors",
+                            set.completed && "bg-primary/5"
                           )}
                         >
-                          <span className="text-base font-semibold text-center tabular-nums">{set.setNumber}</span>
+                          {/* Tap the set number to mark it as warm-up */}
+                          <button
+                            onClick={() => onToggleWarmup(setIndex)}
+                            aria-label={set.warmup ? t.athlete.session.warmupOff : t.athlete.session.warmupOn}
+                            title={t.athlete.session.warmupHint}
+                            className={cn(
+                              "relative h-12 w-10 rounded-lg flex items-center justify-center text-base font-semibold tabular-nums",
+                              set.warmup ? "text-amber-600 dark:text-amber-400" : "text-foreground"
+                            )}
+                          >
+                            {set.warmup ? t.athlete.session.warmupShort : set.setNumber}
+                            {isPR && (
+                              <span className="absolute -top-1 -right-1 text-sm" aria-label={t.athlete.session.personalRecord}>
+                                🏆
+                              </span>
+                            )}
+                          </button>
                           <Input
                             type="text"
                             inputMode="numeric"
@@ -341,18 +392,33 @@ const ExerciseSessionCard = ({
                             onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
                             placeholder={suggestion?.reps || workoutExercise.reps || "10"}
                             className="h-12 text-center text-base px-1 min-w-0"
-                            disabled={set.completed}
                           />
-                          <Input
-                            type="text"
-                            inputMode="decimal"
-                            enterKeyHint="done"
-                            value={set.weight}
-                            onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
-                            placeholder={suggestion?.weight || "0"}
-                            className="h-12 text-center text-base px-1 min-w-0"
-                            disabled={set.completed}
-                          />
+                          {/* Weight with ±2.5 kg steppers so the keyboard isn't needed between sets */}
+                          <div className="relative min-w-0">
+                            <button
+                              onClick={() => onStepWeight(setIndex, -WEIGHT_STEP)}
+                              aria-label={`−${WEIGHT_STEP} kg`}
+                              className="absolute left-0 inset-y-0 z-10 w-9 flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-transform"
+                            >
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              enterKeyHint="done"
+                              value={set.weight}
+                              onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
+                              placeholder={suggestion?.weight || "0"}
+                              className="h-12 text-center text-base px-9 min-w-0"
+                            />
+                            <button
+                              onClick={() => onStepWeight(setIndex, WEIGHT_STEP)}
+                              aria-label={`+${WEIGHT_STEP} kg`}
+                              className="absolute right-0 inset-y-0 z-10 w-9 flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-transform"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
+                          </div>
                           <button
                             onClick={() => onToggleSetComplete(setIndex)}
                             aria-label={t.athlete.session.complete}
@@ -439,10 +505,14 @@ const StrengthWorkoutSession = () => {
   const [now, setNow] = useState(() => Date.now());
   const [rest, setRest] = useState<RestState | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [summary, setSummary] = useState<SessionSummaryData | null>(null);
+  const [finishing, setFinishing] = useState(false);
   // Last logged sets per exerciseId from the athlete's other completed sessions
   // Exercise cards currently expanded (workoutExercise.id). Only the current one opens by default.
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const [previousSets, setPreviousSets] = useState<Map<string, SetProgressData[]>>(new Map());
+  // Heaviest previous working set per exerciseId, to flag new PRs
+  const [bestByExercise, setBestByExercise] = useState<Map<string, ExerciseBest>>(new Map());
   const [exerciseProgress, setExerciseProgress] = useState<Map<string, ExerciseProgress>>(
     new Map()
   );
@@ -466,6 +536,9 @@ const StrengthWorkoutSession = () => {
         if (found && found.workout.type === "strength") {
           setAssignment(found);
           setPreviousSets(buildPreviousSets(assignments, id));
+          setBestByExercise(
+            buildBestByExercise(assignments.filter((a) => a.id !== id && a.completedAt))
+          );
 
           // Load exercises
           try {
@@ -499,6 +572,7 @@ const StrengthWorkoutSession = () => {
                   weight: s.weight,
                   completed: s.completed,
                   time: s.time ?? 0,
+                  warmup: s.warmup ?? false,
                 }))
               : Array.from({ length: we.sets }, (_, i) => ({
                   setNumber: i + 1,
@@ -569,6 +643,40 @@ const StrengthWorkoutSession = () => {
     });
   }, [id, startedAt, exerciseProgress, rest]);
 
+  // Screen locked / app backgrounded mid-rest: ask the server to push when the
+  // rest ends; cancel it as soon as the athlete is back in the app.
+  const restRef = useRef<RestState | null>(null);
+  restRef.current = rest;
+  useEffect(() => {
+    if (!isWorkoutStarted) return;
+    let scheduled = false;
+    const onVisibility = () => {
+      const current = restRef.current;
+      if (document.visibilityState === "hidden" && current) {
+        const remaining = Math.ceil((current.endsAt - Date.now()) / 1000);
+        if (remaining > 3) {
+          const next = assignment?.workout.exercises?.find((we) => we.id === current.nextExerciseId);
+          const nextName = next ? getExerciseByIdOrName(next)?.name || next.exerciseName || "" : "";
+          scheduleRestPush(
+            remaining,
+            t.athlete.session.restDone,
+            nextName
+              ? t.athlete.session.restNext.replace("{{name}}", nextName).replace("{{set}}", String(current.nextSetIndex + 1))
+              : "",
+            `/athlete/workout/${id}/session`
+          );
+          scheduled = true;
+        }
+      } else if (document.visibilityState === "visible" && scheduled) {
+        cancelRestPush();
+        scheduled = false;
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isWorkoutStarted, assignment, id, t]);
+
   // End of rest: clear it and alert (vibration on Android, beep, toast)
   useEffect(() => {
     if (!rest || now < rest.endsAt) return;
@@ -622,6 +730,7 @@ const StrengthWorkoutSession = () => {
             weight: set.weight,
             completed: set.completed,
             time: set.time,
+            ...(set.warmup ? { warmup: true } : {}),
           })),
         })
       );
@@ -629,11 +738,11 @@ const StrengthWorkoutSession = () => {
       const completionPercentage = getCompletionPercentage();
       const elapsed = totalElapsedTime;
 
-      await completeWorkoutWithProgress(
-        assignment.id,
-        progressData,
-        completionPercentage,
-        elapsed
+      // Offline, Firestore queues the write (persistent cache) and the promise
+      // only settles once it reaches the server — don't block the athlete on it.
+      const result = await settleWithin(
+        completeWorkoutWithProgress(assignment.id, progressData, completionPercentage, elapsed),
+        SAVE_TIMEOUT_MS
       );
 
       finishedRef.current = true;
@@ -641,12 +750,35 @@ const StrengthWorkoutSession = () => {
       setRest(null);
       setStartedAt(null);
 
-      toast({
-        title: t.athlete.toast.sessionCompleted,
-        description: t.athlete.toast.sessionCompletedDescription
-          .replace("{{percentage}}", String(completionPercentage))
-          .replace("{{time}}", formatTime(elapsed)),
+      if (result === "pending") {
+        toast({ title: t.athlete.session.savedOffline });
+      }
+
+      // Recap: working sets, volume and new personal records
+      const { sets: workingSets, volume } = computeStrengthVolume(progressData);
+      const records: SessionSummaryData["records"] = [];
+      assignment.workout.exercises?.forEach((we) => {
+        const sets = exerciseProgress.get(we.id)?.sets ?? [];
+        const best = bestByExercise.get(we.exerciseId);
+        const top = sets
+          .filter((set) => isPersonalRecord(set, best))
+          .sort((a, b) => parseNum(b.weight) - parseNum(a.weight) || parseNum(b.reps) - parseNum(a.reps))[0];
+        if (top) {
+          records.push({
+            exercise: getExerciseByIdOrName(we)?.name || we.exerciseName || "",
+            value: `${top.weight} kg × ${top.reps || "–"}`,
+          });
+        }
       });
+      setSummary({
+        workoutName: assignment.workout.name,
+        elapsed: formatTime(elapsed),
+        workingSets,
+        totalSets: progressData.reduce((sum, ex) => sum + ex.sets.length, 0),
+        volumeKg: volume,
+        records,
+      });
+
       const workoutName = assignment.workout.name;
       setShareCaption(
         t.athlete.session.shareCaption
@@ -654,7 +786,6 @@ const StrengthWorkoutSession = () => {
           .replace("{{percentage}}", String(completionPercentage))
           .replace("{{time}}", formatTime(elapsed))
       );
-      setShowShareModal(true);
     } catch (error) {
       console.error("Error saving workout:", error);
       toast({
@@ -665,6 +796,28 @@ const StrengthWorkoutSession = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const saveFeedback = (feedback: { rpe?: number; notes: string }) => {
+    if (!assignment) return Promise.resolve();
+    return settleWithin(
+      updateAssignmentFeedback(assignment.id, { rpe: feedback.rpe, athleteNotes: feedback.notes.trim() }).catch(
+        (error) => console.error("Error saving feedback:", error)
+      ),
+      SAVE_TIMEOUT_MS
+    );
+  };
+
+  const handleFinishSummary = async (feedback: { rpe?: number; notes: string }) => {
+    setFinishing(true);
+    await saveFeedback(feedback);
+    setFinishing(false);
+    navigate("/athlete");
+  };
+
+  const handleShareSummary = (feedback: { rpe?: number; notes: string }) => {
+    saveFeedback(feedback);
+    setShowShareModal(true);
   };
 
   // Update set
@@ -749,12 +902,52 @@ const StrengthWorkoutSession = () => {
         const prev = history[Math.min(setIndex, history.length - 1)];
         return { reps: prev.reps, weight: prev.weight, fromHistory: true };
       }
-      const earlier = progress.sets.slice(0, setIndex).reverse().find((s) => s.reps || s.weight);
+      // Warm-up sets are lighter on purpose, so they never seed the next set
+      const earlier = progress.sets
+        .slice(0, setIndex)
+        .reverse()
+        .find((s) => !s.warmup && (s.reps || s.weight));
       if (earlier) return { reps: earlier.reps, weight: earlier.weight, fromHistory: false };
       const target = assignment?.workout.exercises?.find((we) => we.id === workoutExerciseId)?.reps ?? "";
-      return isPlainNumber(target) ? { reps: target.trim(), weight: "", fromHistory: false } : null;
+      const reps = repsFromTarget(target);
+      return reps ? { reps, weight: "", fromHistory: false } : null;
     },
     [previousSets, assignment]
+  );
+
+  const updateSet = useCallback(
+    (workoutExerciseId: string, setIndex: number, patch: (set: SetProgress) => SetProgress) => {
+      setExerciseProgress((prev) => {
+        const newMap = new Map(prev);
+        const progress = newMap.get(workoutExerciseId);
+        if (progress?.sets[setIndex]) {
+          const newSets = [...progress.sets];
+          newSets[setIndex] = patch(newSets[setIndex]);
+          newMap.set(workoutExerciseId, { ...progress, sets: newSets });
+        }
+        return newMap;
+      });
+    },
+    []
+  );
+
+  // ±2.5 kg from the typed value, else from the suggestion
+  const handleStepWeight = useCallback(
+    (workoutExerciseId: string, setIndex: number, delta: number) => {
+      const suggested = getSuggestion(exerciseProgress, workoutExerciseId, setIndex)?.weight ?? "";
+      updateSet(workoutExerciseId, setIndex, (set) => {
+        const base = set.weight || suggested;
+        const next = Math.max(0, parseNum(base) + delta);
+        return { ...set, weight: formatWeight(next, base) };
+      });
+    },
+    [exerciseProgress, getSuggestion, updateSet]
+  );
+
+  const handleToggleWarmup = useCallback(
+    (workoutExerciseId: string, setIndex: number) =>
+      updateSet(workoutExerciseId, setIndex, (set) => ({ ...set, warmup: !set.warmup })),
+    [updateSet]
   );
 
   const handleUseSuggestion = useCallback(
@@ -913,6 +1106,9 @@ const StrengthWorkoutSession = () => {
 
   const workout = assignment.workout;
   const completionPercentage = getCompletionPercentage();
+  const allSets = Array.from(exerciseProgress.values()).flatMap((p) => p.sets);
+  const completedSetCount = allSets.filter((set) => set.completed).length;
+  const totalSetCount = allSets.length;
 
   const restNextExercise = rest ? workout.exercises?.find((we) => we.id === rest.nextExerciseId) : undefined;
   const restNextLabel = restNextExercise
@@ -947,6 +1143,15 @@ const StrengthWorkoutSession = () => {
       onSubmit={handleSharePost}
       initialCaption={shareCaption}
     />
+    {summary && !showShareModal && (
+      <SessionSummary
+        data={summary}
+        t={t}
+        finishing={finishing}
+        onFinish={handleFinishSummary}
+        onShare={handleShareSummary}
+      />
+    )}
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header — before start only; once started the controls live in the floating glass bar */}
       {!isWorkoutStarted && (
@@ -1104,6 +1309,9 @@ const StrengthWorkoutSession = () => {
                     getSuggestion(exerciseProgress, workoutExercise.id, setIndex)
                   )}
                   onUseSuggestion={(setIndex) => handleUseSuggestion(workoutExercise.id, setIndex)}
+                  best={bestByExercise.get(workoutExercise.exerciseId)}
+                  onStepWeight={(setIndex, delta) => handleStepWeight(workoutExercise.id, setIndex, delta)}
+                  onToggleWarmup={(setIndex) => handleToggleWarmup(workoutExercise.id, setIndex)}
                   onUpdateSet={(setIndex, field, value) =>
                     handleUpdateSet(workoutExercise.id, setIndex, field, value)
                   }
@@ -1146,7 +1354,13 @@ const StrengthWorkoutSession = () => {
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>{t.athlete.session.saveConfirmTitle}</DrawerTitle>
-            <DrawerDescription>{t.athlete.session.saveConfirmDescription}</DrawerDescription>
+            <DrawerDescription>
+              {completedSetCount < totalSetCount
+                ? t.athlete.session.saveIncomplete
+                    .replace("{{done}}", String(completedSetCount))
+                    .replace("{{total}}", String(totalSetCount))
+                : t.athlete.session.saveConfirmDescription}
+            </DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
             <Button onClick={handleSave} disabled={saving} className="w-full">

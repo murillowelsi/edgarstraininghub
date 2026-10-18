@@ -1,7 +1,12 @@
 import { getAnalytics, type Analytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  type Firestore,
+} from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getMessaging, type Messaging } from "firebase/messaging";
 
@@ -17,7 +22,20 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Persistent cache: reads work offline (gym basements!) and writes are queued
+// in IndexedDB until the connection comes back. Falls back to the default
+// in-memory cache where IndexedDB isn't available.
+const createDb = (): Firestore => {
+  try {
+    return initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    });
+  } catch (e) {
+    console.warn("Firestore persistent cache unavailable:", e);
+    return initializeFirestore(app, {});
+  }
+};
+export const db = createDb();
 export const storage = getStorage(app);
 
 // Secondary app instance for creating users without affecting current session

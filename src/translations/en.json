@@ -860,7 +860,9 @@
       "logExtraLastDone": "Last done {{date}}",
       "logExtraNeverDone": "Not done yet",
       "logExtraError": "Couldn't log the session. Try again.",
-      "extra": "Extra"
+      "extra": "Extra",
+      "inProgress": "Workout in progress",
+      "inProgressDetail": "{{done}}/{{total}} sets · {{minutes}} min · tap to continue"
     },
     "workouts": {
       "title": "Workouts",
@@ -888,6 +890,7 @@
       "markedNotDone": "Workout marked as not done",
       "reopened": "Workout marked as pending",
       "removeExtra": "Remove extra session",
+      "overdue": "Overdue",
       "extraRemoved": "Extra session removed",
       "removeExtraDescription": "\"{{name}}\" and any sets you logged in it will be removed. This can't be undone."
     },
@@ -967,6 +970,13 @@
       "avgPowerPlaceholder": "e.g. 220",
       "shareCaption": "Workout complete: {{name}} ✅"
     },
+    "strengthProgress": {
+      "title": "Strength progress",
+      "subtitle": "Heaviest working set per session",
+      "empty": "Log weights in your strength sessions to see your progress here.",
+      "best": "Best",
+      "sessions": "Sessions"
+    },
     "session": {
       "exerciseFallback": "Exercise",
       "complete": "Complete",
@@ -1005,7 +1015,29 @@
       "exitDescription": "Your sets are saved on this phone. You can continue later or discard this session.",
       "exitKeep": "Leave and continue later",
       "exitDiscard": "Discard workout",
-      "exitStay": "Keep training"
+      "exitStay": "Keep training",
+      "warmupShort": "W",
+      "warmupOn": "Mark as warm-up set",
+      "warmupOff": "Mark as working set",
+      "warmupHint": "Tap the set number to mark a warm-up set",
+      "personalRecord": "Personal record",
+      "saveIncomplete": "You completed {{done}} of {{total}} sets. Finish the workout anyway?",
+      "savedOffline": "Saved on your phone — it will sync when you're back online",
+      "summary": {
+        "title": "Workout done!",
+        "time": "Time",
+        "sets": "Sets",
+        "volume": "Volume",
+        "records": "Records",
+        "newRecords": "New personal records",
+        "rpeQuestion": "How hard was it? (effort 1–10)",
+        "rpeEasy": "Very easy",
+        "rpeMax": "Max effort",
+        "notesLabel": "Note for your coach",
+        "notesPlaceholder": "How did it feel? Any pain, machine taken, load too light…",
+        "finish": "Done",
+        "share": "Share on the feed"
+      }
     },
     "profile": {
       "title": "You",

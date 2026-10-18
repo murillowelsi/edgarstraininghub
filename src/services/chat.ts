@@ -95,26 +95,29 @@ export const ChatService = {
             ...unreadUpdates
         });
 
-        // Trigger push notification via Vercel API (fire-and-forget, don't block the send)
-        const recipientId = participants.find(pId => pId !== senderId);
-        if (recipientId) {
+        // Trigger push notifications via Vercel API (fire-and-forget, don't block the send).
+        // Every other participant gets one — team chats have more than one recipient.
+        const recipientIds = participants.filter(pId => pId !== senderId);
+        if (recipientIds.length > 0) {
             try {
                 const { getAuth } = await import("firebase/auth");
                 const { auth } = await import("../lib/firebase");
                 const idToken = await getAuth(auth.app).currentUser?.getIdToken();
                 if (idToken) {
-                    fetch("/api/notify", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            chatId,
-                            messageText: text,
-                            senderName: senderName || "Coach",
-                            recipientId,
-                            idToken,
-                        }),
-                    }).catch(() => {
-                        // Notification failed silently — message was already saved
+                    recipientIds.forEach(recipientId => {
+                        fetch("/api/notify", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                chatId,
+                                messageText: text,
+                                senderName: senderName || "Coach",
+                                recipientId,
+                                idToken,
+                            }),
+                        }).catch(() => {
+                            // Notification failed silently — message was already saved
+                        });
                     });
                 }
             } catch {

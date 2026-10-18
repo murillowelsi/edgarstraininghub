@@ -9,6 +9,7 @@ export interface SetProgressData {
   weight: string;
   completed: boolean;
   time?: number; // seconds tracked by the per-set timer
+  warmup?: boolean; // warm-up sets don't count towards volume or PRs
 }
 
 // Progress data for a single exercise
@@ -52,6 +53,9 @@ export interface WorkoutAssignment {
   skipped?: boolean;
   // Logged by the athlete on a day the coach didn't schedule
   selfLogged?: boolean;
+  // Athlete feedback after a session
+  rpe?: number; // perceived effort 1–10
+  athleteNotes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -72,6 +76,9 @@ export interface WorkoutAssignmentDocument {
   activityData?: ActivityData;
   skipped?: boolean;
   selfLogged?: boolean;
+  // Athlete feedback after a session
+  rpe?: number; // perceived effort 1–10
+  athleteNotes?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

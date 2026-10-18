@@ -25,7 +25,9 @@ import { useEventChatReminders } from "@/hooks/useEventChatReminders";
 import { differenceInCalendarDays } from "date-fns";
 import { addDays, format, isAfter, isBefore, isSameDay, isToday, startOfDay } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import { CalendarCheck, ChevronRight, Dumbbell, Flame, PersonStanding, Plus, Target, Trash2, TrendingUp } from "lucide-react";
+import { CalendarCheck, ChevronRight, Dumbbell, Flame, PersonStanding, Play, Plus, Target, Trash2, TrendingUp } from "lucide-react";
+import { loadSessionDraft } from "@/lib/sessionDraft";
+import { NotificationBanner } from "@/components/NotificationBanner";
 import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -119,6 +121,24 @@ const AthleteHome = () => {
     }
   };
 
+  // A strength session interrupted on this phone (draft autosaved by the session page)
+  const inProgress = (() => {
+    for (const assignment of assignments) {
+      if (assignment.workout.type !== "strength") continue;
+      const draft = loadSessionDraft(assignment.id);
+      if (!draft) continue;
+      if (assignment.completedAt && draft.updatedAt <= assignment.completedAt.getTime()) continue;
+      const sets = Object.values(draft.progress).flatMap((p) => p.sets);
+      return {
+        assignment,
+        done: sets.filter((s) => s.completed).length,
+        total: sets.length,
+        minutes: Math.max(1, Math.round((draft.updatedAt - draft.startedAt) / 60000)),
+      };
+    }
+    return null;
+  })();
+
   // Extra sessions can only be logged for today or past days
   const canLogExtra = !isAfter(selectedDate, startOfDay(new Date()));
 
@@ -167,6 +187,34 @@ const AthleteHome = () => {
         </div>
 
         <LeaveTestimonialBanner mode="home" />
+
+        {/* Ask for notification permission here too, not only inside the chat */}
+        <div className="rounded-xl overflow-hidden empty:hidden">
+          <NotificationBanner />
+        </div>
+
+        {/* In-progress session saved on this phone — one tap back into it */}
+        {inProgress && (
+          <Link
+            to={`/athlete/workout/${inProgress.assignment.id}/session`}
+            className="flex items-center gap-3 rounded-2xl border-2 border-primary bg-primary/10 p-4 transition-transform active:scale-[0.98]"
+          >
+            <div className="h-11 w-11 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+              <Play className="h-5 w-5 ml-0.5" fill="currentColor" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t.athlete.home.inProgress}</p>
+              <p className="font-semibold truncate">{inProgress.assignment.workout.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {t.athlete.home.inProgressDetail
+                  .replace("{{done}}", String(inProgress.done))
+                  .replace("{{total}}", String(inProgress.total))
+                  .replace("{{minutes}}", String(inProgress.minutes))}
+              </p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-primary shrink-0" />
+          </Link>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
@@ -282,7 +330,7 @@ const AthleteHome = () => {
             {/* Selected Date Workouts */}
             <div className="mt-4 space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
-                {isToday(selectedDate) ? t.athlete.home.todaysWorkouts : format(selectedDate, "EEEE, MMM d")}
+                {isToday(selectedDate) ? t.athlete.home.todaysWorkouts : format(selectedDate, language === "pt" ? "EEEE, d MMM" : "EEEE, MMM d", { locale: dateLocale })}
               </p>
 
               {selectedDateAssignments.length === 0 ? (
@@ -311,7 +359,6 @@ const AthleteHome = () => {
                             </span>
                           ) : workout.name
                         }
-                        titleClassName={isCompleted ? "line-through text-muted-foreground" : undefined}
                         subtitle={
                           workout.type === "strength"
                             ? `${workout.exercises?.length || 0} ${t.athlete.home.exercises}`

@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { AssignmentWithWorkout, ExerciseProgressData } from "@/types/workoutAssignment";
+import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { modalityAccent } from "@/utils/modalityColors";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -10,6 +10,7 @@ import { Dumbbell } from "lucide-react";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { Link } from "react-router-dom";
 import { getActivityHeadline } from "@/utils/activityFormat";
+import { computeStrengthVolume } from "@/utils/strengthStats";
 
 interface Props {
   assignment: AssignmentWithWorkout;
@@ -24,22 +25,6 @@ const icons = {
   swimming: GrSwim,
   strength: Dumbbell,
 } as const;
-
-const computeStrengthVolume = (progressData?: ExerciseProgressData[]) => {
-  if (!progressData) return { sets: 0, volume: 0 };
-  let sets = 0;
-  let volume = 0;
-  for (const ex of progressData) {
-    for (const set of ex.sets) {
-      if (!set.completed) continue;
-      sets += 1;
-      const reps = parseInt(set.reps, 10) || 0;
-      const weight = parseFloat(set.weight) || 0;
-      volume += reps * weight;
-    }
-  }
-  return { sets, volume };
-};
 
 const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href }: Props) => {
   const { t, language } = useLanguage();

@@ -3,12 +3,12 @@ import ActivityCard from "@/components/athlete/ActivityCard";
 import EventCard from "@/components/athlete/EventCard";
 import AddEventSheet from "@/components/athlete/AddEventSheet";
 import { ProgressSummaryChart } from "@/components/athlete/ProgressSummaryChart";
+import { StrengthProgressChart } from "@/components/athlete/StrengthProgressChart";
 import { TrainingLogCalendar } from "@/components/athlete/TrainingLogCalendar";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dumbbell, Plus, Settings } from "lucide-react";
-import LanguageChoice from "@/components/LanguageChoice";
 import { LeaveTestimonialBanner } from "@/components/athlete/LeaveTestimonialBanner";
 import { SectionSpinner } from "@/components/ui/spinner";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
@@ -135,15 +135,6 @@ const AthleteProfile = () => {
           </button>
         </div>
 
-        <Card className="border-border/50">
-          <CardContent className="p-4 space-y-2">
-            <h3 className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-              {t.settings.language}
-            </h3>
-            <LanguageChoice />
-          </CardContent>
-        </Card>
-
         <LeaveTestimonialBanner mode="profile" />
 
         <Tabs
@@ -191,6 +182,7 @@ const AthleteProfile = () => {
             </Card>
 
             <ProgressSummaryChart assignments={assignments} />
+            <StrengthProgressChart assignments={assignments} />
 
             <TrainingLogCalendar assignments={assignments} />
 

@@ -47,6 +47,8 @@ const docToAssignment = (
   activityData: data.activityData,
   skipped: data.skipped ?? false,
   selfLogged: data.selfLogged ?? false,
+  rpe: data.rpe ?? undefined,
+  athleteNotes: data.athleteNotes ?? undefined,
   createdAt: data.createdAt?.toDate() || new Date(),
   updatedAt: data.updatedAt?.toDate() || new Date(),
 });
@@ -186,6 +188,8 @@ export const resetWorkoutAssignment = async (id: string): Promise<void> => {
     progressData: null,
     completionPercentage: null,
     totalTime: null,
+    rpe: null,
+    athleteNotes: null,
     updatedAt: serverTimestamp(),
   });
 };
@@ -222,6 +226,19 @@ export const completeWorkoutWithProgress = async (
     totalTime,
     updatedAt: serverTimestamp(),
   });
+};
+
+// Athlete's post-session feedback (perceived effort + note for the coach)
+export const updateAssignmentFeedback = async (
+  id: string,
+  feedback: { rpe?: number; athleteNotes?: string }
+): Promise<void> => {
+  const docRef = doc(db, ASSIGNMENTS_COLLECTION, id);
+  const clean = Object.fromEntries(
+    Object.entries(feedback).filter(([, v]) => v !== undefined && v !== "")
+  );
+  if (Object.keys(clean).length === 0) return;
+  await updateDoc(docRef, { ...clean, updatedAt: serverTimestamp() });
 };
 
 // Get assignments for a specific athlete

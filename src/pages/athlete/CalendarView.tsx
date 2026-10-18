@@ -19,6 +19,7 @@ import {
 import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { workoutLabels } from "@/utils/workoutLabels";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -188,8 +189,6 @@ const AthleteCalendarView = () => {
                                 <p
                                   className={cn(
                                     "font-medium truncate",
-                                    isCompleted &&
-                                      "line-through text-muted-foreground"
                                   )}
                                 >
                                   {workout.name}
@@ -199,9 +198,7 @@ const AthleteCalendarView = () => {
                                     ? `${workout.exercises?.length || 0} ${t.athlete.workouts.exercises}`
                                     : `${workout.stages.length} ${t.athlete.workouts.stages}`}{" "}
                                   ·{" "}
-                                  <span className="capitalize">
-                                    {workout.type}
-                                  </span>
+                                  <span>{workoutLabels(t).type(workout.type)}</span>
                                   {assignment.selfLogged && (
                                     <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">
                                       {t.athlete.home.extra}

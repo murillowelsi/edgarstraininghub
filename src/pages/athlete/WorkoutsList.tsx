@@ -11,7 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 import { subscribeToAssignmentsByAthlete, markAssignmentSkipped, unmarkAssignmentSkipped, deleteAssignment } from "@/services/workoutAssignmentsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { workoutLabels } from "@/utils/workoutLabels";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   Check,
@@ -31,7 +34,7 @@ import {
   Zap,
 } from "lucide-react";
 import { SectionSpinner } from "@/components/ui/spinner";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 const formatTime = (seconds: number) => {
@@ -65,7 +68,7 @@ const filterColors: Record<string, string> = {
 
 const AthleteWorkoutsList = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [displayName, setDisplayName] = useState<string>("");
@@ -140,14 +143,27 @@ const AthleteWorkoutsList = () => {
     }
   };
 
+  const todayStart = startOfDay(new Date());
+  const isOverdue = (a: AssignmentWithWorkout) => !a.completedAt && !a.skipped && a.scheduledDate < todayStart;
+
   // Filter assignments
-  const filteredAssignments = assignments.filter((a) => {
+  const matchingAssignments = assignments.filter((a) => {
     if (filter === "pending" && (a.completedAt || a.skipped)) return false;
     if (filter === "completed" && !a.completedAt) return false;
     if (filter === "skipped" && !a.skipped) return false;
     if (search.trim() && !a.workout.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  // Pending: today and upcoming first (soonest first), then overdue (most recent first)
+  const filteredAssignments =
+    filter === "pending"
+      ? [
+          ...matchingAssignments.filter((a) => !isOverdue(a)),
+          ...matchingAssignments.filter(isOverdue).sort((a, b) => b.scheduledDate.getTime() - a.scheduledDate.getTime()),
+        ]
+      : matchingAssignments;
+  const firstOverdueId = filter === "pending" ? filteredAssignments.find(isOverdue)?.id : undefined;
 
   // Stats
   const totalWorkouts = assignments.length;
@@ -229,19 +245,28 @@ const AthleteWorkoutsList = () => {
               const color = isCompleted ? "#22c55e" : isSkipped ? "#ef4444" : (workoutTypeColors[workout.type] ?? "#8b5cf6");
               const badgeLabel = isCompleted
                 ? (assignment.completionPercentage !== undefined ? `${assignment.completionPercentage}%` : t.athlete.workouts.done)
-                : isSkipped ? t.athlete.workouts.notDone : workout.type;
+                : isSkipped ? t.athlete.workouts.notDone : workoutLabels(t).type(workout.type);
               return (
+                <Fragment key={assignment.id}>
+                {assignment.id === firstOverdueId && (
+                  <p className="pt-3 pb-1 px-1 text-xs font-semibold uppercase tracking-wide text-red-500">
+                    {t.athlete.workouts.overdue}
+                  </p>
+                )}
                 <ListItemCard
-                  key={assignment.id}
                   to={`/athlete/workout/${assignment.id}`}
                   icon={isCompleted ? <Check className="h-5 w-5" /> : isSkipped ? <XCircle className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                   iconStyle={{ backgroundColor: `${color}1a`, color }}
                   title={workout.name}
-                  titleClassName={(isCompleted || isSkipped) ? "line-through text-muted-foreground" : undefined}
+                  titleClassName={isSkipped ? "line-through text-muted-foreground" : undefined}
                   subtitle={
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2">
-                        <span>{format(assignment.scheduledDate, "MMM d")}</span>
+                        <span className={cn(isOverdue(assignment) && "text-red-500 font-medium")}>
+                          {format(assignment.scheduledDate, language === "pt" ? "d MMM" : "MMM d", {
+                            locale: language === "pt" ? ptBR : undefined,
+                          })}
+                        </span>
                         {assignment.selfLogged && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0">{t.athlete.home.extra}</Badge>
                         )}
@@ -310,6 +335,7 @@ const AthleteWorkoutsList = () => {
                     </Button>
                   }
                 />
+                </Fragment>
               );
             })}
           </div>

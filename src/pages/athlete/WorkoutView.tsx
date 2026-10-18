@@ -43,6 +43,7 @@ import type { WorkoutStage } from "@/types/workout";
 import { stageColors } from "@/types/workout";
 import { workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   ArrowLeft,
   Bike,
@@ -534,7 +535,7 @@ const AthleteWorkoutView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, displayName, photoURL, userRole } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const [assignment, setAssignment] = useState<AssignmentWithWorkout | null>(
     null
@@ -1051,8 +1052,7 @@ const AthleteWorkoutView = () => {
                 <div className="flex-1 min-w-0">
                   <h2
                     className={cn(
-                      "text-xl font-bold text-balance break-words",
-                      isCompleted && "line-through text-muted-foreground"
+                      "text-xl font-bold text-balance break-words"
                     )}
                   >
                     {workout.name}
@@ -1066,7 +1066,7 @@ const AthleteWorkoutView = () => {
                       )}
                     >
                       <Icon className="h-3 w-3 mr-1" />
-                      {workout.type}
+                      {workoutLabels(t).type(workout.type)}
                     </Badge>
                     {isCompleted && (
                       <Badge className="bg-green-100 text-green-700 dark:bg-green-900/50">
@@ -1081,7 +1081,9 @@ const AthleteWorkoutView = () => {
                   <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
-                      {format(assignment.scheduledDate, "EEEE, MMM d")}
+                      {format(assignment.scheduledDate, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMM d", {
+                        locale: language === "pt" ? ptBR : undefined,
+                      })}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Layers className="h-4 w-4" />

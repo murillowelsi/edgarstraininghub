@@ -860,7 +860,9 @@
       "logExtraLastDone": "Feito por último em {{date}}",
       "logExtraNeverDone": "Ainda não feito",
       "logExtraError": "Não foi possível registrar a sessão. Tente de novo.",
-      "extra": "Extra"
+      "extra": "Extra",
+      "inProgress": "Treino em andamento",
+      "inProgressDetail": "{{done}}/{{total}} séries · {{minutes}} min · toque para continuar"
     },
     "workouts": {
       "title": "Treinos",
@@ -888,6 +890,7 @@
       "markedNotDone": "Treino marcado como não feito",
       "reopened": "Treino marcado como pendente",
       "removeExtra": "Remover sessão extra",
+      "overdue": "Atrasados",
       "extraRemoved": "Sessão extra removida",
       "removeExtraDescription": "\"{{name}}\" e as séries registradas nele serão removidos. Esta ação não pode ser desfeita."
     },
@@ -967,6 +970,13 @@
       "avgPowerPlaceholder": "Ex: 220",
       "shareCaption": "Treino concluído: {{name}} ✅"
     },
+    "strengthProgress": {
+      "title": "Evolução de carga",
+      "subtitle": "Maior carga por sessão",
+      "empty": "Registre as cargas nos treinos de força para ver sua evolução aqui.",
+      "best": "Melhor",
+      "sessions": "Sessões"
+    },
     "session": {
       "exerciseFallback": "Exercício",
       "complete": "Completo",
@@ -1005,7 +1015,29 @@
       "exitDescription": "Suas séries ficam salvas neste celular. Você pode continuar depois ou descartar esta sessão.",
       "exitKeep": "Sair e continuar depois",
       "exitDiscard": "Descartar treino",
-      "exitStay": "Continuar treinando"
+      "exitStay": "Continuar treinando",
+      "warmupShort": "A",
+      "warmupOn": "Marcar como série de aquecimento",
+      "warmupOff": "Marcar como série válida",
+      "warmupHint": "Toque no número da série para marcar aquecimento",
+      "personalRecord": "Recorde pessoal",
+      "saveIncomplete": "Você completou {{done}} de {{total}} séries. Finalizar o treino mesmo assim?",
+      "savedOffline": "Salvo no celular — sincroniza quando a internet voltar",
+      "summary": {
+        "title": "Treino concluído!",
+        "time": "Tempo",
+        "sets": "Séries",
+        "volume": "Volume",
+        "records": "Recordes",
+        "newRecords": "Novos recordes pessoais",
+        "rpeQuestion": "Quão pesado foi? (esforço 1–10)",
+        "rpeEasy": "Muito leve",
+        "rpeMax": "Esforço máximo",
+        "notesLabel": "Nota para o coach",
+        "notesPlaceholder": "Como se sentiu? Alguma dor, aparelho ocupado, carga leve…",
+        "finish": "Concluir",
+        "share": "Compartilhar no feed"
+      }
     },
     "profile": {
       "title": "Você",

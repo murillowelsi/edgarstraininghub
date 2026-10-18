@@ -154,3 +154,28 @@ Pesados em 4G fraco. Preferir GIF/thumbnail leve na sessão e vídeo só sob dem
 - ⚪ **R2.8 Card "atual" sem descanso ativo** não tem destaque (o anel amarelo só aparece durante o descanso).
 - ⚪ **R2.9 Resumo do card fechado** só aparece quando há carga/reps; séries marcadas vazias mostram só a prescrição.
 - ⚪ **R2.10 Rascunho só no aparelho.** Sincronizar com o Firestore (sem marcar concluído) permitiria continuar em outro celular e o coach acompanhar ao vivo.
+
+---
+
+## Push de mensagens do chat com o app fechado (investigação 18/10/2026)
+
+**Arquitetura atual:** ao enviar mensagem, `src/services/chat.ts` chama `POST /api/notify` (Vercel), que busca `users/{id}/fcmTokens` e envia via FCM. O service worker do PWA (`src/sw.ts`) recebe com `onBackgroundMessage` e mostra a notificação; o clique abre o chat.
+
+**Causa raiz — não funciona hoje:** `VITE_FIREBASE_VAPID_KEY` não existe nem no `.env` nem nas variáveis da Vercel. Sem ela, `FCMService.registerToken` retorna antes de pedir o token, então nenhum aparelho fica registrado e o `/api/notify` não tem para quem enviar.
+
+**Para ativar (ação manual):**
+1. Firebase Console → Configurações do projeto → Cloud Messaging → *Web Push certificates* → **Generate key pair**.
+2. Adicionar a chave pública como `VITE_FIREBASE_VAPID_KEY` na Vercel (Production + Preview) e no `.env` local, e fazer um novo deploy (variável `VITE_` entra no build).
+3. No iPhone (iOS 16.4+): abrir o site no Safari → Compartilhar → **Adicionar à Tela de Início**, abrir **pelo ícone** e tocar em "Ativar" no aviso de notificações. Permissão dada numa aba do Safari não vale para o app instalado.
+4. Testar: mandar mensagem de outra conta com o app fechado.
+
+**Corrigido no código nesta rodada:**
+- Chat de grupo (time) só notificava o primeiro participante — agora notifica todos.
+- O convite para ativar notificações agora aparece também na Home (antes só dentro do Chat).
+
+**Pontos a observar depois de ativar:**
+- Mensagens FCM com `notification` + `onBackgroundMessage` podem gerar notificação duplicada no Android/Chrome; se acontecer, enviar só `data` no `/api/notify`.
+- `public/firebase-messaging-sw.js` (SDK compat v10, config fixa) parece não ser usado — o token usa o SW do PWA. Remover após confirmar.
+- `FIREBASE_PRIVATE_KEY` está marcada na Vercel como *readable-secret*: marque como **Sensitive** no painel.
+- O aviso "notificações bloqueadas" fala em "cadeado do navegador"; no iPhone o caminho é Ajustes → Notificações → app.
+- O aviso de fim de descanso com tela bloqueada (`/api/rest-timer`) depende desse mesmo registro de token.
