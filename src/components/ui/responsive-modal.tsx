@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface ResponsiveModalProps {
   open: boolean;
@@ -25,6 +26,12 @@ interface ResponsiveModalProps {
   description?: string;
   /** Extra className for DrawerContent (e.g. "sm:w-[600px]") */
   className?: string;
+  /** Replaces the default padded, scrolling body wrapper's classes */
+  bodyClassName?: string;
+  /** Pinned below the body (e.g. a Done button) */
+  footer?: ReactNode;
+  /** Mobile: take the full 90dvh instead of hugging the content */
+  fullHeight?: boolean;
   children: ReactNode;
 }
 
@@ -34,9 +41,15 @@ export function ResponsiveModal({
   title,
   description,
   className,
+  bodyClassName = "px-4 pb-6 overflow-y-auto flex-1",
+  footer,
+  fullHeight,
   children,
 }: ResponsiveModalProps) {
   const isMobile = useIsMobile();
+  const footerNode = footer && (
+    <div className="shrink-0 border-t border-border/50 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">{footer}</div>
+  );
 
   if (isMobile) {
     // Note: `repositionInputs` (vaul default = true) is what enables vaul's
@@ -52,12 +65,13 @@ export function ResponsiveModal({
         onOpenChange={onOpenChange}
         shouldScaleBackground={false}
       >
-        <DrawerContent direction="bottom" className="max-h-[90dvh] flex flex-col">
+        <DrawerContent direction="bottom" className={cn("max-h-[90dvh] flex flex-col", fullHeight && "h-[90dvh]")}>
           <DrawerHeader className="text-left shrink-0">
             <DrawerTitle>{title}</DrawerTitle>
             {description && <DrawerDescription>{description}</DrawerDescription>}
           </DrawerHeader>
-          <div className="px-4 pb-6 overflow-y-auto flex-1">{children}</div>
+          <div className={cn("min-h-0", bodyClassName)}>{children}</div>
+          {footerNode}
         </DrawerContent>
       </Drawer>
     );
@@ -70,7 +84,8 @@ export function ResponsiveModal({
           <DrawerTitle>{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
-        <div className="px-4 pb-6 overflow-y-auto flex-1">{children}</div>
+        <div className={cn("min-h-0", bodyClassName)}>{children}</div>
+        {footerNode}
       </DrawerContent>
     </Drawer>
   );

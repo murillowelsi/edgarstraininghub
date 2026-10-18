@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FileText, Home, LayoutGrid, LogOut, Menu, MessageSquareQuote, Shield, UserRound, Users } from "lucide-react";
+import { CalendarDays, Dumbbell, ExternalLink, FileText, Home, LayoutGrid, LogOut, MessageSquareQuote, PanelLeftClose, PanelLeftOpen, Shield, UserRound, Users } from "lucide-react";
+import { CachedAvatar } from "@/components/ui/cached-avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -118,23 +126,7 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
 
   const SidebarContent = ({ collapsed = false, showCollapseButton = false }: { collapsed?: boolean; showCollapseButton?: boolean }) => (
     <>
-      <div className="p-6 border-b">
-        {!collapsed && (
-          <>
-            <h1 className="text-xl font-bold">{t.admin.panel}</h1>
-            <p className="text-sm text-muted-foreground truncate">
-              {user?.email}
-            </p>
-          </>
-        )}
-        {collapsed && (
-          <div className="flex justify-center">
-            <Menu className="h-5 w-5" />
-          </div>
-        )}
-      </div>
-
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-3 pt-4 space-y-1">
         {navItems.map((item) => {
           const isActive = item.href === "/admin"
             ? location.pathname === "/admin"
@@ -169,38 +161,54 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
         })}
       </nav>
 
-      <div className="p-4 border-t space-y-2">
-        {!collapsed && (
-          <Link to="/">
-            <Button variant="outline" className="w-full">
+      {/* Account + collapse: one compact row instead of three stacked buttons */}
+      <div className={cn("p-3 border-t flex items-center gap-1", collapsed && "flex-col")}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={cn(
+                "flex items-center gap-2.5 rounded-xl p-1.5 text-left hover:bg-accent transition-colors min-w-0",
+                !collapsed && "flex-1"
+              )}
+              title={collapsed ? displayName || user?.email || undefined : undefined}
+            >
+              <CachedAvatar
+                src={photoURL}
+                alt={displayName || ""}
+                fallback={(displayName || user?.email || "?").charAt(0).toUpperCase()}
+                className="h-8 w-8 shrink-0"
+                fallbackClassName="bg-primary text-primary-foreground text-sm font-semibold"
+              />
+              {!collapsed && (
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">{displayName || t.admin.panel}</span>
+                  <span className="block truncate text-xs text-muted-foreground">{user?.email}</span>
+                </span>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-56">
+            <DropdownMenuItem onClick={() => navigate("/")}>
+              <ExternalLink className="h-4 w-4 mr-2" />
               {t.admin.viewSite}
-            </Button>
-          </Link>
-        )}
-        <Button
-          variant="ghost"
-          className={cn("w-full", collapsed && "px-2")}
-          onClick={handleLogout}
-          title={collapsed ? t.auth.logout : undefined}
-        >
-          <LogOut className={cn("h-4 w-4", !collapsed && "mr-2")} />
-          {!collapsed && t.auth.logout}
-        </Button>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+              <LogOut className="h-4 w-4 mr-2" />
+              {t.auth.logout}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {showCollapseButton && (
           <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
+            variant="ghost"
+            size="icon"
+            className="shrink-0 h-9 w-9 text-muted-foreground"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={collapsed ? t.admin.expand : t.admin.collapse}
+            aria-label={collapsed ? t.admin.expand : t.admin.collapse}
           >
-            {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <>
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                {t.admin.collapse}
-              </>
-            )}
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
           </Button>
         )}
       </div>

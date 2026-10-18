@@ -33,10 +33,13 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { AddExerciseButton } from "./AddExerciseButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ExerciseDbBrowserProps {
   onExerciseImported: (exercise: Exercise) => void;
+  /** How many times each ExerciseDB exercise (by its ExerciseDB id) is in the workout */
+  addedCounts?: Record<string, number>;
 }
 
 // Exercise card for ExerciseDB results
@@ -45,12 +48,14 @@ const ExerciseDbCard = ({
   onPreview,
   onImport,
   importing,
+  count,
   translations,
 }: {
   exercise: ExerciseDbExercise;
   onPreview: () => void;
   onImport: () => void;
   importing: boolean;
+  count: number;
   translations: ReturnType<typeof useLanguage>["t"];
 }) => {
   const [imageError, setImageError] = useState(false);
@@ -79,15 +84,7 @@ const ExerciseDbCard = ({
           <Badge variant="secondary" className="text-xs capitalize">{exercise.target}</Badge>
         </div>
       </div>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="shrink-0 h-8 w-8 text-muted-foreground hover:text-primary"
-        onClick={(e) => { e.stopPropagation(); onImport(); }}
-        disabled={importing}
-      >
-        {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-      </Button>
+      <AddExerciseButton count={count} loading={importing} onClick={onImport} label={translations.workout.library.addToWorkout} />
     </div>
   );
 };
@@ -209,7 +206,7 @@ const ExerciseDbPreviewDialog = ({
   );
 };
 
-const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
+const ExerciseDbBrowser = ({ onExerciseImported, addedCounts = {} }: ExerciseDbBrowserProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -299,7 +296,6 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
       };
 
       onExerciseImported(importedExercise);
-      toast({ title: t.workout.toast.added.replace("{{name}}", exercise.name) });
 
       // Close preview if open
       if (previewExercise?.id === exercise.id) {
@@ -333,20 +329,14 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
   return (
     <div className="flex flex-col h-full">
       {/* Search and Filters */}
-      <div className="p-4 border-b bg-background space-y-3">
-        <div className="flex items-center gap-2">
-          <Database className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">{t.workout.library.exerciseLibrary}</span>
-          <span className="text-xs text-muted-foreground">{t.workout.library.exerciseCount}</span>
-        </div>
-
+      <div className="px-4 pb-3 space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.workout.library.searchExercises}
-            className="pl-8 h-8 text-sm rounded-full"
+            className="pl-8 h-10 rounded-full"
           />
           {searchQuery && (
             <button
@@ -379,7 +369,7 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
 
       {/* Results */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4">
+        <div className="px-4 pb-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -393,6 +383,7 @@ const ExerciseDbBrowser = ({ onExerciseImported }: ExerciseDbBrowserProps) => {
                   onPreview={() => setPreviewExercise(exercise)}
                   onImport={() => handleImport(exercise)}
                   importing={importing === exercise.id}
+                  count={addedCounts[exercise.id] ?? 0}
                   translations={t}
                 />
               ))}

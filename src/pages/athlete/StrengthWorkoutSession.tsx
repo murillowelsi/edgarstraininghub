@@ -129,6 +129,8 @@ const formatPrescription = (we: WorkoutExercise, t: any) => {
   const reps = (we.reps || "10").trim();
   const repsText = REP_RANGE.test(reps) ? `${reps.replace(/\s*(-|–|to|a|até)\s*/i, "–")} reps` : reps;
   const parts = [`${we.sets} × ${repsText}`];
+  // Coach's suggested load: "20" → "20 kg", free text ("peso corporal") as written
+  if (we.weight?.trim()) parts.push(/^\d+([.,]\d+)?$/.test(we.weight.trim()) ? `${we.weight.trim()} kg` : we.weight.trim());
   if (we.restSeconds > 0) parts.push(`${we.restSeconds}s ${String(t.athlete.session.rest).toLowerCase()}`);
   return parts.join(" · ");
 };
@@ -284,6 +286,12 @@ const ExerciseSessionCard = ({
             className="overflow-hidden"
           >
             <CardContent className="px-4 pb-4 pt-0">
+              {/* Coach's cue for this exercise */}
+              {workoutExercise.notes?.trim() && (
+                <p className="mb-3 rounded-xl bg-primary/10 px-3 py-2 text-sm whitespace-pre-wrap">
+                  {workoutExercise.notes}
+                </p>
+              )}
               {/* Media — compact row; opens the player/GIF on demand */}
               {hasMedia && (
                 isPlaying ? (

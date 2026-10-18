@@ -44,10 +44,13 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { AddExerciseButton } from "./AddExerciseButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MyLibraryBrowserProps {
   onExerciseSelected: (exercise: Exercise) => void;
+  /** How many times each exercise (by id) is already in the workout */
+  addedCounts?: Record<string, number>;
 }
 
 // Exercise card for library
@@ -55,11 +58,13 @@ const LibraryExerciseCard = ({
   exercise,
   onPreview,
   onAdd,
+  count,
   translations,
 }: {
   exercise: Exercise;
   onPreview: () => void;
   onAdd: () => void;
+  count: number;
   translations: ReturnType<typeof useLanguage>["t"];
 }) => {
   const thumbnailUrl = exercise.gifUrl ||
@@ -92,14 +97,7 @@ const LibraryExerciseCard = ({
           ))}
         </div>
       </div>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="shrink-0 h-8 w-8 text-muted-foreground hover:text-primary"
-        onClick={(e) => { e.stopPropagation(); onAdd(); }}
-      >
-        <Plus className="h-4 w-4" />
-      </Button>
+      <AddExerciseButton count={count} onClick={onAdd} label={translations.workout.library.addToWorkout} />
     </div>
   );
 };
@@ -625,7 +623,7 @@ const DeleteExerciseDialog = ({
   );
 };
 
-const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
+const MyLibraryBrowser = ({ onExerciseSelected, addedCounts = {} }: MyLibraryBrowserProps) => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -679,8 +677,8 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
   }, [searchQuery, exercises]);
 
   const handleAddExercise = (exercise: Exercise) => {
+    // The count badge on the row is the feedback; no toast per tap
     onExerciseSelected(exercise);
-    toast({ title: t.workout.toast.added.replace("{{name}}", exercise.name) });
     if (previewExercise?.id === exercise.id) {
       setPreviewExercise(null);
     }
@@ -726,25 +724,14 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b bg-background space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Library className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{t.workout.library.myLibrary}</span>
-          </div>
-          <Button size="sm" onClick={handleOpenCreateDialog}>
-            <Plus className="h-4 w-4 mr-1" />
-            {t.workout.common.new}
-          </Button>
-        </div>
-
-        <div className="relative">
+      <div className="px-4 pb-3 flex items-center gap-2">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.workout.library.searchExercises}
-            className="pl-8 h-8 text-sm rounded-full"
+            className="pl-8 h-10 rounded-full"
           />
           {searchQuery && (
             <button
@@ -755,11 +742,15 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
             </button>
           )}
         </div>
+        <Button size="sm" variant="outline" className="h-10 rounded-full shrink-0" onClick={handleOpenCreateDialog}>
+          <Plus className="h-4 w-4 mr-1" />
+          {t.workout.common.new}
+        </Button>
       </div>
 
       {/* Results */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4">
+        <div className="px-4 pb-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -772,6 +763,7 @@ const MyLibraryBrowser = ({ onExerciseSelected }: MyLibraryBrowserProps) => {
                   exercise={exercise}
                   onPreview={() => setPreviewExercise(exercise)}
                   onAdd={() => handleAddExercise(exercise)}
+                  count={addedCounts[exercise.id] ?? 0}
                   translations={t}
                 />
               ))}
