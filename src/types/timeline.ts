@@ -19,6 +19,25 @@ export interface WorkoutSummary {
   avgSpeed?: number;      // km/h (cycling)
   completionPercentage?: number; // for strength
   stageTimes?: SummaryStageTime[];
+  // Strength sessions
+  volumeKg?: number;
+  workingSets?: number;
+  totalSets?: number;
+  records?: number; // new personal records in this session
+  highlights?: SummaryHighlight[]; // heaviest set of the main exercises
+  rpe?: number; // perceived effort 1–10
+}
+
+export interface SummaryHighlight {
+  name: string;
+  value: string; // "60 kg × 8"
+  pr?: boolean;
+}
+
+/** Someone tagged in a post, kept so their @name can be highlighted. */
+export interface PostMention {
+  id: string;
+  name: string;
 }
 
 export interface TimelinePost {
@@ -28,7 +47,9 @@ export interface TimelinePost {
   authorRole: UserRole;
   authorPhotoURL?: string;
   caption: string;
-  imageUrl?: string;
+  imageUrl?: string; // first photo — kept for older posts/clients
+  imageUrls: string[];
+  mentions: PostMention[];
   workoutSummary?: WorkoutSummary;
   likedBy: string[];
   commentsCount: number;
@@ -43,6 +64,8 @@ export interface TimelinePostDocument {
   authorPhotoURL?: string;
   caption: string;
   imageUrl?: string;
+  imageUrls?: string[];
+  mentions?: PostMention[];
   workoutSummary?: WorkoutSummary;
   likedBy: string[];
   commentsCount: number;
@@ -80,6 +103,14 @@ export interface TimelineCommentDocument {
 
 export interface TimelinePostFormData {
   caption: string;
-  imageUrl?: string;
+  imageUrls?: string[];
+  mentions?: PostMention[];
   workoutSummary?: WorkoutSummary;
+}
+
+/** What the post composer hands back to its caller. */
+export interface ComposerResult {
+  caption: string;
+  imageUrls: string[];
+  mentions: PostMention[];
 }

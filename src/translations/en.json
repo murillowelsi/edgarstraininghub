@@ -1006,6 +1006,9 @@
       "exercisesCount": "Exercises",
       "completePercent": "Complete",
       "shareCaption": "Workout complete: {{name}} — {{percentage}}% in {{time}} 💪",
+      "shareCaptionTitle": "Today's workout: {{name}} 💪",
+      "shareCaptionRecord": "1 new record 🏆",
+      "shareCaptionRecords": "{{n}} new records 🏆",
       "rest": "Rest",
       "restSkip": "Skip",
       "restDone": "Rest over — next set!",
@@ -1322,14 +1325,23 @@
     "noPosts": "No posts published yet. Check back soon!"
   },
   "timeline": {
+    "story": {
+      "footer": "Trained with EZ Training"
+    },
     "postShared": "Post shared!",
     "summary": {
       "time": "Time",
       "distance": "Distance",
-      "avgHeartRate": "Avg HR (bpm)",
+      "avgHeartRate": "Avg HR",
       "avgPace": "Avg Pace",
-      "avgSpeed": "Avg Speed (km/h)",
-      "completed": "Completed"
+      "avgSpeed": "Avg speed",
+      "completed": "Completed",
+      "volume": "Volume",
+      "sets": "Sets",
+      "records": "Records",
+      "highlights": "Highlights",
+      "pr": "Record",
+      "rpe": "Effort {{n}}/10"
     },
     "activity": {
       "title": "Activity",
@@ -1366,7 +1378,14 @@
       "actionsTitle": "Post options",
       "likeError": "Could not update like.",
       "deleteError": "Could not delete post.",
-      "loadMoreError": "Could not load more posts."
+      "loadMoreError": "Could not load more posts.",
+      "deleteConfirm": "This post will be removed from the feed for everyone. This can't be undone.",
+      "seeMore": "more",
+      "seeLess": "less",
+      "shareStory": "Share to Stories",
+      "shareStoryHint": "Image ready for Instagram",
+      "storyError": "Couldn't create the image.",
+      "storySaved": "Image saved — post it to your Stories"
     },
     "create": {
       "title": "New post",
@@ -1380,7 +1399,20 @@
       "uploadFailed": "Upload failed",
       "uploadError": "Could not upload image.",
       "createError": "Failed to create post. Try again.",
-      "loadUsersError": "Could not load users."
+      "loadUsersError": "Could not load users.",
+      "camera": "Camera",
+      "gallery": "Gallery",
+      "maxPhotos": "Up to {{n}} photos",
+      "format": "Format",
+      "formatOriginal": "Original",
+      "overlay": "Stats on photo",
+      "overlayHint": "Puts time, volume and records on the 1st photo",
+      "uploading": "Uploading photos… {{p}}%",
+      "draftRestored": "Draft restored",
+      "mentionHint": "Type @ to tag someone",
+      "tagged": "Tagged",
+      "removePhoto": "Remove photo",
+      "workoutPost": "Workout post"
     },
     "empty": {
       "noPosts": "No posts yet",

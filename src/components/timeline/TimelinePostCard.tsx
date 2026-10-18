@@ -5,7 +5,12 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Flame, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { Flame, Instagram, Loader2, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
+import { renderStoryImage, shareOrDownloadImage } from "@/lib/postImages";
+import { summaryStats } from "@/utils/workoutSummaryStats";
+import type { WorkoutType } from "@/types/workout";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { toggleLike, deleteTimelinePost, updateTimelinePost, createActivityNotification } from "@/services/timelineService";
@@ -14,7 +19,7 @@ import { CreatePostModal } from "./CreatePostModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { CommentsDrawer } from "./CommentsDrawer";
-import type { TimelinePost } from "@/types/timeline";
+import type { ComposerResult, PostMention, TimelinePost } from "@/types/timeline";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -42,15 +47,17 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   const [showHeartBurst, setShowHeartBurst] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [sharingStory, setSharingStory] = useState(false);
 
   const isLiked = user ? post.likedBy.includes(user.uid) : false;
   const liked = pendingLike ?? isLiked;
   const likesCount = post.likedBy.length + (pendingLike !== null && pendingLike !== isLiked ? (pendingLike ? 1 : -1) : 0);
   const commentsCount = post.commentsCount;
-  const doubleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastTapRef = useRef(0);
 
-  const canDelete = user?.uid === post.authorId || isAdmin;
+  const isOwn = user?.uid === post.authorId;
+  const canDelete = isOwn || isAdmin;
 
   const handleLike = useCallback(async () => {
     if (!user || pendingLike !== null) return;
@@ -69,33 +76,56 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
     }
   }, [user, pendingLike, isLiked, post.id, toast]);
 
+  // Double tap on the media (detected in PostMedia): like — never unlike —
+  // and always show the burst, like Instagram
   const handleDoubleTap = () => {
-    const now = Date.now();
-    if (now - lastTapRef.current < 300) {
-      if (doubleTapTimer.current) clearTimeout(doubleTapTimer.current);
-      if (!liked) {
-        setShowHeartBurst(true);
-        setTimeout(() => setShowHeartBurst(false), 800);
-        handleLike();
-      }
-    }
-    lastTapRef.current = now;
+    setShowHeartBurst(true);
+    setTimeout(() => setShowHeartBurst(false), 700);
+    if (!liked) handleLike();
   };
 
   const handleDelete = async () => {
-    setShowActions(false);
+    setDeleting(true);
     try {
       await deleteTimelinePost(post.id);
       onDeleted(post.id);
       toast({ title: t.timeline.post.deleted });
     } catch {
       toast({ title: t.common.error, description: t.timeline.post.deleteError, variant: "destructive" });
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
-  const handleEditSubmit = async (caption: string, imageUrl?: string) => {
+  // 1080×1920 image for Instagram Stories (native share sheet on phones)
+  const handleShareStory = async () => {
+    if (!post.workoutSummary) return;
+    setSharingStory(true);
     try {
-      await updateTimelinePost(post.id, { caption, imageUrl });
+      const summary = post.workoutSummary;
+      const blob = await renderStoryImage({
+        summary,
+        stats: summaryStats(summary, t.timeline.summary, language === "pt" ? "pt-BR" : "en"),
+        typeLabel: t.workoutMeta.types[summary.workoutType as WorkoutType] ?? summary.workoutType,
+        highlightsTitle: t.timeline.summary.highlights,
+        footer: t.timeline.story.footer,
+        authorName: post.authorName,
+        photoUrl: post.imageUrls[0],
+      });
+      const result = await shareOrDownloadImage(blob, "ez-treino.png", summary.workoutName);
+      if (result === "downloaded") toast({ title: t.timeline.post.storySaved });
+      setShowActions(false);
+    } catch {
+      toast({ title: t.common.error, description: t.timeline.post.storyError, variant: "destructive" });
+    } finally {
+      setSharingStory(false);
+    }
+  };
+
+  const handleEditSubmit = async ({ caption, imageUrls, mentions }: ComposerResult) => {
+    try {
+      await updateTimelinePost(post.id, { caption, imageUrls, mentions });
       toast({ title: t.timeline.post.edited });
     } catch {
       toast({ title: t.common.error, description: t.timeline.post.editError, variant: "destructive" });
@@ -107,9 +137,9 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
 
   return (
     <>
-      <article className="bg-card border border-border/50 rounded-2xl overflow-hidden">
+      <article>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-3 py-2.5">
           <div className="flex items-center gap-3">
             <CachedAvatar
               src={post.authorPhotoURL}
@@ -123,8 +153,9 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
 
           {canDelete && (
             <button
-              className="p-1 rounded-full hover:bg-accent transition-colors"
+              className="h-9 w-9 -mr-1 flex items-center justify-center rounded-full hover:bg-accent transition-colors"
               onClick={() => setShowActions(true)}
+              aria-label={t.timeline.post.actionsTitle}
             >
               <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
             </button>
@@ -139,7 +170,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         />
 
         {/* Actions */}
-        <div className="px-4 pt-3 pb-1 flex items-center gap-4">
+        <div className="px-3 pt-2.5 pb-1 flex items-center gap-4">
           <button
             onClick={handleLike}
             disabled={pendingLike !== null}
@@ -162,14 +193,16 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
 
         {/* Caption */}
         {post.caption && (
-          <p className="px-4 pt-1 text-sm">
-            <span className="font-semibold mr-1">{post.authorName}</span>
-            {post.caption}
-          </p>
+          <PostCaption
+            authorName={post.authorName}
+            caption={post.caption}
+            mentions={post.mentions}
+            labels={{ more: t.timeline.post.seeMore, less: t.timeline.post.seeLess }}
+          />
         )}
 
         {/* Timestamp */}
-        <p className="px-4 pt-1 pb-3 text-xs text-muted-foreground uppercase tracking-wide">
+        <p className="px-3 pt-1 pb-2 text-xs text-muted-foreground">
           {formatDistanceToNow(post.createdAt, { addSuffix: true, ...(language === "pt" ? { locale: ptBR } : {}) })}
         </p>
       </article>
@@ -188,20 +221,37 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
             <DrawerTitle>{t.timeline.post.actionsTitle}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-6 space-y-2">
+            {isOwn && post.workoutSummary && (
+              <button
+                className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
+                onClick={handleShareStory}
+                disabled={sharingStory}
+              >
+                <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-fuchsia-500 via-rose-500 to-amber-400 text-white flex items-center justify-center shrink-0">
+                  {sharingStory ? <Loader2 className="h-5 w-5 animate-spin" /> : <Instagram className="h-5 w-5" />}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm">{t.timeline.post.shareStory}</p>
+                  <p className="text-xs text-muted-foreground">{t.timeline.post.shareStoryHint}</p>
+                </div>
+              </button>
+            )}
+            {isOwn && (
+              <button
+                className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
+                onClick={() => { setShowActions(false); setShowEdit(true); }}
+              >
+                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Pencil className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm">{t.timeline.post.edit}</p>
+                </div>
+              </button>
+            )}
             <button
               className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
-              onClick={() => { setShowActions(false); setShowEdit(true); }}
-            >
-              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Pencil className="h-5 w-5 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="font-semibold text-sm">{t.timeline.post.edit}</p>
-              </div>
-            </button>
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
-              onClick={handleDelete}
+              onClick={() => { setShowActions(false); setConfirmDelete(true); }}
             >
               <div className="h-9 w-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
                 <Trash2 className="h-5 w-5 text-destructive" />
@@ -214,12 +264,25 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         </DrawerContent>
       </Drawer>
 
+      <ResponsiveConfirm
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={t.timeline.post.delete}
+        description={t.timeline.post.deleteConfirm}
+        confirmLabel={t.common.delete}
+        cancelLabel={t.common.cancel}
+        destructive
+        loading={deleting}
+        onConfirm={handleDelete}
+      />
+
       <CreatePostModal
         open={showEdit}
         onOpenChange={setShowEdit}
         onSubmit={handleEditSubmit}
         initialCaption={post.caption}
-        initialImageUrl={post.imageUrl}
+        initialImageUrls={post.imageUrls}
+        initialMentions={post.mentions}
         workoutSummary={post.workoutSummary}
         title={t.timeline.post.editTitle}
         submitLabel={t.timeline.post.editSubmit}
@@ -238,11 +301,12 @@ function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const lastTap = useRef<{ time: number; x: number; y: number } | null>(null);
 
   type Slide = { kind: "summary" } | { kind: "image"; url: string };
   const slides: Slide[] = [];
   if (post.workoutSummary) slides.push({ kind: "summary" });
-  if (post.imageUrl) slides.push({ kind: "image", url: post.imageUrl });
+  post.imageUrls.forEach((url) => slides.push({ kind: "image", url }));
 
   useEffect(() => {
     if (!api) return;
@@ -257,60 +321,150 @@ function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
 
   if (slides.length === 0) return null;
 
-  const renderSlide = (s: Slide) => {
-    if (s.kind === "summary" && post.workoutSummary) {
-      return <WorkoutSummaryCard summary={post.workoutSummary} flush />;
+  // Double tap anywhere on the media likes the post. Uses pointerup instead of
+  // two clicks: iOS swallows the second click of a double tap (zoom gesture).
+  const handlePointerUp = (e: React.PointerEvent) => {
+    const now = Date.now();
+    const prev = lastTap.current;
+    const near = prev && Math.abs(e.clientX - prev.x) < 30 && Math.abs(e.clientY - prev.y) < 30;
+    if (prev && near && now - prev.time < 320) {
+      lastTap.current = null;
+      onDoubleTap();
+    } else {
+      lastTap.current = { time: now, x: e.clientX, y: e.clientY };
     }
-    if (s.kind === "image") {
-      return (
-        <div
-          className="w-full bg-muted relative flex items-center justify-center"
-          onClick={onDoubleTap}
-        >
-          <CachedImage
-            src={s.url}
-            alt="Post"
-            className="w-full max-h-[600px] object-contain"
-          />
-          {showHeartBurst && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <Flame className="h-24 w-24 text-orange-400 fill-orange-400 drop-shadow-lg animate-ping" />
-            </div>
-          )}
-        </div>
-      );
-    }
-    return null;
   };
 
-  if (slides.length === 1) {
-    return <div className="w-full">{renderSlide(slides[0])}</div>;
+  const renderSlide = (s: Slide) =>
+    s.kind === "summary" && post.workoutSummary ? (
+      <WorkoutSummaryCard summary={post.workoutSummary} flush />
+    ) : s.kind === "image" ? (
+      <div className="w-full bg-muted">
+        <PostImage url={s.url} />
+      </div>
+    ) : null;
+
+  return (
+    <div>
+      <div
+        className="relative overflow-hidden select-none [touch-action:manipulation] [-webkit-tap-highlight-color:transparent]"
+        onPointerUp={handlePointerUp}
+      >
+        {slides.length === 1 ? (
+          <div className="w-full">{renderSlide(slides[0])}</div>
+        ) : (
+          <Carousel setApi={setApi} opts={{ loop: false }} className="w-full">
+            <CarouselContent className="ml-0">
+              {slides.map((s, i) => (
+                <CarouselItem key={i} className="pl-0 basis-full flex">
+                  {renderSlide(s)}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        )}
+
+        {count > 1 && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 pointer-events-none">
+            {Array.from({ length: count }).map((_, i) => (
+              <span
+                key={i}
+                className={cn("h-1.5 rounded-full transition-all", current === i ? "bg-white w-3" : "bg-white/60 w-1.5")}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Like burst */}
+        <AnimatePresence>
+          {showHeartBurst && (
+            <motion.div
+              key="burst"
+              initial={{ scale: 0.3, opacity: 0 }}
+              animate={{ scale: [0.3, 1.25, 1], opacity: 1 }}
+              exit={{ scale: 1.4, opacity: 0 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            >
+              <Flame className="h-24 w-24 text-orange-400 fill-orange-400 drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+// Fills the card at the photo's own shape, clamped between 4:5 and 1.91:1 like
+// Instagram, so there are no grey bars around portrait or landscape shots.
+function PostImage({ url }: { url: string }) {
+  const [ratio, setRatio] = useState(4 / 5);
+  return (
+    <div className="w-full overflow-hidden" style={{ aspectRatio: ratio }}>
+      <CachedImage
+        src={url}
+        alt="Post"
+        className="w-full h-full object-cover"
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (img.naturalWidth && img.naturalHeight) {
+            setRatio(Math.min(1.91, Math.max(0.8, img.naturalWidth / img.naturalHeight)));
+          }
+        }}
+      />
+    </div>
+  );
+}
+
+const CAPTION_PREVIEW = 140;
+
+/** Caption with tappable-looking @mentions and a "more" toggle for long text. */
+function PostCaption({
+  authorName,
+  caption,
+  mentions,
+  labels,
+}: {
+  authorName: string;
+  caption: string;
+  mentions: PostMention[];
+  labels: { more: string; less: string };
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = caption.length > CAPTION_PREVIEW;
+  const text = expanded || !isLong ? caption : `${caption.slice(0, CAPTION_PREVIEW).trimEnd()}…`;
+
+  // Split on known @names (longest first so "Ana Beatriz" wins over "Ana")
+  const names = [...mentions.map((m) => m.name)].sort((a, b) => b.length - a.length);
+  const parts: { text: string; mention: boolean }[] = [];
+  if (names.length) {
+    const escaped = names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const re = new RegExp(`(@(?:${escaped.join("|")}))`, "g");
+    text.split(re).forEach((chunk) => {
+      if (chunk) parts.push({ text: chunk, mention: re.test(chunk) && chunk.startsWith("@") });
+      re.lastIndex = 0;
+    });
+  } else {
+    parts.push({ text, mention: false });
   }
 
   return (
-    <div className="relative w-full">
-      <Carousel setApi={setApi} opts={{ loop: false }} className="w-full">
-        <CarouselContent className="ml-0">
-          {slides.map((s, i) => (
-            <CarouselItem key={i} className="pl-0 basis-full flex">
-              {renderSlide(s)}
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
-      {count > 1 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1">
-          {Array.from({ length: count }).map((_, i) => (
-            <span
-              key={i}
-              className={cn(
-                "h-1.5 w-1.5 rounded-full transition-all",
-                current === i ? "bg-white w-3" : "bg-white/60"
-              )}
-            />
-          ))}
-        </div>
+    <p className="px-3 pt-1 text-sm whitespace-pre-line break-words">
+      <span className="font-semibold mr-1">{authorName}</span>
+      {parts.map((part, i) =>
+        part.mention ? (
+          <span key={i} className="font-semibold text-primary">
+            {part.text}
+          </span>
+        ) : (
+          <span key={i}>{part.text}</span>
+        )
       )}
-    </div>
+      {isLong && (
+        <button onClick={() => setExpanded((v) => !v)} className="ml-1 text-muted-foreground font-medium">
+          {expanded ? labels.less : labels.more}
+        </button>
+      )}
+    </p>
   );
 }

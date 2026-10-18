@@ -940,11 +940,12 @@ const AthleteWorkoutView = () => {
   const Icon = workoutTypeIcons[workout.type] || PersonStanding;
   const isCompleted = !!assignment.completedAt;
 
-  const handleSharePost = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
+  const handleSharePost = async ({ caption, imageUrls, mentions }: import("@/types/timeline").ComposerResult) => {
     if (!user) return;
     const authorName = displayName || user.email || "Athlete";
+    const mentionedUserIds = mentions.map((m) => m.id);
     const postId = await createTimelinePost(
-      { caption, imageUrl, workoutSummary: shareWorkoutSummary },
+      { caption, imageUrls, mentions, workoutSummary: shareWorkoutSummary },
       user.uid,
       authorName,
       userRole ?? "athlete",

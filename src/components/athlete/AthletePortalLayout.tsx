@@ -21,6 +21,7 @@ import { GlassIconButton, GlassIconLink, GlassToolbar } from "@/components/glass
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useTimelineActions } from "@/contexts/TimelineActionsContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
+import type { ComposerResult } from "@/types/timeline";
 import { ActivityDrawer } from "@/components/timeline/ActivityDrawer";
 import { useToast } from "@/hooks/use-toast";
 
@@ -60,12 +61,12 @@ const AthletePortalLayout = ({
   const { isMenuOpen, setIsMenuOpen } = useTopBarMenu();
   const { createOpen, setCreateOpen, activityOpen, setActivityOpen, activityUnreadCount } = useTimelineActions();
 
-  const handleCreate = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
+  const handleCreate = async ({ caption, imageUrls, mentions }: ComposerResult) => {
     if (!user || !userRole) return;
     const authorName = displayName || user.email || "User";
-    const postId = await createTimelinePost({ caption, imageUrl }, user.uid, authorName, userRole, photoURL);
-    if (mentionedUserIds?.length) {
-      await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
+    const postId = await createTimelinePost({ caption, imageUrls, mentions }, user.uid, authorName, userRole, photoURL);
+    if (mentions.length) {
+      await createMentionNotifications(postId, mentions.map((m) => m.id), authorName, caption);
     }
     toast({ title: t.timeline.postShared });
   };

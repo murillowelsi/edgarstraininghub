@@ -197,14 +197,14 @@ export function TimelineFeed() {
           />
         </div>
 
-        <div className="max-w-lg mx-auto px-4 pt-4 pb-8">
+        <div className="max-w-lg mx-auto pt-2 pb-8">
           {posts.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
+            <div className="text-center py-16 px-4 text-muted-foreground">
               <p className="text-lg font-semibold mb-1">{t.timeline.empty.noPosts}</p>
               <p className="text-sm">{t.timeline.empty.beFirst}</p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {posts.map((post) => (
                 <div key={post.id} data-post-id={post.id}>
                   <TimelinePostCard post={post} onDeleted={handleDeleted} />

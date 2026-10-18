@@ -11,6 +11,7 @@ import { ChatService } from "../services/chat";
 import { NotificationService } from "../services/notifications";
 import { BottomNav } from "./admin/BottomNav";
 import { CreatePostModal } from "./timeline/CreatePostModal";
+import type { ComposerResult } from "@/types/timeline";
 import { ActivityDrawer } from "./timeline/ActivityDrawer";
 import { useTimelineActions } from "../contexts/TimelineActionsContext";
 import { createMentionNotifications, createTimelinePost } from "../services/timelineService";
@@ -29,12 +30,12 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
   const { toast } = useToast();
   const { createOpen, setCreateOpen, activityOpen, setActivityOpen } = useTimelineActions();
 
-  const handleCreate = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
+  const handleCreate = async ({ caption, imageUrls, mentions }: ComposerResult) => {
     if (!user || !userRole) return;
     const authorName = displayName || user.email || "User";
-    const postId = await createTimelinePost({ caption, imageUrl }, user.uid, authorName, userRole, photoURL);
-    if (mentionedUserIds?.length) {
-      await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
+    const postId = await createTimelinePost({ caption, imageUrls, mentions }, user.uid, authorName, userRole, photoURL);
+    if (mentions.length) {
+      await createMentionNotifications(postId, mentions.map((m) => m.id), authorName, caption);
     }
     toast({ title: t.timeline.postShared });
   };

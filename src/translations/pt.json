@@ -1006,6 +1006,9 @@
       "exercisesCount": "Exercícios",
       "completePercent": "Completo",
       "shareCaption": "Treino concluído: {{name}} — {{percentage}}% em {{time}} 💪",
+      "shareCaptionTitle": "Treino de hoje: {{name}} 💪",
+      "shareCaptionRecord": "1 recorde novo 🏆",
+      "shareCaptionRecords": "{{n}} recordes novos 🏆",
       "rest": "Descanso",
       "restSkip": "Pular",
       "restDone": "Descanso acabou — próxima série!",
@@ -1322,14 +1325,23 @@
     "noPosts": "Ainda não há artigos publicados. Volte em breve!"
   },
   "timeline": {
-    "postShared": "Post comcompartilhado!",
+    "story": {
+      "footer": "Treinado com EZ Training"
+    },
+    "postShared": "Post compartilhado!",
     "summary": {
       "time": "Tempo",
       "distance": "Distância",
-      "avgHeartRate": "FC Média (bpm)",
+      "avgHeartRate": "FC Média",
       "avgPace": "Pace Médio",
-      "avgSpeed": "Vel. Média (km/h)",
-      "completed": "Concluído"
+      "avgSpeed": "Vel. Média",
+      "completed": "Concluído",
+      "volume": "Volume",
+      "sets": "Séries",
+      "records": "Recordes",
+      "highlights": "Destaques",
+      "pr": "Recorde",
+      "rpe": "Esforço {{n}}/10"
     },
     "activity": {
       "title": "Atividade",
@@ -1366,7 +1378,14 @@
       "actionsTitle": "Opções do post",
       "likeError": "Não foi possível atualizar o like.",
       "deleteError": "Não foi possível excluir o post.",
-      "loadMoreError": "Não foi possível carregar mais posts."
+      "loadMoreError": "Não foi possível carregar mais posts.",
+      "deleteConfirm": "Este post será removido do feed para todos. Esta ação não pode ser desfeita.",
+      "seeMore": "ver mais",
+      "seeLess": "ver menos",
+      "shareStory": "Compartilhar no Stories",
+      "shareStoryHint": "Imagem pronta para o Instagram",
+      "storyError": "Não foi possível gerar a imagem.",
+      "storySaved": "Imagem salva — publique nos Stories"
     },
     "create": {
       "title": "Novo post",
@@ -1380,7 +1399,20 @@
       "uploadFailed": "Falha no upload",
       "uploadError": "Não foi possível carregar a imagem.",
       "createError": "Erro ao criar post. Tente novamente.",
-      "loadUsersError": "Não foi possível carregar usuários."
+      "loadUsersError": "Não foi possível carregar usuários.",
+      "camera": "Câmera",
+      "gallery": "Galeria",
+      "maxPhotos": "Até {{n}} fotos",
+      "format": "Formato",
+      "formatOriginal": "Original",
+      "overlay": "Números na foto",
+      "overlayHint": "Coloca tempo, volume e recordes na 1ª foto",
+      "uploading": "Enviando fotos… {{p}}%",
+      "draftRestored": "Rascunho restaurado",
+      "mentionHint": "Digite @ para marcar alguém",
+      "tagged": "Marcados",
+      "removePhoto": "Remover foto",
+      "workoutPost": "Post do treino"
     },
     "empty": {
       "noPosts": "Sem posts ainda",

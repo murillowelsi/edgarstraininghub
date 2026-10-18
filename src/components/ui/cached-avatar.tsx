@@ -76,13 +76,14 @@ interface CachedImageProps {
   src?: string | null;
   alt?: string;
   className?: string;
+  onLoad?: React.ReactEventHandler<HTMLImageElement>;
 }
 
 /**
  * CachedImage — drop-in replacement for <img> that skips the loading flash
  * for images already seen this session. Shows nothing while loading.
  */
-export function CachedImage({ src, alt = "", className }: CachedImageProps) {
+export function CachedImage({ src, alt = "", className, onLoad }: CachedImageProps) {
   const isCached = src ? loadedUrls.has(src) : false;
   const [ready, setReady] = React.useState(isCached);
 
@@ -102,5 +103,5 @@ export function CachedImage({ src, alt = "", className }: CachedImageProps) {
   }, [src]);
 
   if (!src || !ready) return null;
-  return <img src={src} alt={alt} className={className} />;
+  return <img src={src} alt={alt} className={className} onLoad={onLoad} />;
 }

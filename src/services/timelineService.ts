@@ -20,6 +20,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import type {
+  PostMention,
   TimelineComment,
   TimelineCommentDocument,
   TimelinePost,
@@ -39,6 +40,8 @@ const docToPost = (id: string, data: TimelinePostDocument): TimelinePost => ({
   authorPhotoURL: data.authorPhotoURL,
   caption: data.caption,
   imageUrl: data.imageUrl,
+  imageUrls: data.imageUrls?.length ? data.imageUrls : data.imageUrl ? [data.imageUrl] : [],
+  mentions: data.mentions ?? [],
   workoutSummary: data.workoutSummary,
   likedBy: data.likedBy || [],
   commentsCount: data.commentsCount || 0,
@@ -130,7 +133,9 @@ export const createTimelinePost = async (
     authorName,
     authorRole,
     caption: data.caption,
-    imageUrl: data.imageUrl || "",
+    imageUrl: data.imageUrls?.[0] || "",
+    imageUrls: data.imageUrls ?? [],
+    mentions: data.mentions ?? [],
     ...(cleanWorkoutSummary && Object.keys(cleanWorkoutSummary).length > 0
       ? { workoutSummary: cleanWorkoutSummary }
       : {}),
@@ -146,11 +151,13 @@ export const createTimelinePost = async (
 
 export const updateTimelinePost = async (
   postId: string,
-  data: { caption: string; imageUrl?: string }
+  data: { caption: string; imageUrls: string[]; mentions?: PostMention[] }
 ): Promise<void> => {
   await updateDoc(doc(db, COLLECTION, postId), {
     caption: data.caption,
-    imageUrl: data.imageUrl ?? "",
+    imageUrl: data.imageUrls[0] ?? "",
+    imageUrls: data.imageUrls,
+    ...(data.mentions ? { mentions: data.mentions } : {}),
     updatedAt: serverTimestamp(),
   });
 };

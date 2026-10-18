@@ -24,6 +24,7 @@ import {
   updateAssignmentFeedback,
 } from "@/services/workoutAssignmentsService";
 import SessionSummary, { type SessionSummaryData } from "@/components/athlete/SessionSummary";
+import type { ComposerResult, SummaryHighlight, WorkoutSummary } from "@/types/timeline";
 import type { Exercise, WorkoutExercise } from "@/types/exercise";
 import {
   getYouTubeThumbnail,
@@ -498,6 +499,7 @@ const StrengthWorkoutSession = () => {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareCaption, setShareCaption] = useState("");
+  const [shareSummary, setShareSummary] = useState<WorkoutSummary | undefined>();
   // Workout session state. Time is derived from timestamps (not counted with
   // setInterval) so it stays correct when iOS freezes the page while the
   // screen is locked or the app is in the background.
@@ -779,13 +781,52 @@ const StrengthWorkoutSession = () => {
         records,
       });
 
-      const workoutName = assignment.workout.name;
-      setShareCaption(
-        t.athlete.session.shareCaption
-          .replace("{{name}}", workoutName)
-          .replace("{{percentage}}", String(completionPercentage))
-          .replace("{{time}}", formatTime(elapsed))
-      );
+      // Feed post: full workout card + a natural caption
+      const highlights: SummaryHighlight[] = (assignment.workout.exercises ?? [])
+        .map((we) => {
+          const sets = (exerciseProgress.get(we.id)?.sets ?? []).filter(
+            (set) => isWorkingSet(set) && parseNum(set.weight) > 0
+          );
+          const top = sets.sort(
+            (a, b) => parseNum(b.weight) - parseNum(a.weight) || parseNum(b.reps) - parseNum(a.reps)
+          )[0];
+          if (!top) return null;
+          const pr = isPersonalRecord(top, bestByExercise.get(we.exerciseId));
+          return {
+            name: getExerciseByIdOrName(we)?.name || we.exerciseName || "",
+            value: `${top.weight} kg × ${top.reps || "–"}`,
+            ...(pr ? { pr: true } : {}),
+            weight: parseNum(top.weight),
+          };
+        })
+        .filter((h): h is SummaryHighlight & { weight: number } => !!h)
+        // PRs first, then the heaviest lifts
+        .sort((a, b) => Number(!!b.pr) - Number(!!a.pr) || b.weight - a.weight)
+        .slice(0, 3)
+        .map(({ weight: _weight, ...h }) => h);
+
+      setShareSummary({
+        workoutName: assignment.workout.name,
+        workoutType: "strength",
+        elapsedTime: elapsed,
+        completionPercentage,
+        volumeKg: Math.round(volume),
+        workingSets,
+        totalSets: progressData.reduce((sum, ex) => sum + ex.sets.length, 0),
+        records: records.length,
+        highlights,
+      });
+
+      const captionParts = [t.athlete.session.shareCaptionTitle.replace("{{name}}", assignment.workout.name)];
+      if (records.length) {
+        captionParts.push(
+          (records.length === 1 ? t.athlete.session.shareCaptionRecord : t.athlete.session.shareCaptionRecords).replace(
+            "{{n}}",
+            String(records.length)
+          )
+        );
+      }
+      setShareCaption(captionParts.join(" · "));
     } catch (error) {
       console.error("Error saving workout:", error);
       toast({
@@ -817,6 +858,8 @@ const StrengthWorkoutSession = () => {
 
   const handleShareSummary = (feedback: { rpe?: number; notes: string }) => {
     saveFeedback(feedback);
+    // Effort shows on the card; the note is private, for the coach only
+    setShareSummary((prev) => (prev && feedback.rpe !== undefined ? { ...prev, rpe: feedback.rpe } : prev));
     setShowShareModal(true);
   };
 
@@ -1117,19 +1160,20 @@ const StrengthWorkoutSession = () => {
         .replace("{{set}}", String((rest?.nextSetIndex ?? 0) + 1))
     : undefined;
 
-  const handleSharePost = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
+  const handleSharePost = async ({ caption, imageUrls, mentions }: ComposerResult) => {
     if (!user) return;
     const authorName = displayName || user.email || "Athlete";
     const postId = await createTimelinePost(
-      { caption, imageUrl },
+      { caption, imageUrls, mentions, workoutSummary: shareSummary },
       user.uid,
       authorName,
       userRole ?? "athlete",
       photoURL
     );
-    if (mentionedUserIds?.length) {
-      await createMentionNotifications(postId, mentionedUserIds, authorName, caption);
+    if (mentions.length) {
+      await createMentionNotifications(postId, mentions.map((m) => m.id), authorName, caption);
     }
+    toast({ title: t.timeline.postShared });
   };
 
   return (
@@ -1142,6 +1186,7 @@ const StrengthWorkoutSession = () => {
       }}
       onSubmit={handleSharePost}
       initialCaption={shareCaption}
+      workoutSummary={shareSummary}
     />
     {summary && !showShareModal && (
       <SessionSummary
