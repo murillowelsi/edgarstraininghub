@@ -441,6 +441,24 @@
     "invalidCredentials": "Email ou senha inválidos."
   },
   "admin": {
+    "results": {
+      "title": "Resultado do atleta",
+      "effort": "Esforço",
+      "effortValue": "{{n}}/10",
+      "note": "Nota do atleta",
+      "noFeedback": "O atleta não deixou esforço nem nota.",
+      "skipped": "O atleta marcou como não feito",
+      "extra": "Sessão extra (o atleta registrou por conta própria)",
+      "notDone": "Ainda não realizado",
+      "warmup": "aquecimento",
+      "skippedExercise": "não feito",
+      "notLogged": "sem registro",
+      "setsSummary": "{{done}}/{{total}} séries",
+      "records": "{{n}} recorde(s) pessoal(is)",
+      "volume": "Volume",
+      "time": "Tempo",
+      "completion": "Conclusão"
+    },
     "assign": {
       "title": "Atribuir treino",
       "subtitle": "Escolha atletas e dias para “{{name}}”.",

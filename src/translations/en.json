@@ -441,6 +441,24 @@
     "invalidCredentials": "Invalid email or password."
   },
   "admin": {
+    "results": {
+      "title": "Athlete's result",
+      "effort": "Effort",
+      "effortValue": "{{n}}/10",
+      "note": "Athlete's note",
+      "noFeedback": "The athlete left no effort rating or note.",
+      "skipped": "The athlete marked it as not done",
+      "extra": "Extra session (logged by the athlete)",
+      "notDone": "Not done yet",
+      "warmup": "warm-up",
+      "skippedExercise": "not done",
+      "notLogged": "not logged",
+      "setsSummary": "{{done}}/{{total}} sets",
+      "records": "{{n}} personal record(s)",
+      "volume": "Volume",
+      "time": "Time",
+      "completion": "Completion"
+    },
     "assign": {
       "title": "Assign workout",
       "subtitle": "Choose athletes and days for “{{name}}”.",

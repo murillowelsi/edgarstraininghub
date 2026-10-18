@@ -31,6 +31,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, Dumbbell, Flame, Footprints, Gauge, HeartPulse, MoreHorizontal, Pencil, Timer, Trash2, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { SessionResults } from "@/components/workout/SessionResults";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -55,6 +56,7 @@ const ActivityDetail = () => {
   const ta = t.athlete.activity;
   const lang = language === "pt" ? "pt" : "en";
   const [assignment, setAssignment] = useState<AssignmentWithWorkout | null>(null);
+  const [history, setHistory] = useState<AssignmentWithWorkout[]>([]);
   const [displayName, setDisplayName] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -86,6 +88,7 @@ const ActivityDetail = () => {
     });
     const unsub = subscribeToAssignmentsByAthlete(ownerId, (data) => {
       setAssignment(data.find((a) => a.id === id) || null);
+      setHistory(data);
     });
     return unsub;
   }, [user, id, athleteId]);
@@ -208,6 +211,16 @@ const ActivityDetail = () => {
             </Card>
           ))}
         </div>
+
+        {(isStrength || assignment.rpe !== undefined || assignment.athleteNotes || assignment.skipped) && (
+          <>
+            <Separator />
+            <div>
+              {isCoachView && <h3 className="font-display font-bold text-base mb-2">{t.admin.results.title}</h3>}
+              <SessionResults assignment={assignment} history={history} hideStats showMissingFeedback={isCoachView} />
+            </div>
+          </>
+        )}
 
         {assignment.workout.notes && (
           <>

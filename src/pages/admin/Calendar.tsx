@@ -35,6 +35,7 @@ import { getUsersByRole } from "@/services/usersService";
 import type { User } from "@/types/user";
 import type { WorkoutType } from "@/types/workout";
 import type { AssignmentWithDetails } from "@/types/workoutAssignment";
+import { SessionResults } from "@/components/workout/SessionResults";
 import {
   addDays,
   addMonths,
@@ -62,6 +63,7 @@ import {
   Pencil,
   Plus,
   Trash2,
+  MessageSquareText,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -106,6 +108,7 @@ const CalendarDay = ({
   onAssignmentClick,
   onEmptyCellClick,
 }: CalendarDayProps) => {
+  const { t } = useLanguage();
   const isCurrentMonth = isSameMonth(date, currentMonth);
   const isTodayDate = isToday(date);
   const isWeekendDay = isWeekend(date);
@@ -175,9 +178,12 @@ const CalendarDay = ({
                     ) : (
                       <Icon className={cn("h-3 w-3 flex-shrink-0", athleteAccentTextClass)} />
                     )}
-                    <span className={cn(isCompleted && "line-through")}>
+                    <span className={cn("truncate", isCompleted && "line-through")}>
                       {assignment.athlete.displayName.split(" ")[0]}
                     </span>
+                    {assignment.athleteNotes && (
+                      <MessageSquareText className="h-3 w-3 flex-shrink-0 ml-auto text-primary" aria-label={t.admin.results.note} />
+                    )}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="max-w-[250px]">
@@ -195,6 +201,14 @@ const CalendarDay = ({
                       <p className="text-green-600 text-xs">
                         Completed {format(assignment.completedAt!, "PPp")}
                       </p>
+                    )}
+                    {assignment.rpe !== undefined && (
+                      <p className="text-xs">
+                        {t.admin.results.effort}: {t.admin.results.effortValue.replace("{{n}}", String(assignment.rpe))}
+                      </p>
+                    )}
+                    {assignment.athleteNotes && (
+                      <p className="text-xs italic line-clamp-3">“{assignment.athleteNotes}”</p>
                     )}
                   </div>
                 </TooltipContent>
@@ -709,12 +723,16 @@ const AdminCalendar = () => {
                                       )}
                                     </p>
                                     <p className="text-xs text-muted-foreground truncate">
-                                      {assignment.athlete.displayName} ·{" "}
-                                      {assignment.workout.stages.length} stages ·{" "}
-                                      <span className="capitalize">
-                                        {assignment.workout.type}
-                                      </span>
+                                      {assignment.athlete.displayName} · {workoutLabels(t).type(assignment.workout.type)}
+                                      {assignment.rpe !== undefined &&
+                                        ` · ${t.admin.results.effort} ${t.admin.results.effortValue.replace("{{n}}", String(assignment.rpe))}`}
                                     </p>
+                                    {assignment.athleteNotes && (
+                                      <p className="text-xs text-primary truncate flex items-center gap-1 mt-0.5">
+                                        <MessageSquareText className="h-3 w-3 shrink-0" />
+                                        <span className="truncate italic">{assignment.athleteNotes}</span>
+                                      </p>
+                                    )}
                                   </div>
                                   {isCompleted ? (
                                     <Badge
@@ -838,6 +856,16 @@ const AdminCalendar = () => {
                   {t.admin.calendar.completedOn}{" "}
                   {format(selectedAssignment.completedAt, language === "pt" ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: dateFnsLocale })}
                 </span>
+              </div>
+            )}
+
+            {(selectedAssignment.completedAt || selectedAssignment.skipped || selectedAssignment.selfLogged) && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">{t.admin.results.title}</p>
+                <SessionResults
+                  assignment={selectedAssignment}
+                  history={assignments.filter((a) => a.athleteId === selectedAssignment.athleteId)}
+                />
               </div>
             )}
 
