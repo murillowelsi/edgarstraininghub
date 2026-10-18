@@ -60,24 +60,18 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CalendarAssignDialog } from "@/components/workout/CalendarAssignDialog";
 import { useLanguage } from "../../contexts/LanguageContext";
-
-const workoutTypeColors: Record<WorkoutType, string> = {
-  running: "bg-blue-100 border-blue-300 text-blue-800",
-  cycling: "bg-green-100 border-green-300 text-green-800",
-  swimming: "bg-cyan-100 border-cyan-300 text-cyan-800",
-  strength: "bg-amber-100 border-amber-300 text-amber-800",
-};
-
-const workoutTypeCardColors: Record<WorkoutType, string> = {
-  running: "bg-blue-500/10 text-blue-600",
-  cycling: "bg-green-500/10 text-green-600",
-  swimming: "bg-cyan-500/10 text-cyan-600",
-  strength: "bg-amber-500/10 text-amber-600",
-};
+import {
+  athleteAccentTextClass,
+  athleteChipClass,
+  athleteColorVars,
+  athleteDotClass,
+  buildAthleteColorMap,
+  type AthleteColor,
+} from "@/lib/athleteColors";
 
 const workoutTypeIcons: Record<WorkoutType, React.ElementType> = {
   running: GrRun,
@@ -90,6 +84,7 @@ interface CalendarDayProps {
   date: Date;
   currentMonth: Date;
   assignments: AssignmentWithDetails[];
+  athleteColors: Map<string, AthleteColor>;
   onAssignmentClick: (assignment: AssignmentWithDetails) => void;
   onEmptyCellClick: (date: Date) => void;
 }
@@ -98,6 +93,7 @@ const CalendarDay = ({
   date,
   currentMonth,
   assignments,
+  athleteColors,
   onAssignmentClick,
   onEmptyCellClick,
 }: CalendarDayProps) => {
@@ -158,16 +154,17 @@ const CalendarDay = ({
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => onAssignmentClick(assignment)}
+                    style={athleteColorVars(athleteColors.get(assignment.athleteId))}
                     className={cn(
                       "w-full text-left text-xs p-1.5 rounded border truncate flex items-center gap-1",
-                      workoutTypeColors[assignment.workout.type],
+                      athleteChipClass,
                       isCompleted && "opacity-60"
                     )}
                   >
                     {isCompleted ? (
                       <Check className="h-3 w-3 flex-shrink-0" />
                     ) : (
-                      <Icon className="h-3 w-3 flex-shrink-0" />
+                      <Icon className={cn("h-3 w-3 flex-shrink-0", athleteAccentTextClass)} />
                     )}
                     <span className={cn(isCompleted && "line-through")}>
                       {assignment.athlete.displayName.split(" ")[0]}
@@ -214,16 +211,17 @@ const CalendarDay = ({
                         <button
                           key={assignment.id}
                           onClick={() => onAssignmentClick(assignment)}
+                          style={athleteColorVars(athleteColors.get(assignment.athleteId))}
                           className={cn(
                             "w-full text-left text-xs p-2 rounded border flex items-center gap-2",
-                            workoutTypeColors[assignment.workout.type],
+                            athleteChipClass,
                             isCompleted && "opacity-60"
                           )}
                         >
                           {isCompleted ? (
                             <Check className="h-3 w-3 flex-shrink-0" />
                           ) : (
-                            <Icon className="h-3 w-3 flex-shrink-0" />
+                            <Icon className={cn("h-3 w-3 flex-shrink-0", athleteAccentTextClass)} />
                           )}
                           <div className="truncate">
                             <p
@@ -234,7 +232,7 @@ const CalendarDay = ({
                             >
                               {assignment.athlete.displayName}
                             </p>
-                            <p className="text-muted-foreground truncate">
+                            <p className="opacity-75 truncate">
                               {assignment.workout.name}
                             </p>
                           </div>
@@ -259,6 +257,7 @@ const AdminCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [assignments, setAssignments] = useState<AssignmentWithDetails[]>([]);
   const [athletes, setAthletes] = useState<User[]>([]);
+  const athleteColors = useMemo(() => buildAthleteColorMap(athletes), [athletes]);
   const [loading, setLoading] = useState(true);
   const [selectedAthleteId, setSelectedAthleteId] = useState<string>("all");
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -488,7 +487,13 @@ const AdminCalendar = () => {
                 <SelectItem value="all">{t.admin.calendar.allAthletes}</SelectItem>
                 {athletes.map((athlete) => (
                   <SelectItem key={athlete.id} value={athlete.id}>
-                    {athlete.displayName}
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={cn("h-2.5 w-2.5 rounded-full shrink-0", athleteDotClass)}
+                        style={athleteColorVars(athleteColors.get(athlete.id))}
+                      />
+                      {athlete.displayName}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -524,6 +529,7 @@ const AdminCalendar = () => {
                       date={day}
                       currentMonth={currentMonth}
                       assignments={filteredAssignments}
+                      athleteColors={athleteColors}
                       onAssignmentClick={handleAssignmentClick}
                       onEmptyCellClick={handleEmptyCellClick}
                     />
@@ -617,11 +623,12 @@ const AdminCalendar = () => {
                               <CardContent className="p-3">
                                 <div className="flex items-center gap-3">
                                   <div
+                                    style={isCompleted ? undefined : athleteColorVars(athleteColors.get(assignment.athleteId))}
                                     className={cn(
                                       "p-2 rounded-lg",
                                       isCompleted
                                         ? "bg-green-100 dark:bg-green-900/30"
-                                        : workoutTypeCardColors[assignment.workout.type]
+                                        : cn("bg-[hsl(var(--ah)_var(--as)_94%)] dark:bg-[hsl(var(--ah)_var(--as)_16%)]", athleteAccentTextClass)
                                     )}
                                   >
                                     {isCompleted ? (
