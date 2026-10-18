@@ -1,4 +1,5 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
+import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import WorkoutChecklistDrawer from "@/components/athlete/WorkoutChecklistDrawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   ArrowLeft,
-  Bike,
   Calendar,
   Check,
   CheckCircle2,
@@ -61,10 +61,8 @@ import {
   Heart,
   Layers,
   Loader2,
-  PersonStanding,
   Play,
   Repeat,
-  Waves,
   Wind,
   X,
   Zap,
@@ -86,22 +84,22 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
-  running: PersonStanding,
-  cycling: Bike,
-  swimming: Waves,
+  running: GrRun,
+  cycling: GrBike,
+  swimming: GrSwim,
   strength: Dumbbell,
 };
 
 const stageIcons: Record<string, React.ElementType> = {
   warmup: Flame,
-  run: PersonStanding,
+  run: GrRun,
   cooldown: Wind,
   recovery: Heart,
   interval: Zap,
   repeat: Repeat,
-  bike: Bike,
+  bike: GrBike,
   rest: Clock,
-  swim: Waves,
+  swim: GrSwim,
 };
 
 const workoutTypeColors: Record<string, string> = {
@@ -197,7 +195,7 @@ const StageItem = ({
   const color = stageColors[stage.type];
   const intensity = formatIntensity(stage, L, t);
   const swimmingDetails = formatSwimmingDetails(stage, L);
-  const StageIcon = stageIcons[stage.type] || PersonStanding;
+  const StageIcon = stageIcons[stage.type] || GrRun;
 
   if (stage.type === "repeat") {
     return (
@@ -222,7 +220,7 @@ const StageItem = ({
             {stage.stages && stage.stages.length > 0 && (
               <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-2">
                 {stage.stages.map((nestedStage, nestedIndex) => {
-                  const NestedIcon = stageIcons[nestedStage.type] || PersonStanding;
+                  const NestedIcon = stageIcons[nestedStage.type] || GrRun;
                   const nestedColor = stageColors[nestedStage.type];
                   return (
                     <div key={nestedStage.id} className="p-3 rounded-lg bg-muted/30">
@@ -949,7 +947,7 @@ const AthleteWorkoutView = () => {
   }
 
   const workout = assignment.workout;
-  const Icon = workoutTypeIcons[workout.type] || PersonStanding;
+  const Icon = workoutTypeIcons[workout.type] || GrRun;
   const isCompleted = !!assignment.completedAt;
 
   // Share any completed workout, any time (feed post or image)

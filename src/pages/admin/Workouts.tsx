@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { ActionMenu } from "@/components/ui/action-menu";
 import { Button } from "@/components/ui/button";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
@@ -9,12 +10,6 @@ import type { Workout } from "@/types/workout";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Dumbbell, Edit, EllipsisVertical, Loader2, Plus, Search, Trash2, UserPlus } from "lucide-react";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -59,7 +54,6 @@ const AdminWorkouts = () => {
       .catch(() => setDeleteCounts({ completed: 0, pending: 0 }));
   }, [confirmWorkout]);
   const [newWorkoutDrawerOpen, setNewWorkoutDrawerOpen] = useState(false);
-  const [actionWorkout, setActionWorkout] = useState<Workout | null>(null);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "running" | "cycling" | "swimming" | "strength">("all");
   const filteredWorkouts = useMemo(() => {
@@ -238,16 +232,20 @@ const AdminWorkouts = () => {
                       </Badge>
                     }
                     actions={
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 shrink-0"
-                        onClick={(e) => { e.preventDefault(); setActionWorkout(workout); }}
+                      <ActionMenu
+                        title={workout.name}
+                        items={[
+                          { icon: UserPlus, label: t.admin.workouts.assignToAthletes, onClick: () => handleAssignClick(workout) },
+                          { icon: Edit, label: t.common.edit, onClick: () => navigate(getWorkoutEditPath(workout)) },
+                          { icon: Trash2, label: t.common.delete, destructive: true, onClick: () => setConfirmWorkout(workout) },
+                        ]}
                       >
-                        {deleting === workout.id
-                          ? <Loader2 className="h-4 w-4 animate-spin" />
-                          : <EllipsisVertical className="h-4 w-4" />}
-                      </Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" aria-label={t.common.actions}>
+                          {deleting === workout.id
+                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                            : <EllipsisVertical className="h-4 w-4" />}
+                        </Button>
+                      </ActionMenu>
                     }
                   />
                 );
@@ -289,41 +287,6 @@ const AdminWorkouts = () => {
           })}
         </div>
       </ResponsiveModal>
-
-      {/* Action drawer */}
-      <Drawer open={!!actionWorkout} onOpenChange={(open) => { if (!open) setActionWorkout(null); }}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle className="truncate">{actionWorkout?.name}</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-2">
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
-              onClick={() => { handleAssignClick(actionWorkout!); setActionWorkout(null); }}
-            >
-              <UserPlus className="h-5 w-5" />
-              {t.admin.workouts.assignToAthletes}
-            </button>
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
-              onClick={() => {
-                navigate(getWorkoutEditPath(actionWorkout!));
-                setActionWorkout(null);
-              }}
-            >
-              <Edit className="h-5 w-5" />
-              {t.common.edit}
-            </button>
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
-              onClick={() => { setConfirmWorkout(actionWorkout); setActionWorkout(null); }}
-            >
-              <Trash2 className="h-5 w-5" />
-              {t.common.delete}
-            </button>
-          </div>
-        </DrawerContent>
-      </Drawer>
 
       <AssignWorkoutDialog
         workout={selectedWorkout}

@@ -259,15 +259,27 @@ export const createDefaultStage = (type: StageType = "run"): WorkoutStage => ({
   },
 });
 
-// Create a repeat block with default nested stages
-export const createRepeatBlock = (repeatCount: number = 2, workoutType: WorkoutType = "running"): WorkoutStage => ({
-  id: generateStageId(),
-  type: "repeat",
-  duration: { type: "lapButton" },
-  intensity: { type: "none" },
-  repeatCount,
-  stages: [
-    createDefaultStage(getDefaultIntervalType(workoutType)),
-    createDefaultStage("recovery"),
-  ],
-});
+// Create a repeat block with a sensible starting point per modality — the coach
+// tweaks numbers instead of starting from two "press lap" stages
+export const createRepeatBlock = (repeatCount: number = 2, workoutType: WorkoutType = "running"): WorkoutStage => {
+  const work = createDefaultStage(getDefaultIntervalType(workoutType));
+  const rest = createDefaultStage(workoutType === "swimming" ? "rest" : "recovery");
+  if (workoutType === "swimming") {
+    work.duration = { type: "distance", value: 100, unit: "m" };
+    rest.duration = { type: "time", value: 15, unit: "sec" };
+  } else if (workoutType === "cycling") {
+    work.duration = { type: "time", value: 5, unit: "min" };
+    rest.duration = { type: "time", value: 3, unit: "min" };
+  } else {
+    work.duration = { type: "distance", value: 400, unit: "m" };
+    rest.duration = { type: "time", value: 90, unit: "sec" };
+  }
+  return {
+    id: generateStageId(),
+    type: "repeat",
+    duration: { type: "lapButton" },
+    intensity: { type: "none" },
+    repeatCount,
+    stages: [work, rest],
+  };
+};

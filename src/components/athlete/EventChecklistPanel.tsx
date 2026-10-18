@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Drawer,
@@ -32,20 +33,17 @@ import {
   type EventChecklistSection,
 } from "@/types/eventChecklist";
 import {
-  Bike,
   ClipboardList,
   FileText,
   Loader2,
   PackageOpen,
   Pencil,
-  PersonStanding,
   Plus,
   RefreshCw,
   Save,
   Sparkles,
   Trash2,
-  Waves,
-} from "lucide-react";
+  } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -64,9 +62,9 @@ const presetOrder: EventChecklistPreset[] = [
 
 const categoryIcon: Record<EventChecklistCategory, React.ElementType> = {
   docs: FileText,
-  running: PersonStanding,
-  cycling: Bike,
-  swimming: Waves,
+  running: GrRun,
+  cycling: GrBike,
+  swimming: GrSwim,
   transition: PackageOpen,
   post: Sparkles,
   custom: ClipboardList,

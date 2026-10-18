@@ -12,6 +12,9 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { Textarea } from "@/components/ui/textarea";
+import { GrBike, GrRun, GrSwim } from "react-icons/gr";
+import { ActionMenu } from "@/components/ui/action-menu";
 import { GlassFab } from "@/components/glass/GlassFab";
 import { WorkoutLoadError } from "@/components/admin/WorkoutLoadError";
 import {
@@ -23,15 +26,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import {
   createWorkout,
@@ -46,7 +46,7 @@ import {
   stageColors,
 } from "@/types/workout";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Bike, ChevronDown, Clock, Flame, GripVertical, Heart, Loader2, MoreVertical, Pencil, PersonStanding, Plus, Repeat, Trash2, Waves, Wind, Zap } from "lucide-react";
+import { ArrowLeft, ChevronDown, Clock, Flame, GripVertical, Heart, Loader2, MoreVertical, Pencil, Plus, Repeat, Trash2, Wind, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
@@ -117,14 +117,14 @@ const formatSwimmingDetails = (stage: WorkoutStage, L: WorkoutLabels): string[] 
 
 const stageIcons: Record<string, React.ElementType> = {
   warmup: Flame,
-  run: PersonStanding,
+  run: GrRun,
   cooldown: Wind,
   recovery: Heart,
   interval: Zap,
   repeat: Repeat,
-  bike: Bike,
+  bike: GrBike,
   rest: Clock,
-  swim: Waves,
+  swim: GrSwim,
 };
 
 // Draggable stage item component with collapsible details
@@ -142,7 +142,6 @@ const DraggableStage = ({
   const { t } = useLanguage();
   const L = workoutLabels(t);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -161,33 +160,10 @@ const DraggableStage = ({
   const color = stageColors[stage.type];
   const intensityDisplay = formatIntensity(stage, L, t);
   const swimmingDetails = formatSwimmingDetails(stage, L);
-  const StageIcon = stageIcons[stage.type] || PersonStanding;
+  const StageIcon = stageIcons[stage.type] || GrRun;
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>{L.stage(stage.type)}</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-2">
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
-              onClick={() => { setMenuOpen(false); onEdit(); }}
-            >
-              <Pencil className="h-5 w-5" />
-              Edit
-            </button>
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium text-destructive"
-              onClick={() => { setMenuOpen(false); onDelete(); }}
-            >
-              <Trash2 className="h-5 w-5" />
-              Delete
-            </button>
-          </div>
-        </DrawerContent>
-      </Drawer>
       <div className={cn("rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden", isNested && "bg-muted/30")}>
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <div className={cn("flex items-center gap-3", isNested ? "p-3" : "p-4")}>
@@ -221,14 +197,17 @@ const DraggableStage = ({
               </button>
             </CollapsibleTrigger>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground shrink-0"
-              onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
+            <ActionMenu
+              title={L.stage(stage.type)}
+              items={[
+                { icon: Pencil, label: t.common.edit, onClick: onEdit },
+                { icon: Trash2, label: t.common.delete, destructive: true, onClick: onDelete },
+              ]}
             >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground shrink-0" aria-label={t.common.actions}>
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </ActionMenu>
           </div>
 
           <CollapsibleContent>
@@ -326,7 +305,6 @@ const RepeatBlock = ({
   const { t } = useLanguage();
   const L = workoutLabels(t);
   const [isExpanded, setIsExpanded] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -347,29 +325,6 @@ const RepeatBlock = ({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>{L.stage(stage.type)}</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-2">
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium"
-              onClick={() => { setMenuOpen(false); onEdit(); }}
-            >
-              <Pencil className="h-5 w-5" />
-              Edit
-            </button>
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-lg border bg-card hover:bg-muted transition-colors text-sm font-medium text-destructive"
-              onClick={() => { setMenuOpen(false); onDelete(); }}
-            >
-              <Trash2 className="h-5 w-5" />
-              Delete
-            </button>
-          </div>
-        </DrawerContent>
-      </Drawer>
       <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <div className="p-4 flex items-center gap-3">
@@ -389,23 +344,26 @@ const RepeatBlock = ({
             <CollapsibleTrigger asChild>
               <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">Repeat {stage.repeatCount || 2}x</p>
+                  <p className="font-semibold text-sm">{t.admin.workoutEditor.repeatTitle.replace("{{n}}", String(stage.repeatCount || 2))}</p>
                   <p className="text-xs text-muted-foreground">
-                    {nestedStages.length} stages
+                    {t.admin.workoutEditor.blockStages.replace("{{n}}", String(nestedStages.length))}
                   </p>
                 </div>
                 <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
               </button>
             </CollapsibleTrigger>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground shrink-0"
-              onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
+            <ActionMenu
+              title={L.stage(stage.type)}
+              items={[
+                { icon: Pencil, label: t.common.edit, onClick: onEdit },
+                { icon: Trash2, label: t.common.delete, destructive: true, onClick: onDelete },
+              ]}
             >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground shrink-0" aria-label={t.common.actions}>
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </ActionMenu>
           </div>
 
           <CollapsibleContent>
@@ -442,7 +400,7 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
   const color = stageColors[stage.type];
   const intensityDisplay = formatIntensity(stage, L, t);
 
-  const StageIcon = stageIcons[stage.type] || PersonStanding;
+  const StageIcon = stageIcons[stage.type] || GrRun;
 
   if (stage.type === "repeat") {
     return (
@@ -453,7 +411,7 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
             <Repeat className="h-4 w-4" />
           </div>
           <div>
-            <p className="font-semibold text-sm">Repeat {stage.repeatCount || 2}x</p>
+            <p className="font-semibold text-sm">{t.admin.workoutEditor.repeatTitle.replace("{{n}}", String(stage.repeatCount || 2))}</p>
           </div>
         </div>
       </div>
@@ -639,6 +597,11 @@ const WorkoutEditor = () => {
   };
 
   const handleDeleteNestedStage = (repeatId: string, nestedStageId: string) => {
+    const block = formData.stages.find((s) => s.id === repeatId);
+    if ((block?.stages?.length ?? 0) <= 1) {
+      toast({ title: t.admin.workoutEditor.blockNeedsStage });
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       stages: prev.stages.map((s) => {
@@ -675,7 +638,7 @@ const WorkoutEditor = () => {
   };
 
   // Resolve which stage is being edited and its onChange handler
-  const getEditingInfo = (): { stage: WorkoutStage; onChange: (s: WorkoutStage) => void } | null => {
+  const getEditingInfo = (): { stage: WorkoutStage; onChange: (s: WorkoutStage) => void; parent?: WorkoutStage } | null => {
     if (!editingStageId) return null;
 
     const topLevel = formData.stages.find((s) => s.id === editingStageId);
@@ -689,6 +652,7 @@ const WorkoutEditor = () => {
         if (nested) {
           return {
             stage: nested,
+            parent: repeatStage,
             onChange: (updated: WorkoutStage) => {
               handleNestedStagesChange(
                 repeatStage.id,
@@ -769,6 +733,11 @@ const WorkoutEditor = () => {
     if (activeContainer.containerId !== overContainer.containerId) {
       const activeStage = getStageById(activeId);
       if (!activeStage || activeStage.type === "repeat") return; // Don't move repeat blocks into other repeat blocks
+      // Never drag the last stage out of a block — an empty repeat reaches the athlete as "2× nothing"
+      if (activeContainer.containerId !== "root") {
+        const source = formData.stages.find((s) => s.id === activeContainer.containerId);
+        if ((source?.stages?.length ?? 0) <= 1) return;
+      }
 
       setFormData((prev) => {
         const newStages = [...prev.stages];
@@ -891,126 +860,118 @@ const WorkoutEditor = () => {
   }
 
   return (
-    <AdminLayout fullHeight>
+    <AdminLayout
+      fullHeight
+      pageTitle={(isEditing ? t.admin.workoutEditor.editTitle : t.admin.workoutEditor.newTitle).replace(
+        "{{type}}",
+        t.workoutMeta.types[formData.type]
+      )}
+    >
       <div className="h-full flex flex-col">
-        {/* Header */}
-        <header className="border-b bg-card px-4 py-3 flex items-center gap-2 shrink-0">
-          <Link to="/admin/workouts" className="shrink-0">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <h1 className="font-semibold text-sm flex-1 min-w-0 truncate">
-            {(isEditing ? t.admin.workoutEditor.editTitle : t.admin.workoutEditor.newTitle)
-              .replace("{{type}}", t.workoutMeta.types[formData.type])}
-          </h1>
-          <Button onClick={handleSubmit} disabled={saving} size="sm" variant="ghost" className="shrink-0 text-primary hover:text-primary">
-            {saving && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
-            {t.workout.editor.saveWorkout}
-          </Button>
-        </header>
-
-        {/* Content */}
         <div className="flex-1 overflow-auto">
-          <div className="p-4 md:p-8 pb-24 lg:pb-8">
-            <div className="flex gap-8">
-              {/* Stages list */}
-              <Card className="flex-1">
-                <div className="p-4 md:p-6">
-                  <div className="space-y-2 mb-6">
-                    <Label>{t.workout.editor.workoutName}</Label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                      placeholder={t.workout.editor.workoutNamePlaceholder}
-                    />
-                  </div>
-                  <h2 className="font-semibold mb-4">Stages</h2>
-                  <div className="space-y-3">
-                    {formData.stages.length === 0 ? (
-                      <div className="text-center py-10 border border-dashed rounded-lg">
-                        <p className="text-sm text-muted-foreground mb-4">
-                          {t.admin.workoutEditor.noStages}
-                        </p>
-                        <Button onClick={handleAddStage} size="sm" className="hidden lg:inline-flex">
-                          <Plus className="h-4 w-4 mr-2" />
-                          {t.admin.workoutEditor.addStage}
-                        </Button>
-                      </div>
-                    ) : (
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCorners}
-                        onDragStart={handleDragStart}
-                        onDragOver={handleDragOver}
-                        onDragEnd={handleDragEnd}
-                      >
-                        <SortableContext
-                          items={getAllSortableIds()}
-                          strategy={verticalListSortingStrategy}
-                        >
-                          {formData.stages.map((stage) => {
-                            if (stage.type === "repeat") {
-                              return (
-                                <RepeatBlock
-                                  key={stage.id}
-                                  stage={stage}
-                                  onEdit={() => setEditingStageId(stage.id)}
-                                  onDelete={() => handleDeleteStage(stage.id)}
-                                  onNestedStagesChange={(nestedStages) =>
-                                    handleNestedStagesChange(stage.id, nestedStages)
-                                  }
-                                  onEditNested={(nestedId) => setEditingStageId(nestedId)}
-                                  onDeleteNested={(nestedId) =>
-                                    handleDeleteNestedStage(stage.id, nestedId)
-                                  }
-                                />
-                              );
-                            }
-
-                            return (
-                              <DraggableStage
-                                key={stage.id}
-                                stage={stage}
-                                onEdit={() => setEditingStageId(stage.id)}
-                                onDelete={() => handleDeleteStage(stage.id)}
-                              />
-                            );
-                          })}
-                        </SortableContext>
-
-                        <DragOverlay>
-                          {activeStage ? <StageOverlay stage={activeStage} /> : null}
-                        </DragOverlay>
-                      </DndContext>
-                    )}
-                  </div>
-                </div>
-              </Card>
-
-              {/* Sidebar */}
-              <div className="w-64 flex-shrink-0 hidden lg:block">
-                <div className="sticky top-4 space-y-3">
-                  <Button
-                    onClick={handleAddStage}
-                    className="w-full"
-                    variant="default"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t.admin.workoutEditor.addStage}
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleAddRepetition}
-                  >
-                    <Repeat className="h-4 w-4 mr-2" />
-                    {t.admin.workoutEditor.addRepetition}
-                  </Button>
-                </div>
-              </div>
+          <div className="mx-auto w-full max-w-2xl px-4 md:px-8 pb-40 md:pb-12 space-y-6">
+            {/* Back + save: part of the page column, pinned while scrolling */}
+            <div className="sticky top-0 z-20 -mx-4 md:-mx-8 px-4 md:px-8 pt-3 pb-2 flex items-center justify-between gap-2 bg-background/85 backdrop-blur-md">
+              <Button variant="ghost" size="sm" className="-ml-2 rounded-full text-muted-foreground" asChild>
+                <Link to="/admin/workouts">
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  {t.admin.nav.workouts}
+                </Link>
+              </Button>
+              <Button onClick={handleSubmit} disabled={saving} size="sm" className="rounded-full px-4">
+                {saving && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
+                {t.workout.editor.saveWorkout}
+              </Button>
             </div>
+
+            {/* Name + instructions */}
+            <div className="space-y-3">
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder={t.workout.editor.workoutNamePlaceholder}
+                aria-label={t.workout.editor.workoutName}
+                className="h-auto border-0 bg-transparent px-0 text-2xl md:text-3xl font-display font-extrabold shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40"
+              />
+              <Textarea
+                value={formData.notes ?? ""}
+                onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+                placeholder={t.workout.editor.instructionsPlaceholder}
+                aria-label={t.workout.editor.instructionsForAthlete}
+                rows={2}
+                className="resize-none rounded-2xl bg-muted/40"
+              />
+            </div>
+
+            {/* Stages */}
+            <section className="space-y-3">
+              <h2 className="font-display text-lg font-bold">{t.admin.workoutEditor.stagesTitle}</h2>
+              {formData.stages.length === 0 ? (
+                <button
+                  type="button"
+                  onClick={handleAddStage}
+                  className="lg:hidden w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-colors py-12 px-6 text-center"
+                >
+                  <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <Plus className="h-6 w-6" />
+                  </div>
+                  <p className="font-semibold">{t.admin.workoutEditor.addStage}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t.admin.workoutEditor.noStages}</p>
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCorners}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext items={getAllSortableIds()} strategy={verticalListSortingStrategy}>
+                      {formData.stages.map((stage) =>
+                        stage.type === "repeat" ? (
+                          <RepeatBlock
+                            key={stage.id}
+                            stage={stage}
+                            onEdit={() => setEditingStageId(stage.id)}
+                            onDelete={() => handleDeleteStage(stage.id)}
+                            onNestedStagesChange={(nestedStages) => handleNestedStagesChange(stage.id, nestedStages)}
+                            onEditNested={(nestedId) => setEditingStageId(nestedId)}
+                            onDeleteNested={(nestedId) => handleDeleteNestedStage(stage.id, nestedId)}
+                          />
+                        ) : (
+                          <DraggableStage
+                            key={stage.id}
+                            stage={stage}
+                            onEdit={() => setEditingStageId(stage.id)}
+                            onDelete={() => handleDeleteStage(stage.id)}
+                          />
+                        )
+                      )}
+                    </SortableContext>
+                    <DragOverlay>{activeStage ? <StageOverlay stage={activeStage} /> : null}</DragOverlay>
+                  </DndContext>
+                </div>
+              )}
+
+              {/* Add buttons — the FAB covers this on mobile */}
+              <div className="hidden lg:grid grid-cols-2 gap-2">
+                {[
+                  { icon: Plus, label: t.admin.workoutEditor.addStage, onClick: handleAddStage },
+                  { icon: Repeat, label: t.admin.workoutEditor.addRepetition, onClick: handleAddRepetition },
+                ].map((b) => (
+                  <button
+                    key={b.label}
+                    type="button"
+                    onClick={b.onClick}
+                    className="rounded-2xl border border-dashed border-border hover:border-primary/50 hover:text-primary transition-colors py-3 text-sm font-medium text-muted-foreground flex items-center justify-center gap-1.5"
+                  >
+                    <b.icon className="h-4 w-4" />
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+            </section>
           </div>
         </div>
 
@@ -1024,23 +985,50 @@ const WorkoutEditor = () => {
           ]}
         />
 
-        {/* Stage editor modal — renders outside DndContext so drag-and-drop is never disrupted */}
+        {/* Stage editor drawer — renders outside DndContext so drag-and-drop is never disrupted */}
         {(() => {
           const editingInfo = getEditingInfo();
+          const te = t.admin.workoutEditor;
+          const repeatTitle = (block: WorkoutStage) => te.repeatTitle.replace("{{n}}", String(block.repeatCount || 2));
+          const title = !editingInfo
+            ? ""
+            : editingInfo.stage.type === "repeat"
+            ? repeatTitle(editingInfo.stage)
+            : editingInfo.parent
+            ? `${repeatTitle(editingInfo.parent)} › ${L.stage(editingInfo.stage.type)}`
+            : te.editStage;
           return (
             <ResponsiveModal
               open={!!editingStageId}
               onOpenChange={(open) => !open && setEditingStageId(null)}
-              title={editingInfo?.stage.type === "repeat" ? "Edit repeat block" : "Edit stage"}
+              title={title}
               className="max-w-md"
             >
               {editingInfo && (
-                <StageEditor
-                  stage={editingInfo.stage}
-                  onChange={editingInfo.onChange}
-                  onDone={() => setEditingStageId(null)}
-                  workoutType={formData.type}
-                />
+                <>
+                  {editingInfo.parent && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="-ml-2 mb-2 rounded-full text-muted-foreground"
+                      onClick={() => setEditingStageId(editingInfo.parent!.id)}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-1" />
+                      {te.backToBlock}
+                    </Button>
+                  )}
+                  <StageEditor
+                    key={editingInfo.stage.id}
+                    stage={editingInfo.stage}
+                    onChange={editingInfo.onChange}
+                    onDone={() => (editingInfo.parent ? setEditingStageId(editingInfo.parent.id) : setEditingStageId(null))}
+                    workoutType={formData.type}
+                    onEditNested={setEditingStageId}
+                    describe={(st) =>
+                      [formatDuration(st, L, te.pressLapButton), formatIntensity(st, L, t)].filter(Boolean).join(" · ")
+                    }
+                  />
+                </>
               )}
             </ResponsiveModal>
           );

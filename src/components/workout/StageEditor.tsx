@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,15 +33,14 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { workoutLabels } from "@/utils/workoutLabels";
 import {
-  Bike,
+  ChevronRight,
+  Minus,
   Clock,
   Flame,
   Heart,
-  PersonStanding,
   Plus,
   Repeat,
   Trash2,
-  Waves,
   Wind,
   Zap,
 } from "lucide-react";
@@ -50,23 +50,28 @@ interface StageEditorProps {
   onChange: (stage: WorkoutStage) => void;
   onDone: () => void;
   workoutType?: WorkoutType;
+  /** Repeat blocks: open one of the block's stages in the editor */
+  onEditNested?: (stageId: string) => void;
+  /** One-line summary of a stage (duration · target) for the block's list */
+  describe?: (stage: WorkoutStage) => string;
 }
 
 const stageIcons: Record<string, React.ElementType> = {
   warmup: Flame,
-  run: PersonStanding,
+  run: GrRun,
   cooldown: Wind,
   recovery: Heart,
   interval: Zap,
   repeat: Repeat,
-  bike: Bike,
+  bike: GrBike,
   rest: Clock,
-  swim: Waves,
+  swim: GrSwim,
 };
 
-const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: StageEditorProps) => {
+const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditNested, describe }: StageEditorProps) => {
   const { t } = useLanguage();
   const L = workoutLabels(t);
+  const te = t.admin.workoutEditor;
   const isRepeat = stage.type === "repeat";
   const isSwimming = workoutType === "swimming";
 
@@ -87,10 +92,8 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
     }
   };
 
-  const handleRepeatCountChange = (value: string) => {
-    const count = parseInt(value);
-    onChange({ ...stage, repeatCount: isNaN(count) || count < 1 ? 1 : count });
-  };
+  const setRepeatCount = (count: number) =>
+    onChange({ ...stage, repeatCount: Math.min(50, Math.max(2, count)) });
 
   const handleDurationTypeChange = (type: DurationType) => {
     onChange({
@@ -177,6 +180,8 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
   const handleAddNestedStage = () => {
     const newStage = createDefaultStage(getDefaultIntervalType(workoutType));
     onChange({ ...stage, stages: [...(stage.stages || []), newStage] });
+    // Straight into the new stage, like "Add stage" at the top level
+    onEditNested?.(newStage.id);
   };
 
   const handleDeleteNestedStage = (index: number) => {
@@ -224,10 +229,10 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
 
   return (
     <div className="space-y-6">
-      {/* Stage type */}
-      <div className="space-y-6">
+      {/* Stage type — a block is created with "Add repetition", never by switching type */}
+      {!isRepeat && (
         <div className="space-y-1.5">
-          <Label>Type</Label>
+          <Label>{te.type}</Label>
           <Select value={stage.type} onValueChange={handleTypeChange}>
             <SelectTrigger>
               <SelectValue />
@@ -238,28 +243,39 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
                   {L.stage(type)}
                 </SelectItem>
               ))}
-              <SelectItem value="repeat">{L.stage("repeat")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
+      )}
 
-        {isRepeat && (
-          <div className="space-y-1.5">
-            <Label>Repeat count</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min="1"
-                max="99"
-                value={stage.repeatCount || 2}
-                onChange={(e) => handleRepeatCountChange(e.target.value)}
-                className="w-24"
-              />
-              <span className="text-sm text-muted-foreground">times</span>
-            </div>
+      {isRepeat && (
+        <div className="flex items-center justify-between">
+          <Label className="text-base">{te.repeatCount}</Label>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-11 w-11 rounded-full"
+              disabled={(stage.repeatCount || 2) <= 2}
+              onClick={() => setRepeatCount((stage.repeatCount || 2) - 1)}
+              aria-label="-1"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <span className="w-14 text-center text-2xl font-bold tabular-nums">{stage.repeatCount || 2}×</span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-11 w-11 rounded-full"
+              disabled={(stage.repeatCount || 2) >= 50}
+              onClick={() => setRepeatCount((stage.repeatCount || 2) + 1)}
+              aria-label="+1"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Duration — non-repeat only */}
       {!isRepeat && (
@@ -522,46 +538,39 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
         </div>
       )}
 
-      {/* Nested stages — repeat only */}
+      {/* Nested stages — repeat only: each row opens that stage's full editor */}
       {isRepeat && (
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Stages to repeat</p>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{te.stagesToRepeat}</p>
           {(stage.stages || []).map((nestedStage, index) => {
-            const NestedIcon = stageIcons[nestedStage.type] || PersonStanding;
+            const NestedIcon = stageIcons[nestedStage.type] || GrRun;
             const nestedColor = stageColors[nestedStage.type];
             return (
-              <div key={nestedStage.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
-                <div
-                  className="p-2 rounded-lg shrink-0 flex items-center justify-center"
-                  style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}
+              <div key={nestedStage.id} className="flex items-center gap-1 rounded-xl border bg-card pr-1">
+                <button
+                  type="button"
+                  onClick={() => onEditNested?.(nestedStage.id)}
+                  className="flex flex-1 min-w-0 items-center gap-3 p-3 text-left"
                 >
-                  <NestedIcon className="h-3.5 w-3.5" />
-                </div>
-                <div className="flex-1">
-                  <Select
-                    value={nestedStage.type}
-                    onValueChange={(type: StageType) =>
-                      handleNestedStageChange(index, { ...nestedStage, type })
-                    }
+                  <div
+                    className="p-2 rounded-lg shrink-0 flex items-center justify-center"
+                    style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}
                   >
-                    <SelectTrigger className="h-8">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableStageTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {L.stage(type)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <NestedIcon className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">{L.stage(nestedStage.type)}</p>
+                    {describe && <p className="text-xs text-muted-foreground truncate">{describe(nestedStage)}</p>}
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </button>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDeleteNestedStage(index)}
                   disabled={(stage.stages || []).length <= 1}
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                  className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0"
+                  aria-label={t.common.delete}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -570,7 +579,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running" }: Stage
           })}
           <Button variant="outline" size="sm" onClick={handleAddNestedStage} className="w-full">
             <Plus className="h-4 w-4 mr-2" />
-            Add Stage
+            {t.admin.workoutEditor.addStage}
           </Button>
         </div>
       )}

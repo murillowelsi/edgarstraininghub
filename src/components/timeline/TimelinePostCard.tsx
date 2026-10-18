@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { ActionMenu } from "@/components/ui/action-menu";
 import {
   Carousel,
   CarouselContent,
@@ -6,7 +7,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { AnimatePresence, motion } from "motion/react";
-import { Flame, Instagram, Loader2, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Flame, Instagram, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { renderStoryImage, shareOrDownloadImage } from "@/lib/postImages";
 import { summaryStats } from "@/utils/workoutSummaryStats";
@@ -23,12 +24,6 @@ import type { ComposerResult, PostMention, TimelinePost } from "@/types/timeline
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 
 interface TimelinePostCardProps {
   post: TimelinePost;
@@ -45,7 +40,6 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   const [pendingLike, setPendingLike] = useState<boolean | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
-  const [showActions, setShowActions] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -115,7 +109,6 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
       });
       const result = await shareOrDownloadImage(blob, "ez-treino.png", summary.workoutName);
       if (result === "downloaded") toast({ title: t.timeline.post.storySaved });
-      setShowActions(false);
     } catch {
       toast({ title: t.common.error, description: t.timeline.post.storyError, variant: "destructive" });
     } finally {
@@ -152,13 +145,28 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
           </div>
 
           {canDelete && (
-            <button
-              className="h-9 w-9 -mr-1 flex items-center justify-center rounded-full hover:bg-accent transition-colors"
-              onClick={() => setShowActions(true)}
-              aria-label={t.timeline.post.actionsTitle}
+            <ActionMenu
+              title={t.timeline.post.actionsTitle}
+              items={[
+                {
+                  icon: Instagram,
+                  label: t.timeline.post.shareStory,
+                  hint: t.timeline.post.shareStoryHint,
+                  loading: sharingStory,
+                  hidden: !(isOwn && post.workoutSummary),
+                  onClick: handleShareStory,
+                },
+                { icon: Pencil, label: t.timeline.post.edit, hidden: !isOwn, onClick: () => setShowEdit(true) },
+                { icon: Trash2, label: t.timeline.post.delete, destructive: true, onClick: () => setConfirmDelete(true) },
+              ]}
             >
-              <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-            </button>
+              <button
+                className="h-9 w-9 -mr-1 flex items-center justify-center rounded-full hover:bg-accent transition-colors"
+                aria-label={t.timeline.post.actionsTitle}
+              >
+                <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </ActionMenu>
           )}
         </div>
 
@@ -215,54 +223,6 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         onCommentsCountChange={() => {}}
       />
 
-      <Drawer open={showActions} onOpenChange={setShowActions}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>{t.timeline.post.actionsTitle}</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-2">
-            {isOwn && post.workoutSummary && (
-              <button
-                className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
-                onClick={handleShareStory}
-                disabled={sharingStory}
-              >
-                <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-fuchsia-500 via-rose-500 to-amber-400 text-white flex items-center justify-center shrink-0">
-                  {sharingStory ? <Loader2 className="h-5 w-5 animate-spin" /> : <Instagram className="h-5 w-5" />}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm">{t.timeline.post.shareStory}</p>
-                  <p className="text-xs text-muted-foreground">{t.timeline.post.shareStoryHint}</p>
-                </div>
-              </button>
-            )}
-            {isOwn && (
-              <button
-                className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
-                onClick={() => { setShowActions(false); setShowEdit(true); }}
-              >
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Pencil className="h-5 w-5 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm">{t.timeline.post.edit}</p>
-                </div>
-              </button>
-            )}
-            <button
-              className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-muted transition-colors text-left"
-              onClick={() => { setShowActions(false); setConfirmDelete(true); }}
-            >
-              <div className="h-9 w-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
-                <Trash2 className="h-5 w-5 text-destructive" />
-              </div>
-              <div className="min-w-0">
-                <p className="font-semibold text-sm text-destructive">{t.timeline.post.delete}</p>
-              </div>
-            </button>
-          </div>
-        </DrawerContent>
-      </Drawer>
 
       <ResponsiveConfirm
         open={confirmDelete}

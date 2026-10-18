@@ -720,6 +720,15 @@
       "toast": { "imageUploaded": "Imagem enviada", "imageUploadedDescription": "A sua imagem foi enviada com sucesso.", "uploadFailed": "Falha no envio", "uploadFailedDescription": "Erro ao enviar imagem. Tente novamente.", "notFound": "Artigo não encontrado", "notFoundDescription": "O artigo que está tentando editar não existe.", "loadError": "Erro ao carregar artigo.", "titleRequired": "O título é obrigatório.", "contentRequired": "O conteúdo é obrigatório.", "updated": "Artigo atualizado", "updatedDescription": "Suas alterações foram salvas.", "createdPublished": "Seu artigo foi publicado.", "createdDraft": "Seu artigo foi salvo como rascunho.", "invalidFile": "Por favor, envie um arquivo de imagem." }
     },
     "workoutEditor": {
+      "stagesTitle": "Etapas",
+      "type": "Tipo",
+      "repeatCount": "Repetições",
+      "stagesToRepeat": "Etapas do bloco",
+      "repeatTitle": "Repetir {{n}}×",
+      "blockStages": "{{n}} etapa(s) por volta",
+      "editStage": "Editar etapa",
+      "backToBlock": "Voltar ao bloco",
+      "blockNeedsStage": "Um bloco de repetição precisa de pelo menos uma etapa",
       "addStage": "Adicionar etapa",
       "addRepetition": "Adicionar repetição",
       "loadFailedTitle": "Não foi possível carregar o treino",

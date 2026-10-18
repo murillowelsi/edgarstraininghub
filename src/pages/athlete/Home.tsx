@@ -25,7 +25,7 @@ import { useEventChatReminders } from "@/hooks/useEventChatReminders";
 import { differenceInCalendarDays } from "date-fns";
 import { addDays, format, isAfter, isBefore, isSameDay, isToday, startOfDay } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import { CalendarCheck, ChevronRight, Dumbbell, Flame, PersonStanding, Play, Plus, Target, Trash2, TrendingUp } from "lucide-react";
+import { CalendarCheck, ChevronRight, Dumbbell, Flame, Play, Plus, Target, Trash2, TrendingUp } from "lucide-react";
 import { loadSessionDraft } from "@/lib/sessionDraft";
 import { NotificationBanner } from "@/components/NotificationBanner";
 import { SectionSpinner } from "@/components/ui/spinner";
@@ -341,7 +341,7 @@ const AthleteHome = () => {
                 <div className="space-y-2">
                   {selectedDateAssignments.map((assignment) => {
                     const workout = assignment.workout;
-                    const Icon = workoutTypeIcons[workout.type] || PersonStanding;
+                    const Icon = workoutTypeIcons[workout.type] || GrRun;
                     const isCompleted = !!assignment.completedAt;
 
                     return (
@@ -419,7 +419,7 @@ const AthleteHome = () => {
             <CardContent className="space-y-2">
               {upcomingWorkouts.map((assignment) => {
                 const workout = assignment.workout;
-                const Icon = workoutTypeIcons[workout.type] || PersonStanding;
+                const Icon = workoutTypeIcons[workout.type] || GrRun;
 
                 return (
                   <ListItemCard

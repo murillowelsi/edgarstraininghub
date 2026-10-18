@@ -14,8 +14,7 @@ import {
   Check,
   ChevronRight,
   Dumbbell,
-  PersonStanding,
-} from "lucide-react";
+  } from "lucide-react";
 import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -153,7 +152,7 @@ const AthleteCalendarView = () => {
                   {dayAssignments.map((assignment) => {
                     const workout = assignment.workout;
                     const Icon =
-                      workoutTypeIcons[workout.type] || PersonStanding;
+                      workoutTypeIcons[workout.type] || GrRun;
                     const isCompleted = !!assignment.completedAt;
 
                     return (

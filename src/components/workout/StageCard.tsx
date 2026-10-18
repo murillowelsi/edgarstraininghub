@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import {
   Collapsible,
   CollapsibleContent,
@@ -10,16 +11,13 @@ import { stageColors } from "@/types/workout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { workoutLabels } from "@/utils/workoutLabels";
 import {
-  Bike,
   ChevronDown,
   Clock,
   Flame,
   GripVertical,
   Heart,
-  PersonStanding,
   Repeat,
   Trash2,
-  Waves,
   Wind,
   Zap,
 } from "lucide-react";
@@ -27,14 +25,14 @@ import { useState } from "react";
 
 const stageIcons: Record<string, React.ElementType> = {
   warmup: Flame,
-  run: PersonStanding,
+  run: GrRun,
   cooldown: Wind,
   recovery: Heart,
   interval: Zap,
   repeat: Repeat,
-  bike: Bike,
+  bike: GrBike,
   rest: Clock,
-  swim: Waves,
+  swim: GrSwim,
 };
 
 interface StageCardProps {
@@ -118,10 +116,10 @@ const StageCard = ({
               <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm">
-                    Repeat {stage.repeatCount || 2}x
+                    {t.admin.workoutEditor.repeatTitle.replace("{{n}}", String(stage.repeatCount || 2))}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {stage.stages?.length || 0} stages
+                    {t.admin.workoutEditor.blockStages.replace("{{n}}", String(stage.stages?.length || 0))}
                   </p>
                 </div>
                 <ChevronDown
@@ -157,7 +155,7 @@ const StageCard = ({
             {stage.stages && stage.stages.length > 0 && (
               <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-2">
                 {stage.stages.map((nestedStage) => {
-                  const NestedIcon = stageIcons[nestedStage.type] || PersonStanding;
+                  const NestedIcon = stageIcons[nestedStage.type] || GrRun;
                   const nestedColor = stageColors[nestedStage.type];
                   const nestedIntensity = formatIntensity(nestedStage);
                   const nestedSwimmingDetails = formatSwimmingDetails(nestedStage);
@@ -199,7 +197,7 @@ const StageCard = ({
   // Regular stage
   const intensity = formatIntensity(stage);
   const swimmingDetails = formatSwimmingDetails(stage);
-  const StageIcon = stageIcons[stage.type] || PersonStanding;
+  const StageIcon = stageIcons[stage.type] || GrRun;
 
   return (
     <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">

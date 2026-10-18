@@ -24,7 +24,6 @@ import {
   Heart,
   Loader2,
   MapPin,
-  PersonStanding,
   PlayCircle,
   RotateCcw,
   Search,
@@ -238,7 +237,7 @@ const AthleteWorkoutsList = () => {
           <div className="flex flex-col gap-2">
             {filteredAssignments.map((assignment) => {
               const workout = assignment.workout;
-              const Icon = workoutTypeIcons[workout.type] || PersonStanding;
+              const Icon = workoutTypeIcons[workout.type] || GrRun;
               const isCompleted = !!assignment.completedAt;
 
               const isSkipped = !!assignment.skipped;
