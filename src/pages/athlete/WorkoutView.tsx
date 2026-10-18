@@ -22,6 +22,7 @@ import { createMentionNotifications, createTimelinePost } from "@/services/timel
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { clearSessionDraft } from "@/lib/sessionDraft";
 import { getAllExercises } from "@/services/exercisesService";
 import {
   getAssignmentsWithWorkoutsByAthlete,
@@ -896,6 +897,7 @@ const AthleteWorkoutView = () => {
     setResetting(true);
     try {
       await resetWorkoutAssignment(assignment.id);
+      clearSessionDraft(assignment.id);
       setAssignment({
         ...assignment,
         completedAt: null,

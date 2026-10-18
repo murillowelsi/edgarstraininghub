@@ -995,7 +995,17 @@
       "saveConfirmConfirm": "Salvar e Encerrar",
       "exercisesCount": "Exercícios",
       "completePercent": "Completo",
-      "shareCaption": "Treino concluído: {{name}} — {{percentage}}% em {{time}} 💪"
+      "shareCaption": "Treino concluído: {{name}} — {{percentage}}% em {{time}} 💪",
+      "rest": "Descanso",
+      "restSkip": "Pular",
+      "restDone": "Descanso acabou — próxima série!",
+      "restNext": "Próxima: {{name}} · série {{set}}",
+      "draftRestored": "Treino restaurado de onde você parou",
+      "exitTitle": "Sair do treino?",
+      "exitDescription": "Suas séries ficam salvas neste celular. Você pode continuar depois ou descartar esta sessão.",
+      "exitKeep": "Sair e continuar depois",
+      "exitDiscard": "Descartar treino",
+      "exitStay": "Continuar treinando"
     },
     "profile": {
       "title": "Você",

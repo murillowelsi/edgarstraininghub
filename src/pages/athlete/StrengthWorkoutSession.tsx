@@ -30,7 +30,15 @@ import {
 } from "@/types/exercise";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { format } from "date-fns";
-import { MotionConfig, motion } from "motion/react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
+import RestTimerPill from "@/components/athlete/RestTimerPill";
+import { useWakeLock } from "@/hooks/useWakeLock";
+import {
+  clearSessionDraft,
+  loadSessionDraft,
+  saveSessionDraft,
+  type RestState,
+} from "@/lib/sessionDraft";
 import {
   Check,
   CheckCircle2,
@@ -41,8 +49,6 @@ import {
   MoreVertical,
   Play,
   Plus,
-  RotateCcw,
-  Square,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -54,7 +60,7 @@ interface SetProgress {
   reps: string;
   weight: string;
   completed: boolean;
-  time: number; // Time spent on this set in seconds
+  time: number; // Legacy per-set stopwatch; kept so saved data keeps its shape
 }
 
 interface ExerciseProgress {
@@ -62,10 +68,24 @@ interface ExerciseProgress {
   sets: SetProgress[];
 }
 
-interface ActiveSet {
-  exerciseId: string;
-  setIndex: number;
-}
+const DEFAULT_REST_SECONDS = 60;
+
+// Short double beep for the end of a rest. The AudioContext must be created
+// from a user gesture on iOS, so it's unlocked when a set is ticked.
+const playRestBeep = (ctx: AudioContext | null) => {
+  if (!ctx) return;
+  [0, 0.25].forEach((offset) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime + offset);
+    gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + offset + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + offset + 0.18);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(ctx.currentTime + offset);
+    osc.stop(ctx.currentTime + offset + 0.2);
+  });
+};
 
 // Format time as MM:SS
 const formatTime = (seconds: number) => {
@@ -80,10 +100,7 @@ const ExerciseSessionCard = ({
   exercise,
   index,
   progress,
-  activeSetIndex,
-  onStartSetTimer,
-  onStopSetTimer,
-  onResetSetTimer,
+  isCurrent,
   onUpdateSet,
   onAddSet,
   onRemoveLastSet,
@@ -94,10 +111,8 @@ const ExerciseSessionCard = ({
   exercise?: Exercise;
   index: number;
   progress: ExerciseProgress;
-  activeSetIndex: number | null;
-  onStartSetTimer: (setIndex: number) => void;
-  onStopSetTimer: () => void;
-  onResetSetTimer: (setIndex: number) => void;
+  /** The exercise the athlete is on (next set after a rest) */
+  isCurrent: boolean;
   onUpdateSet: (setIndex: number, field: "reps" | "weight", value: string) => void;
   onAddSet: () => void;
   onRemoveLastSet: () => void;
@@ -105,7 +120,7 @@ const ExerciseSessionCard = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any;
 }) => {
-  const isActive = activeSetIndex !== null;
+  const isActive = isCurrent;
   const [isPlaying, setIsPlaying] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
@@ -250,88 +265,57 @@ const ExerciseSessionCard = ({
 
         {/* Sets Table */}
         <div>
-          <div className="grid grid-cols-[24px_minmax(0,1fr)_52px_52px_32px] gap-1.5 text-xs font-medium text-muted-foreground mb-2 px-1">
-            <span>{t.athlete.session.setHeader}</span>
-            <span className="truncate">{t.athlete.session.exerciseTimer}</span>
+          <div className="grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
+            <span className="text-center">{t.athlete.session.setHeader}</span>
             <span className="text-center">{t.athlete.session.repsHeader}</span>
             <span className="text-center">{t.athlete.session.kgHeader}</span>
             <span></span>
           </div>
 
           <div className="space-y-2">
-            {progress.sets.map((set, setIndex) => {
-              const isSetActive = activeSetIndex === setIndex;
-              return (
-                <div
-                  key={setIndex}
+            {progress.sets.map((set, setIndex) => (
+              <div
+                key={setIndex}
+                className={cn(
+                  "grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 items-center",
+                  set.completed && "opacity-60"
+                )}
+              >
+                <span className="text-base font-semibold text-center tabular-nums">{set.setNumber}</span>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  enterKeyHint="next"
+                  value={set.reps}
+                  onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
+                  placeholder={workoutExercise.reps || "10"}
+                  className="h-12 text-center text-base px-1 min-w-0"
+                  disabled={set.completed}
+                />
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  enterKeyHint="done"
+                  value={set.weight}
+                  onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
+                  placeholder="0"
+                  className="h-12 text-center text-base px-1 min-w-0"
+                  disabled={set.completed}
+                />
+                <button
+                  onClick={() => onToggleSetComplete(setIndex)}
+                  aria-label={t.athlete.session.complete}
                   className={cn(
-                    "grid grid-cols-[24px_minmax(0,1fr)_52px_52px_32px] gap-1.5 items-center",
-                    set.completed && "opacity-60"
+                    "h-12 w-12 rounded-full flex items-center justify-center transition-all",
+                    set.completed
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
                   )}
                 >
-                  <span className="text-sm font-medium text-center">{set.setNumber}</span>
-                  <div className="flex items-center gap-1 min-w-0">
-                    <button
-                      onClick={() => (isSetActive ? onStopSetTimer() : onStartSetTimer(setIndex))}
-                      disabled={set.completed}
-                      className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
-                        isSetActive
-                          ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          : "bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
-                      )}
-                      aria-label={isSetActive ? t.athlete.session.stop : t.athlete.session.start}
-                    >
-                      {isSetActive ? <Square className="h-2.5 w-2.5" fill="currentColor" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
-                    </button>
-                    <span
-                      className={cn(
-                        "text-xs font-mono tabular-nums truncate",
-                        isSetActive ? "text-primary font-semibold" : "text-muted-foreground"
-                      )}
-                    >
-                      {formatTime(set.time)}
-                    </span>
-                    {set.time > 0 && !set.completed && !isSetActive && (
-                      <button
-                        onClick={() => onResetSetTimer(setIndex)}
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground flex-shrink-0"
-                        aria-label={t.athlete.session.reset ?? "Reset"}
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                  <Input
-                    type="text"
-                    value={set.reps}
-                    onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
-                    placeholder={workoutExercise.reps || "10"}
-                    className="h-10 text-center text-sm px-1 min-w-0"
-                    disabled={set.completed}
-                  />
-                  <Input
-                    type="text"
-                    value={set.weight}
-                    onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
-                    placeholder="0"
-                    className="h-10 text-center text-sm px-1 min-w-0"
-                    disabled={set.completed}
-                  />
-                  <button
-                    onClick={() => onToggleSetComplete(setIndex)}
-                    className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center transition-all",
-                      set.completed
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
-                    )}
-                  >
-                    <Check className={cn("h-4 w-4", !set.completed && "opacity-50")} />
-                  </button>
-                </div>
-              );
-            })}
+                  <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
+                </button>
+              </div>
+            ))}
           </div>
 
           {/* Add / Remove Set Buttons */}
@@ -376,28 +360,26 @@ const StrengthWorkoutSession = () => {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareCaption, setShareCaption] = useState("");
-  // Workout session state
-  const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
-  const [totalElapsedTime, setTotalElapsedTime] = useState(0);
-  const [activeSet, setActiveSet] = useState<ActiveSet | null>(null);
+  // Workout session state. Time is derived from timestamps (not counted with
+  // setInterval) so it stays correct when iOS freezes the page while the
+  // screen is locked or the app is in the background.
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const [rest, setRest] = useState<RestState | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [exerciseProgress, setExerciseProgress] = useState<Map<string, ExerciseProgress>>(
     new Map()
   );
+  const isWorkoutStarted = startedAt !== null;
+  const totalElapsedTime = startedAt ? Math.max(0, Math.floor((now - startedAt) / 1000)) : 0;
 
-  // Timer refs
-  const totalTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const setTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Set once the session is saved or discarded so the autosave stops writing
+  const finishedRef = useRef(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Start workout function
-  const startWorkout = useCallback(() => {
-    if (isWorkoutStarted) return;
-    setIsWorkoutStarted(true);
-    totalTimerRef.current = setInterval(() => {
-      setTotalElapsedTime((prev) => prev + 1);
-    }, 1000);
-  }, [isWorkoutStarted]);
+  useWakeLock(isWorkoutStarted);
 
-  // Load data
+  // Load data (restoring an on-device draft if the session was interrupted)
   useEffect(() => {
     const loadData = async () => {
       if (!user || !id) return;
@@ -416,9 +398,22 @@ const StrengthWorkoutSession = () => {
             console.error("Error loading exercises:", e);
           }
 
-          // Initialize progress for each exercise, restoring saved data if available
+          const draft = loadSessionDraft(id);
+          // A draft older than the last save belongs to a session that was already finished
+          const useDraft =
+            !!draft && (!found.completedAt || draft.updatedAt > found.completedAt.getTime());
+
+          // Initialize progress for each exercise: draft > saved data > empty sets
           const initialProgress = new Map<string, ExerciseProgress>();
           found.workout.exercises?.forEach((we) => {
+            const drafted = useDraft ? draft.progress[we.id] : undefined;
+            if (drafted) {
+              initialProgress.set(we.id, {
+                exerciseId: drafted.exerciseId,
+                sets: drafted.sets.map((s) => ({ ...s, time: s.time ?? 0 })),
+              });
+              return;
+            }
             const saved = found.progressData?.find((p) => p.exerciseId === we.exerciseId);
             const sets: SetProgress[] = saved
               ? saved.sets.map((s) => ({
@@ -442,10 +437,16 @@ const StrengthWorkoutSession = () => {
           });
           setExerciseProgress(initialProgress);
 
-          // Restore previously elapsed time if resuming a saved workout
-          if (found.totalTime) {
-            setTotalElapsedTime(found.totalTime);
+          // Start (or resume) the clock
+          if (useDraft) {
+            setStartedAt(draft.startedAt);
+            if (draft.rest && draft.rest.endsAt > Date.now()) setRest(draft.rest);
+            toast({ title: t.athlete.session.draftRestored });
+          } else {
+            // Resuming a saved workout continues from its recorded time
+            setStartedAt(Date.now() - (found.totalTime ?? 0) * 1000);
           }
+          setNow(Date.now());
         }
       } catch (error) {
         console.error("Error loading workout:", error);
@@ -460,97 +461,73 @@ const StrengthWorkoutSession = () => {
     };
 
     loadData();
-
-    return () => {
-      // Cleanup timers
-      if (totalTimerRef.current) clearInterval(totalTimerRef.current);
-      if (setTimerRef.current) clearInterval(setTimerRef.current);
-    };
   }, [user, id, toast]);
 
-  // Auto-start workout when data is loaded
+  // Tick once a second for display, and immediately when the page comes back
   useEffect(() => {
-    if (!loading && assignment && !isWorkoutStarted) {
-      startWorkout();
-    }
-  }, [loading, assignment, isWorkoutStarted, startWorkout]);
+    if (!isWorkoutStarted) return;
+    const tick = () => setNow(Date.now());
+    const interval = setInterval(tick, 1000);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isWorkoutStarted]);
 
-  // Start set timer (auto-stops any other running set timer)
-  const handleStartSetTimer = useCallback((exerciseId: string, setIndex: number) => {
-    if (setTimerRef.current) {
-      clearInterval(setTimerRef.current);
-    }
+  // Autosave the session on this device after every change
+  useEffect(() => {
+    if (!id || !startedAt || finishedRef.current || exerciseProgress.size === 0) return;
+    saveSessionDraft(id, {
+      startedAt,
+      progress: Object.fromEntries(exerciseProgress),
+      rest,
+    });
+  }, [id, startedAt, exerciseProgress, rest]);
 
-    setActiveSet({ exerciseId, setIndex });
+  // End of rest: clear it and alert (vibration on Android, beep, toast)
+  useEffect(() => {
+    if (!rest || now < rest.endsAt) return;
+    setRest(null);
+    if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+    playRestBeep(audioCtxRef.current);
+    toast({ title: t.athlete.session.restDone });
+  }, [now, rest, toast, t]);
 
-    setTimerRef.current = setInterval(() => {
-      setExerciseProgress((prev) => {
-        const newMap = new Map(prev);
-        const progress = newMap.get(exerciseId);
-        if (progress && progress.sets[setIndex]) {
-          const newSets = [...progress.sets];
-          newSets[setIndex] = {
-            ...newSets[setIndex],
-            time: newSets[setIndex].time + 1,
-          };
-          newMap.set(exerciseId, { ...progress, sets: newSets });
-        }
-        return newMap;
-      });
-    }, 1000);
+  const restRemainingSec = rest ? Math.max(0, Math.ceil((rest.endsAt - now) / 1000)) : 0;
+
+  const handleAdjustRest = useCallback((deltaSec: number) => {
+    setRest((prev) => {
+      if (!prev) return prev;
+      const endsAt = prev.endsAt + deltaSec * 1000;
+      if (endsAt <= Date.now()) return null;
+      return { ...prev, endsAt, durationSec: Math.max(1, prev.durationSec + deltaSec) };
+    });
+    setNow(Date.now());
   }, []);
 
-  // Stop set timer
-  const handleStopSetTimer = useCallback(() => {
-    if (setTimerRef.current) {
-      clearInterval(setTimerRef.current);
-      setTimerRef.current = null;
-    }
-    setActiveSet(null);
-  }, []);
+  const handleSkipRest = useCallback(() => setRest(null), []);
 
-  // Reset a set's timer to zero (also stops it if currently running)
-  const handleResetSetTimer = useCallback(
-    (exerciseId: string, setIndex: number) => {
-      if (
-        activeSet &&
-        activeSet.exerciseId === exerciseId &&
-        activeSet.setIndex === setIndex
-      ) {
-        if (setTimerRef.current) {
-          clearInterval(setTimerRef.current);
-          setTimerRef.current = null;
-        }
-        setActiveSet(null);
-      }
-      setExerciseProgress((prev) => {
-        const newMap = new Map(prev);
-        const progress = newMap.get(exerciseId);
-        if (progress && progress.sets[setIndex]) {
-          const newSets = [...progress.sets];
-          newSets[setIndex] = { ...newSets[setIndex], time: 0 };
-          newMap.set(exerciseId, { ...progress, sets: newSets });
-        }
-        return newMap;
-      });
-    },
-    [activeSet]
-  );
+  // Cancel workout — ask whether to keep the draft for later or discard it
+  const handleCancel = () => setShowExitConfirm(true);
 
-  // Cancel workout
-  const handleCancel = () => {
-    if (totalTimerRef.current) clearInterval(totalTimerRef.current);
-    if (setTimerRef.current) clearInterval(setTimerRef.current);
+  const handleExitKeep = () => {
+    finishedRef.current = true;
+    navigate(`/athlete/workout/${id}`);
+  };
+
+  const handleExitDiscard = () => {
+    finishedRef.current = true;
+    if (id) clearSessionDraft(id);
     navigate(`/athlete/workout/${id}`);
   };
 
   // Save workout
   const handleSave = async () => {
     if (!assignment) return;
-
-    // Stop all timers
-    if (totalTimerRef.current) clearInterval(totalTimerRef.current);
-    if (setTimerRef.current) clearInterval(setTimerRef.current);
 
     setSaving(true);
     try {
@@ -569,26 +546,32 @@ const StrengthWorkoutSession = () => {
       );
 
       const completionPercentage = getCompletionPercentage();
+      const elapsed = totalElapsedTime;
 
       await completeWorkoutWithProgress(
         assignment.id,
         progressData,
         completionPercentage,
-        totalElapsedTime
+        elapsed
       );
+
+      finishedRef.current = true;
+      clearSessionDraft(assignment.id);
+      setRest(null);
+      setStartedAt(null);
 
       toast({
         title: t.athlete.toast.sessionCompleted,
         description: t.athlete.toast.sessionCompletedDescription
           .replace("{{percentage}}", String(completionPercentage))
-          .replace("{{time}}", formatTime(totalElapsedTime)),
+          .replace("{{time}}", formatTime(elapsed)),
       });
       const workoutName = assignment.workout.name;
       setShareCaption(
         t.athlete.session.shareCaption
           .replace("{{name}}", workoutName)
           .replace("{{percentage}}", String(completionPercentage))
-          .replace("{{time}}", formatTime(totalElapsedTime))
+          .replace("{{time}}", formatTime(elapsed))
       );
       setShowShareModal(true);
     } catch (error) {
@@ -620,67 +603,80 @@ const StrengthWorkoutSession = () => {
     []
   );
 
-  // Toggle set complete
-  const handleToggleSetComplete = useCallback(
-    (exerciseId: string, setIndex: number) => {
-      // Stop set timer if the toggled set is currently active
-      if (
-        activeSet &&
-        activeSet.exerciseId === exerciseId &&
-        activeSet.setIndex === setIndex
-      ) {
-        if (setTimerRef.current) {
-          clearInterval(setTimerRef.current);
-          setTimerRef.current = null;
-        }
-        setActiveSet(null);
+  // Next set to do after (exerciseId, setIndex): the next open set of the same
+  // exercise, else the first open set of a later exercise.
+  const findNextSet = useCallback(
+    (progressMap: Map<string, ExerciseProgress>, exerciseId: string, setIndex: number) => {
+      const order = assignment?.workout.exercises ?? [];
+      const start = order.findIndex((we) => we.id === exerciseId);
+      for (let i = Math.max(0, start); i < order.length; i++) {
+        const sets = progressMap.get(order[i].id)?.sets ?? [];
+        const from = i === start ? setIndex + 1 : 0;
+        const next = sets.findIndex((s, idx) => idx >= from && !s.completed);
+        if (next >= 0) return { exerciseId: order[i].id, setIndex: next };
       }
-      setExerciseProgress((prev) => {
-        const newMap = new Map(prev);
-        const progress = newMap.get(exerciseId);
-        if (progress) {
-          const newSets = [...progress.sets];
-          newSets[setIndex] = {
-            ...newSets[setIndex],
-            completed: !newSets[setIndex].completed,
-          };
-          newMap.set(exerciseId, { ...progress, sets: newSets });
-        }
-        return newMap;
-      });
+      return null;
     },
-    [activeSet]
+    [assignment]
   );
 
-  // Remove last set (also stops timer if that set was active)
-  const handleRemoveLastSet = useCallback(
-    (exerciseId: string) => {
-      setExerciseProgress((prev) => {
-        const newMap = new Map(prev);
-        const progress = newMap.get(exerciseId);
-        if (progress && progress.sets.length > 1) {
-          const lastIndex = progress.sets.length - 1;
-          if (
-            activeSet &&
-            activeSet.exerciseId === exerciseId &&
-            activeSet.setIndex === lastIndex
-          ) {
-            if (setTimerRef.current) {
-              clearInterval(setTimerRef.current);
-              setTimerRef.current = null;
-            }
-            setActiveSet(null);
-          }
-          newMap.set(exerciseId, {
-            ...progress,
-            sets: progress.sets.slice(0, -1),
-          });
+  // Toggle set complete — ticking a set starts the rest countdown
+  const handleToggleSetComplete = useCallback(
+    (exerciseId: string, setIndex: number) => {
+      // Unlock audio from this user gesture so the end-of-rest beep can play on iOS
+      if (!audioCtxRef.current && typeof window !== "undefined" && "AudioContext" in window) {
+        try {
+          audioCtxRef.current = new AudioContext();
+        } catch {
+          audioCtxRef.current = null;
         }
-        return newMap;
+      }
+      audioCtxRef.current?.resume().catch(() => {});
+
+      const current = exerciseProgress.get(exerciseId);
+      if (!current?.sets[setIndex]) return;
+      const nowCompleted = !current.sets[setIndex].completed;
+
+      const newMap = new Map(exerciseProgress);
+      const newSets = [...current.sets];
+      newSets[setIndex] = { ...newSets[setIndex], completed: nowCompleted };
+      newMap.set(exerciseId, { ...current, sets: newSets });
+      setExerciseProgress(newMap);
+
+      if (!nowCompleted) return;
+      const next = findNextSet(newMap, exerciseId, setIndex);
+      if (!next) {
+        setRest(null);
+        return;
+      }
+      const workoutExercise = assignment?.workout.exercises?.find((we) => we.id === exerciseId);
+      const durationSec = workoutExercise?.restSeconds || DEFAULT_REST_SECONDS;
+      const startNow = Date.now();
+      setNow(startNow);
+      setRest({
+        endsAt: startNow + durationSec * 1000,
+        durationSec,
+        nextExerciseId: next.exerciseId,
+        nextSetIndex: next.setIndex,
       });
     },
-    [activeSet]
+    [exerciseProgress, findNextSet, assignment]
   );
+
+  // Remove last set
+  const handleRemoveLastSet = useCallback((exerciseId: string) => {
+    setExerciseProgress((prev) => {
+      const newMap = new Map(prev);
+      const progress = newMap.get(exerciseId);
+      if (progress && progress.sets.length > 1) {
+        newMap.set(exerciseId, {
+          ...progress,
+          sets: progress.sets.slice(0, -1),
+        });
+      }
+      return newMap;
+    });
+  }, []);
 
   // Add set
   const handleAddSet = useCallback((exerciseId: string) => {
@@ -742,6 +738,13 @@ const StrengthWorkoutSession = () => {
   const workout = assignment.workout;
   const completionPercentage = getCompletionPercentage();
 
+  const restNextExercise = rest ? workout.exercises?.find((we) => we.id === rest.nextExerciseId) : undefined;
+  const restNextLabel = restNextExercise
+    ? t.athlete.session.restNext
+        .replace("{{name}}", getExerciseByIdOrName(restNextExercise)?.name || restNextExercise.exerciseName || "")
+        .replace("{{set}}", String((rest?.nextSetIndex ?? 0) + 1))
+    : undefined;
+
   const handleSharePost = async (caption: string, imageUrl?: string, mentionedUserIds?: string[]) => {
     if (!user) return;
     const authorName = displayName || user.email || "Athlete";
@@ -796,9 +799,22 @@ const StrengthWorkoutSession = () => {
             initial={{ y: 96, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="fixed inset-x-3 z-50 mx-auto max-w-lg"
+            className="fixed inset-x-3 z-50 mx-auto max-w-lg space-y-2"
             style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
           >
+            <AnimatePresence>
+              {rest && (
+                <RestTimerPill
+                  key="rest"
+                  remainingSec={restRemainingSec}
+                  durationSec={rest.durationSec}
+                  nextLabel={restNextLabel}
+                  labels={{ rest: t.athlete.session.rest, skip: t.athlete.session.restSkip }}
+                  onAdjust={handleAdjustRest}
+                  onSkip={handleSkipRest}
+                />
+              )}
+            </AnimatePresence>
             <div className="glass flex items-center gap-2 h-16 p-1.5 rounded-full">
               <motion.button
                 whileTap={{ scale: 0.85 }}
@@ -845,7 +861,7 @@ const StrengthWorkoutSession = () => {
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-auto pb-28">
+      <div className={cn("flex-1 overflow-auto", rest ? "pb-48" : "pb-28")}>
         <div className="p-4 space-y-4">
           {/* Workout Info Card */}
           <Card>
@@ -898,9 +914,6 @@ const StrengthWorkoutSession = () => {
 
               if (!progress) return null;
 
-              const activeSetIndex =
-                activeSet?.exerciseId === workoutExercise.id ? activeSet.setIndex : null;
-
               return (
                 <ExerciseSessionCard
                   key={workoutExercise.id}
@@ -908,14 +921,7 @@ const StrengthWorkoutSession = () => {
                   exercise={exercise}
                   index={index}
                   progress={progress}
-                  activeSetIndex={activeSetIndex}
-                  onStartSetTimer={(setIndex) =>
-                    handleStartSetTimer(workoutExercise.id, setIndex)
-                  }
-                  onStopSetTimer={handleStopSetTimer}
-                  onResetSetTimer={(setIndex) =>
-                    handleResetSetTimer(workoutExercise.id, setIndex)
-                  }
+                  isCurrent={rest?.nextExerciseId === workoutExercise.id}
                   onUpdateSet={(setIndex, field, value) =>
                     handleUpdateSet(workoutExercise.id, setIndex, field, value)
                   }
@@ -933,6 +939,26 @@ const StrengthWorkoutSession = () => {
       </div>
 
       {/* Bottom Button - only shown during loading before auto-start */}
+
+      <Drawer open={showExitConfirm} onOpenChange={setShowExitConfirm}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{t.athlete.session.exitTitle}</DrawerTitle>
+            <DrawerDescription>{t.athlete.session.exitDescription}</DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter>
+            <Button className="w-full" onClick={handleExitKeep}>
+              {t.athlete.session.exitKeep}
+            </Button>
+            <Button variant="outline" className="w-full text-destructive" onClick={handleExitDiscard}>
+              {t.athlete.session.exitDiscard}
+            </Button>
+            <Button variant="ghost" className="w-full" onClick={() => setShowExitConfirm(false)}>
+              {t.athlete.session.exitStay}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       <Drawer open={showSaveConfirm} onOpenChange={setShowSaveConfirm}>
         <DrawerContent>

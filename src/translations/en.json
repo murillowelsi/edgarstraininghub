@@ -995,7 +995,17 @@
       "saveConfirmConfirm": "Save & Finish",
       "exercisesCount": "Exercises",
       "completePercent": "Complete",
-      "shareCaption": "Workout complete: {{name}} — {{percentage}}% in {{time}} 💪"
+      "shareCaption": "Workout complete: {{name}} — {{percentage}}% in {{time}} 💪",
+      "rest": "Rest",
+      "restSkip": "Skip",
+      "restDone": "Rest over — next set!",
+      "restNext": "Next: {{name}} · set {{set}}",
+      "draftRestored": "Workout restored where you left off",
+      "exitTitle": "Leave workout?",
+      "exitDescription": "Your sets are saved on this phone. You can continue later or discard this session.",
+      "exitKeep": "Leave and continue later",
+      "exitDiscard": "Discard workout",
+      "exitStay": "Keep training"
     },
     "profile": {
       "title": "You",
