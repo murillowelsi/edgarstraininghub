@@ -96,6 +96,8 @@ const settleWithin = (promise: Promise<unknown>, ms: number): Promise<"done" | "
     new Promise<"pending">((resolve) => setTimeout(() => resolve("pending"), ms)),
   ]);
 const WEIGHT_STEP = 2.5;
+// Set · reps/time · weight (with steppers) · done. Fixed reps column so the weight value gets the room.
+const SET_GRID = "grid grid-cols-[40px_60px_minmax(0,1fr)_48px] gap-1.5";
 
 interface SetSuggestion {
   reps: string;
@@ -182,8 +184,9 @@ const ExerciseSessionCard = ({
   isOpen,
   onToggleOpen,
   suggestions,
+  previous,
   best,
-  onUseSuggestion,
+  onUsePrevious,
   onStepWeight,
   onToggleWarmup,
   onUpdateSet,
@@ -202,7 +205,9 @@ const ExerciseSessionCard = ({
   onToggleOpen: () => void;
   /** Per set: what to prefill (last session > previous set > coach target) */
   suggestions: (SetSuggestion | null)[];
-  onUseSuggestion: (setIndex: number) => void;
+  /** Per set: the same set from the athlete's last session, shown as a reference */
+  previous: (SetProgressData | null)[];
+  onUsePrevious: (setIndex: number) => void;
   /** Heaviest previous working set for this exercise, for 🏆 PR badges */
   best?: ExerciseBest;
   onStepWeight: (setIndex: number, delta: number) => void;
@@ -284,7 +289,7 @@ const ExerciseSessionCard = ({
       )}
     >
       {/* Header — always visible, toggles the card */}
-      <button
+      <button type="button"
         onClick={onToggleOpen}
         aria-expanded={isOpen}
         className="w-full flex items-center gap-3 p-4 text-left [-webkit-tap-highlight-color:transparent]"
@@ -353,7 +358,7 @@ const ExerciseSessionCard = ({
                         className="w-full h-full"
                       />
                     ) : null}
-                    <button
+                    <button type="button"
                       onClick={() => setIsPlaying(false)}
                       className="absolute top-2 right-2 z-10 w-9 h-9 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black/90"
                     >
@@ -361,7 +366,7 @@ const ExerciseSessionCard = ({
                     </button>
                   </div>
                 ) : (
-                  <button
+                  <button type="button"
                     onClick={() => setIsPlaying(true)}
                     className="w-full flex items-center gap-3 rounded-xl bg-muted/50 hover:bg-muted p-2 mb-3 text-left transition-colors"
                   >
@@ -384,7 +389,7 @@ const ExerciseSessionCard = ({
               {/* Instructions */}
               {instructions && (
                 <div className="bg-muted/50 rounded-lg mb-3 overflow-hidden">
-                  <button
+                  <button type="button"
                     className="flex items-center justify-between w-full p-3 text-left"
                     onClick={() => setInstructionsOpen((v) => !v)}
                   >
@@ -397,31 +402,42 @@ const ExerciseSessionCard = ({
                 </div>
               )}
 
-              {/* Sets Table */}
+              {/* Sets Table — columns shared by the header and every row */}
               <div>
-                <div className="grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
+                <div className={cn(SET_GRID, "text-xs font-medium text-muted-foreground mb-2")}>
                   <span className="text-center">{t.athlete.session.setHeader}</span>
                   <span className="text-center">{holdSeconds ? t.athlete.session.timeHeader : t.athlete.session.repsHeader}</span>
                   <span className="text-center">{t.athlete.session.kgHeader}</span>
                   <span></span>
                 </div>
+                {/* The warm-up toggle has no other visual cue, so say it until the exercise is underway */}
+                {!progress.sets.some((s) => s.completed || s.warmup) && (
+                  <p className="mb-2 text-[11px] text-muted-foreground">{t.athlete.session.warmupHint}</p>
+                )}
 
                 <div className="space-y-2">
                   {progress.sets.map((set, setIndex) => {
                     const suggestion = suggestions[setIndex];
-                    const showHistory =
-                      !!suggestion?.fromHistory && !set.completed && !set.reps && !set.weight;
+                    const prev = previous[setIndex];
                     const isPR = isPersonalRecord(set, best);
+                    const setLabel = String(set.setNumber);
+                    const previousText = prev
+                      ? [prev.weight ? `${prev.weight} kg` : t.athlete.session.noLoad, prev.reps && `× ${prev.reps}`]
+                          .filter(Boolean)
+                          .join(" ")
+                      : "";
                     return (
                       <div key={setIndex}>
                         <div
                           className={cn(
-                            "grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1.25fr)_48px] gap-2 items-center rounded-xl transition-colors",
+                            SET_GRID,
+                            "items-start rounded-xl transition-colors",
                             set.completed && "bg-primary/5"
                           )}
                         >
                           {/* Tap the set number to mark it as warm-up */}
                           <button
+                            type="button"
                             onClick={() => onToggleWarmup(setIndex)}
                             aria-label={set.warmup ? t.athlete.session.warmupOff : t.athlete.session.warmupOn}
                             title={t.athlete.session.warmupHint}
@@ -443,6 +459,7 @@ const ExerciseSessionCard = ({
                           </button>
                           {holdSeconds && !set.completed ? (
                             <button
+                              type="button"
                               onClick={() => toggleHold(setIndex)}
                               aria-label={
                                 hold?.setIndex === setIndex
@@ -450,7 +467,7 @@ const ExerciseSessionCard = ({
                                   : t.athlete.session.startHold.replace("{{time}}", formatHold(holdSeconds))
                               }
                               className={cn(
-                                "relative h-12 min-w-0 overflow-hidden rounded-md border text-base font-semibold tabular-nums flex items-center justify-center gap-1.5 transition-colors",
+                                "relative h-12 min-w-0 overflow-hidden rounded-md border px-1 text-base font-semibold tabular-nums flex items-center justify-center gap-1 transition-colors",
                                 hold?.setIndex === setIndex ? "border-primary text-primary" : "border-input text-foreground"
                               )}
                             >
@@ -461,12 +478,12 @@ const ExerciseSessionCard = ({
                                     className="absolute inset-y-0 left-0 bg-primary/15"
                                     style={{ width: `${Math.min(100, (1 - (hold.endsAt - now) / (holdSeconds * 1000)) * 100)}%` }}
                                   />
-                                  <Square className="relative h-3.5 w-3.5 fill-current" />
+                                  <Square className="relative h-3 w-3 shrink-0 fill-current" />
                                   <span className="relative">{formatHold(Math.max(0, Math.ceil((hold.endsAt - now) / 1000)))}</span>
                                 </>
                               ) : (
                                 <>
-                                  <Play className="h-3.5 w-3.5 fill-current text-primary" />
+                                  <Play className="h-3 w-3 shrink-0 fill-current text-primary" />
                                   {formatHold(holdSeconds)}
                                 </>
                               )}
@@ -479,15 +496,19 @@ const ExerciseSessionCard = ({
                               value={set.reps}
                               onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
                               placeholder={suggestion?.reps || workoutExercise.reps || "10"}
+                              aria-label={(holdSeconds ? t.athlete.session.setTimeLabel : t.athlete.session.setRepsLabel).replace("{{n}}", setLabel)}
                               className="h-12 text-center text-base px-1 min-w-0 placeholder:text-muted-foreground/50"
                             />
                           )}
-                          {/* Weight with ±2.5 kg steppers so the keyboard isn't needed between sets */}
-                          <div className="relative min-w-0">
+                          {/* Weight with ±2.5 kg steppers so the keyboard isn't needed between sets.
+                              ≥375px: one segmented [−][kg][+] control; narrower: steppers drop below
+                              the field so the value never gets squeezed. */}
+                          <div className="min-w-0 grid grid-cols-2 gap-1 min-[375px]:h-12 min-[375px]:grid-cols-[40px_minmax(0,1fr)_40px] min-[375px]:gap-0 min-[375px]:overflow-hidden min-[375px]:rounded-md min-[375px]:border min-[375px]:border-input min-[375px]:focus-within:ring-2 min-[375px]:focus-within:ring-ring">
                             <button
+                              type="button"
                               onClick={() => onStepWeight(setIndex, -WEIGHT_STEP)}
                               aria-label={`−${WEIGHT_STEP} kg`}
-                              className="absolute left-0 inset-y-0 z-10 w-9 flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-transform"
+                              className="h-10 min-[375px]:h-full flex items-center justify-center rounded-md min-[375px]:rounded-none bg-muted/60 min-[375px]:bg-transparent text-muted-foreground hover:text-foreground active:bg-muted transition-colors"
                             >
                               <Minus className="h-4 w-4" />
                             </button>
@@ -498,19 +519,23 @@ const ExerciseSessionCard = ({
                               value={set.weight}
                               onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
                               placeholder={suggestion?.weight || "0"}
-                              className="h-12 text-center text-base px-9 min-w-0 placeholder:text-muted-foreground/50"
+                              aria-label={t.athlete.session.setWeightLabel.replace("{{n}}", setLabel)}
+                              className="order-first col-span-2 h-12 min-w-0 px-0.5 text-center text-base tabular-nums placeholder:text-muted-foreground/50 min-[375px]:order-none min-[375px]:col-span-1 min-[375px]:h-full min-[375px]:rounded-none min-[375px]:border-0 min-[375px]:focus-visible:ring-0 min-[375px]:focus-visible:ring-offset-0"
                             />
                             <button
+                              type="button"
                               onClick={() => onStepWeight(setIndex, WEIGHT_STEP)}
                               aria-label={`+${WEIGHT_STEP} kg`}
-                              className="absolute right-0 inset-y-0 z-10 w-9 flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-transform"
+                              className="h-10 min-[375px]:h-full flex items-center justify-center rounded-md min-[375px]:rounded-none bg-muted/60 min-[375px]:bg-transparent text-muted-foreground hover:text-foreground active:bg-muted transition-colors"
                             >
                               <Plus className="h-4 w-4" />
                             </button>
                           </div>
                           <button
+                            type="button"
                             onClick={() => onToggleSetComplete(setIndex)}
                             aria-label={t.athlete.session.complete}
+                            aria-pressed={set.completed}
                             className={cn(
                               "h-12 w-12 rounded-full flex items-center justify-center transition-all",
                               set.completed
@@ -521,33 +546,40 @@ const ExerciseSessionCard = ({
                             <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
                           </button>
                         </div>
-                        {showHistory && (
-                          <button
-                            onClick={() => onUseSuggestion(setIndex)}
-                            className="ml-12 mt-1 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
-                          >
-                            <History className="h-3.5 w-3.5" />
-                            <span>
-                              {t.athlete.session.previousHeader}:{" "}
-                              <span className="font-semibold tabular-nums text-foreground/80">
-                                {[suggestion.weight ? `${suggestion.weight} kg` : t.athlete.session.noLoad, suggestion.reps && `× ${suggestion.reps}`]
-                                  .filter(Boolean)
-                                  .join(" ")}
+                        {/* Last session's same set stays visible as a reference; tap to reuse it */}
+                        {prev &&
+                          (set.completed ? (
+                            <p className="ml-12 flex min-h-9 items-center gap-1.5 px-2.5 text-xs text-muted-foreground">
+                              <History className="h-3.5 w-3.5 shrink-0" />
+                              <span>
+                                {t.athlete.session.previousHeader}: <span className="tabular-nums">{previousText}</span>
                               </span>
-                            </span>
-                          </button>
-                        )}
+                            </p>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => onUsePrevious(setIndex)}
+                              className="ml-12 mt-0.5 flex min-h-10 items-center gap-1.5 rounded-full px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                            >
+                              <History className="h-3.5 w-3.5 shrink-0" />
+                              <span>
+                                {t.athlete.session.previousHeader}:{" "}
+                                <span className="font-semibold tabular-nums text-foreground/80">{previousText}</span>
+                              </span>
+                            </button>
+                          ))}
                       </div>
                     );
                   })}
                 </div>
 
                 {/* Add / Remove Set Buttons */}
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center justify-between mt-3">
                   {progress.sets.length > 1 ? (
                     <button
+                      type="button"
                       onClick={onRemoveLastSet}
-                      className="flex items-center gap-2 text-sm text-muted-foreground font-medium hover:text-destructive hover:underline"
+                      className="-ml-2 flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground font-medium hover:text-destructive hover:underline"
                     >
                       <Minus className="h-4 w-4" />
                       {t.athlete.session.removeLastSet}
@@ -556,8 +588,9 @@ const ExerciseSessionCard = ({
                     <span />
                   )}
                   <button
+                    type="button"
                     onClick={onAddSet}
-                    className="flex items-center gap-2 text-sm text-primary font-medium hover:underline"
+                    className="-mr-2 flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm text-primary font-medium hover:underline"
                   >
                     <Plus className="h-4 w-4" />
                     {t.athlete.session.addNewSet}
@@ -795,15 +828,46 @@ const StrengthWorkoutSession = () => {
   // Cancel workout — ask whether to keep the draft for later or discard it
   const handleCancel = () => setShowExitConfirm(true);
 
+  // Browser / system back during the session opens the leave sheet instead of
+  // leaving: a guard entry with the same URL is pushed on start, and popping it
+  // re-arms it. Leaving replaces the guard so it doesn't linger in history.
+  const backGuardRef = useRef(false);
+  const sessionActive = isWorkoutStarted && !summary;
+  useEffect(() => {
+    if (!sessionActive) return;
+    if (!backGuardRef.current) {
+      window.history.pushState({ ...window.history.state, sessionGuard: true }, "");
+      backGuardRef.current = true;
+    }
+    const onPopState = () => {
+      if (finishedRef.current) return;
+      window.history.pushState({ ...window.history.state, sessionGuard: true }, "");
+      setShowExitConfirm(true);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [sessionActive]);
+
+  const leaveTo = useCallback(
+    (to: string) => {
+      const replace = backGuardRef.current;
+      backGuardRef.current = false;
+      navigate(to, { replace });
+    },
+    [navigate]
+  );
+
   const handleExitKeep = () => {
     finishedRef.current = true;
-    navigate(`/athlete/workout/${id}`);
+    setShowExitConfirm(false);
+    leaveTo(`/athlete/workout/${id}`);
   };
 
   const handleExitDiscard = () => {
     finishedRef.current = true;
     if (id) clearSessionDraft(id);
-    navigate(`/athlete/workout/${id}`);
+    setShowExitConfirm(false);
+    leaveTo(`/athlete/workout/${id}`);
   };
 
   // Save workout
@@ -943,7 +1007,7 @@ const StrengthWorkoutSession = () => {
     setFinishing(true);
     await saveFeedback(feedback);
     setFinishing(false);
-    navigate("/athlete");
+    leaveTo("/athlete");
   };
 
   const handleShareSummary = (feedback: { rpe?: number; notes: string }) => {
@@ -1086,9 +1150,19 @@ const StrengthWorkoutSession = () => {
     [updateSet]
   );
 
-  const handleUseSuggestion = useCallback(
+  // Same set from the last session (last logged set when this session has more)
+  const getPreviousSet = useCallback(
+    (exerciseId: string, setIndex: number): SetProgressData | null => {
+      const history = previousSets.get(exerciseId);
+      return history?.length ? history[Math.min(setIndex, history.length - 1)] : null;
+    },
+    [previousSets]
+  );
+
+  const handleUsePrevious = useCallback(
     (workoutExerciseId: string, setIndex: number) => {
-      const suggestion = getSuggestion(exerciseProgress, workoutExerciseId, setIndex);
+      const exerciseId = exerciseProgress.get(workoutExerciseId)?.exerciseId;
+      const suggestion = exerciseId ? getPreviousSet(exerciseId, setIndex) : null;
       if (!suggestion) return;
       setExerciseProgress((prev) => {
         const newMap = new Map(prev);
@@ -1101,7 +1175,7 @@ const StrengthWorkoutSession = () => {
         return newMap;
       });
     },
-    [exerciseProgress, getSuggestion]
+    [exerciseProgress, getPreviousSet]
   );
 
   // Toggle set complete — ticking a set starts the rest countdown
@@ -1235,7 +1309,7 @@ const StrengthWorkoutSession = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <p className="text-muted-foreground mb-4">{t.athlete.session.workoutNotFound}</p>
-        <Button onClick={() => navigate("/athlete")}>{t.athlete.session.goBack}</Button>
+        <Button type="button" onClick={() => navigate("/athlete")}>{t.athlete.session.goBack}</Button>
       </div>
     );
   }
@@ -1248,7 +1322,7 @@ const StrengthWorkoutSession = () => {
 
   const restNextExercise = rest ? workout.exercises?.find((we) => we.id === rest.nextExerciseId) : undefined;
   const restNextLabel = restNextExercise
-    ? t.athlete.session.restNext
+    ? t.athlete.session.restNextSet
         .replace("{{name}}", getExerciseByIdOrName(restNextExercise)?.name || restNextExercise.exerciseName || "")
         .replace("{{set}}", String((rest?.nextSetIndex ?? 0) + 1))
     : undefined;
@@ -1277,7 +1351,7 @@ const StrengthWorkoutSession = () => {
       onOpenChange={(open) => {
         setShowShareModal(open);
         // Posted → done; closed without posting → back to the recap
-        if (!open && postedRef.current) navigate("/athlete");
+        if (!open && postedRef.current) leaveTo("/athlete");
       }}
       onSubmit={handleSharePost}
       initialCaption={shareCaption}
@@ -1317,7 +1391,7 @@ const StrengthWorkoutSession = () => {
             <span className="font-medium">
               {format(assignment.scheduledDate, "d MMM yyyy")}
             </span>
-            <Button variant="ghost" size="icon">
+            <Button type="button" variant="ghost" size="icon">
               <MoreVertical className="h-5 w-5" />
             </Button>
           </div>
@@ -1334,29 +1408,30 @@ const StrengthWorkoutSession = () => {
             className="fixed inset-x-3 z-50 mx-auto max-w-lg"
             style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
           >
-            {/* One bar at a time: during a rest the countdown replaces the session bar,
-                so two stacked pills don't cover the next exercise */}
-            <AnimatePresence mode="wait" initial={false}>
-              {rest ? (
-                <RestTimerPill
-                  key="rest"
-                  remainingSec={restRemainingSec}
-                  durationSec={rest.durationSec}
-                  nextLabel={restNextLabel}
-                  labels={{ rest: t.athlete.session.rest, skip: t.athlete.session.restSkip }}
-                  onAdjust={handleAdjustRest}
-                  onSkip={handleSkipRest}
-                />
-              ) : (
-                <motion.div
-                  key="session"
-                  initial={{ y: 24, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 24, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 420, damping: 30 }}
-                >
-              <div className="glass flex items-center gap-2 h-16 p-1.5 rounded-full">
+            {/* One container: during a rest a compact countdown strip grows on top of the
+                session row, so Save / leave stay reachable without two stacked pills */}
+            <div className="glass rounded-[32px] p-1.5">
+              <AnimatePresence initial={false}>
+                {rest && (
+                  <RestTimerPill
+                    key="rest"
+                    remainingSec={restRemainingSec}
+                    durationSec={rest.durationSec}
+                    nextLabel={restNextLabel}
+                    labels={{
+                      rest: t.athlete.session.rest,
+                      skip: t.athlete.session.restSkip,
+                      subtract: t.athlete.session.restSubtract,
+                      add: t.athlete.session.restAdd,
+                    }}
+                    onAdjust={handleAdjustRest}
+                    onSkip={handleSkipRest}
+                  />
+                )}
+              </AnimatePresence>
+              <div className="flex items-center gap-2 h-[52px]">
                 <motion.button
+                  type="button"
                   whileTap={{ scale: 0.85 }}
                   transition={{ type: "spring", stiffness: 600, damping: 22 }}
                   onClick={handleCancel}
@@ -1386,6 +1461,7 @@ const StrengthWorkoutSession = () => {
                 </div>
 
                 <motion.button
+                  type="button"
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: "spring", stiffness: 600, damping: 22 }}
                   onClick={() => setShowSaveConfirm(true)}
@@ -1396,31 +1472,43 @@ const StrengthWorkoutSession = () => {
                   {t.athlete.session.save}
                 </motion.button>
               </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </div>
           </motion.div>
         </MotionConfig>
       )}
 
-      {/* Content */}
-      <div className="flex-1 overflow-auto pb-28">
+      {/* Content — bottom padding clears the floating bar (taller while the rest strip shows) */}
+      <div className={cn("flex-1 overflow-auto transition-[padding] duration-200", rest ? "pb-48" : "pb-28")}>
         <div className="p-4 space-y-4">
           {/* Workout Info Card */}
           <Card>
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
+                {/* Progress ring, not a checkbox: on the workout page the circle is a "mark as done" button */}
                 <div
-                  className={cn(
-                    "w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0",
-                    completionPercentage === 100
-                      ? "border-primary bg-primary"
-                      : "border-muted-foreground"
-                  )}
+                  role="img"
+                  aria-label={t.athlete.session.progressRing.replace("{{percent}}", String(completionPercentage))}
+                  className="relative h-10 w-10 shrink-0"
                 >
-                  {completionPercentage === 100 && (
-                    <Check className="h-5 w-5 text-primary-foreground" />
-                  )}
+                  <svg viewBox="0 0 40 40" className="h-10 w-10 -rotate-90">
+                    <circle cx="20" cy="20" r="17" className="fill-none stroke-muted" strokeWidth="4" />
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="17"
+                      className={cn(
+                        "fill-none stroke-primary transition-[stroke-dashoffset] duration-300",
+                        completionPercentage === 0 && "opacity-0"
+                      )}
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeDasharray={2 * Math.PI * 17}
+                      strokeDashoffset={2 * Math.PI * 17 * (1 - completionPercentage / 100)}
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold tabular-nums">
+                    {completionPercentage === 100 ? <Check className="h-4 w-4 text-primary" /> : `${completionPercentage}%`}
+                  </span>
                 </div>
                 <div className="flex-1">
                   <h1 className="text-xl font-bold text-balance break-words">{workout.name}</h1>
@@ -1470,7 +1558,8 @@ const StrengthWorkoutSession = () => {
                   suggestions={progress.sets.map((_, setIndex) =>
                     getSuggestion(exerciseProgress, workoutExercise.id, setIndex)
                   )}
-                  onUseSuggestion={(setIndex) => handleUseSuggestion(workoutExercise.id, setIndex)}
+                  previous={progress.sets.map((_, setIndex) => getPreviousSet(progress.exerciseId, setIndex))}
+                  onUsePrevious={(setIndex) => handleUsePrevious(workoutExercise.id, setIndex)}
                   best={bestByExercise.get(workoutExercise.exerciseId)}
                   onStepWeight={(setIndex, delta) => handleStepWeight(workoutExercise.id, setIndex, delta)}
                   onToggleWarmup={(setIndex) => handleToggleWarmup(workoutExercise.id, setIndex)}
@@ -1499,13 +1588,13 @@ const StrengthWorkoutSession = () => {
             <DrawerDescription>{t.athlete.session.exitDescription}</DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
-            <Button className="w-full" onClick={handleExitKeep}>
+            <Button type="button" className="w-full" onClick={handleExitKeep}>
               {t.athlete.session.exitKeep}
             </Button>
-            <Button variant="outline" className="w-full border-destructive/40 text-red-500 dark:text-red-400" onClick={handleExitDiscard}>
+            <Button type="button" variant="outline" className="w-full border-destructive/40 text-red-500 dark:text-red-400" onClick={handleExitDiscard}>
               {t.athlete.session.exitDiscard}
             </Button>
-            <Button variant="ghost" className="w-full" onClick={() => setShowExitConfirm(false)}>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => setShowExitConfirm(false)}>
               {t.athlete.session.exitStay}
             </Button>
           </DrawerFooter>
@@ -1525,11 +1614,11 @@ const StrengthWorkoutSession = () => {
             </DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
-            <Button onClick={handleSave} disabled={saving} className="w-full">
+            <Button type="button" onClick={handleSave} disabled={saving} className="w-full">
               {saving ? <Spinner size="xs" className="mr-2" /> : null}
               {t.athlete.session.saveConfirmConfirm}
             </Button>
-            <Button variant="outline" className="w-full" onClick={() => setShowSaveConfirm(false)}>
+            <Button type="button" variant="outline" className="w-full" onClick={() => setShowSaveConfirm(false)}>
               {t.athlete.session.saveConfirmCancel}
             </Button>
           </DrawerFooter>

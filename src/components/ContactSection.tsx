@@ -1,5 +1,4 @@
 
-import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MapPin, Phone, MessageSquare } from 'lucide-react';
 
@@ -33,7 +32,7 @@ const ContactSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t.contact.info.phone}</h4>
-                <p className="text-muted-foreground">+351 962 869 476</p>
+                <a href="tel:+351962869476" className="inline-block py-1 text-muted-foreground hover:text-primary hover:underline underline-offset-4">+351 962 869 476</a>
               </div>
             </div>
             <div className="flex items-start">
@@ -42,11 +41,12 @@ const ContactSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t.contact.info.whatsapp || "WhatsApp"}</h4>
-                <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 font-medium flex items-center mt-1 gap-2">
-                  <span>Chat now</span>
-                  <Button variant="outline" size="icon" className="bg-green-600 hover:bg-green-700 h-8 w-8 rounded-full p-1.5">
+                <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 font-medium inline-flex items-center mt-1 gap-2 min-h-10">
+                  <span>{t.contact.chatNow}</span>
+                  {/* Decorative — the whole link is the target; a <button> inside <a> is invalid */}
+                  <span className="bg-green-600 h-8 w-8 rounded-full p-1.5 flex items-center justify-center" aria-hidden>
                     <MessageSquare className="h-full w-full text-white" />
-                  </Button>
+                  </span>
                 </a>
               </div>
             </div>

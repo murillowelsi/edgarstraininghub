@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { MotionConfig, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -15,6 +16,8 @@ interface GlassTabBarProps {
   items: GlassTabItem[];
   /** Distinguishes bars so each remembers its own last active tab */
   id: string;
+  /** Accessible name of the <nav>; defaults to "Main" */
+  label?: string;
   className?: string;
 }
 
@@ -25,8 +28,9 @@ interface GlassTabBarProps {
 const lastActiveIndex = new Map<string, number>();
 
 /** Floating liquid-glass tab bar with a sliding selection lens. */
-export function GlassTabBar({ items, id, className }: GlassTabBarProps) {
+export function GlassTabBar({ items, id, label, className }: GlassTabBarProps) {
   const location = useLocation();
+  const { t } = useLanguage();
 
   const isActive = (item: GlassTabItem) =>
     item.exact ? location.pathname === item.href : location.pathname.startsWith(item.href);
@@ -42,6 +46,7 @@ export function GlassTabBar({ items, id, className }: GlassTabBarProps) {
   return (
     <MotionConfig reducedMotion="user">
       <nav
+        aria-label={label ?? t.common.mainNavigation}
         className={cn("fixed inset-x-5 z-50 mx-auto max-w-lg", className)}
         style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
@@ -72,6 +77,7 @@ export function GlassTabBar({ items, id, className }: GlassTabBarProps) {
               <Link
                 key={item.href}
                 to={item.href}
+                aria-current={active ? "page" : undefined}
                 className="relative flex-1 h-full rounded-full [-webkit-tap-highlight-color:transparent]"
               >
                 <motion.div

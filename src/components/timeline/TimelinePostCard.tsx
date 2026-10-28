@@ -21,9 +21,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { CommentsDrawer } from "./CommentsDrawer";
 import type { ComposerResult, PostMention, TimelinePost } from "@/types/timeline";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { fullDateTime, relativeTime } from "./relativeTime";
 
 interface TimelinePostCardProps {
   post: TimelinePost;
@@ -61,7 +60,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
       await toggleLike(post.id, user.uid, wasLiked);
       if (!wasLiked && post.authorId !== user.uid) {
         const actorName = displayName || user.email || "Someone";
-        createActivityNotification(post.authorId, actorName, post.id, "like").catch((err) => console.error("[FeedBadge] like notification failed:", err));
+        createActivityNotification(post.authorId, actorName, post.id, "like", user.uid).catch((err) => console.error("[FeedBadge] like notification failed:", err));
       }
     } catch {
       toast({ title: t.common.error, description: t.timeline.post.likeError, variant: "destructive" });
@@ -178,24 +177,28 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         />
 
         {/* Actions */}
-        <div className="px-3 pt-2.5 pb-1 flex items-center gap-4">
+        {/* Buttons get a 40px+ hit area; the negative margin keeps the icons where they were */}
+        <div className="px-3 pt-0.5 flex items-center">
           <button
             onClick={handleLike}
             disabled={pendingLike !== null}
+            aria-pressed={liked}
+            aria-label={(liked ? t.timeline.post.unlike : t.timeline.post.like).replace("{{n}}", String(likesCount))}
             className={cn(
-              "flex items-center gap-1.5 transition-transform active:scale-110",
+              "-ml-2 min-h-10 min-w-10 px-2 flex items-center gap-1.5 transition-transform active:scale-110",
               liked ? "text-red-500" : "text-foreground hover:text-muted-foreground"
             )}
           >
-            <Flame className={cn("h-6 w-6", liked && "fill-current text-orange-500")} />
-            {likesCount > 0 && <span className="text-sm font-semibold text-foreground">{likesCount}</span>}
+            <Flame className={cn("h-6 w-6", liked && "fill-current text-orange-500")} aria-hidden />
+            {likesCount > 0 && <span className="text-sm font-semibold text-foreground" aria-hidden>{likesCount}</span>}
           </button>
           <button
             onClick={() => setShowComments(true)}
-            className="flex items-center gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
+            aria-label={t.timeline.post.comments.replace("{{n}}", String(commentsCount))}
+            className="min-h-10 min-w-10 px-2 flex items-center gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
           >
-            <MessageCircle className="h-6 w-6" />
-            {commentsCount > 0 && <span className="text-sm font-semibold">{commentsCount}</span>}
+            <MessageCircle className="h-6 w-6" aria-hidden />
+            {commentsCount > 0 && <span className="text-sm font-semibold" aria-hidden>{commentsCount}</span>}
           </button>
         </div>
 
@@ -203,15 +206,17 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         {post.caption && !post.captionIsSummary && (
           <PostCaption
             authorName={post.authorName}
-            caption={post.caption}
-            mentions={post.mentions}
+            caption={post.captionAuto ? t.timeline.post.autoCaption : post.caption}
+            mentions={post.captionAuto ? [] : post.mentions}
             labels={{ more: t.timeline.post.seeMore, less: t.timeline.post.seeLess }}
           />
         )}
 
         {/* Timestamp */}
         <p className="px-3 pt-1 pb-2 text-xs text-muted-foreground">
-          {formatDistanceToNow(post.createdAt, { addSuffix: true, ...(language === "pt" ? { locale: ptBR } : {}) })}
+          <time dateTime={post.createdAt.toISOString()} title={fullDateTime(post.createdAt, language)}>
+            {relativeTime(post.createdAt, language, t.timeline.time.now)}
+          </time>
         </p>
       </article>
 

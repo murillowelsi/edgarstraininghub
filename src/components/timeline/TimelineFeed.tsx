@@ -175,9 +175,10 @@ export function TimelineFeed() {
         </button>
         <button
           onClick={() => setCreateOpen(true)}
+          aria-label={t.timeline.create.addPhoto}
           className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground shrink-0"
         >
-          <Image className="h-6 w-6" />
+          <Image className="h-6 w-6" aria-hidden />
         </button>
       </div>
 

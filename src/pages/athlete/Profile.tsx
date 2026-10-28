@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dumbbell, Plus, Settings } from "lucide-react";
 import { LeaveTestimonialBanner } from "@/components/athlete/LeaveTestimonialBanner";
-import { SectionSpinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { type WorkoutType } from "@/types/workout";
 import { modalityAccent } from "@/utils/modalityColors";
@@ -100,16 +100,28 @@ const AthleteProfile = () => {
     });
   }, [assignments]);
 
+  const tp = t.athlete.profile;
+  const te = t.athlete.events;
+
   if (loading) {
+    // Skeleton in the page's own shape keeps the top bar and tab bar on screen
     return (
-      <AthletePortalLayout>
-        <SectionSpinner />
+      <AthletePortalLayout title={tp.title}>
+        <div className="p-4 space-y-5" aria-busy="true" aria-label={t.common.loading}>
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+          </div>
+          <Skeleton className="h-11 w-full" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+        </div>
       </AthletePortalLayout>
     );
   }
-
-  const tp = t.athlete.profile;
-  const te = t.athlete.events;
 
   return (
     <AthletePortalLayout title={tp.title}>
@@ -128,7 +140,7 @@ const AthleteProfile = () => {
           </div>
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="shrink-0 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            className="shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             aria-label={t.settings.title}
           >
             <Settings className="h-5 w-5" />
@@ -142,10 +154,10 @@ const AthleteProfile = () => {
           onValueChange={(v) => setSearchParams(v === "activities" ? {} : { tab: v }, { replace: true })}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-3 h-11 bg-muted/40">
-            <TabsTrigger value="activities" className="font-semibold">{tp.tabs.activities}</TabsTrigger>
-            <TabsTrigger value="events" className="font-semibold">{tp.tabs.events}</TabsTrigger>
-            <TabsTrigger value="progress" className="font-semibold">{tp.tabs.progress}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/40">
+            <TabsTrigger value="activities" className="h-10 font-semibold">{tp.tabs.activities}</TabsTrigger>
+            <TabsTrigger value="events" className="h-10 font-semibold">{tp.tabs.events}</TabsTrigger>
+            <TabsTrigger value="progress" className="h-10 font-semibold">{tp.tabs.progress}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="progress" className="space-y-4 mt-5">
@@ -205,10 +217,10 @@ const AthleteProfile = () => {
                   setEditingEvent(null);
                   setEventSheetOpen(true);
                 }}
-                className="rounded-full p-1.5 hover:bg-muted transition"
+                className="h-10 w-10 -mr-2 flex items-center justify-center rounded-full hover:bg-muted transition"
                 aria-label={te.addAriaLabel}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-5 w-5" />
               </button>
             </div>
 
@@ -233,6 +245,7 @@ const AthleteProfile = () => {
                   <EventCard
                     key={e.id}
                     event={e}
+                    hidePastLabel
                     onClick={() => navigate(`/athlete/events/${e.id}`)}
                   />
                 ))}
@@ -250,6 +263,7 @@ const AthleteProfile = () => {
                   assignment={a}
                   athleteName={displayName}
                   athletePhotoURL={photoURL}
+                  hideAuthor
                 />
               ))
             )}

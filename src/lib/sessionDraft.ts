@@ -51,7 +51,17 @@ export const saveSessionDraft = (assignmentId: string, draft: Omit<SessionDraft,
   }
 };
 
-export const clearSessionDraft = (assignmentId: string) => {
+/** Share of sets ticked and minutes on the clock, for a "Resume workout" CTA. */
+export const getDraftProgress = (draft: SessionDraft) => {
+  const sets = Object.values(draft.progress).flatMap((p) => p.sets);
+  const done = sets.filter((s) => s.completed).length;
+  return {
+    percent: sets.length ? Math.round((done / sets.length) * 100) : 0,
+    minutes: Math.max(0, Math.floor((Date.now() - draft.startedAt) / 60000)),
+  };
+};
+
+export const clearSessionDraft =(assignmentId: string) => {
   try {
     localStorage.removeItem(keyFor(assignmentId));
   } catch {

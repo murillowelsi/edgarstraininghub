@@ -23,18 +23,28 @@ const YouTubeSection = () => {
           <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
             {loading ? (
               <div className="w-full h-full flex items-center justify-center bg-muted">
-                <p className="text-muted-foreground">Loading latest video...</p>
+                <p className="text-muted-foreground">{t.youtube.loading}</p>
               </div>
             ) : error ? (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-muted gap-2">
-                <p className="text-red-500 font-semibold">Could not load the latest YouTube video.</p>
-                <p className="text-xs text-muted-foreground">{error}</p>
-                <button
-                  onClick={retry}
-                  className="mt-2 px-4 py-2 rounded bg-primary text-white hover:bg-primary/90 transition"
-                >
-                  Retry
-                </button>
+              // Friendly fallback; the technical error stays in the console, not on the page
+              <div className="w-full h-full flex flex-col items-center justify-center bg-background/60 gap-3 p-6 text-center">
+                <p className="font-semibold">{t.youtube.unavailable}</p>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <a
+                    href="https://www.youtube.com/@edgarzanin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-10 px-4 inline-flex items-center rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition"
+                  >
+                    {t.youtube.watchOnYouTube}
+                  </a>
+                  <button
+                    onClick={retry}
+                    className="h-10 px-4 rounded-md border border-border font-medium hover:bg-accent transition"
+                  >
+                    {t.youtube.retry}
+                  </button>
+                </div>
               </div>
             ) : video?.videoId ? (
               <iframe
@@ -49,19 +59,19 @@ const YouTubeSection = () => {
               ></iframe>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-muted">
-                <p className="text-red-500">No video found.</p>
+                <p className="text-muted-foreground">{t.youtube.noVideo}</p>
               </div>
             )}
           </div>
           <p className="mt-6 text-center text-muted-foreground">
-            Check out more videos on my{" "}
+            {t.youtube.moreVideos}{" "}
             <a
               href="https://www.youtube.com/@edgarzanin"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              YouTube channel
+              {t.youtube.channel}
             </a>
             .
           </p>

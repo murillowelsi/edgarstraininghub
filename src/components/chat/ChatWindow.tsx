@@ -1,10 +1,11 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Send, Check, CheckCheck, ChevronLeft, Trash2, Users2 } from "lucide-react";
 import { Message } from "@/types/chat";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatChatDay } from "./chatDates";
 
 interface ChatWindowProps {
     messages: Message[];
@@ -19,10 +20,11 @@ interface ChatWindowProps {
 }
 
 function DateSeparator({ date }: { date: Date }) {
+    const { t, language } = useLanguage();
     return (
         <div className="flex justify-center my-2">
             <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-[11px] font-medium">
-                {format(date, "dd/MM")}
+                {formatChatDay(date, language, { today: t.common.today, yesterday: t.timeline.activity.yesterday })}
             </span>
         </div>
     );
@@ -42,6 +44,8 @@ export default function ChatWindow({
     const { t } = useLanguage();
     const scrollRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const [draft, setDraft] = useState("");
+    const canSend = draft.trim().length > 0 && !isLoading;
 
     useEffect(() => {
         if (messagesContainerRef.current) {
@@ -51,12 +55,9 @@ export default function ChatWindow({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const formData = new FormData(e.target as HTMLFormElement);
-        const message = formData.get("message") as string;
-        if (message.trim()) {
-            onSendMessage(message);
-            (e.target as HTMLFormElement).reset();
-        }
+        if (!canSend) return;
+        onSendMessage(draft);
+        setDraft("");
     };
 
     return (
@@ -67,7 +68,7 @@ export default function ChatWindow({
                 {onBack && (
                     <button
                         onClick={onBack}
-                        className="md:hidden p-1.5 rounded-full hover:bg-accent transition-colors shrink-0"
+                        className="md:hidden h-10 w-10 flex items-center justify-center rounded-full hover:bg-accent transition-colors shrink-0"
                         aria-label={t.athlete.chat.back}
                     >
                         <ChevronLeft className="h-5 w-5" />
@@ -87,7 +88,7 @@ export default function ChatWindow({
                 {onDelete && (
                     <button
                         onClick={onDelete}
-                        className="p-1.5 rounded-full hover:bg-accent transition-colors text-destructive shrink-0"
+                        className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-accent transition-colors text-destructive shrink-0"
                         aria-label={t.athlete.chat.deleteConversation}
                     >
                         <Trash2 className="h-4 w-4" />
@@ -162,9 +163,11 @@ export default function ChatWindow({
 
             {/* Input */}
             <div className="px-3 py-3 border-t bg-background flex-shrink-0">
-                <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-muted rounded-full px-4 py-1">
+                <form onSubmit={handleSubmit} className="flex items-center gap-1 bg-muted rounded-full pl-4 pr-1 py-0.5">
                     <input
                         name="message"
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
                         placeholder={t.chatComponent.placeholder}
                         disabled={isLoading}
                         autoComplete="off"
@@ -172,11 +175,11 @@ export default function ChatWindow({
                     />
                     <button
                         type="submit"
-                        disabled={isLoading}
-                        className="shrink-0 text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+                        disabled={!canSend}
+                        className="shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-primary hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
                         aria-label={t.athlete.chat.send}
                     >
-                        <Send className="h-4 w-4" />
+                        <Send className="h-5 w-5" />
                     </button>
                 </form>
             </div>

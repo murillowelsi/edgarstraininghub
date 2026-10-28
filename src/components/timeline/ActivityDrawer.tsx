@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Flame, MessageCircle, AtSign, Loader2 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
-import { subscribeToActivityNotifications, markMentionsRead } from "@/services/timelineService";
+import { subscribeToActivityNotifications, markMentionsRead, getTimelinePost } from "@/services/timelineService";
 import type { ActivityNotification } from "@/services/timelineService";
+import type { TimelinePost } from "@/types/timeline";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CommentsDrawer } from "./CommentsDrawer";
+import { relativeTime } from "./relativeTime";
 
 interface ActivityDrawerProps {
   open: boolean;
@@ -95,34 +95,64 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
   const [notifications, setNotifications] = useState<ActivityNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
+  const [commentsPost, setCommentsPost] = useState<TimelinePost | null>(null);
+  // Items that were unread when the drawer opened. They are marked read in the
+  // database right away (clears the badge) but stay highlighted while it's open.
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  const seenUnread = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!open || !user) return;
     setLoading(true);
+    seenUnread.current = new Set();
+    setNewIds(new Set());
     const unsubscribe = subscribeToActivityNotifications(user.uid, (notifs) => {
+      const fresh = notifs.filter((n) => !n.read && !seenUnread.current.has(n.id));
+      if (fresh.length) {
+        fresh.forEach((n) => seenUnread.current.add(n.id));
+        setNewIds(new Set(seenUnread.current));
+        // Mark read only after capturing them, so the highlight isn't lost
+        markMentionsRead(user.uid).catch(() => null);
+      }
       setNotifications(notifs);
       setLoading(false);
     });
-
-    // Mark all as read when opening the drawer
-    markMentionsRead(user.uid).catch(() => null);
-
     return unsubscribe;
   }, [open, user]);
+
+  const goToPost = (postId: string) => {
+    onOpenChange(false);
+    const isAdmin = window.location.pathname.startsWith("/admin");
+    const basePath = isAdmin ? "/admin/timeline" : "/athlete/timeline";
+    navigate(basePath, { state: { scrollToPostId: postId } });
+  };
 
   const handleClick = (notification: ActivityNotification) => {
     if (notification.type === "comment" || notification.type === "comment_mention") {
       setCommentsPostId(notification.postId);
+      setCommentsPost(null);
+      // For the context header and the real post author (comment notifications)
+      getTimelinePost(notification.postId)
+        .then(setCommentsPost)
+        .catch(() => null);
     } else {
       // "like" and "mention" (post mention) → navigate to the post
-      onOpenChange(false);
-      const isAdmin = window.location.pathname.startsWith("/admin");
-      const basePath = isAdmin ? "/admin/timeline" : "/athlete/timeline";
-      navigate(basePath, { state: { scrollToPostId: notification.postId } });
+      goToPost(notification.postId);
     }
   };
 
-  const groups = groupByDate(notifications, {
+  const postTitle = (post: TimelinePost) => {
+    const firstLine = post.captionAuto ? "" : post.caption.split("\n")[0].trim();
+    return post.workoutSummary?.workoutName || firstLine || post.authorName;
+  };
+
+  // Your own actions never notify you (only checkable on newer notifications that store actorId)
+  const visible = notifications.filter((n) => !(n.actorId && n.actorId === user?.uid));
+
+  // Ignore a late answer for a post the user already moved away from
+  const openPost = commentsPost && commentsPost.id === commentsPostId ? commentsPost : null;
+
+  const groups = groupByDate(visible, {
     today: t.timeline.activity.today,
     yesterday: t.timeline.activity.yesterday,
     last7Days: t.timeline.activity.last7Days,
@@ -142,7 +172,7 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
             <div className="flex justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
-          ) : notifications.length === 0 ? (
+          ) : visible.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Flame className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
               <p className="text-sm font-medium">{t.timeline.activity.noActivity}</p>
@@ -160,7 +190,7 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
                       className={cn(
                         "w-full flex items-center gap-3 py-2.5 px-2 rounded-lg text-left transition-colors",
                         "hover:bg-accent/50 active:bg-accent",
-                        !n.read && "bg-accent/30"
+                        newIds.has(n.id) && "bg-primary/10"
                       )}
                     >
                       {/* Actor avatar with type icon */}
@@ -179,9 +209,15 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
                       <div className="flex-1 min-w-0">
                         <NotificationText notification={n} translations={t.timeline.activity} />
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {formatDistanceToNow(n.createdAt, { addSuffix: false, ...(language === "pt" ? { locale: ptBR } : {}) })}
+                          {relativeTime(n.createdAt, language, t.timeline.time.now)}
                         </p>
                       </div>
+
+                      {newIds.has(n.id) && (
+                        <span className="shrink-0 h-2 w-2 rounded-full bg-primary">
+                          <span className="sr-only">{t.timeline.activity.new}</span>
+                        </span>
+                      )}
 
                       {/* Post thumbnail */}
                       {n.postImageUrl && (
@@ -202,10 +238,22 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
     {commentsPostId && user && (
       <CommentsDrawer
         open={!!commentsPostId}
-        onOpenChange={(o) => { if (!o) setCommentsPostId(null); }}
+        onOpenChange={(o) => { if (!o) { setCommentsPostId(null); setCommentsPost(null); } }}
         postId={commentsPostId}
-        postAuthorId={user.uid}
+        postAuthorId={openPost?.authorId ?? user.uid}
         onCommentsCountChange={() => {}}
+        postContext={
+          openPost
+            ? {
+                title: postTitle(openPost),
+                onViewPost: () => {
+                  setCommentsPostId(null);
+                  setCommentsPost(null);
+                  goToPost(openPost.id);
+                },
+              }
+            : null
+        }
       />
     )}
   </>

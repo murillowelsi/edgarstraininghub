@@ -5,25 +5,35 @@ import { useLanguage } from "../contexts/LanguageContext";
 const LanguageSwitcher = () => {
   const { language, changeLanguage } = useLanguage();
 
+  // 40px button for the hit area; the inner pill keeps the original compact look
+  const pill = (active: boolean) =>
+    `p-1.5 rounded-md transition-all ${
+      active ? "bg-accent" : "opacity-50 group-hover:opacity-100 group-hover:bg-accent/50"
+    }`;
+
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center">
       <button
         onClick={() => changeLanguage("en")}
-        className={`p-1.5 rounded-md transition-all ${
-          language === "en" ? "bg-accent" : "opacity-50 hover:opacity-100 hover:bg-accent/50"
-        }`}
+        className="group h-10 w-10 flex items-center justify-center"
         title="English"
+        aria-label="English"
+        aria-pressed={language === "en"}
       >
-        <GB className="w-5 h-4 rounded-sm" />
+        <span className={pill(language === "en")}>
+          <GB className="w-5 h-4 rounded-sm" />
+        </span>
       </button>
       <button
         onClick={() => changeLanguage("pt")}
-        className={`p-1.5 rounded-md transition-all ${
-          language === "pt" ? "bg-accent" : "opacity-50 hover:opacity-100 hover:bg-accent/50"
-        }`}
+        className="group h-10 w-10 flex items-center justify-center"
         title="Português"
+        aria-label="Português"
+        aria-pressed={language === "pt"}
       >
-        <PT className="w-5 h-4 rounded-sm" />
+        <span className={pill(language === "pt")}>
+          <PT className="w-5 h-4 rounded-sm" />
+        </span>
       </button>
     </div>
   );

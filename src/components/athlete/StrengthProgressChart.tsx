@@ -125,12 +125,13 @@ export function StrengthProgressChart({ assignments }: { assignments: Assignment
 
         <div className="h-44">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={selected.points} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+            <LineChart data={selected.points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
               <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" className="text-muted-foreground" />
               <YAxis
                 tick={{ fontSize: 10 }}
-                width={36}
+                width={44}
+                tickFormatter={(v: number) => `${v}kg`}
                 // Round the axis to 5 kg steps so ticks read 35 / 40 / 45 / 50
                 domain={[
                   (min: number) => Math.max(0, Math.floor((min - 5) / 5) * 5),

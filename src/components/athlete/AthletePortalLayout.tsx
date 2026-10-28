@@ -27,6 +27,8 @@ import { CreatePostModal } from "@/components/timeline/CreatePostModal";
 import type { ComposerResult } from "@/types/timeline";
 import { ActivityDrawer } from "@/components/timeline/ActivityDrawer";
 import { useToast } from "@/hooks/use-toast";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 
 interface AthletePortalLayoutProps {
   children: React.ReactNode;
@@ -51,6 +53,8 @@ const AthletePortalLayout = ({
   const { theme, toggleTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [confirmRemovePhoto, setConfirmRemovePhoto] = useState(false);
+  usePageTitle(title);
 
   const navItems = [
     { href: "/athlete", label: t.athlete.nav.home, icon: Home, exact: true, featured: false },
@@ -185,6 +189,7 @@ const AthletePortalLayout = ({
 
   const handlePhotoRemove = async () => {
     if (!user) return;
+    setConfirmRemovePhoto(false);
     try {
       await updateDoc(doc(db, "users", user.uid), { photoURL: null });
       setPhotoURL(null);
@@ -202,7 +207,8 @@ const AthletePortalLayout = ({
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top Header */}
       {showHeader && (
-        <header className="sticky top-0 z-50">
+        // Standalone PWA with viewport-fit=cover: keep the bar below the iPhone status bar
+        <header className="sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
           <div aria-hidden className="glass-fade absolute inset-x-0 top-0 -bottom-4 pointer-events-none" />
           {/* Strava-style bar: create on the left, title (the "EZ" logo on Home) centered, inbox + alerts on the right */}
           <div className="relative px-4 h-16 flex items-center justify-between">
@@ -220,7 +226,8 @@ const AthletePortalLayout = ({
                 <Link
                   to="/athlete"
                   aria-label={t.athlete.nav.home}
-                  className="text-primary font-display font-extrabold text-[28px] leading-none tracking-tighter hover:opacity-80 transition-opacity"
+                  // Padding grows the hit area to 40px+ without changing the logo size
+                  className="-m-1.5 p-1.5 min-h-10 flex items-center rounded-lg text-primary font-display font-extrabold text-[28px] leading-none tracking-tighter hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                 >
                   EZ
                 </Link>
@@ -261,7 +268,8 @@ const AthletePortalLayout = ({
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingPhoto}
-                  className="relative group rounded-full focus:outline-none"
+                  aria-label={t.settings.changePhoto}
+                  className="relative group rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   <CachedAvatar
                     src={photoURL}
@@ -280,11 +288,13 @@ const AthletePortalLayout = ({
                   )}
                 </button>
                 {photoURL && !isUploadingPhoto && (
+                  // 32px badge with a 40px hit area (::after); removing asks first
                   <button
-                    onClick={handlePhotoRemove}
-                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive flex items-center justify-center"
+                    onClick={() => setConfirmRemovePhoto(true)}
+                    aria-label={t.settings.removePhoto}
+                    className="absolute -top-3 -right-3 h-8 w-8 rounded-full bg-destructive ring-2 ring-background flex items-center justify-center after:absolute after:-inset-1 after:content-[''] outline-none focus-visible:ring-primary"
                   >
-                    <X className="h-3 w-3 text-white" />
+                    <X className="h-4 w-4 text-white" />
                   </button>
                 )}
               </div>
@@ -317,7 +327,7 @@ const AthletePortalLayout = ({
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors text-sm font-medium"
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-destructive/30 text-destructive hover:bg-destructive/10 dark:border-red-400/40 dark:text-red-400 dark:hover:bg-red-400/10 transition-colors text-sm font-medium"
               >
                 <LogOut size={18} />
                 {t.athlete.logout}
@@ -326,9 +336,18 @@ const AthletePortalLayout = ({
           </div>
         </DrawerContent>
       </Drawer>
+      <ResponsiveConfirm
+        open={confirmRemovePhoto}
+        onOpenChange={setConfirmRemovePhoto}
+        title={t.settings.removePhoto}
+        description={t.settings.removePhotoDescription}
+        confirmLabel={t.common.remove}
+        destructive
+        onConfirm={handlePhotoRemove}
+      />
 
       {/* Main content area */}
-      <main className={fullHeight ? (hideBottomNav ? "h-[calc(100vh-4rem)] overflow-hidden flex flex-col" : "h-[calc(100vh-9.5rem)] overflow-hidden flex flex-col") : cn("flex-1 overflow-auto", hideBottomNav ? "pb-6" : "pb-28")}>{children}</main>
+      <main className={fullHeight ? (hideBottomNav ? "h-[calc(100vh-4rem-env(safe-area-inset-top))] overflow-hidden flex flex-col" : "h-[calc(100vh-9.5rem-env(safe-area-inset-top))] overflow-hidden flex flex-col") : cn("flex-1 overflow-auto", hideBottomNav ? "pb-6" : "pb-28")}>{children}</main>
 
       {/* Bottom navigation — floating liquid-glass pill */}
       {!hideBottomNav && (

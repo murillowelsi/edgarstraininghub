@@ -53,8 +53,10 @@ export function GlassIconLink({ to, active, className, children, ...rest }: Glas
 }
 
 // Stand-alone glass circle (Strava-style top bar): one button per circle, 40px.
+// The ::after (::before is the glass highlight) extends the hit area to 44px.
 const circleClass = (active?: boolean, className?: string) =>
   cn(
+    "after:absolute after:-inset-0.5 after:rounded-full after:content-['']",
     "glass h-10 w-10 shrink-0 flex items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent]",
     "[&_svg]:h-5 [&_svg]:w-5",
     "transition-[transform,color] duration-150 ease-out active:scale-90 motion-reduce:active:scale-100",

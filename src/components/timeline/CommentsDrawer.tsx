@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Flame, Loader2, Send, Trash2, X } from "lucide-react";
+import { ChevronRight, Flame, Loader2, Send, Trash2, X } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
@@ -8,9 +8,8 @@ import { getAllUsers } from "@/services/usersService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { TimelineComment } from "@/types/timeline";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { fullDateTime, relativeTime } from "./relativeTime";
 
 interface CommentsDrawerProps {
   open: boolean;
@@ -18,6 +17,8 @@ interface CommentsDrawerProps {
   postId: string;
   postAuthorId: string;
   onCommentsCountChange: (delta: number) => void;
+  /** Shown above the comments when opened away from the post (from Activity) */
+  postContext?: { title: string; onViewPost: () => void } | null;
 }
 
 interface ReplyingTo {
@@ -28,7 +29,7 @@ interface ReplyingTo {
 
 const QUICK_EMOJIS = ["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", "😂"];
 
-export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCommentsCountChange }: CommentsDrawerProps) {
+export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCommentsCountChange, postContext }: CommentsDrawerProps) {
   const { user, userRole, isAdmin, displayName, photoURL } = useAuth();
   const { toast } = useToast();
   const { t, language } = useLanguage();
@@ -131,7 +132,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
         if (c.authorId !== user.uid) notifySet.add(c.authorId);
       }
       for (const uid of notifySet) {
-        createActivityNotification(uid, authorName, postId, "comment").catch((err) => console.error("[FeedBadge] comment notification failed:", err));
+        createActivityNotification(uid, authorName, postId, "comment", user.uid).catch((err) => console.error("[FeedBadge] comment notification failed:", err));
       }
       // Notify mentioned users in the comment text
       const mentionMatches = text.trim().match(/@([\w\s]+?)(?=\s@|\s*$|[^a-zA-Z\s])/g);
@@ -141,7 +142,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
           for (const mentionName of mentionNames) {
             const mentionedUser = allUsers.find((u) => u.displayName?.toLowerCase() === mentionName.toLowerCase());
             if (mentionedUser && mentionedUser.id !== user.uid && !notifySet.has(mentionedUser.id)) {
-              createActivityNotification(mentionedUser.id, authorName, postId, "comment_mention").catch(() => null);
+              createActivityNotification(mentionedUser.id, authorName, postId, "comment_mention", user.uid).catch(() => null);
             }
           }
         }).catch(() => null);
@@ -194,9 +195,13 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold">{comment.authorName}</span>
-            <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(comment.createdAt, { addSuffix: false, ...(language === "pt" ? { locale: ptBR } : {}) })}
-            </span>
+            <time
+              dateTime={comment.createdAt.toISOString()}
+              title={fullDateTime(comment.createdAt, language)}
+              className="text-xs text-muted-foreground"
+            >
+              {relativeTime(comment.createdAt, language, t.timeline.time.now)}
+            </time>
           </div>
           <p className="text-sm text-foreground mt-0.5 break-words">
             {comment.replyTo && (
@@ -204,11 +209,12 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             )}
             {comment.text}
           </p>
-          <div className="flex items-center gap-3 mt-1.5">
+          {/* 40px hit areas; negative margins keep the text where it was */}
+          <div className="flex items-center -mt-1 -mb-2 -ml-2">
             {!isReply && (
               <button
                 onClick={() => handleReply(comment)}
-                className="text-xs text-muted-foreground font-semibold hover:text-foreground transition-colors"
+                className="min-h-10 px-2 text-xs text-muted-foreground font-semibold hover:text-foreground transition-colors"
               >
                 {t.timeline.comments.reply}
               </button>
@@ -216,27 +222,30 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             {canDelete && (
               <button
                 onClick={() => handleDelete(comment.id, comment.authorId)}
-                className="text-muted-foreground hover:text-destructive transition-colors"
+                aria-label={t.timeline.comments.delete}
+                className="h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
               >
-                <Trash2 className="h-3 w-3" />
+                <Trash2 className="h-3.5 w-3.5" aria-hidden />
               </button>
             )}
           </div>
         </div>
 
         {/* Like button */}
-        <div className="shrink-0 flex flex-col items-center gap-0.5 pt-0.5">
+        <div className="shrink-0 flex flex-col items-center -mt-2 -mr-2">
           <button
             onClick={() => handleCommentLike(comment.id)}
+            aria-pressed={isLiked}
+            aria-label={(isLiked ? t.timeline.comments.unlike : t.timeline.comments.like).replace("{{n}}", String(likes))}
             className={cn(
-              "transition-transform active:scale-125",
+              "h-10 w-10 flex items-center justify-center transition-transform active:scale-125",
               isLiked ? "text-orange-500" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <Flame className={cn("h-4 w-4", isLiked && "fill-current")} />
+            <Flame className={cn("h-4 w-4", isLiked && "fill-current")} aria-hidden />
           </button>
           {likes > 0 && (
-            <span className="text-[10px] text-muted-foreground">{likes}</span>
+            <span className="-mt-2 text-[11px] text-muted-foreground" aria-hidden>{likes}</span>
           )}
         </div>
       </div>
@@ -249,6 +258,23 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
         <DrawerHeader className="shrink-0 pb-3">
           <DrawerTitle className="text-center text-base font-bold">{t.timeline.comments.title}</DrawerTitle>
         </DrawerHeader>
+
+        {/* Which post these comments belong to, when opened from Activity */}
+        {postContext && (
+          <div className="shrink-0 mx-4 mb-2 flex items-center gap-3 rounded-xl bg-muted/60 pl-3 pr-1">
+            <div className="flex-1 min-w-0 py-2">
+              <p className="text-[11px] text-muted-foreground">{t.timeline.comments.onPost}</p>
+              <p className="text-sm font-medium truncate">{postContext.title}</p>
+            </div>
+            <button
+              onClick={postContext.onViewPost}
+              className="shrink-0 min-h-10 flex items-center gap-0.5 px-2 text-sm font-semibold text-primary"
+            >
+              {t.timeline.comments.viewPost}
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+        )}
 
         {/* Comments list */}
         <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-4">
@@ -276,19 +302,24 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             <span className="text-muted-foreground">
               {t.timeline.comments.replyingTo} <span className="font-semibold text-foreground">@{replyingTo.authorName}</span>
             </span>
-            <button onClick={cancelReply} className="text-muted-foreground hover:text-foreground">
-              <X className="h-4 w-4" />
+            <button
+              onClick={cancelReply}
+              aria-label={t.timeline.comments.cancelReply}
+              className="-my-2 -mr-3 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" aria-hidden />
             </button>
           </div>
         )}
 
         {/* Quick emojis */}
-        <div className="shrink-0 flex items-center justify-around px-4 py-2 border-t">
+        <div className="shrink-0 flex items-center px-2 border-t">
           {QUICK_EMOJIS.map((emoji) => (
             <button
               key={emoji}
               onClick={() => setText((prev) => prev + emoji)}
-              className="text-xl hover:scale-125 transition-transform active:scale-110"
+              aria-label={t.timeline.comments.addEmoji.replace("{{emoji}}", emoji)}
+              className="h-11 flex-1 min-w-0 flex items-center justify-center text-xl hover:scale-125 transition-transform active:scale-110"
             >
               {emoji}
             </button>
@@ -304,9 +335,10 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             className="h-9 w-9 shrink-0 ring-2 ring-[#e1b506]"
             fallbackClassName="bg-primary text-primary-foreground text-xs font-semibold"
           />
-          <div className="flex-1 flex items-center bg-muted rounded-full px-4 py-2 gap-2">
+          <div className="flex-1 min-h-11 flex items-center bg-muted rounded-full pl-4 pr-1 gap-1">
             <input
               ref={inputRef}
+              aria-label={t.timeline.comments.placeholder}
               placeholder={replyingTo ? t.timeline.comments.replyPlaceholder.replace("{{name}}", replyingTo.authorName) : t.timeline.comments.placeholder}
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -314,13 +346,14 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
               autoCorrect="off"
               autoComplete="off"
               spellCheck={false}
-              className="flex-1 bg-transparent text-[16px] outline-none placeholder:text-muted-foreground"
+              className="flex-1 min-w-0 h-11 bg-transparent text-[16px] outline-none placeholder:text-muted-foreground"
             />
             {text.trim() && (
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="text-primary font-semibold text-sm shrink-0"
+                aria-label={t.timeline.comments.send}
+                className="h-10 w-10 flex items-center justify-center text-primary font-semibold text-sm shrink-0"
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </button>

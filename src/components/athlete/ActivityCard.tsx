@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { modalityAccent } from "@/utils/modalityColors";
-import { format } from "date-fns";
+import { format, isThisYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dumbbell } from "lucide-react";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
@@ -17,6 +17,8 @@ interface Props {
   athleteName: string;
   athletePhotoURL?: string | null;
   href?: string;
+  /** On the athlete's own feed the avatar + name on every card is noise */
+  hideAuthor?: boolean;
 }
 
 const icons = {
@@ -26,15 +28,17 @@ const icons = {
   strength: Dumbbell,
 } as const;
 
-const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href }: Props) => {
+const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href, hideAuthor }: Props) => {
   const { t, language } = useLanguage();
   const m = t.athlete.activity.metrics;
   const type = assignment.workout.type;
   const Icon = icons[type];
   const dateLocale = language === "pt" ? ptBR : undefined;
+  const activityDate = assignment.completedAt || assignment.scheduledDate;
+  // Short "22 Oct · 06:42" like the rest of the app; the year only when it isn't this one
   const dateStr = format(
-    assignment.completedAt || assignment.scheduledDate,
-    language === "pt" ? "dd 'de' MMMM 'de' yyyy 'às' HH:mm" : "MMMM d, yyyy 'at' HH:mm",
+    activityDate,
+    isThisYear(activityDate) ? "d MMM '·' HH:mm" : "d MMM yyyy '·' HH:mm",
     { locale: dateLocale }
   );
   const accentColor = modalityAccent(type);
@@ -73,6 +77,12 @@ const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href }: Props)
       <div className="flex">
         <div className="w-1.5 shrink-0" style={{ background: accentColor }} aria-hidden />
         <div className="flex-1 p-4 space-y-3">
+          {hideAuthor ? (
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: accentColor }} />
+              <span className="truncate">{dateStr}</span>
+            </p>
+          ) : (
           <div className="flex items-center gap-3">
             <CachedAvatar
               src={athletePhotoURL || undefined}
@@ -89,6 +99,7 @@ const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href }: Props)
               </p>
             </div>
           </div>
+          )}
 
           <h3 className="font-display font-bold text-lg leading-tight flex items-center gap-2">
             <span>{assignment.workout.name}</span>

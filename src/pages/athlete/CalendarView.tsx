@@ -15,7 +15,7 @@ import {
   ChevronRight,
   Dumbbell,
   } from "lucide-react";
-import { SectionSpinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { workoutLabels } from "@/utils/workoutLabels";
@@ -93,7 +93,10 @@ const AthleteCalendarView = () => {
   if (loading) {
     return (
       <AthletePortalLayout title={t.athlete.calendar.title}>
-        <SectionSpinner />
+        {/* Centred in the space between the top bar and the tab bar, not the top 60vh */}
+        <div className="flex min-h-[calc(100dvh-11rem)] w-full items-center justify-center">
+          <Spinner size="lg" />
+        </div>
       </AthletePortalLayout>
     );
   }
@@ -136,7 +139,8 @@ const AthleteCalendarView = () => {
                 {hasWorkouts && (
                   <Badge
                     variant={isTodayDate ? "default" : "secondary"}
-                    className="text-xs shrink-0"
+                    // Dark text on the orange secondary: white on it is under 3:1 at 12px
+                    className={cn("text-xs shrink-0", !isTodayDate && "text-slate-950")}
                   >
                     {dayAssignments.length}{" "}
                     {dayAssignments.length > 1
@@ -208,7 +212,7 @@ const AthleteCalendarView = () => {
                               {isCompleted ? (
                                 <Badge
                                   variant="secondary"
-                                  className="bg-green-100 text-green-700 dark:bg-green-900/50 shrink-0"
+                                  className="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 shrink-0"
                                 >
                                   {assignment.completionPercentage !== undefined
                                     ? `${assignment.completionPercentage}%`

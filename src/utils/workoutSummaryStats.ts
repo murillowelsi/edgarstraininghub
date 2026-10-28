@@ -67,6 +67,35 @@ export const summaryStats = (summary: WorkoutSummary, labels: StatLabels, locale
   return stats;
 };
 
+const CARD_KEYS: Record<string, string[]> = {
+  running: ["time", "distance", "pace", "hr"],
+  cycling: ["time", "distance", "speed", "hr"],
+  swimming: ["time", "distance", "pace"],
+  strength: ["time", "volume", "sets"],
+};
+
+const MISSING = "—";
+
+/**
+ * Feed card numbers: the same fixed set per modality on every card ("—" when
+ * a value is missing), so cards line up when scrolling. Completion is not a
+ * metric here — the card shows it as its own chip.
+ */
+export const cardStats = (summary: WorkoutSummary, labels: StatLabels, locale: string): SummaryStat[] => {
+  const keys = CARD_KEYS[summary.workoutType] ?? CARD_KEYS.running;
+  const available = new Map(summaryStats(summary, labels, locale).map((s) => [s.key, s]));
+  const labelFor: Record<string, string> = {
+    time: labels.time,
+    distance: labels.distance,
+    pace: labels.avgPace,
+    speed: labels.avgSpeed,
+    hr: labels.avgHeartRate,
+    volume: labels.volume,
+    sets: labels.sets,
+  };
+  return keys.map((key) => available.get(key) ?? { key, label: labelFor[key], value: MISSING });
+};
+
 /** Accent per modality (matches the app's modality colors). */
 export const modalityGradient: Record<string, { from: string; to: string; accent: string }> = {
   running: { from: "#1d4ed8", to: "#3b82f6", accent: "#60a5fa" },

@@ -10,6 +10,8 @@ interface Props {
   event: AthleteEvent;
   onClick?: () => void;
   compact?: boolean;
+  /** Drop the "Past" label when the list already sits under a "Past events" heading */
+  hidePastLabel?: boolean;
 }
 
 const typeIcon = {
@@ -19,7 +21,7 @@ const typeIcon = {
   other: Sparkles,
 } as const;
 
-const EventCard = ({ event, onClick, compact }: Props) => {
+const EventCard = ({ event, onClick, compact, hidePastLabel }: Props) => {
   const { t, language } = useLanguage();
   const te = t.athlete.events;
   const Icon = typeIcon[event.type];
@@ -68,12 +70,14 @@ const EventCard = ({ event, onClick, compact }: Props) => {
         <div className="flex-1 p-3 min-w-0 flex items-center gap-2">
           <div className="min-w-0 flex-1">
             <h3 className="font-display font-bold text-base leading-tight truncate">{event.title}</h3>
-            <p className={cn(
-              "text-xs font-bold tracking-wide uppercase mt-1",
-              isPast ? "text-muted-foreground" : "text-primary"
-            )}>
-              {countdown}
-            </p>
+            {!(isPast && hidePastLabel) && (
+              <p className={cn(
+                "text-xs font-bold tracking-wide uppercase mt-1",
+                isPast ? "text-muted-foreground" : "text-primary"
+              )}>
+                {countdown}
+              </p>
+            )}
             {event.goals.length > 0 && !compact && (
               <p className="text-xs text-muted-foreground mt-1.5 truncate">{goalsText}</p>
             )}

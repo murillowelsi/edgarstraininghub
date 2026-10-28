@@ -118,7 +118,14 @@
   "youtube": {
     "title": "Vídeos &",
     "titleHighlight": "Conteúdo",
-    "subtitle": "Acompanhe meus treinos, dicas e motivação no meu canal do YouTube"
+    "subtitle": "Acompanhe meus treinos, dicas e motivação no meu canal do YouTube",
+    "loading": "A carregar o vídeo mais recente...",
+    "unavailable": "Não é possível mostrar o vídeo mais recente agora.",
+    "watchOnYouTube": "Ver no YouTube",
+    "retry": "Tentar novamente",
+    "noVideo": "Ainda não há vídeos disponíveis.",
+    "moreVideos": "Veja mais vídeos no meu",
+    "channel": "canal do YouTube"
   },
   "pricing": {
     "title": "Planos &",
@@ -177,6 +184,7 @@
   "contact": {
     "title": "Entre em",
     "titleHighlight": "Contato",
+    "chatNow": "Conversar agora",
     "subtitle": "Vamos conversar sobre seus objetivos fitness. Estou aqui para ajudar você a alcançar seus melhores resultados.",
     "info": {
       "title": "Informações de Contato",
@@ -437,7 +445,10 @@
     "darkMode": "Modo escuro",
     "lightMode": "Modo claro",
     "english": "Inglês",
-    "portuguese": "Português"
+    "portuguese": "Português",
+    "changePhoto": "Alterar foto de perfil",
+    "removePhoto": "Remover foto",
+    "removePhotoDescription": "Sua foto de perfil será removida. Você pode enviar outra quando quiser."
   },
   "common": {
     "cancel": "Cancelar",
@@ -464,7 +475,10 @@
     "type": "Tipo",
     "all": "Todos",
     "noData": "Sem dados disponíveis",
-    "cannotBeUndone": "Esta ação não pode ser desfeita."
+    "cannotBeUndone": "Esta ação não pode ser desfeita.",
+    "mainNavigation": "Principal",
+    "workoutCountOne": "1 treino",
+    "workoutCountOther": "{{count}} treinos"
   },
   "auth": {
     "login": "Entrar",
@@ -983,25 +997,30 @@
     },
     "home": {
       "welcomeBack": "Bem-vindo,",
-      "statCompletion": "Conclusão",
-      "statCompleted": "Concluídos",
-      "statTotal": "Total",
+      "openMenu": "Abrir menu",
       "statToday": "Hoje",
       "restDay": "Descanso",
+      "restHint": "Dia de recuperação",
+      "todayToDo": "{{count}} a fazer",
+      "todayInProgress": "Em andamento",
+      "todayDone": "Tudo feito",
+      "statWeek": "Esta semana",
+      "weekDone": "concluídos",
+      "weekNothing": "Nada planejado",
+      "statNext": "Próximo treino",
+      "nextNone": "Nada agendado ainda",
       "yourProgress": "Seu Progresso",
       "workoutsRemaining": "{{count}} treinos restantes",
       "progressCount": "{{done}} de {{total}}",
       "todaysWorkouts": "Treinos de Hoje",
       "noWorkoutsScheduled": "Nenhum treino agendado",
-      "upcoming": "Próximos",
-      "seeAll": "Ver todos",
       "today": "Hoje",
       "exercises": "exercícios",
       "stages": "etapas",
       "done": "Feito",
       "logExtra": "Registrar treino de força",
-      "logExtraTitle": "Registrar sessão extra de força",
-      "logExtraDescription": "Treinou num dia que o coach não marcou? Escolha o treino que você fez em {{date}}.",
+      "logExtraTitle": "Registrar treino de força",
+      "logExtraDescription": "Treinou num dia que o coach não marcou? Escolha o treino que você fez.",
       "logExtraEmpty": "Nenhum treino de força atribuído ainda. Quando o coach atribuir um, você pode repeti-lo aqui.",
       "logExtraLastDone": "Feito por último em {{date}}",
       "logExtraNeverDone": "Ainda não feito",
@@ -1069,8 +1088,15 @@
       "stagesSection": "Etapas do Treino",
       "startWorkout": "Iniciar Treino",
       "resumeWorkout": "Retomar Treino",
+      "resumeProgress": "{{percent}}% · {{minutes}} min",
       "completeWorkout": "Concluir Treino",
       "markIncomplete": "Marcar como Incompleto",
+      "markAsDone": "Marcar como feito",
+      "markDoneTitle": "Marcar treino como feito?",
+      "markDoneDescription": "O treino inteiro é marcado como concluído sem registrar nenhuma série.",
+      "markDoneConfirm": "Marcar como feito",
+      "markDoneCancel": "Cancelar",
+      "undo": "Desfazer",
       "resetWorkout": "Resetar Treino",
       "resetConfirmTitle": "Resetar treino?",
       "resetConfirmDescription": "Todo o progresso registrado será apagado. O treino voltará ao estado inicial.",
@@ -1158,7 +1184,7 @@
       "repsHeader": "Reps",
       "timeHeader": "Tempo",
       "startHold": "Iniciar timer de {{time}}",
-      "holdRunning": "Segure",
+      "holdRunning": "Parar timer",
       "kgHeader": "Kg",
       "addNewSet": "Adicionar série",
       "removeLastSet": "Remover última",
@@ -1181,6 +1207,13 @@
       "restSkip": "Pular",
       "restDone": "Descanso acabou — próxima série!",
       "restNext": "Próxima: {{name}} · série {{set}}",
+      "restNextSet": "Série {{set}} · {{name}}",
+      "restSubtract": "Diminuir 15 segundos",
+      "restAdd": "Adicionar 15 segundos",
+      "setRepsLabel": "Série {{n}}: repetições",
+      "setWeightLabel": "Série {{n}}: peso em kg",
+      "setTimeLabel": "Série {{n}}: tempo",
+      "progressRing": "{{percent}}% das séries concluídas",
       "draftRestored": "Treino restaurado de onde você parou",
       "exitTitle": "Sair do treino?",
       "exitDescription": "Suas séries ficam salvas neste celular. Você pode continuar depois ou descartar esta sessão.",
@@ -1491,7 +1524,9 @@
     "title": "Blog &",
     "titleHighlight": "Artigos",
     "subtitle": "Dicas práticas sobre treino, nutrição e desempenho desportivo",
-    "noPosts": "Ainda não há artigos publicados. Volte em breve!"
+    "noPosts": "Ainda não há artigos publicados. Volte em breve!",
+    "readMore": "Ler mais",
+    "loadMore": "Carregar mais artigos"
   },
   "timeline": {
     "story": {
@@ -1511,10 +1546,15 @@
       "records": "Recordes",
       "highlights": "Destaques",
       "pr": "Recorde",
-      "rpe": "Esforço {{n}}/10"
+      "rpe": "Esforço {{n}}/10",
+      "percentDone": "{{p}}% concluído"
+    },
+    "time": {
+      "now": "agora"
     },
     "activity": {
       "title": "Atividade",
+      "new": "Novo",
       "today": "Hoje",
       "yesterday": "Ontem",
       "last7Days": "Últimos 7 dias",
@@ -1535,7 +1575,15 @@
       "placeholder": "Participe da conversa...",
       "loadError": "Não foi possível carregar comentários.",
       "postError": "Erro ao publicar comentário.",
-      "deleteError": "Erro ao excluir comentário."
+      "deleteError": "Erro ao excluir comentário.",
+      "like": "Curtir comentário, {{n}}",
+      "unlike": "Descurtir comentário, {{n}}",
+      "delete": "Excluir comentário",
+      "addEmoji": "Adicionar {{emoji}}",
+      "send": "Enviar comentário",
+      "cancelReply": "Cancelar resposta",
+      "viewPost": "Ver post",
+      "onPost": "No post"
     },
     "post": {
       "delete": "Excluir post",
@@ -1555,7 +1603,11 @@
       "shareStory": "Compartilhar no Stories",
       "shareStoryHint": "Imagem pronta para o Instagram",
       "storyError": "Não foi possível gerar a imagem.",
-      "storySaved": "Imagem salva — publique nos Stories"
+      "storySaved": "Imagem salva — publique nos Stories",
+      "like": "Curtir, {{n}}",
+      "unlike": "Descurtir, {{n}}",
+      "comments": "Comentários, {{n}}",
+      "autoCaption": "Treino concluído ✅"
     },
     "create": {
       "title": "Novo post",
@@ -1582,7 +1634,10 @@
       "mentionHint": "Digite @ para marcar alguém",
       "tagged": "Marcados",
       "removePhoto": "Remover foto",
-      "workoutPost": "Post do treino"
+      "workoutPost": "Post do treino",
+      "addPhoto": "Adicionar foto",
+      "captionLabel": "Texto do post",
+      "peopleLabel": "Pessoas — digite @ para marcar alguém"
     },
     "empty": {
       "noPosts": "Sem posts ainda",

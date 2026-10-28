@@ -118,7 +118,14 @@
   "youtube": {
     "title": "Videos &",
     "titleHighlight": "Content",
-    "subtitle": "Follow my training, tips, and motivation on my YouTube channel"
+    "subtitle": "Follow my training, tips, and motivation on my YouTube channel",
+    "loading": "Loading the latest video...",
+    "unavailable": "The latest video can't be shown right now.",
+    "watchOnYouTube": "Watch on YouTube",
+    "retry": "Try again",
+    "noVideo": "No video available yet.",
+    "moreVideos": "Check out more videos on my",
+    "channel": "YouTube channel"
   },
   "pricing": {
     "title": "Plans &",
@@ -177,6 +184,7 @@
   "contact": {
     "title": "Get in",
     "titleHighlight": "Touch",
+    "chatNow": "Chat now",
     "subtitle": "Let's talk about your fitness goals. I'm here to help you achieve your best results.",
     "info": {
       "title": "Contact Information",
@@ -437,7 +445,10 @@
     "darkMode": "Dark mode",
     "lightMode": "Light mode",
     "english": "English",
-    "portuguese": "Portuguese"
+    "portuguese": "Portuguese",
+    "changePhoto": "Change profile photo",
+    "removePhoto": "Remove photo",
+    "removePhotoDescription": "Your profile photo will be removed. You can upload a new one any time."
   },
   "common": {
     "cancel": "Cancel",
@@ -464,7 +475,10 @@
     "type": "Type",
     "all": "All",
     "noData": "No data available",
-    "cannotBeUndone": "This action cannot be undone."
+    "cannotBeUndone": "This action cannot be undone.",
+    "mainNavigation": "Main",
+    "workoutCountOne": "1 workout",
+    "workoutCountOther": "{{count}} workouts"
   },
   "auth": {
     "login": "Login",
@@ -983,25 +997,30 @@
     },
     "home": {
       "welcomeBack": "Welcome back,",
-      "statCompletion": "Completion",
-      "statCompleted": "Completed",
-      "statTotal": "Total",
+      "openMenu": "Open menu",
       "statToday": "Today",
       "restDay": "Rest",
+      "restHint": "Recovery day",
+      "todayToDo": "{{count}} to do",
+      "todayInProgress": "In progress",
+      "todayDone": "All done",
+      "statWeek": "This week",
+      "weekDone": "done",
+      "weekNothing": "Nothing planned",
+      "statNext": "Next workout",
+      "nextNone": "Nothing scheduled yet",
       "yourProgress": "Your Progress",
       "workoutsRemaining": "{{count}} workouts remaining",
       "progressCount": "{{done}} of {{total}}",
       "todaysWorkouts": "Today's Workouts",
       "noWorkoutsScheduled": "No workouts scheduled",
-      "upcoming": "Upcoming",
-      "seeAll": "See all",
       "today": "Today",
       "exercises": "exercises",
       "stages": "stages",
       "done": "Done",
       "logExtra": "Log strength workout",
-      "logExtraTitle": "Log extra strength session",
-      "logExtraDescription": "Trained on a day your coach didn't schedule? Pick the workout you did on {{date}}.",
+      "logExtraTitle": "Log strength workout",
+      "logExtraDescription": "Trained on a day your coach didn't schedule? Pick the workout you did.",
       "logExtraEmpty": "No strength workouts assigned yet. Once your coach assigns one, you can repeat it here.",
       "logExtraLastDone": "Last done {{date}}",
       "logExtraNeverDone": "Not done yet",
@@ -1069,8 +1088,15 @@
       "stagesSection": "Workout Stages",
       "startWorkout": "Start Workout",
       "resumeWorkout": "Resume Workout",
+      "resumeProgress": "{{percent}}% · {{minutes}} min",
       "completeWorkout": "Complete Workout",
       "markIncomplete": "Mark as Incomplete",
+      "markAsDone": "Mark as done",
+      "markDoneTitle": "Mark workout as done?",
+      "markDoneDescription": "The whole workout is marked as completed without logging any sets.",
+      "markDoneConfirm": "Mark as done",
+      "markDoneCancel": "Cancel",
+      "undo": "Undo",
       "resetWorkout": "Reset Workout",
       "resetConfirmTitle": "Reset workout?",
       "resetConfirmDescription": "All recorded progress will be erased. The workout will return to its initial state.",
@@ -1158,7 +1184,7 @@
       "repsHeader": "Reps",
       "timeHeader": "Time",
       "startHold": "Start {{time}} timer",
-      "holdRunning": "Hold",
+      "holdRunning": "Stop timer",
       "kgHeader": "Kg",
       "addNewSet": "Add new set",
       "removeLastSet": "Remove last",
@@ -1181,6 +1207,13 @@
       "restSkip": "Skip",
       "restDone": "Rest over — next set!",
       "restNext": "Next: {{name}} · set {{set}}",
+      "restNextSet": "Set {{set}} · {{name}}",
+      "restSubtract": "Subtract 15 seconds",
+      "restAdd": "Add 15 seconds",
+      "setRepsLabel": "Set {{n}} reps",
+      "setWeightLabel": "Set {{n}} weight in kg",
+      "setTimeLabel": "Set {{n}} time",
+      "progressRing": "{{percent}}% of sets done",
       "draftRestored": "Workout restored where you left off",
       "exitTitle": "Leave workout?",
       "exitDescription": "Your sets are saved on this phone. You can continue later or discard this session.",
@@ -1491,7 +1524,9 @@
     "title": "Blog &",
     "titleHighlight": "Articles",
     "subtitle": "Practical tips on training, nutrition, and athletic performance",
-    "noPosts": "No posts published yet. Check back soon!"
+    "noPosts": "No posts published yet. Check back soon!",
+    "readMore": "Read more",
+    "loadMore": "Load more posts"
   },
   "timeline": {
     "story": {
@@ -1511,10 +1546,15 @@
       "records": "Records",
       "highlights": "Highlights",
       "pr": "Record",
-      "rpe": "Effort {{n}}/10"
+      "rpe": "Effort {{n}}/10",
+      "percentDone": "{{p}}% done"
+    },
+    "time": {
+      "now": "now"
     },
     "activity": {
       "title": "Activity",
+      "new": "New",
       "today": "Today",
       "yesterday": "Yesterday",
       "last7Days": "Last 7 days",
@@ -1535,7 +1575,15 @@
       "placeholder": "Join the conversation...",
       "loadError": "Could not load comments.",
       "postError": "Failed to post comment.",
-      "deleteError": "Failed to delete comment."
+      "deleteError": "Failed to delete comment.",
+      "like": "Like comment, {{n}}",
+      "unlike": "Unlike comment, {{n}}",
+      "delete": "Delete comment",
+      "addEmoji": "Add {{emoji}}",
+      "send": "Send comment",
+      "cancelReply": "Cancel reply",
+      "viewPost": "View post",
+      "onPost": "On the post"
     },
     "post": {
       "delete": "Delete post",
@@ -1555,7 +1603,11 @@
       "shareStory": "Share to Stories",
       "shareStoryHint": "Image ready for Instagram",
       "storyError": "Couldn't create the image.",
-      "storySaved": "Image saved — post it to your Stories"
+      "storySaved": "Image saved — post it to your Stories",
+      "like": "Like, {{n}}",
+      "unlike": "Unlike, {{n}}",
+      "comments": "Comments, {{n}}",
+      "autoCaption": "Workout complete ✅"
     },
     "create": {
       "title": "New post",
@@ -1582,7 +1634,10 @@
       "mentionHint": "Type @ to tag someone",
       "tagged": "Tagged",
       "removePhoto": "Remove photo",
-      "workoutPost": "Workout post"
+      "workoutPost": "Workout post",
+      "addPhoto": "Add photo",
+      "captionLabel": "Post text",
+      "peopleLabel": "People — type @ to tag someone"
     },
     "empty": {
       "noPosts": "No posts yet",

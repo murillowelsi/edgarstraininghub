@@ -53,6 +53,8 @@ export interface TimelinePost {
   workoutSummary?: WorkoutSummary;
   /** Old strength post whose caption only repeated the stats now shown in the card */
   captionIsSummary?: boolean;
+  /** Caption was the automatic "Workout complete: X" line, shown localized instead */
+  captionAuto?: boolean;
   likedBy: string[];
   commentsCount: number;
   createdAt: Date;
@@ -70,6 +72,7 @@ export interface TimelinePostDocument {
   mentions?: PostMention[];
   workoutSummary?: WorkoutSummary;
   assignmentId?: string;
+  captionAuto?: boolean;
   likedBy: string[];
   commentsCount: number;
   createdAt: Timestamp;

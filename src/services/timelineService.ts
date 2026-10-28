@@ -51,6 +51,14 @@ const legacyStrengthSummary = (caption: string): WorkoutSummary | undefined => {
   };
 };
 
+// The prefilled caption of a shared workout ("Today's workout: X 💪 · 1 new
+// record 🏆"), stored in whatever language the athlete used. It only repeats
+// the card, so the feed swaps it for a short localized line.
+const AUTO_CAPTION =
+  /^(?:Workout complete|Treino concluído|Today's workout|Treino de hoje): .+ (?:✅|💪)(?: · \d+ (?:new records?|recordes? novos?) 🏆)?$/iu;
+
+export const isAutoCaption = (caption: string): boolean => AUTO_CAPTION.test(caption.trim());
+
 const docToPost = (id: string, data: TimelinePostDocument): TimelinePost => {
   const legacySummary = data.workoutSummary ? undefined : legacyStrengthSummary(data.caption ?? "");
   return {
@@ -65,6 +73,7 @@ const docToPost = (id: string, data: TimelinePostDocument): TimelinePost => {
     mentions: data.mentions ?? [],
     workoutSummary: data.workoutSummary ?? legacySummary,
     captionIsSummary: !!legacySummary,
+    captionAuto: !!data.workoutSummary && (data.captionAuto ?? isAutoCaption(data.caption ?? "")),
     likedBy: data.likedBy || [],
     commentsCount: data.commentsCount || 0,
     createdAt: data.createdAt?.toDate() || new Date(),
@@ -163,6 +172,7 @@ export const createTimelinePost = async (
     ...(cleanWorkoutSummary && Object.keys(cleanWorkoutSummary).length > 0
       ? { workoutSummary: cleanWorkoutSummary }
       : {}),
+    ...(data.workoutSummary && isAutoCaption(data.caption) ? { captionAuto: true } : {}),
     likedBy: [],
     commentsCount: 0,
     createdAt: serverTimestamp(),
@@ -171,6 +181,11 @@ export const createTimelinePost = async (
   if (authorPhotoURL) payload.authorPhotoURL = authorPhotoURL;
   const docRef = await addDoc(collection(db, COLLECTION), payload);
   return docRef.id;
+};
+
+export const getTimelinePost = async (postId: string): Promise<TimelinePost | null> => {
+  const snap = await getDoc(doc(db, COLLECTION, postId));
+  return snap.exists() ? docToPost(snap.id, snap.data() as TimelinePostDocument) : null;
 };
 
 /** Whether the athlete already shared this workout on the feed. */
@@ -192,6 +207,8 @@ export const updateTimelinePost = async (
 ): Promise<void> => {
   await updateDoc(doc(db, COLLECTION, postId), {
     caption: data.caption,
+    // An edited caption is the athlete's own text again
+    captionAuto: isAutoCaption(data.caption),
     imageUrl: data.imageUrls[0] ?? "",
     imageUrls: data.imageUrls,
     ...(data.mentions ? { mentions: data.mentions } : {}),
@@ -316,11 +333,13 @@ export const createActivityNotification = async (
   userId: string,
   actorName: string,
   postId: string,
-  type: "like" | "comment" | "comment_mention"
+  type: "like" | "comment" | "comment_mention",
+  actorId?: string
 ): Promise<void> => {
   const notifRef = await addDoc(collection(db, "users", userId, "timelineNotifications"), {
     postId,
     authorName: actorName,
+    ...(actorId ? { actorId } : {}),
     type,
     read: false,
     createdAt: serverTimestamp(),
@@ -357,6 +376,8 @@ export interface ActivityNotification {
   id: string;
   postId: string;
   authorName: string;
+  /** Who did it — only stored on notifications created after this field was added */
+  actorId?: string;
   type: "like" | "comment" | "mention" | "comment_mention";
   caption?: string;
   read: boolean;
@@ -382,6 +403,7 @@ export const subscribeToActivityNotifications = (
         id: d.id,
         postId: data.postId,
         authorName: data.authorName,
+        actorId: data.actorId,
         type: data.type || "mention",
         caption: data.caption,
         read: data.read,

@@ -315,6 +315,7 @@ export function CreatePostModal({
                 setMentionQuery(mentionQueryAt(el.value, el.selectionStart ?? el.value.length));
               }}
               placeholder={t.timeline.create.placeholder}
+              aria-label={tc.captionLabel}
               rows={4}
               className="w-full mt-1 bg-transparent text-[16px] leading-relaxed placeholder:text-muted-foreground resize-none outline-none border-none focus:ring-0"
             />
@@ -483,7 +484,7 @@ export function CreatePostModal({
             onClick={startMention}
             disabled={submitting}
             className="flex items-center gap-2 h-10 px-3 rounded-full text-sm font-medium hover:bg-accent disabled:opacity-40"
-            aria-label={tc.mentionHint}
+            aria-label={tc.peopleLabel}
           >
             <AtSign className="h-5 w-5 text-primary" />
             {tc.people}

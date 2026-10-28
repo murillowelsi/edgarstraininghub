@@ -1,6 +1,11 @@
 import { Facebook, Instagram, Youtube } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+// 40px hit area around each icon
+const socialLink = "h-10 w-10 flex items-center justify-center rounded-full text-gray-300 hover:bg-white/10 transition-colors";
 
 const Footer = () => {
+  const { t } = useLanguage();
   const currentYear = new Date().getFullYear();
 
   // WhatsApp SVG Icon
@@ -17,22 +22,22 @@ const Footer = () => {
   );
 
   return (
-    <footer className="bg-card text-white py-2 md:py-6 fixed bottom-0 left-0 right-0 z-30">
+    <footer className="bg-card text-white py-4 md:py-6 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-6 max-w-6xl mx-auto">
           {/* Brand */}
-          <h3 className="text-base md:text-xl font-bold text-white md:absolute md:left-4">Edgar Zanin</h3>
+          <h3 className="text-base md:text-xl font-bold text-white md:flex-1">Edgar Zanin</h3>
 
           {/* Social Links - Centered */}
-          <div className="flex gap-3 md:gap-4">
+          <div className="flex gap-1 md:gap-2">
             <a
               href="https://wa.me/351962869476"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-300 hover:text-green-500 transition-colors"
+              className={`${socialLink} hover:text-green-500`}
               aria-label="WhatsApp"
             >
-              <div className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
+              <div className="w-5 h-5 flex items-center justify-center">
                 <WhatsAppIcon />
               </div>
             </a>
@@ -40,34 +45,34 @@ const Footer = () => {
               href="https://www.youtube.com/@edgarzanin"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-300 hover:text-red-600 transition-colors"
+              className={`${socialLink} hover:text-red-600`}
               aria-label="YouTube"
             >
-              <Youtube className="w-4 h-4 md:w-5 md:h-5" />
+              <Youtube className="w-5 h-5" />
             </a>
             <a
               href="https://www.instagram.com/edgarzanin/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-300 hover:text-pink-500 transition-colors"
+              className={`${socialLink} hover:text-pink-500`}
               aria-label="Instagram"
             >
-              <Instagram className="w-4 h-4 md:w-5 md:h-5" />
+              <Instagram className="w-5 h-5" />
             </a>
             <a
               href="https://www.facebook.com/e.a.zanin"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-300 hover:text-blue-500 transition-colors"
+              className={`${socialLink} hover:text-blue-500`}
               aria-label="Facebook"
             >
-              <Facebook className="w-4 h-4 md:w-5 md:h-5" />
+              <Facebook className="w-5 h-5" />
             </a>
           </div>
 
           {/* Copyright */}
-          <p className="text-gray-400 text-xs md:text-sm md:absolute md:right-4">
-            &copy; {currentYear} Edgar Zanin. All rights reserved.
+          <p className="text-gray-400 text-xs md:text-sm md:flex-1 md:text-right">
+            &copy; {currentYear} Edgar Zanin. {t.footer.rights}
           </p>
         </div>
       </div>

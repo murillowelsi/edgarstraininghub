@@ -22,6 +22,8 @@ interface InfiniteDateStripProps {
   isReady?: boolean;
   hasWorkouts?: (date: Date) => boolean;
   hasIncompleteWorkouts?: (date: Date) => boolean;
+  /** Workouts on a day, read out in the day button's accessible name */
+  workoutCount?: (date: Date) => number;
   initialRadius?: number;
   pageSize?: number;
   edgeThresholdPx?: number;
@@ -39,6 +41,7 @@ export const InfiniteDateStrip = forwardRef<
     isReady = true,
     hasWorkouts,
     hasIncompleteWorkouts,
+    workoutCount,
     initialRadius = 30,
     pageSize = 30,
     edgeThresholdPx = 240,
@@ -46,7 +49,7 @@ export const InfiniteDateStrip = forwardRef<
   },
   ref,
 ) {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const dateLocale = language === "pt" ? ptBR : undefined;
   const scrollRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -159,6 +162,15 @@ export const InfiniteDateStrip = forwardRef<
         const isTodayDate = isToday(day);
         const hasWk = hasWorkouts?.(day) ?? false;
         const hasIncomplete = hasIncompleteWorkouts?.(day) ?? false;
+        // The visible "Wed 28" is too terse for screen readers
+        const count = workoutCount?.(day) ?? 0;
+        const ariaLabel = [
+          format(day, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMMM d", { locale: dateLocale }),
+          count > 0 &&
+            (count === 1 ? t.common.workoutCountOne : t.common.workoutCountOther.replace("{{count}}", String(count))),
+        ]
+          .filter(Boolean)
+          .join(" · ");
 
         return (
           <button
@@ -168,6 +180,9 @@ export const InfiniteDateStrip = forwardRef<
               else btnRefs.current.delete(key);
             }}
             onClick={() => onSelectDate(day)}
+            aria-label={ariaLabel}
+            aria-pressed={isSelected}
+            aria-current={isTodayDate ? "date" : undefined}
             className={cn(
               "flex flex-col items-center justify-center min-w-[48px] h-[64px] rounded-xl transition-all border flex-shrink-0",
               isSelected

@@ -23,9 +23,9 @@ import AddEventSheet from "@/components/athlete/AddEventSheet";
 import LogExtraWorkoutSheet from "@/components/athlete/LogExtraWorkoutSheet";
 import { useEventChatReminders } from "@/hooks/useEventChatReminders";
 import { differenceInCalendarDays } from "date-fns";
-import { addDays, format, isAfter, isBefore, isSameDay, isToday, startOfDay } from "date-fns";
+import { endOfDay, endOfWeek, format, isAfter, isSameDay, isToday, isWithinInterval, startOfDay, startOfWeek } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
-import { CalendarCheck, ChevronRight, Dumbbell, Flame, Play, Plus, Target, Trash2, TrendingUp } from "lucide-react";
+import { CalendarCheck, CheckCircle2, ChevronRight, Dumbbell, Flame, Moon, Play, Plus, Trash2 } from "lucide-react";
 import { loadSessionDraft } from "@/lib/sessionDraft";
 import { NotificationBanner } from "@/components/NotificationBanner";
 import { SectionSpinner } from "@/components/ui/spinner";
@@ -44,6 +44,44 @@ const workoutTypeColors: Record<string, string> = {
   cycling: "bg-green-500/10 text-green-600 border-green-200",
   swimming: "bg-cyan-500/10 text-cyan-600 border-cyan-200",
   strength: "bg-amber-500/10 text-amber-600 border-amber-200",
+};
+
+interface StatCardProps {
+  to: string;
+  icon: React.ElementType;
+  /** Tailwind classes: card gradient/border, icon chip, icon colour */
+  tone: { card: string; chip: string; icon: string };
+  label: string;
+  value: string;
+  sub?: string;
+  className?: string;
+}
+
+// Label row on top so the value gets the card's full width (long values wrap
+// instead of leaking out at 320px)
+const StatCard = ({ to, icon: Icon, tone, label, value, sub, className }: StatCardProps) => (
+  <Link to={to} className={cn("block min-w-0 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/50", className)}>
+    <Card className={cn("h-full bg-gradient-to-br hover:shadow-md transition-all cursor-pointer", tone.card)}>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className={cn("p-1.5 rounded-lg shrink-0", tone.chip)}>
+            <Icon className={cn("h-4 w-4", tone.icon)} />
+          </div>
+          <p className="text-xs font-medium leading-tight text-muted-foreground line-clamp-2 [overflow-wrap:anywhere]">{label}</p>
+        </div>
+        <p className="mt-2 text-lg font-bold leading-tight line-clamp-2 hyphens-auto [overflow-wrap:anywhere]">{value}</p>
+        {sub && <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2 [overflow-wrap:anywhere] first-letter:uppercase">{sub}</p>}
+      </CardContent>
+    </Card>
+  </Link>
+);
+
+const tones = {
+  primary: { card: "from-primary/10 to-primary/5 border-primary/20 hover:border-primary/40", chip: "bg-primary/20", icon: "text-primary" },
+  rest: { card: "from-indigo-500/10 to-indigo-500/5 border-indigo-200/50 hover:border-indigo-400/50", chip: "bg-indigo-500/20", icon: "text-indigo-500" },
+  done: { card: "from-green-500/10 to-green-500/5 border-green-200/50 hover:border-green-400/50", chip: "bg-green-500/20", icon: "text-green-500" },
+  week: { card: "from-orange-500/10 to-orange-500/5 border-orange-200/50 hover:border-orange-400/50", chip: "bg-orange-500/20", icon: "text-orange-500" },
+  next: { card: "from-blue-500/10 to-blue-500/5 border-blue-200/50 hover:border-blue-400/50", chip: "bg-blue-500/20", icon: "text-blue-500" },
 };
 
 const AthleteHome = () => {
@@ -95,14 +133,20 @@ const AthleteHome = () => {
   const completedWorkouts = assignments.filter((a) => a.completedAt).length;
   const completionRate = totalWorkouts > 0 ? Math.round((completedWorkouts / totalWorkouts) * 100) : 0;
 
-  // Get upcoming workouts (next 7 days, not completed)
-  const upcomingWorkouts = assignments
-    .filter((a) => !a.completedAt && isAfter(a.scheduledDate, startOfDay(new Date())) && isBefore(a.scheduledDate, addDays(new Date(), 7)))
-    .slice(0, 3);
-
   // Get today's workouts
   const todaysWorkouts = assignments.filter((a) => isSameDay(a.scheduledDate, new Date()));
-  const todaysCompleted = todaysWorkouts.filter((a) => a.completedAt).length;
+  const todaysPending = todaysWorkouts.filter((a) => !a.completedAt);
+
+  // This calendar week (Mon–Sun), coach-planned sessions only — extras would inflate "planned"
+  const weekPlanned = assignments.filter(
+    (a) => !a.selfLogged && isWithinInterval(a.scheduledDate, { start: startOfWeek(new Date(), { weekStartsOn: 1 }), end: endOfWeek(new Date(), { weekStartsOn: 1 }) })
+  );
+  const weekDone = weekPlanned.filter((a) => a.completedAt).length;
+
+  // First open workout after today (today's are on the Today card)
+  const nextWorkout = assignments
+    .filter((a) => !a.completedAt && isAfter(a.scheduledDate, endOfDay(new Date())))
+    .sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime())[0];
 
   // Get workouts for selected date
   const selectedDateAssignments = assignments.filter((a) => isSameDay(a.scheduledDate, selectedDate));
@@ -139,11 +183,38 @@ const AthleteHome = () => {
     return null;
   })();
 
-  // Extra sessions can only be logged for today or past days
-  const canLogExtra = !isAfter(selectedDate, startOfDay(new Date()));
+  // Extra sessions can only be logged for today or past days. Today has the
+  // top-bar button, so the in-card one is for logging a past day.
+  const canLogExtra = !isAfter(selectedDate, startOfDay(new Date())) && !isToday(selectedDate);
+
+  const th = t.athlete.home;
+  const workoutCountLabel = (count: number) =>
+    count === 1 ? t.common.workoutCountOne : t.common.workoutCountOther.replace("{{count}}", String(count));
+
+  const todayCard: Omit<StatCardProps, "label"> = inProgress
+    ? { to: `/athlete/workout/${inProgress.assignment.id}/session`, icon: Play, tone: tones.primary, value: th.todayInProgress, sub: inProgress.assignment.workout.name }
+    : todaysWorkouts.length === 0
+      ? { to: "/athlete/calendar", icon: Moon, tone: tones.rest, value: th.restDay, sub: th.restHint }
+      : todaysPending.length === 0
+        ? {
+            to: `/athlete/workout/${todaysWorkouts[0].id}`,
+            icon: CheckCircle2,
+            tone: tones.done,
+            value: th.todayDone,
+            sub: todaysWorkouts.length === 1 ? todaysWorkouts[0].workout.name : workoutCountLabel(todaysWorkouts.length),
+          }
+        : {
+            to: `/athlete/workout/${todaysPending[0].id}`,
+            icon: Dumbbell,
+            tone: tones.primary,
+            value: th.todayToDo.replace("{{count}}", String(todaysPending.length)),
+            sub: todaysPending[0].workout.name,
+          };
 
   // Check if a date has workouts
   const hasWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date));
+
+  const workoutCount = (date: Date) => assignments.filter((a) => isSameDay(a.scheduledDate, date)).length;
 
   // Check if a date has incomplete workouts
   const hasIncompleteWorkouts = (date: Date) => assignments.some((a) => isSameDay(a.scheduledDate, date) && !a.completedAt);
@@ -168,7 +239,11 @@ const AthleteHome = () => {
       <div className="p-4 space-y-4">
         {/* Welcome Section */}
         <div className="flex items-center gap-2">
-          <button onClick={() => setIsMenuOpen(true)} className="rounded-full focus:outline-none">
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            aria-label={th.openMenu}
+            className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
             <CachedAvatar
               src={photoURL}
               alt={displayName}
@@ -216,74 +291,26 @@ const AthleteHome = () => {
           <NotificationBanner />
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards — what to do now; overall progress lives in the card below */}
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/athlete/profile">
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover:shadow-md transition-all hover:border-primary/40 cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-primary/20">
-                    <Target className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{completionRate}%</p>
-                    <p className="text-xs text-muted-foreground">{t.athlete.home.statCompletion}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/athlete/profile">
-            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-200/50 hover:shadow-md transition-all hover:border-orange-400/50 cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-orange-500/20">
-                    <Flame className="h-5 w-5 text-orange-500" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{completedWorkouts}</p>
-                    <p className="text-xs text-muted-foreground">{t.athlete.home.statCompleted}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/athlete/profile">
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-200/50 hover:shadow-md transition-all hover:border-blue-400/50 cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-blue-500/20">
-                    <CalendarCheck className="h-5 w-5 text-blue-500" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{totalWorkouts}</p>
-                    <p className="text-xs text-muted-foreground">{t.athlete.home.statTotal}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/athlete/calendar">
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-200/50 hover:shadow-md transition-all hover:border-green-400/50 cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-green-500/20">
-                    <TrendingUp className="h-5 w-5 text-green-500" />
-                  </div>
-                  <div className="min-w-0">
-                    {/* "0/0" reads like a failure on a rest day */}
-                    <p className={cn("font-bold", todaysWorkouts.length > 0 ? "text-2xl" : "text-base leading-tight min-h-8 flex items-center hyphens-auto [overflow-wrap:anywhere]")}>
-                      {todaysWorkouts.length > 0 ? `${todaysCompleted}/${todaysWorkouts.length}` : t.athlete.home.restDay}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{t.athlete.home.statToday}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+          <StatCard label={th.statToday} {...todayCard} />
+          <StatCard
+            to="/athlete/calendar"
+            icon={CalendarCheck}
+            tone={tones.week}
+            label={th.statWeek}
+            value={weekPlanned.length > 0 ? `${weekDone}/${weekPlanned.length}` : "0"}
+            sub={weekPlanned.length > 0 ? th.weekDone : th.weekNothing}
+          />
+          <StatCard
+            className="col-span-2"
+            to={nextWorkout ? `/athlete/workout/${nextWorkout.id}` : "/athlete/calendar"}
+            icon={nextWorkout ? workoutTypeIcons[nextWorkout.workout.type] || GrRun : CalendarCheck}
+            tone={tones.next}
+            label={th.statNext}
+            value={nextWorkout ? nextWorkout.workout.name : th.nextNone}
+            sub={nextWorkout ? format(nextWorkout.scheduledDate, language === "pt" ? "EEEE, d MMM" : "EEEE, MMM d", { locale: dateLocale }) : undefined}
+          />
         </div>
 
         {/* Progress Card */}
@@ -326,6 +353,7 @@ const AthleteHome = () => {
               isReady={!loading}
               hasWorkouts={hasWorkouts}
               hasIncompleteWorkouts={hasIncompleteWorkouts}
+              workoutCount={workoutCount}
             />
 
             {/* Selected Date Workouts */}
@@ -405,72 +433,35 @@ const AthleteHome = () => {
           </CardContent>
         </Card>
 
-        {/* Upcoming Workouts */}
-        {upcomingWorkouts.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{t.athlete.home.upcoming}</CardTitle>
-                <Link to="/athlete/calendar" className="-my-2 -mr-2 px-2 py-3 text-sm text-primary font-medium hover:underline flex items-center gap-1">
-                  {t.athlete.home.seeAll}
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {upcomingWorkouts.map((assignment) => {
-                const workout = assignment.workout;
-                const Icon = workoutTypeIcons[workout.type] || GrRun;
-
-                return (
-                  <ListItemCard
-                    key={assignment.id}
-                    to={`/athlete/workout/${assignment.id}`}
-                    compact
-                    icon={<Icon className="h-5 w-5" />}
-                    iconClassName={workoutTypeColors[workout.type] || "bg-muted text-foreground"}
-                    title={workout.name}
-                    subtitle={format(assignment.scheduledDate, language === "pt" ? "EEE, d MMM" : "EEE, MMM d", { locale: dateLocale })}
-                    right={<ChevronRight className="h-5 w-5 text-muted-foreground" />}
-                  />
-                );
-              })}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Events Section */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold">
-              {t.athlete.events.title}
-            </h2>
-            <button
-              onClick={() => setEventSheetOpen(true)}
-              className="-mr-2 flex h-11 w-11 items-center justify-center rounded-full hover:bg-muted transition"
-              aria-label={t.athlete.events.addAriaLabel}
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-          {nextEvent ? (
-            <Link to="/athlete/profile?tab=events" className="block">
-              <EventCard event={nextEvent} compact />
-            </Link>
-          ) : (
-            <button
-              onClick={() => setEventSheetOpen(true)}
-              className="w-full text-left rounded-2xl border border-dashed border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground hover:bg-muted/40 transition"
-            >
-              {t.athlete.events.empty}
-            </button>
-          )}
-          {upcomingEvents.length > 1 && (
-            <Link to="/athlete/profile?tab=events" className="block text-xs text-primary font-semibold pt-1">
-              {t.athlete.events.seeMore.replace("{{count}}", String(upcomingEvents.length - 1))}
-            </Link>
-          )}
-        </div>
+        {/* Events — same card pattern as the sections above; "+" is the one add action */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">{t.athlete.events.title}</CardTitle>
+              <button
+                onClick={() => setEventSheetOpen(true)}
+                className="-my-2 -mr-2 flex h-10 w-10 items-center justify-center rounded-full text-primary hover:bg-muted transition"
+                aria-label={t.athlete.events.addAriaLabel}
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {nextEvent ? (
+              <Link to="/athlete/profile?tab=events" className="block">
+                <EventCard event={nextEvent} compact />
+              </Link>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t.athlete.events.empty}</p>
+            )}
+            {upcomingEvents.length > 1 && (
+              <Link to="/athlete/profile?tab=events" className="block text-xs text-primary font-semibold pt-1">
+                {t.athlete.events.seeMore.replace("{{count}}", String(upcomingEvents.length - 1))}
+              </Link>
+            )}
+          </CardContent>
+        </Card>
       </div>
       {user && (
         <AddEventSheet

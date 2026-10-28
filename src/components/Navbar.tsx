@@ -95,7 +95,7 @@ const Navbar = () => {
 
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
             aria-label="Toggle theme"
           >
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
@@ -104,13 +104,17 @@ const Navbar = () => {
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild>
               <button
-                className="p-2 text-foreground hover:text-primary transition-colors"
+                className="h-10 w-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
                 aria-label="Open menu"
               >
                 <Menu size={24} />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 p-0">
+            {/* sheet.tsx's built-in close is 16px; grow it to a 40px target from here */}
+            <SheetContent
+              side="right"
+              className="w-72 p-0 [&>button:last-child]:right-2 [&>button:last-child]:top-2 [&>button:last-child]:h-10 [&>button:last-child]:w-10 [&>button:last-child]:flex [&>button:last-child]:items-center [&>button:last-child]:justify-center [&>button:last-child]:rounded-full [&>button:last-child>svg]:h-5 [&>button:last-child>svg]:w-5"
+            >
               <div className="flex flex-col h-full pt-12">
                 <nav className="flex flex-col px-6 space-y-1">
                   <a
@@ -165,7 +169,7 @@ const Navbar = () => {
   );
 };
 
-const ChatLinkWithBadge = ({ user, className }: { user: any, className?: string }) => {
+const ChatLinkWithBadge = ({ user, className }: { user: { uid: string }, className?: string }) => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {

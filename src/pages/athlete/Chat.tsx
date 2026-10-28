@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { GlassFab } from "@/components/glass/GlassFab";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { ChatService } from "@/services/chat";
@@ -6,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
 import { MessageSquarePlus, Plus, Search, MessageSquare, Users2 } from "lucide-react";
-import { SectionSpinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
@@ -18,23 +19,24 @@ import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Input } from "@/components/ui/input";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
+import { formatChatTime } from "@/components/chat/chatDates";
 
 import { cn } from "@/lib/utils";
-import { format, isToday, isYesterday } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
-const formatChatTime = (timestamp: { seconds: number }, language: string, yesterday: string) => {
-    const date = new Date(timestamp.seconds * 1000);
-    if (isToday(date)) return format(date, "HH:mm");
-    if (isYesterday(date)) return yesterday;
-    return format(date, "d MMM", language === "pt" ? { locale: ptBR } : undefined);
-};
+// Set when a conversation is opened from the list, so "back" can pop that entry
+type ChatLocationState = { fromList?: boolean } | null;
 
 export default function AthleteChat() {
     const { user } = useAuth();
     const { t, language } = useLanguage();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+    // The open conversation lives in the URL (?c=<chatId>) so system back closes it and links can deep-link
+    const selectedChatId = searchParams.get("c");
     const [chats, setChats] = useState<Chat[]>([]);
-    const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+    // A chat just created from "New Message" may not be in the subscription yet
+    const [createdChat, setCreatedChat] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     // Teams the athlete still belongs to — group chats of teams they left stay hidden
@@ -94,16 +96,10 @@ export default function AthleteChat() {
 
             setChats(validChats);
             setLoading(false);
-
-            // If the currently selected chat is updated, update it
-            if (selectedChat) {
-                const updated = validChats.find(c => c.id === selectedChat.id);
-                if (updated) setSelectedChat(updated);
-            }
         });
 
         return () => unsubscribe();
-    }, [user, selectedChat?.id]);
+    }, [user]);
 
     const visibleChats = useMemo(
         () => memberTeamIds
@@ -112,10 +108,32 @@ export default function AthleteChat() {
         [chats, memberTeamIds]
     );
 
+    const selectedChat = useMemo(
+        () => selectedChatId
+            ? visibleChats.find((c) => c.id === selectedChatId)
+                ?? (createdChat?.id === selectedChatId ? createdChat : null)
+            : null,
+        [selectedChatId, visibleChats, createdChat]
+    );
+
+    const openChat = (chatId: string) => {
+        // Desktop switches chats in place; only the first open pushes a history entry
+        setSearchParams({ c: chatId }, {
+            replace: !!selectedChatId,
+            state: selectedChatId ? location.state : { fromList: true },
+        });
+    };
+
+    const closeChat = () => {
+        if ((location.state as ChatLocationState)?.fromList) navigate(-1);
+        else setSearchParams({}, { replace: true });
+    };
+
     // Subscribe to messages when a chat is selected
     useEffect(() => {
         if (!selectedChat || !user) return;
 
+        setMessages([]);
         ChatService.markAsRead(selectedChat.id, user.uid);
         // -1 = first load (don't notify for existing messages, only for new ones)
         let previousCount = -1;
@@ -129,7 +147,7 @@ export default function AthleteChat() {
                     NotificationService.showChatNotification(
                         senderName,
                         newest.text,
-                        '/athlete/chat'
+                        `/athlete/chat?c=${selectedChat.id}`
                     );
                 }
             }
@@ -152,8 +170,9 @@ export default function AthleteChat() {
                 user.displayName || "Athlete",
                 admin.id
             );
-            setSelectedChat(chatObj);
+            setCreatedChat(chatObj);
             setIsNewChatOpen(false);
+            openChat(chatObj.id);
         } catch (error) {
             console.error("Error starting chat:", error);
             toast.error(t.athlete.chat.startChatError);
@@ -198,9 +217,20 @@ export default function AthleteChat() {
     );
 
     if (loading) {
+        // Skeleton rows instead of a bare spinner, inside the normal page chrome
         return (
             <AthletePortalLayout title={t.athlete.chat.title}>
-                <SectionSpinner />
+                <div className="divide-y divide-border/40" aria-busy="true" aria-label={t.common.loading}>
+                    {Array.from({ length: 5 }, (_, i) => (
+                        <div key={i} className="flex items-center gap-3 px-4 py-3">
+                            <Skeleton className="h-12 w-12 rounded-full shrink-0" />
+                            <div className="flex-1 space-y-2">
+                                <Skeleton className="h-4 w-1/3" />
+                                <Skeleton className="h-3 w-2/3" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </AthletePortalLayout>
         );
     }
@@ -216,45 +246,9 @@ export default function AthleteChat() {
                     selectedChat ? "hidden md:flex" : "flex"
                 )}>
                     <div className="hidden sm:flex p-4 border-b items-center justify-end bg-muted/30">
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)} aria-label={t.athlete.chat.newMessage}>
+                        <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => setIsNewChatOpen(true)} aria-label={t.athlete.chat.newMessage}>
                             <Plus className="h-5 w-5" />
                         </Button>
-                        <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title={t.athlete.chat.newMessage}>
-                            <div className="p-2 space-y-4">
-                                <div className="relative">
-                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder={t.athlete.chat.searchCoaches}
-                                        className="pl-9"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                </div>
-                                <div className="h-[300px] overflow-y-auto space-y-2">
-                                    {filteredAdmins.length === 0 ? (
-                                        <p className="text-center text-muted-foreground p-4">{t.athlete.chat.noCoachesFound}</p>
-                                    ) : (
-                                        filteredAdmins.map((admin) => (
-                                            <button
-                                                key={admin.id}
-                                                onClick={() => handleStartChat(admin)}
-                                                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                                            >
-                                                <CachedAvatar
-                                                    src={admin.photoURL}
-                                                    alt={admin.displayName}
-                                                    fallback={admin.displayName[0]?.toUpperCase()}
-                                                />
-                                                <div>
-                                                    <p className="font-medium">{admin.displayName}</p>
-                                                    <p className="text-xs text-muted-foreground">{admin.role}</p>
-                                                </div>
-                                            </button>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        </ResponsiveModal>
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
@@ -278,7 +272,7 @@ export default function AthleteChat() {
                                 return (
                                     <button
                                         key={chat.id}
-                                        onClick={() => setSelectedChat(chat)}
+                                        onClick={() => openChat(chat.id)}
                                         className={cn(
                                             "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40",
                                             selectedChat?.id === chat.id && "bg-muted/60"
@@ -298,7 +292,7 @@ export default function AthleteChat() {
                                                 </span>
                                                 {chat.lastMessageTime && (
                                                     <span className={cn("text-xs shrink-0", unreadCount > 0 ? "text-primary font-medium" : "text-muted-foreground")}>
-                                                        {formatChatTime(chat.lastMessageTime, language, t.timeline.activity.yesterday)}
+                                                        {formatChatTime(new Date(chat.lastMessageTime.seconds * 1000), language, t.timeline.activity.yesterday)}
                                                     </span>
                                                 )}
                                             </div>
@@ -330,13 +324,14 @@ export default function AthleteChat() {
                 )}>
                     {selectedChat ? (
                         <ChatWindow
+                            key={selectedChat.id}
                             messages={messages}
                             currentUserId={user?.uid || ""}
                             onSendMessage={handleSendMessage}
                             participantName={getChatDisplayName(selectedChat)}
                             participantPhotoURL={getChatPhotoURL(selectedChat)}
                             isGroup={selectedChat.isGroup}
-                            onBack={() => setSelectedChat(null)}
+                            onBack={closeChat}
                         />
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
@@ -347,6 +342,43 @@ export default function AthleteChat() {
                     )}
                 </div>
             </div>
+        <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title={t.athlete.chat.newMessage}>
+            <div className="p-2 space-y-4">
+                <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        autoFocus
+                        placeholder={t.athlete.chat.searchCoaches}
+                        className="pl-9"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+                <div className="h-[300px] overflow-y-auto space-y-2">
+                    {filteredAdmins.length === 0 ? (
+                        <p className="text-center text-muted-foreground p-4">{t.athlete.chat.noCoachesFound}</p>
+                    ) : (
+                        filteredAdmins.map((admin) => (
+                            <button
+                                key={admin.id}
+                                onClick={() => handleStartChat(admin)}
+                                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                            >
+                                <CachedAvatar
+                                    src={admin.photoURL}
+                                    alt={admin.displayName}
+                                    fallback={admin.displayName[0]?.toUpperCase()}
+                                />
+                                <div>
+                                    <p className="font-medium">{admin.displayName}</p>
+                                    <p className="text-xs text-muted-foreground">{t.athlete.chat.coachFallback}</p>
+                                </div>
+                            </button>
+                        ))
+                    )}
+                </div>
+            </div>
+        </ResponsiveModal>
         {/* Mobile FAB — only shown on chat list view */}
         {!selectedChat && (
             <GlassFab label={t.athlete.chat.newMessage} icon={MessageSquarePlus} onClick={() => setIsNewChatOpen(true)} />

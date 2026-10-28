@@ -23,7 +23,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex-1 md:pb-24">
+      <div className="flex-1">
 
       {/* Hero Section */}
       <section className="section-modern bg-background pt-32">
@@ -62,9 +62,12 @@ const Contact = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center">
-                <p className="text-2xl font-bold text-primary mb-2">
+                <a
+                  href="tel:+351962869476"
+                  className="inline-block text-2xl font-bold text-primary mb-2 py-1 hover:underline underline-offset-4"
+                >
                   +351 962 869 476
-                </p>
+                </a>
                 <p className="text-muted-foreground">
                   {t.contact?.phoneCard?.available || "Available for calls"}
                 </p>
@@ -86,7 +89,7 @@ const Contact = () => {
                 </p>
                 <Button
                   onClick={() => window.open(getWhatsAppLink(), "_blank")}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="h-12 px-8 text-base bg-green-600 hover:bg-green-700 text-white"
                   size="lg"
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
@@ -173,7 +176,7 @@ const Contact = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
-                className="btn-primary text-lg py-6 px-8"
+                className="btn-primary h-12 px-8 text-base"
                 onClick={() => window.open(getWhatsAppLink(), "_blank")}
               >
                 <MessageSquare className="h-5 w-5 mr-2" />
@@ -182,7 +185,7 @@ const Contact = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-primary text-primary hover:bg-accent font-semibold text-lg py-6 px-8"
+                className="h-12 px-8 text-base border-2 border-primary text-primary hover:bg-accent font-semibold"
                 onClick={() => navigate("/#pricing")}
               >
                 {t.contact?.cta?.plansButton || "View Plans"}

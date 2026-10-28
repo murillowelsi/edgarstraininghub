@@ -3,7 +3,8 @@ import { formatHold, parseTimedReps } from "@/utils/timedReps";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import WorkoutChecklistDrawer from "@/components/athlete/WorkoutChecklistDrawer";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ToastAction } from "@/components/ui/toast";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Drawer,
@@ -24,7 +25,7 @@ import { createMentionNotifications, createTimelinePost, hasPostForAssignment } 
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { clearSessionDraft } from "@/lib/sessionDraft";
+import { clearSessionDraft, getDraftProgress, loadSessionDraft } from "@/lib/sessionDraft";
 import ShareWorkoutSheet from "@/components/athlete/ShareWorkoutSheet";
 import { buildWorkoutSummary } from "@/utils/buildWorkoutSummary";
 import { getAllExercises } from "@/services/exercisesService";
@@ -558,6 +559,7 @@ const AthleteWorkoutView = () => {
   const [showActivityDrawer, setShowActivityDrawer] = useState(false);
   const [showChecklistDrawer, setShowChecklistDrawer] = useState(false);
   const [showIncompleteDrawer, setShowIncompleteDrawer] = useState(false);
+  const [showMarkDoneConfirm, setShowMarkDoneConfirm] = useState(false);
   // stageInputs mirrors workout.stages:
   //   regular stage → { type: "regular", pace: "MM:SS" }
   //   repeat stage  → { type: "repeat", reps: string[][] } (reps[repIdx][nestedStageIdx] = pace "MM:SS")
@@ -734,6 +736,29 @@ const AthleteWorkoutView = () => {
       return;
     }
 
+    // One tap would close the whole workout without any sets logged, so confirm first
+    if (newCompletedState) {
+      setShowMarkDoneConfirm(true);
+      return;
+    }
+
+    await applyToggleComplete(false);
+  };
+
+  const undoMarkDone = async (assignmentId: string) => {
+    try {
+      await toggleAssignmentComplete(assignmentId, false);
+      setAssignment((prev) => (prev ? { ...prev, completedAt: null } : prev));
+      setShowShareSheet(false);
+    } catch (error) {
+      console.error("Error updating workout:", error);
+      toast({ title: t.common.error, description: t.athlete.toast.workoutStatusError, variant: "destructive" });
+    }
+  };
+
+  const applyToggleComplete = async (newCompletedState: boolean) => {
+    if (!assignment) return;
+    setShowMarkDoneConfirm(false);
     setCompleting(true);
     try {
       await toggleAssignmentComplete(assignment.id, newCompletedState);
@@ -748,6 +773,17 @@ const AthleteWorkoutView = () => {
         description: newCompletedState
           ? t.athlete.workoutView.workoutCompletedDesc
           : t.athlete.workoutView.workoutUnmarkedDesc,
+        ...(newCompletedState
+          ? {
+              // Longer than the default 3 s so there's time to hit Undo
+              duration: 6000,
+              action: (
+                <ToastAction altText={t.athlete.workoutView.undo} onClick={() => undoMarkDone(assignment.id)}>
+                  {t.athlete.workoutView.undo}
+                </ToastAction>
+              ),
+            }
+          : {}),
       });
       if (newCompletedState && assignment) {
         setShareCaption(t.athlete.workoutView.shareCaption.replace("{{name}}", assignment.workout.name));
@@ -952,6 +988,32 @@ const AthleteWorkoutView = () => {
   const Icon = workoutTypeIcons[workout.type] || GrRun;
   const isCompleted = !!assignment.completedAt;
 
+  // An unfinished session on this phone (same rule the session uses to restore it)
+  const draft = workout.type === "strength" ? loadSessionDraft(assignment.id) : null;
+  const draftProgress =
+    draft && (!assignment.completedAt || draft.updatedAt > assignment.completedAt.getTime())
+      ? getDraftProgress(draft)
+      : null;
+  const sessionLink = (
+    <Link
+      to={`/athlete/workout/${id}/session`}
+      className={cn(
+        buttonVariants({ size: "lg" }),
+        "w-full h-12 text-base font-semibold rounded-xl bg-amber-500 hover:bg-amber-600 text-black"
+      )}
+    >
+      <Play className="h-5 w-5 mr-2" />
+      {draftProgress || isCompleted ? t.athlete.workoutView.resumeWorkout : t.athlete.workoutView.startWorkout}
+      {draftProgress && (
+        <span className="ml-2 text-sm font-medium tabular-nums opacity-75">
+          {t.athlete.workoutView.resumeProgress
+            .replace("{{percent}}", String(draftProgress.percent))
+            .replace("{{minutes}}", String(draftProgress.minutes))}
+        </span>
+      )}
+    </Link>
+  );
+
   // Share any completed workout, any time (feed post or image)
   const handleOpenShare = () => {
     if (!assignment) return;
@@ -1036,21 +1098,6 @@ const AthleteWorkoutView = () => {
           >
             <CardContent className="p-4">
               <div className="flex items-start gap-4">
-                <button
-                  onClick={handleToggleComplete}
-                  disabled={completing}
-                  aria-label={isCompleted ? t.athlete.workoutView.markIncomplete : t.athlete.workoutView.completeWorkout}
-                  title={isCompleted ? t.athlete.workoutView.markIncomplete : t.athlete.workoutView.completeWorkout}
-                  className="mt-1 transition-transform hover:scale-110"
-                >
-                  {completing ? (
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  ) : isCompleted ? (
-                    <CheckCircle2 className="h-8 w-8 text-green-500" />
-                  ) : (
-                    <Circle className="h-8 w-8 text-muted-foreground/50" />
-                  )}
-                </button>
                 <div className="flex-1 min-w-0">
                   <h2
                     className={cn(
@@ -1071,7 +1118,7 @@ const AthleteWorkoutView = () => {
                       {workoutLabels(t).type(workout.type)}
                     </Badge>
                     {isCompleted && (
-                      <Badge className="bg-green-100 text-green-700 dark:bg-green-900/50">
+                      <Badge className="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
                         <Check className="h-3 w-3 mr-1" />
                         {assignment.completionPercentage !== undefined
                           ? `${assignment.completionPercentage}% ${t.athlete.workoutView.completedBadge}`
@@ -1100,6 +1147,27 @@ const AthleteWorkoutView = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Labelled so the circle reads as an action, not a status icon */}
+                  <button
+                    type="button"
+                    onClick={handleToggleComplete}
+                    disabled={completing}
+                    aria-pressed={isCompleted}
+                    className={cn(
+                      "mt-3 -ml-1.5 inline-flex min-h-10 items-center gap-2 rounded-full pl-1.5 pr-3 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-60",
+                      isCompleted ? "text-green-700 dark:text-green-300" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {completing ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : isCompleted ? (
+                      <CheckCircle2 className="h-6 w-6 text-green-500" />
+                    ) : (
+                      <Circle className="h-6 w-6" />
+                    )}
+                    {isCompleted ? t.athlete.workoutView.markIncomplete : t.athlete.workoutView.markAsDone}
+                  </button>
                 </div>
               </div>
 
@@ -1199,26 +1267,10 @@ const AthleteWorkoutView = () => {
           </Button>
         )}
         {workout.type === "strength" && !isCompleted ? (
-          <Link to={`/athlete/workout/${id}/session`} className="block">
-            <Button
-              size="lg"
-              className="w-full h-12 text-base font-semibold rounded-xl bg-amber-500 hover:bg-amber-600 text-black"
-            >
-              <Play className="h-5 w-5 mr-2" />
-              {t.athlete.workoutView.startWorkout}
-            </Button>
-          </Link>
+          sessionLink
         ) : workout.type === "strength" && isCompleted ? (
           <div className="flex flex-col gap-2">
-            <Link to={`/athlete/workout/${id}/session`} className="block">
-              <Button
-                size="lg"
-                className="w-full h-12 text-base font-semibold rounded-xl bg-amber-500 hover:bg-amber-600 text-black"
-              >
-                <Play className="h-5 w-5 mr-2" />
-                {t.athlete.workoutView.resumeWorkout}
-              </Button>
-            </Link>
+            {sessionLink}
             <Button
               onClick={() => setShowResetConfirm(true)}
               disabled={resetting}
@@ -1281,6 +1333,24 @@ const AthleteWorkoutView = () => {
             </Button>
             <Button variant="outline" className="w-full" onClick={() => setShowResetConfirm(false)}>
               {t.athlete.workoutView.resetConfirmCancel}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      <Drawer open={showMarkDoneConfirm} onOpenChange={setShowMarkDoneConfirm}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{t.athlete.workoutView.markDoneTitle}</DrawerTitle>
+            <DrawerDescription>{t.athlete.workoutView.markDoneDescription}</DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter>
+            <Button type="button" onClick={() => applyToggleComplete(true)} disabled={completing} className="w-full">
+              {completing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {t.athlete.workoutView.markDoneConfirm}
+            </Button>
+            <Button type="button" variant="outline" className="w-full" onClick={() => setShowMarkDoneConfirm(false)}>
+              {t.athlete.workoutView.markDoneCancel}
             </Button>
           </DrawerFooter>
         </DrawerContent>

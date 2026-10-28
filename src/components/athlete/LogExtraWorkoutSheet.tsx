@@ -7,7 +7,7 @@ import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { Workout } from "@/types/workout";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronRight, Dumbbell, Loader2 } from "lucide-react";
+import { CalendarDays, ChevronRight, Dumbbell, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -74,10 +74,15 @@ const LogExtraWorkoutSheet = ({ open, onOpenChange, athleteId, date, assignments
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
+      <DrawerContent showClose>
+        <DrawerHeader className="px-14">
           <DrawerTitle>{th.logExtraTitle}</DrawerTitle>
-          <DrawerDescription>{th.logExtraDescription.replace("{{date}}", dateLabel)}</DrawerDescription>
+          {/* The session is logged on this day — make it unmissable */}
+          <p className="flex items-center justify-center gap-1.5 text-sm font-semibold text-primary sm:justify-start">
+            <CalendarDays className="h-4 w-4 shrink-0" />
+            <span className="inline-block first-letter:uppercase">{dateLabel}</span>
+          </p>
+          <DrawerDescription>{th.logExtraDescription}</DrawerDescription>
         </DrawerHeader>
         <div className="px-4 pb-6 space-y-2 max-h-[60vh] overflow-y-auto">
           {loading ? (

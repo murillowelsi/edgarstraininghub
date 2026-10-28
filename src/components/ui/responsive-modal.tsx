@@ -10,12 +10,15 @@
  */
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { X } from "lucide-react";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +50,22 @@ export function ResponsiveModal({
   children,
 }: ResponsiveModalProps) {
   const isMobile = useIsMobile();
+  const { t } = useLanguage();
+  // Visible close next to the title — swipe/backdrop alone isn't discoverable
+  const header = (
+    <DrawerHeader className="text-left shrink-0 flex flex-row items-start gap-2 space-y-0">
+      <div className="grid gap-1.5 flex-1 min-w-0">
+        <DrawerTitle>{title}</DrawerTitle>
+        {description && <DrawerDescription>{description}</DrawerDescription>}
+      </div>
+      <DrawerClose
+        className="-mr-2 -mt-2 h-10 w-10 shrink-0 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label={t.common.close}
+      >
+        <X className="h-5 w-5" />
+      </DrawerClose>
+    </DrawerHeader>
+  );
   const footerNode = footer && (
     <div className="shrink-0 border-t border-border/50 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">{footer}</div>
   );
@@ -66,10 +85,7 @@ export function ResponsiveModal({
         shouldScaleBackground={false}
       >
         <DrawerContent direction="bottom" className={cn("max-h-[90dvh] flex flex-col", fullHeight && "h-[90dvh]")}>
-          <DrawerHeader className="text-left shrink-0">
-            <DrawerTitle>{title}</DrawerTitle>
-            {description && <DrawerDescription>{description}</DrawerDescription>}
-          </DrawerHeader>
+          {header}
           <div className={cn("min-h-0", bodyClassName)}>{children}</div>
           {footerNode}
         </DrawerContent>
@@ -80,10 +96,7 @@ export function ResponsiveModal({
   return (
     <Drawer direction="right" open={open} onOpenChange={onOpenChange}>
       <DrawerContent direction="right" className={className}>
-        <DrawerHeader className="text-left shrink-0">
-          <DrawerTitle>{title}</DrawerTitle>
-          {description && <DrawerDescription>{description}</DrawerDescription>}
-        </DrawerHeader>
+        {header}
         <div className={cn("min-h-0", bodyClassName)}>{children}</div>
         {footerNode}
       </DrawerContent>

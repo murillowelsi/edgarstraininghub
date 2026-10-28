@@ -4,7 +4,7 @@ import type { WorkoutSummary } from "@/types/timeline";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { WorkoutType } from "@/types/workout";
-import { modalityGradient, summaryStats } from "@/utils/workoutSummaryStats";
+import { cardStats, modalityGradient } from "@/utils/workoutSummaryStats";
 
 const typeIcon: Record<string, React.ElementType> = {
   running: GrRun,
@@ -26,7 +26,9 @@ export function WorkoutSummaryCard({ summary, flush }: Props) {
   const palette = modalityGradient[summary.workoutType] ?? modalityGradient.strength;
   const typeLabel = t.workoutMeta.types[summary.workoutType as WorkoutType] ?? summary.workoutType;
   const Icon = typeIcon[summary.workoutType] ?? Dumbbell;
-  const stats = summaryStats(summary, ts, language === "pt" ? "pt-BR" : "en").filter((s) => s.key !== "records");
+  const stats = cardStats(summary, ts, language === "pt" ? "pt-BR" : "en");
+  const columns = stats.length === 4 ? 2 : 3;
+  const partial = summary.completionPercentage !== undefined && summary.completionPercentage < 100;
   const highlights = summary.highlights?.slice(0, 3) ?? [];
 
   return (
@@ -47,7 +49,12 @@ export function WorkoutSummaryCard({ summary, flush }: Props) {
             <Icon className="h-4 w-4" />
           </span>
           <span className="text-xs font-bold uppercase tracking-wider text-white/85">{typeLabel}</span>
-          <span className="ml-auto flex items-center gap-1.5">
+          <span className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
+            {partial && (
+              <span className="rounded-full bg-black/25 px-2 py-0.5 text-[11px] font-bold tabular-nums">
+                {ts.percentDone.replace("{{p}}", String(summary.completionPercentage))}
+              </span>
+            )}
             {!!summary.records && (
               <span className="flex items-center gap-1 rounded-full bg-amber-400 text-amber-950 px-2 py-0.5 text-[11px] font-bold">
                 <Trophy className="h-3 w-3" />
@@ -66,24 +73,31 @@ export function WorkoutSummaryCard({ summary, flush }: Props) {
       </div>
 
       {/* Big numbers */}
-      {stats.length > 0 && (
-        <div
-          className={cn("grid bg-card", flush && "flex-1 content-center")}
-          style={{ gridTemplateColumns: `repeat(${Math.min(stats.length, stats.length === 4 ? 2 : 3)}, minmax(0, 1fr))` }}
-        >
-          {stats.map((stat) => (
-            <div key={stat.key} className="px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{stat.label}</p>
-              <p className="text-xl font-extrabold tabular-nums leading-tight mt-0.5">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-      )}
+      <div
+        className={cn("grid bg-card", flush && "flex-1 content-center")}
+        style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+      >
+        {stats.map((stat) => (
+          <div key={stat.key} className={cn("py-3 min-w-0", columns === 3 ? "px-3" : "px-4")}>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground truncate">{stat.label}</p>
+            <p
+              className={cn(
+                "font-extrabold tabular-nums leading-tight mt-0.5 whitespace-nowrap",
+                // Three columns at 320px leave ~95px each: "1:23:45" must still fit
+                columns === 3 ? "text-lg min-[380px]:text-xl" : "text-xl",
+                stat.value === "—" && "text-muted-foreground"
+              )}
+            >
+              {stat.value}
+            </p>
+          </div>
+        ))}
+      </div>
 
       {/* Strength highlights */}
       {highlights.length > 0 && (
         <div className="bg-card border-t border-border/60 px-4 py-3 space-y-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{ts.highlights}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{ts.highlights}</p>
           {highlights.map((h) => (
             <div key={h.name} className="flex items-center justify-between gap-3 text-sm">
               <span className="truncate">

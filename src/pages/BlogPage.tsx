@@ -7,13 +7,14 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getPublishedPosts } from "@/services/postsService";
 import type { Post } from "@/types/post";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Timestamp } from "firebase/firestore";
 import { Calendar, ChevronRight, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const BlogPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -57,7 +58,7 @@ const BlogPage = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="flex-1 pt-24 pb-16 md:pb-24">
+      <main className="flex-1 pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
@@ -99,8 +100,9 @@ const BlogPage = () => {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {posts.map((post) => (
-                  <Link key={post.id} to={`/blog/${post.slug}`}>
-                    <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow duration-300 group">
+                  <Link key={post.id} to={`/blog/${post.slug}`} className="block">
+                    {/* Column flex so the body grows below the image instead of a fixed height clipping "Read more" */}
+                    <Card className="overflow-hidden h-full flex flex-col hover:shadow-lg transition-shadow duration-300 group">
                       {post.featuredImage && (
                         <CardHeader className="p-0">
                           <div className="aspect-video overflow-hidden">
@@ -112,11 +114,11 @@ const BlogPage = () => {
                           </div>
                         </CardHeader>
                       )}
-                      <CardContent className="p-6 flex flex-col h-full">
+                      <CardContent className="p-6 flex flex-col flex-1">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                           <Calendar className="h-4 w-4" />
                           <time dateTime={post.createdAt.toISOString()}>
-                            {format(post.createdAt, "MMMM d, yyyy")}
+                            {format(post.createdAt, "d MMM yyyy", language === "pt" ? { locale: ptBR } : undefined)}
                           </time>
                         </div>
                         <h2 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">
@@ -126,7 +128,7 @@ const BlogPage = () => {
                           {post.excerpt}
                         </p>
                         <div className="flex items-center text-primary font-medium group-hover:gap-2 transition-all">
-                          Read More
+                          {t.blog.readMore}
                           <ChevronRight className="h-4 w-4 ml-1" />
                         </div>
                       </CardContent>
@@ -147,10 +149,10 @@ const BlogPage = () => {
                     {loadingMore ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Loading...
+                        {t.common.loading}
                       </>
                     ) : (
-                      "Load More Posts"
+                      t.blog.loadMore
                     )}
                   </Button>
                 </div>
