@@ -143,6 +143,11 @@ export const removeMemberFromTeam = async (teamId: string, uid: string): Promise
     memberIds: arrayRemove(uid),
     updatedAt: serverTimestamp(),
   });
+  // The team group chat only ever grows its participants, so drop the member there too.
+  // Best-effort: the chat may not exist yet.
+  await updateDoc(doc(db, "chats", `team_${teamId}`), {
+    participantIds: arrayRemove(uid),
+  }).catch(() => {});
 };
 
 /**

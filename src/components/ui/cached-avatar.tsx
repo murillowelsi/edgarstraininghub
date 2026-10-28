@@ -6,7 +6,7 @@
  * Cleared only on full page reload.
  */
 import * as React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 const loadedUrls = new Set<string>();
@@ -57,8 +57,10 @@ export function CachedAvatar({
 
   return (
     <Avatar className={className}>
+      {/* Plain <img>: the URL is already loaded, and AvatarImage would reload it
+          while the fallback is hidden, leaving an empty circle */}
       {src && ready && (
-        <AvatarImage src={src} alt={alt} className={cn("object-cover", imgClassName)} />
+        <img src={src} alt={alt} className={cn("aspect-square h-full w-full object-cover", imgClassName)} />
       )}
       <AvatarFallback className={cn(fallbackClassName, ready && src ? "hidden" : "")} style={fallbackStyle}>
         {fallback}

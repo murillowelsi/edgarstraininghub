@@ -29,6 +29,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Save language preference to localStorage
   useEffect(() => {
     localStorage.setItem('preferredLanguage', language);
+    document.documentElement.lang = language;
   }, [language]);
 
   const changeLanguage = (lang: LanguageType) => {

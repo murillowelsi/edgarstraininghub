@@ -1,4 +1,4 @@
-import { LogIn, Menu, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, LogIn, Menu, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -78,12 +78,13 @@ const Navbar = () => {
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
+            {/* Signed-in users go straight to their app instead of the login page */}
             <Link
-              to="/admin/login"
+              to={user ? "/app" : "/admin/login"}
               className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-              aria-label="Admin login"
+              aria-label={user ? t.nav.openApp : "Admin login"}
             >
-              <LogIn size={18} />
+              {user ? <LayoutDashboard size={18} /> : <LogIn size={18} />}
             </Link>
           </div>
         </div>
@@ -147,12 +148,12 @@ const Navbar = () => {
                     />
                   )}
                   <Link
-                    to="/admin/login"
+                    to={user ? "/app" : "/admin/login"}
                     onClick={() => setIsMenuOpen(false)}
                     className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
                   >
-                    <LogIn size={18} />
-                    Login
+                    {user ? <LayoutDashboard size={18} /> : <LogIn size={18} />}
+                    {user ? t.nav.openApp : "Login"}
                   </Link>
                 </nav>
               </div>

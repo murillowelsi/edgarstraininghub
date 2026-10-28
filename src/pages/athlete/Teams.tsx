@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { ListItemCard } from "@/components/shared/ListItemCard";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,7 +13,7 @@ import { getUserById } from "@/services/usersService";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import { getTeamColor } from "@/lib/teamColors";
-import { Search, Shield } from "lucide-react";
+import { MessageSquare, Search, Shield } from "lucide-react";
 import { SectionSpinner } from "@/components/ui/spinner";
 
 function getInitials(name: string) {
@@ -99,11 +100,21 @@ export default function AthleteTeams() {
         {loading ? (
           <SectionSpinner />
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40 gap-2 text-center">
+          <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
             <Shield className="h-10 w-10 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">
               {t.admin.teams.noTeamsTitle}
             </p>
+            {/* Joining happens through the coach's invite link, so point there */}
+            {!search && (
+              <>
+                <p className="max-w-xs text-xs text-muted-foreground">{t.athlete.teams.emptyDescription}</p>
+                <Button variant="outline" size="sm" className="mt-2 h-10" onClick={() => navigate("/athlete/chat")}>
+                  <MessageSquare className="h-4 w-4" />
+                  {t.athlete.teams.emptyCta}
+                </Button>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-2">

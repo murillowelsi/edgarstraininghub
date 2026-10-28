@@ -17,6 +17,8 @@ interface Props {
   athleteId: string;
   date: Date;
   assignments: AssignmentWithWorkout[];
+  /** Workouts still loading (opened from the top bar before they're fetched) */
+  loading?: boolean;
 }
 
 interface WorkoutOption {
@@ -27,7 +29,7 @@ interface WorkoutOption {
 
 // Lets the athlete repeat one of their assigned strength workouts on a day
 // the coach didn't schedule it, then jumps straight into the session.
-const LogExtraWorkoutSheet = ({ open, onOpenChange, athleteId, date, assignments }: Props) => {
+const LogExtraWorkoutSheet = ({ open, onOpenChange, athleteId, date, assignments, loading = false }: Props) => {
   const { t, language } = useLanguage();
   const th = t.athlete.home;
   const dateLocale = language === "pt" ? ptBR : undefined;
@@ -78,7 +80,11 @@ const LogExtraWorkoutSheet = ({ open, onOpenChange, athleteId, date, assignments
           <DrawerDescription>{th.logExtraDescription.replace("{{date}}", dateLabel)}</DrawerDescription>
         </DrawerHeader>
         <div className="px-4 pb-6 space-y-2 max-h-[60vh] overflow-y-auto">
-          {options.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : options.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               <Dumbbell className="h-10 w-10 mx-auto mb-2" />
               <p className="text-sm">{th.logExtraEmpty}</p>

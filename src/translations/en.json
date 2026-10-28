@@ -5,7 +5,8 @@
     "services": "Services",
     "achievements": "Achievements",
     "contact": "Contact",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "openApp": "Open app"
   },
   "hero": {
     "title": "Become a Stronger, Faster Athlete with",
@@ -424,6 +425,7 @@
   },
   "notifications": {
     "blocked": "Notifications are blocked. To enable them, click the padlock in the browser bar and allow notifications.",
+    "blockedApp": "Notifications are blocked. To get alerts, allow notifications for this app in your phone settings.",
     "enablePrompt": "Turn on notifications to get alerts about new messages",
     "enable": "Turn on",
     "dismiss": "Dismiss"
@@ -934,7 +936,9 @@
       "noActiveChat": "Unable to send message."
     },
     "teams": {
-      "you": "You"
+      "you": "You",
+      "emptyDescription": "Ask your coach for an invite link to join a team.",
+      "emptyCta": "Message your coach"
     },
     "nav": {
       "home": "Home",
@@ -983,8 +987,10 @@
       "statCompleted": "Completed",
       "statTotal": "Total",
       "statToday": "Today",
+      "restDay": "Rest",
       "yourProgress": "Your Progress",
       "workoutsRemaining": "{{count}} workouts remaining",
+      "progressCount": "{{done}} of {{total}}",
       "todaysWorkouts": "Today's Workouts",
       "noWorkoutsScheduled": "No workouts scheduled",
       "upcoming": "Upcoming",
@@ -1148,7 +1154,11 @@
       "restBetweenSets": "Rest {{seconds}}s between sets",
       "setHeader": "Set",
       "previousHeader": "Previous",
+      "noLoad": "no load",
       "repsHeader": "Reps",
+      "timeHeader": "Time",
+      "startHold": "Start {{time}} timer",
+      "holdRunning": "Hold",
       "kgHeader": "Kg",
       "addNewSet": "Add new set",
       "removeLastSet": "Remove last",
@@ -1488,6 +1498,7 @@
       "footer": "Trained with EZ Training"
     },
     "postShared": "Post shared!",
+    "newPost": "New post",
     "summary": {
       "time": "Time",
       "distance": "Distance",

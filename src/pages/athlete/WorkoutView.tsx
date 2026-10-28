@@ -1,4 +1,5 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
+import { formatHold, parseTimedReps } from "@/utils/timedReps";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import WorkoutChecklistDrawer from "@/components/athlete/WorkoutChecklistDrawer";
 import { Badge } from "@/components/ui/badge";
@@ -359,6 +360,7 @@ const ExerciseItem = ({
   const thumbnail = videoId
     ? getYouTubeThumbnail(videoId)
     : thumbnailUrl || null;
+  const holdSeconds = parseTimedReps(workoutExercise.reps);
   const hasGif = !!gifUrl;
   const mediaUrl = gifUrl || thumbnail;
 
@@ -371,10 +373,10 @@ const ExerciseItem = ({
               <Dumbbell className="h-4 w-4" />
             </div>
             <div className="flex-1 text-left min-w-0">
-              <p className="font-semibold text-sm truncate">{exerciseName}</p>
+              <p className="font-semibold text-sm line-clamp-2 break-words">{exerciseName}</p>
               <p className="text-xs text-muted-foreground">
-                {workoutExercise.sets} sets × {workoutExercise.reps || "10"} reps
-                {workoutExercise.restSeconds > 0 && ` · ${workoutExercise.restSeconds}s rest`}
+                {workoutExercise.sets} {t.athlete.workoutView.sets.toLowerCase()} × {holdSeconds ? formatHold(holdSeconds) : `${workoutExercise.reps || "10"} ${t.athlete.workoutView.reps.toLowerCase()}`}
+                {workoutExercise.restSeconds > 0 && ` · ${workoutExercise.restSeconds}s ${t.athlete.workoutView.rest.toLowerCase()}`}
               </p>
             </div>
             <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
@@ -452,9 +454,9 @@ const ExerciseItem = ({
               </div>
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground uppercase font-medium">
-                  {t.athlete.workoutView.reps}
+                  {holdSeconds ? t.athlete.session.timeHeader : t.athlete.workoutView.reps}
                 </p>
-                <p className="font-medium mt-1">{workoutExercise.reps || "10"}</p>
+                <p className="font-medium mt-1">{holdSeconds ? formatHold(holdSeconds) : workoutExercise.reps || "10"}</p>
               </div>
               {workoutExercise.restSeconds > 0 && (
                 <div className="bg-muted/50 p-3 rounded-lg">
@@ -998,14 +1000,15 @@ const AthleteWorkoutView = () => {
         }}
       />
     )}
-    <AthletePortalLayout title={t.athlete.nav.workouts} hideBottomNav>
+    <AthletePortalLayout showHeader={false} hideBottomNav>
       {/* Content */}
       <div className="flex-1 overflow-auto pb-24">
-        {/* Sub-header: back + centered workout name */}
-        <div className="relative flex items-center px-4 py-3">
+        {/* Own header (back + workout name + checklist) replaces the app header, so there's one bar, not two */}
+        <div className="sticky top-0 z-40 flex items-center px-2 h-14 bg-background/90 backdrop-blur border-b border-border/50">
           <button
             onClick={() => navigate("/athlete/calendar")}
-            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            aria-label={t.athlete.workoutView.goBack}
+            className="h-11 w-11 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
@@ -1014,7 +1017,7 @@ const AthleteWorkoutView = () => {
           </h1>
           <button
             onClick={() => setShowChecklistDrawer(true)}
-            className="ml-auto p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            className="ml-auto h-11 w-11 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             aria-label={t.athlete.workoutView.checklist}
             title={t.athlete.workoutView.checklist}
           >
@@ -1036,6 +1039,8 @@ const AthleteWorkoutView = () => {
                 <button
                   onClick={handleToggleComplete}
                   disabled={completing}
+                  aria-label={isCompleted ? t.athlete.workoutView.markIncomplete : t.athlete.workoutView.completeWorkout}
+                  title={isCompleted ? t.athlete.workoutView.markIncomplete : t.athlete.workoutView.completeWorkout}
                   className="mt-1 transition-transform hover:scale-110"
                 >
                   {completing ? (

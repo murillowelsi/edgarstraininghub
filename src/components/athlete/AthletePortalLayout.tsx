@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Calendar, Camera, Dumbbell, Flame, Home, LayoutGrid, LogOut, Moon, Plus, Shield, Sun, MessageSquare, User, X } from "lucide-react";
+import { Bell, Calendar, Camera, Dumbbell, Home, LayoutGrid, LogOut, Moon, Shield, SquarePen, Sun, MessageSquare, User, X } from "lucide-react";
 import LanguageChoice from "@/components/LanguageChoice";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,8 +16,11 @@ import { createMentionNotifications, createTimelinePost, subscribeToMentionCount
 import { NotificationService } from "@/services/notifications";
 import { FCMService } from "@/services/fcm";
 import { useEffect, useRef, useState } from "react";
+import LogExtraWorkoutSheet from "@/components/athlete/LogExtraWorkoutSheet";
+import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmentsService";
+import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { GlassTabBar } from "@/components/glass/GlassTabBar";
-import { GlassIconButton, GlassIconLink, GlassToolbar } from "@/components/glass/GlassToolbar";
+import { GlassCircleButton, GlassCircleLink } from "@/components/glass/GlassToolbar";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useTimelineActions } from "@/contexts/TimelineActionsContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
@@ -60,6 +63,21 @@ const AthletePortalLayout = ({
   const [feedUnreadCount, setFeedUnreadCount] = useState(0);
   const { isMenuOpen, setIsMenuOpen } = useTopBarMenu();
   const { createOpen, setCreateOpen, activityOpen, setActivityOpen, activityUnreadCount } = useTimelineActions();
+  // Quick "log a strength workout" from any page; the athlete's workouts load on first open
+  const [logExtraOpen, setLogExtraOpen] = useState(false);
+  const [logExtraAssignments, setLogExtraAssignments] = useState<AssignmentWithWorkout[] | null>(null);
+
+  const openLogExtra = () => {
+    setLogExtraOpen(true);
+    if (user && logExtraAssignments === null) {
+      getAssignmentsWithWorkoutsByAthlete(user.uid)
+        .then(setLogExtraAssignments)
+        .catch((err) => {
+          console.error("Error loading workouts:", err);
+          setLogExtraAssignments([]);
+        });
+    }
+  };
 
   const handleCreate = async ({ caption, imageUrls, mentions }: ComposerResult) => {
     if (!user || !userRole) return;
@@ -186,49 +204,48 @@ const AthletePortalLayout = ({
       {showHeader && (
         <header className="sticky top-0 z-50">
           <div aria-hidden className="glass-fade absolute inset-x-0 top-0 -bottom-4 pointer-events-none" />
+          {/* Strava-style bar: create on the left, title (the "EZ" logo on Home) centered, inbox + alerts on the right */}
           <div className="relative px-4 h-16 flex items-center justify-between">
-            {/* Logo */}
-            <Link
-              to="/athlete"
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
-              <span className="text-primary font-display font-extrabold text-2xl tracking-tighter">
-                EZ
-              </span>
-              <span className="text-foreground font-display font-bold text-sm hidden sm:block">
-                Training
-              </span>
-            </Link>
+            <div className="flex items-center gap-2">
+              <GlassCircleButton active={createOpen} aria-expanded={createOpen} onClick={() => setCreateOpen(true)} aria-label={t.timeline.newPost} title={t.timeline.newPost}>
+                <SquarePen />
+              </GlassCircleButton>
+              <GlassCircleButton active={logExtraOpen} aria-expanded={logExtraOpen} onClick={openLogExtra} aria-label={t.athlete.home.logExtra} title={t.athlete.home.logExtra}>
+                <Dumbbell />
+              </GlassCircleButton>
+            </div>
 
-            {/* Title - center on mobile */}
-            {title && (
-              <h1 className="absolute left-1/2 transform -translate-x-1/2 text-lg font-semibold">
-                {title}
-              </h1>
-            )}
+            <div className="absolute left-1/2 -translate-x-1/2 max-w-[calc(100%-14rem)] flex justify-center">
+              {location.pathname === "/athlete" || !title ? (
+                <Link
+                  to="/athlete"
+                  aria-label={t.athlete.nav.home}
+                  className="text-primary font-display font-extrabold text-[28px] leading-none tracking-tighter hover:opacity-80 transition-opacity"
+                >
+                  EZ
+                </Link>
+              ) : (
+                <h1 className="truncate text-center text-[17px] font-semibold">{title}</h1>
+              )}
+            </div>
 
-            {/* Right controls — grouped in a glass capsule like iOS toolbars */}
-            <GlassToolbar>
-              <GlassIconButton onClick={() => setCreateOpen(true)}>
-                <Plus className="h-5 w-5" />
-              </GlassIconButton>
-
-              <GlassIconButton onClick={() => setActivityOpen(true)}>
-                <Flame className="h-5 w-5" />
-                {activityUnreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
-                )}
-              </GlassIconButton>
-
-              <GlassIconLink to="/athlete/chat" active={location.pathname.startsWith("/athlete/chat")}>
-                <MessageSquare className="h-5 w-5" />
+            <div className="flex items-center gap-2">
+              <GlassCircleLink to="/athlete/chat" active={location.pathname.startsWith("/athlete/chat") && !createOpen && !activityOpen && !logExtraOpen} aria-label={t.athlete.chat.title}>
+                <MessageSquare />
                 {chatUnreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
                     {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
                   </span>
                 )}
-              </GlassIconLink>
-            </GlassToolbar>
+              </GlassCircleLink>
+
+              <GlassCircleButton active={activityOpen} aria-expanded={activityOpen} onClick={() => setActivityOpen(true)} aria-label={t.timeline.activity.title} title={t.timeline.activity.title}>
+                <Bell />
+                {activityUnreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />
+                )}
+              </GlassCircleButton>
+            </div>
           </div>
         </header>
       )}
@@ -333,6 +350,16 @@ const AthletePortalLayout = ({
         open={activityOpen}
         onOpenChange={setActivityOpen}
       />
+      {user && (
+        <LogExtraWorkoutSheet
+          open={logExtraOpen}
+          onOpenChange={setLogExtraOpen}
+          athleteId={user.uid}
+          date={new Date()}
+          assignments={logExtraAssignments ?? []}
+          loading={logExtraAssignments === null}
+        />
+      )}
     </div>
   );
 };

@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { TimelineComment } from "@/types/timeline";
 import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CommentsDrawerProps {
@@ -30,14 +31,14 @@ const QUICK_EMOJIS = ["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", 
 export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCommentsCountChange }: CommentsDrawerProps) {
   const { user, userRole, isAdmin, displayName, photoURL } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [comments, setComments] = useState<TimelineComment[]>([]);
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<ReplyingTo | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -48,9 +49,13 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
       .finally(() => setLoading(false));
   }, [open, postId]);
 
+  // Scroll only the list: scrollIntoView also scrolls every ancestor, including the
+  // overflow-hidden sheet while it animates in, which pushed the title and comments
+  // out of view and left an empty gap at the bottom
   useEffect(() => {
-    if (comments.length > 0) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const list = listRef.current;
+    if (comments.length > 0 && list) {
+      list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
     }
   }, [comments.length]);
 
@@ -190,7 +195,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold">{comment.authorName}</span>
             <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(comment.createdAt, { addSuffix: false })}
+              {formatDistanceToNow(comment.createdAt, { addSuffix: false, ...(language === "pt" ? { locale: ptBR } : {}) })}
             </span>
           </div>
           <p className="text-sm text-foreground mt-0.5 break-words">
@@ -246,7 +251,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
         </DrawerHeader>
 
         {/* Comments list */}
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4">
+        <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-4">
           {loading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -263,7 +268,6 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
               </div>
             ))
           )}
-          <div ref={bottomRef} />
         </div>
 
         {/* Reply banner */}

@@ -55,11 +55,11 @@ export const summaryStats = (summary: WorkoutSummary, labels: StatLabels, locale
   }
 
   if (summary.distance !== undefined)
-    stats.push({ key: "distance", label: labels.distance, value: `${summary.distance}${isSwimming ? "m" : "km"}` });
+    stats.push({ key: "distance", label: labels.distance, value: isSwimming ? `${summary.distance} m` : `${summary.distance.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km` });
   if (summary.avgPace !== undefined)
-    stats.push({ key: "pace", label: labels.avgPace, value: `${formatDuration(summary.avgPace)}${isSwimming ? "/100m" : "/km"}` });
+    stats.push({ key: "pace", label: labels.avgPace, value: `${formatDuration(summary.avgPace)} ${isSwimming ? "/100m" : "/km"}` });
   if (summary.avgSpeed !== undefined)
-    stats.push({ key: "speed", label: labels.avgSpeed, value: `${summary.avgSpeed} km/h` });
+    stats.push({ key: "speed", label: labels.avgSpeed, value: `${summary.avgSpeed.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km/h` });
   if (summary.avgHeartRate !== undefined)
     stats.push({ key: "hr", label: labels.avgHeartRate, value: `${summary.avgHeartRate} bpm` });
   if (summary.completionPercentage !== undefined && stats.length === 0)

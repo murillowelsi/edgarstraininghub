@@ -45,8 +45,8 @@ export function GlassTabBar({ items, id, className }: GlassTabBarProps) {
         className={cn("fixed inset-x-3 z-50 mx-auto max-w-lg", className)}
         style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
-        <div className="glass flex items-center h-16 p-1.5 rounded-full">
-          <div className="absolute inset-1.5 pointer-events-none">
+        <div className="glass flex items-center h-14 p-1 rounded-full">
+          <div className="absolute inset-1 pointer-events-none">
             {activeIndex >= 0 && (
               <motion.span
                 className="glass-lens absolute inset-y-0 left-0 rounded-full"

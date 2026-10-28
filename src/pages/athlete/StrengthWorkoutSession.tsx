@@ -64,9 +64,11 @@ import {
   MoreVertical,
   Play,
   Plus,
+  Square,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { formatHold, parseTimedReps } from "@/utils/timedReps";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 // Types for tracking workout progress
@@ -128,7 +130,10 @@ const REP_RANGE = /^\s*\d+(\s*(-|–|to|a|até)\s*\d+)?\s*$/i;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formatPrescription = (we: WorkoutExercise, t: any) => {
   const reps = (we.reps || "10").trim();
-  const repsText = REP_RANGE.test(reps) ? `${reps.replace(/\s*(-|–|to|a|até)\s*/i, "–")} reps` : reps;
+  const hold = parseTimedReps(reps);
+  const repsText = hold
+    ? formatHold(hold)
+    : REP_RANGE.test(reps) ? `${reps.replace(/\s*(-|–|to|a|até)\s*/i, "–")} reps` : reps;
   const parts = [`${we.sets} × ${repsText}`];
   // Coach's suggested load: "20" → "20 kg", free text ("peso corporal") as written
   if (we.weight?.trim()) parts.push(/^\d+([.,]\d+)?$/.test(we.weight.trim()) ? `${we.weight.trim()} kg` : we.weight.trim());
@@ -213,6 +218,40 @@ const ExerciseSessionCard = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
+  // Timed holds ("20 seconds") get a countdown per set instead of a reps field
+  const holdSeconds = parseTimedReps(workoutExercise.reps);
+  const [hold, setHold] = useState<{ setIndex: number; endsAt: number } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const completeRef = useRef(onToggleSetComplete);
+  completeRef.current = onToggleSetComplete;
+
+  useEffect(() => {
+    if (!hold) return;
+    const id = window.setInterval(() => {
+      const current = Date.now();
+      setNow(current);
+      if (current >= hold.endsAt) {
+        window.clearInterval(id);
+        setHold(null);
+        navigator.vibrate?.([200, 100, 200]);
+        // Ticking the set logs the hold and starts the rest countdown
+        completeRef.current(hold.setIndex);
+      }
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [hold]);
+
+  const toggleHold = (setIndex: number) => {
+    if (!holdSeconds) return;
+    if (hold?.setIndex === setIndex) {
+      setHold(null);
+      return;
+    }
+    const start = Date.now();
+    setNow(start);
+    setHold({ setIndex, endsAt: start + holdSeconds * 1000 });
+  };
+
   // Use exercise from lookup, or fall back to denormalized data stored with workout
   const exerciseName = exercise?.name || workoutExercise.exerciseName || t.athlete.session.exerciseFallback;
   const videoUrl = exercise?.videoUrl || workoutExercise.exerciseVideoUrl;
@@ -259,7 +298,7 @@ const ExerciseSessionCard = ({
           {allComplete ? <Check className="h-4 w-4" /> : index + 1}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-base leading-tight truncate">{exerciseName}</h3>
+          <h3 className="font-semibold text-base leading-tight line-clamp-2 break-words">{exerciseName}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">
             {!isOpen && summary ? summary : formatPrescription(workoutExercise, t)}
           </p>
@@ -362,7 +401,7 @@ const ExerciseSessionCard = ({
               <div>
                 <div className="grid grid-cols-[40px_minmax(0,1fr)_minmax(0,1fr)_48px] gap-2 text-xs font-medium text-muted-foreground mb-2 px-1">
                   <span className="text-center">{t.athlete.session.setHeader}</span>
-                  <span className="text-center">{t.athlete.session.repsHeader}</span>
+                  <span className="text-center">{holdSeconds ? t.athlete.session.timeHeader : t.athlete.session.repsHeader}</span>
                   <span className="text-center">{t.athlete.session.kgHeader}</span>
                   <span></span>
                 </div>
@@ -393,20 +432,56 @@ const ExerciseSessionCard = ({
                           >
                             {set.warmup ? t.athlete.session.warmupShort : set.setNumber}
                             {isPR && (
-                              <span className="absolute -top-1 -right-1 text-sm" aria-label={t.athlete.session.personalRecord}>
-                                🏆
+                              <span
+                                className="absolute -top-1.5 -right-2 rounded-full bg-primary px-1 text-[9px] font-bold leading-4 text-primary-foreground"
+                                aria-label={t.athlete.session.personalRecord}
+                                title={t.athlete.session.personalRecord}
+                              >
+                                PR
                               </span>
                             )}
                           </button>
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            enterKeyHint="next"
-                            value={set.reps}
-                            onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
-                            placeholder={suggestion?.reps || workoutExercise.reps || "10"}
-                            className="h-12 text-center text-base px-1 min-w-0"
-                          />
+                          {holdSeconds && !set.completed ? (
+                            <button
+                              onClick={() => toggleHold(setIndex)}
+                              aria-label={
+                                hold?.setIndex === setIndex
+                                  ? t.athlete.session.holdRunning
+                                  : t.athlete.session.startHold.replace("{{time}}", formatHold(holdSeconds))
+                              }
+                              className={cn(
+                                "relative h-12 min-w-0 overflow-hidden rounded-md border text-base font-semibold tabular-nums flex items-center justify-center gap-1.5 transition-colors",
+                                hold?.setIndex === setIndex ? "border-primary text-primary" : "border-input text-foreground"
+                              )}
+                            >
+                              {hold?.setIndex === setIndex ? (
+                                <>
+                                  <span
+                                    aria-hidden
+                                    className="absolute inset-y-0 left-0 bg-primary/15"
+                                    style={{ width: `${Math.min(100, (1 - (hold.endsAt - now) / (holdSeconds * 1000)) * 100)}%` }}
+                                  />
+                                  <Square className="relative h-3.5 w-3.5 fill-current" />
+                                  <span className="relative">{formatHold(Math.max(0, Math.ceil((hold.endsAt - now) / 1000)))}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="h-3.5 w-3.5 fill-current text-primary" />
+                                  {formatHold(holdSeconds)}
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <Input
+                              type="text"
+                              inputMode={holdSeconds ? "text" : "numeric"}
+                              enterKeyHint="next"
+                              value={set.reps}
+                              onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
+                              placeholder={suggestion?.reps || workoutExercise.reps || "10"}
+                              className="h-12 text-center text-base px-1 min-w-0 placeholder:text-muted-foreground/50"
+                            />
+                          )}
                           {/* Weight with ±2.5 kg steppers so the keyboard isn't needed between sets */}
                           <div className="relative min-w-0">
                             <button
@@ -423,7 +498,7 @@ const ExerciseSessionCard = ({
                               value={set.weight}
                               onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
                               placeholder={suggestion?.weight || "0"}
-                              className="h-12 text-center text-base px-9 min-w-0"
+                              className="h-12 text-center text-base px-9 min-w-0 placeholder:text-muted-foreground/50"
                             />
                             <button
                               onClick={() => onStepWeight(setIndex, WEIGHT_STEP)}
@@ -455,7 +530,7 @@ const ExerciseSessionCard = ({
                             <span>
                               {t.athlete.session.previousHeader}:{" "}
                               <span className="font-semibold tabular-nums text-foreground/80">
-                                {[suggestion.weight && `${suggestion.weight} kg`, suggestion.reps && `× ${suggestion.reps}`]
+                                {[suggestion.weight ? `${suggestion.weight} kg` : t.athlete.session.noLoad, suggestion.reps && `× ${suggestion.reps}`]
                                   .filter(Boolean)
                                   .join(" ")}
                               </span>
@@ -950,24 +1025,27 @@ const StrengthWorkoutSession = () => {
   }, []);
 
   // What to prefill for a set: the same set from the last session, else the
-  // last filled set of this session, else the coach's target reps.
+  // last filled set of this session, else the coach's target reps. A load the
+  // athlete already used today wins over last session's, so it carries forward.
   const getSuggestion = useCallback(
     (progressMap: Map<string, ExerciseProgress>, workoutExerciseId: string, setIndex: number): SetSuggestion | null => {
       const progress = progressMap.get(workoutExerciseId);
       if (!progress) return null;
-      const history = previousSets.get(progress.exerciseId);
-      if (history?.length) {
-        const prev = history[Math.min(setIndex, history.length - 1)];
-        return { reps: prev.reps, weight: prev.weight, fromHistory: true };
-      }
       // Warm-up sets are lighter on purpose, so they never seed the next set
       const earlier = progress.sets
         .slice(0, setIndex)
         .reverse()
         .find((s) => !s.warmup && (s.reps || s.weight));
+      const history = previousSets.get(progress.exerciseId);
+      if (history?.length) {
+        const prev = history[Math.min(setIndex, history.length - 1)];
+        if (earlier?.weight) return { reps: prev.reps || earlier.reps, weight: earlier.weight, fromHistory: false };
+        return { reps: prev.reps, weight: prev.weight, fromHistory: true };
+      }
       if (earlier) return { reps: earlier.reps, weight: earlier.weight, fromHistory: false };
       const target = assignment?.workout.exercises?.find((we) => we.id === workoutExerciseId)?.reps ?? "";
-      const reps = repsFromTarget(target);
+      const hold = parseTimedReps(target);
+      const reps = hold ? formatHold(hold) : repsFromTarget(target);
       return reps ? { reps, weight: "", fromHistory: false } : null;
     },
     [previousSets, assignment]
@@ -1253,11 +1331,13 @@ const StrengthWorkoutSession = () => {
             initial={{ y: 96, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="fixed inset-x-3 z-50 mx-auto max-w-lg space-y-2"
+            className="fixed inset-x-3 z-50 mx-auto max-w-lg"
             style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
           >
-            <AnimatePresence>
-              {rest && (
+            {/* One bar at a time: during a rest the countdown replaces the session bar,
+                so two stacked pills don't cover the next exercise */}
+            <AnimatePresence mode="wait" initial={false}>
+              {rest ? (
                 <RestTimerPill
                   key="rest"
                   remainingSec={restRemainingSec}
@@ -1267,55 +1347,64 @@ const StrengthWorkoutSession = () => {
                   onAdjust={handleAdjustRest}
                   onSkip={handleSkipRest}
                 />
+              ) : (
+                <motion.div
+                  key="session"
+                  initial={{ y: 24, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 24, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                >
+              <div className="glass flex items-center gap-2 h-16 p-1.5 rounded-full">
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  transition={{ type: "spring", stiffness: 600, damping: 22 }}
+                  onClick={handleCancel}
+                  aria-label={t.athlete.session.cancel}
+                  className="glass-lens h-[52px] w-[52px] shrink-0 flex items-center justify-center rounded-full text-foreground/70"
+                >
+                  <X className="h-5 w-5" />
+                </motion.button>
+
+                <div className="flex-1 min-w-0 flex flex-col items-center justify-center">
+                  <span className="sr-only">{t.athlete.session.totalTime}</span>
+                  <span className="text-xl font-mono font-bold text-primary leading-none tabular-nums">
+                    {formatTime(totalElapsedTime)}
+                  </span>
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <div className="h-1 w-20 rounded-full bg-foreground/10 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-primary rounded-full"
+                        animate={{ width: `${completionPercentage}%` }}
+                        transition={{ type: "spring", stiffness: 200, damping: 26 }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
+                      {completionPercentage}%
+                    </span>
+                  </div>
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: "spring", stiffness: 600, damping: 22 }}
+                  onClick={() => setShowSaveConfirm(true)}
+                  disabled={saving}
+                  className="h-[52px] shrink-0 px-6 flex items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold shadow-md disabled:opacity-60"
+                >
+                  {saving ? <Spinner size="xs" className="mr-2" /> : null}
+                  {t.athlete.session.save}
+                </motion.button>
+              </div>
+                </motion.div>
               )}
             </AnimatePresence>
-            <div className="glass flex items-center gap-2 h-16 p-1.5 rounded-full">
-              <motion.button
-                whileTap={{ scale: 0.85 }}
-                transition={{ type: "spring", stiffness: 600, damping: 22 }}
-                onClick={handleCancel}
-                aria-label={t.athlete.session.cancel}
-                className="glass-lens h-[52px] w-[52px] shrink-0 flex items-center justify-center rounded-full text-foreground/70"
-              >
-                <X className="h-5 w-5" />
-              </motion.button>
-
-              <div className="flex-1 min-w-0 flex flex-col items-center justify-center">
-                <span className="sr-only">{t.athlete.session.totalTime}</span>
-                <span className="text-xl font-mono font-bold text-primary leading-none tabular-nums">
-                  {formatTime(totalElapsedTime)}
-                </span>
-                <div className="mt-1.5 flex items-center gap-1.5">
-                  <div className="h-1 w-20 rounded-full bg-foreground/10 overflow-hidden">
-                    <motion.div
-                      className="h-full bg-primary rounded-full"
-                      animate={{ width: `${completionPercentage}%` }}
-                      transition={{ type: "spring", stiffness: 200, damping: 26 }}
-                    />
-                  </div>
-                  <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
-                    {completionPercentage}%
-                  </span>
-                </div>
-              </div>
-
-              <motion.button
-                whileTap={{ scale: 0.92 }}
-                transition={{ type: "spring", stiffness: 600, damping: 22 }}
-                onClick={() => setShowSaveConfirm(true)}
-                disabled={saving}
-                className="h-[52px] shrink-0 px-6 flex items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold shadow-md disabled:opacity-60"
-              >
-                {saving ? <Spinner size="xs" className="mr-2" /> : null}
-                {t.athlete.session.save}
-              </motion.button>
-            </div>
           </motion.div>
         </MotionConfig>
       )}
 
       {/* Content */}
-      <div className={cn("flex-1 overflow-auto", rest ? "pb-48" : "pb-28")}>
+      <div className="flex-1 overflow-auto pb-28">
         <div className="p-4 space-y-4">
           {/* Workout Info Card */}
           <Card>
@@ -1413,7 +1502,7 @@ const StrengthWorkoutSession = () => {
             <Button className="w-full" onClick={handleExitKeep}>
               {t.athlete.session.exitKeep}
             </Button>
-            <Button variant="outline" className="w-full text-destructive" onClick={handleExitDiscard}>
+            <Button variant="outline" className="w-full border-destructive/40 text-red-500 dark:text-red-400" onClick={handleExitDiscard}>
               {t.athlete.session.exitDiscard}
             </Button>
             <Button variant="ghost" className="w-full" onClick={() => setShowExitConfirm(false)}>

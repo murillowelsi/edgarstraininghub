@@ -5,13 +5,14 @@ import { ChatService } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Chat, Message } from "@/types/chat";
-import { Plus, Search, MessageSquare, Users2 } from "lucide-react";
+import { MessageSquarePlus, Plus, Search, MessageSquare, Users2 } from "lucide-react";
 import { SectionSpinner } from "@/components/ui/spinner";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
 import { NotificationBanner } from "@/components/NotificationBanner";
 import { getUsersByRole } from "@/services/usersService";
+import { getTeamsByMember } from "@/services/teamsService";
 import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
@@ -20,21 +21,24 @@ import { CachedAvatar } from "@/components/ui/cached-avatar";
 
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-const formatChatTime = (timestamp: { seconds: number }) => {
+const formatChatTime = (timestamp: { seconds: number }, language: string, yesterday: string) => {
     const date = new Date(timestamp.seconds * 1000);
     if (isToday(date)) return format(date, "HH:mm");
-    if (isYesterday(date)) return "Ontem";
-    return format(date, "dd/MM/yy");
+    if (isYesterday(date)) return yesterday;
+    return format(date, "d MMM", language === "pt" ? { locale: ptBR } : undefined);
 };
 
 export default function AthleteChat() {
     const { user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
+    // Teams the athlete still belongs to — group chats of teams they left stay hidden
+    const [memberTeamIds, setMemberTeamIds] = useState<Set<string> | null>(null);
 
     // Admin selection state
     const [admins, setAdmins] = useState<User[]>([]);
@@ -71,6 +75,13 @@ export default function AthleteChat() {
     }, []);
 
 
+    useEffect(() => {
+        if (!user) return;
+        getTeamsByMember(user.uid)
+            .then((teams) => setMemberTeamIds(new Set(teams.map((team) => team.id))))
+            .catch((error) => console.error("Error loading teams:", error));
+    }, [user]);
+
     // Subscribe to athlete's chats
     useEffect(() => {
         if (!user) return;
@@ -93,6 +104,13 @@ export default function AthleteChat() {
 
         return () => unsubscribe();
     }, [user, selectedChat?.id]);
+
+    const visibleChats = useMemo(
+        () => memberTeamIds
+            ? chats.filter((c) => !c.isGroup || !c.teamId || memberTeamIds.has(c.teamId))
+            : chats,
+        [chats, memberTeamIds]
+    );
 
     // Subscribe to messages when a chat is selected
     useEffect(() => {
@@ -198,7 +216,7 @@ export default function AthleteChat() {
                     selectedChat ? "hidden md:flex" : "flex"
                 )}>
                     <div className="hidden sm:flex p-4 border-b items-center justify-end bg-muted/30">
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsNewChatOpen(true)} aria-label={t.athlete.chat.newMessage}>
                             <Plus className="h-5 w-5" />
                         </Button>
                         <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title={t.athlete.chat.newMessage}>
@@ -240,7 +258,7 @@ export default function AthleteChat() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
-                        {chats.length === 0 ? (
+                        {visibleChats.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground p-4 text-center">
                                 <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
                                 <p className="text-sm">{t.athlete.chat.noConversations}</p>
@@ -253,7 +271,7 @@ export default function AthleteChat() {
                                 </Button>
                             </div>
                         ) : (
-                            chats.map(chat => {
+                            visibleChats.map(chat => {
                                 const displayName = getChatDisplayName(chat);
                                 const unreadCount = user ? (chat.unreadCount?.[user.uid] || 0) : 0;
 
@@ -280,7 +298,7 @@ export default function AthleteChat() {
                                                 </span>
                                                 {chat.lastMessageTime && (
                                                     <span className={cn("text-xs shrink-0", unreadCount > 0 ? "text-primary font-medium" : "text-muted-foreground")}>
-                                                        {formatChatTime(chat.lastMessageTime)}
+                                                        {formatChatTime(chat.lastMessageTime, language, t.timeline.activity.yesterday)}
                                                     </span>
                                                 )}
                                             </div>
@@ -331,7 +349,7 @@ export default function AthleteChat() {
             </div>
         {/* Mobile FAB — only shown on chat list view */}
         {!selectedChat && (
-            <GlassFab label={t.athlete.chat.newMessage} onClick={() => setIsNewChatOpen(true)} />
+            <GlassFab label={t.athlete.chat.newMessage} icon={MessageSquarePlus} onClick={() => setIsNewChatOpen(true)} />
         )}
         </AthletePortalLayout>
     );

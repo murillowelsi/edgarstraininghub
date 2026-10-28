@@ -19,10 +19,17 @@ export const formatTimeShort = (seconds?: number | null): string => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
+/** Decimal number in the app language (LanguageContext keeps <html lang> in sync). */
+export const formatDecimal = (value: number, digits: number): string =>
+  value.toLocaleString(document.documentElement.lang === "pt" ? "pt-BR" : "en", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
+
 export const formatDistance = (km?: number | null, type?: WorkoutType): string => {
   if (km == null) return "—";
   if (type === "swimming") return `${Math.round(km * 1000)} m`;
-  return `${km.toFixed(2).replace(".", ",")} km`;
+  return `${formatDecimal(km, 2)} km`;
 };
 
 export const formatPace = (secondsPerKm?: number | null, type?: WorkoutType): string => {
@@ -35,7 +42,7 @@ export const formatPace = (secondsPerKm?: number | null, type?: WorkoutType): st
 
 export const formatSpeed = (kmh?: number | null): string => {
   if (kmh == null) return "—";
-  return `${kmh.toFixed(1).replace(".", ",")} km/h`;
+  return `${formatDecimal(kmh, 1)} km/h`;
 };
 
 export const formatHeartRate = (bpm?: number | null): string => {

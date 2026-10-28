@@ -188,11 +188,6 @@ const AthleteHome = () => {
 
         <LeaveTestimonialBanner mode="home" />
 
-        {/* Ask for notification permission here too, not only inside the chat */}
-        <div className="rounded-xl overflow-hidden empty:hidden">
-          <NotificationBanner />
-        </div>
-
         {/* In-progress session saved on this phone — one tap back into it */}
         {inProgress && (
           <Link
@@ -215,6 +210,11 @@ const AthleteHome = () => {
             <ChevronRight className="h-5 w-5 text-primary shrink-0" />
           </Link>
         )}
+
+        {/* Ask for notification permission here too, not only inside the chat */}
+        <div className="rounded-xl overflow-hidden empty:hidden">
+          <NotificationBanner />
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
@@ -273,9 +273,10 @@ const AthleteHome = () => {
                   <div className="p-2 rounded-xl bg-green-500/20">
                     <TrendingUp className="h-5 w-5 text-green-500" />
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {todaysCompleted}/{todaysWorkouts.length}
+                  <div className="min-w-0">
+                    {/* "0/0" reads like a failure on a rest day */}
+                    <p className={cn("font-bold", todaysWorkouts.length > 0 ? "text-2xl" : "text-base leading-tight min-h-8 flex items-center hyphens-auto [overflow-wrap:anywhere]")}>
+                      {todaysWorkouts.length > 0 ? `${todaysCompleted}/${todaysWorkouts.length}` : t.athlete.home.restDay}
                     </p>
                     <p className="text-xs text-muted-foreground">{t.athlete.home.statToday}</p>
                   </div>
@@ -292,7 +293,7 @@ const AthleteHome = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{t.athlete.home.yourProgress}</CardTitle>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <span>{completedWorkouts} of {totalWorkouts}</span>
+                  <span>{t.athlete.home.progressCount.replace("{{done}}", String(completedWorkouts)).replace("{{total}}", String(totalWorkouts))}</span>
                   <ChevronRight className="h-4 w-4" />
                 </div>
               </div>
@@ -311,7 +312,7 @@ const AthleteHome = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base capitalize">{format(centerDate, "MMMM yyyy", { locale: dateLocale })}</CardTitle>
-              <button onClick={handleTodayClick} className="text-sm text-primary font-medium hover:underline">
+              <button onClick={handleTodayClick} className="-my-2 -mr-2 px-2 py-3 text-sm text-primary font-medium hover:underline">
                 {t.athlete.home.today}
               </button>
             </div>
@@ -410,7 +411,7 @@ const AthleteHome = () => {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{t.athlete.home.upcoming}</CardTitle>
-                <Link to="/athlete/calendar" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
+                <Link to="/athlete/calendar" className="-my-2 -mr-2 px-2 py-3 text-sm text-primary font-medium hover:underline flex items-center gap-1">
                   {t.athlete.home.seeAll}
                   <ChevronRight className="h-4 w-4" />
                 </Link>
@@ -446,7 +447,7 @@ const AthleteHome = () => {
             </h2>
             <button
               onClick={() => setEventSheetOpen(true)}
-              className="rounded-full p-1.5 hover:bg-muted transition"
+              className="-mr-2 flex h-11 w-11 items-center justify-center rounded-full hover:bg-muted transition"
               aria-label={t.athlete.events.addAriaLabel}
             >
               <Plus className="h-4 w-4" />

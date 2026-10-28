@@ -31,7 +31,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const { isMenuOpen, setIsMenuOpen } = useTopBarMenu();
-  const { setCreateOpen, setActivityOpen, activityUnreadCount } = useTimelineActions();
+  const { createOpen, setCreateOpen, activityOpen, setActivityOpen, activityUnreadCount } = useTimelineActions();
 
   const navItems = [
     { href: "/admin", label: t.admin.nav.home, exact: true },
@@ -106,18 +106,18 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
         )}
 
         <GlassToolbar>
-          <GlassIconButton onClick={() => setCreateOpen(true)}>
+          <GlassIconButton active={createOpen} aria-expanded={createOpen} onClick={() => setCreateOpen(true)}>
             <Plus className="h-5 w-5" />
           </GlassIconButton>
 
-          <GlassIconButton onClick={() => setActivityOpen(true)}>
+          <GlassIconButton active={activityOpen} aria-expanded={activityOpen} onClick={() => setActivityOpen(true)}>
             <Flame className="h-5 w-5" />
             {activityUnreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
+              <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />
             )}
           </GlassIconButton>
 
-          <GlassIconLink to="/admin/chat" active={location.pathname.startsWith("/admin/chat")}>
+          <GlassIconLink to="/admin/chat" active={location.pathname.startsWith("/admin/chat") && !createOpen && !activityOpen}>
             <MessageSquare className="h-5 w-5" />
             {chatUnreadCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">

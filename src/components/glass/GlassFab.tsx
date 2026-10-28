@@ -50,8 +50,8 @@ export function GlassFab({ label, onClick, actions, icon: Icon = Plus, hideFrom 
 
       <div
         className={cn("fixed right-4 z-30 flex flex-col items-end gap-3", hidden, className)}
-        // Clears the floating glass tab bar (h-16 + 0.75rem gap)
-        style={{ bottom: "calc(5.75rem + env(safe-area-inset-bottom))" }}
+        // Clears the floating glass tab bar (h-14 + 0.75rem gap)
+        style={{ bottom: "calc(5.25rem + env(safe-area-inset-bottom))" }}
       >
         <AnimatePresence>
           {isDial && open && (

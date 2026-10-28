@@ -5,7 +5,8 @@
     "services": "Serviços",
     "achievements": "Conquistas",
     "contact": "Contato",
-    "getStarted": "Começar"
+    "getStarted": "Começar",
+    "openApp": "Abrir app"
   },
   "hero": {
     "title": "Torne-se um Atleta Mais Forte e Rápido com",
@@ -424,6 +425,7 @@
   },
   "notifications": {
     "blocked": "Notificações bloqueadas. Para ativar, clique no cadeado na barra do navegador e permita as notificações.",
+    "blockedApp": "Notificações bloqueadas. Para receber alertas, permita as notificações deste app nas configurações do celular.",
     "enablePrompt": "Ative as notificações para receber alertas de novas mensagens",
     "enable": "Ativar",
     "dismiss": "Fechar"
@@ -934,7 +936,9 @@
       "noActiveChat": "Não foi possível enviar a mensagem."
     },
     "teams": {
-      "you": "Você"
+      "you": "Você",
+      "emptyDescription": "Peça ao seu treinador o link de convite para entrar num grupo.",
+      "emptyCta": "Falar com o treinador"
     },
     "nav": {
       "home": "Início",
@@ -983,8 +987,10 @@
       "statCompleted": "Concluídos",
       "statTotal": "Total",
       "statToday": "Hoje",
+      "restDay": "Descanso",
       "yourProgress": "Seu Progresso",
       "workoutsRemaining": "{{count}} treinos restantes",
+      "progressCount": "{{done}} de {{total}}",
       "todaysWorkouts": "Treinos de Hoje",
       "noWorkoutsScheduled": "Nenhum treino agendado",
       "upcoming": "Próximos",
@@ -1148,7 +1154,11 @@
       "restBetweenSets": "Descanso {{seconds}}s entre séries",
       "setHeader": "Série",
       "previousHeader": "Anterior",
+      "noLoad": "sem carga",
       "repsHeader": "Reps",
+      "timeHeader": "Tempo",
+      "startHold": "Iniciar timer de {{time}}",
+      "holdRunning": "Segure",
       "kgHeader": "Kg",
       "addNewSet": "Adicionar série",
       "removeLastSet": "Remover última",
@@ -1488,6 +1498,7 @@
       "footer": "Treinado com EZ Training"
     },
     "postShared": "Post compartilhado!",
+    "newPost": "Nova publicação",
     "summary": {
       "time": "Tempo",
       "distance": "Distância",
