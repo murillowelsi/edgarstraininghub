@@ -42,11 +42,12 @@ export function GlassTabBar({ items, id, className }: GlassTabBarProps) {
   return (
     <MotionConfig reducedMotion="user">
       <nav
-        className={cn("fixed inset-x-3 z-50 mx-auto max-w-lg", className)}
+        className={cn("fixed inset-x-5 z-50 mx-auto max-w-lg", className)}
         style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
-        <div className="glass flex items-center h-14 p-1 rounded-full">
-          <div className="absolute inset-1 pointer-events-none">
+        {/* Proportions follow the Strava tab bar: 20px side margins, 60px tall, 22px icons, 11px labels */}
+        <div className="glass flex items-center h-[60px] p-[5px] rounded-full">
+          <div className="absolute inset-[5px] pointer-events-none">
             {activeIndex >= 0 && (
               <motion.span
                 className="glass-lens absolute inset-y-0 left-0 rounded-full"
@@ -87,7 +88,7 @@ export function GlassTabBar({ items, id, className }: GlassTabBarProps) {
                         active ? "text-primary" : "text-foreground/60"
                       )}
                     >
-                      <item.icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} />
+                      <item.icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.4 : 2} />
                     </motion.div>
                     {badge > 0 && (
                       <span className="absolute -top-1 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
@@ -97,7 +98,7 @@ export function GlassTabBar({ items, id, className }: GlassTabBarProps) {
                   </div>
                   <span
                     className={cn(
-                      "text-[10px] mt-0.5 transition-colors duration-200",
+                      "text-[11px] mt-0.5 transition-colors duration-200",
                       active ? "text-primary font-semibold" : "text-foreground/60 font-medium"
                     )}
                   >
