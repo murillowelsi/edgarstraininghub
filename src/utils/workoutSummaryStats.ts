@@ -77,7 +77,7 @@ export interface CardMetric {
 }
 
 export interface WorkoutCardModel {
-  /** The number that tells the story (distance; volume for strength; time as fallback) */
+  /** The number that tells the story (distance; time for strength, since summed load reads like a single lift; time as fallback) */
   hero?: CardMetric;
   /** Up to 3 supporting numbers; missing values are left out, never "—" */
   secondary: CardMetric[];
@@ -118,7 +118,7 @@ export const workoutCardModel = (summary: WorkoutSummary, labels: StatLabels, lo
     running: { hero: ["distance", "time"], secondary: ["time", "pace", "hr"] },
     cycling: { hero: ["distance", "time"], secondary: ["time", "speed", "hr"] },
     swimming: { hero: ["distance", "time"], secondary: ["time", "pace", "hr"] },
-    strength: { hero: ["volume", "time"], secondary: ["time", "sets"] },
+    strength: { hero: ["time", "sets", "volume"], secondary: ["sets", "volume"] },
   };
   const o = order[summary.workoutType] ?? order.running;
   const heroKey = o.hero.find((k) => m[k]);
