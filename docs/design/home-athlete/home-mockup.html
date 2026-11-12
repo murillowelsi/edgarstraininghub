@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EZ · Home do atleta (proposta 12/11/2026)</title>
+<!-- Mockup estático: só CSS e SVG inline. Dados fictícios do seed. Tokens: design-system §1.5 (escuro cinza-neutro). -->
+<style>
+  :root{--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Montserrat','Inter',system-ui,sans-serif;
+    --primary:hsl(48 96% 45%);--navy:hsl(222 47% 11%);--run:hsl(217 91% 60%);--bike:hsl(142 71% 45%);--swim:hsl(188 86% 53%);--str:hsl(25 95% 53%);--ok:hsl(142 69% 58%);--warn:hsl(43 96% 56%);--bad:hsl(0 91% 71%)}
+  .dark{--bg:hsl(220 5% 9%);--card:hsl(220 5% 12%);--s2:hsl(220 5% 15%);--muted:hsl(220 5% 17%);--border:hsl(220 5% 24%);--fg:hsl(0 0% 98%);--mfg:hsl(220 5% 66%);--pfg:hsl(220 5% 9%);--ink:var(--primary);--wc:hsl(220 5% 8%);--glow:34%;--box:hsl(0 0% 100% / .05);--boxb:hsl(0 0% 100% / .09);--okink:var(--ok)}
+  .light{--bg:hsl(220 20% 95%);--card:#fff;--s2:hsl(210 40% 98%);--muted:hsl(210 40% 94%);--border:hsl(220 13% 88%);--fg:hsl(222 47% 11%);--mfg:hsl(215 16% 42%);--pfg:hsl(222 47% 11%);--ink:hsl(40 95% 30%);--wc:#fff;--glow:16%;--box:hsl(220 20% 97%);--boxb:hsl(220 13% 90%);--okink:hsl(142 72% 29%)}
+  .light .run{--a-ink:hsl(221 83% 43%)}.light .bike{--a-ink:hsl(142 72% 29%)}.light .swim{--a-ink:hsl(192 91% 30%)}.light .str{--a-ink:hsl(21 90% 40%)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#0a0a0a;color:#e5e5e5;padding:32px;line-height:1.4}
+  h1.d{font:700 28px var(--display);color:#fff}p.d{color:#a3a3a3;max-width:1050px;margin:4px 0 24px}
+  .row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-bottom:40px}
+  .lbl{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#a3a3a3;margin-bottom:10px}
+  .note{font-size:13px;color:#a3a3a3;max-width:390px;margin-top:10px}
+  .phone{width:390px;height:1120px;border-radius:40px;border:8px solid #262626;background:var(--bg);color:var(--fg);overflow:hidden;position:relative}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:12px}
+  .g{width:44px;height:44px;border-radius:99px;display:grid;place-items:center;border:1px solid var(--border);background:var(--card);position:relative}
+  .g svg{width:21px;height:21px}.g .b{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:99px;background:var(--bad);color:#fff;font:700 10px var(--font);display:grid;place-items:center}
+  .logo{font:800 24px var(--display);color:var(--ink)}
+  .pad{padding:0 12px}
+  .hi{display:flex;align-items:center;gap:12px;margin:2px 4px 14px}
+  .av{width:44px;height:44px;border-radius:99px;background:var(--primary);color:var(--pfg);display:grid;place-items:center;font:800 17px var(--display);flex:none}
+  .hi small{display:block;font-size:13px;color:var(--mfg)}.hi b{font:800 22px/1.15 var(--display)}
+  /* TODAY hero = card de treino do feed + CTA */
+  .today{--a:var(--swim);border-radius:24px;padding:16px;position:relative;overflow:hidden;color:var(--fg);
+     background:radial-gradient(130% 100% at 100% 0%,color-mix(in srgb,var(--a) var(--glow),transparent),transparent 58%),var(--wc);border:1px solid color-mix(in srgb,var(--a) 35%,var(--border))}
+  .today.str{--a:var(--str)}.today.rest{--a:hsl(250 30% 60%)}
+  .t1{display:flex;align-items:center;gap:8px;font:700 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--a-ink,var(--a))}
+  .t1 .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--a) 18%,transparent)}.t1 svg{width:16px;height:16px}
+  .t1 .r{margin-left:auto;font:600 12px var(--font);letter-spacing:0;text-transform:none;color:var(--mfg)}
+  .wn{font:800 22px/1.2 var(--display);margin:12px 0 4px}
+  .wm{font-size:14px;color:var(--mfg)}
+  .viz{display:flex;align-items:flex-end;gap:3px;height:46px;margin:14px 0}
+  .viz i{border-radius:4px 4px 2px 2px;background:color-mix(in srgb,var(--a) 35%,transparent)}.viz i.h{background:var(--a)}
+  .cta{height:52px;border-radius:14px;background:var(--primary);color:hsl(222 47% 11%);display:flex;align-items:center;justify-content:center;gap:8px;font:700 16px var(--font)}
+  .cta svg{width:18px;height:18px}
+  .sub{display:flex;justify-content:space-between;margin-top:10px;font-size:13px;color:var(--mfg)}.sub b{color:var(--fg);font-weight:600}
+  .prog{height:6px;border-radius:99px;background:var(--muted);overflow:hidden;margin:10px 0 2px}.prog i{display:block;height:100%;background:var(--primary)}
+  /* nudge */
+  .nudge{margin-top:10px;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--card);border:1px solid var(--border);font-size:13px}
+  .nudge .ic2{width:32px;height:32px;border-radius:99px;display:grid;place-items:center;background:hsl(48 96% 45% / .15);color:var(--ink);flex:none}.nudge .ic2 svg{width:16px;height:16px}
+  .nudge b{display:block;font-size:14px}.nudge span{color:var(--mfg)}.nudge .act{margin-left:auto;font-weight:700;color:var(--ink);white-space:nowrap;padding:8px 4px}
+  .nudge .x{color:var(--mfg);padding:8px 4px}
+  .nudge.dash{border-style:dashed}
+  /* section */
+  .sh{display:flex;justify-content:space-between;align-items:baseline;margin:18px 4px 8px}
+  .sh b{font:700 16px var(--font)}.sh a{font-size:13px;color:var(--ink);font-weight:600}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:12px}
+  /* week */
+  .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .wd{text-align:center;padding:6px 0 8px;border-radius:12px;font-size:11px;color:var(--mfg)}
+  .wd b{display:block;font:700 15px var(--font);color:var(--fg);margin:2px 0 4px}
+  .wd.on{background:var(--s2);outline:2px solid var(--primary);outline-offset:-2px}
+  .dot{width:22px;height:22px;border-radius:99px;margin:0 auto;display:grid;place-items:center}
+  .dot svg{width:12px;height:12px}
+  .dot.done{background:var(--c)}.dot.done svg{color:#fff}
+  .dot.plan{border:2px solid var(--c)}
+  .dot.part{background:conic-gradient(var(--c) 0 216deg,transparent 216deg);border:2px solid var(--c)}
+  .dot.miss{border:2px dashed var(--bad)}
+  .dot.none{background:var(--muted);width:6px;height:6px;margin-top:8px}
+  .wsum{display:flex;justify-content:space-between;font-size:13px;color:var(--mfg);margin-top:10px;padding:0 4px}.wsum b{color:var(--fg)}
+  /* next / race */
+  .li{display:flex;align-items:center;gap:12px}
+  .li .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none}
+  .li .ic svg{width:20px;height:20px}
+  .li .t{flex:1;min-width:0}.li .t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.li .t span{font-size:13px;color:var(--mfg)}
+  .li .chev{color:var(--mfg)}
+  .race{border-radius:18px;padding:14px;background:radial-gradient(120% 100% at 100% 0%,hsl(25 95% 53% / .2),transparent 60%),var(--card);border:1px solid var(--border);display:flex;align-items:center;gap:14px}
+  .race .cd{text-align:center;min-width:64px}.race .cd b{display:block;font:800 30px/1 var(--display)}.race .cd span{font-size:11px;color:var(--mfg)}
+  .race .t b{display:block;font-size:15px}.race .t span{font-size:13px;color:var(--mfg)}
+  .tabs{position:absolute;left:12px;right:12px;bottom:12px;height:64px;border-radius:99px;display:flex;justify-content:space-around;align-items:center;font-size:11px;color:var(--mfg);background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--border)}
+  .tabs div{display:flex;flex-direction:column;align-items:center;gap:2px}.tabs .on{color:var(--ink);font-weight:600}.tabs svg{width:22px;height:22px}
+  .mini{width:300px;height:auto;border-radius:24px;padding:12px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="swim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="17" cy="6" r="2"/><path d="m4 12 5-3 4 2 3-1"/><path d="M2 17c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0"/></symbol>
+  <symbol id="dumb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></symbol>
+  <symbol id="run" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="14.5" cy="4.5" r="2"/><path d="m8 21 3-6 3 2 1 5"/><path d="M6 11.5 9 9l4 1 2 3 3 1"/></symbol>
+  <symbol id="bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M15 6h2l1.5 11M5.5 17 9 9h7M9 9l3.5 8h6"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.6A8.5 8.5 0 1 1 21 11.5Z"/></symbol>
+  <symbol id="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10Z"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></symbol>
+  <symbol id="shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/></symbol>
+  <symbol id="grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="quote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.6A8.5 8.5 0 1 1 21 11.5Z"/><path d="M9 10h6M9 13h4"/></symbol>
+</defs></svg>
+
+<h1 class="d">EZ · Home do atleta: proposta</h1>
+<p class="d">Mockup estático (12/11/2026), dados fictícios do seed. A Home responde uma pergunta só: <b>o que eu treino hoje?</b> O treino do dia vira o card principal, no mesmo visual do card de treino do feed, com o botão "Começar" grande. A semana, o próximo treino e a prova vêm abaixo, em blocos menores. Os lembretes (notificações e depoimento) ficam em uma linha cada, nunca acima do treino.</p>
+
+<div class="lbl">1 · Treino planejado (escuro) e treino em andamento (claro) · 390 px</div>
+<div class="row">
+<!-- DARK: planned -->
+<div class="phone dark">
+ <div class="top"><div class="g"><svg><use href="#pen"/></svg></div><span class="logo">EZ</span><div style="display:flex;gap:8px"><div class="g"><svg><use href="#msg"/></svg><span class="b">4</span></div><div class="g"><svg><use href="#bell"/></svg></div></div></div>
+ <div class="pad">
+  <div class="hi"><span class="av">B</span><div><small>Quinta, 12 nov</small><b>Bom dia, Bruno</b></div></div>
+  <div class="today swim">
+   <div class="t1"><span class="ic"><svg><use href="#swim"/></svg></span>Natação · hoje<span class="r">1 de 1</span></div>
+   <div class="wn">Natação: técnica e ritmo</div>
+   <div class="wm">3 etapas · ~40 min · 1.500 m</div>
+   <div class="viz"><i style="flex:2;height:35%"></i><i class="h" style="flex:1;height:70%"></i><i class="h" style="flex:1;height:70%"></i><i class="h" style="flex:1;height:70%"></i><i class="h" style="flex:1;height:70%"></i><i style="flex:2;height:30%"></i></div>
+   <div class="cta"><svg><use href="#play"/></svg>Começar treino</div>
+   <div class="sub"><span>Ver etapas</span><span>Registrar como feito</span></div>
+  </div>
+  <div class="nudge"><span class="ic2"><svg><use href="#bell"/></svg></span><div style="min-width:0"><b>Ative as notificações</b><span>Treinos novos e respostas do coach</span></div><span class="act">Ativar</span><span class="x">✕</span></div>
+
+  <div class="sh"><b>Esta semana</b><a>Calendário</a></div>
+  <div class="card">
+   <div class="wk">
+    <div class="wd">seg<b>9</b><div class="dot none"></div></div>
+    <div class="wd">ter<b>10</b><div class="dot done" style="--c:var(--str)"><svg><use href="#check"/></svg></div></div>
+    <div class="wd">qua<b>11</b><div class="dot none"></div></div>
+    <div class="wd on">qui<b>12</b><div class="dot plan" style="--c:var(--swim)"></div></div>
+    <div class="wd">sex<b>13</b><div class="dot plan" style="--c:var(--str)"></div></div>
+    <div class="wd">sáb<b>14</b><div class="dot none"></div></div>
+    <div class="wd">dom<b>15</b><div class="dot plan" style="--c:var(--run)"></div></div>
+   </div>
+   <div class="wsum"><span><b>1 de 4</b> treinos</span><span>58 min feitos</span></div>
+  </div>
+
+  <div class="sh"><b>Próximo</b></div>
+  <div class="card li"><span class="ic" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#dumb"/></svg></span><div class="t"><b>Força B: membros superiores</b><span>amanhã · 3 exercícios</span></div><span class="chev">›</span></div>
+
+  <div class="sh"><b>Sua prova</b><a>+ Adicionar</a></div>
+  <div class="race"><div class="cd"><b>12</b><span>dias</span></div><div class="t"><b>Corrida 10 km (fictícia)</b><span>ter, 24 nov · 0/1 metas</span></div></div>
+
+  <div class="nudge dash" style="margin-top:14px"><span class="ic2"><svg><use href="#quote"/></svg></span><div><b>Como está o treino?</b><span>Deixe um depoimento</span></div><span class="x" style="margin-left:auto">✕</span></div>
+ </div>
+ <div class="tabs"><div class="on"><svg><use href="#home"/></svg>Início</div><div><svg><use href="#shield"/></svg>Times</div><div><svg><use href="#grid"/></svg>Feed</div><div><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#user"/></svg>Você</div></div>
+</div>
+
+<!-- LIGHT: in progress -->
+<div class="phone light">
+ <div class="top"><div class="g"><svg><use href="#pen"/></svg></div><span class="logo">EZ</span><div style="display:flex;gap:8px"><div class="g"><svg><use href="#msg"/></svg><span class="b">4</span></div><div class="g"><svg><use href="#bell"/></svg></div></div></div>
+ <div class="pad">
+  <div class="hi"><span class="av">B</span><div><small>Sexta, 13 nov</small><b>Boa tarde, Bruno</b></div></div>
+  <div class="today str">
+   <div class="t1"><span class="ic"><svg><use href="#dumb"/></svg></span>Em andamento<span class="r">há 22 min</span></div>
+   <div class="wn">Força B: membros superiores</div>
+   <div class="wm">6 de 10 séries · salvo neste celular</div>
+   <div class="prog"><i style="width:60%"></i></div>
+   <div style="height:14px"></div>
+   <div class="cta"><svg><use href="#play"/></svg>Continuar treino</div>
+   <div class="sub"><span>Descartar</span><span>Finalizar agora</span></div>
+  </div>
+
+  <div class="sh"><b>Esta semana</b><a>Calendário</a></div>
+  <div class="card">
+   <div class="wk">
+    <div class="wd">seg<b>9</b><div class="dot none"></div></div>
+    <div class="wd">ter<b>10</b><div class="dot done" style="--c:var(--str)"><svg><use href="#check"/></svg></div></div>
+    <div class="wd">qua<b>11</b><div class="dot none"></div></div>
+    <div class="wd">qui<b>12</b><div class="dot miss"></div></div>
+    <div class="wd on">sex<b>13</b><div class="dot part" style="--c:var(--str)"></div></div>
+    <div class="wd">sáb<b>14</b><div class="dot none"></div></div>
+    <div class="wd">dom<b>15</b><div class="dot plan" style="--c:var(--run)"></div></div>
+   </div>
+   <div class="wsum"><span><b>1 de 4</b> treinos · 1 não feito</span><span>58 min feitos</span></div>
+  </div>
+
+  <div class="sh"><b>Próximo</b></div>
+  <div class="card li"><span class="ic" style="background:hsl(217 91% 60% / .14);color:hsl(221 83% 43%)"><svg><use href="#run"/></svg></span><div class="t"><b>Corrida: intervalado 5 × 800 m</b><span>domingo · 3 etapas</span></div><span class="chev">›</span></div>
+
+  <div class="sh"><b>Sua prova</b><a>+ Adicionar</a></div>
+  <div class="race"><div class="cd"><b>11</b><span>dias</span></div><div class="t"><b>Corrida 10 km (fictícia)</b><span>ter, 24 nov · 0/1 metas</span></div></div>
+ </div>
+ <div class="tabs"><div class="on"><svg><use href="#home"/></svg>Início</div><div><svg><use href="#shield"/></svg>Times</div><div><svg><use href="#grid"/></svg>Feed</div><div><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#user"/></svg>Você</div></div>
+</div>
+<p class="note">Escuro: o treino de hoje com a cor da modalidade, o mini-gráfico das etapas (o mesmo do feed, a partir do treino planejado), a duração estimada e o "Começar treino" de 52 px. Logo abaixo, o lembrete de notificações em uma linha (Ativar ou ✕). O depoimento fica no fim da página, tracejado e dispensável.<br><br>Claro: com um rascunho de sessão no aparelho, o card vira "Em andamento", com a barra de séries e "Continuar treino". O lembrete de notificações some depois de dispensado. A semana mostra cada dia com a cor da modalidade: ✓ feito, anel planejado, meio anel parcial, tracejado vermelho não feito.</p>
+</div>
+
+<div class="lbl">2 · Outros estados do card de hoje</div>
+<div class="row">
+ <div class="dark mini" style="background:var(--bg)"><div class="today rest">
+  <div class="t1"><span class="ic"><svg><use href="#moon"/></svg></span>Hoje<span class="r"></span></div>
+  <div class="wn">Dia livre</div><div class="wm">Nenhum treino planejado. Próximo: amanhã, Força B.</div>
+  <div style="height:14px"></div><div class="cta" style="background:var(--s2);color:var(--fg);border:1px solid var(--border)">Registrar sessão extra</div></div></div>
+ <div class="dark mini" style="background:var(--bg)"><div class="today" style="--a:var(--ok)">
+  <div class="t1"><span class="ic"><svg><use href="#check"/></svg></span>Feito hoje<span class="r">07:40</span></div>
+  <div class="wn">Força A: membros inferiores</div><div class="wm">58 min · 4.472 kg · 3 recordes</div>
+  <div style="height:14px"></div><div class="cta" style="background:var(--s2);color:var(--fg);border:1px solid var(--border)">Compartilhar no feed</div>
+  <div class="sub"><span>Ver resumo</span><span>Amanhã: Força B</span></div></div></div>
+ <div class="light mini" style="background:var(--bg)"><div class="today swim">
+  <div class="t1"><span class="ic"><svg><use href="#swim"/></svg></span>Hoje · 2 treinos<span class="r">1 de 2</span></div>
+  <div class="wn">Natação: técnica e ritmo</div><div class="wm">3 etapas · ~40 min</div>
+  <div style="height:14px"></div><div class="cta"><svg><use href="#play"/></svg>Começar treino</div>
+  <div class="sub"><span>+1 treino hoje: Força B ›</span><span></span></div></div></div>
+</div>
+</body>
+</html>
