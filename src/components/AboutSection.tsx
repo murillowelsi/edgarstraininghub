@@ -1,3 +1,4 @@
+import YouTubeFacade from "@/components/YouTubeFacade";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLatestYouTubeVideo } from "@/hooks/useLatestYouTubeVideo";
 import { Award, Clock, Users } from "lucide-react";
@@ -105,16 +106,7 @@ const AboutSection = () => {
                   </p>
                 </div>
               ) : video?.videoId ? (
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${video.videoId}`}
-                  title={t.youtube.playerTitle}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                ></iframe>
+                <YouTubeFacade videoId={video.videoId} title={video.title} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
                   <p className="text-muted-foreground">

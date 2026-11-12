@@ -132,7 +132,8 @@
     "noVideo": "No video available yet.",
     "moreVideos": "Check out more videos on my",
     "channel": "YouTube channel",
-    "playerTitle": "YouTube video player"
+    "playerTitle": "YouTube video player",
+    "play": "Play video: {{title}}"
   },
   "pricing": {
     "title": "Plans &",

@@ -132,7 +132,8 @@
     "noVideo": "Ainda não há vídeos disponíveis.",
     "moreVideos": "Veja mais vídeos no meu",
     "channel": "canal do YouTube",
-    "playerTitle": "Player de vídeo do YouTube"
+    "playerTitle": "Player de vídeo do YouTube",
+    "play": "Reproduzir vídeo: {{title}}"
   },
   "pricing": {
     "title": "Planos &",
