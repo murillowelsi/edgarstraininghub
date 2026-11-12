@@ -104,7 +104,8 @@ export const ChatService = {
 
         // Trigger push notifications via Vercel API (fire-and-forget, don't block the send).
         // Every other participant gets one — team chats have more than one recipient.
-        const recipientIds = participants.filter(pId => pId !== senderId);
+        // Distinct ids: a participant listed twice would get every push twice
+        const recipientIds = [...new Set(participants.filter(pId => pId !== senderId))];
         if (recipientIds.length > 0) {
             try {
                 const { getAuth } = await import("firebase/auth");
