@@ -1,3 +1,4 @@
+import { sendAssignPush } from "./assignPush";
 import {
   addDoc,
   collection,
@@ -12,7 +13,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { auth, db } from "../lib/firebase";
 import type {
   AssignmentWithDetails,
   AssignmentWithWorkout,
@@ -177,12 +178,20 @@ export const assignWorkoutToMany = async (
   );
 
   // Firestore batches hold up to 500 writes
+  const newIdsByAthlete = new Map<string, string[]>();
   for (let i = 0; i < pending.length; i += 450) {
     const batch = writeBatch(db);
-    pending.slice(i, i + 450).forEach((data) => batch.set(doc(collection(db, ASSIGNMENTS_COLLECTION)), data));
+    pending.slice(i, i + 450).forEach((data) => {
+      const ref = doc(collection(db, ASSIGNMENTS_COLLECTION));
+      batch.set(ref, data);
+      const athleteId = data.athleteId as string;
+      newIdsByAthlete.set(athleteId, [...(newIdsByAthlete.get(athleteId) ?? []), ref.id]);
+    });
     await batch.commit();
     created += Math.min(450, pending.length - i);
   }
+  // One push per athlete for the new assignments only (skipped days are not new)
+  if (assignedBy === auth.currentUser?.uid) sendAssignPush(newIdsByAthlete);
   return { created, skipped };
 };
 
