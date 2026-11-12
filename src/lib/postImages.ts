@@ -207,7 +207,8 @@ export const renderStoryImage = async (content: StoryContent): Promise<Blob> => 
   }
   if (!hasPhoto) {
     const bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, "#0b0f1a");
+    // Dark end of the fallback gradient = the dark workout-card surface (--workout-card)
+    bg.addColorStop(0, "#131415");
     bg.addColorStop(0.55, palette.from);
     bg.addColorStop(1, palette.to);
     ctx.fillStyle = bg;

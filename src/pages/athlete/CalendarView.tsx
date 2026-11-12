@@ -136,7 +136,7 @@ const AthleteCalendarView = () => {
                   <Badge
                     variant={isTodayDate ? "default" : "secondary"}
                     // Dark text on the orange secondary: white on it is under 3:1 at 12px
-                    className={cn("text-xs shrink-0", !isTodayDate && "text-slate-950")}
+                    className={cn("text-xs shrink-0", !isTodayDate && "text-primary-foreground")}
                   >
                     {dayAssignments.length}{" "}
                     {dayAssignments.length > 1
