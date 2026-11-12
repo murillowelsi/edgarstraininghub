@@ -45,10 +45,24 @@ export const THROTTLE_MS = {
 };
 
 // Recipients' language is not stored yet; the app's main language is Portuguese.
+// Title = who did it; body = what happened and on what (no repeated wording).
+const snippet = (text, max = 90) => {
+  const t = String(text || '').replace(/\s+/g, ' ').trim();
+  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+};
+const postLabel = (post) => {
+  const workout = snippet(post?.workoutSummary?.workoutName, 60);
+  if (workout) return `seu treino ${workout}`;
+  const caption = snippet(post?.caption, 60);
+  return caption ? `sua publicação: ${caption}` : 'sua publicação';
+};
 const TEXT = {
-  like: (name) => ({ title: 'Nova curtida', body: `${name} curtiu seu post` }),
-  comment: (name) => ({ title: 'Novo comentário', body: `${name} comentou no seu post` }),
-  mention: (name) => ({ title: 'Você foi mencionado', body: `${name} mencionou você` }),
+  like: (name, { post }) => ({ title: name, body: `curtiu ${postLabel(post)}` }),
+  comment: (name, { comment }) => ({ title: name, body: `comentou: ${snippet(comment?.text) || '…'}` }),
+  mention: (name, { comment }) => ({
+    title: name,
+    body: comment ? `mencionou você: ${snippet(comment.text)}` : 'mencionou você numa publicação',
+  }),
 };
 
 class Forbidden extends Error {}
@@ -80,19 +94,20 @@ async function resolveAction({ uid, postId, kind, commentId, mentionedUid }) {
 
   if (kind === 'like') {
     if (!(post.likedBy || []).includes(uid)) throw new Forbidden();
-    return { recipientId: post.authorId, throttleKey: `like_${postId}_${uid}`, ref: 'like' };
+    return { recipientId: post.authorId, throttleKey: `like_${postId}_${uid}`, ref: 'like', post };
   }
 
   if (kind === 'comment') {
     if (!commentId) throw new Forbidden();
-    await commentOf();
-    return { recipientId: post.authorId, throttleKey: `comment_${postId}_${uid}`, ref: commentId };
+    const comment = await commentOf();
+    return { recipientId: post.authorId, throttleKey: `comment_${postId}_${uid}`, ref: commentId, post, comment };
   }
 
   // mention
   if (!mentionedUid) throw new Forbidden();
+  let comment;
   if (commentId) {
-    const comment = await commentOf();
+    comment = await commentOf();
     const name = await publicName(mentionedUid);
     if (!String(comment.text || '').toLowerCase().includes(`@${name}`.toLowerCase())) throw new Forbidden();
   } else {
@@ -103,6 +118,8 @@ async function resolveAction({ uid, postId, kind, commentId, mentionedUid }) {
     recipientId: mentionedUid,
     throttleKey: `mention_${postId}_${commentId || 'post'}_${mentionedUid}`,
     ref: commentId || 'post',
+    post,
+    comment,
   };
 }
 
@@ -192,7 +209,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { recipientId, throttleKey, ref } = await resolveAction({ uid, postId, kind, commentId, mentionedUid });
+    const { recipientId, throttleKey, ref, post, comment } = await resolveAction({ uid, postId, kind, commentId, mentionedUid });
 
     // Never notify yourself (liking or commenting on your own post, self-mention)
     if (!recipientId || recipientId === uid) return res.status(200).json({ sent: 0 });
@@ -201,7 +218,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ sent: 0, throttled: true });
     }
 
-    const sent = await sendToUser(recipientId, TEXT[kind](await publicName(uid)));
+    const sent = await sendToUser(recipientId, TEXT[kind](await publicName(uid), { post, comment }));
     return res.status(200).json({ sent });
   } catch (err) {
     if (err instanceof Forbidden) return res.status(403).json({ error: 'Forbidden' });
