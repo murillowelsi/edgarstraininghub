@@ -31,6 +31,19 @@ export const estimateWorkoutDurationSec = (workout: Workout): number => {
   return (workout.stages ?? []).reduce((acc, s) => acc + stageDurationSec(s), 0);
 };
 
+const leafStages = (stages: WorkoutStage[]): WorkoutStage[] =>
+  stages.flatMap((s) => (s.type === "repeat" && s.stages ? leafStages(s.stages) : [s]));
+
+/**
+ * The summed time is the real length of the workout only when every stage is by
+ * time; with distance or lap stages it would show just the rests ("~2 min").
+ */
+export const hasFullTimeEstimate = (workout: Workout): boolean => {
+  if (workout.type === "strength") return true;
+  const leaves = leafStages(workout.stages ?? []);
+  return leaves.length > 0 && leaves.every((s) => s.duration?.type === "time");
+};
+
 const stageDistanceKm = (s: WorkoutStage): number => {
   if (s.type === "repeat" && s.stages) {
     const inner = s.stages.reduce((acc, x) => acc + stageDistanceKm(x), 0);
