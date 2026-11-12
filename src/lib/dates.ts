@@ -19,6 +19,7 @@ export type DateLanguage = "pt" | "en";
  *  monthYear      outubro 2026                    October 2026
  *  monthYearShort out 2026                        Oct 2026
  *  month          out                             Oct
+ *  monthLong      outubro                         October
  *  time           14:05                           14:05
  *  dateTime       19 out, 14:05 (2025)            19 Oct, 14:05 (2025)
  *  dateTimeLong   19 de outubro de 2026 às 14:05  19 October 2026 at 14:05
@@ -36,6 +37,7 @@ export type DateStyle =
   | "monthYear"
   | "monthYearShort"
   | "month"
+  | "monthLong"
   | "time"
   | "dateTime"
   | "dateTimeLong"
@@ -75,6 +77,8 @@ const pattern = (style: Exclude<DateStyle, "relative" | "relativeLong">, date: D
       return "LLL yyyy";
     case "month":
       return "LLL";
+    case "monthLong":
+      return "LLLL";
     case "time":
       return "HH:mm";
     case "dateTime":
