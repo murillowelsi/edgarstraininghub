@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EZ · Chat mobile (proposta 12/11/2026)</title>
+<!-- Mockup estático: só CSS e SVG inline. Dados fictícios. Tokens do tema escuro cinza-neutro (design-system §1.5). -->
+<style>
+  :root{
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --display:'Montserrat','Inter',system-ui,sans-serif;
+    --primary:hsl(48 96% 45%); --pfg:hsl(220 5% 9%);
+    --bg:hsl(220 5% 9%); --card:hsl(220 5% 12%); --s2:hsl(220 5% 15%); --muted:hsl(220 5% 17%);
+    --border:hsl(220 5% 24%); --input:hsl(220 5% 44%); --fg:hsl(0 0% 98%); --mfg:hsl(220 5% 66%);
+    --ok:hsl(142 69% 58%); --bad:hsl(0 91% 71%); --run:hsl(217 91% 60%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#0a0a0a;color:#e5e5e5;padding:32px;line-height:1.4}
+  h1{font:700 28px var(--display);color:#fff;margin-bottom:4px}
+  p.doc{color:#a3a3a3;max-width:980px;margin-bottom:24px}
+  .row{display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;margin-bottom:40px}
+  .lbl{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#a3a3a3;margin-bottom:10px}
+  .note{font-size:13px;color:#a3a3a3;max-width:390px;margin-top:10px}
+  .phone{width:390px;height:844px;border-radius:40px;border:8px solid #262626;background:var(--bg);color:var(--fg);overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .phone.se{width:375px;height:667px;border-radius:28px}
+  .status{height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 24px;font:600 14px var(--font)}
+  .se .status{height:20px;font-size:11px}
+  /* header único */
+  .hdr{flex:none;display:flex;align-items:center;gap:8px;padding:4px 8px 8px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--bg) 80%,transparent)}
+  .ib{width:44px;height:44px;border-radius:99px;display:grid;place-items:center;color:var(--fg);flex:none}
+  .ib svg{width:22px;height:22px}
+  .who{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+  .av{width:36px;height:36px;border-radius:99px;display:grid;place-items:center;font-weight:700;font-size:14px;background:var(--s2);border:1px solid var(--border);flex:none}
+  .av.coach{background:var(--primary);color:var(--pfg);border:none}
+  .av.xs{width:24px;height:24px;font-size:11px}
+  .who b{display:block;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .who small{display:block;font-size:12px;color:var(--mfg)}
+  /* lista */
+  .title{font:700 24px var(--display);padding:6px 16px 10px}
+  .search{margin:0 16px 8px;height:44px;border-radius:12px;background:var(--card);border:1px solid var(--input);display:flex;align-items:center;gap:8px;padding:0 12px;color:var(--mfg);font-size:15px}
+  .search svg{width:18px;height:18px}
+  .sect{font:600 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mfg);padding:12px 16px 6px}
+  .it{display:flex;align-items:center;gap:12px;padding:10px 16px;min-height:72px}
+  .it .av{width:48px;height:48px;font-size:17px}
+  .it .t{flex:1;min-width:0}
+  .it .l1{display:flex;justify-content:space-between;gap:8px}
+  .it .n{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .it .tm{font-size:12px;color:var(--mfg);flex:none}
+  .it .l2{display:flex;justify-content:space-between;gap:8px;margin-top:2px}
+  .it .pv{font-size:14px;color:var(--mfg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .it.unread .n,.it.unread .pv{color:var(--fg)}.it.unread .pv{font-weight:500}.it.unread .tm{color:var(--primary);font-weight:600}
+  .badge{min-width:22px;height:22px;border-radius:99px;background:var(--primary);color:var(--pfg);font:700 12px var(--font);display:grid;place-items:center;padding:0 6px;flex:none}
+  .tabs{flex:none;margin:auto 12px 12px;height:64px;border-radius:99px;display:flex;justify-content:space-around;align-items:center;font-size:11px;color:var(--mfg);background:hsl(220 5% 12% / .6);border:1px solid hsl(0 0% 100% / .1)}
+  .tabs div{display:flex;flex-direction:column;align-items:center;gap:2px}.tabs .on{color:var(--primary);font-weight:600}.tabs svg{width:22px;height:22px}
+  .fab{position:absolute;right:16px;bottom:92px;height:52px;padding:0 18px;border-radius:99px;background:var(--primary);color:var(--pfg);display:flex;align-items:center;gap:8px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+  .fab svg{width:20px;height:20px}
+  /* mensagens */
+  .msgs{flex:1;min-height:0;overflow:hidden;padding:8px 12px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;position:relative}
+  .day{align-self:center;font:600 11px var(--font);color:var(--mfg);padding:4px 10px;margin:10px 0 6px;border-radius:99px;background:var(--s2)}
+  .grp{display:flex;gap:8px;align-items:flex-end;margin-top:8px}
+  .grp.me{justify-content:flex-end}
+  .col{display:flex;flex-direction:column;gap:2px;max-width:78%}
+  .me .col{align-items:flex-end}
+  .sender{font:600 12px var(--font);margin:0 0 2px 12px}
+  .b{padding:9px 13px;font-size:15px;line-height:1.4;border-radius:18px;background:var(--card);border:1px solid var(--border)}
+  .me .b{background:var(--primary);color:var(--pfg);border:none}
+  /* cantos: só a última bolha do grupo tem a "quina" */
+  .them .b{border-radius:6px 18px 18px 6px}.them .b:first-of-type{border-top-left-radius:18px}.them .b.last{border-bottom-left-radius:18px 18px;border-bottom-left-radius:4px}
+  .me .b{border-radius:18px 6px 6px 18px}.me .b.first{border-top-right-radius:18px}.me .b.last{border-bottom-right-radius:4px}
+  .meta{font-size:11px;color:var(--mfg);margin:2px 6px 0;display:flex;gap:4px;align-items:center}
+  .meta svg{width:14px;height:14px;color:var(--primary)}
+  .spacer{width:24px;flex:none}
+  .newpill{position:absolute;right:12px;bottom:8px;height:36px;padding:0 12px;border-radius:99px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;gap:6px;font:600 13px var(--font);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  .newpill i{width:8px;height:8px;border-radius:99px;background:var(--primary)}
+  .newpill svg{width:16px;height:16px}
+  /* composer */
+  .comp{flex:none;display:flex;align-items:flex-end;gap:8px;padding:8px 8px calc(8px + var(--safe,0px));border-top:1px solid var(--border);background:var(--bg)}
+  .field{flex:1;min-height:44px;border-radius:22px;background:var(--card);border:1px solid var(--input);padding:11px 16px;font-size:16px;line-height:1.35;color:var(--fg)}
+  .field.ph{color:var(--mfg)}
+  .send{width:44px;height:44px;border-radius:99px;display:grid;place-items:center;background:var(--primary);color:var(--pfg);flex:none}
+  .send.off{background:var(--muted);color:var(--mfg)}
+  .send svg{width:20px;height:20px}
+  .kb{flex:none;height:291px;background:#2b2b2d;display:flex;align-items:center;justify-content:center;color:#8e8e93;font-size:13px;border-top:1px solid #3a3a3c}
+  .se .kb{height:260px}
+  .fail{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--bad);margin:2px 6px 0}
+  .fail u{color:var(--fg);text-decoration:none;font-weight:600}
+  .sk{background:var(--s2);border-radius:8px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="more" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></symbol>
+  <symbol id="send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="read" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 13 4 4 8-9M10 17l1 0 9-9"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></symbol>
+  <symbol id="grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/></symbol>
+  <symbol id="msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.6A8.5 8.5 0 1 1 21 11.5Z"/></symbol>
+</defs></svg>
+
+<h1>EZ · Chat mobile: proposta</h1>
+<p class="doc">Mockup estático (12/11/2026), tema escuro cinza-neutro, dados fictícios. A conversa ocupa a tela inteira, sem a barra global nem a barra de abas, e tem um cabeçalho só. Ela acompanha a altura visível (<code>100dvh</code> + <code>visualViewport</code>), então o campo fica sempre logo acima do teclado. O campo cresce com o texto; as mensagens são agrupadas por pessoa e por minuto, e a rolagem não pula enquanto você lê mensagens antigas.</p>
+
+<div class="row">
+<div>
+<div class="lbl">1 · Lista de conversas · 390 px</div>
+<div class="phone">
+  <div class="status"><span>9:41</span><span>●●● ◔</span></div>
+  <div class="title">Mensagens</div>
+  <div class="search"><svg><use href="#search"/></svg>Buscar conversa</div>
+  <div class="sect">Coach</div>
+  <div class="it unread"><span class="av coach">C</span><div class="t"><div class="l1"><span class="n">Coach Demo</span><span class="tm">08:12</span></div><div class="l2"><span class="pv">Pode trocar a bike para sábado, sem problema.</span><span class="badge">2</span></div></div></div>
+  <div class="sect">Times</div>
+  <div class="it"><span class="av"><svg width="20" height="20"><use href="#users"/></svg></span><div class="t"><div class="l1"><span class="n">Equipe Tri Demo</span><span class="tm">07:30</span></div><div class="l2"><span class="pv">Coach: Levem gel e água, vai ser 1h15.</span></div></div></div>
+  <div class="fab"><svg><use href="#pen"/></svg>Nova mensagem</div>
+  <div class="tabs"><div><svg><use href="#home"/></svg>Início</div><div><svg><use href="#shield"/></svg>Times</div><div><svg><use href="#grid"/></svg>Feed</div><div><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#user"/></svg>Você</div></div>
+</div>
+<p class="note">Seções "Coach" e "Times" (o atleta tem poucas conversas; o coach vê "Atletas" e "Times"). Não lida: nome e prévia em branco, hora em amarelo, contador amarelo. No grupo, a prévia mostra quem falou. A busca só aparece com mais de 6 conversas. Item de 72 px, área de toque inteira.</p>
+</div>
+
+<div>
+<div class="lbl">2 · Conversa 1:1 com o teclado aberto · 390 px</div>
+<div class="phone">
+  <div class="status"><span>9:41</span><span>●●● ◔</span></div>
+  <div class="hdr"><span class="ib"><svg><use href="#back"/></svg></span><div class="who"><span class="av coach">C</span><div style="min-width:0"><b>Coach Demo</b><small>Seu coach</small></div></div><span class="ib"><svg><use href="#more"/></svg></span></div>
+  <div class="msgs">
+    <div class="day">Ontem</div>
+    <div class="grp them"><div class="col"><div class="b">Bom dia! Viu o treino de amanhã?</div><div class="b last">É intervalado, chega 10 min antes para aquecer.</div><div class="meta">08:05</div></div></div>
+    <div class="grp me"><div class="col"><div class="b first">Vi sim.</div><div class="b last">Posso trocar a bike para sábado?</div><div class="meta">09:12 · <svg><use href="#read"/></svg> Lida</div></div></div>
+    <div class="day">Hoje</div>
+    <div class="grp them"><div class="col"><div class="b last">Pode trocar a bike para sábado, sem problema.</div><div class="meta">08:12</div></div></div>
+  </div>
+  <div class="comp"><div class="field">Combinado! Mando o resultado do intervalado amanhã depois do treino.</div><span class="send"><svg><use href="#send"/></svg></span></div>
+  <div class="kb">teclado do iOS (291 px)</div>
+</div>
+<p class="note">Cabeçalho único de 52 px: voltar (44), avatar, nome e papel; ⋮ com "Apagar conversa" (que pede confirmação), longe do polegar. Sem barra de abas. Com o teclado aberto, o campo fica colado nele e a última mensagem continua visível. Hora uma vez por bloco; "Lida" só na última mensagem sua.</p>
+</div>
+
+<div>
+<div class="lbl">3 · Grupo · iPhone SE 375×667 · teclado aberto, texto longo</div>
+<div class="phone se">
+  <div class="status"><span>9:41</span><span>◔</span></div>
+  <div class="hdr"><span class="ib"><svg><use href="#back"/></svg></span><div class="who"><span class="av"><svg width="18" height="18"><use href="#users"/></svg></span><div style="min-width:0"><b>Equipe Tri Demo</b><small>4 pessoas</small></div></div><span class="ib"><svg><use href="#more"/></svg></span></div>
+  <div class="msgs">
+    <div class="grp them"><span class="av xs coach">C</span><div class="col"><div class="sender" style="color:var(--primary)">Coach Demo</div><div class="b last">Levem gel e água, vai ser 1h15.</div><div class="meta">07:30</div></div></div>
+    <div class="newpill"><i></i>1 nova<svg><use href="#down"/></svg></div>
+  </div>
+  <div class="comp"><div class="field">Coach, hoje senti o joelho no terceiro tiro, diminuí o ritmo e terminei mais leve. Amanhã mantenho o treino ou troco por bike?</div><span class="send"><svg><use href="#send"/></svg></span></div>
+  <div class="kb">teclado do iOS (260 px)</div>
+</div>
+<p class="note">Campo multilinha: cresce até 5 linhas e depois rola por dentro. No celular, Enter quebra linha e o envio é pelo botão; no desktop, Enter envia e Shift+Enter quebra. No grupo, nome e avatar de 24 px aparecem só no 1º e no último balão do bloco; o nome do coach vem em amarelo. A pílula "1 nova ↓" aparece quando chega mensagem e você está lendo mais acima.</p>
+</div>
+</div>
+
+<div class="lbl">4 · Estados: carregando, sem conversas, conversa nova, falha ao enviar</div>
+<div class="row">
+<div class="phone se" style="height:420px"><div class="status"></div><div class="title">Mensagens</div>
+  <div class="it"><div class="sk" style="width:48px;height:48px;border-radius:99px"></div><div class="t"><div class="sk" style="height:12px;width:50%"></div><div class="sk" style="height:10px;width:75%;margin-top:8px"></div></div></div>
+  <div class="it"><div class="sk" style="width:48px;height:48px;border-radius:99px"></div><div class="t"><div class="sk" style="height:12px;width:40%"></div><div class="sk" style="height:10px;width:65%;margin-top:8px"></div></div></div>
+</div>
+<div class="phone se" style="height:420px"><div class="status"></div><div class="title">Mensagens</div>
+  <div style="text-align:center;padding:40px 24px"><div style="width:64px;height:64px;border-radius:99px;background:var(--s2);display:grid;place-items:center;margin:0 auto 14px;color:var(--mfg)"><svg width="30" height="30"><use href="#msg"/></svg></div>
+  <div style="font-weight:600;font-size:17px;margin-bottom:6px">Nenhuma conversa ainda</div><div style="color:var(--mfg);font-size:14px;margin-bottom:16px">Mande uma mensagem para o seu coach.</div>
+  <span class="fab" style="position:static;display:inline-flex">Escrever para o coach</span></div>
+</div>
+<div class="phone se" style="height:420px"><div class="status"></div>
+  <div class="hdr"><span class="ib"><svg><use href="#back"/></svg></span><div class="who"><span class="av coach">C</span><div><b>Coach Demo</b><small>Seu coach</small></div></div><span class="ib"><svg><use href="#more"/></svg></span></div>
+  <div class="msgs" style="justify-content:center;align-items:center;text-align:center;color:var(--mfg);font-size:14px">Comece a conversa.<br>Dúvidas sobre o treino, dores, mudanças na semana.</div>
+  <div class="comp"><div class="field ph">Mensagem para Coach Demo</div><span class="send off"><svg><use href="#send"/></svg></span></div>
+</div>
+<div class="phone se" style="height:420px"><div class="status"></div>
+  <div class="hdr"><span class="ib"><svg><use href="#back"/></svg></span><div class="who"><span class="av coach">C</span><div><b>Coach Demo</b><small>Seu coach</small></div></div><span class="ib"><svg><use href="#more"/></svg></span></div>
+  <div class="msgs"><div class="grp me"><div class="col"><div class="b first" style="opacity:.6">Chego 10 min atrasado.</div><div class="meta">Enviando…</div></div></div>
+    <div class="grp me"><div class="col"><div class="b last" style="opacity:.6;border:1px dashed var(--bad)">Posso fazer o longão no domingo?</div><div class="fail">Não enviada · <u>Tentar de novo</u></div></div></div></div>
+  <div class="comp"><div class="field ph">Mensagem para Coach Demo</div><span class="send off"><svg><use href="#send"/></svg></span></div>
+</div>
+</div>
+</body>
+</html>
