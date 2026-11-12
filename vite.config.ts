@@ -18,8 +18,8 @@ export default defineConfig(({ mode }) => ({
       filename: "sw.ts",
       includeAssets: ["favicon.png", "favicon.ico", "favicon.svg", "apple-touch-icon-180x180.png"],
       manifest: {
-        name: "Edgar Zanin | Fitness Trainer & Triathlete",
-        short_name: "Edgar Zanin",
+        name: "EZ",
+        short_name: "EZ",
         description: "Fitness training platform by Edgar Zanin - workouts, scheduling, and coaching.",
         theme_color: "#161718",
         background_color: "#161718",
