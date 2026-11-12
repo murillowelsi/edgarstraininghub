@@ -1350,7 +1350,8 @@
       "avgHeartRatePlaceholder": "Ex: 145",
       "avgSpeedPlaceholder": "Ex: 28.5",
       "avgPowerPlaceholder": "Ex: 220",
-      "shareCaption": "Treino concluído: {{name}} ✅"
+      "shareCaption": "Treino concluído: {{name}} ✅",
+      "elapsedTimeInvalid": "Use h:mm:ss ou m:ss, por exemplo 1:05:30 ou 45:00."
     },
     "share": {
       "title": "Compartilhar treino",

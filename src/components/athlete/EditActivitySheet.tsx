@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pacePer100m, pacePerKm, swimDistanceMeters } from "@/utils/activityFormat";
+import { formatDuration, normalizeDurationInput, parseDuration } from "@/utils/durationInput";
 
 interface Props {
   open: boolean;
@@ -22,23 +23,10 @@ interface Props {
   onSaved?: (next: ActivityData) => void;
 }
 
-const timeToString = (sec?: number) => {
-  if (!sec && sec !== 0) return "";
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = Math.floor(sec % 60);
-  if (h > 0) return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-};
+const timeToString = (sec?: number) => (!sec && sec !== 0 ? "" : formatDuration(sec));
 
-const stringToTime = (str: string): number | undefined => {
-  if (!str.trim()) return undefined;
-  const parts = str.split(":").map((x) => parseInt(x, 10));
-  if (parts.some(isNaN)) return undefined;
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  if (parts.length === 2) return parts[0] * 60 + parts[1];
-  return parts[0];
-};
+// Strict h:mm:ss / m:ss (see utils/durationInput): a typo never becomes hours
+const stringToTime = (str: string): number | undefined => parseDuration(str);
 
 const formatPaceMSS = (sec: number) => {
   const m = Math.floor(sec / 60);
@@ -78,6 +66,7 @@ const EditActivitySheet = ({ open, onOpenChange, assignmentId, workoutType, init
 
   const distNum = parseFloat(distance.replace(",", "."));
   const elapsedSec = stringToTime(elapsed);
+  const elapsedInvalid = !!elapsed.trim() && elapsedSec === undefined;
   // Stored as typed: metres for swimming, km otherwise
   const storedDistance = isNaN(distNum) ? undefined : distNum;
 
@@ -91,6 +80,8 @@ const EditActivitySheet = ({ open, onOpenChange, assignmentId, workoutType, init
       : undefined;
 
   const handleSave = async () => {
+    // Don't save (and drop the stored time) while the field holds an invalid time
+    if (elapsedInvalid) return;
     setSaving(true);
     try {
       const next: ActivityData = {
@@ -125,7 +116,19 @@ const EditActivitySheet = ({ open, onOpenChange, assignmentId, workoutType, init
       </div>
       <div className="space-y-2">
         <Label>{ta.metrics.time} (h:mm:ss)</Label>
-        <Input value={elapsed} onChange={(e) => setElapsed(e.target.value)} placeholder="0:00" />
+        <Input
+          value={elapsed}
+          onChange={(e) => setElapsed(e.target.value)}
+          onBlur={() => setElapsed((v) => normalizeDurationInput(v))}
+          placeholder="0:00"
+          aria-invalid={elapsedInvalid}
+          aria-describedby={elapsedInvalid ? "edit-elapsed-error" : undefined}
+        />
+        {elapsedInvalid && (
+          <p id="edit-elapsed-error" className="text-xs text-destructive-ink">
+            {t.athlete.workoutView.elapsedTimeInvalid}
+          </p>
+        )}
       </div>
 
       {(derivedPace !== undefined || derivedSpeed !== undefined) && (

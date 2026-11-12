@@ -1350,7 +1350,8 @@
       "avgHeartRatePlaceholder": "e.g. 145",
       "avgSpeedPlaceholder": "e.g. 28.5",
       "avgPowerPlaceholder": "e.g. 220",
-      "shareCaption": "Workout complete: {{name}} ✅"
+      "shareCaption": "Workout complete: {{name}} ✅",
+      "elapsedTimeInvalid": "Use h:mm:ss or m:ss, e.g. 1:05:30 or 45:00."
     },
     "share": {
       "title": "Share workout",
