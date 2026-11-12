@@ -16,6 +16,7 @@ import { useRef, useState } from "react";
 import { useTopBarMenu } from "../contexts/TopBarMenuContext";
 import { useTimelineActions } from "../contexts/TimelineActionsContext";
 import { GlassIconButton, GlassIconLink, GlassToolbar } from "@/components/glass/GlassToolbar";
+import { PushToggle } from "@/components/push/PushToggle";
 
 interface AdminTopBarProps {
   chatUnreadCount?: number;
@@ -197,6 +198,9 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
                   Português
                 </button>
               </div>
+
+              {/* Push notifications */}
+              <PushToggle />
 
               {/* Theme */}
               <button

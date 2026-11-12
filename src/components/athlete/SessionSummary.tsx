@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { CheckCircle2, Share2, Trophy } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PushInvite } from "@/components/push/PushInvite";
 
 export interface SessionSummaryData {
   workoutName: string;
@@ -121,6 +122,13 @@ const SessionSummary = ({ data, t, finishing, onFinish, onShare }: Props) => {
             rows={3}
           />
         </div>
+
+        {/* Once, after the first finished workout: ask about notifications (tap only) */}
+        <PushInvite
+          place="first-workout"
+          title={t.push.invite.firstWorkoutTitle}
+          description={t.push.invite.firstWorkoutDescription}
+        />
 
         <div className="space-y-2">
           <Button className="w-full h-12 text-base" onClick={() => onShare({ rpe, notes })} disabled={finishing}>

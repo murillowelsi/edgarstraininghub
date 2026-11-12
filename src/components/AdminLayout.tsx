@@ -24,6 +24,8 @@ import { ActivityDrawer } from "./timeline/ActivityDrawer";
 import { useTimelineActions } from "../contexts/TimelineActionsContext";
 import { createMentionNotifications, createTimelinePost } from "../services/timelineService";
 import { useToast } from "../hooks/use-toast";
+import { usePushBootstrap } from "@/hooks/usePush";
+import { FCMService } from "@/services/fcm";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -37,6 +39,14 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
   const { t } = useLanguage();
   const { toast } = useToast();
   const { createOpen, setCreateOpen, activityOpen, setActivityOpen } = useTimelineActions();
+
+  // Coach devices get push too: refresh the token if already allowed (never
+  // asks), and show FCM messages that arrive while the app is open
+  usePushBootstrap();
+  useEffect(() => {
+    if (!user) return;
+    return FCMService.listenForeground("/admin/chat");
+  }, [user]);
 
   const handleCreate = async ({ caption, imageUrls, mentions }: ComposerResult) => {
     if (!user || !userRole) return;

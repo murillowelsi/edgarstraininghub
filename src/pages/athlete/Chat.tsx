@@ -21,6 +21,7 @@ import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { formatChatTime } from "@/components/chat/chatDates";
 
 import { cn } from "@/lib/utils";
+import { PushInvite } from "@/components/push/PushInvite";
 
 // Set when a conversation is opened from the list, so "back" can pop that entry
 type ChatLocationState = { fromList?: boolean } | null;
@@ -241,6 +242,12 @@ export default function AthleteChat() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
+                        <PushInvite
+                            place="chat-athlete"
+                            title={t.push.invite.chatAthleteTitle}
+                            description={t.push.invite.chatAthleteDescription}
+                            className="mx-3 mt-3"
+                        />
                         {visibleChats.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground p-4 text-center">
                                 <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
