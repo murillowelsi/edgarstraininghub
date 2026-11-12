@@ -55,6 +55,7 @@ import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage, type TranslationsType } from "../../contexts/LanguageContext";
 import { durationUnitLabel, workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
+import { FormSkeleton } from "@/components/feedback/skeletons";
 
 // Helper to format duration for display
 const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, pressLapButtonLabel: string) => {
@@ -844,9 +845,7 @@ const WorkoutEditor = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <FormSkeleton className="p-4 md:p-8 max-w-3xl" fields={3} />
       </AdminLayout>
     );
   }

@@ -28,6 +28,7 @@ import type QuillInstance from "quill";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
+import { FormSkeleton } from "@/components/feedback/skeletons";
 import { useLanguage } from "../../contexts/LanguageContext";
 
 // Custom horizontal rule blot
@@ -236,9 +237,7 @@ const AdminPostForm = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <FormSkeleton className="p-4 md:p-8 max-w-3xl" />
       </AdminLayout>
     );
   }

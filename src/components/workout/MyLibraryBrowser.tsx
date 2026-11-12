@@ -47,6 +47,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AddExerciseButton } from "./AddExerciseButton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface MyLibraryBrowserProps {
   onExerciseSelected: (exercise: Exercise) => void;
@@ -754,10 +755,8 @@ const MyLibraryBrowser = ({ onExerciseSelected, addedCounts = {} }: MyLibraryBro
       {/* Results */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 pb-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
+          {loading && exercises.length === 0 ? (
+            <ListSkeleton rows={5} />
           ) : filteredExercises.length > 0 ? (
             <div className="space-y-2">
               {filteredExercises.map((exercise) => (

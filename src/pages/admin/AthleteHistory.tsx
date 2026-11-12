@@ -21,12 +21,13 @@ import {
   formatHours,
 } from "@/utils/workoutDuration";
 import { differenceInCalendarDays, isThisWeek } from "date-fns";
-import { ChevronLeft, Dumbbell, Loader2, Plus } from "lucide-react";
+import { ChevronLeft, Dumbbell, Plus } from "lucide-react";
 import { CalendarAssignDialog } from "@/components/workout/CalendarAssignDialog";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import EventCard from "@/components/athlete/EventCard";
+import { DetailSkeleton } from "@/components/feedback/skeletons";
 
 const modalityIcons = {
   running: GrRun,
@@ -101,9 +102,7 @@ const AdminAthleteHistory = () => {
   if (loading || !athlete) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <DetailSkeleton className="p-4 md:p-6" />
       </AdminLayout>
     );
   }

@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { formatChatTime } from "@/components/chat/chatDates";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 export default function AdminChat() {
     const { user } = useAuth();
@@ -229,9 +230,7 @@ export default function AdminChat() {
                     </div>
                     <div className="h-[280px] overflow-y-auto space-y-2">
                         {loadingAthletes ? (
-                            <div className="flex justify-center p-4">
-                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                            </div>
+                            <ListSkeleton rows={4} />
                         ) : filteredAthletes.length === 0 ? (
                             <p className="text-center text-muted-foreground p-4">{t.admin.chat.noAthletesFound}</p>
                         ) : (
@@ -258,9 +257,7 @@ export default function AdminChat() {
             ) : (
                 <div className="h-[320px] overflow-y-auto space-y-2">
                     {loadingTeams ? (
-                        <div className="flex justify-center p-4">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                        </div>
+                        <ListSkeleton rows={4} />
                     ) : teams.length === 0 ? (
                         <p className="text-center text-muted-foreground p-4">{t.admin.chat.noTeams}</p>
                     ) : (
@@ -305,9 +302,7 @@ export default function AdminChat() {
 
                     <div className="flex-1 overflow-y-auto">
                         {loading ? (
-                            <div className="flex justify-center items-center h-40">
-                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                            </div>
+                            <ListSkeleton className="p-2" />
                         ) : chats.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground p-4 text-center">
                                 <MessageSquare className="h-8 w-8 mb-2 opacity-50" />

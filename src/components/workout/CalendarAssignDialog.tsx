@@ -10,11 +10,12 @@ import { modalityColors } from "@/utils/modalityColors";
 import { workoutLabels } from "@/utils/workoutLabels";
 import { enUS, ptBR } from "date-fns/locale";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
-import { ArrowLeft, ChevronRight, Dumbbell, Loader2, Plus, Search, X } from "lucide-react";
+import { ArrowLeft, ChevronRight, Dumbbell, Plus, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AssignmentForm } from "./AssignmentForm";
 import { formatDate } from "@/lib/dates";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 const typeIcons: Record<WorkoutType, React.ElementType> = {
   running: GrRun,
@@ -235,10 +236,8 @@ export const CalendarAssignDialog = ({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
-        {loadingData ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+        {loadingData && workouts.length === 0 ? (
+          <ListSkeleton rows={5} />
         ) : filteredWorkouts.length === 0 ? (
           <p className="text-center text-sm text-muted-foreground py-12">{ta.noWorkouts}</p>
         ) : (

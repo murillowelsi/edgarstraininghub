@@ -60,6 +60,7 @@ import { Calendar as DayPickerCalendar } from "@/components/ui/calendar";
 import { useAuth } from "@/contexts/AuthContext";
 import { duplicateWorkoutForAthlete } from "@/services/workoutsService";
 import { dateLocale, formatDate } from "@/lib/dates";
+import { CalendarSkeleton } from "@/components/feedback/skeletons";
 import {
   athleteAccentTextClass,
   athleteChipClass,
@@ -502,9 +503,7 @@ const AdminCalendar = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-[50vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <CalendarSkeleton className="p-4 md:p-8" />
       </AdminLayout>
     );
   }

@@ -26,6 +26,7 @@ import { getUserById, getUsersByRole } from "@/services/usersService";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import { QRCodeSVG } from "qrcode.react";
+import { DetailSkeleton, ListSkeleton } from "@/components/feedback/skeletons";
 import {
   Loader2,
   Copy,
@@ -206,9 +207,7 @@ export default function AdminTeamDetail() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <DetailSkeleton className="p-4 md:p-8" />
       </AdminLayout>
     );
   }
@@ -353,9 +352,7 @@ export default function AdminTeamDetail() {
             autoFocus
           />
           {loadingAthletes ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
+            <ListSkeleton rows={4} />
           ) : filteredAthletes.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
               {t.admin.teamDetail.noAthletesAvailable}
