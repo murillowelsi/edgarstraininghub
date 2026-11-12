@@ -139,7 +139,6 @@ export default function AthleteTeamDetail() {
                   }
                   iconClassName="p-0"
                   title={member.displayName}
-                  subtitle={member.email}
                   right={
                     member.id === user?.uid ? (
                       <Badge variant="outline" className="text-xs font-normal">
