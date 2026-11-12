@@ -1894,7 +1894,9 @@
       "unlike": "Unlike, {{n}}",
       "comments": "Comments, {{n}}",
       "autoCaption": "Workout complete ✅",
-      "imageAlt": "Post photo"
+      "imageAlt": "Post photo",
+      "coachBadge": "Coach",
+      "notice": "Notice"
     },
     "create": {
       "title": "New post",

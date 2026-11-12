@@ -11,11 +11,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 import { FeedSkeleton } from "@/components/feedback/skeletons";
+import { cn } from "@/lib/utils";
 
 const PULL_THRESHOLD = 72;
 
 export function TimelineFeed() {
-  const { user, photoURL } = useAuth();
+  const { user, photoURL, isAdmin } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   const location = useLocation();
@@ -157,15 +158,16 @@ export function TimelineFeed() {
   const posts = [...realtimePosts, ...extraPosts.filter((p) => !realtimeIds.has(p.id))];
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Create post prompt — pinned, never scrolls */}
-      <div className="shrink-0 border-b border-border/50 px-4 py-3 flex items-center gap-3 bg-background">
+    <div className="flex flex-col h-full bg-feed-canvas">
+      {/* Create post prompt — pinned, never scrolls; a card in the same column as the posts */}
+      <div className="shrink-0 px-2 pt-2 pb-1 md:px-4 md:pt-4">
+      <div className="mx-auto max-w-[600px] rounded-2xl border bg-card px-3 py-2.5 flex items-center gap-3 shadow-sm dark:shadow-none">
         <CachedAvatar
           src={photoURL}
           alt={t.common.profilePhoto}
           fallback={authorName.charAt(0).toUpperCase()}
-          className="h-10 w-10 shrink-0 ring-2 ring-[#e1b506]"
-          fallbackClassName="bg-primary text-primary-foreground font-bold"
+          className={cn("h-10 w-10 shrink-0", isAdmin && "ring-2 ring-primary ring-offset-2 ring-offset-card")}
+          fallbackClassName={isAdmin ? "bg-primary text-primary-foreground font-bold" : "bg-muted text-foreground font-bold"}
         />
         <button
           onClick={() => setCreateOpen(true)}
@@ -180,6 +182,7 @@ export function TimelineFeed() {
         >
           <Image className="h-6 w-6" aria-hidden />
         </button>
+      </div>
       </div>
 
       {/* Scrollable feed */}
@@ -196,14 +199,15 @@ export function TimelineFeed() {
           />
         </div>
 
-        <div className="max-w-lg mx-auto pt-2 pb-8">
+        {/* 600px column; 8px gutters on phones so each card keeps its rounded edge */}
+        <div className="max-w-[600px] mx-auto px-2 md:px-0 pt-2 pb-8">
           {posts.length === 0 ? (
             <div className="text-center py-16 px-4 text-muted-foreground">
               <p className="text-lg font-semibold mb-1">{t.timeline.empty.noPosts}</p>
               <p className="text-sm">{t.timeline.empty.beFirst}</p>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-3 md:space-y-4">
               {posts.map((post) => (
                 <div key={post.id} data-post-id={post.id}>
                   <TimelinePostCard post={post} onDeleted={handleDeleted} />
