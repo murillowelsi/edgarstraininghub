@@ -940,7 +940,35 @@
         "created": "Workout created",
         "createdDescription": "Your workout has been created successfully.",
         "saveError": "Failed to save workout."
-      }
+      },
+      "previewTitle": "Athlete preview",
+      "lapShort": "lap",
+      "tabEdit": "Edit",
+      "tabPreview": "Preview",
+      "unsaved": "Unsaved changes",
+      "saved": "Saved",
+      "newDraft": "Not saved yet",
+      "assign": "Assign",
+      "addTemplate": "Template",
+      "duplicate": "Duplicate",
+      "stageDeleted": "Step deleted",
+      "undo": "Undo",
+      "leaveTitle": "Leave without saving?",
+      "leaveDescription": "The changes to this workout will be lost.",
+      "leaveConfirm": "Leave without saving",
+      "stay": "Keep editing",
+      "fixToSave": "Fix to save",
+      "issues": {
+        "noName": "Name the workout",
+        "emptyRepeat": "A repeat block is empty",
+        "minAboveMax": "A target has its minimum above the maximum",
+        "noStages": "Add the workout steps",
+        "noExercises": "Add the exercises",
+        "noTarget": "{{n}} step(s) without a target",
+        "noDuration": "{{n}} step(s) without a duration"
+      },
+      "fixAction": "Open",
+      "totalsLine": "{{parts}}"
     },
     "calendar": {
       "athlete": "Athlete",
@@ -1124,7 +1152,8 @@
       "zone": "Zone {{n}}",
       "notes": "Notes",
       "notesPlaceholder": "Add notes about this stage",
-      "done": "Done"
+      "done": "Done",
+      "clockInvalid": "Use mm:ss (e.g. 4:30)"
     }
   },
   "athlete": {

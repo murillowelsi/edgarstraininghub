@@ -21,7 +21,6 @@ import { GlassFab } from "@/components/glass/GlassFab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
@@ -36,7 +35,6 @@ import type { Exercise, WorkoutExercise } from "@/types/exercise";
 import { generateExerciseId, getYouTubeThumbnail, getYouTubeVideoId } from "@/types/exercise";
 import {
   ArrowDown,
-  ArrowLeft,
   ArrowUp,
   ChevronRight,
   Copy,
@@ -44,12 +42,15 @@ import {
   Dumbbell,
   GripVertical,
   Library,
-  Loader2,
   Minus,
   Plus,
   Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { WorkoutPreview } from "@/components/workout/WorkoutPreview";
+import { EditorBar, EditorTabs, IssuesBanner, LeaveConfirm } from "@/components/workout/EditorChrome";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import { hasBlockingIssue, validateWorkout } from "@/lib/validateWorkout";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
@@ -319,7 +320,7 @@ const StrengthWorkoutEditor = () => {
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [libraryTab, setLibraryTab] = useState<"library" | "browse">("library");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [leaveOpen, setLeaveOpen] = useState(false);
+  const [tab, setTab] = useState<"edit" | "preview">("edit");
   const savedSnapshot = useRef(snapshot("", "", []));
 
   const sensors = useSensors(
@@ -364,13 +365,13 @@ const StrengthWorkoutEditor = () => {
 
   const dirty = !loading && !loadFailed && snapshot(name, notes, items) !== savedSnapshot.current;
 
-  // Closing the tab / reloading with unsaved edits
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+  // Tab close, in-app links and the back button all ask first (WE-2)
+  const guard = useUnsavedChangesGuard(dirty);
+  const previewForm = useMemo(
+    () => ({ name, type: "strength" as const, stages: [], exercises: items, notes }),
+    [name, items, notes]
+  );
+  const issues = useMemo(() => validateWorkout(previewForm), [previewForm]);
 
   const exerciseById = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises]);
 
@@ -490,16 +491,16 @@ const StrengthWorkoutEditor = () => {
         await updateWorkout(id, workoutData);
         savedSnapshot.current = snapshot(name, notes, items);
         toast({ title: t.workout.toast.workoutUpdated });
-        navigate("/admin/workouts");
       } else {
         const newWorkoutId = await createWorkout(workoutData, user.uid);
         savedSnapshot.current = snapshot(name, notes, items);
         toast({ title: t.workout.toast.workoutCreated });
-        // Back to the calendar with the new workout, else offer to assign it right away
+        // Back to the calendar with the new workout; else keep editing it (Assign in the bar)
         navigate(
           searchParams.get("fromCalendar") === "true"
             ? `/admin/calendar?newWorkoutId=${newWorkoutId}`
-            : `/admin/workouts?assign=${newWorkoutId}`
+            : `/admin/workouts/strength/${newWorkoutId}/edit`,
+          { replace: searchParams.get("fromCalendar") !== "true" }
         );
       }
     } catch (error) {
@@ -535,26 +536,24 @@ const StrengthWorkoutEditor = () => {
   const openLibrary = () => setLibraryOpen(true);
 
   return (
-    <AdminLayout fullHeight pageTitle={isEditing ? te.editStrengthWorkout : te.newStrengthWorkout}>
+    <AdminLayout fullHeight>
       <div className="h-full flex flex-col">
         <div className="flex-1 overflow-auto">
-          <div className="mx-auto w-full max-w-2xl px-4 md:px-8 pb-40 md:pb-12 space-y-6">
-            {/* Back + save: part of the page column, pinned while scrolling */}
-            <div className="sticky top-0 z-20 -mx-4 md:-mx-8 px-4 md:px-8 pt-3 pb-2 flex items-center justify-between gap-2 bg-background/85 backdrop-blur-md">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="-ml-2 rounded-full text-muted-foreground"
-                onClick={() => (dirty ? setLeaveOpen(true) : leave())}
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                {t.admin.nav.workouts}
-              </Button>
-              <Button onClick={handleSave} disabled={saving} size="sm" className="rounded-full px-4">
-                {saving && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
-                {te.saveWorkout}
-              </Button>
+          <div className="mx-auto w-full max-w-6xl px-4 md:px-6 pb-40 md:pb-12">
+            <EditorBar
+              dirty={dirty || !isEditing}
+              isNew={!isEditing}
+              saving={saving}
+              blocked={hasBlockingIssue(issues)}
+              onBack={() => guard.leave("/admin/workouts")}
+              onAssign={isEditing && id ? () => navigate(`/admin/workouts?assign=${id}`) : undefined}
+              onSave={handleSave}
+            />
+            <div className="mt-4 lg:hidden">
+              <EditorTabs tab={tab} onTab={setTab} />
             </div>
+            <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+            <div className={cn("min-w-0 space-y-6", tab === "preview" && "max-lg:hidden")}>
 
             {/* Name + instructions */}
             <div className="space-y-3">
@@ -565,15 +564,20 @@ const StrengthWorkoutEditor = () => {
                 aria-label={te.workoutName}
                 className="h-auto border-0 bg-transparent px-0 text-2xl md:text-3xl font-display font-extrabold shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40"
               />
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder={te.instructionsPlaceholder}
-                aria-label={te.instructionsForAthlete}
-                rows={2}
-                className="resize-none rounded-2xl bg-muted/40"
-              />
+              <div className="space-y-1.5">
+                <label htmlFor="strength-notes" className="text-sm font-medium">{te.instructionsForAthlete}</label>
+                <Textarea
+                  id="strength-notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={te.instructionsPlaceholder}
+                  rows={2}
+                  className="resize-none rounded-2xl"
+                />
+              </div>
             </div>
+
+            <IssuesBanner issues={issues} />
 
             {/* Exercises */}
             <section className="space-y-3">
@@ -632,10 +636,17 @@ const StrengthWorkoutEditor = () => {
                 </>
               )}
             </section>
+            </div>
+
+            {/* Live preview: what the athlete's session will list */}
+            <aside className={cn("min-w-0 lg:sticky lg:top-16 lg:self-start", tab === "edit" && "max-lg:hidden")}>
+              <WorkoutPreview form={previewForm} highlightId={editingId} />
+            </aside>
+            </div>
           </div>
         </div>
 
-        {items.length > 0 && <GlassFab label={te.addExercises} onClick={openLibrary} hideFrom="md" />}
+        {items.length > 0 && tab === "edit" && <GlassFab label={te.addExercises} onClick={openLibrary} hideFrom="md" />}
 
         {/* Library drawer: add as many as needed, badges show what's already in */}
         <ResponsiveModal
@@ -712,16 +723,7 @@ const StrengthWorkoutEditor = () => {
           )}
         </ResponsiveModal>
 
-        <ResponsiveConfirm
-          open={leaveOpen}
-          onOpenChange={setLeaveOpen}
-          title={te.unsavedTitle}
-          description={te.unsavedDescription}
-          confirmLabel={te.discard}
-          cancelLabel={te.keepEditing}
-          destructive
-          onConfirm={leave}
-        />
+        <LeaveConfirm open={guard.confirmOpen} onLeave={guard.confirmLeave} onStay={guard.cancelLeave} />
       </div>
     </AdminLayout>
   );

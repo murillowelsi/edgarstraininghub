@@ -13,9 +13,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { Textarea } from "@/components/ui/textarea";
-import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { ActionMenu } from "@/components/ui/action-menu";
-import { GlassFab } from "@/components/glass/GlassFab";
 import { WorkoutLoadError } from "@/components/admin/WorkoutLoadError";
 import {
   SortableContext,
@@ -26,414 +24,244 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
+import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   createWorkout,
   getWorkoutById,
   updateWorkout,
 } from "@/services/workoutsService";
-import type { WorkoutFormData, WorkoutStage, WorkoutType } from "@/types/workout";
+import type { StageType, WorkoutFormData, WorkoutStage, WorkoutType } from "@/types/workout";
 import {
   createDefaultStage,
   createRepeatBlock,
+  getDefaultIntervalType,
   getDefaultStageType,
-  stageColors,
+  intensityTypesByWorkout,
 } from "@/types/workout";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ChevronDown, Clock, Flame, GripVertical, Heart, Loader2, MoreVertical, Pencil, Plus, Repeat, Trash2, Wind, Zap } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Copy, GripVertical, LayoutTemplate, MoreVertical, Plus, Repeat, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import StageEditor from "../../components/workout/StageEditor";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useAuth } from "../../contexts/AuthContext";
-import { useLanguage, type TranslationsType } from "../../contexts/LanguageContext";
-import { durationUnitLabel, workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
+import { useLanguage } from "../../contexts/LanguageContext";
+import { workoutLabels } from "@/utils/workoutLabels";
 import { FormSkeleton } from "@/components/feedback/skeletons";
+import { SportIcon } from "@/components/icons/sport-icons";
+import { sportKey } from "@/components/timeline/sport";
+import { planTotals } from "@/components/timeline/workout-viz/planModel";
+import { formatTotalTime } from "@/hooks/useAthleteStats";
+import { WorkoutPreview } from "@/components/workout/WorkoutPreview";
+import { EditorBar, EditorTabs, IssuesBanner, LeaveConfirm } from "@/components/workout/EditorChrome";
+import { durationText, targetChip } from "@/components/workout/stageText";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import { hasBlockingIssue, validateWorkout } from "@/lib/validateWorkout";
 
-// Helper to format duration for display
-const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, pressLapButtonLabel: string) => {
-  if (stage.duration.type === "lapButton") {
-    return pressLapButtonLabel;
-  }
-  if (stage.duration.value !== undefined) {
-    const unit = durationUnitLabel(stage.duration.unit);
-    return `${stage.duration.value} ${unit}`;
-  }
-  return L.duration(stage.duration.type);
+/** New ids for a duplicated step (and its nested steps) */
+const cloneStage = (s: WorkoutStage): WorkoutStage => ({
+  ...s,
+  id: crypto.randomUUID(),
+  stages: s.stages?.map(cloneStage),
+});
+
+/** Warm-up → main → cool-down, with zones when this sport has them */
+const templateStages = (type: WorkoutType): WorkoutStage[] => {
+  const zones = intensityTypesByWorkout[type].includes("heartRateZone");
+  const make = (stageType: StageType, minutes: number, zone: number) => {
+    const s = createDefaultStage(stageType);
+    return {
+      ...s,
+      duration: { type: "time" as const, value: minutes, unit: "min" as const },
+      intensity: zones ? { type: "heartRateZone" as const, value: zone } : s.intensity,
+    };
+  };
+  return [make("warmup", 10, 2), make(getDefaultIntervalType(type), 20, 3), make("cooldown", 10, 1)];
 };
 
-// Helper to format intensity for display
-const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: TranslationsType): string | null => {
-  const { intensity } = stage;
-
-  if (intensity.type === "none") {
-    return null;
-  }
-
-  // Zone-based intensity
-  if (intensity.type === "heartRateZone" && intensity.value) {
-    return `${t.workoutMeta.hrZone} ${intensity.value}`;
-  }
-  if (intensity.type === "powerZone" && intensity.value) {
-    return `${t.workoutMeta.powerZoneShort} ${intensity.value}`;
-  }
-
-  // Range-based intensity (min-max)
-  if (intensity.min !== undefined && intensity.max !== undefined) {
-    const unit = intensity.unit || "";
-    return `${intensity.min}-${intensity.max} ${unit}`;
-  }
-
-  // Single value intensity
-  if (intensity.value !== undefined) {
-    const unit = intensity.unit || "";
-    return `${intensity.value} ${unit}`;
-  }
-
-  // Just show the type label if no values
-  return L.intensity(intensity.type);
-};
-
-// Helper to format swimming details
-const formatSwimmingDetails = (stage: WorkoutStage, L: WorkoutLabels): string[] => {
-  const details: string[] = [];
-  if (stage.strokeType) {
-    details.push(L.stroke(stage.strokeType));
-  }
-  if (stage.drillType && stage.drillType !== "none") {
-    details.push(L.drill(stage.drillType));
-  }
-  if (stage.equipment && stage.equipment !== "none") {
-    details.push(L.swimEquipment(stage.equipment));
-  }
-  return details;
-};
-
-const stageIcons: Record<string, React.ElementType> = {
-  warmup: Flame,
-  run: GrRun,
-  cooldown: Wind,
-  recovery: Heart,
-  interval: Zap,
-  repeat: Repeat,
-  bike: GrBike,
-  rest: Clock,
-  swim: GrSwim,
-};
-
-// Draggable stage item component with collapsible details
-const DraggableStage = ({
+/** One step in the list: grip, name, target chip, duration, ⋮ — tap to edit (WE-3) */
+const StageRow = ({
   stage,
-  onEdit,
+  sport,
+  selected,
+  onSelect,
+  onDuplicate,
   onDelete,
+  editor,
   isNested = false,
 }: {
   stage: WorkoutStage;
-  onEdit: () => void;
+  sport: string;
+  selected: boolean;
+  onSelect: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
+  /** The inline form, when this step is open (desktop) */
+  editor?: React.ReactNode;
   isNested?: boolean;
 }) => {
   const { t } = useLanguage();
   const L = workoutLabels(t);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: stage.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const color = stageColors[stage.type];
-  const intensityDisplay = formatIntensity(stage, L, t);
-  const swimmingDetails = formatSwimmingDetails(stage, L);
-  const StageIcon = stageIcons[stage.type] || GrRun;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: stage.id });
+  const chip = targetChip(stage, t);
+  const easy = ["warmup", "cooldown", "recovery", "rest"].includes(stage.type);
 
   return (
-    <div ref={setNodeRef} style={style}>
-      <div className={cn("rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden", isNested && "bg-muted/30")}>
-        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <div className={cn("flex items-center gap-3", isNested ? "p-3" : "p-4")}>
-            <div
-              {...attributes}
-              {...listeners}
-              style={{ touchAction: 'none' }}
-              className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0"
-            >
-              <GripVertical className="h-4 w-4" />
-            </div>
-
-            <div
-              className="p-2 rounded-xl shrink-0 flex items-center justify-center"
-              style={{ backgroundColor: `${color}1a`, color }}
-            >
-              <StageIcon className="h-4 w-4" />
-            </div>
-
-            <CollapsibleTrigger asChild>
-              <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{L.stage(stage.type)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDuration(stage, L, t.admin.workoutEditor.pressLapButton)}
-                    {swimmingDetails.length > 0 && ` · ${swimmingDetails[0]}`}
-                    {!isExpanded && intensityDisplay && ` · ${intensityDisplay}`}
-                  </p>
-                </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
-              </button>
-            </CollapsibleTrigger>
-
-            <ActionMenu
-              title={L.stage(stage.type)}
-              items={[
-                { icon: Pencil, label: t.common.edit, onClick: onEdit },
-                { icon: Trash2, label: t.common.delete, destructive: true, onClick: onDelete },
-              ]}
-            >
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground shrink-0" aria-label={t.common.actions}>
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </ActionMenu>
-          </div>
-
-          <CollapsibleContent>
-            <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-3 text-sm">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.duration}</p>
-                  <p className="font-medium">{formatDuration(stage, L, t.admin.workoutEditor.pressLapButton)}</p>
-                  <p className="text-xs text-muted-foreground">{L.duration(stage.duration.type)}</p>
-                </div>
-                {intensityDisplay && (
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.intensity}</p>
-                    <p className="font-medium">{intensityDisplay}</p>
-                    <p className="text-xs text-muted-foreground">{L.intensity(stage.intensity.type)}</p>
-                  </div>
-                )}
-                {stage.strokeType && (
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.stroke}</p>
-                    <p className="font-medium">{L.stroke(stage.strokeType)}</p>
-                  </div>
-                )}
-              </div>
-              {((stage.drillType && stage.drillType !== "none") || (stage.equipment && stage.equipment !== "none")) && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {stage.drillType && stage.drillType !== "none" && (
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.drillType}</p>
-                      <p className="font-medium">{L.drill(stage.drillType)}</p>
-                    </div>
-                  )}
-                  {stage.equipment && stage.equipment !== "none" && (
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.equipment}</p>
-                      <p className="font-medium">{L.swimEquipment(stage.equipment)}</p>
-                    </div>
-                  )}
-                </div>
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}>
+      <div className={cn("rounded-xl border bg-card transition-colors", selected && "border-primary/60 ring-1 ring-primary/60", isNested && "bg-background")}>
+        <div className="flex items-center gap-2 py-1.5 pl-1.5 pr-1">
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            style={{ touchAction: "none" }}
+            aria-label={t.admin.workoutEditor.dragHere}
+            className="grid h-10 w-7 shrink-0 cursor-grab place-items-center text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={onSelect} aria-expanded={selected} className="flex min-h-11 min-w-0 flex-1 items-center gap-2.5 text-left">
+            <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: `hsl(var(--sport-${sport}) / ${easy ? 0.4 : 1})` }} />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold">{L.stage(stage.type)}</span>
+              {chip && (
+                <span className="mt-0.5 inline-flex items-center gap-1 rounded-md border border-foreground/10 bg-foreground/[0.05] px-1.5 text-xs">
+                  <b className="font-semibold">{chip.kind}</b>
+                  {chip.value && <span className="tabular-nums text-muted-foreground">{chip.value}</span>}
+                </span>
               )}
-              {stage.notes && (
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.notes}</p>
-                  <p className="text-muted-foreground bg-muted/50 p-2 rounded">{stage.notes}</p>
-                </div>
-              )}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+            </span>
+            <span className="shrink-0 text-sm font-semibold tabular-nums">{durationText(stage, t)}</span>
+          </button>
+          <ActionMenu
+            title={L.stage(stage.type)}
+            items={[
+              { icon: Copy, label: t.admin.workoutEditor.duplicate, onClick: onDuplicate },
+              { icon: Trash2, label: t.common.delete, destructive: true, onClick: onDelete },
+            ]}
+          >
+            <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 text-muted-foreground" aria-label={t.common.actions}>
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </ActionMenu>
+        </div>
+        {editor && <div className="border-t px-3 pb-3 pt-3">{editor}</div>}
       </div>
     </div>
   );
 };
 
-// Repeat block container with nested sortable
 // Empty drop zone for repeat blocks
 const EmptyRepeatDropZone = ({ repeatId }: { repeatId: string }) => {
   const { t } = useLanguage();
-  const L = workoutLabels(t);
-  const { setNodeRef, isOver } = useDroppable({
-    id: `empty-${repeatId}`,
-    data: {
-      type: "empty-repeat",
-      repeatId,
-    },
-  });
-
+  const { setNodeRef, isOver } = useDroppable({ id: `empty-${repeatId}`, data: { type: "empty-repeat", repeatId } });
   return (
     <div
       ref={setNodeRef}
-      className={`text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-md transition-colors ${
-        isOver ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950" : ""
-      }`}
+      className={cn("rounded-md border-2 border-dashed py-4 text-center text-sm text-muted-foreground transition-colors", isOver && "border-primary bg-primary/10")}
     >
       {isOver ? t.admin.workoutEditor.dropHere : t.admin.workoutEditor.dragHere}
     </div>
   );
 };
 
+/** Repeat block: dashed, "5×" and its total, nested steps inside */
 const RepeatBlock = ({
   stage,
-  onEdit,
+  sport,
+  selectedId,
+  onSelect,
+  onDuplicate,
   onDelete,
-  onNestedStagesChange,
-  onEditNested,
+  onDuplicateNested,
   onDeleteNested,
+  renderEditor,
 }: {
   stage: WorkoutStage;
-  onEdit: () => void;
+  sport: string;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  onDuplicate: () => void;
   onDelete: () => void;
-  onNestedStagesChange: (stages: WorkoutStage[]) => void;
-  onEditNested: (id: string) => void;
+  onDuplicateNested: (id: string) => void;
   onDeleteNested: (id: string) => void;
+  renderEditor: (id: string) => React.ReactNode;
 }) => {
   const { t } = useLanguage();
-  const L = workoutLabels(t);
-  const [isExpanded, setIsExpanded] = useState(true);
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: stage.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const color = stageColors[stage.type];
-  const nestedStages = stage.stages || [];
+  const te = t.admin.workoutEditor;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: stage.id });
+  const nested = stage.stages || [];
+  const block = { name: "x", type: "running", stages: [stage] } as unknown as Parameters<typeof planTotals>[0];
+  const secs = planTotals(block).seconds;
 
   return (
-    <div ref={setNodeRef} style={style}>
-      <div className="rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all overflow-hidden">
-        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <div className="p-4 flex items-center gap-3">
-            <div
-              {...attributes}
-              {...listeners}
-              style={{ touchAction: 'none' }}
-              className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0"
-            >
-              <GripVertical className="h-4 w-4" />
-            </div>
-
-            <div className="p-2 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}>
-              <Repeat className="h-4 w-4" />
-            </div>
-
-            <CollapsibleTrigger asChild>
-              <button className="flex flex-1 items-center gap-2 min-w-0 text-left">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{t.admin.workoutEditor.repeatTitle.replace("{{n}}", String(stage.repeatCount || 2))}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.admin.workoutEditor.blockStages.replace("{{n}}", String(nestedStages.length))}
-                  </p>
-                </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
-              </button>
-            </CollapsibleTrigger>
-
-            <ActionMenu
-              title={L.stage(stage.type)}
-              items={[
-                { icon: Pencil, label: t.common.edit, onClick: onEdit },
-                { icon: Trash2, label: t.common.delete, destructive: true, onClick: onDelete },
-              ]}
-            >
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground shrink-0" aria-label={t.common.actions}>
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </ActionMenu>
-          </div>
-
-          <CollapsibleContent>
-            <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-2 min-h-[60px]">
-              <SortableContext
-                items={nestedStages.map((s) => s.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {nestedStages.map((nestedStage) => (
-                  <DraggableStage
-                    key={nestedStage.id}
-                    stage={nestedStage}
-                    onEdit={() => onEditNested(nestedStage.id)}
-                    onDelete={() => onDeleteNested(nestedStage.id)}
-                    isNested
-                  />
-                ))}
-              </SortableContext>
-              {nestedStages.length === 0 && (
-                <EmptyRepeatDropZone repeatId={stage.id} />
-              )}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}>
+      <div className={cn("rounded-2xl border border-dashed border-foreground/25 p-1.5", selectedId === stage.id && "border-primary/60")}>
+        <div className="flex items-center gap-2 pr-1">
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            style={{ touchAction: "none" }}
+            aria-label={te.dragHere}
+            className="grid h-10 w-7 shrink-0 cursor-grab place-items-center text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => onSelect(stage.id)} className="flex min-h-11 flex-1 items-center gap-2 text-left">
+            <span className="text-sm font-bold">{te.repeatTitle.replace("{{n}}", String(stage.repeatCount || 2))}</span>
+            {secs ? <span className="text-xs text-muted-foreground tabular-nums">{formatTotalTime(secs)}</span> : null}
+          </button>
+          <ActionMenu
+            title={te.repeatTitle.replace("{{n}}", String(stage.repeatCount || 2))}
+            items={[
+              { icon: Copy, label: te.duplicate, onClick: onDuplicate },
+              { icon: Trash2, label: t.common.delete, destructive: true, onClick: onDelete },
+            ]}
+          >
+            <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 text-muted-foreground" aria-label={t.common.actions}>
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </ActionMenu>
+        </div>
+        {renderEditor(stage.id) && <div className="mb-2 rounded-xl border bg-card p-3">{renderEditor(stage.id)}</div>}
+        <div className="space-y-1.5">
+          <SortableContext items={nested.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+            {nested.map((ns) => (
+              <StageRow
+                key={ns.id}
+                stage={ns}
+                sport={sport}
+                isNested
+                selected={selectedId === ns.id}
+                onSelect={() => onSelect(ns.id)}
+                onDuplicate={() => onDuplicateNested(ns.id)}
+                onDelete={() => onDeleteNested(ns.id)}
+                editor={renderEditor(ns.id)}
+              />
+            ))}
+          </SortableContext>
+          {nested.length === 0 && <EmptyRepeatDropZone repeatId={stage.id} />}
+        </div>
       </div>
     </div>
   );
 };
 
-// Stage overlay for drag preview
 const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
   const { t } = useLanguage();
   const L = workoutLabels(t);
-  const color = stageColors[stage.type];
-  const intensityDisplay = formatIntensity(stage, L, t);
-
-  const StageIcon = stageIcons[stage.type] || GrRun;
-
-  if (stage.type === "repeat") {
-    return (
-      <div className="rounded-xl border bg-card opacity-90 shadow-lg overflow-hidden">
-        <div className="p-4 flex items-center gap-3">
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-          <div className="p-2 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#6366f11a", color: "#6366f1" }}>
-            <Repeat className="h-4 w-4" />
-          </div>
-          <div>
-            <p className="font-semibold text-sm">{t.admin.workoutEditor.repeatTitle.replace("{{n}}", String(stage.repeatCount || 2))}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="rounded-xl border bg-card opacity-90 shadow-lg overflow-hidden">
-      <div className="flex items-center gap-3 p-4">
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
-        <div className="p-2 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}1a`, color }}>
-          <StageIcon className="h-4 w-4" />
-        </div>
-        <div>
-          <p className="font-semibold text-sm">{L.stage(stage.type)}</p>
-          <p className="text-xs text-muted-foreground">
-            {formatDuration(stage, L, t.admin.workoutEditor.pressLapButton)}
-            {intensityDisplay && ` · ${intensityDisplay}`}
-          </p>
-        </div>
-      </div>
+    <div className="flex items-center gap-3 rounded-xl border bg-card p-3 opacity-90 shadow-lg">
+      <GripVertical className="h-4 w-4 text-muted-foreground" />
+      <span className="text-sm font-semibold">
+        {stage.type === "repeat" ? t.admin.workoutEditor.repeatTitle.replace("{{n}}", String(stage.repeatCount || 2)) : L.stage(stage.type)}
+      </span>
+      {stage.type !== "repeat" && <span className="ml-auto text-sm tabular-nums">{durationText(stage, t)}</span>}
     </div>
   );
 };
@@ -441,6 +269,7 @@ const StageOverlay = ({ stage }: { stage: WorkoutStage }) => {
 const WorkoutEditor = () => {
   const { t } = useLanguage();
   const L = workoutLabels(t);
+  const isMobile = useIsMobile();
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const isEditing = Boolean(id);
@@ -463,6 +292,13 @@ const WorkoutEditor = () => {
     type: urlWorkoutType,
     stages: [],
   });
+  // What is saved in Firestore; differs from the form = unsaved changes. A new workout starts dirty.
+  const [saved, setSaved] = useState<string | null>(null);
+  const dirty = saved === null ? !loading : JSON.stringify(formData) !== saved;
+  const guard = useUnsavedChangesGuard(dirty && !loadFailed);
+  const issues = useMemo(() => validateWorkout(formData), [formData]);
+  const blocked = hasBlockingIssue(issues);
+  const [tab, setTab] = useState<"edit" | "preview">("edit");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -501,12 +337,14 @@ const WorkoutEditor = () => {
         navigate("/admin/workouts");
         return;
       }
-      setFormData({
+      const loaded: WorkoutFormData = {
         name: workout.name,
         type: workout.type,
         stages: workout.stages,
         notes: workout.notes,
-      });
+      };
+      setFormData(loaded);
+      setSaved(JSON.stringify(loaded));
     } catch (error) {
       console.error("Error loading workout:", error);
       setLoadFailed(true);
@@ -530,17 +368,19 @@ const WorkoutEditor = () => {
       });
       return;
     }
+    if (blocked) return;
 
     setSaving(true);
 
     try {
       if (isEditing && id) {
         await updateWorkout(id, formData);
+        // Stay on the page: the bar now says "Saved" and Assign is one tap away
+        setSaved(JSON.stringify(formData));
         toast({
           title: t.admin.workoutEditor.toast.updated,
           description: t.admin.workoutEditor.toast.updatedDescription,
         });
-        navigate("/admin/workouts");
       } else {
         const newWorkoutId = await createWorkout(formData, user?.uid || "");
         toast({
@@ -548,11 +388,12 @@ const WorkoutEditor = () => {
           description: t.admin.workoutEditor.toast.createdDescription,
         });
 
-        // Back to the calendar with the new workout, else offer to assign it right away
+        setSaved(JSON.stringify(formData));
+        // Back to the calendar with the new workout; else keep editing the saved one (Assign in the bar)
         if (fromCalendar) {
           navigate(`/admin/calendar?newWorkoutId=${newWorkoutId}`);
         } else {
-          navigate(`/admin/workouts?assign=${newWorkoutId}`);
+          navigate(`/admin/workouts/${newWorkoutId}/edit`, { replace: true });
         }
       }
     } catch (error: unknown) {
@@ -587,7 +428,20 @@ const WorkoutEditor = () => {
     setEditingStageId(newRepeat.id);
   };
 
+  // Delete with "Undo" in the toast (WE-5)
+  const withUndo = (before: WorkoutStage[]) =>
+    toast({
+      title: t.admin.workoutEditor.stageDeleted,
+      duration: 6000,
+      action: (
+        <ToastAction altText={t.admin.workoutEditor.undo} onClick={() => setFormData((prev) => ({ ...prev, stages: before }))}>
+          {t.admin.workoutEditor.undo}
+        </ToastAction>
+      ),
+    });
+
   const handleDeleteStage = (stageId: string) => {
+    const before = formData.stages;
     setFormData((prev) => ({
       ...prev,
       stages: prev.stages.filter((s) => s.id !== stageId),
@@ -595,6 +449,29 @@ const WorkoutEditor = () => {
     if (editingStageId === stageId) {
       setEditingStageId(null);
     }
+    withUndo(before);
+  };
+
+  const handleDuplicateStage = (stageId: string) => {
+    setFormData((prev) => {
+      const idx = prev.stages.findIndex((s) => s.id === stageId);
+      if (idx !== -1) {
+        const copy = cloneStage(prev.stages[idx]);
+        return { ...prev, stages: [...prev.stages.slice(0, idx + 1), copy, ...prev.stages.slice(idx + 1)] };
+      }
+      return {
+        ...prev,
+        stages: prev.stages.map((s) => {
+          const j = s.stages?.findIndex((n) => n.id === stageId) ?? -1;
+          if (j === -1 || !s.stages) return s;
+          return { ...s, stages: [...s.stages.slice(0, j + 1), cloneStage(s.stages[j]), ...s.stages.slice(j + 1)] };
+        }),
+      };
+    });
+  };
+
+  const handleAddTemplate = () => {
+    setFormData((prev) => ({ ...prev, stages: [...prev.stages, ...templateStages(prev.type)] }));
   };
 
   const handleDeleteNestedStage = (repeatId: string, nestedStageId: string) => {
@@ -603,6 +480,8 @@ const WorkoutEditor = () => {
       toast({ title: t.admin.workoutEditor.blockNeedsStage });
       return;
     }
+    const before = formData.stages;
+    withUndo(before);
     setFormData((prev) => ({
       ...prev,
       stages: prev.stages.map((s) => {
@@ -858,180 +737,179 @@ const WorkoutEditor = () => {
     );
   }
 
-  return (
-    <AdminLayout
-      fullHeight
-      pageTitle={(isEditing ? t.admin.workoutEditor.editTitle : t.admin.workoutEditor.newTitle).replace(
-        "{{type}}",
-        t.workoutMeta.types[formData.type]
+  const te = t.admin.workoutEditor;
+  const sport = sportKey(formData.type);
+  const editingInfo = getEditingInfo();
+  const repeatTitle = (block: WorkoutStage) => te.repeatTitle.replace("{{n}}", String(block.repeatCount || 2));
+
+  const stageEditor = editingInfo ? (
+    <>
+      {editingInfo.parent && (
+        <Button variant="ghost" size="sm" className="-ml-2 mb-2 rounded-full text-muted-foreground" onClick={() => setEditingStageId(editingInfo.parent!.id)}>
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          {te.backToBlock}
+        </Button>
       )}
-    >
-      <div className="h-full flex flex-col">
-        <div className="flex-1 overflow-auto">
-          <div className="mx-auto w-full max-w-2xl px-4 md:px-8 pb-40 md:pb-12 space-y-6">
-            {/* Back + save: part of the page column, pinned while scrolling */}
-            <div className="sticky top-0 z-20 -mx-4 md:-mx-8 px-4 md:px-8 pt-3 pb-2 flex items-center justify-between gap-2 bg-background/85 backdrop-blur-md">
-              <Button variant="ghost" size="sm" className="-ml-2 rounded-full text-muted-foreground" asChild>
-                <Link to="/admin/workouts">
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  {t.admin.nav.workouts}
-                </Link>
-              </Button>
-              <Button onClick={handleSubmit} disabled={saving} size="sm" className="rounded-full px-4">
-                {saving && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
-                {t.workout.editor.saveWorkout}
-              </Button>
-            </div>
+      <StageEditor
+        key={editingInfo.stage.id}
+        stage={editingInfo.stage}
+        onChange={editingInfo.onChange}
+        onDone={() => setEditingStageId(null)}
+        workoutType={formData.type}
+        onEditNested={setEditingStageId}
+        describe={(st) => [targetChip(st, t)?.kind, durationText(st, t)].filter(Boolean).join(" · ")}
+      />
+    </>
+  ) : null;
+  // Desktop: the form opens right under the step; phones: in a drawer
+  const renderEditor = (stageId: string) => (!isMobile && editingStageId === stageId ? stageEditor : null);
 
-            {/* Name + instructions */}
-            <div className="space-y-3">
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                placeholder={t.workout.editor.workoutNamePlaceholder}
-                aria-label={t.workout.editor.workoutName}
-                className="h-auto border-0 bg-transparent px-0 text-2xl md:text-3xl font-display font-extrabold shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40"
-              />
-              <Textarea
-                value={formData.notes ?? ""}
-                onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-                placeholder={t.workout.editor.instructionsPlaceholder}
-                aria-label={t.workout.editor.instructionsForAthlete}
-                rows={2}
-                className="resize-none rounded-2xl bg-muted/40"
-              />
-            </div>
+  const totals = planTotals({ ...formData, id: "x" } as unknown as Parameters<typeof planTotals>[0]);
+  const totalsLine = [
+    totals.seconds ? `~${formatTotalTime(totals.seconds)}` : "",
+    totals.km ? (formData.type === "swimming" ? `${Math.round(totals.km * 1000)} m` : `${totals.km.toLocaleString(undefined, { maximumFractionDigits: 1 })} km`) : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
-            {/* Stages */}
-            <section className="space-y-3">
-              <h2 className="font-display text-lg font-bold">{t.admin.workoutEditor.stagesTitle}</h2>
-              {formData.stages.length === 0 ? (
-                <button
-                  type="button"
-                  onClick={handleAddStage}
-                  className="lg:hidden w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-colors py-12 px-6 text-center"
-                >
-                  <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                    <Plus className="h-6 w-6" />
-                  </div>
-                  <p className="font-semibold">{t.admin.workoutEditor.addStage}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{t.admin.workoutEditor.noStages}</p>
-                </button>
-              ) : (
-                <div className="space-y-3">
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCorners}
-                    onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
-                    onDragEnd={handleDragEnd}
+  return (
+    <AdminLayout fullHeight>
+      <div className="h-full overflow-auto">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-24 md:px-6">
+          <EditorBar
+            dirty={dirty}
+            isNew={!isEditing}
+            saving={saving}
+            blocked={blocked}
+            onBack={() => guard.leave("/admin/workouts")}
+            onAssign={isEditing && id ? () => navigate(`/admin/workouts?assign=${id}`) : undefined}
+            onSave={handleSubmit}
+          />
+
+          <div className="mt-4 lg:hidden">
+            <EditorTabs tab={tab} onTab={setTab} />
+          </div>
+
+          <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+            {/* Edit */}
+            <div className={cn("min-w-0 space-y-5", tab === "preview" && "max-lg:hidden")}>
+              <div className="space-y-2">
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder={t.workout.editor.workoutNamePlaceholder}
+                  aria-label={t.workout.editor.workoutName}
+                  className="h-auto border-0 bg-transparent px-0 font-display text-2xl font-extrabold shadow-none placeholder:text-muted-foreground/40 focus-visible:ring-0 md:text-3xl"
+                />
+                <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold"
+                    style={{ backgroundColor: `hsl(var(--sport-${sport}) / 0.15)`, color: `hsl(var(--sport-${sport}))` }}
                   >
-                    <SortableContext items={getAllSortableIds()} strategy={verticalListSortingStrategy}>
+                    <SportIcon type={formData.type} className="h-3.5 w-3.5" aria-hidden />
+                    {t.workoutMeta.types[formData.type]}
+                  </span>
+                  {totalsLine && <span className="tabular-nums">{totalsLine}</span>}
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="workout-notes" className="text-sm font-medium">{t.workout.editor.instructionsForAthlete}</label>
+                <Textarea
+                  id="workout-notes"
+                  value={formData.notes ?? ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+                  placeholder={t.workout.editor.instructionsPlaceholder}
+                  rows={2}
+                  className="resize-none rounded-2xl"
+                />
+              </div>
+
+              <IssuesBanner issues={issues} onOpen={(sid) => setEditingStageId(sid)} />
+
+              <section className="space-y-2" aria-labelledby="stages-title">
+                <h2 id="stages-title" className="text-base font-bold">{te.stagesTitle}</h2>
+                <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+                  <SortableContext items={getAllSortableIds()} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-1.5">
                       {formData.stages.map((stage) =>
                         stage.type === "repeat" ? (
                           <RepeatBlock
                             key={stage.id}
                             stage={stage}
-                            onEdit={() => setEditingStageId(stage.id)}
+                            sport={sport}
+                            selectedId={editingStageId}
+                            onSelect={(sid) => setEditingStageId((cur) => (cur === sid ? null : sid))}
+                            onDuplicate={() => handleDuplicateStage(stage.id)}
                             onDelete={() => handleDeleteStage(stage.id)}
-                            onNestedStagesChange={(nestedStages) => handleNestedStagesChange(stage.id, nestedStages)}
-                            onEditNested={(nestedId) => setEditingStageId(nestedId)}
-                            onDeleteNested={(nestedId) => handleDeleteNestedStage(stage.id, nestedId)}
+                            onDuplicateNested={handleDuplicateStage}
+                            onDeleteNested={(nid) => handleDeleteNestedStage(stage.id, nid)}
+                            renderEditor={renderEditor}
                           />
                         ) : (
-                          <DraggableStage
+                          <StageRow
                             key={stage.id}
                             stage={stage}
-                            onEdit={() => setEditingStageId(stage.id)}
+                            sport={sport}
+                            selected={editingStageId === stage.id}
+                            onSelect={() => setEditingStageId((cur) => (cur === stage.id ? null : stage.id))}
+                            onDuplicate={() => handleDuplicateStage(stage.id)}
                             onDelete={() => handleDeleteStage(stage.id)}
+                            editor={renderEditor(stage.id)}
                           />
                         )
                       )}
-                    </SortableContext>
-                    <DragOverlay>{activeStage ? <StageOverlay stage={activeStage} /> : null}</DragOverlay>
-                  </DndContext>
-                </div>
-              )}
+                    </div>
+                  </SortableContext>
+                  <DragOverlay>{activeStage ? <StageOverlay stage={activeStage} /> : null}</DragOverlay>
+                </DndContext>
 
-              {/* Add buttons — the FAB covers this on mobile */}
-              <div className="hidden lg:grid grid-cols-2 gap-2">
-                {[
-                  { icon: Plus, label: t.admin.workoutEditor.addStage, onClick: handleAddStage },
-                  { icon: Repeat, label: t.admin.workoutEditor.addRepetition, onClick: handleAddRepetition },
-                ].map((b) => (
-                  <button
-                    key={b.label}
-                    type="button"
-                    onClick={b.onClick}
-                    className="rounded-2xl border border-dashed border-border hover:border-primary/50 hover:text-primary transition-colors py-3 text-sm font-medium text-muted-foreground flex items-center justify-center gap-1.5"
-                  >
-                    <b.icon className="h-4 w-4" />
-                    {b.label}
-                  </button>
-                ))}
-              </div>
-            </section>
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  {[
+                    { icon: Plus, label: te.addStage, onClick: handleAddStage },
+                    { icon: Repeat, label: te.addRepetition, onClick: handleAddRepetition },
+                    { icon: LayoutTemplate, label: te.addTemplate, onClick: handleAddTemplate },
+                  ].map((b) => (
+                    <button
+                      key={b.label}
+                      type="button"
+                      onClick={b.onClick}
+                      className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-dashed px-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                    >
+                      <b.icon className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{b.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            {/* Live preview */}
+            <aside className={cn("min-w-0 lg:sticky lg:top-16 lg:self-start", tab === "edit" && "max-lg:hidden")}>
+              <WorkoutPreview form={formData} highlightId={editingStageId} />
+            </aside>
           </div>
         </div>
 
-        {/* Speed dial FAB — mobile only */}
-        <GlassFab
-          label={t.admin.workoutEditor.addStage}
-          hideFrom="lg"
-          actions={[
-            { icon: Plus, label: t.admin.workoutEditor.addStage, onClick: handleAddStage },
-            { icon: Repeat, label: t.admin.workoutEditor.addRepetition, onClick: handleAddRepetition },
-          ]}
-        />
+        {/* Phones: the step form in a drawer (outside DndContext so drag-and-drop is never disrupted) */}
+        <ResponsiveModal
+          open={isMobile && !!editingStageId && !!editingInfo}
+          onOpenChange={(open) => !open && setEditingStageId(null)}
+          title={
+            !editingInfo
+              ? ""
+              : editingInfo.stage.type === "repeat"
+              ? repeatTitle(editingInfo.stage)
+              : editingInfo.parent
+              ? `${repeatTitle(editingInfo.parent)} › ${L.stage(editingInfo.stage.type)}`
+              : te.editStage
+          }
+          className="max-w-md"
+        >
+          {isMobile && stageEditor}
+        </ResponsiveModal>
 
-        {/* Stage editor drawer — renders outside DndContext so drag-and-drop is never disrupted */}
-        {(() => {
-          const editingInfo = getEditingInfo();
-          const te = t.admin.workoutEditor;
-          const repeatTitle = (block: WorkoutStage) => te.repeatTitle.replace("{{n}}", String(block.repeatCount || 2));
-          const title = !editingInfo
-            ? ""
-            : editingInfo.stage.type === "repeat"
-            ? repeatTitle(editingInfo.stage)
-            : editingInfo.parent
-            ? `${repeatTitle(editingInfo.parent)} › ${L.stage(editingInfo.stage.type)}`
-            : te.editStage;
-          return (
-            <ResponsiveModal
-              open={!!editingStageId}
-              onOpenChange={(open) => !open && setEditingStageId(null)}
-              title={title}
-              className="max-w-md"
-            >
-              {editingInfo && (
-                <>
-                  {editingInfo.parent && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="-ml-2 mb-2 rounded-full text-muted-foreground"
-                      onClick={() => setEditingStageId(editingInfo.parent!.id)}
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-1" />
-                      {te.backToBlock}
-                    </Button>
-                  )}
-                  <StageEditor
-                    key={editingInfo.stage.id}
-                    stage={editingInfo.stage}
-                    onChange={editingInfo.onChange}
-                    onDone={() => (editingInfo.parent ? setEditingStageId(editingInfo.parent.id) : setEditingStageId(null))}
-                    workoutType={formData.type}
-                    onEditNested={setEditingStageId}
-                    describe={(st) =>
-                      [formatDuration(st, L, te.pressLapButton), formatIntensity(st, L, t)].filter(Boolean).join(" · ")
-                    }
-                  />
-                </>
-              )}
-            </ResponsiveModal>
-          );
-        })()}
+        <LeaveConfirm open={guard.confirmOpen} onLeave={guard.confirmLeave} onStay={guard.cancelLeave} />
       </div>
     </AdminLayout>
   );
