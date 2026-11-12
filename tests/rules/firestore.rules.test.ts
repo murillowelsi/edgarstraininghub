@@ -194,30 +194,48 @@ describe("keeps working (passes today, must stay green)", () => {
   });
 
   // useEventChatReminders: the athlete's app posts race reminders as the coach
+  const reminder = (extra: Record<string, unknown> = {}) => ({
+    text: "📍 3 days until City Triathlon.",
+    senderId: COACH,
+    senderName: "coach",
+    read: false,
+    kind: "event_reminder",
+    eventId: "ev-ana",
+    createdAt: serverTimestamp(),
+    ...extra,
+  });
+  const seedEvents = () =>
+    env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "athleteEvents", "ev-ana"), { athleteId: ANA, title: "City Triathlon" });
+      await setDoc(doc(ctx.firestore(), "athleteEvents", "ev-bruno"), { athleteId: BRUNO, title: "Other race" });
+    });
+  const dm = () => collection(as(ANA), "chats", `${ANA}_${COACH}`, "messages");
+
   it("an athlete posts a race reminder as the coach in their own 1:1 chat", async () => {
-    await assertSucceeds(
-      setDoc(doc(as(ANA), "chats", `${ANA}_${COACH}`, "messages", "r1"), {
-        text: "Race in 3 days",
-        senderId: COACH,
-        senderName: "coach",
-        read: false,
-        kind: "event_reminder",
-        createdAt: serverTimestamp(),
-      }),
-    );
+    await seedEvents();
+    await assertSucceeds(setDoc(doc(dm(), "r1"), reminder()));
+    await assertSucceeds(setDoc(doc(dm(), "r1b"), reminder({ text: "🏁 Today's the day! City Triathlon — good luck!" })));
   });
 
   it("an athlete cannot post as the coach without the reminder marker or in a team chat", async () => {
+    await seedEvents();
     await assertFails(
-      setDoc(doc(as(ANA), "chats", `${ANA}_${COACH}`, "messages", "r2"), {
-        text: "fake", senderId: COACH, read: false, createdAt: serverTimestamp(),
-      }),
+      setDoc(doc(dm(), "r2"), { text: "fake", senderId: COACH, read: false, createdAt: serverTimestamp() }),
     );
     await assertFails(
-      setDoc(doc(as(ANA), "chats", `team_${TEAM}`, "messages", "r3"), {
-        text: "fake", senderId: COACH, read: false, kind: "event_reminder", createdAt: serverTimestamp(),
-      }),
+      setDoc(doc(as(ANA), "chats", `team_${TEAM}`, "messages", "r3"), reminder()),
     );
+  });
+
+  it("a coach-signed reminder must keep the reminder format and point at the athlete's own event", async () => {
+    await seedEvents();
+    await assertFails(setDoc(doc(dm(), "r4"), reminder({ text: "Pay your plan at example.test" })));
+    await assertFails(setDoc(doc(dm(), "r5"), reminder({ eventId: "ev-bruno" })));
+    await assertFails(setDoc(doc(dm(), "r6"), reminder({ eventId: "missing" })));
+    await assertFails(setDoc(doc(dm(), "r7"), reminder({ text: "📍 " + "x".repeat(260) })));
+    await assertFails(setDoc(doc(dm(), "r8"), reminder({ link: "https://example.test" })));
+    const { eventId: _omit, ...withoutEvent } = reminder();
+    await assertFails(setDoc(doc(dm(), "r9"), withoutEvent));
   });
 });
 
