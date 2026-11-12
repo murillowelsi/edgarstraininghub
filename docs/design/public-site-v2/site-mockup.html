@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EZ · Site público v2 (proposta 12/11/2026)</title>
+<!-- Mockup estático: só CSS e SVG inline. Textos entre [COLCHETES] são placeholders: o conteúdo é do usuário. -->
+<style>
+  :root{--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Montserrat','Inter',system-ui,sans-serif;--primary:hsl(48 96% 45%);--navy:hsl(222 47% 11%)}
+  .dark{--bg:hsl(220 5% 9%);--alt:hsl(220 5% 7%);--card:hsl(220 5% 12%);--s2:hsl(220 5% 15%);--border:hsl(220 5% 24%);--fg:hsl(0 0% 98%);--mfg:hsl(220 5% 66%);--ink:var(--primary);--okc:hsl(142 69% 58%)}
+  .light{--bg:#fff;--alt:hsl(220 20% 96%);--card:#fff;--s2:hsl(210 40% 98%);--border:hsl(220 13% 88%);--fg:hsl(222 47% 11%);--mfg:hsl(215 16% 42%);--ink:hsl(40 95% 30%);--okc:hsl(142 72% 29%)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#0a0a0a;color:#e5e5e5;padding:32px;line-height:1.45}
+  h1.ttl{font:700 28px var(--display);color:#fff}p.doc{color:#a3a3a3;max-width:1100px;margin:4px 0 24px}
+  .row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-bottom:40px}
+  .lbl{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#a3a3a3;margin-bottom:10px}
+  .note{font-size:13px;color:#a3a3a3;max-width:390px;margin-top:10px}
+  .ph{background:hsl(48 96% 45% / .14);color:var(--ink);border:1px dashed hsl(48 96% 45% / .6);border-radius:4px;padding:0 4px;font-weight:600}
+  .site{width:1280px;border-radius:14px;overflow:hidden;border:1px solid #262626;background:var(--bg);color:var(--fg)}
+  .nav{display:flex;align-items:center;gap:28px;padding:16px 56px;border-bottom:1px solid var(--border)}
+  .nav .lg{font:800 24px var(--display);color:var(--ink)}.nav .lg span{color:var(--fg);font-size:18px;margin-left:6px}
+  .nav a{font:600 14px var(--font);color:var(--mfg)}.nav .sp{flex:1}
+  .nav .lang{font:700 12px var(--font);border:1px solid var(--border);border-radius:99px;padding:4px 4px;display:flex;gap:2px}.nav .lang i{font-style:normal;padding:2px 8px;border-radius:99px}.nav .lang .on{background:var(--s2);color:var(--fg)}
+  .btn{height:46px;padding:0 20px;border-radius:12px;background:var(--primary);color:var(--navy);font:700 15px var(--font);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+  .btn.o{background:transparent;color:var(--fg);border:1px solid var(--border)}
+  .btn.sm{height:38px;font-size:13px;padding:0 14px}
+  sec{display:block;padding:72px 56px}
+  .alt{background:var(--alt)}
+  .ov{font:700 12px var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+  h2{font:800 34px/1.15 var(--display);margin:8px 0 10px}
+  .lead{font-size:17px;color:var(--mfg);max-width:620px}
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:56px}
+  .hero h1{font:800 52px/1.08 var(--display)}.hero h1 em{font-style:normal;color:var(--ink)}
+  .hero p{font-size:18px;color:var(--mfg);margin:16px 0 24px;max-width:520px}
+  .proof{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+  .proof span{font:600 13px var(--font);padding:6px 12px;border-radius:99px;border:1px solid var(--border);color:var(--mfg)}
+  .photo{height:420px;border-radius:28px;background:radial-gradient(80% 60% at 60% 30%,hsl(48 96% 45% / .25),transparent 60%),linear-gradient(160deg,hsl(220 5% 22%),hsl(220 5% 12%));display:grid;place-items:center;color:var(--mfg);font-size:13px;border:1px solid var(--border)}
+  /* how */
+  .how{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+  .how div{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px}
+  .how b{display:block;font:800 30px var(--display);color:var(--ink)}.how h3{font:700 17px var(--font);margin:4px 0}.how p{font-size:14px;color:var(--mfg)}
+  /* plans */
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;align-items:stretch}
+  .plan{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:22px;display:flex;flex-direction:column}
+  .plan.pop{border:2px solid var(--primary);position:relative}
+  .plan.pop .tag{position:absolute;top:-12px;left:22px;font:800 11px var(--font);letter-spacing:.06em;background:var(--primary);color:var(--navy);border-radius:99px;padding:4px 10px}
+  .plan h3{font:700 18px var(--font)}.plan .for{font-size:14px;color:var(--mfg);margin:4px 0 14px;min-height:40px}
+  .price{font:800 38px var(--display)}.price small{font:600 15px var(--font);color:var(--mfg)}
+  .feat{list-style:none;margin:16px 0 20px;display:grid;gap:9px;font-size:14px;flex:1}
+  .feat li{display:flex;gap:8px;align-items:flex-start}.feat .y{color:var(--okc);font-weight:800}.feat .n{color:var(--mfg)}.feat li.off{color:var(--mfg)}
+  .plan .btn{justify-content:center}
+  .fine{font-size:13px;color:var(--mfg);margin-top:14px}
+  /* testimonials */
+  .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+  .tq{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
+  .tq .res{font:800 22px var(--display);color:var(--ink)}
+  .tq p{font-size:15px}
+  .tq .who{display:flex;align-items:center;gap:10px;margin-top:auto;font-size:13px;color:var(--mfg)}.tq .who b{color:var(--fg);display:block;font-size:14px}
+  .av{width:40px;height:40px;border-radius:99px;background:var(--s2);border:1px solid var(--border);display:grid;place-items:center;font-weight:700;flex:none}
+  /* faq */
+  .faq{display:grid;grid-template-columns:.8fr 1.2fr;gap:40px}
+  .qa{border-top:1px solid var(--border);padding:16px 0;display:flex;justify-content:space-between;gap:16px;font:600 16px var(--font)}
+  .qa span{color:var(--mfg);font-weight:400;font-size:22px;line-height:1}
+  .qa.open{flex-direction:column}.qa.open p{font:400 15px var(--font);color:var(--mfg)}
+  /* cta */
+  .cta{display:flex;justify-content:space-between;align-items:center;gap:24px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px 32px}
+  .cta h2{font-size:28px;margin:0}
+  .foot{display:flex;gap:24px;align-items:center;padding:22px 56px;background:hsl(220 5% 6%);color:hsl(220 5% 70%);font-size:13px}
+  .foot .sp{flex:1}
+  .yt{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;border:1px solid var(--border);background:var(--card);margin-top:16px;max-width:560px}
+  .yt i{width:44px;height:44px;border-radius:12px;background:hsl(0 80% 55% / .15);display:grid;place-items:center;color:hsl(0 80% 60%);font-style:normal;font-weight:800}
+  /* mobile */
+  .phone{width:390px;border-radius:40px;border:8px solid #262626;background:var(--bg);color:var(--fg);overflow:hidden}
+  .phone sec{padding:36px 18px}
+  .phone h2{font-size:26px}
+  .phone .plans,.phone .tgrid{grid-template-columns:1fr}
+  .phone .plans{display:flex;overflow:hidden;gap:12px;padding-top:14px}.phone .plan{min-width:300px}
+  .mnav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+</style>
+</head>
+<body>
+<h1 class="ttl">EZ · Site público v2: proposta</h1>
+<p class="doc">Mockup estático (12/11/2026). A home responde, nesta ordem, às três perguntas de quem chega: <b>quem é o coach e como ele trabalha?</b> · <b>quanto custa e o que inclui?</b> · <b>funciona para pessoas como eu?</b> Depois vêm as dúvidas (FAQ) e um único chamado para conversar. <span class="ph">[Textos entre colchetes]</span> são placeholders: planos, preços, FAQ e depoimentos dependem do usuário. Nada aqui é conteúdo novo de marketing.</p>
+
+<div class="lbl">1 · Home · desktop 1280 · escuro</div>
+<div class="row"><div class="site dark">
+ <div class="nav"><span class="lg">EZ<span>Edgar Zanin</span></span><span class="sp"></span><a>Como funciona</a><a>Planos</a><a>Sobre</a><a>Blog</a><span class="lang"><i class="on">PT</i><i>EN</i></span><span class="btn sm">Falar no WhatsApp</span></div>
+
+ <div class="hero">
+  <div>
+   <div class="ov">Treino de força, corrida e triathlon</div>
+   <h1>Torne-se um atleta mais forte e rápido com <em>Edgar Zanin</em></h1>
+   <p>Do primeiro passo ao alto rendimento. Acompanhamento personalizado para garantir que você não apenas chegue lá, mas se supere.</p>
+   <div style="display:flex;gap:10px"><span class="btn">Falar no WhatsApp</span><span class="btn o">Ver planos</span></div>
+   <div class="proof"><span>Ironman completo</span><span>Maratona em 2:56</span><span>YMCA Level 3</span><span>Presencial em Bournemouth e online</span></div>
+  </div>
+  <div class="photo">foto do coach (a mesma do hero atual, recortada)</div>
+ </div>
+
+ <sec class="alt">
+  <div class="ov">Como funciona</div><h2>Do primeiro contato ao treino no app</h2>
+  <div class="how">
+   <div><b>1</b><h3>Conversa e avaliação</h3><p><span class="ph">[COMO É A AVALIAÇÃO INICIAL]</span></p></div>
+   <div><b>2</b><h3>Plano no app EZ</h3><p>Treinos de força e endurance no celular, com etapas, cargas e descanso.</p></div>
+   <div><b>3</b><h3>Acompanhamento</h3><p><span class="ph">[COMO É O CONTATO COM O COACH: CHAT, AJUSTES, FREQUÊNCIA]</span></p></div>
+  </div>
+ </sec>
+
+ <sec>
+  <div class="ov">Planos</div><h2>Escolha como quer treinar</h2><p class="lead"><span class="ph">[O QUE TODOS OS PLANOS INCLUEM, EX.: ACESSO AO APP]</span> · <span class="ph">[REGRA DE PAGAMENTO / FIDELIDADE]</span></p>
+  <div class="plans">
+   <div class="plan"><h3><span class="ph">[NOME DO PLANO 1]</span></h3><div class="for"><span class="ph">[PARA QUEM É, 1 FRASE]</span></div><div class="price"><span class="ph">[PREÇO]</span> <small>/ <span class="ph">[PERÍODO]</span></small></div>
+    <ul class="feat"><li><span class="y">✓</span>Plano de treino personalizado</li><li><span class="y">✓</span>Acompanhamento por WhatsApp</li><li class="off"><span class="n">—</span>Avaliação inicial completa</li><li class="off"><span class="n">—</span>Sessão 1:1 por mês</li><li class="off"><span class="n">—</span>Videochamada por mês</li></ul>
+    <span class="btn o">Quero este plano</span></div>
+   <div class="plan pop"><span class="tag">MAIS ESCOLHIDO</span><h3><span class="ph">[NOME DO PLANO 2]</span></h3><div class="for"><span class="ph">[PARA QUEM É, 1 FRASE]</span></div><div class="price"><span class="ph">[PREÇO]</span> <small>/ <span class="ph">[PERÍODO]</span></small></div>
+    <ul class="feat"><li><span class="y">✓</span>Plano de treino personalizado</li><li><span class="y">✓</span>Acompanhamento por WhatsApp</li><li><span class="y">✓</span>Avaliação inicial completa</li><li class="off"><span class="n">—</span>Sessão 1:1 por mês</li><li class="off"><span class="n">—</span>Videochamada por mês</li></ul>
+    <span class="btn">Quero este plano</span></div>
+   <div class="plan"><h3><span class="ph">[NOME DO PLANO 3]</span></h3><div class="for"><span class="ph">[PARA QUEM É, 1 FRASE]</span></div><div class="price"><span class="ph">[PREÇO]</span> <small>/ <span class="ph">[PERÍODO]</span></small></div>
+    <ul class="feat"><li><span class="y">✓</span>Plano de treino personalizado</li><li><span class="y">✓</span>Acompanhamento por WhatsApp</li><li><span class="y">✓</span>Avaliação inicial completa</li><li><span class="y">✓</span>Sessão 1:1 por mês</li><li><span class="y">✓</span>Videochamada por mês</li></ul>
+    <span class="btn o">Quero este plano</span></div>
+  </div>
+  <p class="fine">Os itens com ✓/— são os que já estão no site hoje, só alinhados para comparar. "Quero este plano" abre o WhatsApp com o nome do plano na mensagem.</p>
+ </sec>
+
+ <sec class="alt">
+  <div class="ov">Resultados</div><h2>Quem treina com o EZ</h2>
+  <div class="tgrid">
+   <div class="tq"><div class="res"><span class="ph">[RESULTADO, EX.: "−20 MIN NO 70.3"]</span></div><p>"<span class="ph">[DEPOIMENTO REAL, COM CONSENTIMENTO]</span>"</p><div class="who"><span class="av">?</span><div><b><span class="ph">[NOME]</span></b><span class="ph">[MODALIDADE / NÍVEL]</span></div></div></div>
+   <div class="tq"><div class="res"><span class="ph">[RESULTADO]</span></div><p>"<span class="ph">[DEPOIMENTO REAL, COM CONSENTIMENTO]</span>"</p><div class="who"><span class="av">?</span><div><b><span class="ph">[NOME]</span></b><span class="ph">[MODALIDADE / NÍVEL]</span></div></div></div>
+   <div class="tq"><div class="res"><span class="ph">[RESULTADO]</span></div><p>"<span class="ph">[DEPOIMENTO REAL, COM CONSENTIMENTO]</span>"</p><div class="who"><span class="av">?</span><div><b><span class="ph">[NOME]</span></b><span class="ph">[MODALIDADE / NÍVEL]</span></div></div></div>
+  </div>
+  <p class="fine">Vem dos depoimentos aprovados no portal do coach (já existe). Sem resultado preenchido, o card mostra só a citação. Com menos de 3 aprovados, a grade mostra só os que existem; com 0, a seção some.</p>
+ </sec>
+
+ <sec>
+  <div class="faq">
+   <div><div class="ov">Dúvidas</div><h2>Perguntas frequentes</h2><p class="lead">Não achou a sua? Mande uma mensagem.</p><div style="margin-top:16px"><span class="btn o">Falar no WhatsApp</span></div></div>
+   <div>
+    <div class="qa open"><div style="display:flex;justify-content:space-between;width:100%"><span style="color:var(--fg);font-size:16px;font-weight:600"><span class="ph">[PERGUNTA 1, EX.: PRECISO TER EXPERIÊNCIA?]</span></span><span>−</span></div><p><span class="ph">[RESPOSTA 1]</span></p></div>
+    <div class="qa"><span style="color:var(--fg);font-size:16px"><span class="ph">[PERGUNTA 2, EX.: COMO FUNCIONA O ONLINE?]</span></span><span>+</span></div>
+    <div class="qa"><span style="color:var(--fg);font-size:16px"><span class="ph">[PERGUNTA 3, EX.: POSSO CANCELAR?]</span></span><span>+</span></div>
+    <div class="qa"><span style="color:var(--fg);font-size:16px"><span class="ph">[PERGUNTA 4, EX.: QUE EQUIPAMENTO PRECISO?]</span></span><span>+</span></div>
+    <div class="qa"><span style="color:var(--fg);font-size:16px"><span class="ph">[PERGUNTA 5]</span></span><span>+</span></div>
+   </div>
+  </div>
+ </sec>
+
+ <sec class="alt" style="padding-top:48px;padding-bottom:56px">
+  <div class="cta"><div><h2>Vamos conversar sobre o seu objetivo?</h2><p class="lead" style="margin-top:6px">Resposta pelo WhatsApp, <span class="ph">[PRAZO DE RESPOSTA]</span>.</p></div><span class="btn">Falar no WhatsApp</span></div>
+  <div class="yt"><i>▶</i><div><b>Vídeos no YouTube</b><div style="font-size:13px;color:var(--mfg)">Treinos, dicas e provas · abre o canal</div></div></div>
+ </sec>
+ <div class="foot"><b style="color:#fff">EZ</b><span>Início</span><span>Sobre</span><span>Blog</span><span>Contato</span><span>Área do atleta</span><span>Privacidade</span><span class="sp"></span><span>© 2026 Edgar Zanin</span></div>
+</div></div>
+
+<div class="lbl">2 · Home · celular 390 · claro (planos em carrossel horizontal)</div>
+<div class="row">
+<div class="phone light">
+ <div class="mnav"><b style="font:800 22px var(--display);color:var(--ink)">EZ</b><span class="btn sm">WhatsApp</span></div>
+ <div style="padding:20px 18px">
+  <div class="photo" style="height:220px;margin-bottom:18px">foto do coach</div>
+  <div class="ov">Força, corrida e triathlon</div>
+  <h2 style="font-size:30px">Torne-se um atleta mais forte e rápido com <span style="color:var(--ink)">Edgar Zanin</span></h2>
+  <div class="proof"><span>Ironman</span><span>Maratona 2:56</span><span>YMCA L3</span></div>
+  <div style="display:grid;gap:8px;margin-top:18px"><span class="btn" style="justify-content:center">Falar no WhatsApp</span><span class="btn o" style="justify-content:center">Ver planos</span></div>
+ </div>
+ <sec class="alt">
+  <div class="ov">Planos</div><h2>Escolha como quer treinar</h2>
+  <div class="plans">
+   <div class="plan pop"><span class="tag">MAIS ESCOLHIDO</span><h3><span class="ph">[NOME DO PLANO 2]</span></h3><div class="for"><span class="ph">[PARA QUEM É]</span></div><div class="price"><span class="ph">[PREÇO]</span> <small>/ <span class="ph">[PERÍODO]</span></small></div>
+    <ul class="feat"><li><span class="y">✓</span>Plano personalizado</li><li><span class="y">✓</span>WhatsApp</li><li><span class="y">✓</span>Avaliação inicial</li><li class="off"><span class="n">—</span>Sessão 1:1</li></ul><span class="btn">Quero este plano</span></div>
+   <div class="plan"><h3><span class="ph">[PLANO 3]</span></h3></div>
+  </div>
+  <p class="fine">Deslize para ver os 3 planos · ● ○ ○</p>
+ </sec>
+ <sec>
+  <div class="ov">Resultados</div><h2>Quem treina com o EZ</h2>
+  <div class="tq"><div class="res"><span class="ph">[RESULTADO]</span></div><p>"<span class="ph">[DEPOIMENTO]</span>"</p><div class="who"><span class="av">?</span><div><b><span class="ph">[NOME]</span></b></div></div></div>
+ </sec>
+</div>
+<p class="note">No celular, a ordem é a mesma. Os planos viram um carrossel com o "mais escolhido" primeiro e os depoimentos uma pilha. O FAQ é um acordeão e o rodapé leva os links. O botão do WhatsApp fica no topo, sempre visível.</p>
+</div>
+</body>
+</html>
