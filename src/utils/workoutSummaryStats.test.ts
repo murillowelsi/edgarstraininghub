@@ -42,10 +42,17 @@ describe("workoutCardModel", () => {
     expect(m.secondary[1]).toMatchObject({ value: "1:35", unit: "/100m" });
   });
 
-  it("strength: volume hero, missing blocks disappear", () => {
+  it("strength: time hero, sets and total load as secondaries", () => {
+    const m = workoutCardModel({ ...base, workoutType: "strength", elapsedTime: 1569, volumeKg: 504, workingSets: 12, totalSets: 15 }, labels, "pt-BR");
+    expect(m.hero).toMatchObject({ key: "time", value: "26:09" });
+    expect(m.secondary.map((s) => s.key)).toEqual(["sets", "volume"]);
+    expect(m.secondary[1]).toMatchObject({ value: "504", unit: "kg" });
+  });
+
+  it("strength without time: sets become the hero, missing blocks disappear", () => {
     const m = workoutCardModel({ ...base, workoutType: "strength", volumeKg: 4310.4, workingSets: 13, totalSets: 14 }, labels, "pt-BR");
-    expect(m.hero).toMatchObject({ value: "4.310", unit: "kg" });
-    expect(m.secondary).toEqual([{ key: "sets", label: "Sets", value: "13/14" }]);
+    expect(m.hero).toMatchObject({ key: "sets", value: "13/14" });
+    expect(m.secondary).toEqual([{ key: "volume", label: "Volume", value: "4.310", unit: "kg" }]);
   });
 
   it("falls back to time as the hero when there is no distance", () => {
