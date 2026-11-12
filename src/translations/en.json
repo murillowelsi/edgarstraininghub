@@ -1240,7 +1240,52 @@
       "logExtraError": "Couldn't log the session. Try again.",
       "extra": "Extra",
       "inProgress": "Workout in progress",
-      "inProgressDetail": "{{done}}/{{total}} sets · {{minutes}} min · tap to continue"
+      "inProgressDetail": "{{done}}/{{total}} sets · {{minutes}} min · tap to continue",
+      "todayCard": {
+        "label": "Today",
+        "xOfY": "{{i}} of {{n}}",
+        "moreToday": "+{{n}} more workout today",
+        "moreTodayOther": "+{{n}} more workouts today",
+        "stages": "{{n}} stages",
+        "stageOne": "1 stage",
+        "exercises": "{{n}} exercises",
+        "exerciseOne": "1 exercise",
+        "start": "Start workout",
+        "open": "Open workout",
+        "view": "View workout",
+        "inProgress": "In progress",
+        "startedAgo": "{{n}} min ago",
+        "setsProgress": "{{done}} of {{total}} sets · saved on this phone",
+        "resume": "Continue workout",
+        "discard": "Discard",
+        "discardTitle": "Discard the workout in progress?",
+        "discardDescription": "The sets ticked on this phone will be deleted. The workout stays in your calendar.",
+        "doneToday": "Done today",
+        "viewSummary": "View summary",
+        "restTitle": "Rest day",
+        "restNone": "Nothing planned.",
+        "restNext": "Next: {{when}}, {{name}}.",
+        "tomorrow": "tomorrow"
+      },
+      "week": {
+        "title": "This week",
+        "calendar": "Calendar",
+        "summary": "{{done}} of {{planned}} workouts",
+        "missed": "{{n}} missed",
+        "missedOther": "{{n}} missed",
+        "minutesDone": "{{time}} done",
+        "nothing": "Nothing planned this week",
+        "status": {
+          "done": "done",
+          "partial": "partial",
+          "planned": "planned",
+          "missed": "missed",
+          "none": "no workout"
+        },
+        "dayAria": "{{day}}: {{status}}. Open in calendar"
+      },
+      "nextTitle": "Next",
+      "raceTitle": "Your race"
     },
     "workouts": {
       "title": "Workouts",
@@ -1277,7 +1322,8 @@
       "today": "Today",
       "tomorrow": "Tomorrow",
       "workout": "workout",
-      "workouts": "workouts"
+      "workouts": "workouts",
+      "addExtraFor": "Log a strength workout on this day"
     },
     "workoutView": {
       "pressLapButton": "Press Lap Button",
