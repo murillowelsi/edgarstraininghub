@@ -262,6 +262,8 @@ service cloud.firestore {
       allow read: if request.auth != null && (
         isAdmin() ||
         (resource != null && request.auth.uid in resource.data.participantIds) ||
+        // A team member who is not in the group chat yet (just joined) reads it to add themself
+        (resource != null && isTeamChat() && request.auth.uid in team().data.memberIds) ||
         // Allow reading non-existent docs (no data to leak): 1-to-1 IDs contain the uid,
         // group chat IDs are team_<teamId> — allow any authenticated user to check existence.
         (resource == null && (

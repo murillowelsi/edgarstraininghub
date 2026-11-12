@@ -180,6 +180,15 @@ describe("keeps working (passes today, must stay green)", () => {
     await assertSucceeds(getDoc(doc(as(ANA), "chats", `team_${TEAM}`)));
   });
 
+  // JoinTeam → createOrGetGroupChat reads the chat before adding the new member
+  it("a member who just joined reads the group chat before being added; an outsider cannot", async () => {
+    await env.withSecurityRulesDisabled((ctx) =>
+      updateDoc(doc(ctx.firestore(), "teams", TEAM), { memberIds: arrayUnion("newbie") }),
+    );
+    await assertSucceeds(getDoc(doc(as("newbie"), "chats", `team_${TEAM}`)));
+    await assertFails(getDoc(doc(as(OUTSIDER), "chats", `team_${TEAM}`)));
+  });
+
   it("another user cannot write my fcmTokens", async () => {
     await assertFails(setDoc(doc(as(BRUNO), "users", ANA, "fcmTokens", "tok"), { token: "tok" }));
   });
