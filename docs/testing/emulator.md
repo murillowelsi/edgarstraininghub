@@ -18,6 +18,7 @@ npm run dev:emu     # 3. app at http://localhost:8090 connected to the emulator
 ```
 
 - The emulator keeps data in memory: after restarting it, run `npm run seed` again.
+- **After restarting the emulator, clear the site data in the browser** (DevTools → Application → Storage → Clear site data, for `localhost:8090`). The app keeps a persistent Firestore cache in IndexedDB; with a fresh emulator it can keep showing stale data, e.g. a new user's profile stays "missing" and the app sends them to `/`.
 - `seed` is idempotent: fixed ids, and dates are recomputed relative to today.
 - Inspect or edit data in the Emulator UI: http://127.0.0.1:4000.
 

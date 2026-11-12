@@ -280,7 +280,9 @@ const chat = (id, base, messages) => {
   const last = messages[messages.length - 1];
   chats.push({
     id,
-    data: { ...base, lastMessage: last.text, lastMessageTime: ts(last.at) },
+    // The app stores `id` inside the chat doc (ChatService.createOrGet*), and
+    // createOrGetChat returns the doc data as the chat, so keep it here too.
+    data: { id, ...base, lastMessage: last.text, lastMessageTime: ts(last.at) },
     messages: messages.map((m, i) => ({
       id: `m${String(i + 1).padStart(2, "0")}`,
       data: { text: m.text, senderId: m.from, senderName: nameOf[m.from], createdAt: ts(m.at), read: m.read ?? true },
