@@ -13,10 +13,10 @@
  *   Firebase Console > Project Settings > Service accounts > Generate new private key
  */
 
-const { initializeApp, getApps, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
-const { getMessaging } = require('firebase-admin/messaging');
-const { getAuth } = require('firebase-admin/auth');
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
+import { getAuth } from 'firebase-admin/auth';
 
 // Initialise once (Vercel reuses the process between warm invocations)
 if (!getApps().length) {
@@ -33,7 +33,7 @@ const db = getFirestore();
 const messaging = getMessaging();
 const adminAuth = getAuth();
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Only accept POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -167,4 +167,4 @@ module.exports = async function handler(req, res) {
     console.error('notify error:', err);
     return res.status(500).json({ error: 'Internal error' });
   }
-};
+}

@@ -50,7 +50,8 @@ export const ChatService = {
             await setDoc(chatRef, newChat);
             return newChat;
         }
-        return chatSnap.data() as Chat;
+        // The doc id is the source of truth: legacy chat docs have no `id` field
+        return { ...(chatSnap.data() as Chat), id: chatSnap.id };
     },
 
     // Send a message
@@ -60,7 +61,9 @@ export const ChatService = {
         text: string,
         senderName?: string,
         // "event_reminder": posted by the athlete's app on the coach's behalf (see firestore.rules)
-        kind?: "event_reminder"
+        kind?: "event_reminder",
+        // With kind "event_reminder": the athlete event the reminder is about
+        eventId?: string
     ) => {
         const messagesRef = collection(db, "chats", chatId, "messages");
 
@@ -72,6 +75,7 @@ export const ChatService = {
             createdAt: serverTimestamp(),
             read: false,
             ...(kind ? { kind } : {}),
+            ...(eventId ? { eventId } : {}),
         });
 
         // Update parent chat with last message and increment unread count for OTHERS
@@ -254,7 +258,7 @@ export const ChatService = {
                 ...unreadPatch,
             });
         }
-        return { ...existing, participantIds, groupName };
+        return { ...existing, id: chatId, participantIds, groupName };
     },
 
     // Delete a chat and all its messages

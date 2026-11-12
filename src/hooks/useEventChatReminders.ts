@@ -61,7 +61,8 @@ export const useEventChatReminders = (
             coachId,
             buildMessage(event, threshold),
             coachName,
-            "event_reminder"
+            "event_reminder",
+            event.id
           );
           await markEventNotified(event.id, threshold);
         }

@@ -291,13 +291,24 @@ service cloud.firestore {
         }
 
         // Race reminders (useEventChatReminders) are posted by the athlete's own app
-        // on the coach's behalf, only in that athlete's 1:1 chat and marked as such.
+        // on the coach's behalf, only in that athlete's 1:1 chat. They must point at one
+        // of the athlete's own events and keep the reminder format (fixed fields, one of
+        // the three reminder emojis first, short text), so no free-form "coach" messages.
         function isEventReminderFromCoach() {
           let chat = get(/databases/$(database)/documents/chats/$(chatId)).data;
+          let d = request.resource.data;
           return !chatId.matches('team_.*')
             && chat.get("athleteId", "") == request.auth.uid
-            && request.resource.data.get("kind", "") == "event_reminder"
-            && request.resource.data.senderId in chat.participantIds;
+            && d.keys().hasOnly(["text", "senderId", "senderName", "createdAt", "read", "kind", "eventId"])
+            && d.kind == "event_reminder"
+            && d.senderId in chat.participantIds
+            && d.senderId != request.auth.uid
+            && d.read == false
+            && d.createdAt == request.time
+            && d.text is string && d.text.size() <= 240
+            && d.text.matches('^(🏁|⏰|📍) .+')
+            && d.eventId is string
+            && get(/databases/$(database)/documents/athleteEvents/$(d.eventId)).data.athleteId == request.auth.uid;
         }
 
         allow read: if request.auth != null && isParticipant();
