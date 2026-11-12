@@ -17,12 +17,16 @@ export const DEFAULT_CHANNEL_ID = 'UCfraTOODwkSAJSWz1R47g_g';
 const ALLOWED_CHANNEL_IDS = new Set([DEFAULT_CHANNEL_ID]);
 
 const FEED_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
-const UPSTREAM_TIMEOUT_MS = 5000;
+const UPSTREAM_TIMEOUT_MS = 4000;
+// YouTube's RSS feed fails now and then (404/5xx/timeout): try a few times.
+export const UPSTREAM_ATTEMPTS = 3;
+const RETRY_DELAYS_MS = [300, 900];
 
 // CDN: fresh for 15 min, then serve stale for up to 1 day while revalidating.
-const CACHE_OK = 'public, max-age=0, s-maxage=900, stale-while-revalidate=86400';
-// Short CDN cache on upstream failure so a YouTube hiccup does not hammer the feed.
-const CACHE_ERROR = 'public, max-age=0, s-maxage=60';
+// stale-if-error: if a revalidation fails, keep serving the last good answer for up to 7 days.
+const CACHE_OK = 'public, max-age=0, s-maxage=900, stale-while-revalidate=86400, stale-if-error=604800';
+// Never cache a failure: the next visitor should try again (the browser keeps its last good video).
+const CACHE_ERROR = 'no-store';
 
 const VIDEO_ID_RE = /^[A-Za-z0-9_-]{11}$/;
 
@@ -66,6 +70,29 @@ export function parseLatestVideo(xml) {
   };
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** Fetch and parse the feed, retrying transient failures. Returns a video or throws. */
+export async function fetchLatestVideo(channelId, fetchImpl = fetch) {
+  let lastError;
+  for (let attempt = 0; attempt < UPSTREAM_ATTEMPTS; attempt++) {
+    if (attempt > 0) await sleep(RETRY_DELAYS_MS[attempt - 1] ?? 900);
+    try {
+      const upstream = await fetchImpl(FEED_URL + encodeURIComponent(channelId), {
+        headers: { Accept: 'application/atom+xml, application/xml;q=0.9' },
+        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+      });
+      if (!upstream.ok) throw new Error(`Upstream status ${upstream.status}`);
+      const video = parseLatestVideo(await upstream.text());
+      if (!video) throw new Error('No usable entry in feed');
+      return video;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.setHeader('Allow', 'GET, HEAD');
@@ -78,14 +105,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const upstream = await fetch(FEED_URL + encodeURIComponent(channelId), {
-      headers: { Accept: 'application/atom+xml, application/xml;q=0.9' },
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-    });
-    if (!upstream.ok) throw new Error(`Upstream status ${upstream.status}`);
-
-    const video = parseLatestVideo(await upstream.text());
-    if (!video) throw new Error('No usable entry in feed');
+    const video = await fetchLatestVideo(channelId);
 
     res.setHeader('Cache-Control', CACHE_OK);
     return res.status(200).json({ video });
