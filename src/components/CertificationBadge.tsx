@@ -4,7 +4,8 @@ import { Award } from "lucide-react";
 interface CertificationBadgeProps {
   type: "ymca" | "ofqual";
   className?: string;
-  variant?: "light" | "dark";
+  /** "onPrimary": on a yellow (bg-primary) surface, navy text */
+  variant?: "light" | "onPrimary";
 }
 
 const CertificationBadge = ({
@@ -17,12 +18,12 @@ const CertificationBadge = ({
   const baseClasses =
     "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border";
   const lightClasses = "bg-primary/10 text-primary border-primary/20";
-  const darkClasses = "bg-white/10 text-white border-white/20";
+  const onPrimaryClasses = "bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20";
 
   return (
     <div
       className={`${baseClasses} ${
-        variant === "dark" ? darkClasses : lightClasses
+        variant === "onPrimary" ? onPrimaryClasses : lightClasses
       } ${className}`}
     >
       <Award className="w-4 h-4 mr-2" />
