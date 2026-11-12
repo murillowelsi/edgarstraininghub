@@ -45,6 +45,17 @@ describe("formatDate", () => {
     expect(formatDate(ago(30 * 86_400_000), "relative", "pt")).toBe("13 out");
   });
 
+  it("relativeLong: words for the last week, then a short date", () => {
+    const ago = (ms: number) => new Date(NOW.getTime() - ms);
+    expect(formatDate(ago(10_000), "relativeLong", "pt")).toBe("agora");
+    expect(formatDate(ago(10_000), "relativeLong", "en")).toBe("just now");
+    expect(formatDate(ago(5 * 60_000), "relativeLong", "pt")).toBe("há 5 minutos");
+    expect(formatDate(ago(2 * 3_600_000), "relativeLong", "en")).toBe("2 hours ago");
+    expect(formatDate(ago(86_400_000), "relativeLong", "pt")).toBe("há 1 dia");
+    expect(formatDate(ago(6 * 86_400_000), "relativeLong", "pt")).toBe("há 6 dias");
+    expect(formatDate(ago(30 * 86_400_000), "relativeLong", "en")).toBe("13 Oct");
+  });
+
   it("accepts a timestamp in ms", () => {
     expect(formatDate(d.getTime(), "short", "en")).toBe("21 Sep");
   });

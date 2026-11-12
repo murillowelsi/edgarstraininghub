@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ActionMenu } from "@/components/ui/action-menu";
 import {
   Carousel,
@@ -22,7 +22,9 @@ import { useToast } from "@/hooks/use-toast";
 import { CommentsDrawer } from "./CommentsDrawer";
 import type { ComposerResult, PostMention, TimelinePost } from "@/types/timeline";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { fullDateTime, relativeTime } from "./relativeTime";
+import { fullDateTime } from "./relativeTime";
+import { formatDate } from "@/lib/dates";
+import { SPORT_BG, sportKey } from "./sport";
 
 interface TimelinePostCardProps {
   post: TimelinePost;
@@ -127,20 +129,66 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
 
   const getInitials = (name: string) => name.charAt(0).toUpperCase();
 
+  const isCoachPost = post.authorRole === "admin";
+  const summary = post.workoutSummary;
+  const sport = summary ? sportKey(summary.workoutType) : null;
+  const hasMedia = !!summary || post.imageUrls.length > 0;
+  // The automatic "Workout complete" caption only repeats the workout card: hide it
+  const showCaption = !!post.caption && !post.captionIsSummary && !(post.captionAuto && summary);
+  const kindLabel = summary
+    ? t.workoutMeta.types[summary.workoutType as WorkoutType] ?? summary.workoutType
+    : isCoachPost
+    ? t.timeline.post.notice
+    : null;
+
+  const caption = showCaption ? (
+    <PostCaption
+      authorName={post.authorName}
+      caption={post.captionAuto ? t.timeline.post.autoCaption : post.caption}
+      mentions={post.captionAuto ? [] : post.mentions}
+      labels={{ more: t.timeline.post.seeMore, less: t.timeline.post.seeLess }}
+      textOnly={!hasMedia}
+    />
+  ) : null;
+
   return (
     <>
-      <article>
-        {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2.5">
-          <div className="flex items-center gap-3">
-            <CachedAvatar
-              src={post.authorPhotoURL}
-              alt={post.authorName}
-              fallback={getInitials(post.authorName)}
-              className="h-8 w-8 ring-2 ring-[#e1b506]"
-              fallbackClassName="bg-primary text-primary-foreground text-sm font-semibold"
-            />
-            <p className="text-sm font-semibold">{post.authorName}</p>
+      {/* Each post is its own card on the feed canvas (design: docs/design/feed) */}
+      <article
+        className={cn(
+          "overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm dark:shadow-none",
+          isCoachPost && "border-primary/45"
+        )}
+      >
+        {/* Header: avatar, name (+ Coach), "sport · time ago", menu */}
+        <div className="flex items-center gap-2.5 py-3 pl-3.5 pr-1">
+          <CachedAvatar
+            src={post.authorPhotoURL}
+            alt=""
+            fallback={getInitials(post.authorName)}
+            className={cn("h-10 w-10 shrink-0", isCoachPost && "ring-2 ring-primary ring-offset-2 ring-offset-card")}
+            fallbackClassName={cn(
+              "text-[15px] font-bold",
+              isCoachPost ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+            )}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-1.5 text-title-sm leading-tight">
+              <span className="truncate">{post.authorName}</span>
+              {isCoachPost && (
+                <span className="shrink-0 rounded-sm bg-primary px-1.5 py-0.5 text-overline leading-none text-primary-foreground">
+                  {t.timeline.post.coachBadge}
+                </span>
+              )}
+            </p>
+            <p className="mt-0.5 flex items-center gap-1.5 text-caption text-muted-foreground">
+              {sport && <span aria-hidden className={cn("h-1.5 w-1.5 shrink-0 rounded-full", SPORT_BG[sport])} />}
+              {kindLabel && <span>{kindLabel}</span>}
+              {kindLabel && <span aria-hidden>·</span>}
+              <time dateTime={post.createdAt.toISOString()} title={fullDateTime(post.createdAt, language)}>
+                {formatDate(post.createdAt, "relativeLong", language)}
+              </time>
+            </p>
           </div>
 
           {canDelete && (
@@ -160,7 +208,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
               ]}
             >
               <button
-                className="h-9 w-9 -mr-1 flex items-center justify-center rounded-full hover:bg-accent transition-colors"
+                className="h-11 w-11 shrink-0 flex items-center justify-center rounded-full hover:bg-accent transition-colors"
                 aria-label={t.timeline.post.actionsTitle}
               >
                 <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
@@ -168,6 +216,9 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
             </ActionMenu>
           )}
         </div>
+
+        {/* Text-only post: the text comes first, then the actions */}
+        {!hasMedia && caption}
 
         {/* Media: workout summary card and/or image, swipeable when both */}
         <PostMedia
@@ -177,15 +228,15 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
         />
 
         {/* Actions */}
-        {/* Buttons get a 40px+ hit area; the negative margin keeps the icons where they were */}
-        <div className="px-3 pt-0.5 flex items-center">
+        {/* 44px hit areas */}
+        <div className="flex items-center px-1.5 pt-1.5 pb-1">
           <button
             onClick={handleLike}
             disabled={pendingLike !== null}
             aria-pressed={liked}
             aria-label={(liked ? t.timeline.post.unlike : t.timeline.post.like).replace("{{n}}", String(likesCount))}
             className={cn(
-              "-ml-2 min-h-10 min-w-10 px-2 flex items-center gap-1.5 transition-transform active:scale-110",
+              "min-h-11 min-w-11 px-2 flex items-center gap-1.5 transition-transform active:scale-110",
               liked ? "text-red-500" : "text-foreground hover:text-muted-foreground"
             )}
           >
@@ -195,29 +246,16 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
           <button
             onClick={() => setShowComments(true)}
             aria-label={t.timeline.post.comments.replace("{{n}}", String(commentsCount))}
-            className="min-h-10 min-w-10 px-2 flex items-center gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
+            className="min-h-11 min-w-11 px-2 flex items-center gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
           >
             <MessageCircle className="h-6 w-6" aria-hidden />
             {commentsCount > 0 && <span className="text-sm font-semibold" aria-hidden>{commentsCount}</span>}
           </button>
         </div>
 
-        {/* Caption */}
-        {post.caption && !post.captionIsSummary && (
-          <PostCaption
-            authorName={post.authorName}
-            caption={post.captionAuto ? t.timeline.post.autoCaption : post.caption}
-            mentions={post.captionAuto ? [] : post.mentions}
-            labels={{ more: t.timeline.post.seeMore, less: t.timeline.post.seeLess }}
-          />
-        )}
-
-        {/* Timestamp */}
-        <p className="px-3 pt-1 pb-2 text-xs text-muted-foreground">
-          <time dateTime={post.createdAt.toISOString()} title={fullDateTime(post.createdAt, language)}>
-            {relativeTime(post.createdAt, language, t.timeline.time.now)}
-          </time>
-        </p>
+        {/* Caption below the actions when there is media */}
+        {hasMedia && caption}
+        <div className="h-3" aria-hidden />
       </article>
 
       <CommentsDrawer
@@ -382,23 +420,31 @@ function PostImage({ url }: { url: string }) {
   );
 }
 
-const CAPTION_PREVIEW = 140;
-
-/** Caption with tappable-looking @mentions and a "more" toggle for long text. */
+/** Caption with highlighted @mentions, clamped to 3 lines with a "more" toggle. */
 function PostCaption({
   authorName,
   caption,
   mentions,
   labels,
+  textOnly = false,
 }: {
   authorName: string;
   caption: string;
   mentions: PostMention[];
   labels: { more: string; less: string };
+  /** Post without media: bigger text, no author prefix (the header already has it) */
+  textOnly?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const isLong = caption.length > CAPTION_PREVIEW;
-  const text = expanded || !isLong ? caption : `${caption.slice(0, CAPTION_PREVIEW).trimEnd()}…`;
+  const [clamped, setClamped] = useState(false);
+  const ref = useRef<HTMLParagraphElement>(null);
+
+  // Show "more" only when the text really overflows the 3 lines
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || expanded) return;
+    setClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [caption, expanded]);
 
   // Split on known @names (longest first so "Ana Beatriz" wins over "Ana")
   const names = [...mentions.map((m) => m.name)].sort((a, b) => b.length - a.length);
@@ -406,31 +452,43 @@ function PostCaption({
   if (names.length) {
     const escaped = names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
     const re = new RegExp(`(@(?:${escaped.join("|")}))`, "g");
-    text.split(re).forEach((chunk) => {
+    caption.split(re).forEach((chunk) => {
       if (chunk) parts.push({ text: chunk, mention: re.test(chunk) && chunk.startsWith("@") });
       re.lastIndex = 0;
     });
   } else {
-    parts.push({ text, mention: false });
+    parts.push({ text: caption, mention: false });
   }
 
   return (
-    <p className="px-3 pt-1 text-sm whitespace-pre-line break-words">
-      <span className="font-semibold mr-1">{authorName}</span>
-      {parts.map((part, i) =>
-        part.mention ? (
-          <span key={i} className="font-semibold text-primary">
-            {part.text}
-          </span>
-        ) : (
-          <span key={i}>{part.text}</span>
-        )
-      )}
-      {isLong && (
-        <button onClick={() => setExpanded((v) => !v)} className="ml-1 text-muted-foreground font-medium">
+    <div className={textOnly ? "px-4 pb-1" : "px-4 pt-1"}>
+      <p
+        ref={ref}
+        className={cn(
+          "whitespace-pre-line break-words",
+          textOnly ? "text-body" : "text-body-sm",
+          !expanded && "line-clamp-3"
+        )}
+      >
+        {!textOnly && <span className="font-semibold mr-1">{authorName}</span>}
+        {parts.map((part, i) =>
+          part.mention ? (
+            <span key={i} className="font-semibold text-primary-ink">
+              {part.text}
+            </span>
+          ) : (
+            <span key={i}>{part.text}</span>
+          )
+        )}
+      </p>
+      {(clamped || expanded) && (
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="min-h-8 text-body-sm font-medium text-muted-foreground hover:text-foreground"
+        >
           {expanded ? labels.less : labels.more}
         </button>
       )}
-    </p>
+    </div>
   );
 }

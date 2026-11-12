@@ -1894,7 +1894,9 @@
       "unlike": "Descurtir, {{n}}",
       "comments": "Comentários, {{n}}",
       "autoCaption": "Treino concluído ✅",
-      "imageAlt": "Foto do post"
+      "imageAlt": "Foto do post",
+      "coachBadge": "Coach",
+      "notice": "Aviso"
     },
     "create": {
       "title": "Novo post",

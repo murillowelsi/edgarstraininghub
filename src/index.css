@@ -21,6 +21,8 @@
     --primary-ink: 40 95% 30%;
     /* Popover, menu, sheet over a card */
     --surface-2: 210 40% 98%;
+    /* Feed background, one step behind the post cards so each post reads as a block */
+    --feed-canvas: 220 20% 95%;
     /* Status: fill + readable text ("ink") */
     --success: 142 76% 36%;
     --success-ink: 142 72% 29%;
@@ -106,6 +108,7 @@
     --destructive-ink: 0 91% 71%;
     --primary-ink: 48 96% 45%;
     --surface-2: 222 40% 16%;
+    --feed-canvas: 222 47% 7%;
     --success-ink: 142 69% 58%;
     --warning-ink: 43 96% 56%;
     --info-ink: 198 93% 60%;
