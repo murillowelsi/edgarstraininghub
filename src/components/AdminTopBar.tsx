@@ -89,7 +89,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
     <>
     <header className="fixed w-full z-50">
       <div aria-hidden className="glass-fade absolute inset-x-0 top-0 -bottom-4 pointer-events-none" />
-      <div className="relative px-4 py-4 flex items-center justify-between">
+      <div className="relative px-4 py-4 md:pl-7 md:pr-8 flex items-center justify-between">
         <Link
           to="/admin"
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
