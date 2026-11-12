@@ -1203,7 +1203,10 @@
       "submit": "Enviar",
       "save": "Salvar alterações",
       "submitted": "Obrigado! Seu depoimento foi enviado.",
-      "updated": "Depoimento atualizado — pendente de revisão."
+      "updated": "Depoimento atualizado — pendente de revisão.",
+      "nudgeText": "Como está o treino?",
+      "nudgeCta": "Deixe um depoimento",
+      "nudgeDismiss": "Dispensar lembrete"
     },
     "home": {
       "welcomeBack": "Bem-vindo,",
@@ -1494,6 +1497,16 @@
         "cycling": "Ciclismo",
         "swimming": "Natação",
         "strength": "Força"
+      },
+      "card": {
+        "workoutsIn": "treinos em {{month}}",
+        "timeInMonth": "no mês",
+        "streak": "semanas seguidas",
+        "weekProgress": "{{done}} de {{planned}} nesta semana",
+        "weekNone": "Nada planejado nesta semana",
+        "weekAria": "Treinos desta semana, de segunda a domingo",
+        "monthOne": "1 treino · {{time}}",
+        "monthOther": "{{n}} treinos · {{time}}"
       }
     },
     "events": {
