@@ -186,7 +186,7 @@ const AdminPosts = () => {
             _post: post,
           }))}
           actions={(row) => {
-            const post = row._post as Post;
+            const post = row._post;
             return (
               <>
                 <Link to={`/admin/posts/${post.id}/edit`}>
