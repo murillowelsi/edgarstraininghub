@@ -11,6 +11,7 @@ import type { TimelineComment } from "@/types/timeline";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { fullDateTime, relativeTime } from "./relativeTime";
 import { ListSkeleton } from "@/components/feedback/skeletons";
+import { sendFeedPush } from "@/services/feedPush";
 
 interface CommentsDrawerProps {
   open: boolean;
@@ -135,6 +136,8 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
       for (const uid of notifySet) {
         createActivityNotification(uid, authorName, postId, "comment", user.uid).catch((err) => console.error("[FeedBadge] comment notification failed:", err));
       }
+      // Push goes to the post author only (the server checks the comment and skips self)
+      if (postAuthorId !== user.uid) sendFeedPush({ postId, kind: "comment", commentId: newComment.id });
       // Notify mentioned users in the comment text
       const mentionMatches = text.trim().match(/@([\w\s]+?)(?=\s@|\s*$|[^a-zA-Z\s])/g);
       if (mentionMatches) {
@@ -144,6 +147,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             const mentionedUser = allUsers.find((u) => u.displayName?.toLowerCase() === mentionName.toLowerCase());
             if (mentionedUser && mentionedUser.id !== user.uid && !notifySet.has(mentionedUser.id)) {
               createActivityNotification(mentionedUser.id, authorName, postId, "comment_mention", user.uid).catch(() => null);
+              sendFeedPush({ postId, kind: "mention", mentionedUid: mentionedUser.id, commentId: newComment.id });
             }
           }
         }).catch(() => null);
