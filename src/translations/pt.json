@@ -1323,7 +1323,38 @@
       "tomorrow": "Amanhã",
       "workout": "treino",
       "workouts": "treinos",
-      "addExtraFor": "Registrar treino de força neste dia"
+      "addExtraFor": "Registrar treino de força neste dia",
+      "viewWeek": "Semana",
+      "viewMonth": "Mês",
+      "prevWeek": "Semana anterior",
+      "nextWeek": "Próxima semana",
+      "prevMonth": "Mês anterior",
+      "nextMonth": "Próximo mês",
+      "backToToday": "Hoje",
+      "doneOf": "{{done}} de {{planned}} feitos",
+      "missedOne": "1 não feito",
+      "missedOther": "{{n}} não feitos",
+      "inWeek": "Na semana",
+      "freeDay": "Dia livre",
+      "nothingPlanned": "Nada planejado",
+      "start": "Começar",
+      "race": "Prova",
+      "status": {
+        "done": "Feito",
+        "partial": "Parcial",
+        "missed": "Não feito",
+        "planned": "Planejado",
+        "extra": "Extra"
+      },
+      "legend": {
+        "done": "feito",
+        "planned": "planejado",
+        "missed": "não feito",
+        "partial": "parcial",
+        "race": "prova"
+      },
+      "daysToRace": "em {{n}} dias",
+      "raceToday": "hoje"
     },
     "workoutView": {
       "pressLapButton": "Pressione o Botão de Volta",

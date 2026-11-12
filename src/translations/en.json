@@ -1323,7 +1323,38 @@
       "tomorrow": "Tomorrow",
       "workout": "workout",
       "workouts": "workouts",
-      "addExtraFor": "Log a strength workout on this day"
+      "addExtraFor": "Log a strength workout on this day",
+      "viewWeek": "Week",
+      "viewMonth": "Month",
+      "prevWeek": "Previous week",
+      "nextWeek": "Next week",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "backToToday": "Today",
+      "doneOf": "{{done}} of {{planned}} done",
+      "missedOne": "1 missed",
+      "missedOther": "{{n}} missed",
+      "inWeek": "This week",
+      "freeDay": "Rest day",
+      "nothingPlanned": "Nothing planned",
+      "start": "Start",
+      "race": "Race",
+      "status": {
+        "done": "Done",
+        "partial": "Partial",
+        "missed": "Missed",
+        "planned": "Planned",
+        "extra": "Extra"
+      },
+      "legend": {
+        "done": "done",
+        "planned": "planned",
+        "missed": "missed",
+        "partial": "partial",
+        "race": "race"
+      },
+      "daysToRace": "in {{n}} days",
+      "raceToday": "today"
     },
     "workoutView": {
       "pressLapButton": "Press Lap Button",
