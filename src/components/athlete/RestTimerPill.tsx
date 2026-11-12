@@ -38,7 +38,7 @@ const RestTimerPill = ({ remainingSec, durationSec, nextLabel, labels, onAdjust,
       className="overflow-hidden"
     >
       <div
-        className="flex items-center gap-1.5 px-1 pt-0.5 pb-1.5 border-b border-foreground/10 mb-1.5"
+        className="flex items-center gap-1.5 px-1 pt-0.5 pb-1.5"
         role="timer"
         aria-live="off"
         aria-label={`${labels.rest} ${formatClock(remainingSec)}`}
@@ -51,7 +51,7 @@ const RestTimerPill = ({ remainingSec, durationSec, nextLabel, labels, onAdjust,
               cx="18"
               cy="18"
               r={RING_RADIUS}
-              className={cn("fill-none transition-[stroke-dashoffset] duration-1000 ease-linear", almostDone ? "stroke-red-500" : "stroke-primary")}
+              className={cn("fill-none transition-[stroke-dashoffset] duration-1000 ease-linear", almostDone ? "stroke-destructive-ink" : "stroke-primary")}
               strokeWidth="3"
               strokeLinecap="round"
               strokeDasharray={RING_CIRCUMFERENCE}
@@ -62,11 +62,14 @@ const RestTimerPill = ({ remainingSec, durationSec, nextLabel, labels, onAdjust,
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className={cn("text-lg font-mono font-bold tabular-nums leading-none", almostDone ? "text-red-500" : "text-foreground")}>
+          <p className={cn("text-lg font-bold tabular-nums leading-none", almostDone ? "text-destructive-ink" : "text-foreground")}>
             {formatClock(remainingSec)}
           </p>
-          {/* Set number comes first and the line may wrap, so it's never cut off */}
-          {nextLabel && <p className="mt-0.5 text-[11px] text-muted-foreground leading-tight line-clamp-2 break-words">{nextLabel}</p>}
+          {/* "Rest · next: Set 2"; may wrap, so it's never cut off */}
+          <p className="mt-0.5 text-[11px] text-muted-foreground leading-tight line-clamp-2 break-words">
+            {labels.rest}
+            {nextLabel && ` · ${nextLabel}`}
+          </p>
         </div>
 
         <motion.button

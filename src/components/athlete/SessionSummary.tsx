@@ -35,11 +35,13 @@ const SessionSummary = ({ data, t, finishing, onFinish, onShare }: Props) => {
   const [rpe, setRpe] = useState<number | undefined>(undefined);
   const [notes, setNotes] = useState("");
 
+  // Only numbers that say something: no "—" volume, no "0" records (those get their own list)
   const stats = [
     { label: ts.time, value: data.elapsed },
     { label: ts.sets, value: `${data.workingSets}/${data.totalSets}` },
-    { label: ts.volume, value: data.volumeKg > 0 ? `${Math.round(data.volumeKg).toLocaleString(language === "pt" ? "pt-BR" : "en")} kg` : "—" },
-    { label: ts.records, value: String(data.records.length) },
+    ...(data.volumeKg > 0
+      ? [{ label: ts.volume, value: `${Math.round(data.volumeKg).toLocaleString(language === "pt" ? "pt-BR" : "en")} kg` }]
+      : []),
   ];
 
   return (
@@ -51,7 +53,7 @@ const SessionSummary = ({ data, t, finishing, onFinish, onShare }: Props) => {
         className="max-w-lg mx-auto px-4 pt-10 pb-10 space-y-6"
       >
         <div className="text-center space-y-1">
-          <div className="mx-auto mb-2 h-16 w-16 rounded-full bg-green-500/15 text-green-500 flex items-center justify-center">
+          <div className="mx-auto mb-2 h-16 w-16 rounded-full bg-success/15 text-success-ink flex items-center justify-center">
             <CheckCircle2 className="h-9 w-9" />
           </div>
           <h1 className="text-2xl font-bold">{ts.title}</h1>
@@ -60,11 +62,11 @@ const SessionSummary = ({ data, t, finishing, onFinish, onShare }: Props) => {
           <p className="text-xs text-muted-foreground">{ts.savedHint}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className={cn("grid gap-3", stats.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
           {stats.map((stat) => (
-            <div key={stat.label} className="rounded-2xl bg-muted/50 p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">{stat.label}</p>
-              <p className="text-2xl font-bold tabular-nums mt-1">{stat.value}</p>
+            <div key={stat.label} className="rounded-2xl bg-muted/50 p-3.5">
+              <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-semibold">{stat.label}</p>
+              <p className="font-display text-xl font-extrabold tabular-nums mt-1 whitespace-nowrap">{stat.value}</p>
             </div>
           ))}
         </div>
