@@ -12,7 +12,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/api/**/*.test.ts"],
     // Fixed timezone so date tests behave the same on every machine and in CI.
     env: { TZ: "America/Sao_Paulo" },
   },

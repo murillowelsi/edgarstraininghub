@@ -13,11 +13,11 @@
  * FIREBASE_PRIVATE_KEY). Waiting costs almost no CPU on Fluid Compute.
  */
 
-const { initializeApp, getApps, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
-const { getMessaging } = require('firebase-admin/messaging');
-const { getAuth } = require('firebase-admin/auth');
-const { waitUntil } = require('@vercel/functions');
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
+import { getAuth } from 'firebase-admin/auth';
+import { waitUntil } from '@vercel/functions';
 
 if (!getApps().length) {
   initializeApp({
@@ -76,7 +76,7 @@ async function sendWhenDue({ uid, timerRef, timerId, delay, title, body, url }) 
   await timerRef.set({ timerId: null, updatedAt: Date.now() });
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -111,4 +111,4 @@ module.exports = async function handler(req, res) {
   // locks, and the push must still go out. waitUntil keeps the work alive.
   waitUntil(sendWhenDue({ uid, timerRef, timerId, delay, title, body, url }));
   return res.status(202).json({ scheduled: true });
-};
+}
