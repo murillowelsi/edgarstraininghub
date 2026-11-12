@@ -40,6 +40,10 @@ export default function AthleteChat() {
     const [loading, setLoading] = useState(true);
     // Teams the athlete still belongs to — group chats of teams they left stay hidden
     const [memberTeamIds, setMemberTeamIds] = useState<Set<string> | null>(null);
+    // Team list and coach names settled (loaded or failed): until then the list would
+    // show team chats the athlete already left and "Coach" placeholders, then change
+    const [teamsReady, setTeamsReady] = useState(false);
+    const [adminsReady, setAdminsReady] = useState(false);
 
     // Admin selection state
     const [admins, setAdmins] = useState<PublicProfile[]>([]);
@@ -62,6 +66,8 @@ export default function AthleteChat() {
                 setAdmins(await getPublicProfilesByRole(["admin", "editor"]));
             } catch (error) {
                 console.error("Error loading admins:", error);
+            } finally {
+                setAdminsReady(true);
             }
         };
         loadAdmins();
@@ -72,7 +78,8 @@ export default function AthleteChat() {
         if (!user) return;
         getTeamsByMember(user.uid)
             .then((teams) => setMemberTeamIds(new Set(teams.map((team) => team.id))))
-            .catch((error) => console.error("Error loading teams:", error));
+            .catch((error) => console.error("Error loading teams:", error))
+            .finally(() => setTeamsReady(true));
     }, [user]);
 
     // Subscribe to athlete's chats
@@ -192,7 +199,7 @@ export default function AthleteChat() {
         a.displayName.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    if (loading) {
+    if (loading || !teamsReady || !adminsReady) {
         // Skeleton rows instead of a bare spinner, inside the normal page chrome
         return (
             <AthletePortalLayout title={t.athlete.chat.title}>
