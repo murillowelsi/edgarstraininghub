@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getConsent, onConsentChange, onConsentSettingsOpen, setConsent, type ConsentChoice } from "@/lib/consent";
@@ -16,6 +17,7 @@ const applyConsent = (choice: ConsentChoice | null) => {
  */
 const ConsentBanner = () => {
   const { t } = useLanguage();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(() => getConsent() === null);
 
   useEffect(() => {
@@ -35,11 +37,22 @@ const ConsentBanner = () => {
     setOpen(false);
   };
 
+  // Sit above the floating tab bar (60px pill + its bottom offset) so navigation
+  // stays usable: athlete portal at every width, coach portal only below md.
+  const onAthlete = pathname.startsWith("/athlete");
+  const onAdmin = pathname.startsWith("/admin");
+  const position = onAthlete || onAdmin
+    ? cn(
+        "bottom-[calc(max(0.75rem,env(safe-area-inset-bottom))_+_60px_+_0.75rem)]",
+        onAdmin && "md:bottom-[max(0.75rem,env(safe-area-inset-bottom))]",
+      )
+    : "bottom-[max(0.75rem,env(safe-area-inset-bottom))]";
+
   return (
     <section
       role="region"
       aria-labelledby="consent-title"
-      className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-[60] mx-auto max-w-lg rounded-2xl border bg-card p-4 text-card-foreground shadow-lg md:p-5"
+      className={cn("fixed inset-x-3 z-[60] mx-auto max-w-lg rounded-2xl border bg-card p-4 text-card-foreground shadow-lg md:p-5", position)}
     >
       <h2 id="consent-title" className="font-semibold">
         {t.consent.title}
