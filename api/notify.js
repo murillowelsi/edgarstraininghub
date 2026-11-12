@@ -115,7 +115,8 @@ export default async function handler(req, res) {
       totalUnread += data.unreadCount?.[recipientId] || 0;
     });
 
-    const tokens = tokensSnap.docs.map((d) => d.data().token).filter(Boolean);
+    // Same token twice (legacy docs) would push twice: send once per distinct token
+    const tokens = [...new Set(tokensSnap.docs.map((d) => d.data().token).filter(Boolean))];
     const staleTokens = [];
     let sentCount = 0;
 
@@ -178,6 +179,8 @@ export default async function handler(req, res) {
       await batch.commit();
     }
 
+    // Diagnostics only: counts, no tokens or personal data
+    console.log(JSON.stringify({ fn: 'notify', tokenDocs: tokensSnap.size, distinctTokens: tokens.length, sent: sentCount, stale: staleTokens.length }));
     return res.status(200).json({ sent: sentCount });
   } catch (err) {
     console.error('notify error:', err);
