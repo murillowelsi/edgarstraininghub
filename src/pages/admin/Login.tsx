@@ -60,13 +60,9 @@ const AdminLogin = () => {
     }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  // While auth settles (or the role is read right after signing in), keep the
+  // form on screen with the button busy instead of a full-screen spinner.
+  const busy = loading || authLoading;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -107,7 +103,7 @@ const AdminLogin = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              disabled={loading}
+              disabled={busy}
               aria-invalid={!!error}
               aria-describedby={error ? "login-error" : undefined}
               className="h-13 text-base rounded-xl border-border/70 focus-visible:ring-primary/50 bg-card px-4"
@@ -129,7 +125,7 @@ const AdminLogin = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                disabled={loading}
+                disabled={busy}
                 aria-invalid={!!error}
                 aria-describedby={error ? "login-error" : undefined}
                 className="h-13 text-base rounded-xl border-border/70 focus-visible:ring-primary/50 bg-card px-4 pr-12"
@@ -138,7 +134,7 @@ const AdminLogin = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
+                disabled={busy}
                 tabIndex={-1}
                 aria-label={showPassword ? t.auth.hidePassword : t.auth.showPassword}
                 aria-pressed={showPassword}
@@ -164,11 +160,11 @@ const AdminLogin = () => {
           {/* Submit */}
           <Button
             type="submit"
-            disabled={loading}
+            disabled={busy}
             className="h-13 w-full rounded-xl font-bold text-sm tracking-wide mt-2 btn-primary"
             style={{ height: "52px" }}
           >
-            {loading ? (
+            {busy ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {t.auth.signingIn}

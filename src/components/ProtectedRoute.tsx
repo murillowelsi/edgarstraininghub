@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { PageSpinner } from "./ui/spinner";
+import { AppShellSkeleton } from "./feedback/AppShellSkeleton";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,9 +18,10 @@ export const ProtectedRoute = ({
   const { user, loading, isAdmin, isEditor, isAthlete } = useAuth();
   const location = useLocation();
 
-  // Show loading state while checking auth
+  // Auth or role still loading (first sign-in on this device): the area's shell
+  // with the screen skeleton. With a cached role this is skipped (AuthContext).
   if (loading) {
-    return <PageSpinner />;
+    return <AppShellSkeleton />;
   }
 
   // Not authenticated - redirect to login
