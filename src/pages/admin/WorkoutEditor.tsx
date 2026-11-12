@@ -53,7 +53,7 @@ import AdminLayout from "../../components/AdminLayout";
 import StageEditor from "../../components/workout/StageEditor";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useAuth } from "../../contexts/AuthContext";
-import { useLanguage } from "../../contexts/LanguageContext";
+import { useLanguage, type TranslationsType } from "../../contexts/LanguageContext";
 import { workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
 
 // Helper to format duration for display
@@ -69,7 +69,7 @@ const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, pressLapButtonLab
 };
 
 // Helper to format intensity for display
-const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: any): string | null => {
+const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: TranslationsType): string | null => {
   const { intensity } = stage;
 
   if (intensity.type === "none") {

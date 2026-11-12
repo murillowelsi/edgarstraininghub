@@ -24,6 +24,7 @@ import { ArrowLeft, Loader2, Minus, Save, X, Check, Upload, Image as ImageIcon }
 import { useEffect, useMemo, useState } from "react";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import type QuillInstance from "quill";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
@@ -36,6 +37,9 @@ class DividerBlot extends BlockEmbed {
   static tagName = 'hr';
 }
 Quill.register(DividerBlot);
+
+// Quill calls toolbar handlers with the toolbar module as `this`
+type QuillToolbar = { quill: QuillInstance };
 
 const AdminPostForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -70,7 +74,7 @@ const AdminPostForm = () => {
         ["clean"],
       ],
       handlers: {
-        image: function() {
+        image: function(this: QuillToolbar) {
           const input = document.createElement('input');
           input.setAttribute('type', 'file');
           input.setAttribute('accept', 'image/*');
@@ -79,7 +83,7 @@ const AdminPostForm = () => {
           input.onchange = async () => {
             const file = input.files?.[0];
             if (file) {
-              const quill = (this as any).quill;
+              const quill = this.quill;
               const range = quill.getSelection();
 
               // Show loading state
@@ -88,7 +92,7 @@ const AdminPostForm = () => {
               try {
                 const imageUrl = await uploadImageToCloudinary(file);
                 quill.insertEmbed(range.index, 'image', imageUrl);
-                quill.setSelection(range.index + 1);
+                quill.setSelection(range.index + 1, 0);
 
                 toast({
                   title: t.admin.postForm.toast.imageUploaded,
@@ -107,8 +111,8 @@ const AdminPostForm = () => {
             }
           };
         },
-        divider: function() {
-          const quill = (this as any).quill;
+        divider: function(this: QuillToolbar) {
+          const quill = this.quill;
           if (quill) {
             const range = quill.getSelection();
             if (range) {

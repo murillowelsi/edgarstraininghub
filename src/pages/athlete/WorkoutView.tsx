@@ -22,7 +22,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
 import { createMentionNotifications, createTimelinePost, hasPostForAssignment } from "@/services/timelineService";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, type TranslationsType } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { clearSessionDraft, getDraftProgress, loadSessionDraft } from "@/lib/sessionDraft";
@@ -117,7 +117,8 @@ const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, lapLabel: string)
     return lapLabel;
   }
   if (stage.duration.value !== undefined) {
-    const unit = stage.duration.unit || "";
+    // Older workouts may store the legacy unit "minutes", so widen to string
+    const unit: string = stage.duration.unit || "";
     const value = stage.duration.value;
     if ((unit === "min" || unit === "minutes") && value % 1 !== 0) {
       const totalSeconds = Math.round(value * 60);
@@ -139,7 +140,7 @@ const decimalToMMSS = (val: number): string => {
 
 const isPaceType = (type: string) => type === "pace" || type === "targetPace" || type === "cssBasedPace";
 
-const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: any): string | null => {
+const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: TranslationsType): string | null => {
   if (stage.intensity.type === "none") {
     return null;
   }

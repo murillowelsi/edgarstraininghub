@@ -113,7 +113,7 @@ export const updateSubscriptionHistoryEntry = async (
     const docRef = doc(db, SUBSCRIPTION_HISTORY_COLLECTION, id);
 
     // Convert dates back to Timestamps if present
-    const firestoreUpdates: any = { ...updates };
+    const firestoreUpdates: Record<string, unknown> = { ...updates };
     if (updates.startDate) firestoreUpdates.startDate = Timestamp.fromDate(updates.startDate);
     if (updates.endDate) firestoreUpdates.endDate = Timestamp.fromDate(updates.endDate);
     if (updates.createdAt) delete firestoreUpdates.createdAt; // Don't update creation time usually
