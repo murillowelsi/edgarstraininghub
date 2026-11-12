@@ -75,7 +75,7 @@ const PhotoGallery = () => {
       <div className="flex flex-wrap gap-4 justify-center">
         <Button 
           onClick={triggerFileInput} 
-          className="bg-brand-blue hover:bg-brand-blue/80 text-white"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
           size="lg"
         >
           <Upload className="mr-2 h-5 w-5" /> {t.gallery.uploadPhotos}

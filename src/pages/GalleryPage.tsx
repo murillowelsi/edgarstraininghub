@@ -9,13 +9,13 @@ const GalleryPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <section className="flex-1 section bg-brand-light py-16 md:pb-24">
+      <section className="flex-1 section bg-muted py-16 md:pb-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              {t.gallery.title} <span className="text-brand-blue">{t.gallery.titleHighlight}</span>
+              {t.gallery.title} <span className="text-primary-ink">{t.gallery.titleHighlight}</span>
             </h1>
-            <div className="h-1 w-20 bg-brand-orange mx-auto mb-6"></div>
+            <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
             <p className="max-w-2xl mx-auto text-muted-foreground">
               {t.gallery.subtitle}
             </p>
