@@ -1,4 +1,4 @@
-import { LayoutDashboard, Menu, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Menu, Moon, Sun, UserRound } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -14,6 +14,9 @@ const Navbar = () => {
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { user, isAthlete } = useAuth();
+  // One visible way into the app: "Athlete area" (sign in) or "Open app" when signed in.
+  const appLabel = user ? t.nav.openApp : t.footer.athleteArea;
+  const AppIcon = user ? LayoutDashboard : UserRound;
 
   return (
     <nav className="bg-background/80 backdrop-blur-lg fixed w-full z-50 border-b border-border/50">
@@ -78,31 +81,27 @@ const Navbar = () => {
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            {/* Signed-in users get a shortcut to their app; sign-in lives in the footer */}
-            {user && (
-              <Link
-                to="/app"
-                className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-                aria-label={t.nav.openApp}
-                title={t.nav.openApp}
-              >
-                <LayoutDashboard size={18} />
-              </Link>
-            )}
           </div>
+
+          <Link
+            to="/app"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <AppIcon size={16} aria-hidden="true" />
+            {appLabel}
+          </Link>
         </div>
 
         {/* Mobile: utility buttons + Sheet trigger */}
         <div className="md:hidden flex items-center gap-1">
-          <LanguageSwitcher />
-
-          <button
-            onClick={toggleTheme}
-            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-            aria-label={t.common.toggleTheme}
+          <Link
+            to="/app"
+            className="mr-1 inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
+            <AppIcon size={16} aria-hidden="true" />
+            {appLabel}
+          </Link>
+          <LanguageSwitcher />
 
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild>
@@ -154,16 +153,22 @@ const Navbar = () => {
                       className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center justify-between"
                     />
                   )}
-                  {user && (
-                    <Link
-                      to="/app"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
-                    >
-                      <LayoutDashboard size={18} />
-                      {t.nav.openApp}
-                    </Link>
-                  )}
+                  <Link
+                    to="/app"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="font-semibold text-primary transition-colors py-3 flex items-center gap-2"
+                  >
+                    <AppIcon size={18} aria-hidden="true" />
+                    {appLabel}
+                  </Link>
+                  {/* Theme lives in the menu on mobile, so the header keeps room for the app button */}
+                  <button
+                    onClick={toggleTheme}
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2 border-t border-border/50 text-left"
+                  >
+                    {theme === "light" ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
+                    {t.common.toggleTheme}
+                  </button>
                 </nav>
               </div>
             </SheetContent>
