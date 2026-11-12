@@ -95,7 +95,8 @@ const docToComment = (id: string, data: TimelineCommentDocument): TimelineCommen
 });
 
 export const subscribeToTimelinePosts = (
-  callback: (result: { posts: TimelinePost[]; hasMore: boolean; lastTimestamp?: Timestamp }) => void
+  callback: (result: { posts: TimelinePost[]; hasMore: boolean; lastTimestamp?: Timestamp }) => void,
+  onError?: (error: unknown) => void
 ): (() => void) => {
   const q = query(
     collection(db, COLLECTION),
@@ -117,7 +118,10 @@ export const subscribeToTimelinePosts = (
 
       callback({ posts, hasMore: snapshot.docs.length > POSTS_PER_PAGE, lastTimestamp });
     },
-    (error) => console.error("Timeline snapshot error:", error)
+    (error) => {
+      console.error("Timeline snapshot error:", error);
+      onError?.(error);
+    }
   );
 };
 

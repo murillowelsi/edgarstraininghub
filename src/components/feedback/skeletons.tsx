@@ -62,26 +62,24 @@ export const ListSkeleton = ({
   </SkeletonFrame>
 );
 
-/** Feed posts: header with avatar, 4:5 media, action bar. */
+/** Feed posts as cards: header (avatar + 2 lines), 200px media block, action row. */
 export const FeedSkeleton = ({ posts = 2, className, label }: PresetProps & { posts?: number }) => (
   <SkeletonFrame className={className} label={label}>
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[600px] space-y-3 px-2 md:space-y-4 md:px-0">
       {Array.from({ length: posts }, (_, i) => (
-        <div key={i} className="space-y-3">
-          <div className="flex items-center gap-3 px-4">
+        <div key={i} className="overflow-hidden rounded-2xl border bg-card pb-3 shadow-sm dark:shadow-none">
+          <div className="flex items-center gap-2.5 py-3 pl-3.5 pr-3">
             <Skeleton className="h-10 w-10 rounded-full" />
             <div className="flex-1 space-y-2">
-              <Line className="w-1/3" />
-              <Skeleton className="h-3 w-1/5" />
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-3 w-1/4" />
             </div>
           </div>
-          <Skeleton className="aspect-[4/5] w-full rounded-none" />
-          <div className="flex gap-4 px-4">
-            <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="mx-3 h-[200px] rounded-2xl" />
+          <div className="flex gap-3 px-3.5 pt-3">
             <Skeleton className="h-6 w-6 rounded-full" />
             <Skeleton className="h-6 w-6 rounded-full" />
           </div>
-          <Line className="mx-4 w-2/3" />
         </div>
       ))}
     </div>

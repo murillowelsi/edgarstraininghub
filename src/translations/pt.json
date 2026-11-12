@@ -1943,6 +1943,16 @@
       "lanesSummary": "{{n}} repetições principais",
       "sets": "Séries",
       "setsDone": "{{done}} de {{total}}"
+    },
+    "state": {
+      "errorTitle": "Não foi possível carregar o feed",
+      "errorDescription": "Verifique sua conexão e tente de novo.",
+      "retry": "Tentar de novo",
+      "emptyTitle": "Ainda não há posts",
+      "emptyDescription": "Quando você ou o seu time concluírem um treino, ele aparece aqui.",
+      "emptyAction": "Compartilhar um treino",
+      "newPostOne": "1 post novo",
+      "newPosts": "{{n}} posts novos"
     }
   },
   "gallery": {

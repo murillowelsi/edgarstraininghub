@@ -1943,6 +1943,16 @@
       "lanesSummary": "{{n}} main repeats",
       "sets": "Sets",
       "setsDone": "{{done}} of {{total}}"
+    },
+    "state": {
+      "errorTitle": "Couldn't load the feed",
+      "errorDescription": "Check your connection and try again.",
+      "retry": "Try again",
+      "emptyTitle": "No posts yet",
+      "emptyDescription": "When you or your team finish a workout, it shows up here.",
+      "emptyAction": "Share a workout",
+      "newPostOne": "1 new post",
+      "newPosts": "{{n}} new posts"
     }
   },
   "gallery": {

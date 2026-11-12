@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowDown, Image } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Image, Newspaper } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { TimelinePostCard } from "./TimelinePostCard";
 import { getTimelinePosts, subscribeToMentionCount, subscribeToTimelinePosts } from "@/services/timelineService";
@@ -24,6 +25,11 @@ export function TimelineFeed() {
   const [realtimePosts, setRealtimePosts] = useState<TimelinePost[]>([]);
   const [extraPosts, setExtraPosts] = useState<TimelinePost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+  // Posts that arrived in real time while the person was scrolled down
+  const [newPosts, setNewPosts] = useState<TimelinePost[]>([]);
+  const seenIds = useRef<Set<string> | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [lastTimestamp, setLastTimestamp] = useState<Timestamp | undefined>();
@@ -54,14 +60,41 @@ export function TimelineFeed() {
 
   // Real-time subscription for the first page
   useEffect(() => {
-    const unsubscribe = subscribeToTimelinePosts(({ posts, hasMore: more, lastTimestamp: lastTs }) => {
-      setRealtimePosts(posts);
-      setHasMore(more);
-      setLastTimestamp(lastTs);
-      setLoading(false);
-    });
+    setLoadError(false);
+    const unsubscribe = subscribeToTimelinePosts(
+      ({ posts, hasMore: more, lastTimestamp: lastTs }) => {
+        // After the first page, anything unseen is new; keep it for the pill
+        // when the list is scrolled (the browser keeps the scroll position)
+        if (seenIds.current) {
+          const fresh = posts.filter((p) => !seenIds.current!.has(p.id));
+          if (fresh.length && (scrollRef.current?.scrollTop ?? 0) > 120) {
+            setNewPosts((prev) => [...fresh, ...prev]);
+          }
+        }
+        seenIds.current = new Set([...(seenIds.current ?? []), ...posts.map((p) => p.id)]);
+        setRealtimePosts(posts);
+        setHasMore(more);
+        setLastTimestamp(lastTs);
+        setLoading(false);
+      },
+      () => {
+        setLoadError(true);
+        setLoading(false);
+      }
+    );
     return unsubscribe;
-  }, []);
+  }, [retryKey]);
+
+  // Reaching the top clears the "new posts" pill
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      if (el.scrollTop < 40) setNewPosts((prev) => (prev.length ? [] : prev));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [loading]);
 
   useEffect(() => {
     if (!user) return;
@@ -150,7 +183,7 @@ export function TimelineFeed() {
   };
 
   if (loading) {
-    return <FeedSkeleton className="py-4" />;
+    return <FeedSkeleton className="h-full bg-feed-canvas py-4" />;
   }
 
   const authorName = user?.email || "User";
@@ -186,7 +219,34 @@ export function TimelineFeed() {
       </div>
 
       {/* Scrollable feed */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      <div ref={scrollRef} className="relative flex-1 overflow-y-auto">
+        {/* New posts arrived while scrolled down: one tap goes back to the top */}
+        {newPosts.length > 0 && (
+          <div className="pointer-events-none sticky top-2 z-sticky flex justify-center">
+            <button
+              onClick={() => {
+                scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                setNewPosts([]);
+              }}
+              className="pointer-events-auto flex items-center gap-2 rounded-full bg-primary py-1.5 pl-1.5 pr-3.5 text-body-sm font-semibold text-primary-foreground shadow-lg"
+            >
+              <span className="flex">
+                {newPosts.slice(0, 3).map((p, i) => (
+                  <CachedAvatar
+                    key={p.id}
+                    src={p.authorPhotoURL}
+                    alt=""
+                    fallback={p.authorName.charAt(0).toUpperCase()}
+                    className={cn("h-6 w-6 ring-2 ring-primary", i > 0 && "-ml-1.5")}
+                    fallbackClassName="bg-muted text-foreground text-[11px] font-bold"
+                  />
+                ))}
+              </span>
+              {(newPosts.length === 1 ? t.timeline.state.newPostOne : t.timeline.state.newPosts.replace("{{n}}", String(newPosts.length)))}
+              <ArrowUp className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+        )}
         {/* Pull-to-refresh indicator */}
         <div
           className="flex items-center justify-center overflow-hidden transition-all duration-200"
@@ -201,10 +261,27 @@ export function TimelineFeed() {
 
         {/* 600px column; 8px gutters on phones so each card keeps its rounded edge */}
         <div className="max-w-[600px] mx-auto px-2 md:px-0 pt-2 pb-8">
-          {posts.length === 0 ? (
-            <div className="text-center py-16 px-4 text-muted-foreground">
-              <p className="text-lg font-semibold mb-1">{t.timeline.empty.noPosts}</p>
-              <p className="text-sm">{t.timeline.empty.beFirst}</p>
+          {loadError && posts.length === 0 ? (
+            <div role="alert" className="mt-2 flex flex-col items-center rounded-2xl border bg-card px-6 py-10 text-center">
+              <span className="grid h-12 w-12 place-items-center rounded-full bg-destructive/15 text-destructive-ink">
+                <AlertTriangle className="h-6 w-6" aria-hidden />
+              </span>
+              <p className="mt-3 text-title-sm">{t.timeline.state.errorTitle}</p>
+              <p className="mt-1 text-body-sm text-muted-foreground">{t.timeline.state.errorDescription}</p>
+              <Button className="mt-4" onClick={() => { setLoading(true); setRetryKey((k) => k + 1); }}>
+                {t.timeline.state.retry}
+              </Button>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="mt-2 flex flex-col items-center rounded-2xl border-2 border-dashed bg-card/60 px-6 py-10 text-center">
+              <span className="grid h-12 w-12 place-items-center rounded-full bg-muted text-muted-foreground">
+                <Newspaper className="h-6 w-6" aria-hidden />
+              </span>
+              <p className="mt-3 text-title-sm">{t.timeline.state.emptyTitle}</p>
+              <p className="mt-1 text-body-sm text-muted-foreground">{t.timeline.state.emptyDescription}</p>
+              <Button variant="outline" className="mt-4" onClick={() => setCreateOpen(true)}>
+                {t.timeline.state.emptyAction}
+              </Button>
             </div>
           ) : (
             <div className="space-y-3 md:space-y-4">
@@ -219,7 +296,7 @@ export function TimelineFeed() {
           <div ref={sentinelRef} className="h-1" />
 
           {/* Next page: one post-shaped placeholder at the end of the list */}
-          {loadingMore && <FeedSkeleton posts={1} className="py-4" />}
+          {loadingMore && <FeedSkeleton posts={1} className="pt-3 [&_.max-w-\[600px\]]:px-0" />}
         </div>
       </div>
 
