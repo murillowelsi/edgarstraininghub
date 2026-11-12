@@ -215,7 +215,7 @@ export const EventChecklistDrawer = ({
             </DrawerPrimitive.Title>
             <DrawerPrimitive.Description className="text-sm text-muted-foreground mt-1">
               {loading
-                ? t.common.loading
+                ? <span aria-hidden="true" className="inline-block h-4 w-28 rounded-md bg-muted align-middle motion-safe:animate-pulse" />
                 : needsPreset
                 ? tec.startHint
                 : tec.itemsChecked

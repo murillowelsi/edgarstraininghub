@@ -1,4 +1,4 @@
-import { ArrowDown, Loader2 } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const PULL_RESISTANCE = 0.5;
@@ -115,14 +115,11 @@ export const PullToRefresh = () => {
         }`}
         style={{ opacity: refreshing ? 1 : Math.max(progress, 0.4) }}
       >
-        {refreshing ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <ArrowDown
-            className="h-5 w-5 transition-transform duration-200"
-            style={{ transform: passedThreshold ? "rotate(180deg)" : "rotate(0deg)" }}
-          />
-        )}
+        {/* No spinner: the arrow flips past the threshold and pulses while refreshing */}
+        <ArrowDown
+          className={`h-5 w-5 transition-transform duration-200 ${refreshing ? "motion-safe:animate-pulse" : ""}`}
+          style={{ transform: passedThreshold ? "rotate(180deg)" : "rotate(0deg)" }}
+        />
       </div>
     </div>
   );

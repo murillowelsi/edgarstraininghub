@@ -9,7 +9,6 @@ import { auth } from "@/lib/firebase";
 import { updateOwnPhoto } from "@/services/usersService";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
-import { Spinner } from "@/components/ui/spinner";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { ChatService } from "@/services/chat";
 import { createMentionNotifications, createTimelinePost, subscribeToMentionCount } from "@/services/timelineService";
@@ -282,8 +281,9 @@ const AthletePortalLayout = ({
                     <Camera className="h-5 w-5 text-white" />
                   </div>
                   {isUploadingPhoto && (
-                    <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-                      <Spinner size="xs" className="text-white" />
+                    // Uploading: the avatar pulses as a skeleton instead of a spinner
+                    <div role="status" className="absolute inset-0 rounded-full bg-muted motion-safe:animate-pulse">
+                      <span className="sr-only">{t.common.saving}</span>
                     </div>
                   )}
                 </button>

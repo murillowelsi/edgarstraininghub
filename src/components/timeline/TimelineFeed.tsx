@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Image, Loader2 } from "lucide-react";
+import { ArrowDown, Image } from "lucide-react";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { TimelinePostCard } from "./TimelinePostCard";
 import { getTimelinePosts, subscribeToMentionCount, subscribeToTimelinePosts } from "@/services/timelineService";
@@ -189,12 +189,10 @@ export function TimelineFeed() {
           className="flex items-center justify-center overflow-hidden transition-all duration-200"
           style={{ height: refreshing ? 48 : pullY > 0 ? pullY : 0 }}
         >
-          <Loader2
-            className="h-5 w-5 text-muted-foreground transition-transform"
-            style={{
-              animation: refreshing ? "spin 1s linear infinite" : "none",
-              transform: `rotate(${Math.min((pullY / PULL_THRESHOLD) * 360, 360)}deg)`,
-            }}
+          {/* No spinner: the arrow turns as you pull and pulses while refreshing */}
+          <ArrowDown
+            className={`h-5 w-5 text-muted-foreground transition-transform ${refreshing ? "motion-safe:animate-pulse" : ""}`}
+            style={{ transform: `rotate(${refreshing ? 180 : Math.min((pullY / PULL_THRESHOLD) * 180, 180)}deg)` }}
           />
         </div>
 

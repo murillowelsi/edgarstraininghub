@@ -155,8 +155,9 @@ const ShareWorkoutSheet = ({ open, onOpenChange, summary, alreadyPosted, onPostT
               >
                 {preview && <img src={preview.url} alt="" className="h-full w-full object-cover" />}
                 {rendering && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                  // Image being generated: skeleton over the card, no spinner
+                  <div role="status" className="absolute inset-0 bg-muted/80 motion-safe:animate-pulse">
+                    <span className="sr-only">{t.common.loading}</span>
                   </div>
                 )}
                 {photoUrl && (

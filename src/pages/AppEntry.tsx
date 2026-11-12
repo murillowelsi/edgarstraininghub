@@ -12,7 +12,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { PageSpinner } from "@/components/ui/spinner";
+import { AppShellSkeleton } from "@/components/feedback/AppShellSkeleton";
 
 export default function AppEntry() {
   const { user, loading, isAdmin, isEditor, isAthlete } = useAuth();
@@ -32,5 +32,5 @@ export default function AppEntry() {
     }
   }, [user, loading, isAdmin, isEditor, isAthlete, navigate]);
 
-  return <PageSpinner />;
+  return <AppShellSkeleton />;
 }
