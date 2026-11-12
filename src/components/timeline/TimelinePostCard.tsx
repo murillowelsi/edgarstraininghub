@@ -7,9 +7,8 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { AnimatePresence, motion } from "motion/react";
-import { Flame, Instagram, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Flame, MessageCircle, MoreHorizontal, Pencil, Share2, Trash2 } from "lucide-react";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
-import { renderStoryImage, shareOrDownloadImage } from "@/lib/postImages";
 import { summaryStats, workoutCardModel } from "@/utils/workoutSummaryStats";
 import type { WorkoutType } from "@/types/workout";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
@@ -20,6 +19,8 @@ import { CreatePostModal } from "./CreatePostModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { CommentsDrawer } from "./CommentsDrawer";
+import ShareWorkoutSheet from "@/components/athlete/ShareWorkoutSheet";
+import { haptics } from "@/lib/haptics";
 import type { ComposerResult, PostMention, TimelinePost } from "@/types/timeline";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { fullDateTime } from "./relativeTime";
@@ -44,7 +45,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   const [showEdit, setShowEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [sharingStory, setSharingStory] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const isLiked = user ? post.likedBy.includes(user.uid) : false;
   const liked = pendingLike ?? isLiked;
@@ -57,6 +58,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
   const handleLike = useCallback(async () => {
     if (!user || pendingLike !== null) return;
     const wasLiked = isLiked;
+    if (!wasLiked) haptics.tap();
     setPendingLike(!wasLiked);
     try {
       await toggleLike(post.id, user.uid, wasLiked);
@@ -93,27 +95,19 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
     }
   };
 
-  // 1080×1920 image for Instagram Stories (native share sheet on phones)
-  const handleShareStory = async () => {
-    if (!post.workoutSummary) return;
-    setSharingStory(true);
+  // Share: own workout → the share sheet (image for other apps); otherwise the
+  // phone's share menu with the post text, when the browser has one
+  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+  const canShare = (isOwn && !!post.workoutSummary) || canNativeShare;
+  const handleShare = async () => {
+    if (isOwn && post.workoutSummary) {
+      setShowShare(true);
+      return;
+    }
     try {
-      const summary = post.workoutSummary;
-      const blob = await renderStoryImage({
-        summary,
-        stats: summaryStats(summary, t.timeline.summary, language === "pt" ? "pt-BR" : "en"),
-        typeLabel: t.workoutMeta.types[summary.workoutType as WorkoutType] ?? summary.workoutType,
-        highlightsTitle: t.timeline.summary.highlights,
-        footer: t.timeline.story.footer,
-        authorName: post.authorName,
-        photoUrl: post.imageUrls[0],
-      });
-      const result = await shareOrDownloadImage(blob, "ez-treino.png", summary.workoutName);
-      if (result === "downloaded") toast({ title: t.timeline.post.storySaved });
+      await navigator.share({ title: post.authorName, text: post.caption || post.workoutSummary?.workoutName || "" });
     } catch {
-      toast({ title: t.common.error, description: t.timeline.post.storyError, variant: "destructive" });
-    } finally {
-      setSharingStory(false);
+      // cancelled by the person: nothing to do
     }
   };
 
@@ -195,14 +189,6 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
             <ActionMenu
               title={t.timeline.post.actionsTitle}
               items={[
-                {
-                  icon: Instagram,
-                  label: t.timeline.post.shareStory,
-                  hint: t.timeline.post.shareStoryHint,
-                  loading: sharingStory,
-                  hidden: !(isOwn && post.workoutSummary),
-                  onClick: handleShareStory,
-                },
                 { icon: Pencil, label: t.timeline.post.edit, hidden: !isOwn, onClick: () => setShowEdit(true) },
                 { icon: Trash2, label: t.timeline.post.delete, destructive: true, onClick: () => setConfirmDelete(true) },
               ]}
@@ -237,10 +223,19 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
             aria-label={(liked ? t.timeline.post.unlike : t.timeline.post.like).replace("{{n}}", String(likesCount))}
             className={cn(
               "min-h-11 min-w-11 px-2 flex items-center gap-1.5 transition-transform active:scale-110",
-              liked ? "text-red-500" : "text-foreground hover:text-muted-foreground"
+              "text-foreground hover:text-muted-foreground"
             )}
           >
-            <Flame className={cn("h-6 w-6", liked && "fill-current text-orange-500")} aria-hidden />
+            {/* The flame is EZ's "like": a short spring pop when it lights up */}
+            <motion.span
+              key={liked ? "on" : "off"}
+              initial={false}
+              animate={liked ? { scale: [1, 1.25, 1] } : { scale: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 32, duration: 0.28 }}
+              className="inline-flex"
+            >
+              <Flame className={cn("h-6 w-6", liked && "fill-sport-strength text-sport-strength")} aria-hidden />
+            </motion.span>
             {likesCount > 0 && <span className="text-sm font-semibold text-foreground" aria-hidden>{likesCount}</span>}
           </button>
           <button
@@ -251,12 +246,25 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
             <MessageCircle className="h-6 w-6" aria-hidden />
             {commentsCount > 0 && <span className="text-sm font-semibold" aria-hidden>{commentsCount}</span>}
           </button>
+          {canShare && (
+            <button
+              onClick={handleShare}
+              aria-label={t.timeline.post.share}
+              className="ml-auto min-h-11 min-w-11 px-2 flex items-center justify-center text-foreground hover:text-muted-foreground transition-colors"
+            >
+              <Share2 className="h-6 w-6" aria-hidden />
+            </button>
+          )}
         </div>
 
         {/* Caption below the actions when there is media */}
         {hasMedia && caption}
         <div className="h-3" aria-hidden />
       </article>
+
+      {isOwn && post.workoutSummary && (
+        <ShareWorkoutSheet open={showShare} onOpenChange={setShowShare} summary={post.workoutSummary} />
+      )}
 
       <CommentsDrawer
         open={showComments}

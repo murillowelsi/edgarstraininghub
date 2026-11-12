@@ -1896,7 +1896,8 @@
       "autoCaption": "Workout complete ✅",
       "imageAlt": "Post photo",
       "coachBadge": "Coach",
-      "notice": "Notice"
+      "notice": "Notice",
+      "share": "Share"
     },
     "create": {
       "title": "New post",

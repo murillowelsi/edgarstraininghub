@@ -1896,7 +1896,8 @@
       "autoCaption": "Treino concluído ✅",
       "imageAlt": "Foto do post",
       "coachBadge": "Coach",
-      "notice": "Aviso"
+      "notice": "Aviso",
+      "share": "Compartilhar"
     },
     "create": {
       "title": "Novo post",
