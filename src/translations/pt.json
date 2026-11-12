@@ -544,7 +544,9 @@
     "welcomeBack": "Bem-vindo de volta!",
     "loggedIn": "Sessão iniciada com sucesso.",
     "loginFailed": "Falha no Login",
-    "invalidCredentials": "Email ou senha inválidos."
+    "invalidCredentials": "Email ou senha inválidos.",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha"
   },
   "admin": {
     "results": {

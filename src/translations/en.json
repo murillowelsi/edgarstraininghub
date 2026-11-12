@@ -544,7 +544,9 @@
     "welcomeBack": "Welcome back!",
     "loggedIn": "You have successfully logged in.",
     "loginFailed": "Login Failed",
-    "invalidCredentials": "Invalid email or password."
+    "invalidCredentials": "Invalid email or password.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "admin": {
     "results": {

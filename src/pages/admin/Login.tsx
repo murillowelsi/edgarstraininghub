@@ -148,6 +148,8 @@ const AdminLogin = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
                 tabIndex={-1}
+                aria-label={showPassword ? t.auth.hidePassword : t.auth.showPassword}
+                aria-pressed={showPassword}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-primary transition-colors rounded-md"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
