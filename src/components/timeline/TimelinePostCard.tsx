@@ -105,21 +105,9 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
     }
   };
 
-  // Share: own workout → the share sheet (image for other apps); otherwise the
-  // phone's share menu with the post text, when the browser has one
-  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
-  const canShare = (isOwn && !!post.workoutSummary) || canNativeShare;
-  const handleShare = async () => {
-    if (isOwn && post.workoutSummary) {
-      setShowShare(true);
-      return;
-    }
-    try {
-      await navigator.share({ title: post.authorName, text: post.caption || post.workoutSummary?.workoutName || "" });
-    } catch {
-      // cancelled by the person: nothing to do
-    }
-  };
+  // Share: only your own activities, as the activity image (share sheet)
+  const canShare = isOwn && !!post.workoutSummary;
+  const handleShare = () => setShowShare(true);
 
   const handleEditSubmit = async ({ caption, imageUrls, mentions }: ComposerResult) => {
     try {
@@ -289,7 +277,12 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
       </article>
 
       {isOwn && post.workoutSummary && (
-        <ShareWorkoutSheet open={showShare} onOpenChange={setShowShare} summary={post.workoutSummary} />
+        <ShareWorkoutSheet
+          open={showShare}
+          onOpenChange={setShowShare}
+          summary={post.workoutSummary}
+          initialPhotoUrl={post.imageUrls?.[0]}
+        />
       )}
 
       <CommentsDrawer
