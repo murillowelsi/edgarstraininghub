@@ -7,8 +7,9 @@
  * - Only admins may call it.
  * - Every assignment must exist, belong to athleteId and have been created or
  *   changed in the last 10 minutes, so old assignments cannot be re-announced.
- * - One push per call: "Novo treino: {nome} · {dia}" (links to the workout) or
- *   "{n} treinos novos na sua agenda" (links to the calendar).
+ * - One push per call. Title: the coach's public name ("Coach" if it is missing or
+ *   an e-mail). Body: what happened, e.g. "atribuiu Rodagem Z2 para sex, 14/11"
+ *   (links to the workout) or "atribuiu 5 treinos para esta semana" (links to the calendar).
  * - At most one push per athlete every 2 minutes; assignments that arrive inside
  *   the window are kept and counted in the next push.
  * - Text in Portuguese (the recipient's language is not stored yet).
@@ -41,6 +42,42 @@ export const THROTTLE_MS = 2 * 60 * 1000;
 const ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
 
 class Forbidden extends Error {}
+
+const looksLikeEmail = (name) => typeof name === 'string' && name.includes('@');
+
+// Same lookup as /api/notify-feed; never put an e-mail address in a push
+const coachName = async (uid) => {
+  const profile = await db.collection('publicProfiles').doc(uid).get();
+  let name = profile.exists ? profile.data().displayName : undefined;
+  if (!name) {
+    const user = await db.collection('users').doc(uid).get();
+    name = user.exists ? user.data().displayName : undefined;
+  }
+  return name && !looksLikeEmail(name) ? name : 'Coach';
+};
+
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const dayMs = (day) => Date.parse(`${day}T00:00:00Z`);
+// Monday of the week of a "YYYY-MM-DD" day (or of today), in ms
+const weekStart = (ms) => {
+  const d = new Date(ms);
+  const offset = (d.getUTCDay() + 6) % 7;
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - offset);
+};
+
+/** "para esta semana", "para a próxima semana", "para sex, 14/11" or "de seg, 16/11 a dom, 13/12" */
+const periodOf = (days) => {
+  const valid = days.filter((d) => typeof d === 'string' && DAY_RE.test(d)).sort();
+  if (!valid.length) return '';
+  const first = valid[0];
+  const last = valid[valid.length - 1];
+  if (first === last) return `para ${formatDay(first)}`;
+  const thisWeek = weekStart(Date.now());
+  const weeks = new Set(valid.map((d) => weekStart(dayMs(d))));
+  if (weeks.size === 1 && weeks.has(thisWeek)) return 'para esta semana';
+  if (weeks.size === 1 && weeks.has(thisWeek + 7 * 86400000)) return 'para a próxima semana';
+  return `de ${formatDay(first)} a ${formatDay(last)}`;
+};
 
 const millis = (t) => (t && typeof t.toMillis === 'function' ? t.toMillis() : 0);
 
@@ -88,23 +125,20 @@ async function reserve(athleteId, ids) {
   });
 }
 
-async function buildMessage(ids) {
+async function buildMessage(ids, title) {
   // Queued ids may have been deleted meanwhile; announce only the ones that still exist
   const snaps = await Promise.all(ids.map((id) => db.collection('workoutAssignments').doc(id).get()));
   const live = snaps.filter((s) => s.exists).map((s) => ({ id: s.id, ...s.data() }));
   if (!live.length) return null;
   if (live.length > 1) {
-    return { title: 'Treinos novos', body: `${live.length} treinos novos na sua agenda`, url: '/athlete/calendar' };
+    const period = periodOf(live.map((a) => a.scheduledDay));
+    return { title, body: `atribuiu ${live.length} treinos${period ? ` ${period}` : ''}`, url: '/athlete/calendar' };
   }
   const a = live[0];
   const workout = await db.collection('workouts').doc(a.workoutId).get();
-  const name = (workout.exists && workout.data().name) || 'treino';
+  const name = (workout.exists && workout.data().name) || 'um treino';
   const day = formatDay(a.scheduledDay);
-  return {
-    title: 'Novo treino',
-    body: `Novo treino: ${name}${day ? ` · ${day}` : ''}`,
-    url: `/athlete/workout/${a.id}`,
-  };
+  return { title, body: `atribuiu ${name}${day ? ` para ${day}` : ''}`, url: `/athlete/workout/${a.id}` };
 }
 
 export default async function handler(req, res) {
@@ -145,7 +179,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ sent: 0, throttled: true });
     }
 
-    const message = await buildMessage(toAnnounce);
+    const message = await buildMessage(toAnnounce, await coachName(uid));
     if (!message) return res.status(200).json({ sent: 0 });
 
     const tokensRef = db.collection('users').doc(athleteId).collection('fcmTokens');

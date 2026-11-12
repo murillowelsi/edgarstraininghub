@@ -76,7 +76,8 @@ beforeEach(() => {
   invalidTokens = new Set();
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date("2026-11-12T10:00:00Z"));
-  store.set("users/coach", { role: "admin" });
+  store.set("users/coach", { role: "admin", displayName: "Coach Demo" });
+  store.set("publicProfiles/coach", { displayName: "Coach Demo" });
   store.set("users/ana", { role: "athlete" });
   store.set("users/ana/fcmTokens/tok-ana", { token: "tok-ana" });
   store.set("workouts/w1", { name: "Força A" });
@@ -112,13 +113,40 @@ describe("/api/notify-assign", () => {
     const r = await call({ idToken: "coach", athleteId: "ana", assignmentIds: ["a1"] });
     expect(r.code).toBe(200);
     expect(r.body).toEqual({ sent: 1 });
-    expect(pushes).toEqual([{ token: "tok-ana", title: "Novo treino", body: "Novo treino: Força A · qui, 12/11", url: "/athlete/workout/a1" }]);
+    expect(pushes).toEqual([{ token: "tok-ana", title: "Coach Demo", body: "atribuiu Força A para qui, 12/11", url: "/athlete/workout/a1" }]);
   });
 
   it("200 with ONE grouped push for several assignments", async () => {
     await call({ idToken: "coach", athleteId: "ana", assignmentIds: ["a1", "a2"] });
     expect(pushes).toHaveLength(1);
-    expect(pushes[0]).toMatchObject({ body: "2 treinos novos na sua agenda", url: "/athlete/calendar" });
+    expect(pushes[0]).toMatchObject({ title: "Coach Demo", body: "atribuiu 2 treinos para esta semana", url: "/athlete/calendar" });
+  });
+
+  it("names the period: next week, one day, or a range", async () => {
+    // Today is Thu 12/11/2026; next week starts Mon 16/11
+    assignment("n1", "ana", 1000, "2026-11-16");
+    assignment("n2", "ana", 1000, "2026-11-20");
+    assignment("s1", "bruno", 1000, "2026-11-18");
+    assignment("s2", "bruno", 1000, "2026-11-18");
+    assignment("r1", "carla", 1000, "2026-11-16");
+    assignment("r2", "carla", 1000, "2026-12-13");
+    store.set("users/bruno/fcmTokens/tok-bruno", { token: "tok-bruno" });
+    store.set("users/carla/fcmTokens/tok-carla", { token: "tok-carla" });
+    await call({ idToken: "coach", athleteId: "ana", assignmentIds: ["n1", "n2"] });
+    await call({ idToken: "coach", athleteId: "bruno", assignmentIds: ["s1", "s2"] });
+    await call({ idToken: "coach", athleteId: "carla", assignmentIds: ["r1", "r2"] });
+    expect(pushes.map((p) => p.body)).toEqual([
+      "atribuiu 2 treinos para a próxima semana",
+      "atribuiu 2 treinos para qua, 18/11",
+      "atribuiu 2 treinos de seg, 16/11 a dom, 13/12",
+    ]);
+  });
+
+  it("title falls back to Coach when the name is an e-mail", async () => {
+    store.set("publicProfiles/coach", { displayName: "coach@ez.test" });
+    await call({ idToken: "coach", athleteId: "ana", assignmentIds: ["a1"] });
+    expect(pushes[0].title).toBe("Coach");
+    expect(JSON.stringify(pushes)).not.toContain("@");
   });
 
   it("rate limit per athlete: a second call inside 2 min is held and counted in the next push", async () => {
@@ -127,7 +155,7 @@ describe("/api/notify-assign", () => {
     vi.setSystemTime(Date.now() + THROTTLE_MS + 1);
     assignment("a3", "ana");
     expect((await call({ idToken: "coach", athleteId: "ana", assignmentIds: ["a3"] })).body).toEqual({ sent: 1 });
-    expect(pushes.map((p) => p.body)).toEqual(["Novo treino: Força A · qui, 12/11", "2 treinos novos na sua agenda"]);
+    expect(pushes.map((p) => p.body)).toEqual(["atribuiu Força A para qui, 12/11", "atribuiu 2 treinos para esta semana"]);
   });
 
   it("no push to the caller's own account; invalid tokens are removed", async () => {
