@@ -3,72 +3,58 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
-import { auth, db } from "../../lib/firebase";
+import { auth } from "../../lib/firebase";
+import { getErrorMessage } from "../../lib/errors";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Set after a successful sign-in; AuthContext then reads the role
+  const [justSignedIn, setJustSignedIn] = useState(false);
   const { user, isAdmin, isAthlete, userRole, loading: authLoading } = useAuth();
   const { t } = useLanguage();
-  const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
 
+  // The role is read by AuthContext once the auth state is ready (no race with
+  // the sign-in). Here we only react to the result.
+  useEffect(() => {
+    if (!justSignedIn || authLoading || !user) return;
+    setJustSignedIn(false);
+    if (userRole) {
+      toast({ title: t.auth.welcomeBack, description: t.auth.loggedIn });
+    } else {
+      // Signed in to Firebase, but there is no profile with a role in the app
+      setError(t.auth.accountNotSetUp);
+      auth.signOut();
+    }
+  }, [justSignedIn, authLoading, user, userRole, toast, t]);
+
   if (!authLoading && user && userRole) {
-    if (isAdmin) return <Navigate to={from || "/admin"} replace />;
     if (isAthlete) return <Navigate to="/athlete" replace />;
+    return <Navigate to={from || "/admin"} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
-      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
-      if (!userDoc.exists()) {
-        toast({
-          title: t.auth.accessDenied,
-          description: t.auth.userNotFound,
-          variant: "destructive",
-        });
-        await auth.signOut();
-        setLoading(false);
-        return;
-      }
-
-      const role = userDoc.data()?.role;
-
-      toast({
-        title: t.auth.welcomeBack,
-        description: t.auth.loggedIn,
-      });
-
-      if (role === "admin") {
-        navigate(from || "/admin", { replace: true });
-      } else if (role === "athlete") {
-        navigate("/athlete", { replace: true });
-      } else {
-        navigate(from || "/admin", { replace: true });
-      }
-    } catch (error: unknown) {
-      console.error("Login error:", error);
-      toast({
-        title: t.auth.loginFailed,
-        description: error instanceof Error ? error.message : t.auth.invalidCredentials,
-        variant: "destructive",
-      });
+      await signInWithEmailAndPassword(auth, email, password);
+      setJustSignedIn(true);
+    } catch (err: unknown) {
+      console.error("Login error:", err);
+      setError(getErrorMessage(err, t));
     } finally {
       setLoading(false);
     }
@@ -120,7 +106,10 @@ const AdminLogin = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
               disabled={loading}
+              aria-invalid={!!error}
+              aria-describedby={error ? "login-error" : undefined}
               className="h-13 text-base rounded-xl border-border/70 focus-visible:ring-primary/50 bg-card px-4"
               style={{ height: "52px" }}
             />
@@ -139,7 +128,10 @@ const AdminLogin = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
                 disabled={loading}
+                aria-invalid={!!error}
+                aria-describedby={error ? "login-error" : undefined}
                 className="h-13 text-base rounded-xl border-border/70 focus-visible:ring-primary/50 bg-card px-4 pr-12"
                 style={{ height: "52px" }}
               />
@@ -156,6 +148,18 @@ const AdminLogin = () => {
               </button>
             </div>
           </div>
+
+          {/* Error stays in the form until the next attempt (design system 8.4) */}
+          {error && (
+            <p
+              id="login-error"
+              role="alert"
+              className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive-ink"
+            >
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
+              {error}
+            </p>
+          )}
 
           {/* Submit */}
           <Button

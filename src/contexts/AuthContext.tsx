@@ -1,5 +1,6 @@
 import { User, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { getErrorCode } from "../lib/errors";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../lib/firebase";
 import type { UserRole } from "../types/user";
@@ -28,6 +29,19 @@ const AuthContext = createContext<AuthContextType>({
   setPhotoURL: () => {},
 });
 
+// Right after sign-in the first Firestore read can race the new auth token and
+// fail with permission-denied: refresh the token and try once more.
+const readUserDoc = async (firebaseUser: User) => {
+  const ref = doc(db, "users", firebaseUser.uid);
+  try {
+    return await getDoc(ref);
+  } catch (error) {
+    if (getErrorCode(error) !== "permission-denied") throw error;
+    await firebaseUser.getIdToken(true);
+    return await getDoc(ref);
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,11 +51,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
+      // Publish the user together with the role: no render sees a user without
+      // a role while the profile is still loading.
+      if (firebaseUser) setLoading(true);
 
       if (firebaseUser) {
         try {
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          const userDoc = await readUserDoc(firebaseUser);
+          // Signed out (or switched user) while reading: a newer callback owns the state
+          if (auth.currentUser?.uid !== firebaseUser.uid) return;
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setUserRole(userData?.role as UserRole || null);
@@ -64,6 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setPhotoURL(null);
       }
 
+      setUser(firebaseUser);
       setLoading(false);
     });
 

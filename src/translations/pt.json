@@ -540,14 +540,11 @@
     "emailPlaceholder": "admin@exemplo.com",
     "passwordPlaceholder": "Digite sua senha",
     "signInDescription": "Entre para acessar sua conta",
-    "accessDenied": "Acesso Negado",
-    "userNotFound": "Conta de usuário não encontrada.",
     "welcomeBack": "Bem-vindo de volta!",
     "loggedIn": "Sessão iniciada com sucesso.",
-    "loginFailed": "Falha no Login",
-    "invalidCredentials": "Email ou senha inválidos.",
     "showPassword": "Mostrar senha",
-    "hidePassword": "Ocultar senha"
+    "hidePassword": "Ocultar senha",
+    "accountNotSetUp": "Sua conta ainda não está liberada no app. Fale com o seu treinador."
   },
   "admin": {
     "results": {
@@ -1949,5 +1946,14 @@
   "notFound": {
     "message": "Ops! Página não encontrada",
     "backHome": "Voltar ao início"
+  },
+  "errors": {
+    "permissionDenied": "Você não tem acesso a isso.",
+    "offline": "Sem conexão. Tente de novo em instantes.",
+    "notFound": "Não encontramos esse item. Ele pode ter sido excluído.",
+    "wrongCredentials": "E-mail ou senha incorretos.",
+    "emailInUse": "Já existe uma conta com esse e-mail. Entre com a sua senha.",
+    "tooManyRequests": "Muitas tentativas seguidas. Espere alguns minutos e tente de novo.",
+    "generic": "Algo deu errado. Tente de novo."
   }
 }

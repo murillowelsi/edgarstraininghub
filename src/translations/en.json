@@ -540,14 +540,11 @@
     "emailPlaceholder": "admin@example.com",
     "passwordPlaceholder": "Enter your password",
     "signInDescription": "Sign in to access your account",
-    "accessDenied": "Access Denied",
-    "userNotFound": "User account not found.",
     "welcomeBack": "Welcome back!",
     "loggedIn": "You have successfully logged in.",
-    "loginFailed": "Login Failed",
-    "invalidCredentials": "Invalid email or password.",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "accountNotSetUp": "Your account isn't set up in the app yet. Contact your coach."
   },
   "admin": {
     "results": {
@@ -1949,5 +1946,14 @@
   "notFound": {
     "message": "Oops! Page not found",
     "backHome": "Back to home"
+  },
+  "errors": {
+    "permissionDenied": "You don't have access to this.",
+    "offline": "You're offline. Try again in a moment.",
+    "notFound": "We couldn't find this. It may have been deleted.",
+    "wrongCredentials": "Incorrect email or password.",
+    "emailInUse": "An account with this email already exists. Sign in instead.",
+    "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
+    "generic": "Something went wrong. Please try again."
   }
 }
