@@ -19,13 +19,15 @@ interface Props {
   alreadyPosted?: boolean;
   /** Omit when the workout is already a feed post (sharing from the feed) */
   onPostToFeed?: () => void;
+  /** Photo of the post being shared: starts the image with it (can still be changed) */
+  initialPhotoUrl?: string;
 }
 
 /**
  * One place to share a finished workout, at any time: post it on the feed
  * (again, if they skipped it earlier) or create an image for other apps.
  */
-const ShareWorkoutSheet = ({ open, onOpenChange, summary, alreadyPosted, onPostToFeed }: Props) => {
+const ShareWorkoutSheet = ({ open, onOpenChange, summary, alreadyPosted, onPostToFeed, initialPhotoUrl }: Props) => {
   const { t, language } = useLanguage();
   const ts = t.athlete.share;
   const { displayName, user } = useAuth();
@@ -42,8 +44,10 @@ const ShareWorkoutSheet = ({ open, onOpenChange, summary, alreadyPosted, onPostT
     if (!open) {
       setPhotoUrl(null);
       setPreview(null);
+    } else {
+      setPhotoUrl(initialPhotoUrl ?? null);
     }
-  }, [open]);
+  }, [open, initialPhotoUrl]);
 
   // Live preview of the final image: photo + workout stats on top
   useEffect(() => {
