@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pacePer100m, pacePerKm, swimDistanceMeters } from "@/utils/activityFormat";
 
 interface Props {
   open: boolean;
@@ -65,7 +66,7 @@ const EditActivitySheet = ({ open, onOpenChange, assignmentId, workoutType, init
       setDistance(
         initial?.distance != null
           ? isSwim
-            ? String(Math.round(initial.distance * 1000))
+            ? String(swimDistanceMeters(initial.distance) ?? "")
             : String(initial.distance)
           : ""
       );
@@ -77,15 +78,16 @@ const EditActivitySheet = ({ open, onOpenChange, assignmentId, workoutType, init
 
   const distNum = parseFloat(distance.replace(",", "."));
   const elapsedSec = stringToTime(elapsed);
-  const distanceKm = isNaN(distNum) ? undefined : isSwim ? distNum / 1000 : distNum;
+  // Stored as typed: metres for swimming, km otherwise
+  const storedDistance = isNaN(distNum) ? undefined : distNum;
 
   const derivedSpeed =
-    elapsedSec && distanceKm && distanceKm > 0 ? (distanceKm / elapsedSec) * 3600 : undefined;
+    elapsedSec && storedDistance && storedDistance > 0 ? (storedDistance / elapsedSec) * 3600 : undefined;
   const derivedPace =
-    elapsedSec && distanceKm && distanceKm > 0
+    elapsedSec && storedDistance
       ? isSwim
-        ? elapsedSec / (distanceKm * 10)
-        : elapsedSec / distanceKm
+        ? pacePer100m(elapsedSec, storedDistance)
+        : pacePerKm(elapsedSec, storedDistance)
       : undefined;
 
   const handleSave = async () => {
@@ -93,7 +95,7 @@ const EditActivitySheet = ({ open, onOpenChange, assignmentId, workoutType, init
     try {
       const next: ActivityData = {
         ...(initial ?? {}),
-        distance: distanceKm,
+        distance: storedDistance,
         elapsedTime: elapsedSec,
         avgPace: !isCycle ? derivedPace : undefined,
         avgSpeed: isCycle ? derivedSpeed : undefined,
