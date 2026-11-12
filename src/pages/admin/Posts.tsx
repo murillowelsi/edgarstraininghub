@@ -42,7 +42,7 @@ const AdminPosts = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [newPostForm, setNewPostForm] = useState<PostFormData>(emptyForm());
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, displayName } = useAuth();
   const { t, language } = useLanguage();
 
   const quillModules = useMemo(() => ({
@@ -116,7 +116,8 @@ const AdminPosts = () => {
     }
     setCreating(true);
     try {
-      await createPost(newPostForm, user?.uid || "", user?.displayName || user?.email || "Admin");
+      // Public byline: the profile name, never the e-mail
+      await createPost(newPostForm, user?.uid || "", [displayName, user?.displayName].find((n) => n && !n.includes("@")) || t.about.name);
       toast({
         title: t.admin.postForm.toast.created,
         description: newPostForm.published ? t.admin.postForm.toast.createdPublished : t.admin.postForm.toast.createdDraft,

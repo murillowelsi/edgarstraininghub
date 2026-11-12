@@ -44,7 +44,7 @@ type QuillToolbar = { quill: QuillInstance };
 const AdminPostForm = () => {
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
-  const { user } = useAuth();
+  const { user, displayName } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -209,7 +209,8 @@ const AdminPostForm = () => {
         await createPost(
           formData,
           user?.uid || "",
-          user?.displayName || user?.email || "Admin"
+          // Public byline: the profile name, never the e-mail
+          [displayName, user?.displayName].find((n) => n && !n.includes("@")) || t.about.name
         );
         toast({
           title: t.admin.postForm.toast.created,

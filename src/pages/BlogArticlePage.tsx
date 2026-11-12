@@ -166,12 +166,11 @@ const BlogArticlePage = () => {
                   {post && formatDate(post.createdAt, "long", language)}
                 </time>
               </div>
-              {post?.authorName && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>{post.authorName}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                {/* Older posts saved the author's e-mail: never show it, use the coach's public name */}
+                <span>{post?.authorName && !post.authorName.includes("@") ? post.authorName : t.about.name}</span>
+              </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>{t.blog.minRead.replace("{{n}}", String(readingTime))}</span>
