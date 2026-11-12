@@ -10,7 +10,6 @@ import { MessageSquarePlus, Plus, Search, MessageSquare, Users2 } from "lucide-r
 import { Skeleton } from "@/components/ui/skeleton";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
-import { NotificationService } from "@/services/notifications";
 import { getPublicProfilesByRole } from "@/services/usersService";
 import { getTeamsByMember } from "@/services/teamsService";
 import type { PublicProfile } from "@/types/user";
@@ -127,23 +126,8 @@ export default function AthleteChat() {
 
         setMessages([]);
         ChatService.markAsRead(selectedChat.id, user.uid);
-        // -1 = first load (don't notify for existing messages, only for new ones)
-        let previousCount = -1;
-
+        // New-message alerts come from the real push (/api/notify), not from here
         const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
-            // Notify only on genuinely new messages (not the initial load)
-            if (previousCount >= 0 && msgs.length > previousCount) {
-                const newest = msgs[msgs.length - 1];
-                if (newest && newest.senderId !== user.uid) {
-                    const senderName = getChatDisplayName(selectedChat);
-                    NotificationService.showChatNotification(
-                        senderName,
-                        newest.text,
-                        `/athlete/chat?c=${selectedChat.id}`
-                    );
-                }
-            }
-            previousCount = msgs.length;
             setMessages(msgs);
             if (msgs.length > 0) {
                 ChatService.markAsRead(selectedChat.id, user.uid).catch(console.error);

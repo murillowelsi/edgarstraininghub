@@ -20,7 +20,6 @@ import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { cn } from "@/lib/utils";
 import { formatChatTime } from "@/components/chat/chatDates";
 import { toast } from "sonner";
-import { NotificationService } from "@/services/notifications";
 import { ListSkeleton } from "@/components/feedback/skeletons";
 import { PushInvite } from "@/components/push/PushInvite";
 
@@ -90,19 +89,8 @@ export default function AdminChat() {
     useEffect(() => {
         if (!selectedChat || !user) return;
         ChatService.markAsRead(selectedChat.id, user.uid);
-        let previousCount = -1;
+        // New-message alerts come from the real push (/api/notify), not from here
         const unsubscribe = ChatService.subscribeToMessages(selectedChat.id, (msgs) => {
-            if (previousCount >= 0 && msgs.length > previousCount) {
-                const newest = msgs[msgs.length - 1];
-                if (newest && newest.senderId !== user.uid) {
-                    NotificationService.showChatNotification(
-                        getChatDisplayName(selectedChat),
-                        newest.text,
-                        '/admin/chat'
-                    );
-                }
-            }
-            previousCount = msgs.length;
             setMessages(msgs);
             if (msgs.length > 0) ChatService.markAsRead(selectedChat.id, user.uid).catch(console.error);
         });
