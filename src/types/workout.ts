@@ -47,6 +47,7 @@ export const stageTypesByWorkout: Record<WorkoutType, StageType[]> = {
   running: ["warmup", "run", "cooldown", "recovery", "interval"],
   cycling: ["warmup", "bike", "recovery", "rest", "cooldown"],
   swimming: ["warmup", "swim", "cooldown", "recovery", "rest"],
+  strength: [],
 };
 
 // Duration types
@@ -66,6 +67,7 @@ export const durationTypesByWorkout: Record<WorkoutType, DurationType[]> = {
   running: ["time", "distance", "lapButton", "calories", "heartRate"],
   cycling: ["time", "distance", "lapButton", "calories", "heartRate", "power"],
   swimming: ["time", "distance", "lapButton"],
+  strength: [],
 };
 
 // Duration units
@@ -110,6 +112,7 @@ export const intensityTypesByWorkout: Record<WorkoutType, IntensityType[]> = {
   running: ["none", "pace", "cadence", "heartRateZone", "customHeartRate", "powerZone", "customPower"],
   cycling: ["none", "speed", "bikeCadence", "heartRateZone", "customHeartRate", "powerZone", "customPower"],
   swimming: ["none", "effortBased", "targetPace", "cssBasedPace"],
+  strength: [],
 };
 
 // Swimming-specific types
