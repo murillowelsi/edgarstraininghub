@@ -2116,7 +2116,9 @@
       "chatCoachTitle": "Avisar quando um atleta escrever",
       "chatCoachDescription": "Um aviso neste aparelho, mesmo com o app fechado.",
       "firstWorkoutTitle": "Quer saber quando o coach comentar?",
-      "firstWorkoutDescription": "Ative as notificações para receber os comentários e as mensagens do coach."
+      "firstWorkoutDescription": "Ative as notificações para receber os comentários e as mensagens do coach.",
+      "homeTitle": "Ative as notificações",
+      "homeDescription": "Saiba na hora quando o coach atribuir um treino, responder no chat ou comentar no seu feed, mesmo com o app fechado."
     },
     "install": {
       "title": "Adicione o EZ à Tela de Início",
