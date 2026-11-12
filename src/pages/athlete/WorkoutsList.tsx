@@ -14,6 +14,7 @@ import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { workoutLabels } from "@/utils/workoutLabels";
+import { formatDistance } from "@/utils/activityFormat";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   Check,
@@ -285,7 +286,7 @@ const AthleteWorkoutsList = () => {
                           {assignment.activityData.distance !== undefined && (
                             <span className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
-                              {assignment.activityData.distance}{workout.type === "swimming" ? "m" : "km"}
+                              {formatDistance(assignment.activityData.distance, workout.type)}
                             </span>
                           )}
                           {assignment.activityData.avgHeartRate !== undefined && (

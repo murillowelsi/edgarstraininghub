@@ -47,6 +47,7 @@ import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { WorkoutStage } from "@/types/workout";
 import { stageColors } from "@/types/workout";
 import { durationUnitLabel, workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
+import { formatDistance, pacePer100m, pacePerKm, swimDistanceMeters } from "@/utils/activityFormat";
 import {
   ArrowLeft,
   Calendar,
@@ -670,9 +671,9 @@ const AthleteWorkoutView = () => {
   const derivePace = (elapsedTime: string, distance: string, type: string): string => {
     const totalSecs = parseElapsedTime(elapsedTime);
     const dist = parseFloat(distance);
-    if (!totalSecs || !dist || dist <= 0) return "";
-    if (type === "swimming") return formatPace(totalSecs / (dist / 100));
-    return formatPace(totalSecs / dist);
+    // Swim distance is typed in metres, run distance in km
+    const pace = type === "swimming" ? pacePer100m(totalSecs, dist) : pacePerKm(totalSecs, dist);
+    return pace ? formatPace(pace) : "";
   };
 
   // Derive avg speed (km/h) from elapsed time and distance (km)
@@ -831,7 +832,12 @@ const AthleteWorkoutView = () => {
     });
     setActivityForm({
       elapsedTime: existing.elapsedTime ? secsToHHMMSS(existing.elapsedTime) : "",
-      distance: existing.distance !== undefined ? String(existing.distance) : "",
+      distance:
+        existing.distance === undefined
+          ? ""
+          : assignment.workout.type === "swimming"
+          ? String(swimDistanceMeters(existing.distance) ?? "")
+          : String(existing.distance),
       avgHeartRate: existing.avgHeartRate !== undefined ? String(existing.avgHeartRate) : "",
       avgPace: existing.avgPace !== undefined ? formatPace(existing.avgPace) : "",
       avgSpeed: existing.avgSpeed !== undefined ? String(existing.avgSpeed) : "",
@@ -1181,7 +1187,7 @@ const AthleteWorkoutView = () => {
                   {assignment.activityData.distance !== undefined && (
                     <div className="flex items-center gap-1.5">
                       <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span>{assignment.activityData.distance}{workout.type === "swimming" ? "m" : "km"}</span>
+                      <span>{formatDistance(assignment.activityData.distance, workout.type)}</span>
                     </div>
                   )}
                   {assignment.activityData.avgHeartRate !== undefined && (

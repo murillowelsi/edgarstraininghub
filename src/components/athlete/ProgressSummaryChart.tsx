@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { modalityAccent } from "@/utils/modalityColors";
+import { distanceInKm } from "@/utils/activityFormat";
 import {
   actualDurationSec,
   estimateWorkoutDistanceKm,
@@ -27,11 +28,7 @@ type MetricKey = "distance" | "time";
 
 const SPORTS: WorkoutType[] = ["running", "cycling", "swimming", "strength"];
 
-const distanceKm = (a: AssignmentWithWorkout): number => {
-  const d = a.activityData?.distance ?? 0;
-  if (a.workout.type === "swimming") return d / 1000;
-  return d;
-};
+const distanceKm = (a: AssignmentWithWorkout): number => distanceInKm(a.activityData?.distance, a.workout.type);
 
 const timeHours = (a: AssignmentWithWorkout): number => actualDurationSec(a) / 3600;
 
