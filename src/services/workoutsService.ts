@@ -1,3 +1,4 @@
+import { normalizeWorkoutName } from "@/utils/workoutName";
 import {
   addDoc,
   collection,
@@ -155,7 +156,7 @@ export const createWorkout = async (
   authorId: string
 ): Promise<string> => {
   const workoutData: Record<string, unknown> = {
-    name: data.name,
+    name: normalizeWorkoutName(data.name),
     type: data.type,
     stages: cleanStagesForFirestore(data.stages),
     notes: data.notes || "",
@@ -182,7 +183,7 @@ export const updateWorkout = async (
   const docRef = doc(db, WORKOUTS_COLLECTION, id);
 
   const updateData: Record<string, unknown> = {
-    name: data.name,
+    name: normalizeWorkoutName(data.name),
     type: data.type,
     stages: cleanStagesForFirestore(data.stages),
     notes: data.notes || "",
@@ -210,7 +211,7 @@ export const duplicateWorkoutForAthlete = async (
 ): Promise<string> =>
   createWorkout(
     {
-      name: `${workout.name} · ${athleteName.split(" ")[0]}`,
+      name: normalizeWorkoutName(`${workout.name} · ${athleteName.split(" ")[0]}`),
       type: workout.type,
       stages: workout.stages,
       exercises: workout.exercises,
