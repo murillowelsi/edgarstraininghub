@@ -206,7 +206,7 @@ export function TimelineFeed() {
           onClick={() => setCreateOpen(true)}
           className="flex-1 text-left text-muted-foreground text-base py-1 hover:text-foreground transition-colors"
         >
-          {t.timeline.create.placeholder}
+          {isAdmin ? t.timeline.coach.composerPlaceholder : t.timeline.create.placeholder}
         </button>
         <button
           onClick={() => setCreateOpen(true)}

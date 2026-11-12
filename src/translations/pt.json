@@ -1963,6 +1963,11 @@
       "emptyAction": "Compartilhar um treino",
       "newPostOne": "1 post novo",
       "newPosts": "{{n}} posts novos"
+    },
+    "coach": {
+      "title": "Feed",
+      "newNotice": "Novo aviso",
+      "composerPlaceholder": "Escreva um aviso para o time…"
     }
   },
   "gallery": {

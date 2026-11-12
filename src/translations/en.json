@@ -1963,6 +1963,11 @@
       "emptyAction": "Share a workout",
       "newPostOne": "1 new post",
       "newPosts": "{{n}} new posts"
+    },
+    "coach": {
+      "title": "Feed",
+      "newNotice": "New notice",
+      "composerPlaceholder": "Write a notice for the team…"
     }
   },
   "gallery": {
