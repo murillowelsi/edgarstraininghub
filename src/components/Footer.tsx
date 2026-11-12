@@ -1,14 +1,12 @@
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
 
 // 40px hit area around each icon
 const socialLink = "h-10 w-10 flex items-center justify-center rounded-full text-gray-300 hover:bg-white/10 transition-colors";
 
 const Footer = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const currentYear = new Date().getFullYear();
 
   // WhatsApp SVG Icon
@@ -76,15 +74,11 @@ const Footer = () => {
           {/* Copyright */}
           <p className="text-gray-400 text-xs md:text-sm md:flex-1 md:text-right">
             &copy; {currentYear} Edgar Zanin. {t.footer.rights}
-            {/* Discreet entry for the coach and athletes; signed-in users use "Open app" in the navbar */}
-            {!user && (
-              <>
-                {" · "}
-                <Link to="/admin/login" className="inline-block py-2 underline-offset-2 hover:text-gray-200 hover:underline">
-                  {t.footer.signIn}
-                </Link>
-              </>
-            )}
+            {/* Discreet entry to the app (/app sends signed-out users to the login) */}
+            {" · "}
+            <Link to="/app" className="inline-block py-2 underline-offset-2 hover:text-gray-200 hover:underline">
+              {t.footer.athleteArea}
+            </Link>
           </p>
         </div>
       </div>
