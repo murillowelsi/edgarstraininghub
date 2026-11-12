@@ -99,7 +99,8 @@ const cleanExercisesForFirestore = (exercises: WorkoutExercise[]): Record<string
 // Convert Firestore document to Workout
 const docToWorkout = (id: string, data: WorkoutDocument): Workout => ({
   id,
-  name: data.name,
+  // Names saved before the tidy-up on save are tidied for display
+  name: normalizeWorkoutName(data.name ?? ""),
   type: data.type,
   stages: data.stages || [],
   exercises: data.exercises || [],
