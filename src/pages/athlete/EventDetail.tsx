@@ -8,8 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { getAthleteEventById } from "@/services/athleteEventsService";
 import type { AthleteEvent } from "@/types/athleteEvent";
-import { differenceInCalendarDays, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { differenceInCalendarDays } from "date-fns";
 import {
   ArrowLeft,
   Calendar,
@@ -22,6 +21,7 @@ import {
 import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 const typeIcon = {
   race: Flag,
@@ -36,7 +36,6 @@ const EventDetail = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const { toast } = useToast();
-  const dateLocale = language === "pt" ? ptBR : undefined;
 
   const [event, setEvent] = useState<AthleteEvent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,7 +133,7 @@ const EventDetail = () => {
                   </div>
                   <div className="flex items-center gap-1.5 mt-3 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    {format(event.eventDate, "PPP", { locale: dateLocale })}
+                    {formatDate(event.eventDate, "long", language)}
                   </div>
                 </div>
               </div>

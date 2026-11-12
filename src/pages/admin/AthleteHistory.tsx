@@ -216,7 +216,7 @@ const AdminAthleteHistory = () => {
               <button
                 onClick={() => setAssignOpen(true)}
                 className="rounded-full p-1.5 hover:bg-muted transition"
-                aria-label="Assign workout"
+                aria-label={t.admin.assign.title}
               >
                 <Plus className="h-4 w-4" />
               </button>

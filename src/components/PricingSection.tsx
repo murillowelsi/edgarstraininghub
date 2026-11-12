@@ -48,15 +48,15 @@ const PricingSection = () => {
               key={plan.key}
               className={`relative bg-card rounded-xl shadow-lg p-8 flex flex-col h-full ${
                 plan.popular
-                  ? "border-2 border-primary transform scale-105"
+                  ? "border-2 border-primary pt-10 md:scale-105"
                   : "border border-border"
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-primary text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1">
+                  <div className="bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold uppercase whitespace-nowrap flex items-center gap-1">
                     <Star className="h-4 w-4" />
-                    MAIS POPULAR
+                    {t.pricing.mostPopular}
                   </div>
                 </div>
               )}
@@ -66,7 +66,7 @@ const PricingSection = () => {
                   {plan.name}
                 </h3>
                 <div className="text-3xl font-bold text-primary mb-2">
-                  {plan.price || "Preço a consultar"}
+                  {plan.price || t.pricing.priceOnRequest}
                 </div>
               </div>
 
@@ -81,10 +81,10 @@ const PricingSection = () => {
 
               <div className="text-center mt-auto">
                 <Button
-                  className={`w-full h-12 text-white font-semibold ${
+                  className={`w-full h-12 font-semibold ${
                     plan.popular
-                      ? "bg-primary hover:bg-primary/90"
-                      : "bg-zinc-800 hover:bg-zinc-700 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "bg-zinc-800 text-white hover:bg-zinc-700 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                   }`}
                   onClick={() => {
                     navigate("/contact");

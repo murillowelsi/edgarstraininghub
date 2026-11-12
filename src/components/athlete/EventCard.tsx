@@ -2,9 +2,9 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { AthleteEvent } from "@/types/athleteEvent";
-import { differenceInCalendarDays, differenceInWeeks, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { differenceInCalendarDays, differenceInWeeks } from "date-fns";
 import { Flag, Target, Trophy, Sparkles, ChevronRight } from "lucide-react";
+import { formatDate } from "@/lib/dates";
 
 interface Props {
   event: AthleteEvent;
@@ -27,7 +27,6 @@ const EventCard = ({ event, onClick, compact, hidePastLabel }: Props) => {
   const Icon = typeIcon[event.type];
   const days = differenceInCalendarDays(event.eventDate, new Date());
   const weeks = differenceInWeeks(event.eventDate, new Date());
-  const dateLocale = language === "pt" ? ptBR : undefined;
 
   const countdown = (() => {
     if (days < 0) return te.countdown.past;
@@ -37,7 +36,7 @@ const EventCard = ({ event, onClick, compact, hidePastLabel }: Props) => {
     return te.countdown.weeks.replace("{{count}}", String(weeks));
   })();
 
-  const monthLabel = format(event.eventDate, "MMM", { locale: dateLocale }).toUpperCase().replace(".", "");
+  const monthLabel = formatDate(event.eventDate, "month", language).toUpperCase();
   const day = event.eventDate.getDate();
   const isPast = days < 0;
   const goalsText = te.goalsCount

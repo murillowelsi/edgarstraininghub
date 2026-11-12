@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { differenceInCalendarDays, differenceInWeeks, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { differenceInCalendarDays, differenceInWeeks } from "date-fns";
 import { Flag, Sparkles, Target, Trophy, ChevronRight } from "lucide-react";
 import { getAllEvents } from "@/services/athleteEventsService";
 import { getUserById } from "@/services/usersService";
@@ -8,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import type { AthleteEvent, AthleteEventType } from "@/types/athleteEvent";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/dates";
 
 const typeIcon: Record<AthleteEventType, React.ElementType> = {
   race: Flag,
@@ -55,7 +55,6 @@ const UpcomingEventsBanner = ({ athleteIdFilter }: { athleteIdFilter?: string })
 
   if (loading || filtered.length === 0) return null;
 
-  const dateLocale = language === "pt" ? ptBR : undefined;
 
   return (
     <div className="px-4 pt-3 pb-2">
@@ -99,7 +98,7 @@ const UpcomingEventsBanner = ({ athleteIdFilter }: { athleteIdFilter?: string })
                   style={{ minWidth: 44 }}
                 >
                   <span className="text-[9px] font-bold tracking-widest">
-                    {format(e.eventDate, "MMM", { locale: dateLocale }).toUpperCase().replace(".", "")}
+                    {formatDate(e.eventDate, "month", language).toUpperCase()}
                   </span>
                   <span className="font-display text-xl font-extrabold leading-none">
                     {e.eventDate.getDate()}

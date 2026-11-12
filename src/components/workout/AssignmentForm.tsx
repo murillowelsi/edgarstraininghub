@@ -15,10 +15,11 @@ import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
 import type { Workout } from "@/types/workout";
 import { toDayString } from "@/utils/scheduledDay";
-import { addDays, format, isBefore, startOfDay } from "date-fns";
+import { addDays, isBefore, startOfDay } from "date-fns";
 import { enUS, ptBR } from "date-fns/locale";
 import { Loader2, Search, Users2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { formatDate } from "@/lib/dates";
 
 interface Props {
   workout: Workout;
@@ -283,7 +284,7 @@ export function AssignmentForm({ workout, initialDates, preSelectedAthleteIds, o
                     key={toDayString(d)}
                     className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary pl-2.5 pr-1 h-7 text-xs font-medium"
                   >
-                    {format(d, language === "pt" ? "EEE d MMM" : "EEE MMM d", { locale })}
+                    {formatDate(d, "weekdayShort", language)}
                     {dates.some((x) => toDayString(x) === toDayString(d)) && (
                       <button
                         onClick={() => setDates((prev) => prev.filter((x) => toDayString(x) !== toDayString(d)))}

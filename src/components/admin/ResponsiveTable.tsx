@@ -2,6 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { ReactNode, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Column {
   key: string;
@@ -13,16 +14,21 @@ interface Column {
   mobileHidden?: boolean;
 }
 
-interface ResponsiveTableProps {
+// Cells are rendered as ReactNode; extra keys (e.g. the source record) can ride along for `actions`
+type Row = Record<string, unknown>;
+
+interface ResponsiveTableProps<TRow extends Row> {
   columns: Column[];
-  rows: Record<string, ReactNode>[];
+  rows: TRow[];
   rowKey?: string;
-  actions?: (row: Record<string, ReactNode>) => ReactNode;
+  actions?: (row: TRow) => ReactNode;
   emptyState?: ReactNode;
   loading?: boolean;
 }
 
-export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, loading }: ResponsiveTableProps) {
+export function ResponsiveTable<TRow extends Row>({ columns, rows, rowKey, actions, emptyState, loading }: ResponsiveTableProps<TRow>) {
+  const cell = (row: TRow, key: string) => row[key] as ReactNode;
+  const { t } = useLanguage();
   const [expandedRows, setExpandedRows] = useState<Set<string | number>>(new Set());
 
   const toggleRow = (key: string | number) => {
@@ -47,7 +53,7 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
                     {col.label}
                   </th>
                 ))}
-                {actions && <th className="h-12 px-4 text-right font-medium text-muted-foreground">Actions</th>}
+                {actions && <th className="h-12 px-4 text-right font-medium text-muted-foreground">{t.common.actions}</th>}
               </tr>
             </thead>
             <tbody>
@@ -82,7 +88,7 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
     return emptyState ? (
       <>{emptyState}</>
     ) : (
-      <div className="text-center py-8 text-muted-foreground text-sm">No data available</div>
+      <div className="text-center py-8 text-muted-foreground text-sm">{t.common.noData}</div>
     );
   }
 
@@ -102,7 +108,7 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
                   {col.label}
                 </th>
               ))}
-              {actions && <th className="h-12 px-4 text-right font-medium text-muted-foreground">Actions</th>}
+              {actions && <th className="h-12 px-4 text-right font-medium text-muted-foreground">{t.common.actions}</th>}
             </tr>
           </thead>
           <tbody>
@@ -110,7 +116,7 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
               <tr key={rowKey ? String(row[rowKey]) : i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                 {columns.map((col) => (
                   <td key={col.key} className={`px-4 py-3 ${col.className ?? ""}`}>
-                    {row[col.key]}
+                    {cell(row, col.key)}
                   </td>
                 ))}
                 {actions && (
@@ -136,17 +142,17 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
                   <button
                     onClick={() => toggleRow(key)}
                     className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label={isExpanded ? "Collapse" : "Expand"}
+                    aria-label={isExpanded ? t.admin.collapse : t.admin.expand}
                   >
                     <ChevronRight className={cn("h-4 w-4 transition-transform duration-200", isExpanded && "rotate-90")} />
                   </button>
                 )}
                 <div className="flex-1 min-w-0 text-sm">
-                  {row[primaryCol.key]}
+                  {cell(row, primaryCol.key)}
                 </div>
                 {badgeCols.map((col) => (
                   <div key={col.key} className="shrink-0">
-                    {row[col.key]}
+                    {cell(row, col.key)}
                   </div>
                 ))}
                 {actions && (
@@ -162,7 +168,7 @@ export function ResponsiveTable({ columns, rows, rowKey, actions, emptyState, lo
                   {expandableCols.map((col) => (
                     <div key={col.key} className="flex items-start gap-2">
                       <span className="text-xs text-muted-foreground w-20 shrink-0 pt-0.5">{col.label}</span>
-                      <div className="text-sm flex-1">{row[col.key]}</div>
+                      <div className="text-sm flex-1">{cell(row, col.key)}</div>
                     </div>
                   ))}
                 </div>

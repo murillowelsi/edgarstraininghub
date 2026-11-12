@@ -11,10 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 import { subscribeToAssignmentsByAthlete, markAssignmentSkipped, unmarkAssignmentSkipped, deleteAssignment } from "@/services/workoutAssignmentsService";
 import { getUserById } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import { format, startOfDay } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { workoutLabels } from "@/utils/workoutLabels";
+import { formatDistance } from "@/utils/activityFormat";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   Check,
@@ -35,6 +35,7 @@ import {
 import { SectionSpinner } from "@/components/ui/spinner";
 import { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 const formatTime = (seconds: number) => {
   const hrs = Math.floor(seconds / 3600);
@@ -189,7 +190,7 @@ const AthleteWorkoutsList = () => {
             placeholder={t.athlete.workouts.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-8 text-sm rounded-full"
+            className="pl-8 h-8 text-base md:text-sm rounded-full"
           />
         </div>
 
@@ -262,9 +263,7 @@ const AthleteWorkoutsList = () => {
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <span className={cn(isOverdue(assignment) && "text-red-500 font-medium")}>
-                          {format(assignment.scheduledDate, language === "pt" ? "d MMM" : "MMM d", {
-                            locale: language === "pt" ? ptBR : undefined,
-                          })}
+                          {formatDate(assignment.scheduledDate, "short", language)}
                         </span>
                         {assignment.selfLogged && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0">{t.athlete.home.extra}</Badge>
@@ -287,7 +286,7 @@ const AthleteWorkoutsList = () => {
                           {assignment.activityData.distance !== undefined && (
                             <span className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
-                              {assignment.activityData.distance}{workout.type === "swimming" ? "m" : "km"}
+                              {formatDistance(assignment.activityData.distance, workout.type)}
                             </span>
                           )}
                           {assignment.activityData.avgHeartRate !== undefined && (

@@ -13,6 +13,11 @@
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
+    /* Navy bands that stay navy in both themes (footer). Design system 1.2 */
+    --surface-inverse: 222 47% 11%;
+    /* Error text that passes AA on the background (design system 1.2) */
+    --destructive-ink: 0 72% 51%;
+
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
@@ -70,6 +75,9 @@
 
     --card: 222 47% 13%;
     --card-foreground: 0 0% 98%;
+
+    --surface-inverse: 222 47% 8%;
+    --destructive-ink: 0 91% 71%;
 
     --popover: 222 47% 13%;
     --popover-foreground: 0 0% 98%;

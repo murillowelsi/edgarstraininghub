@@ -162,7 +162,7 @@ export function TimelineFeed() {
       <div className="shrink-0 border-b border-border/50 px-4 py-3 flex items-center gap-3 bg-background">
         <CachedAvatar
           src={photoURL}
-          alt="Profile"
+          alt={t.common.profilePhoto}
           fallback={authorName.charAt(0).toUpperCase()}
           className="h-10 w-10 shrink-0 ring-2 ring-[#e1b506]"
           fallbackClassName="bg-primary text-primary-foreground font-bold"

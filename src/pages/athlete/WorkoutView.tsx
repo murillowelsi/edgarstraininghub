@@ -22,7 +22,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
 import { createMentionNotifications, createTimelinePost, hasPostForAssignment } from "@/services/timelineService";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, type TranslationsType } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { clearSessionDraft, getDraftProgress, loadSessionDraft } from "@/lib/sessionDraft";
@@ -46,9 +46,9 @@ import {
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { WorkoutStage } from "@/types/workout";
 import { stageColors } from "@/types/workout";
-import { workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { durationUnitLabel, workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
+import { formatDistance, pacePer100m, pacePerKm, swimDistanceMeters } from "@/utils/activityFormat";
+import { formatDuration as formatElapsed, nextDurationInput, normalizeDurationInput, parseDuration, type DurationInputMode } from "@/utils/durationInput";
 import {
   ArrowLeft,
   Calendar,
@@ -82,8 +82,9 @@ const formatTime = (seconds: number | undefined) => {
   }
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -117,7 +118,8 @@ const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, lapLabel: string)
     return lapLabel;
   }
   if (stage.duration.value !== undefined) {
-    const unit = stage.duration.unit || "";
+    // Older workouts may store the legacy unit "minutes", so widen to string
+    const unit: string = stage.duration.unit || "";
     const value = stage.duration.value;
     if ((unit === "min" || unit === "minutes") && value % 1 !== 0) {
       const totalSeconds = Math.round(value * 60);
@@ -125,7 +127,7 @@ const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, lapLabel: string)
       const secs = totalSeconds % 60;
       return `${mins}:${secs.toString().padStart(2, "0")} ${unit}`;
     }
-    return `${value} ${unit}`;
+    return `${value} ${durationUnitLabel(unit)}`;
   }
   return L.duration(stage.duration.type);
 };
@@ -139,7 +141,7 @@ const decimalToMMSS = (val: number): string => {
 
 const isPaceType = (type: string) => type === "pace" || type === "targetPace" || type === "cssBasedPace";
 
-const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: any): string | null => {
+const formatIntensity = (stage: WorkoutStage, L: WorkoutLabels, t: TranslationsType): string | null => {
   if (stage.intensity.type === "none") {
     return null;
   }
@@ -209,7 +211,7 @@ const StageItem = ({
                 <Repeat className="h-4 w-4" />
               </div>
               <div className="flex-1 text-left min-w-0">
-                <p className="font-semibold text-sm">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}x</p>
+                <p className="font-semibold text-sm">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}×</p>
                 <p className="text-xs text-muted-foreground">
                   {stage.stages?.length || 0} {t.athlete.workoutView.stages}
                 </p>
@@ -401,7 +403,7 @@ const ExerciseItem = ({
                     />
                   ) : videoId ? (
                     <iframe
-                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`}
+                      src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`}
                       title={exerciseName}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                       allowFullScreen
@@ -585,6 +587,8 @@ const AthleteWorkoutView = () => {
     paceManuallyEdited: false,
     stageInputs: [],
   });
+  // How the elapsed-time field groups digits (see nextDurationInput)
+  const elapsedMode = useRef<DurationInputMode>("auto");
 
   useEffect(() => {
     const loadAssignment = async () => {
@@ -657,22 +661,17 @@ const AthleteWorkoutView = () => {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Parse "HH:MM:SS" or "MM:SS" to seconds
-  const parseElapsedTime = (val: string): number => {
-    const parts = val.trim().split(":").map(Number);
-    if (parts.some(isNaN)) return 0;
-    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    if (parts.length === 2) return parts[0] * 60 + parts[1];
-    return 0;
-  };
+  // "h:mm:ss" or "m:ss" to seconds; 0 when empty or invalid (see utils/durationInput)
+  const parseElapsedTime = (val: string): number => parseDuration(val) ?? 0;
+  const elapsedInvalid = !!activityForm.elapsedTime.trim() && parseDuration(activityForm.elapsedTime) === undefined;
 
   // Derive pace from elapsed time string and distance
   const derivePace = (elapsedTime: string, distance: string, type: string): string => {
     const totalSecs = parseElapsedTime(elapsedTime);
     const dist = parseFloat(distance);
-    if (!totalSecs || !dist || dist <= 0) return "";
-    if (type === "swimming") return formatPace(totalSecs / (dist / 100));
-    return formatPace(totalSecs / dist);
+    // Swim distance is typed in metres, run distance in km
+    const pace = type === "swimming" ? pacePer100m(totalSecs, dist) : pacePerKm(totalSecs, dist);
+    return pace ? formatPace(pace) : "";
   };
 
   // Derive avg speed (km/h) from elapsed time and distance (km)
@@ -699,13 +698,6 @@ const AthleteWorkoutView = () => {
     return decimalPaceToMMSS(paceDec);
   };
 
-  // Apply HH:MM:SS mask to raw input
-  const applyTimeMask = (raw: string): string => {
-    const digits = raw.replace(/\D/g, "").slice(0, 6);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 4) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
-    return `${digits.slice(0, 2)}:${digits.slice(2, 4)}:${digits.slice(4)}`;
-  };
 
   const handleToggleComplete = async () => {
     if (!assignment) return;
@@ -731,6 +723,7 @@ const AthleteWorkoutView = () => {
         }
         return { type: "regular" as const, pace: stageToPaceString(s) };
       });
+      elapsedMode.current = "auto";
       setActivityForm({ elapsedTime: "", distance: "", avgHeartRate: "", avgPace: "", avgSpeed: "", avgPower: "", paceManuallyEdited: false, stageInputs });
       setShowActivityDrawer(true);
       return;
@@ -806,13 +799,6 @@ const AthleteWorkoutView = () => {
     }
   };
 
-  // Format seconds back to HH:MM:SS for pre-filling elapsed time
-  const secsToHHMMSS = (secs: number): string => {
-    const h = Math.floor(secs / 3600);
-    const m = Math.floor((secs % 3600) / 60);
-    const s = secs % 60;
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
 
   const handleEditActivityData = () => {
     if (!assignment) return;
@@ -829,9 +815,15 @@ const AthleteWorkoutView = () => {
       }
       return { type: "regular" as const, pace: stageToPaceString(s) };
     });
+    elapsedMode.current = "auto";
     setActivityForm({
-      elapsedTime: existing.elapsedTime ? secsToHHMMSS(existing.elapsedTime) : "",
-      distance: existing.distance !== undefined ? String(existing.distance) : "",
+      elapsedTime: existing.elapsedTime ? formatElapsed(existing.elapsedTime) : "",
+      distance:
+        existing.distance === undefined
+          ? ""
+          : assignment.workout.type === "swimming"
+          ? String(swimDistanceMeters(existing.distance) ?? "")
+          : String(existing.distance),
       avgHeartRate: existing.avgHeartRate !== undefined ? String(existing.avgHeartRate) : "",
       avgPace: existing.avgPace !== undefined ? formatPace(existing.avgPace) : "",
       avgSpeed: existing.avgSpeed !== undefined ? String(existing.avgSpeed) : "",
@@ -863,6 +855,11 @@ const AthleteWorkoutView = () => {
 
   const handleSaveActivityData = async (skip = false) => {
     if (!assignment) return;
+    // Keep the drawer open so the person can fix the time (the field shows why)
+    if (!skip && elapsedInvalid) {
+      document.getElementById("elapsed-time")?.focus();
+      return;
+    }
     setCompleting(true);
     setShowActivityDrawer(false);
     try {
@@ -1130,9 +1127,7 @@ const AthleteWorkoutView = () => {
                   <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
-                      {format(assignment.scheduledDate, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMM d", {
-                        locale: language === "pt" ? ptBR : undefined,
-                      })}
+                      {formatDate(assignment.scheduledDate, "weekdayLong", language)}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Layers className="h-4 w-4" />
@@ -1183,7 +1178,7 @@ const AthleteWorkoutView = () => {
                   {assignment.activityData.distance !== undefined && (
                     <div className="flex items-center gap-1.5">
                       <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span>{assignment.activityData.distance}{workout.type === "swimming" ? "m" : "km"}</span>
+                      <span>{formatDistance(assignment.activityData.distance, workout.type)}</span>
                     </div>
                   )}
                   {assignment.activityData.avgHeartRate !== undefined && (
@@ -1369,11 +1364,19 @@ const AthleteWorkoutView = () => {
               <Label htmlFor="elapsed-time">{t.athlete.workoutView.elapsedTime}</Label>
               <Input
                 id="elapsed-time"
-                placeholder="HH:MM:SS"
+                placeholder="h:mm:ss"
                 inputMode="numeric"
+                autoComplete="off"
+                aria-invalid={elapsedInvalid}
+                aria-describedby={elapsedInvalid ? "elapsed-time-error" : undefined}
                 value={activityForm.elapsedTime}
+                onBlur={() =>
+                  setActivityForm((f) => ({ ...f, elapsedTime: normalizeDurationInput(f.elapsedTime) }))
+                }
                 onChange={(e) => {
-                  const elapsedTime = applyTimeMask(e.target.value);
+                  const typed = nextDurationInput(activityForm.elapsedTime, e.target.value, elapsedMode.current);
+                  elapsedMode.current = typed.mode;
+                  const elapsedTime = typed.value;
                   setActivityForm((f) => {
                     const next = { ...f, elapsedTime };
                     if (!next.paceManuallyEdited) {
@@ -1387,6 +1390,11 @@ const AthleteWorkoutView = () => {
                   });
                 }}
               />
+              {elapsedInvalid && (
+                <p id="elapsed-time-error" className="text-xs text-destructive-ink">
+                  {t.athlete.workoutView.elapsedTimeInvalid}
+                </p>
+              )}
             </div>
 
             {/* Distance */}

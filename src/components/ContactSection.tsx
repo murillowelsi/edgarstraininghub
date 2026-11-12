@@ -56,7 +56,7 @@ const ContactSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t.contact.info.location}</h4>
-                <p className="text-muted-foreground">Bournemouth, England</p>
+                <p className="text-muted-foreground">{t.contact.info.city}</p>
                 <p className="text-muted-foreground text-sm mt-1">{t.contact.info.locationDesc}</p>
               </div>
             </div>
@@ -67,11 +67,11 @@ const ContactSection = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="font-medium">{t.contact.hours.weekdays}</h4>
-                  <p className="text-muted-foreground">6:00 AM - 8:00 PM</p>
+                  <p className="text-muted-foreground">{t.contact.hours.weekdaysHours}</p>
                 </div>
                 <div>
                   <h4 className="font-medium">{t.contact.hours.weekends}</h4>
-                  <p className="text-muted-foreground">8:00 AM - 2:00 PM</p>
+                  <p className="text-muted-foreground">{t.contact.hours.weekendsHours}</p>
                 </div>
               </div>
             </div>

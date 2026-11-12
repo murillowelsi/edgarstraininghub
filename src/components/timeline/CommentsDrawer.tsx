@@ -330,7 +330,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
         <div className="shrink-0 border-t px-4 py-3 flex gap-3 items-center bg-background">
           <CachedAvatar
             src={photoURL}
-            alt="Profile"
+            alt={t.common.profilePhoto}
             fallback={getInitials(displayName || user?.email || "U")}
             className="h-9 w-9 shrink-0 ring-2 ring-[#e1b506]"
             fallbackClassName="bg-primary text-primary-foreground text-xs font-semibold"

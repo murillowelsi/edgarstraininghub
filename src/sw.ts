@@ -1,3 +1,4 @@
+/// <reference lib="webworker" />
 import { cleanupOutdatedCaches, precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching'
 import { clientsClaim } from 'workbox-core'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
@@ -6,8 +7,14 @@ import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { initializeApp } from 'firebase/app'
 import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
+import type { ExtendedNotificationOptions } from './types/notifications'
 
 declare let self: ServiceWorkerGlobalScope
+
+// Badging API (https://w3c.github.io/badging/) is not in TypeScript's webworker lib yet
+type BadgingServiceWorkerGlobalScope = ServiceWorkerGlobalScope & {
+  setAppBadge(contents?: number): Promise<void>
+}
 
 // Initialize Firebase in the service worker so FCM can deliver background push
 // messages via onBackgroundMessage (required — raw push events alone are unreliable
@@ -30,10 +37,10 @@ onBackgroundMessage(_messaging, (payload) => {
   const unreadCount = parseInt((payload.data?.unreadCount as string) || '1', 10)
 
   if ('setAppBadge' in self) {
-    (self as any).setAppBadge(unreadCount).catch(() => {})
+    (self as BadgingServiceWorkerGlobalScope).setAppBadge(unreadCount).catch(() => {})
   }
 
-  return self.registration.showNotification(title, {
+  const options: ExtendedNotificationOptions = {
     body,
     icon:     '/pwa-192x192.png',
     badge:    '/pwa-192x192.png',
@@ -41,7 +48,8 @@ onBackgroundMessage(_messaging, (payload) => {
     vibrate:  [200, 100, 200],
     tag:      url,
     renotify: true,
-  })
+  }
+  return self.registration.showNotification(title, options)
 })
 
 self.skipWaiting()

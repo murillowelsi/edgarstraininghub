@@ -1,5 +1,6 @@
 import type { SummaryHighlight, WorkoutSummary } from "@/types/timeline";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
+import { swimDistanceMeters } from "@/utils/activityFormat";
 import {
   buildBestByExercise,
   computeStrengthVolume,
@@ -29,7 +30,9 @@ export const buildWorkoutSummary = (
     return {
       ...base,
       ...(a.elapsedTime !== undefined ? { elapsedTime: a.elapsedTime } : {}),
-      ...(a.distance !== undefined ? { distance: a.distance } : {}),
+      ...(a.distance !== undefined
+        ? { distance: workout.type === "swimming" ? swimDistanceMeters(a.distance) : a.distance }
+        : {}),
       ...(a.avgHeartRate !== undefined ? { avgHeartRate: a.avgHeartRate } : {}),
       ...(a.avgPace !== undefined ? { avgPace: a.avgPace } : {}),
       ...(a.avgSpeed !== undefined ? { avgSpeed: a.avgSpeed } : {}),

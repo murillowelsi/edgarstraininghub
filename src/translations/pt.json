@@ -1,4 +1,5 @@
 {
+  "_reviewNotes": "ATENÇÃO: a seção \"privacy\" (política de privacidade) é um RASCUNHO escrito pelo time e precisa da revisão do usuário e do coach antes de publicar. Os campos entre colchetes são placeholders.",
   "nav": {
     "home": "Início",
     "about": "Sobre",
@@ -24,7 +25,8 @@
       "10k": "10K PB",
       "halfMarathon": "Meia Maratona",
       "marathon": "Maratona"
-    }
+    },
+    "imageAlt": "Edgar Zanin, atleta de Ironman"
   },
   "about": {
     "title": "Sobre",
@@ -68,7 +70,8 @@
       "title": "Pronto para Transformar seu Condicionamento Físico?",
       "description": "Ofereço treinos personalizados 1-a-1 tanto presencialmente em Bournemouth quanto online para clientes em todo o mundo. Cada programa é especialmente desenvolvido para se adequar aos seus objetivos específicos, nível de condicionamento físico e agenda.",
       "button": "Entre em Contato"
-    }
+    },
+    "imageAlt": "Edgar Zanin com um grupo de corrida no Porto"
   },
   "achievements": {
     "title": "Minhas",
@@ -104,7 +107,9 @@
     "subtitle": "Veja o que alguns dos meus clientes têm a dizer sobre a experiência de treino.",
     "murilloWelsi": {
       "text": "Os treinos de fortalecimento com o Edgar ajudaram-me a reduzir dores e evitar pequenas lesões. Sinto-me mais estável e a correr melhor no dia a dia."
-    }
+    },
+    "previous": "Depoimento anterior",
+    "next": "Próximo depoimento"
   },
   "footer": {
     "description": "Personal Trainer & Triatleta baseado no Bournemouth, Inglaterra, especializado em treino de resistência e otimização de desempenho.",
@@ -113,7 +118,8 @@
     "getInTouch": "Entre em Contato",
     "rights": "Todos os direitos reservados.",
     "privacy": "Política de Privacidade",
-    "terms": "Termos de Serviço"
+    "terms": "Termos de Serviço",
+    "athleteArea": "Área do atleta"
   },
   "youtube": {
     "title": "Vídeos &",
@@ -125,7 +131,9 @@
     "retry": "Tentar novamente",
     "noVideo": "Ainda não há vídeos disponíveis.",
     "moreVideos": "Veja mais vídeos no meu",
-    "channel": "canal do YouTube"
+    "channel": "canal do YouTube",
+    "playerTitle": "Player de vídeo do YouTube",
+    "play": "Reproduzir vídeo: {{title}}"
   },
   "pricing": {
     "title": "Planos &",
@@ -163,7 +171,9 @@
         ]
       }
     },
-    "cta": "Começar Agora"
+    "cta": "Começar Agora",
+    "mostPopular": "Mais popular",
+    "priceOnRequest": "Preço a consultar"
   },
   "certifications": {
     "title": "Certificações",
@@ -192,7 +202,8 @@
       "whatsapp": "WhatsApp",
       "email": "Email",
       "location": "Localização",
-      "locationDesc": "Atendo clientes em todo o Bournemouth e também ofereço treinos online personalizados"
+      "locationDesc": "Atendo clientes em todo o Bournemouth e também ofereço treinos online personalizados",
+      "city": "Bournemouth, Inglaterra"
     },
     "hours": {
       "title": "Horário de Funcionamento",
@@ -321,7 +332,8 @@
       "customExercise": "Exercício Personalizado",
       "fromExerciseLibrary": "Da Biblioteca de Exercícios",
       "addToWorkout": "Adicionar ao Treino",
-      "noImage": "Sem imagem"
+      "noImage": "Sem imagem",
+      "videoThumbnailAlt": "Miniatura do vídeo"
     },
     "exerciseForm": {
       "createCustomExercise": "Criar Exercício Personalizado",
@@ -403,30 +415,69 @@
     }
   },
   "workoutMeta": {
-    "types": { "running": "Corrida", "cycling": "Ciclismo", "swimming": "Natação", "strength": "Força" },
+    "types": {
+      "running": "Corrida",
+      "cycling": "Ciclismo",
+      "swimming": "Natação",
+      "strength": "Força"
+    },
     "stages": {
-      "warmup": "Aquecimento", "run": "Corrida", "cooldown": "Desaquecimento", "recovery": "Recuperação",
-      "interval": "Intervalado", "repeat": "Repetir", "bike": "Bike", "rest": "Descanso", "swim": "Natação"
+      "warmup": "Aquecimento",
+      "run": "Corrida",
+      "cooldown": "Desaquecimento",
+      "recovery": "Recuperação",
+      "interval": "Intervalado",
+      "repeat": "Repetir",
+      "bike": "Bike",
+      "rest": "Descanso",
+      "swim": "Natação"
     },
     "durations": {
-      "time": "Tempo", "distance": "Distância", "lapButton": "Pressione o Botão de Volta",
-      "calories": "Calorias", "heartRate": "Frequência Cardíaca", "power": "Potência"
+      "time": "Tempo",
+      "distance": "Distância",
+      "lapButton": "Pressione o Botão de Volta",
+      "calories": "Calorias",
+      "heartRate": "Frequência Cardíaca",
+      "power": "Potência"
     },
     "intensities": {
-      "none": "Sem Alvo", "pace": "Pace", "cadence": "Cadência", "heartRateZone": "Zona de FC",
-      "customHeartRate": "FC Personalizada", "powerZone": "Zona de Potência", "customPower": "Potência Personalizada",
-      "speed": "Velocidade", "bikeCadence": "Cadência na Bike", "effortBased": "Por Esforço",
-      "targetPace": "Pace Alvo", "cssBasedPace": "Pace Baseado no CSS"
+      "none": "Sem Alvo",
+      "pace": "Pace",
+      "cadence": "Cadência",
+      "heartRateZone": "Zona de FC",
+      "customHeartRate": "FC Personalizada",
+      "powerZone": "Zona de Potência",
+      "customPower": "Potência Personalizada",
+      "speed": "Velocidade",
+      "bikeCadence": "Cadência na Bike",
+      "effortBased": "Por Esforço",
+      "targetPace": "Pace Alvo",
+      "cssBasedPace": "Pace Baseado no CSS"
     },
     "strokes": {
-      "freestyle": "Crawl", "breaststroke": "Peito", "backstroke": "Costas",
-      "butterfly": "Borboleta", "choice": "Livre escolha", "im": "Medley (IM)",
-      "imByRound": "Medley por Série", "reverseIm": "Medley Invertido (RIMO)", "mixed": "Misto"
+      "freestyle": "Crawl",
+      "breaststroke": "Peito",
+      "backstroke": "Costas",
+      "butterfly": "Borboleta",
+      "choice": "Livre escolha",
+      "im": "Medley (IM)",
+      "imByRound": "Medley por Série",
+      "reverseIm": "Medley Invertido (RIMO)",
+      "mixed": "Misto"
     },
-    "drills": { "none": "Nenhum", "kick": "Pernada", "arms": "Braçada", "drill": "Educativo" },
+    "drills": {
+      "none": "Nenhum",
+      "kick": "Pernada",
+      "arms": "Braçada",
+      "drill": "Educativo"
+    },
     "swimEquipment": {
-      "none": "Nenhum", "fins": "Nadadeiras", "kickboard": "Prancha",
-      "paddles": "Palmares", "pullBuoy": "Pull Buoy", "snorkel": "Snorkel"
+      "none": "Nenhum",
+      "fins": "Nadadeiras",
+      "kickboard": "Prancha",
+      "paddles": "Palmares",
+      "pullBuoy": "Pull Buoy",
+      "snorkel": "Snorkel"
     },
     "hrZone": "Zona FC",
     "powerZoneShort": "Zona de Potência"
@@ -478,7 +529,10 @@
     "cannotBeUndone": "Esta ação não pode ser desfeita.",
     "mainNavigation": "Principal",
     "workoutCountOne": "1 treino",
-    "workoutCountOther": "{{count}} treinos"
+    "workoutCountOther": "{{count}} treinos",
+    "profilePhoto": "Foto de perfil",
+    "toggleTheme": "Alternar tema",
+    "openMenu": "Abrir menu"
   },
   "auth": {
     "login": "Entrar",
@@ -488,12 +542,11 @@
     "emailPlaceholder": "admin@exemplo.com",
     "passwordPlaceholder": "Digite sua senha",
     "signInDescription": "Entre para acessar sua conta",
-    "accessDenied": "Acesso Negado",
-    "userNotFound": "Conta de usuário não encontrada.",
     "welcomeBack": "Bem-vindo de volta!",
     "loggedIn": "Sessão iniciada com sucesso.",
-    "loginFailed": "Falha no Login",
-    "invalidCredentials": "Email ou senha inválidos."
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "accountNotSetUp": "Sua conta ainda não está liberada no app. Fale com o seu treinador."
   },
   "admin": {
     "results": {
@@ -646,12 +699,27 @@
     "posts": {
       "title": "Artigos",
       "newPost": "Novo Artigo",
-      "columns": { "title": "Título", "status": "Estado", "created": "Criado" },
+      "columns": {
+        "title": "Título",
+        "status": "Estado",
+        "created": "Criado"
+      },
       "published": "Publicado",
       "draft": "Rascunho",
-      "empty": { "title": "Sem artigos", "description": "Crie seu primeiro artigo para começar." },
-      "delete": { "title": "Excluir Artigo", "description": "Tem certeza que quer excluir \"{{name}}\"?" },
-      "toast": { "loadError": "Erro ao carregar artigos.", "deleted": "Artigo excluído", "deletedDescription": "O artigo foi excluído permanentemente.", "deleteError": "Erro ao excluir artigo." }
+      "empty": {
+        "title": "Sem artigos",
+        "description": "Crie seu primeiro artigo para começar."
+      },
+      "delete": {
+        "title": "Excluir Artigo",
+        "description": "Tem certeza que quer excluir \"{{name}}\"?"
+      },
+      "toast": {
+        "loadError": "Erro ao carregar artigos.",
+        "deleted": "Artigo excluído",
+        "deletedDescription": "O artigo foi excluído permanentemente.",
+        "deleteError": "Erro ao excluir artigo."
+      }
     },
     "testimonials": {
       "title": "Depoimentos",
@@ -670,8 +738,15 @@
       "save": "Salvar",
       "deleteConfirmTitle": "Excluir depoimento",
       "deleteConfirmDescription": "Remover o depoimento de {{name}}? Esta ação não pode ser desfeita.",
-      "empty": { "title": "Nenhum depoimento ainda", "description": "Submissões de atletas e entradas manuais aparecerão aqui." },
-      "filters": { "all": "Todos", "pending": "Aguardando revisão", "approved": "Aprovados" },
+      "empty": {
+        "title": "Nenhum depoimento ainda",
+        "description": "Submissões de atletas e entradas manuais aparecerão aqui."
+      },
+      "filters": {
+        "all": "Todos",
+        "pending": "Aguardando revisão",
+        "approved": "Aprovados"
+      },
       "fields": {
         "name": "Nome",
         "namePlaceholder": "Nome completo",
@@ -698,11 +773,32 @@
       "newUser": "Novo Usuário",
       "searchPlaceholder": "Pesquisar por nome ou email…",
       "you": "você",
-      "columns": { "name": "Nome", "email": "Email", "role": "Função", "created": "Criado" },
-      "roles": { "admin": "Admin", "editor": "Editor", "athlete": "Atleta" },
-      "empty": { "title": "Sem usuários", "description": "Adicione seu primeiro usuário para começar." },
-      "delete": { "title": "Excluir Usuário", "description": "Tem certeza que quer excluir \"{{name}}\"?", "selfDeleteError": "Não pode excluir sua própria conta." },
-      "toast": { "loadError": "Erro ao carregar usuários.", "deleted": "Usuário excluído", "deletedDescription": "O usuário foi removido.", "deleteError": "Erro ao excluir usuário." }
+      "columns": {
+        "name": "Nome",
+        "email": "Email",
+        "role": "Função",
+        "created": "Criado"
+      },
+      "roles": {
+        "admin": "Admin",
+        "editor": "Editor",
+        "athlete": "Atleta"
+      },
+      "empty": {
+        "title": "Sem usuários",
+        "description": "Adicione seu primeiro usuário para começar."
+      },
+      "delete": {
+        "title": "Excluir Usuário",
+        "description": "Tem certeza que quer excluir \"{{name}}\"?",
+        "selfDeleteError": "Não pode excluir sua própria conta."
+      },
+      "toast": {
+        "loadError": "Erro ao carregar usuários.",
+        "deleted": "Usuário excluído",
+        "deletedDescription": "O usuário foi removido.",
+        "deleteError": "Erro ao excluir usuário."
+      }
     },
     "workouts": {
       "title": "Treinos",
@@ -715,9 +811,23 @@
       "assignToAthletes": "Atribuir a atletas",
       "stagesCount": "{{count}} etapas",
       "exercisesCount": "{{count}} exercícios",
-      "empty": { "title": "Sem treinos", "description": "Crie seu primeiro treino para começar." },
-      "delete": { "descriptionPending": "Excluir “{{name}}”? {{pending}} atribuição(ões) ainda não feita(s) também serão removidas dos atletas.", "descriptionArchive": "“{{name}}” sai da biblioteca. {{pending}} atribuição(ões) não feita(s) serão removidas; {{completed}} sessão(ões) concluída(s) continuam no histórico dos atletas.", "title": "Excluir Treino", "description": "Tem certeza que quer excluir \"{{name}}\"?" },
-      "toast": { "archivedDescription": "Removido da biblioteca. {{completed}} sessão(ões) concluída(s) continuam no histórico dos atletas.", "loadError": "Erro ao carregar treinos.", "deleted": "Treino excluído", "deletedDescription": "O treino e suas atribuições foram excluídos permanentemente.", "deleteError": "Erro ao excluir treino." }
+      "empty": {
+        "title": "Sem treinos",
+        "description": "Crie seu primeiro treino para começar."
+      },
+      "delete": {
+        "descriptionPending": "Excluir “{{name}}”? {{pending}} atribuição(ões) ainda não feita(s) também serão removidas dos atletas.",
+        "descriptionArchive": "“{{name}}” sai da biblioteca. {{pending}} atribuição(ões) não feita(s) serão removidas; {{completed}} sessão(ões) concluída(s) continuam no histórico dos atletas.",
+        "title": "Excluir Treino",
+        "description": "Tem certeza que quer excluir \"{{name}}\"?"
+      },
+      "toast": {
+        "archivedDescription": "Removido da biblioteca. {{completed}} sessão(ões) concluída(s) continuam no histórico dos atletas.",
+        "loadError": "Erro ao carregar treinos.",
+        "deleted": "Treino excluído",
+        "deletedDescription": "O treino e suas atribuições foram excluídos permanentemente.",
+        "deleteError": "Erro ao excluir treino."
+      }
     },
     "userForm": {
       "createTitle": "Criar Novo Usuário",
@@ -731,11 +841,26 @@
       "passwordPlaceholder": "Mínimo 6 caracteres",
       "passwordHint": "Deve ter pelo menos 6 caracteres.",
       "rolePlaceholder": "Selecione uma função",
-      "roleDescriptions": { "admin": "Acesso total para gerir usuários e artigos", "editor": "Pode criar e editar artigos do blog", "athlete": "Acesso ao painel do atleta" },
+      "roleDescriptions": {
+        "admin": "Acesso total para gerir usuários e artigos",
+        "editor": "Pode criar e editar artigos do blog",
+        "athlete": "Acesso ao painel do atleta"
+      },
       "editNote": "O email e a senha não podem ser alterados aqui. Contate o administrador do sistema.",
       "createButton": "Criar Usuário",
       "updateButton": "Atualizar Usuário",
-      "toast": { "notFound": "Usuário não encontrado", "notFoundDescription": "O usuário que está tentando editar não existe.", "loadError": "Erro ao carregar usuário.", "displayNameRequired": "O nome de exibição é obrigatório.", "emailRequired": "O email é obrigatório.", "passwordTooShort": "A senha deve ter pelo menos 6 caracteres.", "updated": "Usuário atualizado", "updatedDescription": "As informações do usuário foram salvas.", "created": "Usuário criado", "createdDescription": "O novo usuário foi criado com sucesso." }
+      "toast": {
+        "notFound": "Usuário não encontrado",
+        "notFoundDescription": "O usuário que está tentando editar não existe.",
+        "loadError": "Erro ao carregar usuário.",
+        "displayNameRequired": "O nome de exibição é obrigatório.",
+        "emailRequired": "O email é obrigatório.",
+        "passwordTooShort": "A senha deve ter pelo menos 6 caracteres.",
+        "updated": "Usuário atualizado",
+        "updatedDescription": "As informações do usuário foram salvas.",
+        "created": "Usuário criado",
+        "createdDescription": "O novo usuário foi criado com sucesso."
+      }
     },
     "postForm": {
       "createTitle": "Criar Novo Artigo",
@@ -750,7 +875,37 @@
       "publishLabel": "Publicar este artigo",
       "savePublish": "Salvar e Publicar",
       "saveDraft": "Salvar como Rascunho",
-      "toast": { "imageUploaded": "Imagem enviada", "imageUploadedDescription": "A sua imagem foi enviada com sucesso.", "uploadFailed": "Falha no envio", "uploadFailedDescription": "Erro ao enviar imagem. Tente novamente.", "notFound": "Artigo não encontrado", "notFoundDescription": "O artigo que está tentando editar não existe.", "loadError": "Erro ao carregar artigo.", "titleRequired": "O título é obrigatório.", "contentRequired": "O conteúdo é obrigatório.", "updated": "Artigo atualizado", "updatedDescription": "Suas alterações foram salvas.", "createdPublished": "Seu artigo foi publicado.", "createdDraft": "Seu artigo foi salvo como rascunho.", "invalidFile": "Por favor, envie um arquivo de imagem." }
+      "toast": {
+        "imageUploaded": "Imagem enviada",
+        "imageUploadedDescription": "A sua imagem foi enviada com sucesso.",
+        "uploadFailed": "Falha no envio",
+        "uploadFailedDescription": "Erro ao enviar imagem. Tente novamente.",
+        "notFound": "Artigo não encontrado",
+        "notFoundDescription": "O artigo que está tentando editar não existe.",
+        "loadError": "Erro ao carregar artigo.",
+        "titleRequired": "O título é obrigatório.",
+        "contentRequired": "O conteúdo é obrigatório.",
+        "updated": "Artigo atualizado",
+        "updatedDescription": "Suas alterações foram salvas.",
+        "createdPublished": "Seu artigo foi publicado.",
+        "createdDraft": "Seu artigo foi salvo como rascunho.",
+        "invalidFile": "Por favor, envie um arquivo de imagem.",
+        "validationError": "Erro de validação",
+        "created": "Artigo criado",
+        "invalidFileTitle": "Arquivo inválido"
+      },
+      "slugLabel": "Slug",
+      "slugPlaceholder": "url-do-artigo",
+      "slugHint": "Identificador do artigo na URL",
+      "uploadingImage": "Enviando imagem...",
+      "uploading": "Enviando...",
+      "dropImage": "Solte a imagem aqui ou clique para escolher",
+      "dropOrClick": "Solte ou clique para enviar",
+      "recommendedSize": "Recomendado: 1200×630 px",
+      "imagePreviewAlt": "Prévia da imagem de destaque",
+      "imageHint": "Imagem exibida nos cards do blog",
+      "contentLabel": "Conteúdo",
+      "contentPlaceholder": "Escreva o conteúdo do artigo aqui..."
     },
     "workoutEditor": {
       "stagesTitle": "Etapas",
@@ -775,7 +930,17 @@
       "dragHere": "Arraste etapas para aqui",
       "dropHere": "Soltar aqui",
       "noStages": "Sem etapas. Adicione a sua primeira etapa para começar.",
-      "toast": { "notFound": "Treino não encontrado", "notFoundDescription": "O treino que está tentando editar não existe.", "loadError": "Erro ao carregar treino.", "nameRequired": "O nome do treino é obrigatório.", "updated": "Treino atualizado", "updatedDescription": "Suas alterações foram salvas.", "created": "Treino criado", "createdDescription": "Seu treino foi criado com sucesso.", "saveError": "Erro ao salvar treino." }
+      "toast": {
+        "notFound": "Treino não encontrado",
+        "notFoundDescription": "O treino que está tentando editar não existe.",
+        "loadError": "Erro ao carregar treino.",
+        "nameRequired": "O nome do treino é obrigatório.",
+        "updated": "Treino atualizado",
+        "updatedDescription": "Suas alterações foram salvas.",
+        "created": "Treino criado",
+        "createdDescription": "Seu treino foi criado com sucesso.",
+        "saveError": "Erro ao salvar treino."
+      }
     },
     "calendar": {
       "athlete": "Atleta",
@@ -791,7 +956,15 @@
       "title": "Calendário",
       "allAthletes": "Todos os Atletas",
       "today": "Hoje",
-      "days": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+      "days": [
+        "Seg",
+        "Ter",
+        "Qua",
+        "Qui",
+        "Sex",
+        "Sáb",
+        "Dom"
+      ],
       "noWorkouts": "Sem treinos",
       "completedOn": "Concluído em",
       "deleteAssignment": "Excluir Atribuição",
@@ -801,9 +974,20 @@
       "tomorrow": "Amanhã",
       "workout": "treino",
       "workouts": "treinos",
-      "legend": { "workoutTypes": "Tipos de treino:", "completed": "= Concluído" },
+      "legend": {
+        "workoutTypes": "Tipos de treino:",
+        "completed": "= Concluído"
+      },
       "upcomingAthleteEvents": "Próximos eventos dos atletas",
-      "toast": { "loadError": "Erro ao carregar dados do calendário.", "assignmentDeleted": "Atribuição excluída", "assignmentDeletedDescription": "A atribuição do treino foi removida.", "deleteError": "Erro ao excluir a atribuição." }
+      "toast": {
+        "loadError": "Erro ao carregar dados do calendário.",
+        "assignmentDeleted": "Atribuição excluída",
+        "assignmentDeletedDescription": "A atribuição do treino foi removida.",
+        "deleteError": "Erro ao excluir a atribuição."
+      },
+      "extra": "Extra",
+      "more": "a mais",
+      "done": "Feito"
     },
     "chat": {
       "title": "Mensagens",
@@ -822,7 +1006,11 @@
       "tabDirect": "Direto",
       "tabGroup": "Grupo",
       "noTeams": "Nenhum time encontrado.",
-      "toast": { "deleteSuccess": "Chat excluído com sucesso", "deleteError": "Erro ao excluir o chat. Tente novamente." }
+      "toast": {
+        "deleteSuccess": "Chat excluído com sucesso",
+        "deleteError": "Erro ao excluir o chat. Tente novamente.",
+        "groupChatFailed": "Não foi possível abrir o chat do grupo."
+      }
     },
     "teams": {
       "title": "Times",
@@ -856,7 +1044,8 @@
         "deleted": "Grupo excluído",
         "deletedDescription": "\"{{name}}\" foi excluído.",
         "deleteError": "Erro ao excluir grupo."
-      }
+      },
+      "photoAlt": "Foto do time"
     },
     "teamDetail": {
       "viewStats": "Ver Estatísticas",
@@ -897,7 +1086,9 @@
         "athleteAddedDescription": "{{name}} adicionado ao grupo.",
         "addAthleteError": "Erro ao adicionar atleta.",
         "linkCopied": "Link copiado!",
-        "linkCopiedDescription": "O link de convite foi copiado."
+        "linkCopiedDescription": "O link de convite foi copiado.",
+        "copyFailed": "Não foi possível copiar.",
+        "chatFailed": "Não foi possível abrir o chat do grupo."
       }
     },
     "teamStats": {
@@ -915,6 +1106,25 @@
       "notAssigned": "Não atribuído",
       "completed": "Concluído",
       "notCompleted": "Não concluído"
+    },
+    "stageEditor": {
+      "duration": "Duração",
+      "intensity": "Intensidade",
+      "intensityGoal": "Meta de intensidade",
+      "swimming": "Natação",
+      "stroke": "Estilo",
+      "strokeType": "Estilo de nado",
+      "drillType": "Educativo",
+      "equipment": "Equipamento",
+      "custom": "Personalizado",
+      "value": "Valor",
+      "min": "Mín",
+      "max": "Máx",
+      "rangeTo": "a",
+      "zone": "Zona {{n}}",
+      "notes": "Observações",
+      "notesPlaceholder": "Adicione observações sobre esta etapa",
+      "done": "Concluir"
     }
   },
   "athlete": {
@@ -1140,7 +1350,8 @@
       "avgHeartRatePlaceholder": "Ex: 145",
       "avgSpeedPlaceholder": "Ex: 28.5",
       "avgPowerPlaceholder": "Ex: 220",
-      "shareCaption": "Treino concluído: {{name}} ✅"
+      "shareCaption": "Treino concluído: {{name}} ✅",
+      "elapsedTimeInvalid": "Use h:mm:ss ou m:ss, por exemplo 1:05:30 ou 45:00."
     },
     "share": {
       "title": "Compartilhar treino",
@@ -1345,7 +1556,8 @@
         "today": "🏁 É hoje! {{title}} — boa sorte!",
         "tomorrow": "⏰ Falta 1 dia para {{title}}. Você está pronto!",
         "days": "📍 Faltam {{count}} dias para {{title}}."
-      }
+      },
+      "raceChecklist": "Checklist da prova"
     },
     "activity": {
       "loading": "Carregando...",
@@ -1396,20 +1608,45 @@
       "saveError": "Não foi possível salvar.",
       "defaults": {
         "running": [
-          "Tênis de corrida", "Meias", "Roupa de corrida", "Garrafa de água", "Gel / nutrição",
-          "Relógio carregado", "Cinta cardíaca", "Boné / viseira", "Protetor solar"
+          "Tênis de corrida",
+          "Meias",
+          "Roupa de corrida",
+          "Garrafa de água",
+          "Gel / nutrição",
+          "Relógio carregado",
+          "Cinta cardíaca",
+          "Boné / viseira",
+          "Protetor solar"
         ],
         "cycling": [
-          "Bike revisada", "Capacete", "Sapatilha", "Câmara reserva", "Bomba / CO2", "Multitool",
-          "Garrafas (água / isotônico)", "Óculos", "Luvas", "Gel / barra", "Celular carregado"
+          "Bike revisada",
+          "Capacete",
+          "Sapatilha",
+          "Câmara reserva",
+          "Bomba / CO2",
+          "Multitool",
+          "Garrafas (água / isotônico)",
+          "Óculos",
+          "Luvas",
+          "Gel / barra",
+          "Celular carregado"
         ],
         "swimming": [
-          "Sunga / maiô", "Touca", "Óculos de natação", "Toalha", "Chinelo", "Garrafa de água",
+          "Sunga / maiô",
+          "Touca",
+          "Óculos de natação",
+          "Toalha",
+          "Chinelo",
+          "Garrafa de água",
           "Pull buoy / palmar (se aplicável)"
         ],
         "strength": [
-          "Roupa de treino", "Tênis", "Garrafa de água", "Toalha",
-          "Luvas / strap (se usar)", "Fone de ouvido"
+          "Roupa de treino",
+          "Tênis",
+          "Garrafa de água",
+          "Toalha",
+          "Luvas / strap (se usar)",
+          "Fone de ouvido"
         ]
       }
     },
@@ -1456,31 +1693,73 @@
       },
       "items": {
         "docs": [
-          "RG / documento com foto", "Confirmação de inscrição", "Kit do atleta / numeração",
-          "Chip de cronometragem", "Atestado médico (se exigido)", "Cartão de saúde / seguro"
+          "RG / documento com foto",
+          "Confirmação de inscrição",
+          "Kit do atleta / numeração",
+          "Chip de cronometragem",
+          "Atestado médico (se exigido)",
+          "Cartão de saúde / seguro"
         ],
         "running": [
-          "Tênis de prova", "Meias", "Roupa de corrida", "Boné / viseira", "Óculos", "Relógio carregado",
-          "Cinta cardíaca", "Géis / nutrição", "Sal / cápsulas", "Protetor solar", "Vaselina / body glide"
+          "Tênis de prova",
+          "Meias",
+          "Roupa de corrida",
+          "Boné / viseira",
+          "Óculos",
+          "Relógio carregado",
+          "Cinta cardíaca",
+          "Géis / nutrição",
+          "Sal / cápsulas",
+          "Protetor solar",
+          "Vaselina / body glide"
         ],
         "cycling": [
-          "Bike revisada", "Capacete", "Sapatilha", "Câmara reserva (x2)", "Bomba / CO2", "Multitool",
-          "Garrafas (água / isotônico)", "Géis / barras", "Óculos", "Luvas", "Roupa de bike / macaquinho"
+          "Bike revisada",
+          "Capacete",
+          "Sapatilha",
+          "Câmara reserva (x2)",
+          "Bomba / CO2",
+          "Multitool",
+          "Garrafas (água / isotônico)",
+          "Géis / barras",
+          "Óculos",
+          "Luvas",
+          "Roupa de bike / macaquinho"
         ],
         "swimming": [
-          "Wetsuit (se permitido)", "Touca da prova", "Touca extra", "Óculos de natação",
-          "Óculos extra", "Body glide / vaselina", "Roupa de prova / trisuit"
+          "Wetsuit (se permitido)",
+          "Touca da prova",
+          "Touca extra",
+          "Óculos de natação",
+          "Óculos extra",
+          "Body glide / vaselina",
+          "Roupa de prova / trisuit"
         ],
         "transition": [
-          "Mochila / caixa de transição", "Toalha", "Talco", "Elástico de cadarço",
-          "Garrafa para enxaguar pés", "Saco para roupa molhada"
+          "Mochila / caixa de transição",
+          "Toalha",
+          "Talco",
+          "Elástico de cadarço",
+          "Garrafa para enxaguar pés",
+          "Saco para roupa molhada"
         ],
         "post": [
-          "Roupa seca", "Chinelo", "Recovery / shake", "Água / isotônico extra",
-          "Dinheiro / cartão", "Carregador / power bank", "Sacola para lixo"
+          "Roupa seca",
+          "Chinelo",
+          "Recovery / shake",
+          "Água / isotônico extra",
+          "Dinheiro / cartão",
+          "Carregador / power bank",
+          "Sacola para lixo"
         ],
-        "longBike": ["Special needs bike (sacola)", "Aerobar / hidratação na bike"],
-        "longRun": ["Special needs corrida (sacola)", "Lanterna / headlamp (se anoitecer)"]
+        "longBike": [
+          "Special needs bike (sacola)",
+          "Aerobar / hidratação na bike"
+        ],
+        "longRun": [
+          "Special needs corrida (sacola)",
+          "Lanterna / headlamp (se anoitecer)"
+        ]
       }
     }
   },
@@ -1526,7 +1805,14 @@
     "subtitle": "Dicas práticas sobre treino, nutrição e desempenho desportivo",
     "noPosts": "Ainda não há artigos publicados. Volte em breve!",
     "readMore": "Ler mais",
-    "loadMore": "Carregar mais artigos"
+    "loadMore": "Carregar mais artigos",
+    "notFoundTitle": "Artigo não encontrado",
+    "notFoundDescription": "O artigo que você procura não existe ou foi removido.",
+    "backToBlog": "Voltar ao blog",
+    "minRead": "{{n}} min de leitura",
+    "ctaTitle": "Quer levar seu treino para o próximo nível?",
+    "ctaDescription": "Entre em contato para um acompanhamento personalizado, focado nos seus objetivos.",
+    "ctaButton": "Agendar uma consulta"
   },
   "timeline": {
     "story": {
@@ -1607,7 +1893,8 @@
       "like": "Curtir, {{n}}",
       "unlike": "Descurtir, {{n}}",
       "comments": "Comentários, {{n}}",
-      "autoCaption": "Treino concluído ✅"
+      "autoCaption": "Treino concluído ✅",
+      "imageAlt": "Foto do post"
     },
     "create": {
       "title": "Novo post",
@@ -1643,5 +1930,115 @@
       "noPosts": "Sem posts ainda",
       "beFirst": "Seja o primeiro a compartilhar algo!"
     }
+  },
+  "gallery": {
+    "title": "Galeria do",
+    "titleHighlight": "Grupo de Treino",
+    "subtitle": "Fotos dos nossos treinos e eventos",
+    "uploadPhotos": "Enviar fotos",
+    "noPhotos": "Nenhuma foto ainda",
+    "noPhotosDescription": "Envie fotos dos seus treinos para mostrar as atividades do grupo",
+    "selectFiles": "Selecionar arquivos",
+    "toast": {
+      "uploaded": "Fotos enviadas",
+      "uploadedDescription": "{{n}} foto(s) adicionada(s)",
+      "removed": "Foto removida",
+      "removedDescription": "A foto foi removida da galeria"
+    }
+  },
+  "notFound": {
+    "message": "Ops! Página não encontrada",
+    "backHome": "Voltar ao início"
+  },
+  "errors": {
+    "permissionDenied": "Você não tem acesso a isso.",
+    "offline": "Sem conexão. Tente de novo em instantes.",
+    "notFound": "Não encontramos esse item. Ele pode ter sido excluído.",
+    "wrongCredentials": "E-mail ou senha incorretos.",
+    "emailInUse": "Já existe uma conta com esse e-mail. Entre com a sua senha.",
+    "tooManyRequests": "Muitas tentativas seguidas. Espere alguns minutos e tente de novo.",
+    "generic": "Algo deu errado. Tente de novo."
+  },
+  "consent": {
+    "title": "Cookies e privacidade",
+    "description": "Usamos o Google Analytics para entender como o site é usado. Ele só é ativado se você aceitar. Você pode mudar a escolha a qualquer momento no rodapé.",
+    "privacyLink": "Política de privacidade",
+    "accept": "Aceitar",
+    "decline": "Recusar",
+    "settings": "Preferências de cookies"
+  },
+  "privacy": {
+    "_reviewStatus": "RASCUNHO escrito pelo time EZ. Precisa da revisão do usuário e do coach (e, se possível, de assessoria jurídica) antes de publicar. Substitua todos os campos entre colchetes.",
+    "title": "Política de privacidade",
+    "lastUpdated": "Última atualização: [DATA DA ÚLTIMA ATUALIZAÇÃO]",
+    "intro": "Esta página explica quais dados o EZ Training Hub coleta, por que coleta e o que você pode fazer com eles. Ela vale para o site público, o portal do coach e o app do atleta.",
+    "sections": [
+      {
+        "title": "Quem é responsável pelos seus dados",
+        "body": [
+          "O responsável pelo tratamento dos dados é [NOME DO RESPONSÁVEL], [ENDEREÇO].",
+          "Para qualquer dúvida ou pedido sobre os seus dados, escreva para [E-MAIL DE CONTATO]."
+        ]
+      },
+      {
+        "title": "Quais dados coletamos",
+        "body": [
+          "Conta: nome, e-mail, foto de perfil (opcional), papel no app (atleta ou coach) e dados do plano de treino.",
+          "Treinos: os treinos atribuídos a você e o que você registra ao concluir, como tempo, distância, pace, frequência cardíaca, cargas, repetições, esforço percebido e observações.",
+          "Comunicação: mensagens do chat com o coach e com o time, publicações, comentários e curtidas no feed, e eventos e provas que você cadastra.",
+          "Notificações: se você permitir, um identificador do aparelho para enviar notificações push.",
+          "Uso do site: só se você aceitar os cookies de análise, o Google Analytics registra páginas visitadas, tipo de aparelho e navegador e uma localização aproximada."
+        ]
+      },
+      {
+        "title": "Para que usamos",
+        "body": [
+          "Para prestar o acompanhamento de treino: montar e ajustar os seus treinos, acompanhar a sua evolução e falar com você.",
+          "Para enviar avisos que você pediu, como lembretes e mensagens do coach.",
+          "Para manter o app seguro e funcionando, por exemplo para identificar o seu acesso.",
+          "Com o seu consentimento, para entender como o site é usado e melhorá-lo."
+        ]
+      },
+      {
+        "title": "Base legal",
+        "body": [
+          "Usamos os seus dados para cumprir o serviço de acompanhamento que você contratou, com o seu consentimento (análise de uso e notificações) e para a segurança do serviço. [CONFIRMAR AS BASES LEGAIS E AS LEIS APLICÁVEIS COM ASSESSORIA JURÍDICA.]"
+        ]
+      },
+      {
+        "title": "Com quem compartilhamos",
+        "body": [
+          "Não vendemos os seus dados. Usamos fornecedores que processam dados em nosso nome:",
+          "Google Firebase (login, banco de dados, armazenamento de fotos e notificações); Google Analytics (só com o seu aceite); Vercel (hospedagem do site); Cloudinary (imagens de publicações); YouTube (vídeos no site, que só carregam quando você toca em reproduzir).",
+          "Esses fornecedores podem guardar dados fora do seu país. [CONFIRMAR LOCAL DE ARMAZENAMENTO E GARANTIAS DE TRANSFERÊNCIA.]"
+        ]
+      },
+      {
+        "title": "Cookies e armazenamento no aparelho",
+        "body": [
+          "Necessários: guardamos no seu navegador o idioma, o tema, a sua sessão de login e uma cópia dos dados para o app funcionar sem internet. Sem isso o app não funciona.",
+          "Análise: os cookies do Google Analytics só são usados se você aceitar no aviso de cookies. Você pode mudar a escolha a qualquer momento em \"Preferências de cookies\", no rodapé.",
+          "YouTube: os vídeos do site mostram só uma imagem até você tocar em reproduzir. Ao reproduzir, o vídeo carrega pelo modo de privacidade do YouTube (youtube-nocookie.com), e o YouTube pode registrar dados conforme a política dele."
+        ]
+      },
+      {
+        "title": "Por quanto tempo guardamos",
+        "body": [
+          "Guardamos os dados enquanto a sua conta estiver ativa e por [PRAZO DE RETENÇÃO] depois do fim do acompanhamento, a menos que você peça a exclusão antes."
+        ]
+      },
+      {
+        "title": "Seus direitos",
+        "body": [
+          "Você pode pedir acesso, correção, cópia ou exclusão dos seus dados, e retirar um consentimento a qualquer momento. Escreva para [E-MAIL DE CONTATO]. Respondemos em até [PRAZO DE RESPOSTA]."
+        ]
+      },
+      {
+        "title": "Alterações desta política",
+        "body": [
+          "Quando esta política mudar, atualizamos a data no topo da página e, se a mudança for importante, avisamos no app."
+        ]
+      }
+    ]
   }
 }

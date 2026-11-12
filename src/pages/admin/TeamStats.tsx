@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/dates";
 
 // Format seconds as mm:ss
 function formatTime(totalSeconds: number): string {
@@ -40,7 +41,7 @@ export default function AdminTeamStats() {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [team, setTeam] = useState<Team | null>(null);
@@ -160,7 +161,7 @@ export default function AdminTeamStats() {
             onClick={() => navigate(`/admin/teams/${team.id}`)}
           >
             <ChevronLeft className="h-4 w-4" />
-            Back
+            {t.common.back}
           </Button>
         </div>
 
@@ -190,7 +191,7 @@ export default function AdminTeamStats() {
                 <SelectContent>
                   {dateDays.map((day) => (
                     <SelectItem key={day} value={day}>
-                      {format(new Date(day + "T00:00:00"), "EEEE, dd MMM yyyy")}
+                      {formatDate(new Date(day + "T00:00:00"), "weekday", language)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -241,7 +242,7 @@ export default function AdminTeamStats() {
                         let detail = "—";
                         if (completed) {
                           if (cardio) {
-                            detail = format(assignment.completedAt!, "dd/MM/yyyy HH:mm");
+                            detail = formatDate(assignment.completedAt!, "dateTime", language);
                           } else {
                             const pct = assignment.completionPercentage !== undefined
                               ? `${Math.round(assignment.completionPercentage)}%`

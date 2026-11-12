@@ -1,4 +1,4 @@
-import { getAnalytics, type Analytics } from "firebase/analytics";
+import type { Analytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth, type Auth } from "firebase/auth";
 import {
@@ -69,13 +69,37 @@ if (useEmulator) {
 const secondaryApp = initializeApp(firebaseConfig, "secondary");
 export const secondaryAuth = connectAuth(getAuth(secondaryApp));
 
-// Analytics is optional - may be blocked by ad blockers. Off in the emulator.
+// Google Analytics only starts after the visitor accepts (src/lib/consent.ts,
+// ConsentBanner). The SDK is loaded on demand, so nothing is fetched before
+// that. It stays null when declined, blocked by an ad blocker, unsupported or
+// in the emulator: callers must handle null.
 export let analytics: Analytics | null = null;
-try {
-  if (!useEmulator) analytics = getAnalytics(app);
-} catch (e) {
-  console.warn("Analytics blocked or unavailable");
-}
+
+export const enableAnalytics = async (): Promise<Analytics | null> => {
+  if (useEmulator || typeof window === "undefined") return null;
+  try {
+    const { getAnalytics, isSupported, setAnalyticsCollectionEnabled } = await import("firebase/analytics");
+    if (!analytics) {
+      if (!(await isSupported())) return null;
+      analytics = getAnalytics(app);
+    }
+    setAnalyticsCollectionEnabled(analytics, true);
+  } catch (e) {
+    console.warn("Analytics blocked or unavailable", e);
+  }
+  return analytics;
+};
+
+/** Consent withdrawn in this session: stop sending events (no-op if never started). */
+export const disableAnalytics = async (): Promise<void> => {
+  if (!analytics) return;
+  try {
+    const { setAnalyticsCollectionEnabled } = await import("firebase/analytics");
+    setAnalyticsCollectionEnabled(analytics, false);
+  } catch (e) {
+    console.warn("Analytics unavailable", e);
+  }
+};
 
 // Firebase Cloud Messaging — only available in browsers that support service workers.
 // Off in the emulator: there is no FCM emulator.

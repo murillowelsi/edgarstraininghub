@@ -363,12 +363,13 @@ function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
 // Fills the card at the photo's own shape, clamped between 4:5 and 1.91:1 like
 // Instagram, so there are no grey bars around portrait or landscape shots.
 function PostImage({ url }: { url: string }) {
+  const { t } = useLanguage();
   const [ratio, setRatio] = useState(4 / 5);
   return (
     <div className="w-full overflow-hidden" style={{ aspectRatio: ratio }}>
       <CachedImage
         src={url}
-        alt="Post"
+        alt={t.timeline.post.imageAlt}
         className="w-full h-full object-cover"
         onLoad={(e) => {
           const img = e.currentTarget;

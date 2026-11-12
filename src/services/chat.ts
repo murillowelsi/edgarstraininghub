@@ -28,8 +28,8 @@ export const ChatService = {
         const compositeId = `${athleteId}_${adminId}`;
 
         // Check for new format first
-        let chatRef = doc(db, "chats", compositeId);
-        let chatSnap = await getDoc(chatRef);
+        const chatRef = doc(db, "chats", compositeId);
+        const chatSnap = await getDoc(chatRef);
 
         // If not found, check legacy format (just athleteId) if this is the first admin (optional, or just migrate)
         // For now, let's treat legacy chats as distinct or we can migrate them. 

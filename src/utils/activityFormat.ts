@@ -26,10 +26,38 @@ export const formatDecimal = (value: number, digits: number): string =>
     maximumFractionDigits: digits,
   });
 
-export const formatDistance = (km?: number | null, type?: WorkoutType): string => {
-  if (km == null) return "—";
-  if (type === "swimming") return `${Math.round(km * 1000)} m`;
-  return `${formatDecimal(km, 2)} km`;
+/**
+ * ActivityData.distance is km for running/cycling and METRES for swimming.
+ * Until Nov 2026 EditActivitySheet saved swims in km (e.g. 1.5 for 1500 m).
+ * Defensive read: a swim value under 25 can't be metres (one pool length is
+ * 25 m) and is read as km. Every swim read goes through this helper.
+ */
+export const LEGACY_SWIM_KM_THRESHOLD = 25;
+
+export const swimDistanceMeters = (value?: number | null): number | undefined => {
+  if (value == null || Number.isNaN(value)) return undefined;
+  return value < LEGACY_SWIM_KM_THRESHOLD ? Math.round(value * 1000) : value;
+};
+
+/** Stored distance converted to km for any sport (charts, totals). */
+export const distanceInKm = (value: number | null | undefined, type?: WorkoutType): number => {
+  if (value == null || Number.isNaN(value)) return 0;
+  return type === "swimming" ? (swimDistanceMeters(value) ?? 0) / 1000 : value;
+};
+
+/** Seconds per km (running) from total seconds and km. */
+export const pacePerKm = (elapsedSec: number, km: number): number | undefined =>
+  elapsedSec > 0 && km > 0 ? elapsedSec / km : undefined;
+
+/** Seconds per 100 m (swimming) from total seconds and metres. */
+export const pacePer100m = (elapsedSec: number, meters: number): number | undefined =>
+  elapsedSec > 0 && meters > 0 ? elapsedSec / (meters / 100) : undefined;
+
+/** `value` is the stored distance: km, or metres for swimming. */
+export const formatDistance = (value?: number | null, type?: WorkoutType): string => {
+  if (value == null) return "—";
+  if (type === "swimming") return `${Math.round(swimDistanceMeters(value) ?? 0)} m`;
+  return `${formatDecimal(value, 2)} km`;
 };
 
 export const formatPace = (secondsPerKm?: number | null, type?: WorkoutType): string => {

@@ -195,36 +195,28 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
   const showTimeUnit = stage.duration.type === "time";
   const showPowerUnit = stage.duration.type === "power";
 
-  const getIntensityLabel = () => {
-    switch (stage.intensity.type) {
-      case "speed": return "Speed";
-      case "bikeCadence": return "Bike Cadence";
-      case "cadence": return "Cadence";
-      case "pace": return "Pace";
-      case "customHeartRate": return "Heart Rate";
-      case "customPower": return "Power";
-      case "heartRateZone": return "HR Zone";
-      case "powerZone": return "Power Zone";
-      default: return "Value";
-    }
-  };
+  const se = t.admin.stageEditor;
+  const getIntensityLabel = () =>
+    stage.intensity.type === "none" ? se.value : L.intensity(stage.intensity.type);
+
+  const zone = (n: number, range: string) => `${se.zone.replace("{{n}}", String(n))} (${range})`;
 
   const heartRateZones = [
-    { value: 1, label: "Zone 1 (101-121 bpm)" },
-    { value: 2, label: "Zone 2 (121-141 bpm)" },
-    { value: 3, label: "Zone 3 (141-159 bpm)" },
-    { value: 4, label: "Zone 4 (159-181 bpm)" },
-    { value: 5, label: "Zone 5 (181-201 bpm)" },
+    { value: 1, label: zone(1, "101-121 bpm") },
+    { value: 2, label: zone(2, "121-141 bpm") },
+    { value: 3, label: zone(3, "141-159 bpm") },
+    { value: 4, label: zone(4, "159-181 bpm") },
+    { value: 5, label: zone(5, "181-201 bpm") },
   ];
 
   const powerZones = [
-    { value: 1, label: "Zone 1 (0-110 W)" },
-    { value: 2, label: "Zone 2 (110-150 W)" },
-    { value: 3, label: "Zone 3 (150-185 W)" },
-    { value: 4, label: "Zone 4 (185-220 W)" },
-    { value: 5, label: "Zone 5 (220-260 W)" },
-    { value: 6, label: "Zone 6 (260-310 W)" },
-    { value: 7, label: "Zone 7 (310+ W)" },
+    { value: 1, label: zone(1, "0-110 W") },
+    { value: 2, label: zone(2, "110-150 W") },
+    { value: 3, label: zone(3, "150-185 W") },
+    { value: 4, label: zone(4, "185-220 W") },
+    { value: 5, label: zone(5, "220-260 W") },
+    { value: 6, label: zone(6, "260-310 W") },
+    { value: 7, label: zone(7, "310+ W") },
   ];
 
   return (
@@ -280,10 +272,10 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
       {/* Duration — non-repeat only */}
       {!isRepeat && (
         <div className="space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Duration</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{se.duration}</p>
 
           <div className="space-y-1.5">
-            <Label>Type</Label>
+            <Label>{te.type}</Label>
             <Select value={stage.duration.type} onValueChange={handleDurationTypeChange}>
               <SelectTrigger>
                 <SelectValue />
@@ -301,15 +293,9 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
           {showDurationValue && (
             <div className="space-y-1.5">
               <Label>
-                {stage.duration.type === "distance"
-                  ? "Distance"
-                  : stage.duration.type === "time"
-                  ? "Time"
-                  : stage.duration.type === "calories"
-                  ? "Calories"
-                  : stage.duration.type === "power"
-                  ? "Power"
-                  : "Value"}
+                {["distance", "time", "calories", "power"].includes(stage.duration.type)
+                  ? L.duration(stage.duration.type)
+                  : se.value}
               </Label>
               <div className="flex gap-2">
                 {isSwimming && showDistanceUnit ? (
@@ -330,7 +316,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
                           {dist} m
                         </SelectItem>
                       ))}
-                      <SelectItem value="custom">Custom</SelectItem>
+                      <SelectItem value="custom">{se.custom}</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : (
@@ -368,7 +354,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="min">min</SelectItem>
-                      <SelectItem value="sec">sec</SelectItem>
+                      <SelectItem value="sec">s</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -384,10 +370,10 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
       {/* Swimming fields — non-repeat only */}
       {isSwimming && !isRepeat && (
         <div className="space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Swimming</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{se.swimming}</p>
 
           <div className="space-y-1.5">
-            <Label>Stroke type</Label>
+            <Label>{se.strokeType}</Label>
             <Select
               value={stage.strokeType || "freestyle"}
               onValueChange={(v) => handleStrokeTypeChange(v as SwimmingStrokeType)}
@@ -406,7 +392,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
           </div>
 
           <div className="space-y-1.5">
-            <Label>Drill type</Label>
+            <Label>{se.drillType}</Label>
             <Select
               value={stage.drillType || "none"}
               onValueChange={(v) => handleDrillTypeChange(v as SwimmingDrillType)}
@@ -425,7 +411,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
           </div>
 
           <div className="space-y-1.5">
-            <Label>Equipment</Label>
+            <Label>{se.equipment}</Label>
             <Select
               value={stage.equipment || "none"}
               onValueChange={(v) => handleEquipmentChange(v as SwimmingEquipmentType)}
@@ -448,10 +434,10 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
       {/* Intensity goal — non-repeat only */}
       {!isRepeat && (
         <div className="space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Intensity Goal</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{se.intensityGoal}</p>
 
           <div className="space-y-1.5">
-            <Label>Type</Label>
+            <Label>{te.type}</Label>
             <Select value={stage.intensity.type} onValueChange={handleIntensityTypeChange}>
               <SelectTrigger>
                 <SelectValue />
@@ -475,16 +461,16 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
                   step="0.1"
                   value={stage.intensity.min ?? ""}
                   onChange={(e) => handleIntensityMinChange(e.target.value)}
-                  placeholder="Min"
+                  placeholder={se.min}
                   className="flex-1"
                 />
-                <span className="text-sm text-muted-foreground shrink-0">to</span>
+                <span className="text-sm text-muted-foreground shrink-0">{se.rangeTo}</span>
                 <Input
                   type="number"
                   step="0.1"
                   value={stage.intensity.max ?? ""}
                   onChange={(e) => handleIntensityMaxChange(e.target.value)}
-                  placeholder="Max"
+                  placeholder={se.max}
                   className="flex-1"
                 />
                 <span className="text-sm text-muted-foreground shrink-0">
@@ -586,9 +572,9 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
 
       {/* Notes */}
       <div className="space-y-1.5">
-        <Label>Notes</Label>
+        <Label>{se.notes}</Label>
         <Textarea
-          placeholder="Add notes about this stage"
+          placeholder={se.notesPlaceholder}
           value={stage.notes || ""}
           onChange={(e) => handleNotesChange(e.target.value)}
           rows={3}
@@ -601,7 +587,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
 
       {/* Done */}
       <Button onClick={onDone} className="w-full">
-        Done
+        {se.done}
       </Button>
     </div>
   );

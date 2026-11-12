@@ -2,11 +2,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { modalityAccent } from "@/utils/modalityColors";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import { addDays, format, isAfter, isSameDay, isToday, isTomorrow, startOfDay } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { addDays, isAfter, isSameDay, isToday, isTomorrow, startOfDay } from "date-fns";
 import { ChevronRight, Dumbbell } from "lucide-react";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { Link } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 const icons = {
   running: GrRun,
@@ -23,7 +23,6 @@ interface Props {
 
 const UpcomingWorkoutsList = ({ assignments, language }: Props) => {
   const t = (pt: string, en: string) => (language === "pt" ? pt : en);
-  const dateLocale = language === "pt" ? ptBR : undefined;
 
   const now = new Date();
   const today = startOfDay(now);
@@ -67,7 +66,7 @@ const UpcomingWorkoutsList = ({ assignments, language }: Props) => {
               ? t("Hoje", "Today")
               : isTomorrow(a.scheduledDate)
               ? t("Amanhã", "Tomorrow")
-              : format(a.scheduledDate, language === "pt" ? "EEE, dd MMM" : "EEE, MMM dd", { locale: dateLocale });
+              : formatDate(a.scheduledDate, "weekdayShort", language);
 
             return (
               <Link

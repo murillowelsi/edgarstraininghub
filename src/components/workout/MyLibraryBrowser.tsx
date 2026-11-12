@@ -138,7 +138,7 @@ const ExercisePreviewDialog = ({
           <div className="aspect-video bg-muted rounded-lg overflow-hidden">
             {videoId ? (
               <iframe
-                src={`https://www.youtube.com/embed/${videoId}`}
+                src={`https://www.youtube-nocookie.com/embed/${videoId}`}
                 className="w-full h-full"
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -411,7 +411,7 @@ const ExerciseFormDialog = ({
             <div className="mt-2 aspect-video rounded overflow-hidden">
               <img
                 src={getYouTubeThumbnail(getYouTubeVideoId(videoUrl)!)}
-                alt="Video thumbnail"
+                alt={translations.workout.library.videoThumbnailAlt}
                 className="w-full h-full object-cover"
               />
             </div>

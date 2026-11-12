@@ -70,7 +70,7 @@ const HeroSection = () => {
           <div className="absolute right-0 bottom-0 animate-slide-in-right hidden lg:flex items-end justify-end w-[55%] xl:w-[50%] 2xl:w-[48%]">
             <img
               src={edgarImage}
-              alt="Edgar Zanin - Ironman Athlete"
+              alt={t.hero.imageAlt}
               className="w-full h-[88vh] lg:h-[90vh] xl:h-[92vh] max-h-[1400px] object-contain object-bottom opacity-80"
             />
           </div>

@@ -3,12 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmentsService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import { addDays, format, isSameDay, isToday, isTomorrow } from "date-fns";
+import { addDays, isSameDay, isToday, isTomorrow } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   Check,
@@ -19,6 +18,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { workoutLabels } from "@/utils/workoutLabels";
+import { formatDate } from "@/lib/dates";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -37,7 +37,6 @@ const workoutTypeColors: Record<string, string> = {
 const AthleteCalendarView = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
-  const dateLocale = language === "pt" ? ptBR : undefined;
   const { toast } = useToast();
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +86,7 @@ const AthleteCalendarView = () => {
   const formatDateLabel = (date: Date) => {
     if (isToday(date)) return t.athlete.calendar.today;
     if (isTomorrow(date)) return t.athlete.calendar.tomorrow;
-    return format(date, "EEEE", { locale: dateLocale });
+    return formatDate(date, "dayName", language);
   };
 
   if (loading) {
@@ -133,7 +132,7 @@ const AthleteCalendarView = () => {
                     {formatDateLabel(day)}
                   </span>
                   <span className="text-muted-foreground ml-2">
-                    {format(day, language === "pt" ? "d MMM" : "MMM d", { locale: dateLocale })}
+                    {formatDate(day, "short", language)}
                   </span>
                 </div>
                 {hasWorkouts && (

@@ -26,21 +26,7 @@ import type { AthleteEvent } from "@/types/athleteEvent";
 import type { Testimonial } from "@/types/testimonial";
 import type { Team } from "@/types/team";
 import type { User } from "@/types/user";
-import {
-  addDays,
-  differenceInCalendarDays,
-  endOfDay,
-  endOfWeek,
-  format,
-  formatDistanceToNowStrict,
-  isSameDay,
-  isThisWeek,
-  isToday,
-  startOfDay,
-  startOfWeek,
-  subDays,
-  subWeeks,
-} from "date-fns";
+import { addDays, differenceInCalendarDays, endOfDay, endOfWeek, format, formatDistanceToNowStrict, isSameDay, isThisWeek, isToday, startOfDay, startOfWeek, subDays, subWeeks } from "date-fns";
 import {
   CartesianGrid,
   Line,
@@ -51,7 +37,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { enUS, ptBR } from "date-fns/locale";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   AlertTriangle,
@@ -73,6 +58,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
+import { dateLocale, formatDate } from "@/lib/dates";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -92,7 +78,7 @@ const AdminDashboard = () => {
   const { user, photoURL } = useAuth();
   const { t, language } = useLanguage();
   const ta = t.admin.dashboard.attention;
-  const dateLocale = language === "pt" ? ptBR : enUS;
+  const locale = dateLocale(language);
   const { toast } = useToast();
   const { setIsMenuOpen } = useTopBarMenu();
 
@@ -355,8 +341,8 @@ const AdminDashboard = () => {
       const planned = items.length;
       const done = items.filter((a) => a.completedAt).length;
       return {
-        label: format(ws, "d MMM", { locale: dateLocale }),
-        rangeLabel: `${format(ws, "d MMM", { locale: dateLocale })} – ${format(we, "d MMM", { locale: dateLocale })}`,
+        label: formatDate(ws, "short", language),
+        rangeLabel: `${formatDate(ws, "short", language)} – ${formatDate(we, "short", language)}`,
         // No workouts planned that week: a gap in the line, not a fake 0%
         compliance: planned > 0 ? Math.round((done / planned) * 100) : null,
         planned,
@@ -600,7 +586,7 @@ const AdminDashboard = () => {
                   {t.admin.dashboard.tomorrowPreview}
                 </CardTitle>
                 <span className="text-xs text-muted-foreground">
-                  · {format(tomorrow, "EEEE, d MMM")}
+                  · {formatDate(tomorrow, "weekday", language)}
                 </span>
               </div>
               <Button
@@ -691,7 +677,7 @@ const AdminDashboard = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base capitalize">
-                {format(centerDate, "MMMM yyyy", { locale: dateLocale })}
+                {formatDate(centerDate, "monthYear", language)}
               </CardTitle>
               <button
                 onClick={() => {
@@ -720,7 +706,7 @@ const AdminDashboard = () => {
             {/* Selected Date Assignments */}
             <div className="mt-4 space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
-                {isToday(selectedDate) ? t.admin.dashboard.todaysActivity : format(selectedDate, "EEEE, MMM d")}
+                {isToday(selectedDate) ? t.admin.dashboard.todaysActivity : formatDate(selectedDate, "weekday", language)}
               </p>
 
               {selectedDateAssignments.length === 0 ? (
@@ -785,7 +771,7 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">{t.admin.dashboard.rosterWeek}</CardTitle>
               <span className="text-xs text-muted-foreground">
-                {format(weekRange.start, "d MMM")} – {format(weekRange.end, "d MMM")}
+                {formatDate(weekRange.start, "short", language)} – {formatDate(weekRange.end, "short", language)}
               </span>
             </div>
           </CardHeader>
@@ -1049,7 +1035,7 @@ const AdminDashboard = () => {
                     >
                       <div className="shrink-0 w-12 text-center">
                         <p className="text-[10px] uppercase font-semibold text-muted-foreground leading-none">
-                          {format(e.eventDate, "MMM")}
+                          {formatDate(e.eventDate, "month", language)}
                         </p>
                         <p className="text-lg font-bold leading-none mt-0.5">
                           {format(e.eventDate, "d")}
@@ -1193,7 +1179,7 @@ const AdminDashboard = () => {
                           <p className="text-xs text-muted-foreground truncate">
                             {a.athlete.displayName} •{" "}
                             {formatDistanceToNowStrict(a.completedAt!, {
-                              locale: dateLocale,
+                              locale,
                               addSuffix: true,
                             })}
                           </p>

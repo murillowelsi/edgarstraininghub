@@ -89,7 +89,7 @@ const TestimonialsSection = () => {
                 <button
                   onClick={prev}
                   className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-                  aria-label="Previous testimonial"
+                  aria-label={t.testimonials.previous}
                 >
                   <ChevronLeft className="h-6 w-6 text-foreground" />
                 </button>
@@ -97,7 +97,7 @@ const TestimonialsSection = () => {
                 <button
                   onClick={next}
                   className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-                  aria-label="Next testimonial"
+                  aria-label={t.testimonials.next}
                 >
                   <ChevronRight className="h-6 w-6 text-foreground" />
                 </button>

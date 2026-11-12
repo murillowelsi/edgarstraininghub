@@ -27,13 +27,12 @@ import {
   formatSpeed,
   formatTimeShort,
 } from "@/utils/activityFormat";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { ChevronLeft, Dumbbell, Flame, Footprints, Gauge, HeartPulse, MoreHorizontal, Pencil, Timer, Trash2, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { SessionResults } from "@/components/workout/SessionResults";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { useNavigate, useParams } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 const icons = {
   running: GrRun,
@@ -105,11 +104,7 @@ const ActivityDetail = () => {
   const Icon = icons[type];
   const color = modalityAccent(type);
   const data = assignment.activityData;
-  const dateStr = format(
-    assignment.completedAt || assignment.scheduledDate,
-    lang === "pt" ? "dd 'de' MMMM 'de' yyyy 'às' HH:mm" : "MMMM d, yyyy 'at' HH:mm",
-    { locale: lang === "pt" ? ptBR : undefined }
-  );
+  const dateStr = formatDate(assignment.completedAt || assignment.scheduledDate, "dateTimeLong", lang);
 
   const isStrength = type === "strength";
   const isSwim = type === "swimming";
@@ -243,7 +238,7 @@ const ActivityDetail = () => {
                   if (!stage) return null;
                   return (
                     <div key={i} className="flex items-center justify-between text-sm py-2 border-b border-border/30 last:border-0">
-                      <span className="capitalize">{stage.type}</span>
+                      <span>{t.workoutMeta.stages[stage.type] ?? stage.type}</span>
                       <span className="font-medium font-mono">
                         {s.time != null
                           ? formatTimeShort(s.time)

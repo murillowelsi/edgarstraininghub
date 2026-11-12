@@ -4,6 +4,8 @@
  * Handles browser notification permissions, chat notifications, and app badge.
  */
 
+import type { ExtendedNotificationOptions } from "@/types/notifications";
+
 export const NotificationService = {
   isGranted(): boolean {
     return typeof Notification !== "undefined" && Notification.permission === "granted";
@@ -38,7 +40,7 @@ export const NotificationService = {
 
     const body = messageText.length > 80 ? messageText.substring(0, 80) + "…" : messageText;
 
-    const options: NotificationOptions = {
+    const options: ExtendedNotificationOptions = {
       body,
       icon: "/pwa-192x192.png",
       badge: "/pwa-192x192.png",

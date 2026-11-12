@@ -1,5 +1,6 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
+import ConsentBanner from "@/components/ConsentBanner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -12,6 +13,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { TopBarMenuProvider } from "./contexts/TopBarMenuContext";
 import { TimelineActionsProvider } from "./contexts/TimelineActionsContext";
 import About from "./pages/About";
+import Privacy from "./pages/Privacy";
 import AppEntry from "./pages/AppEntry";
 import BlogArticlePage from "./pages/BlogArticlePage";
 import BlogPage from "./pages/BlogPage";
@@ -65,6 +67,7 @@ const App = () => (
             <BrowserRouter>
               <ScrollToTop />
               <PullToRefresh />
+              <ConsentBanner />
               <Routes>
                 {/* PWA entry point — redirects to app based on auth state */}
                 <Route path="/app" element={<AppEntry />} />
@@ -72,6 +75,7 @@ const App = () => (
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/privacy" element={<Privacy />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogArticlePage />} />

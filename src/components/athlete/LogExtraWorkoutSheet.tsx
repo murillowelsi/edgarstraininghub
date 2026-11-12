@@ -5,11 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { createSelfLoggedAssignment } from "@/services/workoutAssignmentsService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { Workout } from "@/types/workout";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { CalendarDays, ChevronRight, Dumbbell, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 interface Props {
   open: boolean;
@@ -32,7 +31,6 @@ interface WorkoutOption {
 const LogExtraWorkoutSheet = ({ open, onOpenChange, athleteId, date, assignments, loading = false }: Props) => {
   const { t, language } = useLanguage();
   const th = t.athlete.home;
-  const dateLocale = language === "pt" ? ptBR : undefined;
   const { toast } = useToast();
   const navigate = useNavigate();
   const [creating, setCreating] = useState<string | null>(null);
@@ -70,7 +68,7 @@ const LogExtraWorkoutSheet = ({ open, onOpenChange, athleteId, date, assignments
     }
   };
 
-  const dateLabel = format(date, language === "pt" ? "EEEE, d MMM" : "EEEE, MMM d", { locale: dateLocale });
+  const dateLabel = formatDate(date, "weekday", language);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -107,7 +105,7 @@ const LogExtraWorkoutSheet = ({ open, onOpenChange, athleteId, date, assignments
                   lastCompletedAt
                     ? th.logExtraLastDone.replace(
                         "{{date}}",
-                        format(lastCompletedAt, language === "pt" ? "d MMM" : "MMM d", { locale: dateLocale })
+                        formatDate(lastCompletedAt, "short", language)
                       )
                     : th.logExtraNeverDone
                 }`}

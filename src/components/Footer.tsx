@@ -1,5 +1,7 @@
 import { Facebook, Instagram, Youtube } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { openConsentSettings } from "@/lib/consent";
 
 // 40px hit area around each icon
 const socialLink = "h-10 w-10 flex items-center justify-center rounded-full text-gray-300 hover:bg-white/10 transition-colors";
@@ -22,7 +24,7 @@ const Footer = () => {
   );
 
   return (
-    <footer className="bg-card text-white py-4 md:py-6 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <footer className="bg-surface-inverse text-white py-4 md:py-6 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-6 max-w-6xl mx-auto">
           {/* Brand */}
@@ -73,6 +75,23 @@ const Footer = () => {
           {/* Copyright */}
           <p className="text-gray-400 text-xs md:text-sm md:flex-1 md:text-right">
             &copy; {currentYear} Edgar Zanin. {t.footer.rights}
+            {/* Discreet entry to the app (/app sends signed-out users to the login) */}
+            {" · "}
+            <Link to="/app" className="inline-block py-2 underline-offset-2 hover:text-gray-200 hover:underline">
+              {t.footer.athleteArea}
+            </Link>
+            {" · "}
+            <Link to="/privacy" className="inline-block py-2 underline-offset-2 hover:text-gray-200 hover:underline">
+              {t.footer.privacy}
+            </Link>
+            {" · "}
+            <button
+              type="button"
+              onClick={openConsentSettings}
+              className="inline-block py-2 underline-offset-2 hover:text-gray-200 hover:underline"
+            >
+              {t.consent.settings}
+            </button>
           </p>
         </div>
       </div>

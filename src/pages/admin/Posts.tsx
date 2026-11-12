@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import { createPost, deletePost, generateSlug, getAllPosts } from "@/services/postsService";
 import type { Post, PostFormData } from "@/types/post";
-import { format } from "date-fns";
 import { Edit, FileText, Loader2, Plus, Trash2, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ReactQuill from "react-quill";
@@ -22,6 +21,7 @@ import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
 import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { formatDate } from "@/lib/dates";
 
 const emptyForm = (): PostFormData => ({
   title: "",
@@ -42,8 +42,8 @@ const AdminPosts = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [newPostForm, setNewPostForm] = useState<PostFormData>(emptyForm());
   const { toast } = useToast();
-  const { user } = useAuth();
-  const { t } = useLanguage();
+  const { user, displayName } = useAuth();
+  const { t, language } = useLanguage();
 
   const quillModules = useMemo(() => ({
     toolbar: [
@@ -116,9 +116,10 @@ const AdminPosts = () => {
     }
     setCreating(true);
     try {
-      await createPost(newPostForm, user?.uid || "", user?.displayName || user?.email || "Admin");
+      // Public byline: the profile name, never the e-mail
+      await createPost(newPostForm, user?.uid || "", [displayName, user?.displayName].find((n) => n && !n.includes("@")) || t.about.name);
       toast({
-        title: "Post created",
+        title: t.admin.postForm.toast.created,
         description: newPostForm.published ? t.admin.postForm.toast.createdPublished : t.admin.postForm.toast.createdDraft,
       });
       setIsNewPostOpen(false);
@@ -182,11 +183,11 @@ const AdminPosts = () => {
             ) : (
               <Badge variant="secondary">{t.admin.posts.draft}</Badge>
             ),
-            created: format(post.createdAt, "MMM d, yyyy"),
+            created: formatDate(post.createdAt, "short", language),
             _post: post,
           }))}
           actions={(row) => {
-            const post = row._post as Post;
+            const post = row._post;
             return (
               <>
                 <Link to={`/admin/posts/${post.id}/edit`}>
@@ -251,12 +252,12 @@ const AdminPosts = () => {
 
           {/* Slug */}
           <div className="space-y-1.5">
-            <Label htmlFor="new-slug">Slug</Label>
+            <Label htmlFor="new-slug">{t.admin.postForm.slugLabel}</Label>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground text-sm shrink-0">/blog/</span>
               <Input
                 id="new-slug"
-                placeholder="post-url-slug"
+                placeholder={t.admin.postForm.slugPlaceholder}
                 value={newPostForm.slug}
                 onChange={(e) => setNewPostForm((prev) => ({ ...prev, slug: e.target.value }))}
               />
@@ -280,7 +281,7 @@ const AdminPosts = () => {
             <Label>{t.admin.postForm.featuredImage}</Label>
             {newPostForm.featuredImage ? (
               <div className="relative">
-                <img src={newPostForm.featuredImage} alt="Featured" className="w-full rounded-lg border max-h-40 object-cover" />
+                <img src={newPostForm.featuredImage} alt={t.admin.postForm.imagePreviewAlt} className="w-full rounded-lg border max-h-40 object-cover" />
                 <Button
                   type="button"
                   variant="destructive"
@@ -288,7 +289,7 @@ const AdminPosts = () => {
                   className="absolute top-2 right-2"
                   onClick={() => setNewPostForm((prev) => ({ ...prev, featuredImage: "" }))}
                 >
-                  Remove
+                  {t.common.remove}
                 </Button>
               </div>
             ) : (
@@ -314,12 +315,12 @@ const AdminPosts = () => {
                 {uploadingImage ? (
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Uploading...</p>
+                    <p className="text-sm text-muted-foreground">{t.admin.postForm.uploading}</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2">
                     <Upload className="h-6 w-6 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Drop or click to upload</p>
+                    <p className="text-sm text-muted-foreground">{t.admin.postForm.dropOrClick}</p>
                   </div>
                 )}
               </div>
@@ -328,14 +329,14 @@ const AdminPosts = () => {
 
           {/* Content */}
           <div className="space-y-1.5">
-            <Label>Content *</Label>
+            <Label>{t.admin.postForm.contentLabel} *</Label>
             <div className="border rounded-lg overflow-hidden bg-card" style={{ height: 280 }}>
               <ReactQuill
                 theme="snow"
                 value={newPostForm.content}
                 onChange={(content) => setNewPostForm((prev) => ({ ...prev, content }))}
                 modules={quillModules}
-                placeholder="Write your post content here..."
+                placeholder={t.admin.postForm.contentPlaceholder}
                 className="h-full"
               />
             </div>

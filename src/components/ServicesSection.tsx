@@ -79,18 +79,18 @@ const ServicesSection = () => {
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="p-8 md:p-12 flex flex-col justify-center">
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+              <h3 className="text-2xl md:text-3xl font-bold text-primary-foreground mb-4">
                 {t.services.cta.title}
               </h3>
-              <p className="text-white/90 mb-6">{t.services.cta.description}</p>
+              <p className="text-primary-foreground/90 mb-6">{t.services.cta.description}</p>
               <div className="flex flex-wrap gap-2 mb-4">
-                <CertificationBadge type="ymca" variant="dark" />
-                <CertificationBadge type="ofqual" variant="dark" />
+                <CertificationBadge type="ymca" variant="onPrimary" />
+                <CertificationBadge type="ofqual" variant="onPrimary" />
               </div>
               <div>
                 <a
                   href="#contact"
-                  className="inline-block px-6 py-3 bg-background text-primary font-bold rounded-md hover:bg-background/90 transition-colors"
+                  className="inline-block px-6 py-3 bg-primary-foreground text-primary font-bold rounded-md hover:bg-primary-foreground/90 transition-colors"
                 >
                   {t.services.cta.button}
                 </a>
@@ -99,7 +99,7 @@ const ServicesSection = () => {
             <div className="hidden lg:block relative min-h-[600px] flex items-center justify-center">
               <img
                 src="/lovable-uploads/c2022b01-82d4-4894-b5f3-eba98aebfd4e.png"
-                alt="Edgar Zanin with running group in Porto"
+                alt={t.services.imageAlt}
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>

@@ -1,4 +1,5 @@
 import type { WorkoutSummary } from "@/types/timeline";
+import { swimDistanceMeters } from "@/utils/activityFormat";
 
 export interface SummaryStat {
   key: string;
@@ -55,7 +56,7 @@ export const summaryStats = (summary: WorkoutSummary, labels: StatLabels, locale
   }
 
   if (summary.distance !== undefined)
-    stats.push({ key: "distance", label: labels.distance, value: isSwimming ? `${summary.distance} m` : `${summary.distance.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km` });
+    stats.push({ key: "distance", label: labels.distance, value: isSwimming ? `${swimDistanceMeters(summary.distance)} m` : `${summary.distance.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km` });
   if (summary.avgPace !== undefined)
     stats.push({ key: "pace", label: labels.avgPace, value: `${formatDuration(summary.avgPace)} ${isSwimming ? "/100m" : "/km"}` });
   if (summary.avgSpeed !== undefined)

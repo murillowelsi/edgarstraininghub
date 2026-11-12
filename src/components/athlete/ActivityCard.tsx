@@ -4,13 +4,12 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { modalityAccent } from "@/utils/modalityColors";
-import { format, isThisYear } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { Dumbbell } from "lucide-react";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { Link } from "react-router-dom";
 import { getActivityHeadline } from "@/utils/activityFormat";
 import { computeStrengthVolume } from "@/utils/strengthStats";
+import { formatDate } from "@/lib/dates";
 
 interface Props {
   assignment: AssignmentWithWorkout;
@@ -33,14 +32,9 @@ const ActivityCard = ({ assignment, athleteName, athletePhotoURL, href, hideAuth
   const m = t.athlete.activity.metrics;
   const type = assignment.workout.type;
   const Icon = icons[type];
-  const dateLocale = language === "pt" ? ptBR : undefined;
   const activityDate = assignment.completedAt || assignment.scheduledDate;
-  // Short "22 Oct · 06:42" like the rest of the app; the year only when it isn't this one
-  const dateStr = format(
-    activityDate,
-    isThisYear(activityDate) ? "d MMM '·' HH:mm" : "d MMM yyyy '·' HH:mm",
-    { locale: dateLocale }
-  );
+  // Short "22 Oct, 06:42" like the rest of the app; the year only when it isn't this one
+  const dateStr = formatDate(activityDate, "dateTime", language);
   const accentColor = modalityAccent(type);
 
   let metrics: { label: string; value: string }[] = [];

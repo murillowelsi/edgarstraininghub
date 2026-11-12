@@ -3,7 +3,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode } from
 import ptTranslations from '../translations/pt.json';
 import enTranslations from '../translations/en.json';
 
-type TranslationsType = typeof ptTranslations;
+export type TranslationsType = typeof ptTranslations;
 type LanguageType = 'pt' | 'en';
 
 interface LanguageContextType {

@@ -115,7 +115,7 @@ export default function AdminTeamDetail() {
       setTimeout(() => setCopied(false), 2000);
       toast({ title: t.admin.teamDetail.toast.linkCopied, description: t.admin.teamDetail.toast.linkCopiedDescription });
     }).catch(() => {
-      toast({ title: t.common.error, description: "Could not copy to clipboard.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.admin.teamDetail.toast.copyFailed, variant: "destructive" });
     });
   };
 
@@ -147,7 +147,7 @@ export default function AdminTeamDetail() {
       await ChatService.createOrGetGroupChat(team.id, team.name, user.uid, team.memberIds);
       navigate("/admin/chat", { state: { openChatId: `team_${team.id}` } });
     } catch {
-      toast({ title: t.common.error, description: "Failed to open group chat.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.admin.teamDetail.toast.chatFailed, variant: "destructive" });
       setOpeningChat(false);
     }
   };
@@ -225,7 +225,7 @@ export default function AdminTeamDetail() {
             variant="ghost"
             className="h-8 w-8 shrink-0"
             onClick={() => navigate("/admin/teams")}
-            aria-label="Voltar"
+            aria-label={t.common.back}
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>

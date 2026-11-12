@@ -1,23 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { modalityAccent } from "@/utils/modalityColors";
 import type { WorkoutType } from "@/types/workout";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import {
-  addMonths,
-  eachDayOfInterval,
-  endOfMonth,
-  format,
-  isSameMonth,
-  isToday,
-  startOfMonth,
-  startOfWeek,
-  endOfWeek,
-} from "date-fns";
+import { addMonths, eachDayOfInterval, endOfMonth, format, isSameMonth, isToday, startOfMonth, startOfWeek, endOfWeek } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
+import { dateLocale, formatDate } from "@/lib/dates";
 
 const SPORTS: WorkoutType[] = ["running", "cycling", "swimming", "strength"];
 
@@ -37,16 +27,16 @@ export const TrainingLogCalendar = ({
   assignments: AssignmentWithWorkout[];
 }) => {
   const { t, language } = useLanguage();
-  const dateLocale = language === "pt" ? ptBR : undefined;
+  const locale = dateLocale(language);
   const tp = t.athlete.profile;
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
 
   const weekdayLabels = useMemo(() => {
     const ref = startOfWeek(new Date(), { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) =>
-      format(new Date(ref.getTime() + i * 86400000), "EEEEE", { locale: dateLocale }),
+      format(new Date(ref.getTime() + i * 86400000), "EEEEE", { locale }),
     );
-  }, []);
+  }, [locale]);
 
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(cursor), { weekStartsOn: 1 });
@@ -105,7 +95,7 @@ export const TrainingLogCalendar = ({
               <ChevronLeft className="h-4 w-4" />
             </button>
             <span className="text-sm font-semibold w-28 text-center capitalize">
-              {format(cursor, "MMMM yyyy", { locale: dateLocale })}
+              {formatDate(cursor, "monthYear", language)}
             </span>
             <button
               onClick={() => setCursor((c) => addMonths(c, 1))}

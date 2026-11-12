@@ -18,15 +18,7 @@ import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { cn } from "@/lib/utils";
-import { format, isToday, isYesterday } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
-const formatChatTime = (timestamp: { seconds: number }, language: string, yesterday: string) => {
-    const date = new Date(timestamp.seconds * 1000);
-    if (isToday(date)) return format(date, "HH:mm");
-    if (isYesterday(date)) return yesterday;
-    return format(date, "d MMM", language === "pt" ? { locale: ptBR } : undefined);
-};
+import { formatChatTime } from "@/components/chat/chatDates";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
 import { NotificationBanner } from "@/components/NotificationBanner";
@@ -143,7 +135,7 @@ export default function AdminChat() {
             setSelectedChat(chat);
             setIsNewChatOpen(false);
         } catch {
-            toast.error("Failed to open group chat.");
+            toast.error(t.admin.chat.toast.groupChatFailed);
         } finally {
             setOpeningGroupChat(null);
         }
@@ -353,7 +345,7 @@ export default function AdminChat() {
                                                 </span>
                                                 {chat.lastMessageTime && (
                                                     <span className={cn("text-xs shrink-0", unreadCount > 0 ? "text-primary font-medium" : "text-muted-foreground")}>
-                                                        {formatChatTime(chat.lastMessageTime, language, t.timeline.activity.yesterday)}
+                                                        {formatChatTime(new Date(chat.lastMessageTime.seconds * 1000), language, t.timeline.activity.yesterday)}
                                                     </span>
                                                 )}
                                             </div>

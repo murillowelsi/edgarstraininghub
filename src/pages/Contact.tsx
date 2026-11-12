@@ -110,7 +110,7 @@ const Contact = () => {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-2xl font-bold text-primary mb-2">
-                  Bournemouth, England
+                  {t.contact.info.city}
                 </p>
                 <p className="text-muted-foreground">
                   {t.contact?.locationCard?.description ||

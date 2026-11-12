@@ -143,7 +143,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
                 >
                   <CachedAvatar
                     src={photoURL}
-                    alt="Profile"
+                    alt={t.common.profilePhoto}
                     fallback={getInitials(user?.email)}
                     className="h-14 w-14 ring-2 ring-[#e1b506]"
                     fallbackClassName="bg-primary text-primary-foreground text-lg font-semibold"
@@ -204,7 +204,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
                 className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-border hover:bg-accent/50 transition-colors text-sm"
               >
                 {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-                <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
+                <span>{theme === "light" ? t.settings.darkMode : t.settings.lightMode}</span>
               </button>
 
               {/* Logout */}

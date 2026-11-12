@@ -1,4 +1,5 @@
 {
+  "_reviewNotes": "NOTE: the \"privacy\" section (privacy policy) is a DRAFT written by the team and needs review by the user and the coach before publishing. Fields in square brackets are placeholders.",
   "nav": {
     "home": "Home",
     "about": "About",
@@ -24,7 +25,8 @@
       "10k": "10K PB",
       "halfMarathon": "Half Marathon",
       "marathon": "Marathon"
-    }
+    },
+    "imageAlt": "Edgar Zanin, Ironman athlete"
   },
   "about": {
     "title": "About",
@@ -68,7 +70,8 @@
       "title": "Ready to Transform Your Fitness?",
       "description": "I offer personalized 1-on-1 training both in-person in Bournemouth and online for clients worldwide. Each program is specially designed to fit your specific goals, fitness level, and schedule.",
       "button": "Get in Touch"
-    }
+    },
+    "imageAlt": "Edgar Zanin with a running group in Porto"
   },
   "achievements": {
     "title": "My",
@@ -104,7 +107,9 @@
     "subtitle": "See what some of my clients have to say about their training experience.",
     "murilloWelsi": {
       "text": "The strength training with Edgar has helped me reduce pain and avoid minor injuries. I feel more stable and am running better day-to-day."
-    }
+    },
+    "previous": "Previous testimonial",
+    "next": "Next testimonial"
   },
   "footer": {
     "description": "Personal Trainer & Triathlete based in Bournemouth, England, specializing in endurance coaching and performance optimization.",
@@ -113,7 +118,8 @@
     "getInTouch": "Get in Touch",
     "rights": "All rights reserved.",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
+    "terms": "Terms of Service",
+    "athleteArea": "Athlete area"
   },
   "youtube": {
     "title": "Videos &",
@@ -125,7 +131,9 @@
     "retry": "Try again",
     "noVideo": "No video available yet.",
     "moreVideos": "Check out more videos on my",
-    "channel": "YouTube channel"
+    "channel": "YouTube channel",
+    "playerTitle": "YouTube video player",
+    "play": "Play video: {{title}}"
   },
   "pricing": {
     "title": "Plans &",
@@ -163,7 +171,9 @@
         ]
       }
     },
-    "cta": "Get Started"
+    "cta": "Get Started",
+    "mostPopular": "Most popular",
+    "priceOnRequest": "Price on request"
   },
   "certifications": {
     "title": "Certifications",
@@ -192,7 +202,8 @@
       "whatsapp": "WhatsApp",
       "email": "Email",
       "location": "Location",
-      "locationDesc": "I serve clients throughout Bournemouth and also offer personalized online training"
+      "locationDesc": "I serve clients throughout Bournemouth and also offer personalized online training",
+      "city": "Bournemouth, England"
     },
     "hours": {
       "title": "Operating Hours",
@@ -321,7 +332,8 @@
       "customExercise": "Custom Exercise",
       "fromExerciseLibrary": "From Exercise Library",
       "addToWorkout": "Add to Workout",
-      "noImage": "No image"
+      "noImage": "No image",
+      "videoThumbnailAlt": "Video thumbnail"
     },
     "exerciseForm": {
       "createCustomExercise": "Create Custom Exercise",
@@ -403,30 +415,69 @@
     }
   },
   "workoutMeta": {
-    "types": { "running": "Running", "cycling": "Cycling", "swimming": "Swimming", "strength": "Strength" },
+    "types": {
+      "running": "Running",
+      "cycling": "Cycling",
+      "swimming": "Swimming",
+      "strength": "Strength"
+    },
     "stages": {
-      "warmup": "Warmup", "run": "Run", "cooldown": "Cooldown", "recovery": "Recovery",
-      "interval": "Interval", "repeat": "Repeat", "bike": "Bike", "rest": "Rest", "swim": "Swim"
+      "warmup": "Warmup",
+      "run": "Run",
+      "cooldown": "Cooldown",
+      "recovery": "Recovery",
+      "interval": "Interval",
+      "repeat": "Repeat",
+      "bike": "Bike",
+      "rest": "Rest",
+      "swim": "Swim"
     },
     "durations": {
-      "time": "Time", "distance": "Distance", "lapButton": "Press Lap Button",
-      "calories": "Calories", "heartRate": "Heart Rate", "power": "Power"
+      "time": "Time",
+      "distance": "Distance",
+      "lapButton": "Press Lap Button",
+      "calories": "Calories",
+      "heartRate": "Heart Rate",
+      "power": "Power"
     },
     "intensities": {
-      "none": "No Target", "pace": "Pace", "cadence": "Cadence", "heartRateZone": "Heart Rate Zone",
-      "customHeartRate": "Custom Heart Rate", "powerZone": "Power Zone", "customPower": "Custom Power",
-      "speed": "Speed", "bikeCadence": "Bike Cadence", "effortBased": "Effort Based",
-      "targetPace": "Target Pace", "cssBasedPace": "CSS Based Pace"
+      "none": "No Target",
+      "pace": "Pace",
+      "cadence": "Cadence",
+      "heartRateZone": "Heart Rate Zone",
+      "customHeartRate": "Custom Heart Rate",
+      "powerZone": "Power Zone",
+      "customPower": "Custom Power",
+      "speed": "Speed",
+      "bikeCadence": "Bike Cadence",
+      "effortBased": "Effort Based",
+      "targetPace": "Target Pace",
+      "cssBasedPace": "CSS Based Pace"
     },
     "strokes": {
-      "freestyle": "Freestyle", "breaststroke": "Breaststroke", "backstroke": "Backstroke",
-      "butterfly": "Butterfly", "choice": "Choice", "im": "Individual Medley (IM)",
-      "imByRound": "IM by Round", "reverseIm": "Reverse IM (RIMO)", "mixed": "Mixed"
+      "freestyle": "Freestyle",
+      "breaststroke": "Breaststroke",
+      "backstroke": "Backstroke",
+      "butterfly": "Butterfly",
+      "choice": "Choice",
+      "im": "Individual Medley (IM)",
+      "imByRound": "IM by Round",
+      "reverseIm": "Reverse IM (RIMO)",
+      "mixed": "Mixed"
     },
-    "drills": { "none": "None", "kick": "Kick", "arms": "Arms", "drill": "Drill" },
+    "drills": {
+      "none": "None",
+      "kick": "Kick",
+      "arms": "Arms",
+      "drill": "Drill"
+    },
     "swimEquipment": {
-      "none": "None", "fins": "Fins", "kickboard": "Kickboard",
-      "paddles": "Paddles", "pullBuoy": "Pull Buoy", "snorkel": "Snorkel"
+      "none": "None",
+      "fins": "Fins",
+      "kickboard": "Kickboard",
+      "paddles": "Paddles",
+      "pullBuoy": "Pull Buoy",
+      "snorkel": "Snorkel"
     },
     "hrZone": "HR Zone",
     "powerZoneShort": "Power Zone"
@@ -478,7 +529,10 @@
     "cannotBeUndone": "This action cannot be undone.",
     "mainNavigation": "Main",
     "workoutCountOne": "1 workout",
-    "workoutCountOther": "{{count}} workouts"
+    "workoutCountOther": "{{count}} workouts",
+    "profilePhoto": "Profile photo",
+    "toggleTheme": "Toggle theme",
+    "openMenu": "Open menu"
   },
   "auth": {
     "login": "Login",
@@ -488,12 +542,11 @@
     "emailPlaceholder": "admin@example.com",
     "passwordPlaceholder": "Enter your password",
     "signInDescription": "Sign in to access your account",
-    "accessDenied": "Access Denied",
-    "userNotFound": "User account not found.",
     "welcomeBack": "Welcome back!",
     "loggedIn": "You have successfully logged in.",
-    "loginFailed": "Login Failed",
-    "invalidCredentials": "Invalid email or password."
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "accountNotSetUp": "Your account isn't set up in the app yet. Contact your coach."
   },
   "admin": {
     "results": {
@@ -646,12 +699,27 @@
     "posts": {
       "title": "Posts",
       "newPost": "New Post",
-      "columns": { "title": "Title", "status": "Status", "created": "Created" },
+      "columns": {
+        "title": "Title",
+        "status": "Status",
+        "created": "Created"
+      },
       "published": "Published",
       "draft": "Draft",
-      "empty": { "title": "No posts yet", "description": "Create your first blog post to get started." },
-      "delete": { "title": "Delete Post", "description": "Are you sure you want to delete \"{{name}}\"?" },
-      "toast": { "loadError": "Failed to load posts.", "deleted": "Post deleted", "deletedDescription": "The post has been permanently deleted.", "deleteError": "Failed to delete post." }
+      "empty": {
+        "title": "No posts yet",
+        "description": "Create your first blog post to get started."
+      },
+      "delete": {
+        "title": "Delete Post",
+        "description": "Are you sure you want to delete \"{{name}}\"?"
+      },
+      "toast": {
+        "loadError": "Failed to load posts.",
+        "deleted": "Post deleted",
+        "deletedDescription": "The post has been permanently deleted.",
+        "deleteError": "Failed to delete post."
+      }
     },
     "testimonials": {
       "title": "Testimonials",
@@ -670,8 +738,15 @@
       "save": "Save",
       "deleteConfirmTitle": "Delete testimonial",
       "deleteConfirmDescription": "Remove the testimonial from {{name}}? This cannot be undone.",
-      "empty": { "title": "No testimonials yet", "description": "Athlete submissions and manual entries will show up here." },
-      "filters": { "all": "All", "pending": "Pending review", "approved": "Approved" },
+      "empty": {
+        "title": "No testimonials yet",
+        "description": "Athlete submissions and manual entries will show up here."
+      },
+      "filters": {
+        "all": "All",
+        "pending": "Pending review",
+        "approved": "Approved"
+      },
       "fields": {
         "name": "Name",
         "namePlaceholder": "Full name",
@@ -698,11 +773,32 @@
       "newUser": "New User",
       "searchPlaceholder": "Search by name or email…",
       "you": "you",
-      "columns": { "name": "Name", "email": "Email", "role": "Role", "created": "Created" },
-      "roles": { "admin": "Admin", "editor": "Editor", "athlete": "Athlete" },
-      "empty": { "title": "No users yet", "description": "Add your first user to get started." },
-      "delete": { "title": "Delete User", "description": "Are you sure you want to delete \"{{name}}\"?", "selfDeleteError": "You cannot delete your own account." },
-      "toast": { "loadError": "Failed to load users.", "deleted": "User deleted", "deletedDescription": "The user has been removed.", "deleteError": "Failed to delete user." }
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "created": "Created"
+      },
+      "roles": {
+        "admin": "Admin",
+        "editor": "Editor",
+        "athlete": "Athlete"
+      },
+      "empty": {
+        "title": "No users yet",
+        "description": "Add your first user to get started."
+      },
+      "delete": {
+        "title": "Delete User",
+        "description": "Are you sure you want to delete \"{{name}}\"?",
+        "selfDeleteError": "You cannot delete your own account."
+      },
+      "toast": {
+        "loadError": "Failed to load users.",
+        "deleted": "User deleted",
+        "deletedDescription": "The user has been removed.",
+        "deleteError": "Failed to delete user."
+      }
     },
     "workouts": {
       "title": "Workouts",
@@ -715,9 +811,23 @@
       "assignToAthletes": "Assign to athletes",
       "stagesCount": "{{count}} stages",
       "exercisesCount": "{{count}} exercises",
-      "empty": { "title": "No workouts yet", "description": "Create your first workout to get started." },
-      "delete": { "descriptionPending": "Delete “{{name}}”? {{pending}} assignment(s) not done yet will also be removed from athletes.", "descriptionArchive": "“{{name}}” leaves the library. {{pending}} assignment(s) not done will be removed; {{completed}} completed session(s) stay in athletes’ history.", "title": "Delete Workout", "description": "Are you sure you want to delete \"{{name}}\"?" },
-      "toast": { "archivedDescription": "Removed from the library. {{completed}} completed session(s) stay in athletes’ history.", "loadError": "Failed to load workouts.", "deleted": "Workout deleted", "deletedDescription": "The workout and its assignments have been permanently deleted.", "deleteError": "Failed to delete workout." }
+      "empty": {
+        "title": "No workouts yet",
+        "description": "Create your first workout to get started."
+      },
+      "delete": {
+        "descriptionPending": "Delete “{{name}}”? {{pending}} assignment(s) not done yet will also be removed from athletes.",
+        "descriptionArchive": "“{{name}}” leaves the library. {{pending}} assignment(s) not done will be removed; {{completed}} completed session(s) stay in athletes’ history.",
+        "title": "Delete Workout",
+        "description": "Are you sure you want to delete \"{{name}}\"?"
+      },
+      "toast": {
+        "archivedDescription": "Removed from the library. {{completed}} completed session(s) stay in athletes’ history.",
+        "loadError": "Failed to load workouts.",
+        "deleted": "Workout deleted",
+        "deletedDescription": "The workout and its assignments have been permanently deleted.",
+        "deleteError": "Failed to delete workout."
+      }
     },
     "userForm": {
       "createTitle": "Create New User",
@@ -731,11 +841,26 @@
       "passwordPlaceholder": "Minimum 6 characters",
       "passwordHint": "Must be at least 6 characters long.",
       "rolePlaceholder": "Select a role",
-      "roleDescriptions": { "admin": "Full access to manage users and posts", "editor": "Can create and edit blog posts", "athlete": "Access to athlete dashboard" },
+      "roleDescriptions": {
+        "admin": "Full access to manage users and posts",
+        "editor": "Can create and edit blog posts",
+        "athlete": "Access to athlete dashboard"
+      },
       "editNote": "Email and password cannot be changed here. Contact the system administrator for those changes.",
       "createButton": "Create User",
       "updateButton": "Update User",
-      "toast": { "notFound": "User not found", "notFoundDescription": "The user you're trying to edit doesn't exist.", "loadError": "Failed to load user.", "displayNameRequired": "Display name is required.", "emailRequired": "Email is required.", "passwordTooShort": "Password must be at least 6 characters.", "updated": "User updated", "updatedDescription": "User details have been saved.", "created": "User created", "createdDescription": "New user has been created successfully." }
+      "toast": {
+        "notFound": "User not found",
+        "notFoundDescription": "The user you're trying to edit doesn't exist.",
+        "loadError": "Failed to load user.",
+        "displayNameRequired": "Display name is required.",
+        "emailRequired": "Email is required.",
+        "passwordTooShort": "Password must be at least 6 characters.",
+        "updated": "User updated",
+        "updatedDescription": "User details have been saved.",
+        "created": "User created",
+        "createdDescription": "New user has been created successfully."
+      }
     },
     "postForm": {
       "createTitle": "Create New Post",
@@ -750,7 +875,37 @@
       "publishLabel": "Publish this post",
       "savePublish": "Save & Publish",
       "saveDraft": "Save as Draft",
-      "toast": { "imageUploaded": "Image uploaded", "imageUploadedDescription": "Your image has been successfully uploaded.", "uploadFailed": "Upload failed", "uploadFailedDescription": "Failed to upload image. Please try again.", "notFound": "Post not found", "notFoundDescription": "The post you're trying to edit doesn't exist.", "loadError": "Failed to load post.", "titleRequired": "Title is required.", "contentRequired": "Content is required.", "updated": "Post updated", "updatedDescription": "Your changes have been saved.", "createdPublished": "Your post has been published.", "createdDraft": "Your post has been saved as a draft.", "invalidFile": "Please upload an image file." }
+      "toast": {
+        "imageUploaded": "Image uploaded",
+        "imageUploadedDescription": "Your image has been successfully uploaded.",
+        "uploadFailed": "Upload failed",
+        "uploadFailedDescription": "Failed to upload image. Please try again.",
+        "notFound": "Post not found",
+        "notFoundDescription": "The post you're trying to edit doesn't exist.",
+        "loadError": "Failed to load post.",
+        "titleRequired": "Title is required.",
+        "contentRequired": "Content is required.",
+        "updated": "Post updated",
+        "updatedDescription": "Your changes have been saved.",
+        "createdPublished": "Your post has been published.",
+        "createdDraft": "Your post has been saved as a draft.",
+        "invalidFile": "Please upload an image file.",
+        "validationError": "Validation error",
+        "created": "Post created",
+        "invalidFileTitle": "Invalid file"
+      },
+      "slugLabel": "Slug",
+      "slugPlaceholder": "post-url-slug",
+      "slugHint": "URL-friendly identifier for this post",
+      "uploadingImage": "Uploading image...",
+      "uploading": "Uploading...",
+      "dropImage": "Drop your image here or click to browse",
+      "dropOrClick": "Drop or click to upload",
+      "recommendedSize": "Recommended: 1200×630 px",
+      "imagePreviewAlt": "Featured image preview",
+      "imageHint": "Image displayed in blog cards",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write your post content here..."
     },
     "workoutEditor": {
       "stagesTitle": "Stages",
@@ -775,7 +930,17 @@
       "dragHere": "Drag stages here",
       "dropHere": "Drop here",
       "noStages": "No stages yet. Add your first stage to get started.",
-      "toast": { "notFound": "Workout not found", "notFoundDescription": "The workout you're trying to edit doesn't exist.", "loadError": "Failed to load workout.", "nameRequired": "Workout name is required.", "updated": "Workout updated", "updatedDescription": "Your changes have been saved.", "created": "Workout created", "createdDescription": "Your workout has been created successfully.", "saveError": "Failed to save workout." }
+      "toast": {
+        "notFound": "Workout not found",
+        "notFoundDescription": "The workout you're trying to edit doesn't exist.",
+        "loadError": "Failed to load workout.",
+        "nameRequired": "Workout name is required.",
+        "updated": "Workout updated",
+        "updatedDescription": "Your changes have been saved.",
+        "created": "Workout created",
+        "createdDescription": "Your workout has been created successfully.",
+        "saveError": "Failed to save workout."
+      }
     },
     "calendar": {
       "athlete": "Athlete",
@@ -791,7 +956,15 @@
       "title": "Calendar",
       "allAthletes": "All Athletes",
       "today": "Today",
-      "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      "days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
       "noWorkouts": "No workouts",
       "completedOn": "Completed on",
       "deleteAssignment": "Delete Assignment",
@@ -801,9 +974,20 @@
       "tomorrow": "Tomorrow",
       "workout": "workout",
       "workouts": "workouts",
-      "legend": { "workoutTypes": "Workout types:", "completed": "= Completed" },
+      "legend": {
+        "workoutTypes": "Workout types:",
+        "completed": "= Completed"
+      },
       "upcomingAthleteEvents": "Upcoming athlete events",
-      "toast": { "loadError": "Failed to load calendar data.", "assignmentDeleted": "Assignment deleted", "assignmentDeletedDescription": "The workout assignment has been removed.", "deleteError": "Failed to delete the assignment." }
+      "toast": {
+        "loadError": "Failed to load calendar data.",
+        "assignmentDeleted": "Assignment deleted",
+        "assignmentDeletedDescription": "The workout assignment has been removed.",
+        "deleteError": "Failed to delete the assignment."
+      },
+      "extra": "Extra",
+      "more": "more",
+      "done": "Done"
     },
     "chat": {
       "title": "Messages",
@@ -822,7 +1006,11 @@
       "tabDirect": "Direct",
       "tabGroup": "Group",
       "noTeams": "No teams found.",
-      "toast": { "deleteSuccess": "Chat deleted successfully", "deleteError": "Failed to delete chat. Please try again." }
+      "toast": {
+        "deleteSuccess": "Chat deleted successfully",
+        "deleteError": "Failed to delete chat. Please try again.",
+        "groupChatFailed": "Failed to open group chat."
+      }
     },
     "teams": {
       "title": "Teams",
@@ -856,7 +1044,8 @@
         "deleted": "Team deleted",
         "deletedDescription": "\"{{name}}\" has been deleted.",
         "deleteError": "Failed to delete team."
-      }
+      },
+      "photoAlt": "Team photo"
     },
     "teamDetail": {
       "viewStats": "View Stats",
@@ -897,7 +1086,9 @@
         "athleteAddedDescription": "{{name}} added to the team.",
         "addAthleteError": "Failed to add athlete.",
         "linkCopied": "Link copied!",
-        "linkCopiedDescription": "The invite link has been copied."
+        "linkCopiedDescription": "The invite link has been copied.",
+        "copyFailed": "Could not copy to clipboard.",
+        "chatFailed": "Failed to open group chat."
       }
     },
     "teamStats": {
@@ -915,6 +1106,25 @@
       "notAssigned": "Not assigned",
       "completed": "Completed",
       "notCompleted": "Not completed"
+    },
+    "stageEditor": {
+      "duration": "Duration",
+      "intensity": "Intensity",
+      "intensityGoal": "Intensity goal",
+      "swimming": "Swimming",
+      "stroke": "Stroke",
+      "strokeType": "Stroke type",
+      "drillType": "Drill type",
+      "equipment": "Equipment",
+      "custom": "Custom",
+      "value": "Value",
+      "min": "Min",
+      "max": "Max",
+      "rangeTo": "to",
+      "zone": "Zone {{n}}",
+      "notes": "Notes",
+      "notesPlaceholder": "Add notes about this stage",
+      "done": "Done"
     }
   },
   "athlete": {
@@ -1140,7 +1350,8 @@
       "avgHeartRatePlaceholder": "e.g. 145",
       "avgSpeedPlaceholder": "e.g. 28.5",
       "avgPowerPlaceholder": "e.g. 220",
-      "shareCaption": "Workout complete: {{name}} ✅"
+      "shareCaption": "Workout complete: {{name}} ✅",
+      "elapsedTimeInvalid": "Use h:mm:ss or m:ss, e.g. 1:05:30 or 45:00."
     },
     "share": {
       "title": "Share workout",
@@ -1345,7 +1556,8 @@
         "today": "🏁 Today's the day! {{title}} — good luck!",
         "tomorrow": "⏰ 1 day to go for {{title}}. You're ready!",
         "days": "📍 {{count}} days until {{title}}."
-      }
+      },
+      "raceChecklist": "Race checklist"
     },
     "activity": {
       "loading": "Loading...",
@@ -1396,20 +1608,45 @@
       "saveError": "Could not save.",
       "defaults": {
         "running": [
-          "Running shoes", "Socks", "Running outfit", "Water bottle", "Gel / nutrition",
-          "Charged watch", "Heart rate strap", "Cap / visor", "Sunscreen"
+          "Running shoes",
+          "Socks",
+          "Running outfit",
+          "Water bottle",
+          "Gel / nutrition",
+          "Charged watch",
+          "Heart rate strap",
+          "Cap / visor",
+          "Sunscreen"
         ],
         "cycling": [
-          "Bike serviced", "Helmet", "Cycling shoes", "Spare tube", "Pump / CO2", "Multitool",
-          "Bottles (water / sports drink)", "Sunglasses", "Gloves", "Gel / bar", "Charged phone"
+          "Bike serviced",
+          "Helmet",
+          "Cycling shoes",
+          "Spare tube",
+          "Pump / CO2",
+          "Multitool",
+          "Bottles (water / sports drink)",
+          "Sunglasses",
+          "Gloves",
+          "Gel / bar",
+          "Charged phone"
         ],
         "swimming": [
-          "Swimsuit", "Swim cap", "Goggles", "Towel", "Flip-flops", "Water bottle",
+          "Swimsuit",
+          "Swim cap",
+          "Goggles",
+          "Towel",
+          "Flip-flops",
+          "Water bottle",
           "Pull buoy / paddles (if needed)"
         ],
         "strength": [
-          "Training outfit", "Trainers", "Water bottle", "Towel",
-          "Gloves / straps (if you use them)", "Headphones"
+          "Training outfit",
+          "Trainers",
+          "Water bottle",
+          "Towel",
+          "Gloves / straps (if you use them)",
+          "Headphones"
         ]
       }
     },
@@ -1456,31 +1693,73 @@
       },
       "items": {
         "docs": [
-          "Photo ID", "Entry confirmation", "Race kit / bib number", "Timing chip",
-          "Medical certificate (if required)", "Health card / insurance"
+          "Photo ID",
+          "Entry confirmation",
+          "Race kit / bib number",
+          "Timing chip",
+          "Medical certificate (if required)",
+          "Health card / insurance"
         ],
         "running": [
-          "Race shoes", "Socks", "Running outfit", "Cap / visor", "Sunglasses", "Charged watch",
-          "Heart rate strap", "Gels / nutrition", "Salt / capsules", "Sunscreen", "Body glide"
+          "Race shoes",
+          "Socks",
+          "Running outfit",
+          "Cap / visor",
+          "Sunglasses",
+          "Charged watch",
+          "Heart rate strap",
+          "Gels / nutrition",
+          "Salt / capsules",
+          "Sunscreen",
+          "Body glide"
         ],
         "cycling": [
-          "Bike serviced", "Helmet", "Cycling shoes", "Spare tubes (x2)", "Pump / CO2", "Multitool",
-          "Bottles (water / sports drink)", "Gels / bars", "Sunglasses", "Gloves", "Bike kit / skinsuit"
+          "Bike serviced",
+          "Helmet",
+          "Cycling shoes",
+          "Spare tubes (x2)",
+          "Pump / CO2",
+          "Multitool",
+          "Bottles (water / sports drink)",
+          "Gels / bars",
+          "Sunglasses",
+          "Gloves",
+          "Bike kit / skinsuit"
         ],
         "swimming": [
-          "Wetsuit (if allowed)", "Race swim cap", "Spare cap", "Goggles", "Spare goggles",
-          "Body glide", "Race kit / trisuit"
+          "Wetsuit (if allowed)",
+          "Race swim cap",
+          "Spare cap",
+          "Goggles",
+          "Spare goggles",
+          "Body glide",
+          "Race kit / trisuit"
         ],
         "transition": [
-          "Transition bag / box", "Towel", "Talc", "Elastic laces",
-          "Bottle to rinse feet", "Bag for wet kit"
+          "Transition bag / box",
+          "Towel",
+          "Talc",
+          "Elastic laces",
+          "Bottle to rinse feet",
+          "Bag for wet kit"
         ],
         "post": [
-          "Dry clothes", "Flip-flops", "Recovery / shake", "Extra water / sports drink",
-          "Cash / card", "Charger / power bank", "Rubbish bag"
+          "Dry clothes",
+          "Flip-flops",
+          "Recovery / shake",
+          "Extra water / sports drink",
+          "Cash / card",
+          "Charger / power bank",
+          "Rubbish bag"
         ],
-        "longBike": ["Bike special needs (bag)", "Aerobars / bike hydration"],
-        "longRun": ["Run special needs (bag)", "Headlamp (if it gets dark)"]
+        "longBike": [
+          "Bike special needs (bag)",
+          "Aerobars / bike hydration"
+        ],
+        "longRun": [
+          "Run special needs (bag)",
+          "Headlamp (if it gets dark)"
+        ]
       }
     }
   },
@@ -1526,7 +1805,14 @@
     "subtitle": "Practical tips on training, nutrition, and athletic performance",
     "noPosts": "No posts published yet. Check back soon!",
     "readMore": "Read more",
-    "loadMore": "Load more posts"
+    "loadMore": "Load more posts",
+    "notFoundTitle": "Post not found",
+    "notFoundDescription": "The article you're looking for doesn't exist or has been removed.",
+    "backToBlog": "Back to blog",
+    "minRead": "{{n}} min read",
+    "ctaTitle": "Want to take your training to the next level?",
+    "ctaDescription": "Get in touch for personalized coaching focused on your specific goals.",
+    "ctaButton": "Schedule a consultation"
   },
   "timeline": {
     "story": {
@@ -1607,7 +1893,8 @@
       "like": "Like, {{n}}",
       "unlike": "Unlike, {{n}}",
       "comments": "Comments, {{n}}",
-      "autoCaption": "Workout complete ✅"
+      "autoCaption": "Workout complete ✅",
+      "imageAlt": "Post photo"
     },
     "create": {
       "title": "New post",
@@ -1643,5 +1930,115 @@
       "noPosts": "No posts yet",
       "beFirst": "Be the first to share something!"
     }
+  },
+  "gallery": {
+    "title": "Training Group",
+    "titleHighlight": "Gallery",
+    "subtitle": "Photos from our training sessions and events",
+    "uploadPhotos": "Upload photos",
+    "noPhotos": "No photos yet",
+    "noPhotosDescription": "Upload photos of your training sessions to showcase your group's activities",
+    "selectFiles": "Select files",
+    "toast": {
+      "uploaded": "Photos uploaded",
+      "uploadedDescription": "{{n}} photo(s) added",
+      "removed": "Photo removed",
+      "removedDescription": "The photo has been removed from the gallery"
+    }
+  },
+  "notFound": {
+    "message": "Oops! Page not found",
+    "backHome": "Back to home"
+  },
+  "errors": {
+    "permissionDenied": "You don't have access to this.",
+    "offline": "You're offline. Try again in a moment.",
+    "notFound": "We couldn't find this. It may have been deleted.",
+    "wrongCredentials": "Incorrect email or password.",
+    "emailInUse": "An account with this email already exists. Sign in instead.",
+    "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
+    "generic": "Something went wrong. Please try again."
+  },
+  "consent": {
+    "title": "Cookies and privacy",
+    "description": "We use Google Analytics to understand how the site is used. It only runs if you accept. You can change your choice at any time in the footer.",
+    "privacyLink": "Privacy policy",
+    "accept": "Accept",
+    "decline": "Decline",
+    "settings": "Cookie preferences"
+  },
+  "privacy": {
+    "_reviewStatus": "DRAFT written by the EZ team. Needs review by the user and the coach (and, if possible, legal advice) before publishing. Replace every field in square brackets.",
+    "title": "Privacy policy",
+    "lastUpdated": "Last updated: [LAST UPDATED DATE]",
+    "intro": "This page explains what data EZ Training Hub collects, why, and what you can do about it. It covers the public site, the coach portal and the athlete app.",
+    "sections": [
+      {
+        "title": "Who is responsible for your data",
+        "body": [
+          "The data controller is [CONTROLLER NAME], [ADDRESS].",
+          "For any question or request about your data, write to [CONTACT EMAIL]."
+        ]
+      },
+      {
+        "title": "What we collect",
+        "body": [
+          "Account: name, email, profile photo (optional), your role in the app (athlete or coach) and training plan details.",
+          "Training: the workouts assigned to you and what you log when you finish them, such as time, distance, pace, heart rate, loads, reps, perceived effort and notes.",
+          "Communication: chat messages with the coach and the team, posts, comments and likes in the feed, and the events and races you add.",
+          "Notifications: if you allow them, a device identifier to send push notifications.",
+          "Site usage: only if you accept analytics cookies, Google Analytics records the pages you visit, device and browser type and an approximate location."
+        ]
+      },
+      {
+        "title": "Why we use it",
+        "body": [
+          "To provide the coaching: build and adjust your workouts, follow your progress and talk to you.",
+          "To send the notices you asked for, such as reminders and messages from the coach.",
+          "To keep the app safe and working, for example to recognise your sign-in.",
+          "With your consent, to understand how the site is used and improve it."
+        ]
+      },
+      {
+        "title": "Legal basis",
+        "body": [
+          "We use your data to deliver the coaching service you signed up for, with your consent (usage analytics and notifications) and to keep the service secure. [CONFIRM THE LEGAL BASES AND APPLICABLE LAWS WITH LEGAL ADVICE.]"
+        ]
+      },
+      {
+        "title": "Who we share it with",
+        "body": [
+          "We don't sell your data. We use providers that process data on our behalf:",
+          "Google Firebase (sign-in, database, photo storage and notifications); Google Analytics (only if you accept); Vercel (site hosting); Cloudinary (post images); YouTube (videos on the site, which only load when you press play).",
+          "These providers may store data outside your country. [CONFIRM STORAGE LOCATIONS AND TRANSFER SAFEGUARDS.]"
+        ]
+      },
+      {
+        "title": "Cookies and storage on your device",
+        "body": [
+          "Necessary: we keep your language, theme, sign-in session and a copy of your data in your browser so the app works offline. The app doesn't work without them.",
+          "Analytics: Google Analytics cookies are only used if you accept them in the cookie notice. You can change your choice at any time in \"Cookie preferences\" in the footer.",
+          "YouTube: videos on the site show only an image until you press play. When you play one, it loads in YouTube's privacy-enhanced mode (youtube-nocookie.com), and YouTube may record data under its own policy."
+        ]
+      },
+      {
+        "title": "How long we keep it",
+        "body": [
+          "We keep your data while your account is active and for [RETENTION PERIOD] after the coaching ends, unless you ask us to delete it sooner."
+        ]
+      },
+      {
+        "title": "Your rights",
+        "body": [
+          "You can ask to access, correct, copy or delete your data, and withdraw consent at any time. Write to [CONTACT EMAIL]. We reply within [RESPONSE TIME]."
+        ]
+      },
+      {
+        "title": "Changes to this policy",
+        "body": [
+          "When this policy changes, we update the date at the top of the page and, for important changes, let you know in the app."
+        ]
+      }
+    ]
   }
 }
