@@ -10,7 +10,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Flame, Instagram, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { renderStoryImage, shareOrDownloadImage } from "@/lib/postImages";
-import { summaryStats } from "@/utils/workoutSummaryStats";
+import { summaryStats, workoutCardModel } from "@/utils/workoutSummaryStats";
 import type { WorkoutType } from "@/types/workout";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
@@ -300,20 +300,28 @@ interface PostMediaProps {
   showHeartBurst: boolean;
 }
 
+const clampRatio = (r: number) => Math.min(1.91, Math.max(0.8, r));
+
+/**
+ * Photos keep their own shape within 4:5 (portrait) and 1.91:1 (landscape).
+ * In a carousel every slide shares the first photo's ratio so the post never
+ * jumps while swiping. With a workout card as the last slide the box is at
+ * most 5:4 (landscape), the shortest box where the card still fits.
+ * The workout card is the last slide; the first photo carries its 3 numbers.
+ */
 function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
+  const { t, language } = useLanguage();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
+  const [firstRatio, setFirstRatio] = useState(4 / 5);
   const lastTap = useRef<{ time: number; x: number; y: number } | null>(null);
 
-  type Slide = { kind: "summary" } | { kind: "image"; url: string };
-  const slides: Slide[] = [];
-  if (post.workoutSummary) slides.push({ kind: "summary" });
-  post.imageUrls.forEach((url) => slides.push({ kind: "image", url }));
+  const summary = post.workoutSummary;
+  const images = post.imageUrls;
+  const slideCount = images.length + (summary && images.length ? 1 : 0);
 
   useEffect(() => {
     if (!api) return;
-    setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap());
     const onSelect = () => setCurrent(api.selectedScrollSnap());
     api.on("select", onSelect);
@@ -321,8 +329,6 @@ function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
       api.off("select", onSelect);
     };
   }, [api]);
-
-  if (slides.length === 0) return null;
 
   // Double tap anywhere on the media likes the post. Uses pointerup instead of
   // two clicks: iOS swallows the second click of a double tap (zoom gesture).
@@ -338,84 +344,111 @@ function PostMedia({ post, onDoubleTap, showHeartBurst }: PostMediaProps) {
     }
   };
 
-  const renderSlide = (s: Slide) =>
-    s.kind === "summary" && post.workoutSummary ? (
-      <WorkoutSummaryCard summary={post.workoutSummary} flush />
-    ) : s.kind === "image" ? (
-      <div className="w-full bg-muted">
-        <PostImage url={s.url} />
-      </div>
-    ) : null;
+  const burst = (
+    <AnimatePresence>
+      {showHeartBurst && (
+        <motion.div
+          key="burst"
+          initial={{ scale: 0.3, opacity: 0 }}
+          animate={{ scale: [0.3, 1.25, 1], opacity: 1 }}
+          exit={{ scale: 1.4, opacity: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        >
+          <Flame className="h-24 w-24 fill-sport-strength text-sport-strength drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]" />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
-  return (
-    <div>
-      <div
-        className="relative overflow-hidden select-none [touch-action:manipulation] [-webkit-tap-highlight-color:transparent]"
-        onPointerUp={handlePointerUp}
-      >
-        {slides.length === 1 ? (
-          <div className="w-full">{renderSlide(slides[0])}</div>
-        ) : (
-          <Carousel setApi={setApi} opts={{ loop: false }} className="w-full">
-            <CarouselContent className="ml-0">
-              {slides.map((s, i) => (
-                <CarouselItem key={i} className="pl-0 basis-full flex">
-                  {renderSlide(s)}
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        )}
-
-        {count > 1 && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 pointer-events-none">
-            {Array.from({ length: count }).map((_, i) => (
-              <span
-                key={i}
-                className={cn("h-1.5 rounded-full transition-all", current === i ? "bg-white w-3" : "bg-white/60 w-1.5")}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Like burst */}
-        <AnimatePresence>
-          {showHeartBurst && (
-            <motion.div
-              key="burst"
-              initial={{ scale: 0.3, opacity: 0 }}
-              animate={{ scale: [0.3, 1.25, 1], opacity: 1 }}
-              exit={{ scale: 1.4, opacity: 0 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            >
-              <Flame className="h-24 w-24 text-orange-400 fill-orange-400 drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+  const wrap = (children: React.ReactNode, className?: string) => (
+    <div
+      className={cn("relative select-none [touch-action:manipulation] [-webkit-tap-highlight-color:transparent]", className)}
+      onPointerUp={handlePointerUp}
+    >
+      {children}
+      {burst}
     </div>
   );
-}
 
-// Fills the card at the photo's own shape, clamped between 4:5 and 1.91:1 like
-// Instagram, so there are no grey bars around portrait or landscape shots.
-function PostImage({ url }: { url: string }) {
-  const { t } = useLanguage();
-  const [ratio, setRatio] = useState(4 / 5);
-  return (
-    <div className="w-full overflow-hidden" style={{ aspectRatio: ratio }}>
+  // Workout without photos: the card inline, at its own height
+  if (!images.length) {
+    return summary ? wrap(<WorkoutSummaryCard summary={summary} variant="inline" />) : null;
+  }
+
+  const ratio = summary ? Math.min(clampRatio(firstRatio), 1.25) : clampRatio(firstRatio);
+  const card = summary ? workoutCardModel(summary, t.timeline.summary, language === "pt" ? "pt-BR" : "en") : null;
+  const overlay = card ? [card.hero, ...card.secondary].filter(Boolean).slice(0, 3) : [];
+
+  const photo = (url: string, i: number) => (
+    <div className="relative h-full w-full overflow-hidden bg-muted">
       <CachedImage
         src={url}
         alt={t.timeline.post.imageAlt}
-        className="w-full h-full object-cover"
-        onLoad={(e) => {
-          const img = e.currentTarget;
-          if (img.naturalWidth && img.naturalHeight) {
-            setRatio(Math.min(1.91, Math.max(0.8, img.naturalWidth / img.naturalHeight)));
-          }
-        }}
+        className="h-full w-full object-cover"
+        onLoad={
+          i === 0
+            ? (e) => {
+                const img = e.currentTarget;
+                if (img.naturalWidth && img.naturalHeight) setFirstRatio(img.naturalWidth / img.naturalHeight);
+              }
+            : undefined
+        }
       />
+      {/* The workout's numbers on the first photo, on a dark glass that reads on any photo */}
+      {i === 0 && overlay.length > 0 && (
+        <div className="absolute inset-x-3 bottom-3 flex items-end gap-4 rounded-2xl border border-white/20 bg-black/50 px-3.5 py-2.5 text-white backdrop-blur-md">
+          {overlay.map((m) => (
+            <div key={m!.key} className="min-w-0">
+              <p className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-white/75">{m!.label}</p>
+              <p className="whitespace-nowrap font-display text-xl font-bold tabular-nums leading-tight">
+                {m!.value}
+                {m!.unit && <span className="ml-0.5 text-xs font-semibold text-white/75">{m!.unit}</span>}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const slides: React.ReactNode[] = images.map((url, i) => photo(url, i));
+  if (summary) slides.push(<WorkoutSummaryCard summary={summary} variant="poster" compact={ratio > 1} />);
+
+  return (
+    <div>
+      {wrap(
+        <div className="w-full overflow-hidden" style={{ aspectRatio: ratio }}>
+          {slides.length === 1 ? (
+            slides[0]
+          ) : (
+            <Carousel setApi={setApi} opts={{ loop: false }} className="h-full w-full [&>div]:h-full">
+              <CarouselContent className="ml-0 h-full">
+                {slides.map((s, i) => (
+                  <CarouselItem key={i} className="h-full basis-full pl-0">
+                    {s}
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          )}
+          {slideCount > 1 && (
+            <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/45 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-white">
+              {current + 1}/{slideCount}
+            </span>
+          )}
+        </div>
+      )}
+      {slideCount > 1 && (
+        <div className="flex justify-center gap-1.5 pt-2.5" aria-hidden>
+          {Array.from({ length: slideCount }).map((_, i) => (
+            <span
+              key={i}
+              className={cn("h-1.5 rounded-full transition-all duration-fast", current === i ? "w-4 bg-primary" : "w-1.5 bg-border")}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
