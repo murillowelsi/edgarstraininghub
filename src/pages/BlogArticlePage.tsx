@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // Calculate reading time based on word count
@@ -109,6 +110,8 @@ const BlogArticlePage = () => {
   }
 
   const readingTime = post ? calculateReadingTime(post.content) : 0;
+  // Post HTML comes from Firestore: sanitize before rendering it
+  const safeContent = sanitizeHtml(post?.content || "");
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -178,7 +181,7 @@ const BlogArticlePage = () => {
             {/* Content */}
             <div
               className="article-content"
-              dangerouslySetInnerHTML={{ __html: post?.content || "" }}
+              dangerouslySetInnerHTML={{ __html: safeContent }}
             />
           </div>
 
