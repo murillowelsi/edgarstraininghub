@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EZ · Calendário do atleta (proposta 12/11/2026)</title>
+<!-- Mockup estático: só CSS e SVG inline. Dados fictícios do seed. Tokens: design-system §1.5. -->
+<style>
+  :root{--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Montserrat','Inter',system-ui,sans-serif;
+    --primary:hsl(48 96% 45%);--run:hsl(217 91% 60%);--bike:hsl(142 71% 45%);--swim:hsl(188 86% 53%);--str:hsl(25 95% 53%)}
+  .dark{--bg:hsl(220 5% 9%);--card:hsl(220 5% 12%);--s2:hsl(220 5% 15%);--muted:hsl(220 5% 17%);--border:hsl(220 5% 24%);--fg:hsl(0 0% 98%);--mfg:hsl(220 5% 66%);--ink:var(--primary);--okc:hsl(142 69% 58%);--warnc:hsl(43 96% 56%);--badc:hsl(0 91% 71%)}
+  .light{--bg:hsl(220 20% 95%);--card:#fff;--s2:hsl(210 40% 98%);--muted:hsl(210 40% 93%);--border:hsl(220 13% 88%);--fg:hsl(222 47% 11%);--mfg:hsl(215 16% 42%);--ink:hsl(40 95% 30%);--okc:hsl(142 72% 29%);--warnc:hsl(26 90% 37%);--badc:hsl(0 72% 51%)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#0a0a0a;color:#e5e5e5;padding:32px;line-height:1.4}
+  h1.ttl{font:700 28px var(--display);color:#fff}p.doc{color:#a3a3a3;max-width:1100px;margin:4px 0 24px}
+  .row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-bottom:40px}
+  .lbl{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#a3a3a3;margin-bottom:10px}
+  .note{font-size:13px;color:#a3a3a3;max-width:390px;margin-top:10px}
+  .phone{width:390px;height:844px;border-radius:40px;border:8px solid #262626;background:var(--bg);color:var(--fg);overflow:hidden;position:relative}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:12px}
+  .top b{font:600 17px var(--font)}
+  .ib{width:44px;height:44px;border-radius:99px;display:grid;place-items:center;border:1px solid var(--border);background:var(--card)}.ib svg{width:20px;height:20px}
+  .seg{display:grid;grid-template-columns:1fr 1fr;margin:0 12px;border-radius:12px;background:var(--muted);padding:3px}
+  .seg div{text-align:center;padding:8px 0;font:600 14px var(--font);color:var(--mfg);border-radius:9px}.seg .on{background:var(--card);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 8px 6px}
+  .nav b{font:700 17px var(--font)}.nav span{font-size:13px;color:var(--mfg)}
+  .arr{width:44px;height:44px;display:grid;place-items:center;color:var(--mfg)}.arr svg{width:20px;height:20px}
+  .hoje{font:600 13px var(--font);color:var(--ink);padding:6px 10px;border:1px solid var(--border);border-radius:99px}
+  /* week strip */
+  .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 8px}
+  .wd{text-align:center;padding:8px 0 10px;border-radius:14px;font-size:11px;color:var(--mfg)}
+  .wd b{display:block;font:700 17px var(--font);color:var(--fg);margin:2px 0 6px}
+  .wd.sel{background:var(--card);outline:2px solid var(--primary);outline-offset:-2px}
+  .wd.today b{color:var(--ink)}
+  .dot{width:22px;height:22px;border-radius:99px;margin:0 auto;display:grid;place-items:center}.dot svg{width:12px;height:12px;color:#fff}
+  .dot.done{background:var(--c)}.dot.plan{border:2px solid var(--c)}.dot.part{border:2px solid var(--c);background:conic-gradient(var(--c) 0 216deg,transparent 216deg)}.dot.miss{border:2px dashed var(--badc)}.dot.none{width:6px;height:6px;background:var(--muted);margin-top:8px}
+  .sum{display:flex;justify-content:space-between;font-size:13px;color:var(--mfg);padding:10px 16px}.sum b{color:var(--fg)}
+  .sh{font:600 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mfg);padding:10px 16px 6px}
+  /* day cards */
+  .it{--a:var(--run);margin:0 12px 8px;border-radius:16px;padding:12px;display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);position:relative}
+  .it .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--a) 16%,transparent);color:var(--a);flex:none}.it .ic svg{width:20px;height:20px}
+  .it .t{flex:1;min-width:0}.it .t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.it .t span{font-size:13px;color:var(--mfg)}
+  .st{font:700 12px var(--font);padding:3px 8px;border-radius:7px;white-space:nowrap}
+  .s-ok{background:color-mix(in srgb,var(--okc) 15%,transparent);color:var(--okc)}
+  .s-part{background:color-mix(in srgb,var(--warnc) 15%,transparent);color:var(--warnc)}
+  .s-miss{background:color-mix(in srgb,var(--badc) 14%,transparent);color:var(--badc)}
+  .s-plan{background:var(--muted);color:var(--mfg)}
+  .go{height:36px;padding:0 12px;border-radius:10px;background:var(--primary);color:hsl(222 47% 11%);font:700 13px var(--font);display:grid;place-items:center}
+  .empty{margin:0 12px;padding:16px;border-radius:16px;border:1px dashed var(--border);text-align:center;color:var(--mfg);font-size:14px}
+  .empty b{display:block;color:var(--fg);font-size:15px;margin-bottom:2px}
+  .lk{color:var(--ink);font-weight:600}
+  /* month */
+  .mh{display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px;font:600 11px var(--font);color:var(--mfg);text-align:center;margin-bottom:4px}
+  .mg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:0 8px}
+  .mc{height:52px;border-radius:10px;text-align:center;padding-top:5px;font:600 14px var(--font)}
+  .mc.out{color:var(--mfg);opacity:.4}
+  .mc.sel{background:var(--card);outline:2px solid var(--primary);outline-offset:-2px}
+  .mc.today{color:var(--ink)}
+  .mc .ds{display:flex;justify-content:center;gap:3px;margin-top:5px}
+  .mc .ds i{width:8px;height:8px;border-radius:99px;background:var(--c)}
+  .mc .ds i.p{background:transparent;box-shadow:inset 0 0 0 2px var(--c)}
+  .mc .ds i.m{background:transparent;box-shadow:inset 0 0 0 2px var(--badc)}
+  .legend{display:flex;justify-content:center;gap:14px;font-size:11px;color:var(--mfg);padding:10px 0 4px}
+  .legend span{display:flex;align-items:center;gap:5px}.legend i{width:10px;height:10px;border-radius:99px}
+  .tabs{position:absolute;left:12px;right:12px;bottom:12px;height:64px;border-radius:99px;display:flex;justify-content:space-around;align-items:center;font-size:11px;color:var(--mfg);background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--border)}
+  .tabs div{display:flex;flex-direction:column;align-items:center;gap:2px}.tabs .on{color:var(--ink);font-weight:600}.tabs svg{width:22px;height:22px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="r" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></symbol>
+  <symbol id="swim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="17" cy="6" r="2"/><path d="m4 12 5-3 4 2 3-1"/><path d="M2 17c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0"/></symbol>
+  <symbol id="dumb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></symbol>
+  <symbol id="run" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="14.5" cy="4.5" r="2"/><path d="m8 21 3-6 3 2 1 5"/><path d="M6 11.5 9 9l4 1 2 3 3 1"/></symbol>
+  <symbol id="bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M15 6h2l1.5 11M5.5 17 9 9h7M9 9l3.5 8h6"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></symbol>
+  <symbol id="shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/></symbol>
+  <symbol id="grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+</defs></svg>
+
+<h1 class="ttl">EZ · Calendário do atleta: proposta</h1>
+<p class="doc">Mockup estático (12/11/2026), dados fictícios do seed. A tela responde a duas perguntas: <b>o que eu tenho nesta semana (ou no dia X)?</b> e <b>o que eu fiz ou perdi?</b> Tem duas vistas: <b>Semana</b> (padrão: 7 dias com status e, abaixo, os treinos do dia escolhido) e <b>Mês</b> (grade com bolinhas na cor da modalidade). Dias vazios não ocupam espaço.</p>
+
+<div class="lbl">1 · Semana (escuro) e Mês (claro) · 390 px</div>
+<div class="row">
+<div class="phone dark">
+ <div class="top"><span class="ib"><svg><use href="#plus"/></svg></span><b>Calendário</b><span class="hoje">Hoje</span></div>
+ <div class="seg"><div class="on">Semana</div><div>Mês</div></div>
+ <div class="nav"><span class="arr"><svg><use href="#l"/></svg></span><div style="text-align:center"><b>9 – 15 nov</b><br><span>esta semana</span></div><span class="arr"><svg><use href="#r"/></svg></span></div>
+ <div class="wk">
+  <div class="wd">seg<b>9</b><div class="dot miss"></div></div>
+  <div class="wd">ter<b>10</b><div class="dot done" style="--c:var(--str)"><svg><use href="#check"/></svg></div></div>
+  <div class="wd">qua<b>11</b><div class="dot none"></div></div>
+  <div class="wd sel today">qui<b>12</b><div class="dot plan" style="--c:var(--swim)"></div></div>
+  <div class="wd">sex<b>13</b><div class="dot plan" style="--c:var(--str)"></div></div>
+  <div class="wd">sáb<b>14</b><div class="dot none"></div></div>
+  <div class="wd">dom<b>15</b><div class="dot plan" style="--c:var(--run)"></div></div>
+ </div>
+ <div class="sum"><span><b>1 de 4</b> feitos · 1 não feito</span><span>58 min</span></div>
+ <div class="sh">Hoje · quinta, 12 nov</div>
+ <div class="it" style="--a:var(--swim)"><span class="ic"><svg><use href="#swim"/></svg></span><div class="t"><b>Natação: técnica e ritmo</b><span>3 etapas · ~40 min</span></div><span class="go">Começar</span></div>
+ <div class="sh">Na semana</div>
+ <div class="it" style="--a:var(--str)"><span class="ic"><svg><use href="#dumb"/></svg></span><div class="t"><b>Força A: membros inferiores</b><span>ter, 10 nov · 58 min</span></div><span class="st s-ok">Feito</span></div>
+ <div class="it" style="--a:var(--run)"><span class="ic"><svg><use href="#run"/></svg></span><div class="t"><b>Corrida: rodagem leve</b><span>seg, 9 nov</span></div><span class="st s-miss">Não feito</span></div>
+ <div class="it" style="--a:var(--str)"><span class="ic"><svg><use href="#dumb"/></svg></span><div class="t"><b>Força B: membros superiores</b><span>sex, 13 nov · 3 exercícios</span></div><span class="st s-plan">Planejado</span></div>
+ <div class="it" style="--a:var(--run)"><span class="ic"><svg><use href="#run"/></svg></span><div class="t"><b>Corrida: intervalado 5 × 800 m</b><span>dom, 15 nov · 3 etapas</span></div><span class="st s-plan">Planejado</span></div>
+ <div class="tabs"><div><svg><use href="#home"/></svg>Início</div><div><svg><use href="#shield"/></svg>Times</div><div><svg><use href="#grid"/></svg>Feed</div><div class="on"><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#user"/></svg>Você</div></div>
+</div>
+
+<div class="phone light">
+ <div class="top"><span class="ib"><svg><use href="#plus"/></svg></span><b>Calendário</b><span class="hoje">Hoje</span></div>
+ <div class="seg"><div>Semana</div><div class="on">Mês</div></div>
+ <div class="nav"><span class="arr"><svg><use href="#l"/></svg></span><div style="text-align:center"><b>Novembro 2026</b><br><span>9 de 14 feitos</span></div><span class="arr"><svg><use href="#r"/></svg></span></div>
+ <div class="mh"><span>seg</span><span>ter</span><span>qua</span><span>qui</span><span>sex</span><span>sáb</span><span>dom</span></div>
+ <div class="mg">
+  <div class="mc out">26</div><div class="mc out">27</div><div class="mc out">28</div><div class="mc out">29</div><div class="mc out">30</div><div class="mc out">31</div><div class="mc">1</div>
+  <div class="mc">2</div><div class="mc">3<div class="ds"><i style="--c:var(--str)"></i></div></div><div class="mc">4</div><div class="mc">5</div><div class="mc">6<div class="ds"><i style="--c:var(--run)"></i></div></div><div class="mc">7<div class="ds"><i style="--c:var(--str);opacity:.55"></i></div></div><div class="mc">8<div class="ds"><i style="--c:var(--bike)"></i></div></div>
+  <div class="mc">9<div class="ds"><i class="m"></i></div></div><div class="mc">10<div class="ds"><i style="--c:var(--str)"></i></div></div><div class="mc">11</div><div class="mc sel today">12<div class="ds"><i class="p" style="--c:var(--swim)"></i></div></div><div class="mc">13<div class="ds"><i class="p" style="--c:var(--str)"></i></div></div><div class="mc">14</div><div class="mc">15<div class="ds"><i class="p" style="--c:var(--run)"></i></div></div>
+  <div class="mc">16</div><div class="mc">17<div class="ds"><i class="p" style="--c:var(--str)"></i></div></div><div class="mc">18</div><div class="mc">19</div><div class="mc">20</div><div class="mc">21</div><div class="mc">22</div>
+  <div class="mc">23</div><div class="mc">24<div class="ds"><i class="p" style="--c:var(--str)"></i></div></div><div class="mc">25</div><div class="mc">26</div><div class="mc">27</div><div class="mc">28</div><div class="mc">29</div>
+ </div>
+ <div class="legend"><span><i style="background:var(--run)"></i>feito</span><span><i style="box-shadow:inset 0 0 0 2px var(--run)"></i>planejado</span><span><i style="box-shadow:inset 0 0 0 2px var(--badc)"></i>não feito</span></div>
+ <div class="sh">Quinta, 12 nov</div>
+ <div class="it" style="--a:var(--swim)"><span class="ic"><svg><use href="#swim"/></svg></span><div class="t"><b>Natação: técnica e ritmo</b><span>3 etapas · ~40 min</span></div><span class="go">Começar</span></div>
+ <div class="tabs"><div><svg><use href="#home"/></svg>Início</div><div><svg><use href="#shield"/></svg>Times</div><div><svg><use href="#grid"/></svg>Feed</div><div class="on"><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#user"/></svg>Você</div></div>
+</div>
+<p class="note"><b>Semana (padrão):</b> faixa de 7 dias com o status na cor da modalidade (✓ feito, anel planejado, meio anel parcial, tracejado vermelho não feito, ponto vazio dia livre) e um resumo de uma linha. Abaixo, o dia escolhido primeiro, com "Começar" se for hoje, e depois o resto da semana, com o status em texto. Setas e arrasto mudam de semana; "Hoje" volta.<br><br><b>Mês:</b> grade com até 3 bolinhas por dia (cor da modalidade: cheia = feito, anel = planejado, anel vermelho = não feito; parcial em 55% de opacidade). Tocar num dia mostra os treinos dele embaixo. A prova do dia (quando existir) vira uma bandeira no canto (fase 2).</p>
+</div>
+
+<div class="lbl">2 · Dia sem treino (escuro)</div>
+<div class="row"><div class="phone dark" style="height:420px">
+ <div class="top"><span class="ib"><svg><use href="#plus"/></svg></span><b>Calendário</b><span class="hoje">Hoje</span></div>
+ <div class="seg"><div class="on">Semana</div><div>Mês</div></div>
+ <div class="wk" style="margin-top:12px">
+  <div class="wd">seg<b>16</b><div class="dot none"></div></div><div class="wd">ter<b>17</b><div class="dot plan" style="--c:var(--str)"></div></div><div class="wd sel">qua<b>18</b><div class="dot none"></div></div><div class="wd">qui<b>19</b><div class="dot none"></div></div><div class="wd">sex<b>20</b><div class="dot none"></div></div><div class="wd">sáb<b>21</b><div class="dot none"></div></div><div class="wd">dom<b>22</b><div class="dot none"></div></div>
+ </div>
+ <div class="sh">Quarta, 18 nov</div>
+ <div class="empty"><b>Dia livre</b>Nada planejado. <span class="lk">Registrar sessão extra</span></div>
+</div>
+<p class="note">Dia sem treino: uma linha tracejada, com a ação de registrar uma sessão extra (que já existe na Home), em vez de uma faixa vazia por dia.</p></div>
+</body>
+</html>
