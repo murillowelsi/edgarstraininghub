@@ -35,3 +35,13 @@ export interface TeamDocument {
   createdAt: import("firebase/firestore").Timestamp;
   updatedAt: import("firebase/firestore").Timestamp;
 }
+
+// teamInvites/{token}: what the /join page may show before login.
+// Mirrors the team's name and photo; written by the coach with the team.
+export interface TeamInvite {
+  token: string;
+  teamId: string;
+  teamName: string;
+  teamPhotoURL?: string;
+  coachId: string;
+}

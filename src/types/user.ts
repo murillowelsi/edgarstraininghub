@@ -22,6 +22,14 @@ export interface User {
   updatedAt: Date;
 }
 
+// Public profile (publicProfiles/{uid}): what other users may see
+export interface PublicProfile {
+  id: string;
+  displayName: string;
+  photoURL?: string;
+  role: UserRole;
+}
+
 // Form data for creating/editing users
 export interface UserFormData {
   email: string;

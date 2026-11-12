@@ -3,7 +3,7 @@ import { differenceInCalendarDays } from "date-fns";
 import { ChatService } from "@/services/chat";
 import { markEventNotified } from "@/services/athleteEventsService";
 import { getAssignmentsByAthlete } from "@/services/workoutAssignmentsService";
-import { getUserById, getUsersByRole } from "@/services/usersService";
+import { getPublicProfile, getPublicProfilesByRole } from "@/services/usersService";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { AthleteEvent } from "@/types/athleteEvent";
 
@@ -35,17 +35,17 @@ export const useEventChatReminders = (
         let coachName = "Coach";
 
         if (!coachId) {
-          const admins = await getUsersByRole("admin");
+          const admins = await getPublicProfilesByRole(["admin"]);
           coachId = admins[0]?.id;
           coachName = admins[0]?.displayName || "Coach";
         } else {
-          const coach = await getUserById(coachId);
+          const coach = await getPublicProfile(coachId);
           coachName = coach?.displayName || "Coach";
         }
 
         if (!coachId) return;
 
-        const athlete = await getUserById(athleteId);
+        const athlete = await getPublicProfile(athleteId);
         const athleteName = athlete?.displayName || "Athlete";
 
         for (const event of events) {

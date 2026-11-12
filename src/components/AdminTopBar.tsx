@@ -7,9 +7,9 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { Spinner } from "@/components/ui/spinner";
-import { auth, db } from "../lib/firebase";
+import { auth } from "../lib/firebase";
 import { signOut } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
+import { updateOwnPhoto } from "../services/usersService";
 import { uploadImageToCloudinary } from "../lib/cloudinary";
 import GB from "country-flag-icons/react/3x2/GB";
 import PT from "country-flag-icons/react/3x2/PT";
@@ -65,7 +65,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
     setIsUploadingPhoto(true);
     try {
       const url = await uploadImageToCloudinary(file, "profile-photos");
-      await updateDoc(doc(db, "users", user.uid), { photoURL: url });
+      await updateOwnPhoto(user.uid, url);
       setPhotoURL(url);
     } catch (err) {
       console.error("Error uploading photo:", err);
@@ -78,7 +78,7 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
   const handlePhotoRemove = async () => {
     if (!user) return;
     try {
-      await updateDoc(doc(db, "users", user.uid), { photoURL: null });
+      await updateOwnPhoto(user.uid, null);
       setPhotoURL(null);
     } catch (err) {
       console.error("Error removing photo:", err);

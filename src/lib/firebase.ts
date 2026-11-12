@@ -26,7 +26,12 @@ const firebaseConfig = {
 export const useEmulator = import.meta.env.VITE_USE_EMULATOR === "true";
 const emulatorHost = import.meta.env.VITE_EMULATOR_HOST || "127.0.0.1";
 // Ports must match "emulators" in firebase.json.
-const EMULATOR_PORTS = { auth: 9099, firestore: 8081, storage: 9199 };
+// Defaults match firebase.json; override to run a second emulator side by side.
+const EMULATOR_PORTS = {
+  auth: Number(import.meta.env.VITE_EMULATOR_AUTH_PORT || 9099),
+  firestore: Number(import.meta.env.VITE_EMULATOR_FIRESTORE_PORT || 8081),
+  storage: Number(import.meta.env.VITE_EMULATOR_STORAGE_PORT || 9199),
+};
 
 // Guard: the emulator must only ever run against a demo project, so a wrong
 // .env can never point a local session with fake data at production.

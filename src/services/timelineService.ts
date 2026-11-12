@@ -19,6 +19,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { findPublicProfileByName, getPublicProfile } from "./usersService";
 import type {
   PostMention,
   WorkoutSummary,
@@ -427,18 +428,18 @@ export const subscribeToActivityNotifications = (
       })
     );
 
-    // Enrich actor photos by name lookup
-    const actorNames = [...new Set(notifications.map((n) => n.authorName))];
+    // Enrich actor photos from public profiles: by actorId, or by name for
+    // older notifications that were stored without actorId
+    const actorKey = (n: ActivityNotification) => n.actorId ?? `name:${n.authorName}`;
+    const actorKeys = [...new Set(notifications.map(actorKey))];
     const actorPhotoMap = new Map<string, string>();
     await Promise.all(
-      actorNames.map(async (name) => {
+      actorKeys.map(async (key) => {
         try {
-          const usersQ = query(collection(db, "users"), where("displayName", "==", name), limit(1));
-          const usersSnap = await getDocs(usersQ);
-          if (!usersSnap.empty) {
-            const userData = usersSnap.docs[0].data();
-            if (userData.photoURL) actorPhotoMap.set(name, userData.photoURL);
-          }
+          const profile = key.startsWith("name:")
+            ? await findPublicProfileByName(key.slice(5))
+            : await getPublicProfile(key);
+          if (profile?.photoURL) actorPhotoMap.set(key, profile.photoURL);
         } catch { /* ignore */ }
       })
     );
@@ -446,7 +447,7 @@ export const subscribeToActivityNotifications = (
     const enriched = notifications.map((n) => ({
       ...n,
       postImageUrl: postMap.get(n.postId),
-      actorPhotoURL: actorPhotoMap.get(n.authorName),
+      actorPhotoURL: actorPhotoMap.get(actorKey(n)),
     }));
     callback(enriched);
   });

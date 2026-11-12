@@ -5,8 +5,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { auth, db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { auth } from "@/lib/firebase";
+import { updateOwnPhoto } from "@/services/usersService";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Spinner } from "@/components/ui/spinner";
@@ -177,7 +177,7 @@ const AthletePortalLayout = ({
     setIsUploadingPhoto(true);
     try {
       const url = await uploadImageToCloudinary(file, "profile-photos");
-      await updateDoc(doc(db, "users", user.uid), { photoURL: url });
+      await updateOwnPhoto(user.uid, url);
       setPhotoURL(url);
     } catch (err) {
       console.error("Error uploading photo:", err);
@@ -191,7 +191,7 @@ const AthletePortalLayout = ({
     if (!user) return;
     setConfirmRemovePhoto(false);
     try {
-      await updateDoc(doc(db, "users", user.uid), { photoURL: null });
+      await updateOwnPhoto(user.uid, null);
       setPhotoURL(null);
     } catch (err) {
       console.error("Error removing photo:", err);

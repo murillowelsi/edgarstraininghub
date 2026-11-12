@@ -9,12 +9,16 @@
  *   same documents (dates are recomputed relative to today).
  * - Refuses to run unless it talks to the emulator with a demo-* project.
  * - Every name, e-mail and number here is invented. Never add real data.
+ * - SEED_LEGACY=1 skips publicProfiles and teamInvites (the state production is
+ *   in before the backfill in scripts/migrations/), to test the fallbacks and the
+ *   backfill script itself.
  */
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 const PROJECT_ID = process.env.EMULATOR_PROJECT_ID || "demo-ez";
+const LEGACY = process.env.SEED_LEGACY === "1";
 const HOST = process.env.EMULATOR_HOST || "127.0.0.1";
 // Ports must match "emulators" in firebase.json.
 process.env.FIRESTORE_EMULATOR_HOST ||= `${HOST}:8081`;
@@ -423,6 +427,16 @@ const blogPosts = [
       published: false, authorId: COACH, authorName: nameOf[COACH], createdAt: ts(at(-1, 10)),
     },
   },
+  {
+    // Older posts stored the author's e-mail as authorName (backlog F0.4);
+    // scripts/migrations/backfill-public-data.mjs --blog-authors fixes these.
+    id: "demo-post-email-author", data: {
+      title: "Recuperação ativa entre treinos", slug: "recuperacao-ativa",
+      excerpt: "Post de exemplo com o e-mail no lugar do nome do autor.",
+      content: "<p>Conteúdo fictício de exemplo.</p>",
+      published: true, authorId: COACH, authorName: "coach@ez.test", createdAt: ts(at(-30, 10)),
+    },
+  },
 ];
 
 // ─── Write ───────────────────────────────────────────────────────────────────
@@ -446,6 +460,12 @@ for (const u of users) {
     updatedAt: NOW,
   });
 }
+if (!LEGACY) {
+  // Public profile: what other users may read (mirrors users/{uid})
+  for (const u of users) {
+    put(db.doc(`publicProfiles/${u.uid}`), { displayName: u.displayName, photoURL: null, role: u.role, updatedAt: NOW });
+  }
+}
 for (const u of users.filter((x) => x.role === "athlete")) {
   put(db.doc(`subscriptionHistory/demo-sub-${u.uid}`), {
     athleteId: u.uid, plan: u.plan, status: u.status,
@@ -468,6 +488,12 @@ for (const a of assignments) {
   put(db.doc(`workoutAssignments/${id}`), rest);
 }
 put(db.doc(`teams/${TEAM_ID}`), team);
+if (!LEGACY) {
+  // What /join reads before login (the token is the doc id)
+  put(db.doc(`teamInvites/${INVITE_TOKEN}`), {
+    teamId: TEAM_ID, teamName: team.name, teamPhotoURL: null, coachId: COACH, createdAt: team.createdAt, updatedAt: NOW,
+  });
+}
 for (const c of chats) {
   put(db.doc(`chats/${c.id}`), c.data);
   for (const m of c.messages) put(db.doc(`chats/${c.id}/messages/${m.id}`), m.data);
@@ -496,4 +522,5 @@ console.log(`  ${users.length} users, ${workouts.length} workouts, ${assignments
 console.log(`  Logins (password for all: ${PASSWORD}):`);
 for (const u of users) console.log(`    ${u.role.padEnd(8)} ${u.email}`);
 console.log(`  Team invite: /join/${INVITE_TOKEN}`);
+if (LEGACY) console.log("  SEED_LEGACY=1: no publicProfiles / teamInvites (pre-backfill state)");
 process.exit(0);

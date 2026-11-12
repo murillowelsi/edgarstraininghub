@@ -9,9 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { getTeamById } from "@/services/teamsService";
-import { getUserById } from "@/services/usersService";
+import { getPublicProfile } from "@/services/usersService";
 import type { Team } from "@/types/team";
-import type { User } from "@/types/user";
+import type { PublicProfile } from "@/types/user";
 import { getTeamColor } from "@/lib/teamColors";
 import { ChevronLeft, Shield, Users } from "lucide-react";
 import { SectionSpinner } from "@/components/ui/spinner";
@@ -28,7 +28,7 @@ export default function AthleteTeamDetail() {
   const { t } = useLanguage();
 
   const [team, setTeam] = useState<Team | null>(null);
-  const [members, setMembers] = useState<User[]>([]);
+  const [members, setMembers] = useState<PublicProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,9 +40,9 @@ export default function AthleteTeamDetail() {
         if (cancelled) return;
         if (!data) { navigate("/athlete/teams"); return; }
         setTeam(data);
-        const memberUsers = await Promise.all(data.memberIds.map((id) => getUserById(id)));
+        const memberUsers = await Promise.all(data.memberIds.map((id) => getPublicProfile(id)));
         if (cancelled) return;
-        setMembers(memberUsers.filter((u): u is User => u !== null));
+        setMembers(memberUsers.filter((u): u is PublicProfile => u !== null));
       } catch {
         if (!cancelled) toast({ title: t.common.error, variant: "destructive" });
       } finally {

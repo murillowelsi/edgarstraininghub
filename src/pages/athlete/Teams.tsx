@@ -9,9 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { getTeamsByMember } from "@/services/teamsService";
-import { getUserById } from "@/services/usersService";
+import { getPublicProfile } from "@/services/usersService";
 import type { Team } from "@/types/team";
-import type { User } from "@/types/user";
+import type { PublicProfile } from "@/types/user";
 import { getTeamColor } from "@/lib/teamColors";
 import { MessageSquare, Search, Shield } from "lucide-react";
 import { SectionSpinner } from "@/components/ui/spinner";
@@ -20,7 +20,7 @@ function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }
 
-function MemberAvatarStack({ memberIds, memberMap }: { memberIds: string[]; memberMap: Map<string, User> }) {
+function MemberAvatarStack({ memberIds, memberMap }: { memberIds: string[]; memberMap: Map<string, PublicProfile> }) {
   const preview = memberIds.slice(0, 3);
   const overflow = memberIds.length - preview.length;
   return (
@@ -54,7 +54,7 @@ export default function AthleteTeams() {
   const { toast } = useToast();
 
   const [teams, setTeams] = useState<Team[]>([]);
-  const [memberMap, setMemberMap] = useState<Map<string, User>>(new Map());
+  const [memberMap, setMemberMap] = useState<Map<string, PublicProfile>>(new Map());
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -67,8 +67,8 @@ export default function AthleteTeams() {
 
         const previewIds = new Set<string>();
         data.forEach((team) => team.memberIds.slice(0, 4).forEach((id) => previewIds.add(id)));
-        const users = await Promise.all(Array.from(previewIds).map((id) => getUserById(id)));
-        const map = new Map<string, User>();
+        const users = await Promise.all(Array.from(previewIds).map((id) => getPublicProfile(id)));
+        const map = new Map<string, PublicProfile>();
         users.forEach((u) => { if (u) map.set(u.id, u); });
         setMemberMap(map);
       } catch {

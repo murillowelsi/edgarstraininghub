@@ -3,12 +3,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { AtSign, Camera, ImagePlus, Images, Loader2, X } from "lucide-react";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Switch } from "@/components/ui/switch";
-import { getAllUsers } from "@/services/usersService";
+import { getPublicProfiles } from "@/services/usersService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { User } from "@/types/user";
+import type { PublicProfile } from "@/types/user";
 import type { ComposerResult, PostMention, WorkoutSummary } from "@/types/timeline";
 import type { WorkoutType } from "@/types/workout";
 import { renderPostImage, uploadPostImage, type PostAspect } from "@/lib/postImages";
@@ -71,7 +71,7 @@ export function CreatePostModal({
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   // Inline @mention autocomplete
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<PublicProfile[]>([]);
   const [mentionQuery, setMentionQuery] = useState<{ query: string; start: number } | null>(null);
 
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -167,7 +167,7 @@ export function CreatePostModal({
   const loadUsers = async () => {
     if (users.length) return;
     try {
-      const all = await getAllUsers();
+      const all = await getPublicProfiles();
       setUsers(all.filter((u) => u.id !== user?.uid));
     } catch {
       toast({ title: t.common.error, description: tc.loadUsersError, variant: "destructive" });
@@ -183,7 +183,7 @@ export function CreatePostModal({
     setMentions((prev) => prev.filter((m) => value.includes(`@${m.name}`)));
   };
 
-  const insertMention = (u: User) => {
+  const insertMention = (u: PublicProfile) => {
     if (!mentionQuery) return;
     const before = caption.slice(0, mentionQuery.start);
     const after = caption.slice(mentionQuery.start + 1 + mentionQuery.query.length);

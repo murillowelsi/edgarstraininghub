@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { useToast } from "@/hooks/use-toast";
-import { getUserById } from "@/services/usersService";
+import { getPublicProfile } from "@/services/usersService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { modalityAccent } from "@/utils/modalityColors";
 import {
@@ -80,7 +80,7 @@ const ActivityDetail = () => {
   useEffect(() => {
     if (!user) return;
     const ownerId = athleteId ?? user.uid;
-    getUserById(ownerId).then((u) => {
+    getPublicProfile(ownerId).then((u) => {
       if (!u) return;
       setDisplayName(u.displayName || "Athlete");
       setAthletePhotoURL(u.photoURL ?? null);

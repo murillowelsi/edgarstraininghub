@@ -91,6 +91,25 @@ service cloud.firestore {
       }
     }
 
+    // Public profile: the minimum other users may see (name, photo, role).
+    // Kept in sync with users/{uid} by the app (same batch) and by the backfill script.
+    // A user may only write their own profile as an exact mirror of their users doc.
+    match /publicProfiles/{userId} {
+      function mirrorsOwnUser() {
+        let u = getAfter(/databases/$(database)/documents/users/$(userId)).data;
+        let d = request.resource.data;
+        return d.keys().hasOnly(["displayName", "photoURL", "role", "updatedAt"])
+          && d.get("displayName", null) == u.get("displayName", null)
+          && d.get("role", null) == u.get("role", null)
+          && d.get("photoURL", null) == u.get("photoURL", null);
+      }
+
+      allow read: if request.auth != null;
+      allow create, update: if isAdmin() ||
+        (request.auth != null && request.auth.uid == userId && mirrorsOwnUser());
+      allow delete: if isAdmin();
+    }
+
     // Posts collection: public can read published, editors can CRUD
     match /posts/{postId} {
       allow read: if resource.data.published == true || isEditor();
@@ -302,6 +321,30 @@ service cloud.firestore {
       allow read: if request.auth != null &&
         (isAdmin() || resource.data.athleteId == request.auth.uid);
       allow create, update, delete: if isAdmin();
+    }
+
+    // Team invite, doc id = the team's inviteToken. The token is the secret:
+    // whoever has the /join link reads this one doc; nobody can list invites.
+    // Only the team's coach writes it, mirroring the team's name and photo.
+    match /teamInvites/{token} {
+      function isCoachMirrorOfTeam() {
+        let d = request.resource.data;
+        let team = getAfter(/databases/$(database)/documents/teams/$(d.teamId)).data;
+        return d.keys().hasOnly(["teamId", "teamName", "teamPhotoURL", "coachId", "createdAt", "updatedAt"])
+          && team.coachId == request.auth.uid
+          && team.inviteToken == token
+          && d.coachId == request.auth.uid
+          && d.teamName == team.name
+          && d.get("teamPhotoURL", null) == team.get("photoURL", null);
+      }
+
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.auth != null && isCoachMirrorOfTeam();
+      allow update: if request.auth != null && isCoachMirrorOfTeam()
+        && request.resource.data.teamId == resource.data.teamId;
+      allow delete: if request.auth != null &&
+        (isAdmin() || resource.data.coachId == request.auth.uid);
     }
 
     // Teams collection
