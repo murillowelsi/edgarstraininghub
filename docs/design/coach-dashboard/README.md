@@ -36,14 +36,25 @@ Testado no emulador como `coach@ez.test`, em 1440 px e 390 px, tema escuro. Dado
 
 ## 2. Proposta enxuta
 
-![Desktop 1440 escuro, uma tela, com ações rápidas](img/proposta-1-desktop.png)
-![Celular claro: chips de ação e resposta no card; folha de resultados e lembrete](img/proposta-2-mobile.png)
+**Ordem:** cabeçalho (saudação, "Ações", "Atribuir treino") → **chips de aviso**, só quando existem → **precisa de atenção** → **hoje** (+ linha de amanhã) → **esta semana**.
 
-**Ordem:** cabeçalho (data, saudação, **ações rápidas**) → **precisa de atenção** (desktop: coluna principal) → **hoje** (+ linha de amanhã) → **esta semana** (card pequeno; desktop: abaixo de "Hoje", na coluna da direita) → avisos, só quando existem.
+### Layout (ajuste de 12/11: "ainda não está bem distribuído")
+Conteúdo igual ao aprovado; muda só a distribuição. Regras para as duas variações: **mesmo gap (14 px) e mesmo raio (20 px)** em todos os cards, topos e bases alinhados, **"Atribuir treino" como único botão primário**, e avisos como **chips numa linha** que somem quando não há aviso.
 
-### 2.0 Ações rápidas (faixa abaixo da saudação)
-- **Desktop:** na linha da saudação, à direita; "Atribuir treino" continua o botão principal (amarelo, por último) e as outras 4 são botões de contorno.
-- **Celular:** chips roláveis no topo, com "Atribuir" primeiro. **O botão flutuante sai** (repetiria "Atribuir").
+| A · grade proposta (**recomendada**) | B · alternativa |
+|---|---|
+| ![](img/proposta-1a-desktop.png) | ![](img/proposta-1b-desktop.png) |
+
+- **A:** linha 1, saudação | "Ações ▾" (menu: Novo treino, Aviso no feed, Mensagem ao time, Convidar atleta) + "Atribuir treino". Linha 2, chips de aviso. Linha 3, duas colunas da **mesma altura**: "Precisa de atenção" (60%, rolagem interna acima de 640 px) | "Hoje" em cima e "Esta semana" embaixo (40%). Para "Hoje" não sobrar vazio, ele mostra **quem fez e quem falta** do treino do dia, com "Lembrar" por atleta (o mesmo conteúdo da folha "Ver resultados", agora inline no desktop).
+- **B:** saudação com os chips de aviso logo abaixo | 4 ícones com rótulo no hover + "Atribuir treino". "Precisa de atenção" na largura toda, em grade 2 × 2 (até 6 cards, depois "Ver todos"). Embaixo, Hoje | Esta semana, 50/50, mesma altura.
+- **Por que A:** aguenta listas longas de atenção (rolagem interna) sem empurrar "Hoje" para baixo da dobra, e "Precisa de atenção" continua o 1º bloco lido. B fica bonita com 4 pendências, mas com 8 a grade ocupa a tela toda.
+- **Celular** (as duas variações): chips de aviso → Precisa de atenção → Hoje → Esta semana; **"Atribuir" fixo** (botão flutuante) e o resto no botão **"Ações"** do topo, que abre uma folha.
+
+![Celular claro: ordem e folha "Ações"](img/proposta-2-mobile.png)
+
+### 2.0 Ações rápidas
+- **Desktop:** "Atribuir treino" (primário) + as outras 4 num menu "Ações ▾" (A) ou em ícones com rótulo no hover (B). Nada de 5 botões grandes.
+- **Celular:** "Atribuir" fixo como botão flutuante; as outras 4 na folha "Ações" (botão no topo).
 
 | Ação | O que faz | Status | Onde já existe |
 |---|---|---|---|
@@ -98,7 +109,7 @@ Testado no emulador como `coach@ez.test`, em 1440 px e 390 px, tema escuro. Dado
 - **Amanhã** é **uma linha** no fim do card: "Amanhã: Força B · 3 atletas · Ver".
 - **Sem treino hoje:** "Nenhum treino hoje", e a linha de amanhã continua.
 
-### 2.4 Avisos condicionais (1 linha cada, só quando existem)
+### 2.4 Avisos condicionais (chips numa linha, só quando existem)
 - **Prova em menos de 14 dias:** "Bruno Teste · Corrida 10 km em 12 dias · Ver".
 - **Depoimento pendente:** "1 depoimento para revisar · Revisar".
 - Quando não há nenhum, nada aparece. Não há estado vazio nem título de seção.
@@ -129,10 +140,10 @@ Testado no emulador como `coach@ez.test`, em 1440 px e 390 px, tema escuro. Dado
 |---|---|---|---|
 | ⭐ CD-1 | **Precisa de atenção como bloco principal:** coluna principal no desktop e 2º bloco no celular; chips por motivo; **resposta rápida no card** (campo + enviar no chat); Ver treino; Atribuir; estado vazio. | M | `src/pages/admin/Dashboard.tsx` (bloco `attention`, ~l. 176-215, e o JSX), `src/components/admin/AttentionList.tsx` (novo), `src/services/chat.ts` (só uso) |
 | ⭐ CD-2 | **Card "Esta semana"** abaixo de "Hoje": "x de y treinos feitos · %" só da semana atual + 7 dias compactos (anel + "feitos/planejados", hoje destacado, futuros tracejados); **tocar no dia abre `/admin/calendar?date=`** (Calendar passa a ler `date`). Hook `useTeamWeekStats(assignments)` com contagem por dia, com teste. | P | `Dashboard.tsx`, `src/components/admin/WeekCard.tsx` (novo), `src/hooks/useTeamWeekStats.ts` (novo), `src/pages/admin/Calendar.tsx` |
-| ⭐ CD-3 | **Ações rápidas:** faixa no desktop e chips roláveis no celular (Atribuir, Novo treino, Aviso no feed, Mensagem ao time, Convidar atleta), todas com fluxos que já existem; menu de time quando houver mais de um; remover o botão flutuante. | P | `Dashboard.tsx`, `src/components/admin/QuickActions.tsx` (novo), `src/contexts/TimelineActionsContext.tsx` (só uso) |
+| ⭐ CD-3 | **Layout e ações rápidas:** grade A (atenção 60% com rolagem interna | Hoje + Esta semana 40%, mesma altura; gap 14, raio 20); "Atribuir treino" + menu "Ações" (Novo treino, Aviso no feed, Mensagem ao time, Convidar atleta); no celular, "Atribuir" flutuante e folha "Ações". | P | `Dashboard.tsx`, `src/components/admin/QuickActions.tsx` (novo, `DropdownMenu`/`Sheet` do shadcn) |
 | ⭐ CD-4 | **Remover o que saiu:** cards de inventário, "Conclusão geral", tendência (`LineChart`), tabela de atletas, "Destaques", faixa de datas, "Atividade de hoje", "Atividade recente", "Times", bloco "Amanhã". | P | `Dashboard.tsx` (~l. 400-760) |
 | CD-5 | **Hoje agrupado por treino** + linha "Amanhã" + **Ver resultados / Lembrar quem falta** (folha com rpe e nota; "Lembrar" abre o chat com o texto no campo, sem envio automático). | M | `Dashboard.tsx`, `src/components/admin/TodayWorkoutSheet.tsx` (novo), `src/components/chat/ChatWindow.tsx` (rascunho já existe) |
-| CD-6 | **Avisos condicionais:** prova em menos de 14 dias e depoimento pendente, uma linha cada, nada quando não existem. | P | `Dashboard.tsx` |
+| CD-6 | **Avisos condicionais** como chips numa linha (prova em menos de 14 dias, depoimento pendente), que some quando não há aviso; "quem fez / quem falta" inline em "Hoje" no desktop. | P | `Dashboard.tsx` |
 | CD-7 | QA: 1440 × 900 sem rolar; 390 px em ~1,4 tela com 4 pendências e 2 avisos; claro e escuro; com 0 pendências, 0 treinos hoje, 0 avisos, 1 e 2 times; resposta rápida (enviar, Esc, erro de rede); lembrete não envia sozinho (EZ QA). | P | testes do EZ QA |
 
 **Ordem:** CD-1 → CD-2 → CD-3 → CD-4 (≈ 1 dia) → CD-5 → CD-6 → CD-7.
