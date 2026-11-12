@@ -2,6 +2,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonFrame } from "@/components/feedback/skeletons";
 import { getPostBySlug } from "@/services/postsService";
 import type { Post } from "@/types/post";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
@@ -62,7 +63,7 @@ const BlogArticlePage = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 pt-24 pb-20">
-          <article className="container mx-auto px-4 max-w-3xl">
+          <SkeletonFrame className="container mx-auto px-4 max-w-3xl">
             <Skeleton className="h-8 w-32 mb-8" />
             <Skeleton className="h-12 w-full mb-4" />
             <Skeleton className="h-12 w-3/4 mb-8" />
@@ -77,7 +78,7 @@ const BlogArticlePage = () => {
               <Skeleton className="h-5 w-full" />
               <Skeleton className="h-5 w-5/6" />
             </div>
-          </article>
+          </SkeletonFrame>
         </main>
         <Footer />
       </div>
