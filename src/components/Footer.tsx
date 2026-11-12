@@ -23,7 +23,7 @@ const Footer = () => {
   );
 
   return (
-    <footer className="bg-card text-white py-4 md:py-6 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <footer className="bg-surface-inverse text-white py-4 md:py-6 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-6 max-w-6xl mx-auto">
           {/* Brand */}
