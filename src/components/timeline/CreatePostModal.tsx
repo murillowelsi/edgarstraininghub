@@ -299,7 +299,7 @@ export function CreatePostModal({
         <div className="flex gap-3 px-4 pt-2">
           <CachedAvatar
             src={photoURL}
-            alt="Profile"
+            alt={t.common.profilePhoto}
             fallback={authorName.charAt(0).toUpperCase()}
             className="h-11 w-11 shrink-0 ring-2 ring-[#e1b506]"
             fallbackClassName="bg-primary text-primary-foreground font-bold text-lg"

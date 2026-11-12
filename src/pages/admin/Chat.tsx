@@ -135,7 +135,7 @@ export default function AdminChat() {
             setSelectedChat(chat);
             setIsNewChatOpen(false);
         } catch {
-            toast.error("Failed to open group chat.");
+            toast.error(t.admin.chat.toast.groupChatFailed);
         } finally {
             setOpeningGroupChat(null);
         }

@@ -13,11 +13,11 @@ const GalleryPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Training Group <span className="text-brand-blue">Gallery</span>
+              {t.gallery.title} <span className="text-brand-blue">{t.gallery.titleHighlight}</span>
             </h1>
             <div className="h-1 w-20 bg-brand-orange mx-auto mb-6"></div>
             <p className="max-w-2xl mx-auto text-muted-foreground">
-              Check out photos from our amazing training sessions and events
+              {t.gallery.subtitle}
             </p>
           </div>
 

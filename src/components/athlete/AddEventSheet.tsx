@@ -221,7 +221,7 @@ const AddEventSheet = ({ open, onOpenChange, athleteId, event }: Props) => {
             onClick={() => setChecklistOpen(true)}
           >
             <ClipboardList className="h-4 w-4 mr-2" />
-            Checklist da prova
+            {t.athlete.events.raceChecklist}
           </Button>
         )}
         <Button onClick={handleSave} disabled={!canSave} className="w-full">

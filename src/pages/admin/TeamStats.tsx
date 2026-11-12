@@ -161,7 +161,7 @@ export default function AdminTeamStats() {
             onClick={() => navigate(`/admin/teams/${team.id}`)}
           >
             <ChevronLeft className="h-4 w-4" />
-            Back
+            {t.common.back}
           </Button>
         </div>
 

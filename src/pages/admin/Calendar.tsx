@@ -176,7 +176,7 @@ const CalendarDay = ({
                     <p className="font-medium">
                       {assignment.workout.name}
                       {assignment.selfLogged && (
-                        <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">Extra</Badge>
+                        <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">{t.admin.calendar.extra}</Badge>
                       )}
                     </p>
                     <p className="text-muted-foreground">
@@ -206,7 +206,7 @@ const CalendarDay = ({
             <Popover>
               <PopoverTrigger asChild>
                 <button className="w-full text-left text-xs p-1 text-muted-foreground hover:text-foreground">
-                  +{hiddenCount} more
+                  +{hiddenCount} {t.admin.calendar.more}
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-2" align="start">
@@ -704,7 +704,7 @@ const AdminCalendar = () => {
                                     >
                                       {assignment.workout.name}
                                       {assignment.selfLogged && (
-                                        <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">Extra</Badge>
+                                        <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">{t.admin.calendar.extra}</Badge>
                                       )}
                                     </p>
                                     <p className="text-xs text-muted-foreground truncate">
@@ -724,7 +724,7 @@ const AdminCalendar = () => {
                                       variant="secondary"
                                       className="bg-green-100 text-green-700 dark:bg-green-900/50 shrink-0"
                                     >
-                                      Done
+                                      {t.admin.calendar.done}
                                     </Badge>
                                   ) : (
                                     <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -748,19 +748,19 @@ const AdminCalendar = () => {
             <span className="text-muted-foreground">{t.admin.calendar.legend.workoutTypes}</span>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded bg-cyan-200 border border-cyan-300" />
-              <span>Swimming</span>
+              <span>{workoutLabels(t).type("swimming")}</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded bg-green-200 border border-green-300" />
-              <span>Cycling</span>
+              <span>{workoutLabels(t).type("cycling")}</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded bg-blue-200 border border-blue-300" />
-              <span>Running</span>
+              <span>{workoutLabels(t).type("running")}</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded bg-amber-200 border border-amber-300" />
-              <span>Strength</span>
+              <span>{workoutLabels(t).type("strength")}</span>
             </div>
             <div className="flex items-center gap-1 ml-4">
               <Check className="h-3 w-3 text-muted-foreground" />

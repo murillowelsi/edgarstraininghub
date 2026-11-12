@@ -101,7 +101,7 @@ const AboutSection = () => {
               {loading ? (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
                   <p className="text-muted-foreground">
-                    Loading latest video...
+                    {t.youtube.loading}
                   </p>
                 </div>
               ) : video?.videoId ? (
@@ -109,7 +109,7 @@ const AboutSection = () => {
                   width="100%"
                   height="100%"
                   src={`https://www.youtube.com/embed/${video.videoId}`}
-                  title="YouTube video player"
+                  title={t.youtube.playerTitle}
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   referrerPolicy="strict-origin-when-cross-origin"
@@ -117,21 +117,21 @@ const AboutSection = () => {
                 ></iframe>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <p className="text-red-500">
-                    Failed to load video. Check console for details.
+                  <p className="text-muted-foreground">
+                    {t.youtube.unavailable}
                   </p>
                 </div>
               )}
             </div>
             <p className="mt-4 text-muted-foreground">
-              Check out more videos on my{" "}
+              {t.youtube.moreVideos}{" "}
               <a
                 href="https://www.youtube.com/@edgarzanin"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                YouTube channel
+                {t.youtube.channel}
               </a>
               .
             </p>

@@ -91,14 +91,14 @@ const BlogArticlePage = () => {
         <main className="flex-1 pt-24 pb-20 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
-            <h2 className="text-2xl font-bold mb-4">Post Not Found</h2>
+            <h2 className="text-2xl font-bold mb-4">{t.blog.notFoundTitle}</h2>
             <p className="text-muted-foreground mb-8 max-w-md">
-              The article you're looking for doesn't exist or has been removed.
+              {t.blog.notFoundDescription}
             </p>
             <Link to="/blog">
               <Button>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Blog
+                {t.blog.backToBlog}
               </Button>
             </Link>
           </div>
@@ -138,7 +138,7 @@ const BlogArticlePage = () => {
             }`}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Blog
+            {t.blog.backToBlog}
           </Link>
 
           {/* Article Card */}
@@ -171,7 +171,7 @@ const BlogArticlePage = () => {
               )}
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                <span>{readingTime} min read</span>
+                <span>{t.blog.minRead.replace("{{n}}", String(readingTime))}</span>
               </div>
             </div>
 
@@ -185,15 +185,14 @@ const BlogArticlePage = () => {
           {/* CTA Section */}
           <div className="mt-16 mb-12 p-8 md:p-10 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 text-center">
             <h3 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">
-              Want to Take Your Training to the Next Level?
+              {t.blog.ctaTitle}
             </h3>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto text-lg">
-              Get in touch for personalized coaching focused on your specific
-              goals.
+              {t.blog.ctaDescription}
             </p>
             <Link to="/contact">
               <Button size="lg" className="btn-primary text-lg px-8">
-                Schedule a Consultation
+                {t.blog.ctaButton}
               </Button>
             </Link>
           </div>

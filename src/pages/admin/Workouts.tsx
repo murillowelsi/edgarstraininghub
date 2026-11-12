@@ -165,11 +165,11 @@ const AdminWorkouts = () => {
 
         <div className="flex gap-2 overflow-x-auto pb-3 mb-1 scrollbar-hide">
           {([
-            { key: "all", label: "All", icon: null, color: null },
-            { key: "running", label: "Running", icon: <GrRun className="h-3.5 w-3.5" />, color: workoutTypeColors.running },
-            { key: "cycling", label: "Cycling", icon: <GrBike className="h-3.5 w-3.5" />, color: workoutTypeColors.cycling },
-            { key: "swimming", label: "Swimming", icon: <GrSwim className="h-3.5 w-3.5" />, color: workoutTypeColors.swimming },
-            { key: "strength", label: "Strength", icon: <Dumbbell className="h-3.5 w-3.5" />, color: workoutTypeColors.strength },
+            { key: "all", label: t.common.all, icon: null, color: null },
+            { key: "running", label: t.workoutMeta.types.running, icon: <GrRun className="h-3.5 w-3.5" />, color: workoutTypeColors.running },
+            { key: "cycling", label: t.workoutMeta.types.cycling, icon: <GrBike className="h-3.5 w-3.5" />, color: workoutTypeColors.cycling },
+            { key: "swimming", label: t.workoutMeta.types.swimming, icon: <GrSwim className="h-3.5 w-3.5" />, color: workoutTypeColors.swimming },
+            { key: "strength", label: t.workoutMeta.types.strength, icon: <Dumbbell className="h-3.5 w-3.5" />, color: workoutTypeColors.strength },
           ] as const).map(({ key, label, icon, color }) => {
             const isActive = activeTab === key;
             const count = tabCounts[key];
@@ -280,7 +280,7 @@ const AdminWorkouts = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm">{label}</p>
-                  <p className="text-xs text-muted-foreground">{count} workout{count !== 1 ? "s" : ""}</p>
+                  <p className="text-xs text-muted-foreground">{count === 1 ? t.common.workoutCountOne : t.common.workoutCountOther.replace("{{count}}", String(count))}</p>
                 </div>
               </button>
             );

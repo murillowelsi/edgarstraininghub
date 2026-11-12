@@ -89,7 +89,7 @@ function TeamPhotoUpload({
             {uploading ? (
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             ) : photoURL ? (
-              <img src={photoURL} alt="Team" className="h-full w-full object-cover" />
+              <img src={photoURL} alt={label} className="h-full w-full object-cover" />
             ) : (
               <Camera className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             )}

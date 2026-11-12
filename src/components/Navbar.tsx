@@ -73,7 +73,7 @@ const Navbar = () => {
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-              aria-label="Toggle theme"
+              aria-label={t.common.toggleTheme}
             >
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
@@ -96,7 +96,7 @@ const Navbar = () => {
           <button
             onClick={toggleTheme}
             className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-            aria-label="Toggle theme"
+            aria-label={t.common.toggleTheme}
           >
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
@@ -105,7 +105,7 @@ const Navbar = () => {
             <SheetTrigger asChild>
               <button
                 className="h-10 w-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
-                aria-label="Open menu"
+                aria-label={t.common.openMenu}
               >
                 <Menu size={24} />
               </button>

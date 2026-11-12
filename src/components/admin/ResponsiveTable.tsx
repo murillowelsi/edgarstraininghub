@@ -2,6 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { ReactNode, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Column {
   key: string;
@@ -27,6 +28,7 @@ interface ResponsiveTableProps<TRow extends Row> {
 
 export function ResponsiveTable<TRow extends Row>({ columns, rows, rowKey, actions, emptyState, loading }: ResponsiveTableProps<TRow>) {
   const cell = (row: TRow, key: string) => row[key] as ReactNode;
+  const { t } = useLanguage();
   const [expandedRows, setExpandedRows] = useState<Set<string | number>>(new Set());
 
   const toggleRow = (key: string | number) => {
@@ -51,7 +53,7 @@ export function ResponsiveTable<TRow extends Row>({ columns, rows, rowKey, actio
                     {col.label}
                   </th>
                 ))}
-                {actions && <th className="h-12 px-4 text-right font-medium text-muted-foreground">Actions</th>}
+                {actions && <th className="h-12 px-4 text-right font-medium text-muted-foreground">{t.common.actions}</th>}
               </tr>
             </thead>
             <tbody>
@@ -86,7 +88,7 @@ export function ResponsiveTable<TRow extends Row>({ columns, rows, rowKey, actio
     return emptyState ? (
       <>{emptyState}</>
     ) : (
-      <div className="text-center py-8 text-muted-foreground text-sm">No data available</div>
+      <div className="text-center py-8 text-muted-foreground text-sm">{t.common.noData}</div>
     );
   }
 
@@ -106,7 +108,7 @@ export function ResponsiveTable<TRow extends Row>({ columns, rows, rowKey, actio
                   {col.label}
                 </th>
               ))}
-              {actions && <th className="h-12 px-4 text-right font-medium text-muted-foreground">Actions</th>}
+              {actions && <th className="h-12 px-4 text-right font-medium text-muted-foreground">{t.common.actions}</th>}
             </tr>
           </thead>
           <tbody>
@@ -140,7 +142,7 @@ export function ResponsiveTable<TRow extends Row>({ columns, rows, rowKey, actio
                   <button
                     onClick={() => toggleRow(key)}
                     className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label={isExpanded ? "Collapse" : "Expand"}
+                    aria-label={isExpanded ? t.admin.collapse : t.admin.expand}
                   >
                     <ChevronRight className={cn("h-4 w-4 transition-transform duration-200", isExpanded && "rotate-90")} />
                   </button>

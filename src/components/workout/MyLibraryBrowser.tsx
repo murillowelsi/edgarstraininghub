@@ -411,7 +411,7 @@ const ExerciseFormDialog = ({
             <div className="mt-2 aspect-video rounded overflow-hidden">
               <img
                 src={getYouTubeThumbnail(getYouTubeVideoId(videoUrl)!)}
-                alt="Video thumbnail"
+                alt={translations.workout.library.videoThumbnailAlt}
                 className="w-full h-full object-cover"
               />
             </div>

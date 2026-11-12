@@ -180,7 +180,7 @@ const AdminPostForm = () => {
 
     if (!formData.title.trim()) {
       toast({
-        title: "Validation Error",
+        title: t.admin.postForm.toast.validationError,
         description: t.admin.postForm.toast.titleRequired,
         variant: "destructive",
       });
@@ -189,7 +189,7 @@ const AdminPostForm = () => {
 
     if (!formData.content.trim()) {
       toast({
-        title: "Validation Error",
+        title: t.admin.postForm.toast.validationError,
         description: t.admin.postForm.toast.contentRequired,
         variant: "destructive",
       });
@@ -212,7 +212,7 @@ const AdminPostForm = () => {
           user?.displayName || user?.email || "Admin"
         );
         toast({
-          title: "Post created",
+          title: t.admin.postForm.toast.created,
           description: formData.published
             ? t.admin.postForm.toast.createdPublished
             : t.admin.postForm.toast.createdDraft,
@@ -271,12 +271,12 @@ const AdminPostForm = () => {
 
                   {/* Slug */}
                   <div className="space-y-2">
-                    <Label htmlFor="slug">Slug</Label>
+                    <Label htmlFor="slug">{t.admin.postForm.slugLabel}</Label>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">/blog/</span>
                       <Input
                         id="slug"
-                        placeholder="post-url-slug"
+                        placeholder={t.admin.postForm.slugPlaceholder}
                         value={formData.slug}
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, slug: e.target.value }))
@@ -285,7 +285,7 @@ const AdminPostForm = () => {
                       />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      URL-friendly identifier for this post
+                      {t.admin.postForm.slugHint}
                     </p>
                   </div>
 
@@ -344,7 +344,7 @@ const AdminPostForm = () => {
                               }
                             } else {
                               toast({
-                                title: "Invalid file",
+                                title: t.admin.postForm.toast.invalidFileTitle,
                                 description: t.admin.postForm.toast.invalidFile,
                                 variant: "destructive",
                               });
@@ -385,7 +385,7 @@ const AdminPostForm = () => {
                           {uploadingImage ? (
                             <div className="flex flex-col items-center gap-3">
                               <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                              <p className="text-sm text-muted-foreground">Uploading image...</p>
+                              <p className="text-sm text-muted-foreground">{t.admin.postForm.uploadingImage}</p>
                             </div>
                           ) : (
                             <div className="flex flex-col items-center gap-3">
@@ -393,8 +393,8 @@ const AdminPostForm = () => {
                                 <Upload className="h-8 w-8 text-primary" />
                               </div>
                               <div>
-                                <p className="text-sm font-medium">Drop your image here or click to browse</p>
-                                <p className="text-xs text-muted-foreground mt-1">Recommended: 1200x630px</p>
+                                <p className="text-sm font-medium">{t.admin.postForm.dropImage}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{t.admin.postForm.recommendedSize}</p>
                               </div>
                             </div>
                           )}
@@ -403,7 +403,7 @@ const AdminPostForm = () => {
                         <div className="relative inline-block">
                           <img
                             src={formData.featuredImage}
-                            alt="Featured image preview"
+                            alt={t.admin.postForm.imagePreviewAlt}
                             className="max-w-full rounded-lg border"
                           />
                           <Button
@@ -415,19 +415,19 @@ const AdminPostForm = () => {
                             disabled={saving}
                           >
                             <X className="h-4 w-4" />
-                            Remove
+                            {t.common.remove}
                           </Button>
                         </div>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Image displayed in blog cards
+                      {t.admin.postForm.imageHint}
                     </p>
                   </div>
 
                   {/* Content */}
                   <div className="space-y-2">
-                    <Label>Content</Label>
+                    <Label>{t.admin.postForm.contentLabel}</Label>
                     <div className="border rounded-lg overflow-hidden bg-card h-[500px]">
                       <ReactQuill
                         theme="snow"
@@ -436,7 +436,7 @@ const AdminPostForm = () => {
                           setFormData((prev) => ({ ...prev, content }))
                         }
                         modules={quillModules}
-                        placeholder="Write your post content here..."
+                        placeholder={t.admin.postForm.contentPlaceholder}
                         className="h-full"
                       />
                     </div>

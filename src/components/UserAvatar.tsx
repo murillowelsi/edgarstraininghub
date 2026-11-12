@@ -21,7 +21,7 @@ export function UserAvatar({ photoURL, initials, showCrown = false, className, s
     <div className="relative inline-flex shrink-0">
       <CachedAvatar
         src={photoURL}
-        alt="Profile"
+        alt=""
         fallback={initials}
         className={cn(sizeMap[size], "ring-2 ring-[#e1b506]", className)}
         fallbackClassName="bg-primary text-primary-foreground font-semibold"

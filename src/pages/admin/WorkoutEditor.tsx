@@ -214,20 +214,20 @@ const DraggableStage = ({
             <div className="px-4 pb-4 pt-3 border-t border-border/50 space-y-3 text-sm">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Duration</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.duration}</p>
                   <p className="font-medium">{formatDuration(stage, L, t.admin.workoutEditor.pressLapButton)}</p>
                   <p className="text-xs text-muted-foreground">{L.duration(stage.duration.type)}</p>
                 </div>
                 {intensityDisplay && (
                   <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Intensity</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.intensity}</p>
                     <p className="font-medium">{intensityDisplay}</p>
                     <p className="text-xs text-muted-foreground">{L.intensity(stage.intensity.type)}</p>
                   </div>
                 )}
                 {stage.strokeType && (
                   <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Stroke</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.stroke}</p>
                     <p className="font-medium">{L.stroke(stage.strokeType)}</p>
                   </div>
                 )}
@@ -236,13 +236,13 @@ const DraggableStage = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {stage.drillType && stage.drillType !== "none" && (
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Drill Type</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.drillType}</p>
                       <p className="font-medium">{L.drill(stage.drillType)}</p>
                     </div>
                   )}
                   {stage.equipment && stage.equipment !== "none" && (
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Equipment</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.equipment}</p>
                       <p className="font-medium">{L.swimEquipment(stage.equipment)}</p>
                     </div>
                   )}
@@ -250,7 +250,7 @@ const DraggableStage = ({
               )}
               {stage.notes && (
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Notes</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t.admin.stageEditor.notes}</p>
                   <p className="text-muted-foreground bg-muted/50 p-2 rounded">{stage.notes}</p>
                 </div>
               )}

@@ -16,6 +16,7 @@ import {
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Image, Upload, X } from "lucide-react";
 
 interface Photo {
@@ -25,6 +26,7 @@ interface Photo {
 }
 
 const PhotoGallery = () => {
+  const { t } = useLanguage();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,8 +50,8 @@ const PhotoGallery = () => {
       
       setPhotos(prev => [...prev, ...newPhotos]);
       toast({
-        title: "Photos uploaded",
-        description: `Successfully added ${newPhotos.length} new photo${newPhotos.length > 1 ? 's' : ''}`,
+        title: t.gallery.toast.uploaded,
+        description: t.gallery.toast.uploadedDescription.replace("{{n}}", String(newPhotos.length)),
       });
     }
   };
@@ -63,8 +65,8 @@ const PhotoGallery = () => {
   const removePhoto = (photoId: string) => {
     setPhotos(photos.filter(photo => photo.id !== photoId));
     toast({
-      title: "Photo removed",
-      description: "The photo has been removed from the gallery",
+      title: t.gallery.toast.removed,
+      description: t.gallery.toast.removedDescription,
     });
   };
 
@@ -76,7 +78,7 @@ const PhotoGallery = () => {
           className="bg-brand-blue hover:bg-brand-blue/80 text-white"
           size="lg"
         >
-          <Upload className="mr-2 h-5 w-5" /> Upload Photos
+          <Upload className="mr-2 h-5 w-5" /> {t.gallery.uploadPhotos}
         </Button>
         <input
           type="file"
@@ -91,12 +93,12 @@ const PhotoGallery = () => {
       {photos.length === 0 ? (
         <div className="flex flex-col items-center justify-center bg-muted rounded-xl p-10 text-center">
           <Image className="h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-medium text-foreground mb-2">No photos yet</h3>
+          <h3 className="text-xl font-medium text-foreground mb-2">{t.gallery.noPhotos}</h3>
           <p className="text-muted-foreground mb-6 max-w-md">
-            Upload photos of your training sessions to showcase your group's activities
+            {t.gallery.noPhotosDescription}
           </p>
           <Button onClick={triggerFileInput} variant="outline">
-            <Upload className="mr-2 h-4 w-4" /> Select Files
+            <Upload className="mr-2 h-4 w-4" /> {t.gallery.selectFiles}
           </Button>
         </div>
       ) : (
@@ -144,7 +146,7 @@ const PhotoGallery = () => {
             )}
           </ScrollArea>
           <AlertDialogFooter>
-            <AlertDialogCancel>Close</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.close}</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
