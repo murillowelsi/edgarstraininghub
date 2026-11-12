@@ -1931,6 +1931,17 @@
     "empty": {
       "noPosts": "No posts yet",
       "beFirst": "Be the first to share something!"
+    },
+    "viz": {
+      "reps": "Reps",
+      "best": "best {{t}}",
+      "repsSummary": "{{n}} reps, best {{t}}",
+      "stages": "Stages",
+      "stagesSummary": "{{n}} stages, {{t}} in total",
+      "lanes": "Sets",
+      "lanesSummary": "{{n}} main repeats",
+      "sets": "Sets",
+      "setsDone": "{{done}} of {{total}}"
     }
   },
   "gallery": {

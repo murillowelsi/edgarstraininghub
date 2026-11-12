@@ -104,3 +104,62 @@ export const modalityGradient: Record<string, { from: string; to: string; accent
   swimming: { from: "#0e7490", to: "#06b6d4", accent: "#22d3ee" },
   strength: { from: "#6d28d9", to: "#a855f7", accent: "#c084fc" },
 };
+
+/** One number on the workout card, split so the unit can be styled apart. */
+export interface CardMetric {
+  key: string;
+  label: string;
+  value: string;
+  unit?: string;
+}
+
+export interface WorkoutCardModel {
+  /** The number that tells the story (distance; volume for strength; time as fallback) */
+  hero?: CardMetric;
+  /** Up to 3 supporting numbers; missing values are left out, never "—" */
+  secondary: CardMetric[];
+}
+
+/**
+ * Numbers for the redesigned feed card (docs/design/feed): one hero number and
+ * up to three secondaries per sport. Blocks without data disappear.
+ */
+export const workoutCardModel = (summary: WorkoutSummary, labels: StatLabels, locale: string): WorkoutCardModel => {
+  const isSwim = summary.workoutType === "swimming";
+  const num = (n: number, digits = 0) =>
+    n.toLocaleString(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  const m: Record<string, CardMetric | undefined> = {};
+
+  if (summary.elapsedTime && summary.elapsedTime > 0)
+    m.time = { key: "time", label: labels.time, value: formatDuration(summary.elapsedTime) };
+  if (summary.distance !== undefined && summary.distance > 0)
+    m.distance = isSwim
+      ? { key: "distance", label: labels.distance, value: num(swimDistanceMeters(summary.distance) ?? 0), unit: "m" }
+      : { key: "distance", label: labels.distance, value: num(summary.distance, 2), unit: "km" };
+  if (summary.avgPace !== undefined && summary.avgPace > 0)
+    m.pace = { key: "pace", label: labels.avgPace, value: formatDuration(Math.round(summary.avgPace)), unit: isSwim ? "/100m" : "/km" };
+  if (summary.avgSpeed !== undefined && summary.avgSpeed > 0)
+    m.speed = { key: "speed", label: labels.avgSpeed, value: num(summary.avgSpeed, 1), unit: "km/h" };
+  if (summary.avgHeartRate !== undefined && summary.avgHeartRate > 0)
+    m.hr = { key: "hr", label: labels.avgHeartRate, value: String(Math.round(summary.avgHeartRate)), unit: "bpm" };
+  if (summary.volumeKg !== undefined && summary.volumeKg > 0)
+    m.volume = { key: "volume", label: labels.volume, value: num(Math.round(summary.volumeKg)), unit: "kg" };
+  if (summary.workingSets !== undefined)
+    m.sets = {
+      key: "sets",
+      label: labels.sets,
+      value: summary.totalSets ? `${summary.workingSets}/${summary.totalSets}` : String(summary.workingSets),
+    };
+
+  const order: Record<string, { hero: string[]; secondary: string[] }> = {
+    running: { hero: ["distance", "time"], secondary: ["time", "pace", "hr"] },
+    cycling: { hero: ["distance", "time"], secondary: ["time", "speed", "hr"] },
+    swimming: { hero: ["distance", "time"], secondary: ["time", "pace", "hr"] },
+    strength: { hero: ["volume", "time"], secondary: ["time", "sets"] },
+  };
+  const o = order[summary.workoutType] ?? order.running;
+  const heroKey = o.hero.find((k) => m[k]);
+  const hero = heroKey ? m[heroKey] : undefined;
+  const secondary = o.secondary.filter((k) => k !== heroKey && m[k]).map((k) => m[k]!) .slice(0, 3);
+  return { hero, secondary };
+};

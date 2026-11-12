@@ -1931,6 +1931,17 @@
     "empty": {
       "noPosts": "Sem posts ainda",
       "beFirst": "Seja o primeiro a compartilhar algo!"
+    },
+    "viz": {
+      "reps": "Tiros",
+      "best": "melhor {{t}}",
+      "repsSummary": "{{n}} tiros, melhor {{t}}",
+      "stages": "Etapas",
+      "stagesSummary": "{{n}} etapas, {{t}} no total",
+      "lanes": "Séries",
+      "lanesSummary": "{{n}} repetições principais",
+      "sets": "Séries",
+      "setsDone": "{{done}} de {{total}}"
     }
   },
   "gallery": {

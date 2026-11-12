@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { summaryStats } from "./workoutSummaryStats";
+import { summaryStats, workoutCardModel } from "./workoutSummaryStats";
 
 const labels = {
   time: "Time",
@@ -24,5 +24,33 @@ describe("summaryStats distance", () => {
 
   it("shows runs in km with two decimals", () => {
     expect(distanceOf(10.2, "running")).toBe("10.20 km");
+  });
+});
+
+describe("workoutCardModel", () => {
+  const base = { workoutName: "W" };
+  it("running: distance is the hero, time/pace/HR follow", () => {
+    const m = workoutCardModel({ ...base, workoutType: "running", distance: 10.2, elapsedTime: 3120, avgPace: 306, avgHeartRate: 152 }, labels, "pt-BR");
+    expect(m.hero).toMatchObject({ value: "10,20", unit: "km" });
+    expect(m.secondary.map((s) => s.key)).toEqual(["time", "pace", "hr"]);
+    expect(m.secondary[1]).toMatchObject({ value: "5:06", unit: "/km" });
+  });
+
+  it("swimming in metres (also legacy km) with pace per 100 m", () => {
+    const m = workoutCardModel({ ...base, workoutType: "swimming", distance: 1.5, elapsedTime: 1425, avgPace: 95 }, labels, "en");
+    expect(m.hero).toMatchObject({ value: "1,500", unit: "m" });
+    expect(m.secondary[1]).toMatchObject({ value: "1:35", unit: "/100m" });
+  });
+
+  it("strength: volume hero, missing blocks disappear", () => {
+    const m = workoutCardModel({ ...base, workoutType: "strength", volumeKg: 4310.4, workingSets: 13, totalSets: 14 }, labels, "pt-BR");
+    expect(m.hero).toMatchObject({ value: "4.310", unit: "kg" });
+    expect(m.secondary).toEqual([{ key: "sets", label: "Sets", value: "13/14" }]);
+  });
+
+  it("falls back to time as the hero when there is no distance", () => {
+    const m = workoutCardModel({ ...base, workoutType: "cycling", elapsedTime: 4800 }, labels, "en");
+    expect(m.hero).toMatchObject({ key: "time", value: "1:20:00" });
+    expect(m.secondary).toEqual([]);
   });
 });
