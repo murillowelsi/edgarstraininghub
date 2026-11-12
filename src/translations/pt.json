@@ -2008,7 +2008,7 @@
         "title": "Com quem compartilhamos",
         "body": [
           "Não vendemos os seus dados. Usamos fornecedores que processam dados em nosso nome:",
-          "Google Firebase (login, banco de dados, armazenamento de fotos e notificações); Google Analytics (só com o seu aceite); Vercel (hospedagem do site); Cloudinary (imagens de publicações); YouTube (vídeos incorporados no site, que podem definir cookies do próprio YouTube ao carregar).",
+          "Google Firebase (login, banco de dados, armazenamento de fotos e notificações); Google Analytics (só com o seu aceite); Vercel (hospedagem do site); Cloudinary (imagens de publicações); YouTube (vídeos no site, que só carregam quando você toca em reproduzir).",
           "Esses fornecedores podem guardar dados fora do seu país. [CONFIRMAR LOCAL DE ARMAZENAMENTO E GARANTIAS DE TRANSFERÊNCIA.]"
         ]
       },
@@ -2016,7 +2016,8 @@
         "title": "Cookies e armazenamento no aparelho",
         "body": [
           "Necessários: guardamos no seu navegador o idioma, o tema, a sua sessão de login e uma cópia dos dados para o app funcionar sem internet. Sem isso o app não funciona.",
-          "Análise: os cookies do Google Analytics só são usados se você aceitar no aviso de cookies. Você pode mudar a escolha a qualquer momento em \"Preferências de cookies\", no rodapé."
+          "Análise: os cookies do Google Analytics só são usados se você aceitar no aviso de cookies. Você pode mudar a escolha a qualquer momento em \"Preferências de cookies\", no rodapé.",
+          "YouTube: os vídeos do site mostram só uma imagem até você tocar em reproduzir. Ao reproduzir, o vídeo carrega pelo modo de privacidade do YouTube (youtube-nocookie.com), e o YouTube pode registrar dados conforme a política dele."
         ]
       },
       {

@@ -2008,7 +2008,7 @@
         "title": "Who we share it with",
         "body": [
           "We don't sell your data. We use providers that process data on our behalf:",
-          "Google Firebase (sign-in, database, photo storage and notifications); Google Analytics (only if you accept); Vercel (site hosting); Cloudinary (post images); YouTube (videos embedded on the site, which may set YouTube's own cookies when they load).",
+          "Google Firebase (sign-in, database, photo storage and notifications); Google Analytics (only if you accept); Vercel (site hosting); Cloudinary (post images); YouTube (videos on the site, which only load when you press play).",
           "These providers may store data outside your country. [CONFIRM STORAGE LOCATIONS AND TRANSFER SAFEGUARDS.]"
         ]
       },
@@ -2016,7 +2016,8 @@
         "title": "Cookies and storage on your device",
         "body": [
           "Necessary: we keep your language, theme, sign-in session and a copy of your data in your browser so the app works offline. The app doesn't work without them.",
-          "Analytics: Google Analytics cookies are only used if you accept them in the cookie notice. You can change your choice at any time in \"Cookie preferences\" in the footer."
+          "Analytics: Google Analytics cookies are only used if you accept them in the cookie notice. You can change your choice at any time in \"Cookie preferences\" in the footer.",
+          "YouTube: videos on the site show only an image until you press play. When you play one, it loads in YouTube's privacy-enhanced mode (youtube-nocookie.com), and YouTube may record data under its own policy."
         ]
       },
       {
