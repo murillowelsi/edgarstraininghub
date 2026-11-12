@@ -41,18 +41,36 @@ module.exports = async function handler(req, res) {
 
   const { chatId, messageText, senderName, recipientId, idToken } = req.body || {};
 
-  if (!chatId || !messageText || !recipientId || !idToken) {
+  if (
+    typeof chatId !== 'string' || !chatId ||
+    typeof messageText !== 'string' || !messageText ||
+    typeof recipientId !== 'string' || !recipientId ||
+    typeof idToken !== 'string' || !idToken ||
+    chatId.includes('/') || recipientId.includes('/')
+  ) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  let senderId;
   try {
     // Verify the sender is authenticated (idToken from Firebase Auth)
-    await adminAuth.verifyIdToken(idToken);
+    senderId = (await adminAuth.verifyIdToken(idToken)).uid;
   } catch {
     return res.status(401).json({ error: 'Invalid auth token' });
   }
 
   try {
+    // Only participants of this chat may notify another participant of it
+    const chatSnap = await db.collection('chats').doc(chatId).get();
+    const participantIds = chatSnap.exists ? chatSnap.data().participantIds || [] : [];
+    if (
+      recipientId === senderId ||
+      !participantIds.includes(senderId) ||
+      !participantIds.includes(recipientId)
+    ) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     // Get recipient's FCM tokens
     const tokensSnap = await db
       .collection('users')
@@ -147,6 +165,6 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ sent: sentCount });
   } catch (err) {
     console.error('notify error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal error' });
   }
 };
