@@ -2116,7 +2116,9 @@
       "chatCoachTitle": "Get notified when an athlete writes",
       "chatCoachDescription": "A notice on this device, even with the app closed.",
       "firstWorkoutTitle": "Want to know when your coach comments?",
-      "firstWorkoutDescription": "Turn on notifications for your coach's comments and messages."
+      "firstWorkoutDescription": "Turn on notifications for your coach's comments and messages.",
+      "homeTitle": "Turn on notifications",
+      "homeDescription": "Know right away when your coach assigns a workout, replies in chat or comments on your feed, even with the app closed."
     },
     "install": {
       "title": "Add EZ to your Home Screen",

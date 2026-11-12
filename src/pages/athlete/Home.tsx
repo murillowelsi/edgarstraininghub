@@ -2,6 +2,7 @@ import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { InfiniteDateStrip, type InfiniteDateStripHandle } from "@/components/shared/InfiniteDateStrip";
 import { ListItemCard } from "@/components/shared/ListItemCard";
 import { LeaveTestimonialBanner } from "@/components/athlete/LeaveTestimonialBanner";
+import { PushInvite } from "@/components/push/PushInvite";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -259,6 +260,11 @@ const AthleteHome = () => {
           </div>
         </div>
 
+        <PushInvite
+          place="home-athlete"
+          title={t.push.invite.homeTitle}
+          description={t.push.invite.homeDescription}
+        />
         <LeaveTestimonialBanner mode="home" />
 
         {/* In-progress session saved on this phone — one tap back into it */}
