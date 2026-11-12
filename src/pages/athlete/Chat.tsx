@@ -158,15 +158,16 @@ export default function AthleteChat() {
     const handleSendMessage = async (text: string) => {
         if (!selectedChat || !user) {
             toast.error(t.athlete.chat.noActiveChat);
-            return;
+            throw new Error("no active chat");
         }
+        // A failure is shown in the field, which keeps the text
+        await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Athlete");
+    };
 
-        try {
-            await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Athlete");
-        } catch (error) {
-            console.error("Error sending message:", error);
-            toast.error(t.athlete.chat.sendError);
-        }
+    const getChatSubtitle = (chat: Chat) => {
+        if (!chat.isGroup) return t.chatComponent.yourCoach;
+        const n = chat.participantIds.length;
+        return n === 1 ? t.chatComponent.membersOne : t.chatComponent.membersOther.replace("{{n}}", String(n));
     };
 
     const getChatDisplayName = (chat: Chat) => {
@@ -211,7 +212,7 @@ export default function AthleteChat() {
     }
 
     return (
-        <AthletePortalLayout title={t.athlete.chat.title} showHeader={true} fullHeight={true} hideBottomNav={!!selectedChat}>
+        <AthletePortalLayout title={t.athlete.chat.title} showHeader={true} fullHeight={true} hideBottomNav={!!selectedChat} immersive={!!selectedChat}>
             <div className="flex flex-col md:flex-row flex-1 min-h-0 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
 
                 {/* Chat List Sidebar */}
@@ -310,6 +311,7 @@ export default function AthleteChat() {
                             onSendMessage={handleSendMessage}
                             participantName={getChatDisplayName(selectedChat)}
                             participantPhotoURL={getChatPhotoURL(selectedChat)}
+                            subtitle={getChatSubtitle(selectedChat)}
                             isGroup={selectedChat.isGroup}
                             onBack={closeChat}
                         />

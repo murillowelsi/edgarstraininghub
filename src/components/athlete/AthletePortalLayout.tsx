@@ -37,6 +37,8 @@ interface AthletePortalLayoutProps {
   showHeader?: boolean;
   fullHeight?: boolean;
   hideBottomNav?: boolean;
+  /** Phones: a full-screen view (an open chat) covers the page, so drop the top bar */
+  immersive?: boolean;
 }
 
 const AthletePortalLayout = ({
@@ -45,6 +47,7 @@ const AthletePortalLayout = ({
   showHeader = true,
   fullHeight = false,
   hideBottomNav = false,
+  immersive = false,
 }: AthletePortalLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -186,7 +189,7 @@ const AthletePortalLayout = ({
       {/* Top Header */}
       {showHeader && (
         // Standalone PWA with viewport-fit=cover: keep the bar below the iPhone status bar
-        <header className="sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
+        <header className={cn("sticky top-0 z-50 pt-[env(safe-area-inset-top)]", immersive && "max-md:hidden")}>
           <div aria-hidden className="glass-fade absolute inset-x-0 top-0 -bottom-4 pointer-events-none" />
           {/* Strava-style bar: create on the left, title (the "EZ" logo on Home) centered, inbox + alerts on the right */}
           <div className="relative px-4 h-16 flex items-center justify-between">
@@ -329,7 +332,7 @@ const AthletePortalLayout = ({
       />
 
       {/* Main content area */}
-      <main className={fullHeight ? (hideBottomNav ? "h-[calc(100vh-4rem-env(safe-area-inset-top))] overflow-hidden flex flex-col" : "h-[calc(100vh-9.5rem-env(safe-area-inset-top))] overflow-hidden flex flex-col") : cn("flex-1 overflow-auto", hideBottomNav ? "pb-6" : "pb-28")}>{children}</main>
+      <main className={fullHeight ? (hideBottomNav ? "h-[calc(100dvh-4rem-env(safe-area-inset-top))] overflow-hidden flex flex-col" : "h-[calc(100dvh-9.5rem-env(safe-area-inset-top))] overflow-hidden flex flex-col") : cn("flex-1 overflow-auto", hideBottomNav ? "pb-6" : "pb-28")}>{children}</main>
 
       {/* Bottom navigation — floating liquid-glass pill */}
       {!hideBottomNav && (

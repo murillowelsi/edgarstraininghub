@@ -149,8 +149,14 @@ export default function AdminChat() {
         return undefined;
     };
 
+    const getChatSubtitle = (chat: Chat) => {
+        if (!chat.isGroup) return t.chatComponent.athleteRole;
+        const n = chat.participantIds.length;
+        return n === 1 ? t.chatComponent.membersOne : t.chatComponent.membersOther.replace("{{n}}", String(n));
+    };
+
     const handleSendMessage = async (text: string) => {
-        if (!selectedChat || !user) return;
+        if (!selectedChat || !user) throw new Error("no active chat");
         await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Coach");
     };
 
@@ -275,7 +281,7 @@ export default function AdminChat() {
     );
 
     return (
-        <AdminLayout fullHeight hideBottomNav={!!selectedChat}>
+        <AdminLayout fullHeight hideBottomNav={!!selectedChat} immersive={!!selectedChat}>
             <div className="flex flex-col md:flex-row flex-1 min-h-0 md:mx-4 md:mt-4 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
 
                 {/* Chat List Sidebar */}
@@ -365,11 +371,13 @@ export default function AdminChat() {
                 )}>
                     {selectedChat ? (
                         <ChatWindow
+                            key={selectedChat.id}
                             messages={messages}
                             currentUserId={user?.uid || ""}
                             onSendMessage={handleSendMessage}
                             participantName={getChatDisplayName(selectedChat)}
                             participantPhotoURL={getChatPhotoURL(selectedChat)}
+                            subtitle={getChatSubtitle(selectedChat)}
                             isGroup={selectedChat.isGroup}
                             onBack={() => {
                             if (openedViaDeepLink) {
@@ -409,13 +417,9 @@ export default function AdminChat() {
             <ResponsiveConfirm
                 open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
-                title={t.admin.chat.deleteConversation}
-                description={
-                    <>
-                        {t.admin.chat.deleteConversationDescription.replace("{{name}}", selectedChat ? getChatDisplayName(selectedChat) : "")}
-                    </>
-                }
-                confirmLabel="Delete"
+                title={t.chatComponent.deleteConversation}
+                description={t.chatComponent.deleteConversationDescription.replace("{{name}}", selectedChat ? getChatDisplayName(selectedChat) : "")}
+                confirmLabel={t.chatComponent.deleteConfirm}
                 destructive
                 loading={deleting}
                 onConfirm={handleDeleteChat}

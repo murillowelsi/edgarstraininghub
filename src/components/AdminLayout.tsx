@@ -32,9 +32,11 @@ interface AdminLayoutProps {
   fullHeight?: boolean;
   hideBottomNav?: boolean;
   pageTitle?: string;
+  /** Phones: a full-screen view (an open chat) covers the page, so drop the top bar */
+  immersive?: boolean;
 }
 
-const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, pageTitle }: AdminLayoutProps) => {
+const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, pageTitle, immersive = false }: AdminLayoutProps) => {
   const { user, userRole, displayName, photoURL } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -205,10 +207,12 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
   );
 
   return (
-    <div className={cn("bg-background", fullHeight ? "h-screen overflow-hidden" : "min-h-screen")}>
-      <AdminTopBar chatUnreadCount={chatUnreadCount} pageTitle={pageTitle} />
+    <div className={cn("bg-background", fullHeight ? "h-dvh overflow-hidden" : "min-h-screen")}>
+      <div className={cn(immersive && "max-md:hidden")}>
+        <AdminTopBar chatUnreadCount={chatUnreadCount} pageTitle={pageTitle} />
+      </div>
 
-      <div className={cn("pt-[73px] flex", fullHeight ? "h-screen" : "min-h-[calc(100vh-73px)]")}>
+      <div className={cn("pt-[73px] flex", fullHeight ? "h-dvh" : "min-h-[calc(100vh-73px)]")}>
         {/* Desktop Sidebar */}
         <aside className={cn(
           "hidden md:flex border-r bg-card flex-col fixed left-0 top-[73px] h-[calc(100vh-73px)] overflow-y-auto transition-all duration-300",

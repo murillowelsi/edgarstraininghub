@@ -1767,7 +1767,21 @@
     "noMessages": "Sem mensagens. Inicie uma conversa!",
     "noChats": "Sem conversas ativas.",
     "noMessagesYet": "Sem mensagens",
-    "placeholder": "Enviar uma mensagem"
+    "placeholder": "Enviar uma mensagem",
+    "yourCoach": "Seu coach",
+    "athleteRole": "Atleta",
+    "membersOne": "1 pessoa",
+    "membersOther": "{{n}} pessoas",
+    "moreActions": "Mais opções",
+    "deleteConversation": "Apagar conversa",
+    "deleteConversationDescription": "A conversa com {{name}} e todas as mensagens serão apagadas para todos. Isso não pode ser desfeito.",
+    "deleteConfirm": "Apagar",
+    "sending": "Enviando…",
+    "sendFailed": "Não enviada. Toque em enviar para tentar de novo.",
+    "newOne": "1 nova",
+    "newOther": "{{n}} novas",
+    "jumpToLatest": "Ir para as mensagens mais recentes",
+    "messageTo": "Mensagem para {{name}}"
   },
   "joinTeam": {
     "invalidLink": "Link de convite inválido.",
