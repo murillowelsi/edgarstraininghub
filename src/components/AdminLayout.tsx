@@ -84,8 +84,6 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
   }, [sidebarCollapsed]);
 
   // Track previous lastMessageTime per chat to detect genuinely new messages
-  const prevMessageTimes = useRef<Map<string, number>>(new Map());
-  const isFirstLoad = useRef(true);
 
   // Subscribe to all chats — calculate unread count and detect new messages
   useEffect(() => {
@@ -99,28 +97,9 @@ const AdminLayout = ({ children, fullHeight = false, hideBottomNav = false, page
           totalUnread += chat.unreadCount[user.uid];
         }
 
-        // Detect new incoming messages (skip first load to avoid notifying old messages)
-        if (!isFirstLoad.current) {
-          const currentTime = chat.lastMessageTime?.toMillis?.() ?? 0;
-          const prevTime = prevMessageTimes.current.get(chat.id) ?? 0;
-          const hasNewMessage = currentTime > prevTime;
-          const hasUnread = (chat.unreadCount?.[user.uid] ?? 0) > 0;
-          const onChatPage = window.location.pathname.includes('/chat');
 
-          if (hasNewMessage && hasUnread && !onChatPage) {
-            const senderName = chat.athleteName || 'Someone';
-            NotificationService.showChatNotification(
-              senderName,
-              chat.lastMessage || 'New message',
-              '/admin/chat'
-            );
-          }
-        }
-
-        prevMessageTimes.current.set(chat.id, chat.lastMessageTime?.toMillis?.() ?? 0);
       });
 
-      if (isFirstLoad.current) isFirstLoad.current = false;
 
       setChatUnreadCount(totalUnread);
       NotificationService.setBadge(totalUnread);

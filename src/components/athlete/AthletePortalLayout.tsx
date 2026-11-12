@@ -95,8 +95,6 @@ const AthletePortalLayout = ({
     toast({ title: t.timeline.postShared });
   };
 
-  const prevMessageTimes = useRef<Map<string, number>>(new Map());
-  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     if (!user) return;
@@ -135,27 +133,8 @@ const AthletePortalLayout = ({
       }, 0);
 
       chats.forEach((chat) => {
-        if (!isFirstLoad.current) {
-          const currentTime = chat.lastMessageTime?.toMillis?.() ?? 0;
-          const prevTime = prevMessageTimes.current.get(chat.id) ?? 0;
-          const hasNewMessage = currentTime > prevTime;
-          const hasUnread = (chat.unreadCount?.[user.uid] ?? 0) > 0;
-          const onChatPage = window.location.pathname.includes('/chat');
-
-          if (hasNewMessage && hasUnread && !onChatPage) {
-            // Find the other participant's name (coach/admin name)
-            const otherName = 'Coach';
-            NotificationService.showChatNotification(
-              otherName,
-              chat.lastMessage || 'New message',
-              '/athlete/chat'
-            );
-          }
-        }
-        prevMessageTimes.current.set(chat.id, chat.lastMessageTime?.toMillis?.() ?? 0);
       });
 
-      if (isFirstLoad.current) isFirstLoad.current = false;
 
       setChatUnreadCount(totalUnread);
       NotificationService.setBadge(totalUnread);
