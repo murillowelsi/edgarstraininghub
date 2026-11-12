@@ -40,7 +40,7 @@ const ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
 // Minimum time between two pushes for the same throttle key
 export const THROTTLE_MS = {
   like: 30 * 60 * 1000, // per post + liker: unlike/like again does not spam
-  comment: 2 * 60 * 1000, // per post + commenter: a burst of comments sends one push
+  comment: 0, // every comment notifies; the key is per comment, so the same comment never twice
   mention: 10 * 60 * 1000, // per post (or comment) + mentioned user
 };
 
@@ -100,7 +100,7 @@ async function resolveAction({ uid, postId, kind, commentId, mentionedUid }) {
   if (kind === 'comment') {
     if (!commentId) throw new Forbidden();
     const comment = await commentOf();
-    return { recipientId: post.authorId, throttleKey: `comment_${postId}_${uid}`, ref: commentId, post, comment };
+    return { recipientId: post.authorId, throttleKey: `comment_${postId}_${commentId}`, ref: commentId, post, comment };
   }
 
   // mention

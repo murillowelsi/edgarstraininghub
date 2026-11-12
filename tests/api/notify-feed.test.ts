@@ -149,16 +149,13 @@ describe("/api/notify-feed", () => {
     expect(sent).toEqual(["tok-ana", "tok-ana"]);
   });
 
-  it("rate limit: a burst of comments sends one push; the same comment never twice", async () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(new Date("2026-11-12T10:00:00Z"));
+  it("every comment notifies; the same comment never twice", async () => {
     store.set("timeline_posts/p1/comments/c3", { authorId: "bruno", text: "de novo" });
     expect((await call({ idToken: "bruno", postId: "p1", kind: "comment", commentId: "c1" })).body).toEqual({ sent: 1 });
-    expect((await call({ idToken: "bruno", postId: "p1", kind: "comment", commentId: "c3" })).body).toEqual({ sent: 0, throttled: true });
-    vi.setSystemTime(Date.now() + THROTTLE_MS.comment + 1);
     expect((await call({ idToken: "bruno", postId: "p1", kind: "comment", commentId: "c3" })).body).toEqual({ sent: 1 });
-    vi.setSystemTime(Date.now() + THROTTLE_MS.comment + 1);
     expect((await call({ idToken: "bruno", postId: "p1", kind: "comment", commentId: "c3" })).body).toEqual({ sent: 0, throttled: true });
+    expect((await call({ idToken: "bruno", postId: "p1", kind: "comment", commentId: "c1" })).body).toEqual({ sent: 0, throttled: true });
+    expect(sent).toEqual(["tok-ana", "tok-ana"]);
   });
 
   it("removes invalid tokens and returns only generic errors", async () => {
