@@ -1896,7 +1896,18 @@
       "autoCaption": "Workout complete ✅",
       "imageAlt": "Post photo",
       "coachBadge": "Coach",
-      "notice": "Notice"
+      "notice": "Notice",
+      "share": "Share",
+      "you": "You",
+      "likedByPrefix": "Liked by",
+      "likedByOne": "",
+      "likedByTwo": "and {{second}}",
+      "likedByMany": "and {{n}} others",
+      "seeAllComments": "View all {{n}} comments",
+      "firstComment": "Be the first to comment",
+      "replyAsCoach": "Reply as coach…",
+      "likedByOther": "and 1 other",
+      "seeOneComment": "View 1 comment"
     },
     "create": {
       "title": "New post",
@@ -1931,6 +1942,32 @@
     "empty": {
       "noPosts": "No posts yet",
       "beFirst": "Be the first to share something!"
+    },
+    "viz": {
+      "reps": "Reps",
+      "best": "best {{t}}",
+      "repsSummary": "{{n}} reps, best {{t}}",
+      "stages": "Stages",
+      "stagesSummary": "{{n}} stages, {{t}} in total",
+      "lanes": "Sets",
+      "lanesSummary": "{{n}} main repeats",
+      "sets": "Sets",
+      "setsDone": "{{done}} of {{total}}"
+    },
+    "state": {
+      "errorTitle": "Couldn't load the feed",
+      "errorDescription": "Check your connection and try again.",
+      "retry": "Try again",
+      "emptyTitle": "No posts yet",
+      "emptyDescription": "When you or your team finish a workout, it shows up here.",
+      "emptyAction": "Share a workout",
+      "newPostOne": "1 new post",
+      "newPosts": "{{n}} new posts"
+    },
+    "coach": {
+      "title": "Feed",
+      "newNotice": "New notice",
+      "composerPlaceholder": "Write a notice for the team…"
     }
   },
   "gallery": {

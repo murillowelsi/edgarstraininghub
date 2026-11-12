@@ -198,7 +198,7 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
                           src={n.actorPhotoURL}
                           alt={n.authorName}
                           fallback={n.authorName.charAt(0).toUpperCase()}
-                          className="h-11 w-11 ring-2 ring-[#e1b506]"
+                          className="h-11 w-11 ring-2 ring-primary"
                           fallbackClassName="bg-primary text-primary-foreground text-sm font-semibold"
                         />
                         <NotificationIcon type={n.type} />

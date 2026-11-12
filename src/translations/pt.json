@@ -1896,7 +1896,18 @@
       "autoCaption": "Treino concluído ✅",
       "imageAlt": "Foto do post",
       "coachBadge": "Coach",
-      "notice": "Aviso"
+      "notice": "Aviso",
+      "share": "Compartilhar",
+      "you": "Você",
+      "likedByPrefix": "Curtido por",
+      "likedByOne": "",
+      "likedByTwo": "e {{second}}",
+      "likedByMany": "e outras {{n}} pessoas",
+      "seeAllComments": "Ver os {{n}} comentários",
+      "firstComment": "Seja o primeiro a comentar",
+      "replyAsCoach": "Responder como coach…",
+      "likedByOther": "e outra pessoa",
+      "seeOneComment": "Ver 1 comentário"
     },
     "create": {
       "title": "Novo post",
@@ -1931,6 +1942,32 @@
     "empty": {
       "noPosts": "Sem posts ainda",
       "beFirst": "Seja o primeiro a compartilhar algo!"
+    },
+    "viz": {
+      "reps": "Tiros",
+      "best": "melhor {{t}}",
+      "repsSummary": "{{n}} tiros, melhor {{t}}",
+      "stages": "Etapas",
+      "stagesSummary": "{{n}} etapas, {{t}} no total",
+      "lanes": "Séries",
+      "lanesSummary": "{{n}} repetições principais",
+      "sets": "Séries",
+      "setsDone": "{{done}} de {{total}}"
+    },
+    "state": {
+      "errorTitle": "Não foi possível carregar o feed",
+      "errorDescription": "Verifique sua conexão e tente de novo.",
+      "retry": "Tentar de novo",
+      "emptyTitle": "Ainda não há posts",
+      "emptyDescription": "Quando você ou o seu time concluírem um treino, ele aparece aqui.",
+      "emptyAction": "Compartilhar um treino",
+      "newPostOne": "1 post novo",
+      "newPosts": "{{n}} posts novos"
+    },
+    "coach": {
+      "title": "Feed",
+      "newNotice": "Novo aviso",
+      "composerPlaceholder": "Escreva um aviso para o time…"
     }
   },
   "gallery": {

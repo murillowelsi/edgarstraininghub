@@ -187,7 +187,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             src={comment.authorPhotoURL}
             alt={comment.authorName}
             fallback={getInitials(comment.authorName)}
-            className={cn(isReply ? "h-7 w-7" : "h-9 w-9", "ring-2 ring-[#e1b506]")}
+            className={cn(isReply ? "h-7 w-7" : "h-9 w-9", "ring-2 ring-primary")}
             fallbackClassName="bg-primary text-primary-foreground text-xs font-semibold"
           />
         </div>
@@ -331,7 +331,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
             src={photoURL}
             alt={t.common.profilePhoto}
             fallback={getInitials(displayName || user?.email || "U")}
-            className="h-9 w-9 shrink-0 ring-2 ring-[#e1b506]"
+            className="h-9 w-9 shrink-0 ring-2 ring-primary"
             fallbackClassName="bg-primary text-primary-foreground text-xs font-semibold"
           />
           <div className="flex-1 min-h-11 flex items-center bg-muted rounded-full pl-4 pr-1 gap-1">

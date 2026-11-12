@@ -17,7 +17,8 @@ interface Props {
   summary: WorkoutSummary;
   /** The athlete already posted this workout on the feed */
   alreadyPosted?: boolean;
-  onPostToFeed: () => void;
+  /** Omit when the workout is already a feed post (sharing from the feed) */
+  onPostToFeed?: () => void;
 }
 
 /**
@@ -57,6 +58,18 @@ const ShareWorkoutSheet = ({ open, onOpenChange, summary, alreadyPosted, onPostT
       footer: t.timeline.story.footer,
       authorName: displayName || user?.email || "",
       photoUrl: photoUrl ?? undefined,
+      labels: t.timeline.summary,
+      locale: language === "pt" ? "pt-BR" : "en",
+      badges: {
+        pr: t.timeline.summary.pr,
+        records: t.timeline.summary.records,
+        rpe: summary.rpe !== undefined ? t.timeline.summary.rpe.replace("{{n}}", String(summary.rpe)) : undefined,
+        percentDone:
+          summary.completionPercentage !== undefined && summary.completionPercentage < 100
+            ? t.timeline.summary.percentDone.replace("{{p}}", String(summary.completionPercentage))
+            : undefined,
+      },
+      viz: t.timeline.viz,
       format,
     })
       .then((blob) => {
@@ -99,6 +112,7 @@ const ShareWorkoutSheet = ({ open, onOpenChange, summary, alreadyPosted, onPostT
           </div>
 
           {/* Post on the app feed */}
+          {onPostToFeed && (
           <button
             onClick={onPostToFeed}
             className="flex items-center gap-3 w-full p-4 rounded-2xl border bg-card hover:bg-muted transition-colors text-left"
@@ -114,6 +128,7 @@ const ShareWorkoutSheet = ({ open, onOpenChange, summary, alreadyPosted, onPostT
             </div>
             {alreadyPosted && <Check className="h-4 w-4 text-green-500 shrink-0" />}
           </button>
+          )}
 
           {/* Image for Instagram, WhatsApp, Strava… */}
           <div className="rounded-2xl border bg-card p-4 space-y-3">

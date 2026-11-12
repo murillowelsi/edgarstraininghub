@@ -302,7 +302,7 @@ export function CreatePostModal({
             src={photoURL}
             alt={t.common.profilePhoto}
             fallback={authorName.charAt(0).toUpperCase()}
-            className="h-11 w-11 shrink-0 ring-2 ring-[#e1b506]"
+            className="h-11 w-11 shrink-0 ring-2 ring-primary"
             fallbackClassName="bg-primary text-primary-foreground font-bold text-lg"
           />
           <div className="flex-1 min-w-0">
