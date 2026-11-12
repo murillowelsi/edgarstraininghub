@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EZ · Feed: mockups (proposta 12/11/2026)</title>
+<!-- Mockup estático: só CSS e SVG inline, sem scripts e sem rede. Dados fictícios. -->
+<style>
+  :root{
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --display:'Montserrat','Inter',system-ui,sans-serif;
+    --primary:hsl(48 96% 45%); --primary-fg:hsl(222 47% 11%); --primary-ink:hsl(40 95% 30%);
+    --run:hsl(217 91% 60%); --bike:hsl(142 71% 45%); --swim:hsl(188 86% 53%); --str:hsl(25 95% 53%);
+    --ok:hsl(142 69% 58%); --warn:hsl(43 96% 56%);
+  }
+  .dark{
+    --page:hsl(222 47% 7%);          /* --feed-canvas (novo) */
+    --card:hsl(222 47% 12%);          /* --card do post */
+    --card-2:hsl(222 40% 16%);        /* --surface-2 */
+    --fg:hsl(0 0% 98%); --muted:hsl(215 20% 65%); --border:hsl(217 33% 20%);
+    --ink:var(--primary);
+  }
+  .light{
+    --page:hsl(220 20% 95%);
+    --card:#fff; --card-2:hsl(210 40% 98%);
+    --fg:hsl(222 47% 11%); --muted:hsl(215 16% 42%); --border:hsl(220 13% 88%);
+    --ink:var(--primary-ink);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#0b0f19;color:#e5e7eb;padding:32px;line-height:1.4}
+  h1.doc{font-family:var(--display);font-size:28px;color:#fff;margin-bottom:4px}
+  p.doc{color:#94a3b8;margin-bottom:28px;max-width:900px}
+  .row{display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start;margin-bottom:56px}
+  .frame-label{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:10px}
+  .phone{width:390px;border-radius:36px;overflow:hidden;border:8px solid #1f2937;box-shadow:0 30px 60px rgba(0,0,0,.45);background:var(--page);color:var(--fg);position:relative}
+  .scroll{padding:0 0 96px}
+  /* ---------- chrome ---------- */
+  .topbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:12px 12px 10px;background:color-mix(in srgb,var(--page) 70%,transparent);backdrop-filter:blur(14px)}
+  .topbar h2{font:600 17px var(--font)}
+  .gbtn{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;background:color-mix(in srgb,var(--card) 80%,transparent);border:1px solid var(--border)}
+  .gbtn svg{width:22px;height:22px}
+  .tabbar{position:absolute;left:12px;right:12px;bottom:12px;height:64px;border-radius:999px;display:flex;justify-content:space-around;align-items:center;background:color-mix(in srgb,var(--card) 75%,transparent);backdrop-filter:blur(16px);border:1px solid var(--border);font-size:11px;color:var(--muted)}
+  .tabbar div{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .tabbar .on{color:var(--ink);font-weight:600}
+  .tabbar svg{width:22px;height:22px}
+  /* ---------- composer ---------- */
+  .composer{margin:4px 8px 12px;padding:10px 12px;border-radius:16px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .composer .ph{flex:1;color:var(--muted);font-size:15px}
+  .chip-btn{height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;background:var(--card-2);border:1px solid var(--border)}
+  .chip-btn svg{width:16px;height:16px}
+  /* ---------- post ---------- */
+  .post{margin:0 8px 12px;border-radius:20px;background:var(--card);border:1px solid var(--border);overflow:hidden}
+  .light .post{box-shadow:0 1px 2px hsl(222 47% 11%/.06),0 4px 12px hsl(222 47% 11%/.04)}
+  .post.coach{border-color:color-mix(in srgb,var(--primary) 45%,var(--border))}
+  .p-head{display:flex;align-items:center;gap:10px;padding:12px 8px 10px 14px}
+  .av{width:40px;height:40px;border-radius:999px;display:grid;place-items:center;font-weight:700;font-size:15px;flex:none;background:var(--card-2);color:var(--fg);border:1px solid var(--border)}
+  .av.coach{background:var(--primary);color:var(--primary-fg);border:none;box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--primary)}
+  .av.sm{width:24px;height:24px;font-size:11px}
+  .who{flex:1;min-width:0}
+  .name{font-weight:600;font-size:15px;display:flex;align-items:center;gap:6px}
+  .role{font:700 10px var(--font);letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:6px;background:var(--primary);color:var(--primary-fg)}
+  .meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:1px}
+  .dot{width:6px;height:6px;border-radius:99px;display:inline-block}
+  .more{width:44px;height:44px;display:grid;place-items:center;color:var(--muted)}
+  .more svg{width:20px;height:20px}
+  .text-only{padding:0 16px 4px;font-size:16px;line-height:1.5}
+  .pin{margin:0 16px 10px;font:600 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);display:flex;gap:6px;align-items:center}
+  .pin svg{width:14px;height:14px}
+  .actions{display:flex;align-items:center;padding:6px 6px 0}
+  .act{height:44px;min-width:44px;padding:0 8px;display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px}
+  .act svg{width:24px;height:24px}
+  .act.liked svg{color:var(--str);fill:var(--str)}
+  .act.share{margin-left:auto}
+  .likes{padding:0 16px;font-size:14px;display:flex;align-items:center;gap:8px}
+  .stack{display:flex}.stack .av{margin-left:-6px;box-shadow:0 0 0 2px var(--card)}.stack .av:first-child{margin-left:0}
+  .caption{padding:6px 16px 0;font-size:14px;line-height:1.45}
+  .caption b{font-weight:600}
+  .mention{font-weight:600;color:var(--ink)}
+  .see{color:var(--muted)}
+  .comments{padding:6px 16px 14px;font-size:14px;display:grid;gap:4px}
+  .comments .all{color:var(--muted)}
+  .divider{height:1px;background:var(--border);margin:0 16px}
+  /* ---------- media / carousel ---------- */
+  .media{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--card-2)}
+  .photo{position:absolute;inset:0;background:
+     radial-gradient(120% 80% at 70% 20%,hsl(200 60% 55%) 0%,transparent 55%),
+     radial-gradient(90% 60% at 20% 90%,hsl(30 70% 45%) 0%,transparent 60%),
+     linear-gradient(160deg,hsl(210 40% 35%),hsl(220 45% 18%))}
+  .photo::after{content:"foto do atleta (4:5)";position:absolute;left:12px;top:12px;font-size:11px;color:#fff;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:99px}
+  .counter{position:absolute;top:12px;right:12px;font:600 12px var(--font);color:#fff;background:rgba(0,0,0,.45);padding:3px 9px;border-radius:99px}
+  .dots{display:flex;justify-content:center;gap:5px;padding:10px 0 0}
+  .dots i{width:6px;height:6px;border-radius:99px;background:var(--border)}
+  .dots i.on{width:16px;background:var(--primary)}
+  .overlay-stats{position:absolute;left:12px;right:12px;bottom:12px;border-radius:16px;padding:12px 14px;background:rgba(10,14,26,.55);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);color:#fff;display:flex;gap:18px;align-items:flex-end}
+  .overlay-stats .k{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+  .overlay-stats .v{font:700 20px var(--display);font-variant-numeric:tabular-nums}
+  /* ---------- workout card (always dark "medal") ---------- */
+  .wc{--accent:var(--run);margin:0 10px;border-radius:18px;color:#f8fafc;position:relative;overflow:hidden;
+      background:radial-gradient(140% 90% at 100% 0%,color-mix(in srgb,var(--accent) 34%,transparent) 0%,transparent 55%),hsl(222 47% 9%);
+      border:1px solid color-mix(in srgb,var(--accent) 35%,hsl(217 33% 20%))}
+  .wc.run{--accent:var(--run)}.wc.bike{--accent:var(--bike)}.wc.swim{--accent:var(--swim)}.wc.str{--accent:var(--str)}
+  .wc .wm{position:absolute;right:16px;bottom:9px;font:800 13px var(--display);letter-spacing:-.02em;color:var(--primary);opacity:.9}
+  .wc-in{padding:14px 16px 30px}
+  .wc-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .sport{display:flex;align-items:center;gap:6px;font:700 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  .sport .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 18%,transparent)}
+  .sport svg{width:16px;height:16px}
+  .pill{margin-left:auto;display:flex;gap:6px}
+  .pill span{font:600 11px var(--font);padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:4px}
+  .pr{background:var(--primary)!important;color:var(--primary-fg);border:none!important;font-weight:800!important}
+  .pr svg{width:12px;height:12px}
+  .wname{font:700 17px var(--font);margin-top:10px;line-height:1.25}
+  .hero{display:flex;align-items:baseline;gap:6px;margin-top:10px}
+  .hero .n{font:800 52px/1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .hero .u{font:700 18px var(--display);color:rgba(248,250,252,.7)}
+  .hero-k{font:600 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:rgba(248,250,252,.6);margin-top:2px}
+  .sec{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .sec > div{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:8px 10px}
+  .sec .k{font:600 10px var(--font);letter-spacing:.08em;text-transform:uppercase;color:rgba(248,250,252,.55)}
+  .sec .v{font:700 16px var(--font);white-space:nowrap;font-variant-numeric:tabular-nums;margin-top:2px}
+  .viz{margin-top:14px}
+  .viz-k{font:600 10px var(--font);letter-spacing:.08em;text-transform:uppercase;color:rgba(248,250,252,.55);margin-bottom:6px;display:flex;justify-content:space-between}
+  .bars{display:flex;align-items:flex-end;gap:4px;height:44px}
+  .bars i{flex:1;border-radius:4px 4px 2px 2px;background:color-mix(in srgb,var(--accent) 35%,transparent)}
+  .bars i.hi{background:var(--accent)}
+  .segs{display:flex;gap:3px}
+  .segs i{flex:1;height:10px;border-radius:3px;background:var(--accent)}
+  .segs i.off{background:rgba(255,255,255,.12)}
+  .lanes{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+  .lanes i{height:22px;border-radius:4px;background:color-mix(in srgb,var(--accent) 30%,transparent);position:relative}
+  .lanes i.drill{background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--accent) 55%,transparent) 0 4px,transparent 4px 8px)}
+  .lanes i.main{background:var(--accent)}
+  .hl{margin-top:12px;display:grid;gap:6px}
+  .hl div{display:flex;justify-content:space-between;font-size:13px;gap:10px}
+  .hl b{font-variant-numeric:tabular-nums}
+  .hl .tag{font:800 10px var(--font);color:var(--primary-fg);background:var(--primary);border-radius:5px;padding:1px 5px;margin-right:6px}
+  .legend{display:flex;gap:10px;font-size:10px;color:rgba(248,250,252,.6);margin-top:6px}
+  .legend span{display:flex;align-items:center;gap:4px}
+  .legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+  /* poster (4:5) */
+  .poster{aspect-ratio:4/5;margin:0;border-radius:0;border:none;display:flex;flex-direction:column}
+  .poster .wc-in{flex:1;display:flex;flex-direction:column;padding:20px}
+  .poster .hero .n{font-size:72px}
+  .poster .viz{margin-top:auto}
+  /* ---------- states ---------- */
+  .sk{background:var(--card-2);border-radius:8px}
+  @keyframes pulse{50%{opacity:.55}}
+  .pulse{animation:pulse 1.6s ease-in-out infinite}
+  .empty{margin:24px 8px;padding:36px 20px;text-align:center;border-radius:20px;background:var(--card);border:1px dashed var(--border)}
+  .empty .ring{width:64px;height:64px;margin:0 auto 14px;border-radius:99px;display:grid;place-items:center;background:var(--card-2)}
+  .empty h3{font:600 17px var(--font);margin-bottom:6px}
+  .empty p{font-size:14px;color:var(--muted);max-width:30ch;margin:0 auto 16px}
+  .btn{height:44px;padding:0 18px;border-radius:10px;font:600 14px var(--font);display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:var(--primary-fg);border:none}
+  .btn.out{background:transparent;color:var(--fg);border:1px solid var(--border)}
+  .newpill{white-space:nowrap;position:absolute;top:76px;left:50%;transform:translateX(-50%);z-index:3;height:36px;padding:0 14px;border-radius:99px;display:flex;align-items:center;gap:8px;font:600 13px var(--font);background:var(--primary);color:var(--primary-fg);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .newpill .stack .av{box-shadow:0 0 0 2px var(--primary)}
+  .newpill svg{width:16px;height:16px}
+  /* ---------- desktop ---------- */
+  .desk{width:1240px;border-radius:16px;overflow:hidden;border:1px solid #1f2937;background:var(--page);color:var(--fg);display:grid;grid-template-columns:240px 1fr 300px;min-height:900px}
+  .side{border-right:1px solid var(--border);padding:20px 12px;display:grid;align-content:start;gap:4px;font-size:14px;background:var(--card)}
+  .side .logo{font:800 26px var(--display);color:var(--primary);margin:0 8px 18px}
+  .side div.i{padding:10px 12px;border-radius:10px;color:var(--muted)}
+  .side div.on{background:var(--card-2);color:var(--ink);font-weight:600}
+  .center{padding:24px 0;display:flex;flex-direction:column;align-items:center}
+  .col{width:600px}
+  .col .post,.col .composer{margin-left:0;margin-right:0}
+  .col .post{margin-bottom:16px}
+  .ph-title{width:600px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .ph-title h2{font:700 24px var(--display)}
+  .rail{padding:24px 20px;border-left:1px solid var(--border);display:grid;align-content:start;gap:12px}
+  .rail .box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+  .rail h4{font:600 13px var(--font);margin-bottom:10px}
+  .rail .r{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 0}
+  .rail .r small{margin-left:auto;color:var(--muted)}
+  .note{max-width:390px;font-size:13px;color:#94a3b8;margin-top:10px}
+  .grid4{display:grid;grid-template-columns:repeat(2,370px);gap:20px}
+  .gcard{background:hsl(222 47% 7%);padding:14px 0;border-radius:20px;border:1px solid #1f2937}
+  .story{width:220px;aspect-ratio:9/16;border-radius:20px;overflow:hidden;position:relative}
+  .story .wc{margin:0;height:100%;border-radius:20px}
+  .story .wc-in{padding:16px;height:100%;display:flex;flex-direction:column}
+  .story .hero .n{font-size:46px}
+  .story .viz{margin-top:auto}
+</style>
+</head>
+<body>
+
+<!-- Ícones (estilo traço 2, desenhados para o mockup) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-2.7 7-6.8 0-3.6-2.4-5.6-3.6-7.6-.6 1.6-1.6 2.6-2.8 3 .4-3.4-1-6.6-3.6-8.6.2 3-1.4 5-3 7S5 12.4 5 15.2C5 19.3 8 22 12 22Z"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.6A8.5 8.5 0 1 1 21 11.5Z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 6h3a3 3 0 0 1-3 4M7 6H4a3 3 0 0 0 3 4"/></symbol>
+    <symbol id="i-run" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.5" cy="4.5" r="2"/><path d="m8 21 3-6 3 2 1 5"/><path d="M6 11.5 9 9l4 1 2 3 3 1"/><path d="M11 15 13 10"/></symbol>
+    <symbol id="i-bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M15 6h2l1.5 11M5.5 17 9 9h7M9 9l3.5 8h6"/></symbol>
+    <symbol id="i-swim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="6" r="2"/><path d="m4 12 5-3 4 2 3-1"/><path d="M2 17c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0"/><path d="M2 21c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0"/></symbol>
+    <symbol id="i-dumb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4-4-10 10"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  </defs>
+</svg>
+
+<h1 class="doc">EZ · Feed: proposta de redesenho</h1>
+<p class="doc">Mockups estáticos para aprovação (12/11/2026). Dados e nomes fictícios. Cada post é um card com superfície própria sobre um fundo mais escuro, o cabeçalho traz autor, papel, modalidade e tempo, e o card de treino é sempre um "card de conquista" escuro, igual nos dois temas e reaproveitado na imagem de compartilhar.</p>
+
+<!-- =================== 1. MOBILE ESCURO =================== -->
+<div class="row">
+<div>
+<div class="frame-label">1 · Atleta · 390 px · escuro</div>
+<div class="phone dark">
+  <div class="topbar">
+    <div style="display:flex;gap:8px"><div class="gbtn"><svg><use href="#i-edit"/></svg></div></div>
+    <h2>Feed</h2>
+    <div style="display:flex;gap:8px"><div class="gbtn"><svg><use href="#i-msg"/></svg></div><div class="gbtn"><svg><use href="#i-bell"/></svg></div></div>
+  </div>
+  <div class="newpill"><span class="stack"><span class="av sm">C</span><span class="av sm">D</span></span>2 posts novos <svg><use href="#i-up"/></svg></div>
+  <div class="scroll">
+    <div class="composer"><span class="av">B</span><span class="ph">Conte como foi o treino…</span><span class="chip-btn"><svg><use href="#i-img"/></svg>Foto</span></div>
+
+    <!-- Coach post (fixado) -->
+    <article class="post coach">
+      <div class="p-head"><span class="av coach">C</span>
+        <div class="who"><div class="name">Coach Demo <span class="role">Coach</span></div><div class="meta">Aviso · há 1 dia</div></div>
+        <div class="more"><svg><use href="#i-more"/></svg></div></div>
+      <div class="pin"><svg><use href="#i-pin"/></svg>Fixado pelo coach</div>
+      <p class="text-only">Semana de recuperação a partir de segunda. Volume menor, sono em dia.</p>
+      <div class="actions"><span class="act"><svg><use href="#i-flame"/></svg>1</span><span class="act"><svg><use href="#i-msg"/></svg></span></div>
+      <div class="comments"><span class="all">Seja o primeiro a comentar</span></div>
+    </article>
+
+    <!-- Strength -->
+    <article class="post">
+      <div class="p-head"><span class="av">A</span>
+        <div class="who"><div class="name">Ana Teste</div><div class="meta"><i class="dot" style="background:var(--str)"></i>Força · há 2 dias</div></div>
+        <div class="more"><svg><use href="#i-more"/></svg></div></div>
+      <div class="wc str"><div class="wc-in">
+        <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-dumb"/></svg></span>Força</span>
+          <span class="pill"><span class="pr"><svg><use href="#i-trophy"/></svg>1 recorde</span><span>Esforço 8/10</span></span></div>
+        <div class="wname">Força A: membros inferiores</div>
+        <div class="hero"><span class="n">4.310</span><span class="u">kg</span></div><div class="hero-k">Volume total</div>
+        <div class="sec"><div><div class="k">Tempo</div><div class="v">58 min</div></div><div><div class="k">Séries</div><div class="v">13/14</div></div><div><div class="k">Exercícios</div><div class="v">4</div></div></div>
+        <div class="viz"><div class="viz-k"><span>Séries</span><span>13 de 14</span></div>
+          <div class="segs"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i></div></div>
+        <div class="hl"><div><span><span class="tag">PR</span>Agachamento livre</span><b>55 kg × 8</b></div><div><span>Levantamento terra romeno</span><b>45 kg × 10</b></div></div>
+      </div><span class="wm">EZ</span></div>
+      <div class="actions"><span class="act liked"><svg><use href="#i-flame"/></svg>2</span><span class="act"><svg><use href="#i-msg"/></svg>2</span><span class="act share"><svg><use href="#i-share"/></svg></span></div>
+      <div class="likes"><span class="stack"><span class="av sm">B</span><span class="av sm coach">C</span></span><span>Curtido por <b>Bruno Teste</b> e <b>Coach Demo</b></span></div>
+      <div class="comments"><div><b>Coach Demo</b> Boa! Próxima semana sobe 2,5 kg no agachamento.</div><div class="all">Ver os 2 comentários</div></div>
+    </article>
+
+    <!-- Run -->
+    <article class="post">
+      <div class="p-head"><span class="av">B</span>
+        <div class="who"><div class="name">Bruno Teste</div><div class="meta"><i class="dot" style="background:var(--run)"></i>Corrida · há 6 dias</div></div>
+        <div class="more"><svg><use href="#i-more"/></svg></div></div>
+      <div class="wc run"><div class="wc-in">
+        <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-run"/></svg></span>Corrida</span><span class="pill"><span>Esforço 8/10</span></span></div>
+        <div class="wname">Corrida: intervalado 5 × 800 m</div>
+        <div class="hero"><span class="n">10,2</span><span class="u">km</span></div><div class="hero-k">Distância</div>
+        <div class="sec"><div><div class="k">Tempo</div><div class="v">52:00</div></div><div><div class="k">Pace</div><div class="v">5:06 /km</div></div><div><div class="k">FC média</div><div class="v">152</div></div></div>
+        <div class="viz"><div class="viz-k"><span>Tiros de 800 m</span><span>melhor 3:02</span></div>
+          <div class="bars"><i style="height:30%"></i><i class="hi" style="height:78%"></i><i style="height:22%"></i><i class="hi" style="height:82%"></i><i style="height:22%"></i><i class="hi" style="height:88%"></i><i style="height:22%"></i><i class="hi" style="height:92%"></i><i style="height:22%"></i><i class="hi" style="height:84%"></i><i style="height:35%"></i></div></div>
+      </div><span class="wm">EZ</span></div>
+      <div class="actions"><span class="act"><svg><use href="#i-flame"/></svg>3</span><span class="act"><svg><use href="#i-msg"/></svg>1</span><span class="act share"><svg><use href="#i-share"/></svg></span></div>
+      <p class="caption"><b>Bruno Teste</b> Intervalado com calor de 30 graus. <span class="mention">@Carla Teste</span>, sábado tem mais.</p>
+      <div class="comments"><div><b>Carla Teste</b> Bora!</div></div>
+    </article>
+  </div>
+  <div class="tabbar"><div><svg><use href="#i-home"/></svg>Início</div><div><svg><use href="#i-shield"/></svg>Times</div><div class="on"><svg><use href="#i-grid"/></svg>Feed</div><div><svg><use href="#i-cal"/></svg>Calendário</div><div><svg><use href="#i-user"/></svg>Você</div></div>
+</div>
+<p class="note">Fundo do feed mais escuro que o card (7% × 12% de luminosidade) + borda + 12 px entre posts: cada post vira um bloco. O post do coach ganha borda dourada, selo "Coach" e pode ser fixado. A pílula "2 posts novos" aparece quando chegam posts em tempo real e você está rolando.</p>
+</div>
+
+<!-- =================== 2. MOBILE CLARO + FOTO =================== -->
+<div>
+<div class="frame-label">2 · Atleta · 390 px · claro · post com fotos</div>
+<div class="phone light">
+  <div class="topbar">
+    <div style="display:flex;gap:8px"><div class="gbtn"><svg><use href="#i-edit"/></svg></div></div>
+    <h2>Feed</h2>
+    <div style="display:flex;gap:8px"><div class="gbtn"><svg><use href="#i-msg"/></svg></div><div class="gbtn"><svg><use href="#i-bell"/></svg></div></div>
+  </div>
+  <div class="scroll">
+    <article class="post">
+      <div class="p-head"><span class="av">C</span>
+        <div class="who"><div class="name">Carla Teste</div><div class="meta"><i class="dot" style="background:var(--bike)"></i>Bike · há 3 h</div></div>
+        <div class="more"><svg><use href="#i-more"/></svg></div></div>
+      <div class="media"><div class="photo"></div><span class="counter">1/3</span>
+        <div class="overlay-stats"><div><div class="k">Distância</div><div class="v">38,5 km</div></div><div><div class="k">Tempo</div><div class="v">1:25:10</div></div><div><div class="k">Vel. média</div><div class="v">27,1</div></div></div></div>
+      <div class="dots"><i class="on"></i><i></i><i></i></div>
+      <div class="actions"><span class="act liked"><svg><use href="#i-flame"/></svg>5</span><span class="act"><svg><use href="#i-msg"/></svg>4</span><span class="act share"><svg><use href="#i-share"/></svg></span></div>
+      <div class="likes"><span class="stack"><span class="av sm">A</span><span class="av sm">B</span><span class="av sm coach">C</span></span><span>Curtido por <b>Ana Teste</b> e outras 4 pessoas</span></div>
+      <p class="caption"><b>Carla Teste</b> Primeiro longão de Z2 no plano. Vento contra na volta inteira, mas segurei a cadência em 85–90 rpm e terminei inteira <span class="see">… mais</span></p>
+      <div class="comments"><div><b>Coach Demo</b> Ótimo controle de intensidade.</div><div><b>Ana Teste</b> Que lugar lindo!</div><div class="all">Ver os 4 comentários</div></div>
+    </article>
+
+    <article class="post">
+      <div class="p-head"><span class="av">D</span>
+        <div class="who"><div class="name">Diego Teste</div><div class="meta"><i class="dot" style="background:var(--swim)"></i>Natação · ontem</div></div>
+        <div class="more"><svg><use href="#i-more"/></svg></div></div>
+      <div class="wc swim"><div class="wc-in">
+        <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-swim"/></svg></span>Natação</span><span class="pill"><span>Esforço 6/10</span></span></div>
+        <div class="wname">Natação: técnica e ritmo</div>
+        <div class="hero"><span class="n">2.000</span><span class="u">m</span></div><div class="hero-k">Distância</div>
+        <div class="sec"><div><div class="k">Tempo</div><div class="v">42 min</div></div><div><div class="k">Pace</div><div class="v">1:58 /100 m</div></div><div><div class="k">Piscina</div><div class="v">25 m</div></div></div>
+        <div class="viz"><div class="viz-k"><span>Séries</span><span>20 × 100 m</span></div>
+          <div class="lanes"><i></i><i></i><i></i><i class="drill"></i><i class="drill"></i><i class="drill"></i><i class="drill"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i></i><i></i><i></i></div>
+          <div class="legend"><span><i style="background:color-mix(in srgb,var(--swim) 30%,transparent)"></i>Leve</span><span><i style="background:repeating-linear-gradient(45deg,var(--swim) 0 2px,transparent 2px 4px)"></i>Educativo</span><span><i style="background:var(--swim)"></i>Principal</span></div></div>
+      </div><span class="wm">EZ</span></div>
+      <div class="actions"><span class="act"><svg><use href="#i-flame"/></svg></span><span class="act"><svg><use href="#i-msg"/></svg></span><span class="act share"><svg><use href="#i-share"/></svg></span></div>
+      <div class="comments"><span class="all">Seja o primeiro a comentar</span></div>
+    </article>
+  </div>
+  <div class="tabbar"><div><svg><use href="#i-home"/></svg>Início</div><div><svg><use href="#i-shield"/></svg>Times</div><div class="on"><svg><use href="#i-grid"/></svg>Feed</div><div><svg><use href="#i-cal"/></svg>Calendário</div><div><svg><use href="#i-user"/></svg>Você</div></div>
+</div>
+<p class="note">No claro: fundo cinza-azulado (95%) e cards brancos com sombra leve. O card de treino continua escuro nos dois temas: é a "medalha" do treino, e o amarelo só tem contraste sobre navy. Com fotos, as mídias ficam todas em 4:5. A 1ª foto leva os números num vidro, e o card de treino vira o último slide.</p>
+</div>
+</div>
+
+<!-- =================== 3. CARDS POR MODALIDADE =================== -->
+<div class="frame-label">3 · Card de treino: um visual por modalidade (inline, largura do post)</div>
+<div class="row"><div class="grid4">
+  <div class="gcard">
+    <div class="wc run"><div class="wc-in">
+      <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-run"/></svg></span>Corrida</span><span class="pill"><span class="pr"><svg><use href="#i-trophy"/></svg>Recorde 5 km</span></span></div>
+      <div class="wname">Rodagem leve + strides</div>
+      <div class="hero"><span class="n">8,0</span><span class="u">km</span></div><div class="hero-k">Distância</div>
+      <div class="sec"><div><div class="k">Tempo</div><div class="v">44:10</div></div><div><div class="k">Pace</div><div class="v">5:31 /km</div></div><div><div class="k">FC média</div><div class="v">141</div></div></div>
+      <div class="viz"><div class="viz-k"><span>Etapas</span><span>aquec. · principal · desaq.</span></div>
+        <div class="bars"><i style="height:35%"></i><i style="height:40%"></i><i class="hi" style="height:60%"></i><i class="hi" style="height:62%"></i><i class="hi" style="height:61%"></i><i class="hi" style="height:64%"></i><i class="hi" style="height:95%"></i><i class="hi" style="height:96%"></i><i style="height:30%"></i></div></div>
+    </div><span class="wm">EZ</span></div>
+  </div>
+  <div class="gcard">
+    <div class="wc bike"><div class="wc-in">
+      <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-bike"/></svg></span>Bike</span><span class="pill"><span>Esforço 5/10</span></span></div>
+      <div class="wname">Bike: endurance Z2</div>
+      <div class="hero"><span class="n">38,5</span><span class="u">km</span></div><div class="hero-k">Distância</div>
+      <div class="sec"><div><div class="k">Tempo</div><div class="v">1:25:10</div></div><div><div class="k">Vel. média</div><div class="v">27,1 km/h</div></div><div><div class="k">FC média</div><div class="v">132</div></div></div>
+      <div class="viz"><div class="viz-k"><span>Etapas</span><span>1h25</span></div>
+        <div class="segs" style="gap:2px"><i style="flex:1;opacity:.45"></i><i style="flex:6"></i><i style="flex:1;opacity:.45"></i></div>
+        <div class="legend"><span>Aquec. 10 min</span><span>Z2 65 min</span><span>Desaq. 10 min</span></div></div>
+    </div><span class="wm">EZ</span></div>
+  </div>
+  <div class="gcard">
+    <div class="wc swim"><div class="wc-in">
+      <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-swim"/></svg></span>Natação</span></div>
+      <div class="wname">Natação: técnica e ritmo</div>
+      <div class="hero"><span class="n">2.000</span><span class="u">m</span></div><div class="hero-k">Distância</div>
+      <div class="sec"><div><div class="k">Tempo</div><div class="v">42 min</div></div><div><div class="k">Pace</div><div class="v">1:58 /100 m</div></div><div><div class="k">Esforço</div><div class="v">6/10</div></div></div>
+      <div class="viz"><div class="viz-k"><span>Séries</span><span>20 × 100 m</span></div>
+        <div class="lanes"><i></i><i></i><i></i><i class="drill"></i><i class="drill"></i><i class="drill"></i><i class="drill"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i class="main"></i><i></i><i></i><i></i></div></div>
+    </div><span class="wm">EZ</span></div>
+  </div>
+  <div class="gcard">
+    <div class="wc str"><div class="wc-in">
+      <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-dumb"/></svg></span>Força</span><span class="pill"><span class="pr"><svg><use href="#i-trophy"/></svg>2 recordes</span><span>60%</span></span></div>
+      <div class="wname">Força B: membros superiores</div>
+      <div class="hero"><span class="n">2.180</span><span class="u">kg</span></div><div class="hero-k">Volume total · treino parcial</div>
+      <div class="sec"><div><div class="k">Tempo</div><div class="v">34 min</div></div><div><div class="k">Séries</div><div class="v">6/10</div></div><div><div class="k">Exercícios</div><div class="v">2/3</div></div></div>
+      <div class="viz"><div class="viz-k"><span>Séries</span><span>6 de 10</span></div>
+        <div class="segs"><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></div></div>
+      <div class="hl"><div><span><span class="tag">PR</span>Supino reto</span><b>50 kg × 6</b></div><div><span><span class="tag">PR</span>Remada curvada</span><b>45 kg × 8</b></div></div>
+    </div><span class="wm">EZ</span></div>
+  </div>
+</div></div>
+
+<!-- =================== 4. POSTER 4:5 + STORY 9:16 =================== -->
+<div class="frame-label">4 · O mesmo card como slide 4:5 (carrossel com foto) e como imagem de compartilhar 9:16</div>
+<div class="row">
+  <div style="width:340px"><div class="wc run poster"><div class="wc-in">
+    <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-run"/></svg></span>Corrida</span><span class="pill"><span>Esforço 8/10</span></span></div>
+    <div class="wname" style="font-size:20px">Corrida: intervalado 5 × 800 m</div>
+    <div class="hero"><span class="n">10,2</span><span class="u">km</span></div><div class="hero-k">Distância</div>
+    <div class="sec"><div><div class="k">Tempo</div><div class="v">52:00</div></div><div><div class="k">Pace</div><div class="v">5:06 /km</div></div><div><div class="k">FC média</div><div class="v">152</div></div></div>
+    <div class="viz"><div class="viz-k"><span>Tiros de 800 m</span><span>melhor 3:02</span></div>
+      <div class="bars" style="height:70px"><i style="height:30%"></i><i class="hi" style="height:78%"></i><i style="height:22%"></i><i class="hi" style="height:82%"></i><i style="height:22%"></i><i class="hi" style="height:88%"></i><i style="height:22%"></i><i class="hi" style="height:92%"></i><i style="height:22%"></i><i class="hi" style="height:84%"></i><i style="height:35%"></i></div></div>
+  </div><span class="wm">EZ</span></div></div>
+  <div class="story"><div class="wc str"><div class="wc-in">
+    <div style="font:800 22px var(--display);color:var(--primary)">EZ</div>
+    <div class="wc-top" style="margin-top:14px"><span class="sport"><span class="ic"><svg><use href="#i-dumb"/></svg></span>Força</span></div>
+    <div class="wname" style="font-size:15px">Força A: membros inferiores</div>
+    <div class="hero"><span class="n">4.310</span><span class="u">kg</span></div><div class="hero-k">Volume total</div>
+    <div class="hl" style="margin-top:16px"><div><span><span class="tag">PR</span>Agachamento</span><b>55 kg × 8</b></div></div>
+    <div class="viz"><div class="viz-k"><span>Séries</span><span>13/14</span></div><div class="segs"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i></div>
+      <div style="font-size:11px;color:rgba(248,250,252,.6);margin-top:12px">Ana Teste · treinando com EZ</div></div>
+  </div></div></div>
+  <p class="note" style="max-width:420px">Um componente com 3 tamanhos: <b>inline</b> (no post sem foto, altura livre), <b>poster</b> 4:5 (slide do carrossel quando há fotos) e <b>story</b> 9:16 (imagem gerada no compartilhar, que hoje é desenhada à parte em <code>postImages.ts</code>). A mesma hierarquia nos três: modalidade → nome → número principal → 3 secundários → mini-gráfico → destaques.</p>
+</div>
+
+<!-- =================== 5. ESTADOS =================== -->
+<div class="frame-label">5 · Estados: carregando, vazio, erro</div>
+<div class="row">
+  <div class="phone dark" style="height:560px"><div class="scroll" style="padding-top:12px">
+    <div class="post pulse" style="padding:14px"><div style="display:flex;gap:10px;align-items:center"><div class="sk" style="width:40px;height:40px;border-radius:99px"></div><div style="flex:1"><div class="sk" style="height:12px;width:45%"></div><div class="sk" style="height:10px;width:30%;margin-top:6px"></div></div></div>
+      <div class="sk" style="height:200px;margin-top:12px;border-radius:18px"></div><div style="display:flex;gap:10px;margin-top:12px"><div class="sk" style="width:44px;height:20px"></div><div class="sk" style="width:44px;height:20px"></div></div><div class="sk" style="height:10px;width:70%;margin-top:10px"></div></div>
+    <div class="post pulse" style="padding:14px"><div style="display:flex;gap:10px;align-items:center"><div class="sk" style="width:40px;height:40px;border-radius:99px"></div><div style="flex:1"><div class="sk" style="height:12px;width:40%"></div><div class="sk" style="height:10px;width:25%;margin-top:6px"></div></div></div><div class="sk" style="height:120px;margin-top:12px;border-radius:18px"></div></div>
+  </div></div>
+  <div class="phone dark" style="height:560px"><div class="scroll" style="padding-top:12px">
+    <div class="composer"><span class="av">B</span><span class="ph">Conte como foi o treino…</span></div>
+    <div class="empty"><div class="ring"><svg width="32" height="32" style="color:var(--muted)"><use href="#i-grid"/></svg></div><h3>Ainda não há posts</h3><p>Quando você ou o seu time concluírem um treino, ele aparece aqui.</p><span class="btn">Compartilhar um treino</span></div>
+  </div></div>
+  <div class="phone light" style="height:560px"><div class="scroll" style="padding-top:12px">
+    <div class="empty" style="border-style:solid"><div class="ring" style="background:hsl(0 84% 60%/.12)"><svg width="32" height="32" style="color:hsl(0 72% 51%)"><use href="#i-alert"/></svg></div><h3>Não foi possível carregar o feed</h3><p>Verifique sua conexão e tente de novo.</p><span class="btn">Tentar de novo</span></div>
+  </div></div>
+</div>
+
+<!-- =================== 6. DESKTOP =================== -->
+<div class="frame-label">6 · Coach · desktop 1440 · escuro · coluna de 600 px</div>
+<div class="row"><div class="desk dark">
+  <div class="side"><div class="logo">EZ</div><div class="i">Início</div><div class="i">Usuários</div><div class="i">Treinos</div><div class="i">Times</div><div class="i">Calendário</div><div class="i">Artigos</div><div class="i on">Feed</div><div class="i">Depoimentos</div></div>
+  <div class="center">
+    <div class="ph-title"><h2>Feed</h2><span class="btn">Novo aviso</span></div>
+    <div class="col">
+      <div class="composer"><span class="av coach">C</span><span class="ph">Escreva um aviso para o time…</span><span class="chip-btn"><svg><use href="#i-img"/></svg>Foto</span><span class="chip-btn"><svg><use href="#i-pin"/></svg>Fixar</span></div>
+      <article class="post">
+        <div class="p-head"><span class="av">B</span><div class="who"><div class="name">Bruno Teste</div><div class="meta"><i class="dot" style="background:var(--run)"></i>Corrida · há 6 dias</div></div><div class="more"><svg><use href="#i-more"/></svg></div></div>
+        <div class="wc run"><div class="wc-in">
+          <div class="wc-top"><span class="sport"><span class="ic"><svg><use href="#i-run"/></svg></span>Corrida</span><span class="pill"><span>Esforço 8/10</span></span></div>
+          <div class="wname">Corrida: intervalado 5 × 800 m</div>
+          <div style="display:flex;gap:28px;align-items:flex-end">
+            <div><div class="hero"><span class="n">10,2</span><span class="u">km</span></div><div class="hero-k">Distância</div></div>
+            <div class="sec" style="flex:1;margin-top:0"><div><div class="k">Tempo</div><div class="v">52:00</div></div><div><div class="k">Pace</div><div class="v">5:06 /km</div></div><div><div class="k">FC média</div><div class="v">152</div></div></div></div>
+          <div class="viz"><div class="viz-k"><span>Tiros de 800 m</span><span>melhor 3:02</span></div><div class="bars"><i style="height:30%"></i><i class="hi" style="height:78%"></i><i style="height:22%"></i><i class="hi" style="height:82%"></i><i style="height:22%"></i><i class="hi" style="height:88%"></i><i style="height:22%"></i><i class="hi" style="height:92%"></i><i style="height:22%"></i><i class="hi" style="height:84%"></i><i style="height:35%"></i></div></div>
+        </div><span class="wm">EZ</span></div>
+        <div class="actions"><span class="act"><svg><use href="#i-flame"/></svg>3</span><span class="act"><svg><use href="#i-msg"/></svg>1</span><span class="act share"><svg><use href="#i-share"/></svg></span></div>
+        <p class="caption"><b>Bruno Teste</b> Intervalado com calor de 30 graus. <span class="mention">@Carla Teste</span>, sábado tem mais.</p>
+        <div class="comments"><div><b>Carla Teste</b> Bora!</div><div class="all">Responder como coach…</div></div>
+      </article>
+    </div>
+  </div>
+  <div class="rail">
+    <div class="box"><h4>Esta semana no time</h4><div class="r"><span class="av sm">A</span>Ana Teste<small>3 treinos</small></div><div class="r"><span class="av sm">B</span>Bruno Teste<small>2 treinos</small></div><div class="r"><span class="av sm">C</span>Carla Teste<small>4 treinos</small></div></div>
+    <div class="box"><h4>Recordes recentes</h4><div class="r"><span class="tag" style="font:800 10px var(--font);background:var(--primary);color:var(--primary-fg);border-radius:5px;padding:1px 5px">PR</span>Agachamento · Ana<small>55 kg</small></div></div>
+    <p style="font-size:12px;color:var(--muted)">Coluna lateral opcional (decisão do usuário): só no ≥ xl.</p>
+  </div>
+</div></div>
+
+</body>
+</html>
