@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EZ · Editor de treino (proposta 12/11/2026)</title>
+<!-- Mockup estático: só CSS e SVG inline. Dados fictícios do seed. Tokens: design-system §1.5. -->
+<style>
+  :root{--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Montserrat','Inter',system-ui,sans-serif;
+    --primary:hsl(48 96% 45%);--run:hsl(217 91% 60%);--str:hsl(25 95% 53%)}
+  .dark{--bg:hsl(220 5% 9%);--card:hsl(220 5% 12%);--s2:hsl(220 5% 15%);--muted:hsl(220 5% 17%);--border:hsl(220 5% 24%);--input:hsl(220 5% 44%);--fg:hsl(0 0% 98%);--mfg:hsl(220 5% 66%);--ink:var(--primary);--wc:hsl(220 5% 8%);--glow:32%;--box:hsl(0 0% 100% / .05);--boxb:hsl(0 0% 100% / .09);--okc:hsl(142 69% 58%);--warnc:hsl(43 96% 56%)}
+  .light{--bg:hsl(220 20% 95%);--card:#fff;--s2:hsl(210 40% 98%);--muted:hsl(210 40% 93%);--border:hsl(220 13% 88%);--input:hsl(220 9% 65%);--fg:hsl(222 47% 11%);--mfg:hsl(215 16% 42%);--ink:hsl(40 95% 30%);--wc:#fff;--glow:15%;--box:hsl(220 20% 97%);--boxb:hsl(220 13% 90%);--okc:hsl(142 72% 29%);--warnc:hsl(26 90% 37%)}
+  .light .run{--a-ink:hsl(221 83% 43%)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#0a0a0a;color:#e5e5e5;padding:32px;line-height:1.4}
+  h1.ttl{font:700 28px var(--display);color:#fff}p.doc{color:#a3a3a3;max-width:1100px;margin:4px 0 24px}
+  .row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-bottom:40px}
+  .lbl{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#a3a3a3;margin-bottom:10px}
+  .note{font-size:13px;color:#a3a3a3;max-width:390px;margin-top:10px}
+  /* app shell */
+  .desk{width:1340px;border-radius:16px;overflow:hidden;border:1px solid #262626;background:var(--bg);color:var(--fg);display:grid;grid-template-columns:72px 1fr}
+  .rail{background:var(--card);border-right:1px solid var(--border);display:grid;align-content:start;justify-items:center;gap:6px;padding:16px 0}
+  .rail .lg{font:800 20px var(--display);color:var(--ink);margin-bottom:10px}.rail i{width:40px;height:40px;border-radius:10px;background:var(--s2);display:block}.rail i.on{background:hsl(48 96% 45% / .2)}
+  .bar{display:flex;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--border)}
+  .bar .bk{color:var(--mfg);font-size:14px;display:flex;align-items:center;gap:6px}.bar .bk svg{width:18px;height:18px}
+  .bar .st{margin-left:auto;font-size:13px;color:var(--mfg);display:flex;align-items:center;gap:6px}.bar .st i{width:8px;height:8px;border-radius:99px;background:var(--okc)}
+  .btn{height:40px;padding:0 16px;border-radius:11px;background:var(--primary);color:hsl(222 47% 11%);font:700 14px var(--font);display:inline-flex;align-items:center;gap:8px}
+  .btn.o{background:transparent;color:var(--fg);border:1px solid var(--border)}
+  .cols{display:grid;grid-template-columns:1fr 420px;gap:22px;padding:22px}
+  /* editor */
+  .name{font:800 26px var(--display);padding:4px 0 8px;border-bottom:1px dashed transparent}
+  .meta{display:flex;gap:8px;align-items:center;margin:4px 0 14px}
+  .chip{font:600 12px var(--font);padding:4px 10px;border-radius:99px;border:1px solid var(--border);display:inline-flex;gap:6px;align-items:center;color:var(--mfg)}
+  .chip.sp{color:var(--a-ink,var(--run));border-color:color-mix(in srgb,var(--run) 40%,var(--border));background:hsl(217 91% 60% / .1)}
+  .ta{border:1px solid var(--input);border-radius:12px;padding:10px 12px;font-size:14px;color:var(--fg);min-height:56px;background:var(--bg)}
+  .ta small{display:block;font:600 11px var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--mfg);margin-bottom:2px}
+  .sh{display:flex;justify-content:space-between;align-items:center;margin:20px 0 8px}.sh b{font:700 16px var(--font)}.sh span{font-size:13px;color:var(--mfg)}
+  .stp{display:grid;grid-template-columns:20px 1fr auto auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;margin-bottom:6px}
+  .stp .hd{color:var(--mfg);font-size:14px;letter-spacing:-1px}
+  .stp b{font-size:15px}.stp .tg{font-size:13px;color:var(--mfg)}
+  .stp .dur{font:700 15px var(--font);font-variant-numeric:tabular-nums}
+  .zone{font:700 11px var(--font);padding:1px 7px;border-radius:6px;margin-right:6px}
+  .stp.sel{border-color:var(--primary);box-shadow:0 0 0 3px hsl(48 96% 45% / .15)}
+  .edit{background:var(--s2);border:1px solid var(--primary);border-top:none;border-radius:0 0 14px 14px;margin:-8px 0 8px;padding:16px 12px 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .f small{display:block;font:600 11px var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--mfg);margin-bottom:4px}
+  .f .in{height:40px;border-radius:10px;border:1px solid var(--input);background:var(--bg);display:flex;align-items:center;padding:0 10px;font:600 15px var(--font);gap:6px;font-variant-numeric:tabular-nums}
+  .f .in span{color:var(--mfg);font-weight:500;font-size:13px;margin-left:auto}
+  .seg{display:flex;background:var(--muted);border-radius:10px;padding:3px}.seg i{flex:1;text-align:center;font:600 12px var(--font);font-style:normal;padding:7px 0;border-radius:8px;color:var(--mfg)}.seg .on{background:var(--card);color:var(--fg)}
+  .rep{border:1px dashed color-mix(in srgb,var(--run) 45%,var(--border));border-radius:16px;padding:10px;margin-bottom:6px}
+  .rep .rh{display:flex;justify-content:space-between;align-items:center;margin:0 4px 8px;font:700 13px var(--font);color:var(--a-ink,var(--run))}
+  .rep .rh .cnt{display:flex;align-items:center;gap:6px}.rep .rh .cnt b{width:32px;height:28px;border-radius:8px;border:1px solid var(--input);display:grid;place-items:center;color:var(--fg)}
+  .add{display:flex;gap:6px;margin-top:6px}
+  .add span{height:40px;padding:0 14px;border-radius:11px;border:1px dashed var(--border);display:flex;align-items:center;gap:6px;font:600 13px var(--font);color:var(--mfg)}
+  .warn{margin-top:14px;border-radius:12px;padding:10px 12px;font-size:13px;background:hsl(43 96% 56% / .1);border:1px solid hsl(43 96% 56% / .3);color:var(--warnc)}
+  /* preview */
+  .pv{position:sticky;top:0}
+  .pvh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.pvh b{font:700 14px var(--font)}.pvh span{font-size:12px;color:var(--mfg)}
+  .phoneframe{border-radius:28px;border:6px solid #2a2a2a;background:var(--bg);padding:12px;overflow:hidden}
+  .hero{--a:var(--run);border-radius:20px;padding:14px;background:radial-gradient(130% 100% at 100% 0%,color-mix(in srgb,var(--a) var(--glow),transparent),transparent 58%),var(--wc);border:1px solid color-mix(in srgb,var(--a) 35%,var(--border))}
+  .t1{display:flex;align-items:center;gap:8px;font:700 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--a-ink,var(--a))}
+  .t1 .ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--a) 18%,transparent)}.t1 svg{width:15px;height:15px}.t1 .r{margin-left:auto;letter-spacing:0;text-transform:none;font-weight:600;color:var(--mfg)}
+  .wn{font:800 19px/1.2 var(--display);margin:8px 0 10px}
+  .tot{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.tot div{border-radius:10px;padding:6px 8px;background:var(--box);border:1px solid var(--boxb)}.tot b{display:block;font:700 15px var(--font)}.tot span{font:600 9px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mfg)}
+  .vbar{display:flex;align-items:flex-end;gap:2px;height:44px;margin-top:10px}.vbar i{border-radius:3px 3px 1px 1px}
+  .pl{margin-top:10px;font-size:13px}.pl div{display:flex;justify-content:space-between;padding:6px 2px;border-top:1px solid var(--border)}.pl div span{color:var(--mfg)}
+  .pl .in2{padding-left:14px}
+  .cta{margin-top:12px;height:46px;border-radius:12px;background:var(--primary);color:hsl(222 47% 11%);display:flex;align-items:center;justify-content:center;font:700 15px var(--font);gap:6px}
+  /* mobile */
+  .phone{width:390px;height:844px;border-radius:40px;border:8px solid #262626;background:var(--bg);color:var(--fg);overflow:hidden;position:relative}
+  .mbar{display:flex;align-items:center;gap:8px;padding:10px 10px 8px;border-bottom:1px solid var(--border)}
+  .mbar .ib{width:44px;height:44px;display:grid;place-items:center}.mbar .ib svg{width:22px;height:22px}
+  .mbar .t{flex:1;font:600 15px var(--font)}.mbar .t small{display:block;font-size:12px;color:var(--mfg);font-weight:500}
+  .tabs2{display:grid;grid-template-columns:1fr 1fr;margin:10px 12px 0;background:var(--muted);border-radius:12px;padding:3px}.tabs2 div{text-align:center;padding:9px 0;font:600 14px var(--font);border-radius:9px;color:var(--mfg)}.tabs2 .on{background:var(--card);color:var(--fg)}
+  .mp{padding:12px}
+  .bottom{position:absolute;left:0;right:0;bottom:0;padding:12px 12px 22px;background:linear-gradient(transparent,var(--bg) 30%);display:flex;gap:8px}
+  .bottom .btn{flex:1;height:50px;justify-content:center;font-size:15px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="run" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="14.5" cy="4.5" r="2"/><path d="m8 21 3-6 3 2 1 5"/><path d="M6 11.5 9 9l4 1 2 3 3 1"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/></symbol>
+  <symbol id="more" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></symbol>
+</defs></svg>
+
+<h1 class="ttl">EZ · Editor de treino (coach): proposta</h1>
+<p class="doc">Mockup estático (12/11/2026), dados fictícios do seed. O editor responde a duas perguntas: <b>o que o atleta vai fazer?</b> e <b>está certo e completo?</b> À esquerda fica a edição, com as etapas editáveis na própria lista. À direita, a <b>prévia ao vivo</b>: o mesmo card que o atleta vê na Home e no detalhe (totais, mini-gráfico, etapas), atualizado a cada tecla. No celular, Editar e Prévia viram duas abas. Avisos de validação só aparecem quando há um problema.</p>
+
+<div class="lbl">1 · Desktop 1440 · escuro · endurance (o editor de força segue o mesmo esqueleto)</div>
+<div class="row"><div class="desk dark run">
+ <div class="rail"><span class="lg">EZ</span><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
+ <div>
+  <div class="bar"><span class="bk"><svg><use href="#back"/></svg>Treinos</span><span class="st"><i></i>Salvo há 5 s</span><span class="btn o"><svg width="16" height="16"><use href="#users"/></svg>Atribuir</span><span class="btn">Salvar</span></div>
+  <div class="cols">
+   <div>
+    <div class="name">Corrida: intervalado 5 × 800 m</div>
+    <div class="meta"><span class="chip sp"><svg width="14" height="14"><use href="#run"/></svg>Corrida</span><span class="chip">~47 min · 4 km de tiros</span></div>
+    <div class="ta"><small>Instruções para o atleta</small>Recuperação trotando leve.</div>
+    <div class="sh"><b>Etapas</b><span>arraste para reordenar</span></div>
+    <div class="stp"><span class="hd">⋮⋮</span><div><b>Aquecimento</b><div class="tg"><span class="zone" style="background:hsl(142 71% 45% / .18);color:var(--okc)">Z2</span>FC zona 2</div></div><span class="dur">15:00</span><svg width="18" height="18" style="color:var(--mfg)"><use href="#more"/></svg></div>
+    <div class="rep"><div class="rh"><span>Repetir</span><span class="cnt"><b>5</b>× · ~25 min</span></div>
+     <div class="stp sel"><span class="hd">⋮⋮</span><div><b>Tiro</b><div class="tg"><span class="zone" style="background:hsl(25 95% 53% / .18);color:var(--str)">Pace</span>4:20–4:27 /km</div></div><span class="dur">800 m</span><svg width="18" height="18" style="color:var(--mfg)"><use href="#more"/></svg></div>
+     <div class="edit">
+      <div class="f"><small>Tipo</small><div class="seg"><i>Aquec.</i><i class="on">Tiro</i><i>Recup.</i><i>Desaq.</i></div></div>
+      <div class="f"><small>Duração</small><div class="seg"><i>Tempo</i><i class="on">Distância</i><i>Volta</i></div></div>
+      <div class="f"><small>Distância</small><div class="in">800<span>m</span></div></div>
+      <div class="f"><small>Alvo</small><div class="seg"><i>Zona FC</i><i class="on">Pace</i><i>Potência</i></div></div>
+      <div class="f"><small>Pace mín.</small><div class="in">4:20<span>/km</span></div></div>
+      <div class="f"><small>Pace máx.</small><div class="in">4:27<span>/km</span></div></div>
+     </div>
+     <div class="stp"><span class="hd">⋮⋮</span><div><b>Recuperação</b><div class="tg">trote leve</div></div><span class="dur">1:30</span><svg width="18" height="18" style="color:var(--mfg)"><use href="#more"/></svg></div>
+    </div>
+    <div class="stp"><span class="hd">⋮⋮</span><div><b>Desaquecimento</b><div class="tg">leve</div></div><span class="dur">10:00</span><svg width="18" height="18" style="color:var(--mfg)"><use href="#more"/></svg></div>
+    <div class="add"><span>+ Etapa</span><span>+ Repetição</span><span>+ Modelo (aquec · principal · desaq)</span></div>
+    <div class="warn">⚠ A "Recuperação" não tem alvo. O atleta vai ver só "1:30". <b>Adicionar alvo</b></div>
+   </div>
+   <div class="pv">
+    <div class="pvh"><b>Como o atleta vê</b><span>atualiza ao digitar</span></div>
+    <div class="phoneframe">
+     <div class="hero">
+      <div class="t1"><span class="ic"><svg><use href="#run"/></svg></span>Corrida<span class="r">dom, 15 nov</span></div>
+      <div class="wn">Corrida: intervalado 5 × 800 m</div>
+      <div class="tot"><div><b>~47 min</b><span>Duração</span></div><div><b>4 km</b><span>Tiros</span></div><div><b>12</b><span>Etapas</span></div></div>
+      <div class="vbar">
+       <i style="flex:15;height:35%;background:color-mix(in srgb,var(--run) 40%,transparent)"></i>
+       <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+       <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+       <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+       <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+       <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+       <i style="flex:10;height:30%;background:color-mix(in srgb,var(--run) 40%,transparent)"></i>
+      </div>
+      <div class="cta"><svg width="16" height="16"><use href="#play"/></svg>Começar treino</div>
+     </div>
+     <div class="pl">
+      <div><b>Aquecimento</b><span>15:00 · Z2</span></div>
+      <div><b>Repetir 5×</b><span>~25 min</span></div>
+      <div class="in2"><b style="background:hsl(48 96% 45% / .18);border-radius:4px;padding:0 3px">Tiro</b><span>800 m · 4:20–4:27</span></div>
+      <div class="in2"><b>Recuperação</b><span>1:30</span></div>
+      <div><b>Desaquecimento</b><span>10:00</span></div>
+     </div>
+    </div>
+    <div class="note" style="max-width:420px">A etapa em edição aparece realçada na prévia. A data mostrada é a da próxima atribuição; sem atribuição, "hoje".</div>
+   </div>
+  </div>
+ </div>
+</div></div>
+
+<div class="lbl">2 · Celular 390 px · Editar (escuro) e Prévia (claro)</div>
+<div class="row">
+<div class="phone dark run">
+ <div class="mbar"><span class="ib"><svg><use href="#back"/></svg></span><div class="t">Corrida: intervalado 5 × 800 m<small>Salvo há 5 s</small></div><span class="ib"><svg><use href="#more"/></svg></span></div>
+ <div class="tabs2"><div class="on">Editar</div><div>Prévia</div></div>
+ <div class="mp">
+  <div class="meta"><span class="chip sp">Corrida</span><span class="chip">~47 min</span></div>
+  <div class="ta"><small>Instruções</small>Recuperação trotando leve.</div>
+  <div class="sh"><b>Etapas</b><span>12</span></div>
+  <div class="stp"><span class="hd">⋮⋮</span><div><b>Aquecimento</b><div class="tg">Z2 · FC zona 2</div></div><span class="dur">15:00</span><span></span></div>
+  <div class="rep"><div class="rh"><span>Repetir</span><span class="cnt"><b>5</b>×</span></div>
+   <div class="stp sel"><span class="hd">⋮⋮</span><div><b>Tiro</b><div class="tg">Pace 4:20–4:27 /km</div></div><span class="dur">800 m</span><span></span></div>
+   <div class="stp"><span class="hd">⋮⋮</span><div><b>Recuperação</b><div class="tg">trote leve</div></div><span class="dur">1:30</span><span></span></div>
+  </div>
+  <div class="stp"><span class="hd">⋮⋮</span><div><b>Desaquecimento</b></div><span class="dur">10:00</span><span></span></div>
+  <div class="add"><span>+ Etapa</span><span>+ Repetição</span></div>
+ </div>
+ <div class="bottom"><span class="btn o" style="flex:none;width:50px;padding:0;justify-content:center"><svg width="18" height="18"><use href="#users"/></svg></span><span class="btn">Salvar</span></div>
+</div>
+<div class="phone light run">
+ <div class="mbar"><span class="ib"><svg><use href="#back"/></svg></span><div class="t">Corrida: intervalado 5 × 800 m<small>Alterações não salvas</small></div><span class="ib"><svg><use href="#more"/></svg></span></div>
+ <div class="tabs2"><div>Editar</div><div class="on">Prévia</div></div>
+ <div class="mp">
+  <div class="hero">
+   <div class="t1"><span class="ic"><svg><use href="#run"/></svg></span>Corrida<span class="r">dom, 15 nov</span></div>
+   <div class="wn">Corrida: intervalado 5 × 800 m</div>
+   <div class="tot"><div><b>~47 min</b><span>Duração</span></div><div><b>4 km</b><span>Tiros</span></div><div><b>12</b><span>Etapas</span></div></div>
+   <div class="vbar"><i style="flex:15;height:35%;background:color-mix(in srgb,var(--run) 35%,transparent)"></i><i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i><i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i><i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i><i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i><i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i><i style="flex:10;height:30%;background:color-mix(in srgb,var(--run) 35%,transparent)"></i></div>
+   <div class="cta">Começar treino</div>
+  </div>
+  <div class="pl"><div><b>Aquecimento</b><span>15:00 · Z2</span></div><div><b>Repetir 5×</b><span>~25 min</span></div><div class="in2"><b>Tiro</b><span>800 m · 4:20–4:27</span></div><div class="in2"><b>Recuperação</b><span>1:30</span></div><div><b>Desaquecimento</b><span>10:00</span></div></div>
+ </div>
+ <div class="bottom"><span class="btn o" style="flex:none;width:50px;padding:0;justify-content:center"><svg width="18" height="18"><use href="#users"/></svg></span><span class="btn">Salvar</span></div>
+</div>
+<p class="note">No celular, tocar numa etapa abre o mesmo formulário num drawer de baixo; a lista fica limpa. A aba Prévia mostra exatamente o card do atleta. O estado do salvamento ("Salvo há 5 s" / "Alterações não salvas") fica sob o título; Salvar e Atribuir ficam fixos embaixo.</p>
+</div>
+</body>
+</html>
