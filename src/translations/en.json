@@ -2079,5 +2079,35 @@
         ]
       }
     ]
+  },
+  "push": {
+    "toggle": {
+      "label": "Notifications",
+      "on": "On for this device",
+      "off": "Off",
+      "blockedIOS": "Blocked. Turn them on in Settings → Notifications → EZ.",
+      "blockedBrowser": "Blocked. Allow them in this site's settings in your browser.",
+      "unsupported": "This browser can't receive notifications.",
+      "needsInstall": "On iPhone, add the app to your Home Screen to turn them on.",
+      "howToInstall": "How to install"
+    },
+    "invite": {
+      "enable": "Turn on",
+      "notNow": "Not now",
+      "chatAthleteTitle": "Get notified when your coach replies",
+      "chatAthleteDescription": "A notice on your phone, even with the app closed.",
+      "chatCoachTitle": "Get notified when an athlete writes",
+      "chatCoachDescription": "A notice on this device, even with the app closed.",
+      "firstWorkoutTitle": "Want to know when your coach comments?",
+      "firstWorkoutDescription": "Turn on notifications for your coach's comments and messages."
+    },
+    "install": {
+      "title": "Add EZ to your Home Screen",
+      "description": "On iPhone, notifications only work when the app is on the Home Screen.",
+      "step1": "Tap Share in Safari's toolbar",
+      "step2": "Choose \"Add to Home Screen\"",
+      "step3": "Open EZ from the icon and turn on notifications",
+      "ok": "Got it"
+    }
   }
 }

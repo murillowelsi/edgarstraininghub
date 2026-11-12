@@ -28,6 +28,8 @@ import { ActivityDrawer } from "@/components/timeline/ActivityDrawer";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
+import { PushToggle } from "@/components/push/PushToggle";
+import { usePushBootstrap } from "@/hooks/usePush";
 
 interface AthletePortalLayoutProps {
   children: React.ReactNode;
@@ -49,6 +51,7 @@ const AthletePortalLayout = ({
   const { user, photoURL, setPhotoURL, userRole, displayName } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
+  usePushBootstrap();
   const { theme, toggleTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
@@ -106,12 +109,9 @@ const AthletePortalLayout = ({
 
     let unsubscribeFCM: (() => void) | null = null;
 
+    // Token refresh happens in usePushBootstrap (only if already allowed and
+    // not turned off on this device); here we only listen while the app is open
     const setupFCM = async () => {
-      // Register FCM token if permission already granted (e.g. returning user)
-      if (NotificationService.isGranted()) {
-        await FCMService.registerToken(user.uid);
-      }
-
       // Listen for foreground messages
       unsubscribeFCM = FCMService.listenForeground('/athlete/chat');
     };
@@ -314,6 +314,9 @@ const AthletePortalLayout = ({
             <div className="border-t pt-4 space-y-2">
               {/* Language */}
               <LanguageChoice />
+
+              {/* Push notifications */}
+              <PushToggle />
 
               {/* Theme */}
               <button

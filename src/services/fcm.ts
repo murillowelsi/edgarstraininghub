@@ -1,73 +1,64 @@
 /**
- * FCM Token Service
- *
- * Registers the device with Firebase Cloud Messaging and saves the token
- * to Firestore so the Cloud Function can send push notifications to this device.
- *
- * SETUP REQUIRED:
- * 1. Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
- *    → Generate Key Pair → copy the key to VITE_FIREBASE_VAPID_KEY in .env
- * 2. Deploy the Cloud Function in docs/push-notification-function.ts
+ * FCM token service: registers this device for push notifications and keeps
+ * its token in users/{uid}/fcmTokens/{token}, which the server (/api/notify,
+ * /api/rest-timer) reads to send. Needs VITE_FIREBASE_VAPID_KEY (set in
+ * Vercel); without it (local, emulator) registration is skipped quietly.
  */
 
-import { getToken, onMessage } from "firebase/messaging";
-import { doc, setDoc } from "firebase/firestore";
+import { deleteToken, getToken, onMessage } from "firebase/messaging";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { messaging } from "../lib/firebase";
 import { db } from "../lib/firebase";
 import { NotificationService } from "./notifications";
+import { getSavedToken, setSavedToken } from "../lib/pushSupport";
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined;
 
 export const FCMService = {
+  /** False on local/emulator builds (no VAPID key or no messaging): push is off there. */
+  isConfigured(): boolean {
+    return !!messaging && !!VAPID_KEY;
+  },
+
   /**
-   * Register this device for push notifications.
-   * Saves the FCM token to Firestore under users/{userId}/fcmTokens/{token}.
-   * Call this after the user grants notification permission.
+   * Register this device. Call only after permission is granted. Saves the
+   * token for this user (and drops the previous one if FCM rotated it).
    */
   async registerToken(userId: string): Promise<string | null> {
-    if (!messaging) {
-      console.warn("FCM: Messaging not initialized");
-      return null;
-    }
-    if (!VAPID_KEY) {
-      console.warn("FCM: VITE_FIREBASE_VAPID_KEY not set. Push notifications won't work.");
-      return null;
-    }
-
+    if (!messaging || !VAPID_KEY) return null;
     try {
-      console.log("FCM: Requesting FCM token with existing PWA service worker...");
-
-      // Use the existing PWA service worker (registered by vite-plugin-pwa)
-      // The PWA service worker now includes FCM background message handling
+      // The PWA service worker (vite-plugin-pwa, src/sw.ts) also handles FCM
       const swRegistration = await navigator.serviceWorker.ready;
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swRegistration });
+      if (!token) return null;
 
-      console.log("FCM: Using service worker:", swRegistration);
-
-      const token = await getToken(messaging, {
-        vapidKey: VAPID_KEY,
-        serviceWorkerRegistration: swRegistration,
-      });
-
-      if (!token) {
-        console.warn("FCM: Failed to get FCM token - it returned null");
-        return null;
+      const previous = getSavedToken(userId);
+      if (previous && previous !== token) {
+        await deleteDoc(doc(db, "users", userId, "fcmTokens", previous)).catch(() => {});
       }
-
-      console.log("FCM: Token obtained successfully:", token.substring(0, 20) + "...");
-
-      // Save token to Firestore so Cloud Function can look it up
-      await setDoc(
-        doc(db, "users", userId, "fcmTokens", token),
-        { token, updatedAt: new Date(), platform: navigator.userAgent }
-      );
-
-      console.log("FCM: Token saved to Firestore");
-
+      await setDoc(doc(db, "users", userId, "fcmTokens", token), {
+        token,
+        updatedAt: new Date(),
+        platform: navigator.userAgent,
+      });
+      setSavedToken(userId, token);
       return token;
     } catch (err) {
       console.error("FCM token registration failed:", err);
       return null;
     }
+  },
+
+  /** Turn push off on this device: remove its token from Firestore and from FCM. */
+  async unregisterToken(userId: string): Promise<void> {
+    const token = getSavedToken(userId);
+    setSavedToken(userId, null);
+    if (token) {
+      await deleteDoc(doc(db, "users", userId, "fcmTokens", token)).catch((err) =>
+        console.error("FCM token delete failed:", err)
+      );
+    }
+    if (messaging) await deleteToken(messaging).catch(() => {});
   },
 
   /**

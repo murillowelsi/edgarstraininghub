@@ -22,6 +22,7 @@ import { formatChatTime } from "@/components/chat/chatDates";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
 import { ListSkeleton } from "@/components/feedback/skeletons";
+import { PushInvite } from "@/components/push/PushInvite";
 
 export default function AdminChat() {
     const { user } = useAuth();
@@ -301,6 +302,12 @@ export default function AdminChat() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
+                        <PushInvite
+                            place="chat-coach"
+                            title={t.push.invite.chatCoachTitle}
+                            description={t.push.invite.chatCoachDescription}
+                            className="mx-3 mt-3"
+                        />
                         {loading ? (
                             <ListSkeleton className="p-2" />
                         ) : chats.length === 0 ? (
