@@ -13,6 +13,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { TopBarMenuProvider } from "./contexts/TopBarMenuContext";
 import { TimelineActionsProvider } from "./contexts/TimelineActionsContext";
 import About from "./pages/About";
+import Privacy from "./pages/Privacy";
 import AppEntry from "./pages/AppEntry";
 import BlogArticlePage from "./pages/BlogArticlePage";
 import BlogPage from "./pages/BlogPage";
@@ -74,6 +75,7 @@ const App = () => (
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/privacy" element={<Privacy />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogArticlePage />} />

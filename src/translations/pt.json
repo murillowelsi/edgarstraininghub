@@ -1,4 +1,5 @@
 {
+  "_reviewNotes": "ATENÇÃO: a seção \"privacy\" (política de privacidade) é um RASCUNHO escrito pelo time e precisa da revisão do usuário e do coach antes de publicar. Os campos entre colchetes são placeholders.",
   "nav": {
     "home": "Início",
     "about": "Sobre",
@@ -1963,5 +1964,78 @@
     "accept": "Aceitar",
     "decline": "Recusar",
     "settings": "Preferências de cookies"
+  },
+  "privacy": {
+    "_reviewStatus": "RASCUNHO escrito pelo time EZ. Precisa da revisão do usuário e do coach (e, se possível, de assessoria jurídica) antes de publicar. Substitua todos os campos entre colchetes.",
+    "title": "Política de privacidade",
+    "lastUpdated": "Última atualização: [DATA DA ÚLTIMA ATUALIZAÇÃO]",
+    "intro": "Esta página explica quais dados o EZ Training Hub coleta, por que coleta e o que você pode fazer com eles. Ela vale para o site público, o portal do coach e o app do atleta.",
+    "sections": [
+      {
+        "title": "Quem é responsável pelos seus dados",
+        "body": [
+          "O responsável pelo tratamento dos dados é [NOME DO RESPONSÁVEL], [ENDEREÇO].",
+          "Para qualquer dúvida ou pedido sobre os seus dados, escreva para [E-MAIL DE CONTATO]."
+        ]
+      },
+      {
+        "title": "Quais dados coletamos",
+        "body": [
+          "Conta: nome, e-mail, foto de perfil (opcional), papel no app (atleta ou coach) e dados do plano de treino.",
+          "Treinos: os treinos atribuídos a você e o que você registra ao concluir, como tempo, distância, pace, frequência cardíaca, cargas, repetições, esforço percebido e observações.",
+          "Comunicação: mensagens do chat com o coach e com o time, publicações, comentários e curtidas no feed, e eventos e provas que você cadastra.",
+          "Notificações: se você permitir, um identificador do aparelho para enviar notificações push.",
+          "Uso do site: só se você aceitar os cookies de análise, o Google Analytics registra páginas visitadas, tipo de aparelho e navegador e uma localização aproximada."
+        ]
+      },
+      {
+        "title": "Para que usamos",
+        "body": [
+          "Para prestar o acompanhamento de treino: montar e ajustar os seus treinos, acompanhar a sua evolução e falar com você.",
+          "Para enviar avisos que você pediu, como lembretes e mensagens do coach.",
+          "Para manter o app seguro e funcionando, por exemplo para identificar o seu acesso.",
+          "Com o seu consentimento, para entender como o site é usado e melhorá-lo."
+        ]
+      },
+      {
+        "title": "Base legal",
+        "body": [
+          "Usamos os seus dados para cumprir o serviço de acompanhamento que você contratou, com o seu consentimento (análise de uso e notificações) e para a segurança do serviço. [CONFIRMAR AS BASES LEGAIS E AS LEIS APLICÁVEIS COM ASSESSORIA JURÍDICA.]"
+        ]
+      },
+      {
+        "title": "Com quem compartilhamos",
+        "body": [
+          "Não vendemos os seus dados. Usamos fornecedores que processam dados em nosso nome:",
+          "Google Firebase (login, banco de dados, armazenamento de fotos e notificações); Google Analytics (só com o seu aceite); Vercel (hospedagem do site); Cloudinary (imagens de publicações); YouTube (vídeos incorporados no site, que podem definir cookies do próprio YouTube ao carregar).",
+          "Esses fornecedores podem guardar dados fora do seu país. [CONFIRMAR LOCAL DE ARMAZENAMENTO E GARANTIAS DE TRANSFERÊNCIA.]"
+        ]
+      },
+      {
+        "title": "Cookies e armazenamento no aparelho",
+        "body": [
+          "Necessários: guardamos no seu navegador o idioma, o tema, a sua sessão de login e uma cópia dos dados para o app funcionar sem internet. Sem isso o app não funciona.",
+          "Análise: os cookies do Google Analytics só são usados se você aceitar no aviso de cookies. Você pode mudar a escolha a qualquer momento em \"Preferências de cookies\", no rodapé."
+        ]
+      },
+      {
+        "title": "Por quanto tempo guardamos",
+        "body": [
+          "Guardamos os dados enquanto a sua conta estiver ativa e por [PRAZO DE RETENÇÃO] depois do fim do acompanhamento, a menos que você peça a exclusão antes."
+        ]
+      },
+      {
+        "title": "Seus direitos",
+        "body": [
+          "Você pode pedir acesso, correção, cópia ou exclusão dos seus dados, e retirar um consentimento a qualquer momento. Escreva para [E-MAIL DE CONTATO]. Respondemos em até [PRAZO DE RESPOSTA]."
+        ]
+      },
+      {
+        "title": "Alterações desta política",
+        "body": [
+          "Quando esta política mudar, atualizamos a data no topo da página e, se a mudança for importante, avisamos no app."
+        ]
+      }
+    ]
   }
 }

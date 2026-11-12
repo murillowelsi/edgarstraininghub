@@ -1,4 +1,5 @@
 {
+  "_reviewNotes": "NOTE: the \"privacy\" section (privacy policy) is a DRAFT written by the team and needs review by the user and the coach before publishing. Fields in square brackets are placeholders.",
   "nav": {
     "home": "Home",
     "about": "About",
@@ -1963,5 +1964,78 @@
     "accept": "Accept",
     "decline": "Decline",
     "settings": "Cookie preferences"
+  },
+  "privacy": {
+    "_reviewStatus": "DRAFT written by the EZ team. Needs review by the user and the coach (and, if possible, legal advice) before publishing. Replace every field in square brackets.",
+    "title": "Privacy policy",
+    "lastUpdated": "Last updated: [LAST UPDATED DATE]",
+    "intro": "This page explains what data EZ Training Hub collects, why, and what you can do about it. It covers the public site, the coach portal and the athlete app.",
+    "sections": [
+      {
+        "title": "Who is responsible for your data",
+        "body": [
+          "The data controller is [CONTROLLER NAME], [ADDRESS].",
+          "For any question or request about your data, write to [CONTACT EMAIL]."
+        ]
+      },
+      {
+        "title": "What we collect",
+        "body": [
+          "Account: name, email, profile photo (optional), your role in the app (athlete or coach) and training plan details.",
+          "Training: the workouts assigned to you and what you log when you finish them, such as time, distance, pace, heart rate, loads, reps, perceived effort and notes.",
+          "Communication: chat messages with the coach and the team, posts, comments and likes in the feed, and the events and races you add.",
+          "Notifications: if you allow them, a device identifier to send push notifications.",
+          "Site usage: only if you accept analytics cookies, Google Analytics records the pages you visit, device and browser type and an approximate location."
+        ]
+      },
+      {
+        "title": "Why we use it",
+        "body": [
+          "To provide the coaching: build and adjust your workouts, follow your progress and talk to you.",
+          "To send the notices you asked for, such as reminders and messages from the coach.",
+          "To keep the app safe and working, for example to recognise your sign-in.",
+          "With your consent, to understand how the site is used and improve it."
+        ]
+      },
+      {
+        "title": "Legal basis",
+        "body": [
+          "We use your data to deliver the coaching service you signed up for, with your consent (usage analytics and notifications) and to keep the service secure. [CONFIRM THE LEGAL BASES AND APPLICABLE LAWS WITH LEGAL ADVICE.]"
+        ]
+      },
+      {
+        "title": "Who we share it with",
+        "body": [
+          "We don't sell your data. We use providers that process data on our behalf:",
+          "Google Firebase (sign-in, database, photo storage and notifications); Google Analytics (only if you accept); Vercel (site hosting); Cloudinary (post images); YouTube (videos embedded on the site, which may set YouTube's own cookies when they load).",
+          "These providers may store data outside your country. [CONFIRM STORAGE LOCATIONS AND TRANSFER SAFEGUARDS.]"
+        ]
+      },
+      {
+        "title": "Cookies and storage on your device",
+        "body": [
+          "Necessary: we keep your language, theme, sign-in session and a copy of your data in your browser so the app works offline. The app doesn't work without them.",
+          "Analytics: Google Analytics cookies are only used if you accept them in the cookie notice. You can change your choice at any time in \"Cookie preferences\" in the footer."
+        ]
+      },
+      {
+        "title": "How long we keep it",
+        "body": [
+          "We keep your data while your account is active and for [RETENTION PERIOD] after the coaching ends, unless you ask us to delete it sooner."
+        ]
+      },
+      {
+        "title": "Your rights",
+        "body": [
+          "You can ask to access, correct, copy or delete your data, and withdraw consent at any time. Write to [CONTACT EMAIL]. We reply within [RESPONSE TIME]."
+        ]
+      },
+      {
+        "title": "Changes to this policy",
+        "body": [
+          "When this policy changes, we update the date at the top of the page and, for important changes, let you know in the app."
+        ]
+      }
+    ]
   }
 }
