@@ -96,6 +96,15 @@
   .rr .t{flex:1;min-width:0}.rr .t b{font-weight:600}.rr .t span{display:block;font-size:12px;color:var(--mfg)}
   .draft{margin-top:10px;border-radius:12px;background:var(--s2);border:1px dashed var(--border);padding:10px 12px;font-size:13px;color:var(--mfg)}
   .draft b{color:var(--fg);font-weight:600}
+
+  .wc .sum{font-size:14px;color:var(--mfg);margin:-2px 0 10px}.wc .sum b{color:var(--fg);font-weight:700;font-variant-numeric:tabular-nums}
+  .wd7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .wd7 .c{position:relative;border-radius:12px;border:1px solid var(--border);background:var(--s2);padding:6px 0 7px;display:grid;justify-items:center;gap:3px;font-size:11px;color:var(--mfg);cursor:pointer}
+  .wd7 .c b{font:700 12px var(--font);color:var(--fg);font-variant-numeric:tabular-nums}
+  .wd7 .c.fut{background:transparent;border-style:dashed}.wd7 .c.fut b{color:var(--mfg);font-weight:600}
+  .wd7 .c.on{border:2px solid var(--primary);padding:5px 0 6px}.wd7 .c.on span:first-child{color:var(--fg);font-weight:700}
+  .wd7 .c.hv{outline:2px solid var(--fg);outline-offset:1px}
+  .wd7 svg{width:22px;height:22px;transform:rotate(-90deg)}
 </style>
 </head>
 <body>
@@ -125,7 +134,7 @@
 </defs></svg>
 
 <h1 class="ttl">EZ · Dashboard do coach: enxuto + ações rápidas</h1>
-<p class="doc">Mockup estático (12/11/2026), dados fictícios do seed. As mesmas três perguntas (<b>quem precisa de mim?</b> · <b>o que acontece hoje?</b> · <b>como vai a semana?</b>), agora com <b>mais ações e nenhum número a mais</b>: faixa de ações rápidas, resposta no próprio card, resultados e lembrete por treino, e cada dia da semana abre o Calendário. Nenhum dado novo; o que reaproveita e o que é código novo está no README.</p>
+<p class="doc">Mockup estático (12/11/2026), dados fictícios do seed. As mesmas três perguntas (<b>quem precisa de mim?</b> · <b>o que acontece hoje?</b> · <b>como vai a semana?</b>), agora com <b>mais ações e nenhum número a mais</b>: faixa de ações rápidas, resposta no próprio card, resultados e lembrete por treino, e um card compacto "Esta semana" (feitos/planejados por dia; tocar abre o Calendário nesse dia). Nenhum dado novo; o que reaproveita e o que é código novo está no README.</p>
 
 <div class="lbl">1 · Desktop 1440 × 900 · escuro · cabe numa tela</div>
 <div class="row"><div class="desk dark" style="position:relative">
@@ -133,8 +142,6 @@
  <div class="main">
   <div class="head"><div class="t"><small>Quinta, 12 nov</small><b>Bom dia, Coach</b></div>
    <div class="qa"><span class="qb"><svg width="14" height="14"><use href="#edit"/></svg>Novo treino</span><span class="qb"><svg width="14" height="14"><use href="#mega"/></svg>Aviso no feed</span><span class="qb"><svg width="14" height="14"><use href="#team"/></svg>Mensagem ao time</span><span class="qb"><svg width="14" height="14"><use href="#link"/></svg>Convidar atleta</span><span class="btn"><svg width="16" height="16"><use href="#plus"/></svg>Atribuir treino</span></div></div>
-  <div class="wk"><div class="num"><small>Esta semana</small><b>8 de 14</b><span>· 57%</span></div>
-   <div class="days"><div class="day">seg<div class="col"><i style="height:60%"></i></div></div><div class="day">ter<div class="col"><i style="height:100%"></i></div></div><div class="day" style="position:relative">qua<div class="col" style="outline:2px solid var(--fg);outline-offset:1px"><i style="height:30%"></i></div><span class="tip">Abrir qua, 11 nov no Calendário</span></div><div class="day on">qui<div class="col"><i style="height:10%"></i></div></div><div class="day">sex<div class="col fut"></div></div><div class="day">sáb<div class="col fut"></div></div><div class="day">dom<div class="col fut"></div></div></div></div>
   <div class="g2">
    <div class="att">
     <div class="ch"><b><svg width="18" height="18" style="color:var(--badc)"><use href="#alert"/></svg>Precisa de atenção <span class="cnt">4</span></b><span class="r">últimos 7 dias</span></div>
@@ -151,6 +158,7 @@
      <div class="wa"><span class="ab"><svg width="14" height="14"><use href="#chart"/></svg>Ver resultados</span><span class="ab y"><svg width="14" height="14"><use href="#bellr"/></svg>Lembrar quem falta (2)</span></div>
      <div class="tmr">Amanhã: <b>Força B: membros superiores</b> · 3 atletas<a>Ver</a></div>
     </div>
+    <div class="card wc"><div class="ch" style="margin-bottom:4px"><b>Esta semana</b><a class="r" style="color:var(--ink);font-weight:600">Calendário ›</a></div><div class="sum"><b>8 de 14</b> treinos feitos · 57%</div><div class="wd7"><div class="c "><span>seg</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="37.7 50.27"/></svg><b>3/4</b></div><div class="c "><span>ter</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--okc)" stroke-width="3" stroke-linecap="round" stroke-dasharray="50.3 50.27"/></svg><b>3/3</b></div><div class="c hv"><span>qua</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16.8 50.27"/></svg><b>1/3</b><span class="tip" style="top:calc(100% + 7px)">Abrir qua, 11 nov no Calendário</span></div><div class="c on"><span>qui</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16.8 50.27"/></svg><b>1/3</b></div><div class="c fut"><span>sex</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.0 50.27"/></svg><b>0/1</b></div><div class="c fut"><span>sáb</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="2 3"/></svg><b>—</b></div><div class="c fut"><span>dom</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="2 3"/></svg><b>—</b></div></div></div>
     <div class="nt"><span class="ic" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#flag"/></svg></span><span><b>Bruno Teste</b> <span class="m">· Corrida 10 km em 12 dias</span></span><a>Ver</a></div>
     <div class="nt"><span class="ic" style="background:hsl(48 96% 45% / .15);color:var(--ink)"><svg><use href="#quote"/></svg></span><span><b>1 depoimento</b> <span class="m">para revisar</span></span><a>Revisar</a></div>
    </div>
@@ -158,16 +166,14 @@
  </div>
  <div class="toast" style="left:calc(220px + 50%)"><svg width="16" height="16"><use href="#check"/></svg>Link de convite do time copiado</div>
 </div></div>
-<p class="note" style="max-width:1100px;margin-top:-28px;margin-bottom:40px">Cabe em 1440 × 900 sem rolar. Estados mostrados ao mesmo tempo só para o mockup: resposta rápida aberta na Ana, dica ao passar o mouse em "qua" e o toast de "Convidar atleta". "Atribuir treino" continua o botão principal, à direita.</p>
+<p class="note" style="max-width:1100px;margin-top:-28px;margin-bottom:40px">Cabe em 1440 × 900 sem rolar. Estados mostrados ao mesmo tempo só para o mockup: resposta rápida aberta na Ana, dica ao passar o mouse em "qua" no card da semana e o toast de "Convidar atleta". "Atribuir treino" continua o botão principal, à direita.</p>
 
 <div class="lbl">2 · Celular 390 px · claro: ações rápidas e resposta no card · resultados e lembrete de "Hoje"</div>
 <div class="row">
-<div class="phone light" style="height:1240px">
+<div class="phone light" style="height:1330px">
  <div class="top"><span style="font:800 24px var(--display);color:var(--ink)">EZ</span><div style="display:flex;gap:8px"><div class="g"><svg><use href="#msg"/></svg></div><div class="g"><svg><use href="#bell"/></svg></div></div></div>
  <div class="pp">
   <div class="chiprow"><span class="qb p"><svg width="14" height="14"><use href="#plus"/></svg>Atribuir</span><span class="qb"><svg width="14" height="14"><use href="#edit"/></svg>Novo treino</span><span class="qb"><svg width="14" height="14"><use href="#mega"/></svg>Aviso no feed</span><span class="qb"><svg width="14" height="14"><use href="#team"/></svg>Mensagem ao time</span><span class="qb"><svg width="14" height="14"><use href="#link"/></svg>Convidar</span></div>
-  <div class="wk"><div class="num"><small>Esta semana · toque num dia</small><b>8 de 14</b><span>· 57%</span></div>
-   <div class="days"><div class="day">seg<div class="col"><i style="height:60%"></i></div></div><div class="day">ter<div class="col"><i style="height:100%"></i></div></div><div class="day" style="position:relative">qua<div class="col" ><i style="height:30%"></i></div></div><div class="day on">qui<div class="col"><i style="height:10%"></i></div></div><div class="day">sex<div class="col fut"></div></div><div class="day">sáb<div class="col fut"></div></div><div class="day">dom<div class="col fut"></div></div></div></div>
   <div class="att">
    <div class="ch"><b><svg width="18" height="18" style="color:var(--badc)"><use href="#alert"/></svg>Precisa de atenção <span class="cnt">4</span></b></div>
    <div class="ai"><span class="av">A</span><div class="t"><div class="nm">Ana Teste</div><div class="chips"><span class="chip c-bad">1 não feito</span><span class="chip c-mut">nota</span></div><div class="quote">“Subi a carga no agachamento…”</div>
@@ -182,6 +188,7 @@
    <div class="wa" style="margin-left:0"><span class="ab">Ver resultados</span><span class="ab y">Lembrar quem falta (2)</span></div>
    <div class="tmr">Amanhã: <b>Força B</b> · 3 atletas<a>Ver</a></div>
   </div>
+  <div class="card wc"><div class="ch" style="margin-bottom:4px"><b>Esta semana</b><a class="r" style="color:var(--ink);font-weight:600">Calendário ›</a></div><div class="sum"><b>8 de 14</b> treinos feitos · 57%</div><div class="wd7"><div class="c "><span>seg</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="37.7 50.27"/></svg><b>3/4</b></div><div class="c "><span>ter</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--okc)" stroke-width="3" stroke-linecap="round" stroke-dasharray="50.3 50.27"/></svg><b>3/3</b></div><div class="c "><span>qua</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16.8 50.27"/></svg><b>1/3</b></div><div class="c on"><span>qui</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16.8 50.27"/></svg><b>1/3</b></div><div class="c fut"><span>sex</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.0 50.27"/></svg><b>0/1</b></div><div class="c fut"><span>sáb</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="2 3"/></svg><b>—</b></div><div class="c fut"><span>dom</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="2 3"/></svg><b>—</b></div></div></div>
   <div class="nt"><span class="ic" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#flag"/></svg></span><span><b>Bruno</b> <span class="m">· 10 km em 12 dias</span></span><a>Ver</a></div>
   <div class="nt"><span class="ic" style="background:hsl(48 96% 45% / .15);color:var(--ink)"><svg><use href="#quote"/></svg></span><span><b>1 depoimento</b> <span class="m">para revisar</span></span><a>Revisar</a></div>
  </div>
@@ -200,7 +207,7 @@
   <div style="display:flex;margin-top:12px"><span class="ab" style="flex:1;justify-content:center">Fechar</span></div>
  </div>
 </div>
-<p class="note">Esquerda: as ações rápidas viram chips roláveis no topo, com "Atribuir" primeiro (o botão flutuante saiu, para não repetir). A resposta rápida abre no próprio card. Com 4 pendências e 2 avisos, a página tem ~1,4 tela. Direita: "Ver resultados" e "Lembrar quem falta" abrem a mesma folha. "Lembrar" abre o chat de cada atleta com o texto já no campo; o coach revisa e envia.</p>
+<p class="note">Esquerda: as ações rápidas viram chips roláveis no topo, com "Atribuir" primeiro (o botão flutuante saiu, para não repetir). A resposta rápida abre no próprio card. Com 4 pendências e 2 avisos, a página tem ~1,5 tela. Direita: "Ver resultados" e "Lembrar quem falta" abrem a mesma folha. "Lembrar" abre o chat de cada atleta com o texto já no campo; o coach revisa e envia.</p>
 </div>
 </body>
 </html>
