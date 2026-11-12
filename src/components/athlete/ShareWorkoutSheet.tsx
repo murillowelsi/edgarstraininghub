@@ -58,6 +58,18 @@ const ShareWorkoutSheet = ({ open, onOpenChange, summary, alreadyPosted, onPostT
       footer: t.timeline.story.footer,
       authorName: displayName || user?.email || "",
       photoUrl: photoUrl ?? undefined,
+      labels: t.timeline.summary,
+      locale: language === "pt" ? "pt-BR" : "en",
+      badges: {
+        pr: t.timeline.summary.pr,
+        records: t.timeline.summary.records,
+        rpe: summary.rpe !== undefined ? t.timeline.summary.rpe.replace("{{n}}", String(summary.rpe)) : undefined,
+        percentDone:
+          summary.completionPercentage !== undefined && summary.completionPercentage < 100
+            ? t.timeline.summary.percentDone.replace("{{p}}", String(summary.completionPercentage))
+            : undefined,
+      },
+      viz: t.timeline.viz,
       format,
     })
       .then((blob) => {
