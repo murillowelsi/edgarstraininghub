@@ -98,7 +98,7 @@ const ServicesSection = () => {
             </div>
             <div className="hidden lg:block relative min-h-[600px] flex items-center justify-center">
               <img
-                src="/lovable-uploads/c2022b01-82d4-4894-b5f3-eba98aebfd4e.png"
+                src="/images/c2022b01-82d4-4894-b5f3-eba98aebfd4e.png"
                 alt={t.services.imageAlt}
                 className="absolute inset-0 w-full h-full object-cover"
               />

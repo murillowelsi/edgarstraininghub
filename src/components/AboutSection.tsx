@@ -25,7 +25,7 @@ const AboutSection = () => {
           <div className="relative animate-slide-in-left">
             <div className="rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500">
               <img
-                src="/lovable-uploads/ba2184b9-65d7-4393-87da-9d1999bc5169.png"
+                src="/images/ba2184b9-65d7-4393-87da-9d1999bc5169.png"
                 alt="Edgar Zanin - Personal Trainer"
                 className="w-full h-auto object-cover"
               />

@@ -9,18 +9,18 @@ const About = () => {
 
   // Placeholder certificate images - replace with actual paths
   const certificates = [
-    { src: "/lovable-uploads/cert1.svg", alt: "YMCA Level 3 Diploma" },
+    { src: "/images/cert1.svg", alt: "YMCA Level 3 Diploma" },
     {
-      src: "/lovable-uploads/cert2.svg",
+      src: "/images/cert2.svg",
       alt: "Anatomy and Physiology Certification",
     },
     {
-      src: "/lovable-uploads/cert3.svg",
+      src: "/images/cert3.svg",
       alt: "Gym Exercise Planning Certification",
     },
-    { src: "/lovable-uploads/cert4.svg", alt: "Nutrition Certification" },
+    { src: "/images/cert4.svg", alt: "Nutrition Certification" },
     {
-      src: "/lovable-uploads/cert5.svg",
+      src: "/images/cert5.svg",
       alt: "Safety and Wellbeing Certification",
     },
   ];
@@ -46,7 +46,7 @@ const About = () => {
             <div className="relative animate-slide-in-left">
               <div className="rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500">
                 <img
-                  src="/lovable-uploads/ba2184b9-65d7-4393-87da-9d1999bc5169.png"
+                  src="/images/ba2184b9-65d7-4393-87da-9d1999bc5169.png"
                   alt="Edgar Zanin - Personal Trainer"
                   className="w-full h-auto object-cover"
                 />
