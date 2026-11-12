@@ -15,21 +15,79 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["admin", "editor"];
     }
 
-    // Users collection: authenticated users can read their own, admins can read all and manage
-    // Users can also create their own document (self-registration via team invite)
+    // Keys changed by the current update
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function postAuthorIs(postId, uid) {
+      return get(/databases/$(database)/documents/timeline_posts/$(postId)).data.authorId == uid;
+    }
+
+    // likedBy may only change by adding or removing the caller's own uid
+    function togglesOnlyOwnLike() {
+      let before = resource.data.get("likedBy", []).toSet();
+      let after = request.resource.data.get("likedBy", []).toSet();
+      return after.difference(before).union(before.difference(after)).hasOnly([request.auth.uid]);
+    }
+
+    // Users collection
+    // - Self-registration (team invite) may only create an athlete profile with no subscription.
+    // - A user may only change their own photo; role and subscription fields are admin-only.
+    // NOTE: still readable by any signed-in user (feed/chat read names and photos).
+    //       Splitting a minimal public profile out of users is a pending data-model change.
     match /users/{userId} {
+      function isSelf() {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      function isValidSelfRegistration() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(["displayName", "email", "role", "subscriptionStatus",
+                                 "subscriptionPlan", "photoURL", "createdAt", "updatedAt"])
+          && d.get("role", "athlete") == "athlete"
+          && d.get("subscriptionStatus", "inactive") == "inactive"
+          && d.get("subscriptionPlan", "none") == "none";
+      }
+
       allow read: if request.auth != null;
-      allow create: if isAdmin() ||
-        (request.auth != null && request.auth.uid == userId);
+      allow create: if isAdmin() || (isSelf() && isValidSelfRegistration());
       allow update: if isAdmin() ||
-        (request.auth != null && request.auth.uid == userId &&
-         request.resource.data.diff(resource.data).affectedKeys().hasOnly(["photoURL"]));
+        (isSelf() && changedKeys().hasOnly(["photoURL"]));
       allow delete: if isAdmin();
 
+      // Push tokens: only the owner reads or writes them (/api/notify uses the Admin SDK).
+      // Doc id = the FCM token itself.
+      match /fcmTokens/{tokenId} {
+        allow read, delete: if isSelf();
+        allow create, update: if isSelf()
+          && request.resource.data.keys().hasOnly(["token", "updatedAt", "platform"])
+          && request.resource.data.token == tokenId;
+      }
+
+      // Feed activity notifications for userId.
+      // Created by the actor: likes/comments carry actorId == caller; mentions come from the post author.
       match /timelineNotifications/{notifId} {
-        allow read, update: if request.auth != null && request.auth.uid == userId;
-        allow create: if request.auth != null;
-        allow delete: if request.auth != null;
+        function isValidNotification() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(["postId", "authorName", "actorId", "caption", "type", "read", "createdAt"])
+            && d.postId is string
+            && d.read == false
+            && d.createdAt == request.time
+            && (
+              (d.type == "mention" && postAuthorIs(d.postId, request.auth.uid))
+              || (d.type in ["like", "comment", "comment_mention"]
+                  && d.actorId == request.auth.uid
+                  && exists(/databases/$(database)/documents/timeline_posts/$(d.postId)))
+            );
+        }
+
+        allow read: if isSelf();
+        allow update: if isSelf() && changedKeys().hasOnly(["read"]);
+        allow create: if request.auth != null && isValidNotification();
+        // Owner, admin, or the post author (deleting a post cleans up its notifications)
+        allow delete: if isSelf() || isAdmin() ||
+          (request.auth != null && postAuthorIs(resource.data.postId, request.auth.uid));
       }
     }
 
@@ -45,17 +103,22 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Workout assignments: admins can CRUD, athletes can read their own and update completion
+    // Workout assignments: admins can CRUD; athletes read their own and may only
+    // change completion/result fields (never athleteId, workoutId, schedule or assignedBy)
     match /workoutAssignments/{assignmentId} {
       allow read: if request.auth != null &&
         (isAdmin() || resource.data.athleteId == request.auth.uid);
-      // Athletes can create their own assignment (e.g., auto-assign on team join)
+      // Athletes can create their own assignment (e.g., auto-assign on team join, self-logged session)
       allow create: if isAdmin() ||
         (request.auth != null && request.resource.data.athleteId == request.auth.uid);
       allow delete: if isAdmin() ||
         (request.auth != null && resource.data.athleteId == request.auth.uid);
       allow update: if isAdmin() ||
-        (request.auth != null && resource.data.athleteId == request.auth.uid);
+        (request.auth != null
+          && resource.data.athleteId == request.auth.uid
+          && changedKeys().hasOnly(["completedAt", "completionPercentage", "totalTime",
+                                    "progressData", "activityData", "skipped", "rpe",
+                                    "athleteNotes", "updatedAt"]));
     }
 
     // Athlete events: athlete owns their events; admins can read all
@@ -128,7 +191,55 @@ service cloud.firestore {
     }
 
     // Chat rules: Admin can read/write any chat. Participants can read/write their own.
+    // Team group chats (id team_<teamId>) only ever contain the team's coach and members.
     match /chats/{chatId} {
+      function isTeamChat() {
+        return chatId.matches('team_.+');
+      }
+
+      function team() {
+        return get(/databases/$(database)/documents/teams/$(chatId.replace('^team_', '')));
+      }
+
+      function teamRoster() {
+        return team().data.get("memberIds", []).concat([team().data.coachId]);
+      }
+
+      // Participants may only be added (never dropped), and only team coach/members;
+      // groupName may only follow the team name.
+      function isValidTeamRosterChange() {
+        let before = resource.data.participantIds;
+        let after = request.resource.data.participantIds;
+        return after.hasAll(before)
+          && teamRoster().hasAll(after.removeAll(before))
+          && request.resource.data.get("groupName", "") in
+               [resource.data.get("groupName", ""), team().data.name];
+      }
+
+      function isValidParticipantUpdate() {
+        return changedKeys().hasOnly(["lastMessage", "lastMessageTime", "unreadCount",
+                                      "participantIds", "groupName"])
+          && (!changedKeys().hasAny(["participantIds", "groupName"])
+              || (isTeamChat() && isValidTeamRosterChange()));
+      }
+
+      // A team member who is not yet in the group chat adds themself (join via invite)
+      function isValidTeamSelfJoin() {
+        return isTeamChat()
+          && request.auth.uid in team().data.memberIds
+          && request.auth.uid in request.resource.data.participantIds
+          && changedKeys().hasOnly(["participantIds", "unreadCount", "groupName"])
+          && isValidTeamRosterChange();
+      }
+
+      function isValidCreate() {
+        return (!isTeamChat() && request.auth.uid in request.resource.data.participantIds)
+          || (isTeamChat()
+              && request.auth.uid in teamRoster()
+              && teamRoster().hasAll(request.resource.data.participantIds)
+              && request.resource.data.teamId == chatId.replace('^team_', ''));
+      }
+
       allow read: if request.auth != null && (
         isAdmin() ||
         (resource != null && request.auth.uid in resource.data.participantIds) ||
@@ -139,34 +250,44 @@ service cloud.firestore {
           chatId.matches('team_.*')
         ))
       );
-      
-      allow create: if request.auth != null && (
-        isAdmin() || 
-        request.auth.uid in request.resource.data.participantIds
-      );
-      
+
+      allow create: if request.auth != null && (isAdmin() || isValidCreate());
+
       allow update: if request.auth != null && (
         isAdmin() ||
-        request.auth.uid in resource.data.participantIds ||
-        // Allow self-joining a team group chat (athlete joining via invite link)
-        (chatId.matches('team_.*') &&
-         request.resource.data.participantIds.hasAll(resource.data.participantIds) &&
-         request.resource.data.participantIds.removeAll(resource.data.participantIds).hasOnly([request.auth.uid]))
+        (request.auth.uid in resource.data.participantIds && isValidParticipantUpdate()) ||
+        isValidTeamSelfJoin()
       );
-      
+
       allow delete: if isAdmin();
-      
+
+      // Messages: participants read and send as themselves; only the sender edits or deletes.
+      // Other participants may only flip `read` to true (mark as read).
       match /messages/{messageId} {
-        allow read, write: if request.auth != null && (
-          isAdmin() || 
-          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds
+        function isParticipant() {
+          return isAdmin() ||
+            request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
+        }
+
+        allow read: if request.auth != null && isParticipant();
+        allow create: if request.auth != null && isParticipant()
+          && request.resource.data.senderId == request.auth.uid;
+        allow update: if request.auth != null && isParticipant() && (
+          (resource.data.senderId == request.auth.uid
+            && request.resource.data.senderId == resource.data.senderId)
+          || (changedKeys().hasOnly(["read"]) && request.resource.data.read == true)
+        );
+        // Admin keeps delete for "delete chat" (removes all messages first)
+        allow delete: if request.auth != null && (
+          isAdmin() ||
+          (isParticipant() && resource.data.senderId == request.auth.uid)
         );
       }
     }
 
     // Subscription history: admins can read/write all, athletes can read their own
     match /subscriptionHistory/{historyId} {
-      allow read: if request.auth != null && 
+      allow read: if request.auth != null &&
         (isAdmin() || resource.data.athleteId == request.auth.uid);
       allow create, update, delete: if isAdmin();
     }
@@ -176,8 +297,8 @@ service cloud.firestore {
       // Public read: allows unauthenticated lookup by inviteToken on the join page
       allow read: if true;
 
-      // Only the team's coach (coachId) can create or delete
-      allow create: if request.auth != null
+      // Only an admin (coach) can create a team, as its own coach; only the coach deletes it
+      allow create: if isAdmin()
         && request.resource.data.coachId == request.auth.uid;
       allow delete: if request.auth != null
         && resource.data.coachId == request.auth.uid;
@@ -194,28 +315,61 @@ service cloud.firestore {
       );
     }
 
-    // Timeline posts: all authenticated users can read and create
-    // Only the author or an admin can delete; anyone authenticated can update (likes)
+    // Timeline posts: all authenticated users can read; authors create as themselves.
+    // Non-authors may only toggle their own like or move commentsCount by one (add/delete comment).
     match /timeline_posts/{postId} {
+      function isValidPostUpdate() {
+        let isAuthor = resource.data.authorId == request.auth.uid;
+        return (!changedKeys().hasAny(["likedBy"]) || togglesOnlyOwnLike())
+          && (!changedKeys().hasAny(["commentsCount"])
+              || (request.resource.data.commentsCount - resource.data.get("commentsCount", 0)) in [1, -1])
+          && (isAuthor
+              ? !changedKeys().hasAny(["authorId", "createdAt"])
+              : changedKeys().hasOnly(["likedBy", "commentsCount"]));
+      }
+
       allow read: if request.auth != null;
       allow create: if request.auth != null &&
-        request.resource.data.authorId == request.auth.uid;
-      allow update: if request.auth != null;
+        request.resource.data.authorId == request.auth.uid &&
+        request.resource.data.get("likedBy", []).size() == 0 &&
+        request.resource.data.get("commentsCount", 0) == 0;
+      allow update: if request.auth != null && isValidPostUpdate();
       allow delete: if request.auth != null &&
         (resource.data.authorId == request.auth.uid || isAdmin());
 
       match /comments/{commentId} {
+        function isValidCommentUpdate() {
+          let isAuthor = resource.data.authorId == request.auth.uid;
+          return (!changedKeys().hasAny(["likedBy"]) || togglesOnlyOwnLike())
+            && (isAuthor
+                ? !changedKeys().hasAny(["authorId", "createdAt"])
+                : changedKeys().hasOnly(["likedBy"]));
+        }
+
         allow read: if request.auth != null;
         allow create: if request.auth != null &&
-          request.resource.data.authorId == request.auth.uid;
-        allow update: if request.auth != null;
+          request.resource.data.authorId == request.auth.uid &&
+          request.resource.data.get("likedBy", []).size() == 0;
+        allow update: if request.auth != null && isValidCommentUpdate();
         allow delete: if request.auth != null &&
           (resource.data.authorId == request.auth.uid || isAdmin());
       }
 
+      // Index of the notifications a post produced, so deleting the post can clean them up.
+      // Written by whoever created that notification; read/deleted by the post author or admin.
       match /notificationRefs/{refId} {
-        allow read, create: if request.auth != null;
-        allow delete: if request.auth != null;
+        function isValidRef() {
+          let d = request.resource.data;
+          let notif = get(/databases/$(database)/documents/users/$(d.userId)/timelineNotifications/$(d.notificationId));
+          return d.keys().hasOnly(["userId", "notificationId"])
+            && notif.data.postId == postId
+            && (notif.data.get("actorId", "") == request.auth.uid
+                || postAuthorIs(postId, request.auth.uid));
+        }
+
+        allow read, delete: if request.auth != null &&
+          (isAdmin() || postAuthorIs(postId, request.auth.uid));
+        allow create: if request.auth != null && isValidRef();
       }
     }
 
