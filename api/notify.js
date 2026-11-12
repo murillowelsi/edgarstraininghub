@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { chatId, messageText, senderName, recipientId, idToken } = req.body || {};
+  const { chatId, messageText, recipientId, idToken } = req.body || {};
 
   if (
     typeof chatId !== 'string' || !chatId ||
@@ -70,6 +70,22 @@ export default async function handler(req, res) {
     ) {
       return res.status(403).json({ error: 'Forbidden' });
     }
+
+    // Sender name comes from the server (public profile), never from the client,
+    // and an e-mail address is never shown on a lock screen
+    let senderName;
+    const profileSnap = await db.collection('publicProfiles').doc(senderId).get();
+    let rawName = profileSnap.exists ? profileSnap.data().displayName : undefined;
+    let senderRole = profileSnap.exists ? profileSnap.data().role : undefined;
+    if (!rawName || !senderRole) {
+      const senderSnap = await db.collection('users').doc(senderId).get();
+      if (senderSnap.exists) {
+        rawName = rawName || senderSnap.data().displayName;
+        senderRole = senderRole || senderSnap.data().role;
+      }
+    }
+    if (rawName && !rawName.includes('@')) senderName = rawName;
+    else if (senderRole === 'admin') senderName = 'Coach';
 
     // Get recipient's FCM tokens
     const tokensSnap = await db
@@ -110,12 +126,12 @@ export default async function handler(req, res) {
           await messaging.send({
             token,
             notification: {
-              title: senderName || 'New message',
+              title: senderName || 'Nova mensagem',
               body: messageText.length > 100 ? messageText.slice(0, 100) + '…' : messageText,
             },
             data: {
               url: chatUrl,
-              title: senderName || 'New message',
+              title: senderName || 'Nova mensagem',
               body: messageText,
               unreadCount: String(Math.max(totalUnread, 1)),
             },

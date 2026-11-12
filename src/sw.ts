@@ -40,6 +40,10 @@ onBackgroundMessage(_messaging, (payload) => {
     (self as BadgingServiceWorkerGlobalScope).setAppBadge(unreadCount).catch(() => {})
   }
 
+  // Messages with a `notification` block are already shown by the FCM SDK.
+  // Showing it here too made every push appear twice.
+  if (payload.notification) return
+
   const options: ExtendedNotificationOptions = {
     body,
     icon:     '/pwa-192x192.png',
