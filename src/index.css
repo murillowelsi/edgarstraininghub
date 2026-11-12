@@ -21,8 +21,10 @@
     --primary-ink: 40 95% 30%;
     /* Popover, menu, sheet over a card */
     --surface-2: 210 40% 98%;
-    /* Feed background, one step behind the post cards so each post reads as a block */
+    /* Feed background, one step behind the post cards */
     --feed-canvas: 220 20% 95%;
+    /* Workout card surface (follows the theme) */
+    --workout-card: 0 0% 100%;
     /* Status: fill + readable text ("ink") */
     --success: 142 76% 36%;
     --success-ink: 142 72% 29%;
@@ -98,57 +100,59 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 220 5% 9%;
     --foreground: 0 0% 98%;
 
-    --card: 222 47% 13%;
+    --card: 220 5% 12%;
     --card-foreground: 0 0% 98%;
 
-    --surface-inverse: 222 47% 8%;
+    /* Neutral grey dark theme (hue 220, 5% saturation): docs/design/dark-neutral */
+    --surface-inverse: 220 5% 6%;
+    --feed-canvas: 220 5% 7%;
+    --workout-card: 220 5% 8%;
     --destructive-ink: 0 91% 71%;
     --primary-ink: 48 96% 45%;
-    --surface-2: 222 40% 16%;
-    --feed-canvas: 222 47% 7%;
+    --surface-2: 220 5% 15%;
     --success-ink: 142 69% 58%;
     --warning-ink: 43 96% 56%;
     --info-ink: 198 93% 60%;
 
-    --popover: 222 47% 13%;
+    --popover: 220 5% 12%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 48 96% 45%;
-    --primary-foreground: 222 47% 11%;
+    --primary-foreground: 220 5% 9%;
     --primary-glow: 48 96% 60%;
 
     --secondary: 25 95% 53%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 5% 17%;
+    --muted-foreground: 220 5% 66%;
 
-    --accent: 217 33% 17%;
+    --accent: 220 5% 17%;
     --accent-foreground: 48 96% 45%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
+    --border: 220 5% 24%;
+    --input: 220 5% 44%;
     --ring: 48 96% 45%;
     
     --gradient-primary: linear-gradient(135deg, hsl(48 96% 45%) 0%, hsl(48 96% 35%) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(25 95% 43%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(222 47% 11%) 100%), linear-gradient(135deg, hsl(48 96% 45% / 0.1) 0%, hsl(25 95% 53% / 0.1) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 5% 9%) 0%, hsl(220 5% 9%) 100%), linear-gradient(135deg, hsl(48 96% 45% / 0.1) 0%, hsl(25 95% 53% / 0.1) 100%);
     
     --shadow-glow: 0 0 30px hsl(48 96% 45% / 0.4);
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar-background: 220 5% 12%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-primary: 48 96% 45%;
+    --sidebar-primary-foreground: 220 5% 9%;
+    --sidebar-accent: 220 5% 15%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-border: 220 5% 24%;
+    --sidebar-ring: 48 96% 45%;
   }
 }
 
@@ -271,9 +275,9 @@
   }
 
   .dark .glass {
-    background: hsl(220 15% 12% / 0.55);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    backdrop-filter: blur(20px) saturate(180%);
+    background: hsl(220 5% 12% / 0.6);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    backdrop-filter: blur(20px) saturate(140%);
     border-color: hsl(0 0% 100% / 0.12);
     box-shadow:
       inset 0 1px 0 hsl(0 0% 100% / 0.14),
@@ -320,7 +324,7 @@
   }
 
   .dark .glass-sheet {
-    background: hsl(220 15% 10% / 0.78);
+    background: hsl(220 5% 10% / 0.8);
     border-color: hsl(0 0% 100% / 0.1);
     box-shadow:
       inset 0 1px 0 hsl(0 0% 100% / 0.12),
@@ -340,7 +344,7 @@
   }
 
   .dark .glass-menu {
-    background: hsl(220 15% 12% / 0.78);
+    background: hsl(220 5% 13% / 0.8);
     border-color: hsl(0 0% 100% / 0.1);
     box-shadow:
       inset 0 1px 0 hsl(0 0% 100% / 0.12),
