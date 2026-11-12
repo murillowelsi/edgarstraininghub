@@ -1,4 +1,4 @@
-import { addDays, endOfDay, isAfter, isSameDay, startOfDay, startOfWeek } from "date-fns";
+import { addDays, endOfDay, endOfMonth, endOfWeek, isAfter, isSameDay, isSameMonth, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { SessionDraft } from "@/lib/sessionDraft";
 import { actualDurationSec } from "@/utils/workoutDuration";
@@ -86,8 +86,13 @@ const isPartial = (a: AssignmentWithWorkout) => a.completionPercentage !== undef
  * Mon–Sun with one status per day. A day with several workouts shows what still
  * matters most: missed > planned > partial > done.
  */
-export function weekSummary(assignments: AssignmentWithWorkout[], now: Date = new Date()): WeekSummary {
-  const start = startOfWeek(now, { weekStartsOn: 1 });
+export function weekSummary(
+  assignments: AssignmentWithWorkout[],
+  now: Date = new Date(),
+  /** Any day of the week to show (the calendar pages through weeks); defaults to this week */
+  weekOf: Date = now
+): WeekSummary {
+  const start = startOfWeek(weekOf, { weekStartsOn: 1 });
   const todayStart = startOfDay(now);
 
   const days: WeekDay[] = Array.from({ length: 7 }, (_, i) => {
@@ -119,4 +124,54 @@ export function weekSummary(assignments: AssignmentWithWorkout[], now: Date = ne
     missed: coach.filter((a) => !a.completedAt && a.scheduledDate < todayStart).length,
     seconds: week.filter((a) => a.completedAt).reduce((sum, a) => sum + actualDurationSec(a), 0),
   };
+}
+
+// ---------- Calendar ----------
+
+export type AssignmentStatus = "done" | "partial" | "missed" | "planned" | "extra";
+
+/**
+ * One word per workout for the calendar (docs/design/athlete-calendar §2.1):
+ * an extra the athlete logged; done / partial once finished; missed when the
+ * day is over (or the coach marked it skipped); planned otherwise.
+ */
+export function assignmentStatus(a: AssignmentWithWorkout, now: Date = new Date()): AssignmentStatus {
+  if (a.selfLogged) return "extra";
+  if (a.completedAt) return isPartial(a) ? "partial" : "done";
+  if (a.skipped || a.scheduledDate < startOfDay(now)) return "missed";
+  return "planned";
+}
+
+export interface MonthDay {
+  date: Date;
+  inMonth: boolean;
+  isToday: boolean;
+  /** Up to 3, in day order */
+  dots: { type: string; status: AssignmentStatus }[];
+  more: number;
+}
+
+/** Mon–Sun grid covering the month, with the workout dots of each day */
+export function monthGrid(assignments: AssignmentWithWorkout[], month: Date, now: Date = new Date()): MonthDay[] {
+  const first = startOfMonth(month);
+  const start = startOfWeek(first, { weekStartsOn: 1 });
+  const end = endOfWeek(endOfMonth(month), { weekStartsOn: 1 });
+  const days: MonthDay[] = [];
+  for (let d = start; d <= end; d = addDays(d, 1)) {
+    const items = assignments.filter((a) => isSameDay(a.scheduledDate, d));
+    days.push({
+      date: d,
+      inMonth: isSameMonth(d, month),
+      isToday: isSameDay(d, now),
+      dots: items.slice(0, 3).map((a) => ({ type: a.workout.type, status: assignmentStatus(a, now) })),
+      more: Math.max(0, items.length - 3),
+    });
+  }
+  return days;
+}
+
+/** "9 of 14 done" for the month: coach-planned workouts only */
+export function monthDone(assignments: AssignmentWithWorkout[], month: Date): { done: number; planned: number } {
+  const coach = assignments.filter((a) => !a.selfLogged && isSameMonth(a.scheduledDate, month));
+  return { done: coach.filter((a) => a.completedAt).length, planned: coach.length };
 }
