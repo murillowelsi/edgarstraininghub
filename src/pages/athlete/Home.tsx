@@ -26,7 +26,6 @@ import { endOfDay, endOfWeek, format, isAfter, isSameDay, isToday, isWithinInter
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { CalendarCheck, CheckCircle2, ChevronRight, Dumbbell, Flame, Moon, Play, Plus, Trash2 } from "lucide-react";
 import { loadSessionDraft } from "@/lib/sessionDraft";
-import { NotificationBanner } from "@/components/NotificationBanner";
 import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -287,7 +286,6 @@ const AthleteHome = () => {
 
         {/* Ask for notification permission here too, not only inside the chat */}
         <div className="rounded-xl overflow-hidden empty:hidden">
-          <NotificationBanner />
         </div>
 
         {/* Stats Cards — what to do now; overall progress lives in the card below */}

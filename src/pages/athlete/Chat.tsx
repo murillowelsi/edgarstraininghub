@@ -11,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
-import { NotificationBanner } from "@/components/NotificationBanner";
 import { getPublicProfilesByRole } from "@/services/usersService";
 import { getTeamsByMember } from "@/services/teamsService";
 import type { PublicProfile } from "@/types/user";
@@ -228,7 +227,6 @@ export default function AthleteChat() {
 
     return (
         <AthletePortalLayout title={t.athlete.chat.title} showHeader={true} fullHeight={true} hideBottomNav={!!selectedChat}>
-            <NotificationBanner />
             <div className="flex flex-col md:flex-row flex-1 min-h-0 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
 
                 {/* Chat List Sidebar */}

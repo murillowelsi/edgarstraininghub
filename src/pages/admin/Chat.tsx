@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import { formatChatTime } from "@/components/chat/chatDates";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
-import { NotificationBanner } from "@/components/NotificationBanner";
 
 export default function AdminChat() {
     const { user } = useAuth();
@@ -291,7 +290,6 @@ export default function AdminChat() {
 
     return (
         <AdminLayout fullHeight hideBottomNav={!!selectedChat}>
-            <NotificationBanner />
             <div className="flex flex-col md:flex-row flex-1 min-h-0 md:mx-4 md:mt-4 bg-card md:rounded-lg md:border overflow-hidden md:shadow-sm">
 
                 {/* Chat List Sidebar */}
