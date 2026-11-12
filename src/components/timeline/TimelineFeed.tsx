@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Image, Loader2 } from "lucide-react";
-import { SectionSpinner } from "@/components/ui/spinner";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { TimelinePostCard } from "./TimelinePostCard";
 import { getTimelinePosts, subscribeToMentionCount, subscribeToTimelinePosts } from "@/services/timelineService";
@@ -11,6 +10,7 @@ import { useTimelineActions } from "@/contexts/TimelineActionsContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
+import { FeedSkeleton } from "@/components/feedback/skeletons";
 
 const PULL_THRESHOLD = 72;
 
@@ -149,7 +149,7 @@ export function TimelineFeed() {
   };
 
   if (loading) {
-    return <SectionSpinner />;
+    return <FeedSkeleton className="py-4" />;
   }
 
   const authorName = user?.email || "User";
@@ -216,11 +216,8 @@ export function TimelineFeed() {
 
           <div ref={sentinelRef} className="h-1" />
 
-          {loadingMore && (
-            <div className="flex justify-center py-6">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          )}
+          {/* Next page: one post-shaped placeholder at the end of the list */}
+          {loadingMore && <FeedSkeleton posts={1} className="py-4" />}
         </div>
       </div>
 

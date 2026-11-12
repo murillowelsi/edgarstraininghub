@@ -20,6 +20,7 @@ import { enUS, ptBR } from "date-fns/locale";
 import { Loader2, Search, Users2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface Props {
   workout: Workout;
@@ -160,9 +161,7 @@ export function AssignmentForm({ workout, initialDates, preSelectedAthleteIds, o
       </div>
 
       {loadingLists ? (
-        <div className="flex justify-center py-8">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        </div>
+        <ListSkeleton rows={4} />
       ) : tab === "athletes" ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2">

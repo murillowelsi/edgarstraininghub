@@ -15,7 +15,7 @@ import type { Workout } from "@/types/workout";
 import { resolveScheduledDate } from "@/utils/scheduledDay";
 import type { WorkoutAssignment, WorkoutAssignmentDocument } from "@/types/workoutAssignment";
 import { format, startOfDay } from "date-fns";
-import { Loader2, ChevronLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ChevronLeft, CheckCircle2, XCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/dates";
+import { TableSkeleton } from "@/components/feedback/skeletons";
 
 // Format seconds as mm:ss
 function formatTime(totalSeconds: number): string {
@@ -141,9 +142,7 @@ export default function AdminTeamStats() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <TableSkeleton className="p-4 md:p-8" cols={3} />
       </AdminLayout>
     );
   }

@@ -19,6 +19,7 @@ import { AlertCircle, Loader2, Plus, RotateCw, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AddExerciseButton } from "./AddExerciseButton";
 import { ExerciseFrames } from "./ExerciseFrames";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface ExerciseCatalogBrowserProps {
   onExerciseImported: (exercise: Exercise) => void;
@@ -120,10 +121,8 @@ const ExerciseCatalogBrowser = ({ onExerciseImported, addedCounts = {} }: Exerci
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 pb-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
+          {loading && all.length === 0 ? (
+            <ListSkeleton rows={5} />
           ) : failed ? (
             <div className="flex flex-col items-center text-center py-12 text-muted-foreground">
               <AlertCircle className="h-10 w-10 mb-3 opacity-60" />

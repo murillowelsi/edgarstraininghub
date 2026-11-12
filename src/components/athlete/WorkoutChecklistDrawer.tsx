@@ -24,6 +24,7 @@ import {
 import type { WorkoutType } from "@/types/workout";
 import { Loader2, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface Props {
   open: boolean;
@@ -160,10 +161,8 @@ export const WorkoutChecklistDrawer = ({
         </div>
 
         <div className="flex-1 overflow-auto px-4 pb-4 space-y-2">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
+          {loading && items.length === 0 ? (
+            <ListSkeleton rows={4} avatar={false} />
           ) : items.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
               {tc.empty}

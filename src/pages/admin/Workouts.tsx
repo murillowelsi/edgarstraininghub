@@ -19,6 +19,7 @@ import { ListItemCard } from "../../components/shared/ListItemCard";
 import { AssignWorkoutDialog } from "../../components/workout/AssignWorkoutDialog";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { Input } from "@/components/ui/input";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 const workoutTypeColors: Record<string, string> = {
   running: "#3b82f6",
@@ -198,9 +199,7 @@ const AdminWorkouts = () => {
         <div>
 
           {loading ? (
-            <div className="flex items-center justify-center h-40">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
+            <ListSkeleton />
           ) : filteredWorkouts.length === 0 ? (
             <AdminEmptyState
               icon={Dumbbell}

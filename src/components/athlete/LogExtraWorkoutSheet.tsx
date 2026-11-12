@@ -9,6 +9,7 @@ import { CalendarDays, ChevronRight, Dumbbell, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface Props {
   open: boolean;
@@ -84,9 +85,7 @@ const LogExtraWorkoutSheet = ({ open, onOpenChange, athleteId, date, assignments
         </DrawerHeader>
         <div className="px-4 pb-6 space-y-2 max-h-[60vh] overflow-y-auto">
           {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
+            <ListSkeleton rows={4} />
           ) : options.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               <Dumbbell className="h-10 w-10 mx-auto mb-2" />

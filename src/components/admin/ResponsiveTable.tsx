@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonFrame } from "@/components/feedback/skeletons";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { ReactNode, useState } from "react";
@@ -42,7 +43,7 @@ export function ResponsiveTable<TRow extends Row>({ columns, rows, rowKey, actio
 
   if (loading) {
     return (
-      <>
+      <SkeletonFrame>
         {/* Desktop skeleton */}
         <div className="hidden md:block rounded-lg border bg-card overflow-x-auto">
           <table className="w-full text-sm">
@@ -80,7 +81,7 @@ export function ResponsiveTable<TRow extends Row>({ columns, rows, rowKey, actio
             </div>
           ))}
         </div>
-      </>
+      </SkeletonFrame>
     );
   }
 

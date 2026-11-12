@@ -33,6 +33,7 @@ import {
   updateTestimonial,
 } from "@/services/testimonialsService";
 import type { Testimonial, TestimonialFormData } from "@/types/testimonial";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 const emptyForm = (): TestimonialFormData => ({
   name: "",
@@ -194,9 +195,7 @@ const AdminTestimonials = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-[40vh]">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
+          <ListSkeleton rows={4} />
         ) : filtered.length === 0 ? (
           <AdminEmptyState
             icon={MessageSquareQuote}

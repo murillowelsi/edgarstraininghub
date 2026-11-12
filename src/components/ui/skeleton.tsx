@@ -6,7 +6,8 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
+      // Pulse only when the person allows motion (design system 6.3)
+      className={cn("motion-safe:animate-pulse rounded-md bg-muted", className)}
       {...props}
     />
   )

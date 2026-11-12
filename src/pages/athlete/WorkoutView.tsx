@@ -85,6 +85,7 @@ const formatTime = (seconds: number | undefined) => {
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
+import { DetailSkeleton } from "@/components/feedback/skeletons";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -966,8 +967,8 @@ const AthleteWorkoutView = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background">
+        <DetailSkeleton className="mx-auto max-w-2xl p-4 pt-[max(1rem,env(safe-area-inset-top))]" />
       </div>
     );
   }

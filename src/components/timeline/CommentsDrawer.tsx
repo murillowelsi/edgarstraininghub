@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { TimelineComment } from "@/types/timeline";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { fullDateTime, relativeTime } from "./relativeTime";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface CommentsDrawerProps {
   open: boolean;
@@ -278,10 +279,8 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
 
         {/* Comments list */}
         <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-4">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
+          {loading && comments.length === 0 ? (
+            <ListSkeleton rows={3} />
           ) : comments.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-8">
               {t.timeline.comments.empty}

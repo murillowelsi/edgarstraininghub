@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonFrame } from "@/components/feedback/skeletons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getPublishedPosts } from "@/services/postsService";
 import type { Post } from "@/types/post";
@@ -75,6 +76,7 @@ const BlogPage = () => {
 
           {/* Posts Grid */}
           {loading ? (
+            <SkeletonFrame>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="overflow-hidden">
@@ -89,6 +91,7 @@ const BlogPage = () => {
                 </Card>
               ))}
             </div>
+            </SkeletonFrame>
           ) : posts.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">

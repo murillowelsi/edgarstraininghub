@@ -32,10 +32,10 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import { SectionSpinner } from "@/components/ui/spinner";
 import { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 const formatTime = (seconds: number) => {
   const hrs = Math.floor(seconds / 3600);
@@ -176,7 +176,7 @@ const AthleteWorkoutsList = () => {
   if (loading) {
     return (
       <AthletePortalLayout title={t.athlete.workouts.title}>
-        <SectionSpinner />
+        <ListSkeleton className="p-4" />
       </AthletePortalLayout>
     );
   }

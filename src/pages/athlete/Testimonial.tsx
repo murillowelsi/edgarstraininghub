@@ -1,7 +1,6 @@
 import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { SectionSpinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,6 +15,7 @@ import type { Testimonial } from "@/types/testimonial";
 import { ArrowLeft, Loader2, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FormSkeleton } from "@/components/feedback/skeletons";
 
 const AthleteTestimonial = () => {
   const { user, displayName, photoURL } = useAuth();
@@ -84,7 +84,7 @@ const AthleteTestimonial = () => {
   return (
     <AthletePortalLayout title={tt.pageTitle} hideBottomNav>
       {loading ? (
-        <SectionSpinner />
+        <FormSkeleton className="p-4" fields={2} />
       ) : (
         <div className="flex-1 overflow-auto pb-6">
           <div className="relative flex items-center px-4 py-3">

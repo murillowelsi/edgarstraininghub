@@ -47,7 +47,6 @@ import {
   Crown,
   Dumbbell,
   Flag,
-  Loader2,
   MessageSquareQuote,
   Plus,
   Shield,
@@ -59,6 +58,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { dateLocale, formatDate } from "@/lib/dates";
+import { StatsSkeleton } from "@/components/feedback/skeletons";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -356,9 +356,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <StatsSkeleton className="p-4 md:p-8 max-w-7xl mx-auto" />
       </AdminLayout>
     );
   }

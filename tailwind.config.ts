@@ -55,7 +55,28 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				'surface-inverse': 'hsl(var(--surface-inverse))',
+				'surface-2': 'hsl(var(--surface-2))',
+				'primary-ink': 'hsl(var(--primary-ink))',
 				'destructive-ink': 'hsl(var(--destructive-ink))',
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					ink: 'hsl(var(--success-ink))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					ink: 'hsl(var(--warning-ink))'
+				},
+				info: {
+					DEFAULT: 'hsl(var(--info))',
+					ink: 'hsl(var(--info-ink))'
+				},
+				sport: {
+					run: 'hsl(var(--sport-run))',
+					bike: 'hsl(var(--sport-bike))',
+					swim: 'hsl(var(--sport-swim))',
+					strength: 'hsl(var(--sport-strength))',
+					other: 'hsl(var(--sport-other))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -65,12 +86,6 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				},
-				brand: {
-					blue: '#0EA5E9', // Bright blue
-					orange: '#F97316', // Bright orange
-					dark: '#1E293B', // Dark slate
-					light: '#F8FAFC', // Light background
 				},
 			},
 			borderRadius: {
@@ -138,6 +153,44 @@ export default {
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
 				display: ['Montserrat', 'sans-serif']
+			},
+			// Type scale (design system 2.1). Display/title-lg/metric-lg+ also get
+			// Montserrat and metrics get tabular-nums in src/index.css.
+			fontSize: {
+				'display-xl': ['3.5rem', { lineHeight: '3.75rem', letterSpacing: '-0.02em', fontWeight: '800' }],
+				'display-lg': ['2.5rem', { lineHeight: '2.75rem', fontWeight: '700' }],
+				'display-md': ['2rem', { lineHeight: '2.375rem', fontWeight: '700' }],
+				'title-lg': ['1.5rem', { lineHeight: '1.875rem', fontWeight: '700' }],
+				'title-md': ['1.25rem', { lineHeight: '1.625rem', fontWeight: '600' }],
+				'title-sm': ['1.0625rem', { lineHeight: '1.375rem', fontWeight: '600' }],
+				'body-lg': ['1.125rem', { lineHeight: '1.75rem', fontWeight: '400' }],
+				body: ['1rem', { lineHeight: '1.5rem', fontWeight: '400' }],
+				'body-sm': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '400' }],
+				caption: ['0.75rem', { lineHeight: '1rem', fontWeight: '500' }],
+				overline: ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.08em', fontWeight: '600' }],
+				'metric-xl': ['3rem', { lineHeight: '3.25rem', fontWeight: '700' }],
+				'metric-lg': ['2rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+				'metric-md': ['1.25rem', { lineHeight: '1.5rem', fontWeight: '600' }],
+			},
+			// Layers (design system 3): stop using z-50 for everything
+			zIndex: {
+				sticky: '10',
+				fab: '30',
+				chrome: '40',
+				overlay: '50',
+				toast: '100',
+			},
+			// Motion (design system 6.1)
+			transitionDuration: {
+				instant: '100ms',
+				fast: '150ms',
+				base: '200ms',
+				moderate: '280ms',
+				slow: '400ms',
+			},
+			transitionTimingFunction: {
+				standard: 'cubic-bezier(0.2, 0, 0, 1)',
+				exit: 'cubic-bezier(0.4, 0, 1, 1)',
 			},
 		}
 	},

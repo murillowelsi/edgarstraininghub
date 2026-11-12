@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FormSkeleton, SkeletonFrame } from "@/components/feedback/skeletons";
 
 export default function JoinTeam() {
   const { inviteToken } = useParams<{ inviteToken: string }>();
@@ -122,9 +124,17 @@ export default function JoinTeam() {
   // --- Render states ---
 
   if (loadingTeam || authLoading) {
+    // Same shape as the invite card below: team photo, title, form
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="w-full max-w-sm space-y-6">
+          <SkeletonFrame className="flex flex-col items-center gap-3">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <Skeleton className="h-7 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </SkeletonFrame>
+          <FormSkeleton fields={3} />
+        </div>
       </div>
     );
   }

@@ -14,11 +14,11 @@ import {
   ChevronRight,
   Dumbbell,
   } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { workoutLabels } from "@/utils/workoutLabels";
 import { formatDate } from "@/lib/dates";
+import { CalendarSkeleton } from "@/components/feedback/skeletons";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -92,10 +92,7 @@ const AthleteCalendarView = () => {
   if (loading) {
     return (
       <AthletePortalLayout title={t.athlete.calendar.title}>
-        {/* Centred in the space between the top bar and the tab bar, not the top 60vh */}
-        <div className="flex min-h-[calc(100dvh-11rem)] w-full items-center justify-center">
-          <Spinner size="lg" />
-        </div>
+        <CalendarSkeleton className="p-4" />
       </AthletePortalLayout>
     );
   }

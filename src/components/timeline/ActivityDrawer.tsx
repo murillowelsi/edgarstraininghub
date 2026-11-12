@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Flame, MessageCircle, AtSign, Loader2 } from "lucide-react";
+import { Flame, MessageCircle, AtSign } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { CachedAvatar, CachedImage } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CommentsDrawer } from "./CommentsDrawer";
 import { relativeTime } from "./relativeTime";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface ActivityDrawerProps {
   open: boolean;
@@ -168,10 +169,8 @@ export function ActivityDrawer({ open, onOpenChange }: ActivityDrawerProps) {
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-6">
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
+          {loading && notifications.length === 0 ? (
+            <ListSkeleton rows={4} />
           ) : visible.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Flame className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />

@@ -20,6 +20,7 @@ import { getUserById } from "@/services/usersService";
 import type { User } from "@/types/user";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Shield, Loader2, Trash2, Check, EllipsisVertical, Search, Camera, X } from "lucide-react";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -293,9 +294,7 @@ export default function AdminTeams() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-40">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <ListSkeleton />
         ) : teams.length === 0 ? (
           <AdminEmptyState
             illustration="/undraw_security.svg"

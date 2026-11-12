@@ -30,6 +30,7 @@ import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
 import { ListItemCard } from "../../components/shared/ListItemCard";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -211,9 +212,7 @@ const AdminUsers = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-40">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <ListSkeleton />
         ) : (
           <Tabs defaultValue="athletes" className="w-full">
             <TabsList className="grid w-full sm:w-auto grid-cols-2 h-10 bg-muted/40 mb-4">

@@ -18,10 +18,10 @@ import {
   Target,
   Trophy,
 } from "lucide-react";
-import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
+import { DetailSkeleton } from "@/components/feedback/skeletons";
 
 const typeIcon = {
   race: Flag,
@@ -71,10 +71,11 @@ const EventDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editOpen]);
 
-  if (loading || !event || !user) {
+  // Skeleton only until the first event arrives; reloads after an edit keep it on screen
+  if (!event || !user) {
     return (
       <AthletePortalLayout title={t.athlete.events.title} hideBottomNav>
-        <SectionSpinner />
+        <DetailSkeleton className="p-4" />
       </AthletePortalLayout>
     );
   }

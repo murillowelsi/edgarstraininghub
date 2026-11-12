@@ -53,6 +53,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
+import { FormSkeleton } from "@/components/feedback/skeletons";
 
 type T = ReturnType<typeof useLanguage>["t"];
 
@@ -514,9 +515,7 @@ const StrengthWorkoutEditor = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-[50vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <FormSkeleton className="p-4 md:p-8 max-w-3xl" fields={3} />
       </AdminLayout>
     );
   }
