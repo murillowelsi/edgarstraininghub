@@ -1,6 +1,7 @@
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { openConsentSettings } from "@/lib/consent";
 
 // 40px hit area around each icon
 const socialLink = "h-10 w-10 flex items-center justify-center rounded-full text-gray-300 hover:bg-white/10 transition-colors";
@@ -79,6 +80,18 @@ const Footer = () => {
             <Link to="/app" className="inline-block py-2 underline-offset-2 hover:text-gray-200 hover:underline">
               {t.footer.athleteArea}
             </Link>
+            {" · "}
+            <Link to="/privacy" className="inline-block py-2 underline-offset-2 hover:text-gray-200 hover:underline">
+              {t.footer.privacy}
+            </Link>
+            {" · "}
+            <button
+              type="button"
+              onClick={openConsentSettings}
+              className="inline-block py-2 underline-offset-2 hover:text-gray-200 hover:underline"
+            >
+              {t.consent.settings}
+            </button>
           </p>
         </div>
       </div>

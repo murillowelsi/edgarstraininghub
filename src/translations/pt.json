@@ -1955,5 +1955,13 @@
     "emailInUse": "Já existe uma conta com esse e-mail. Entre com a sua senha.",
     "tooManyRequests": "Muitas tentativas seguidas. Espere alguns minutos e tente de novo.",
     "generic": "Algo deu errado. Tente de novo."
+  },
+  "consent": {
+    "title": "Cookies e privacidade",
+    "description": "Usamos o Google Analytics para entender como o site é usado. Ele só é ativado se você aceitar. Você pode mudar a escolha a qualquer momento no rodapé.",
+    "privacyLink": "Política de privacidade",
+    "accept": "Aceitar",
+    "decline": "Recusar",
+    "settings": "Preferências de cookies"
   }
 }

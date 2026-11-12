@@ -1,5 +1,6 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
+import ConsentBanner from "@/components/ConsentBanner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -65,6 +66,7 @@ const App = () => (
             <BrowserRouter>
               <ScrollToTop />
               <PullToRefresh />
+              <ConsentBanner />
               <Routes>
                 {/* PWA entry point — redirects to app based on auth state */}
                 <Route path="/app" element={<AppEntry />} />
