@@ -1121,11 +1121,7 @@
       "zone": "Zone {{n}}",
       "notes": "Notes",
       "notesPlaceholder": "Add notes about this stage",
-      "done": "Done",
-      "units": {
-        "sec": "sec",
-        "min": "min"
-      }
+      "done": "Done"
     }
   },
   "athlete": {

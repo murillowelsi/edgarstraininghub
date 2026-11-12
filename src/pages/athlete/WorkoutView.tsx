@@ -46,7 +46,7 @@ import {
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { WorkoutStage } from "@/types/workout";
 import { stageColors } from "@/types/workout";
-import { workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
+import { durationUnitLabel, workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
 import {
   ArrowLeft,
   Calendar,
@@ -125,7 +125,7 @@ const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, lapLabel: string)
       const secs = totalSeconds % 60;
       return `${mins}:${secs.toString().padStart(2, "0")} ${unit}`;
     }
-    return `${value} ${unit}`;
+    return `${value} ${durationUnitLabel(unit)}`;
   }
   return L.duration(stage.duration.type);
 };

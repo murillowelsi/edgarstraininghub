@@ -54,7 +54,7 @@ import StageEditor from "../../components/workout/StageEditor";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage, type TranslationsType } from "../../contexts/LanguageContext";
-import { workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
+import { durationUnitLabel, workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
 
 // Helper to format duration for display
 const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, pressLapButtonLabel: string) => {
@@ -62,7 +62,7 @@ const formatDuration = (stage: WorkoutStage, L: WorkoutLabels, pressLapButtonLab
     return pressLapButtonLabel;
   }
   if (stage.duration.value !== undefined) {
-    const unit = stage.duration.unit || "";
+    const unit = durationUnitLabel(stage.duration.unit);
     return `${stage.duration.value} ${unit}`;
   }
   return L.duration(stage.duration.type);

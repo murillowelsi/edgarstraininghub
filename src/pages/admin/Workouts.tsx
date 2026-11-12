@@ -228,7 +228,7 @@ const AdminWorkouts = () => {
                         className="text-xs font-normal border-transparent"
                         style={{ backgroundColor: `${color}18`, color }}
                       >
-                        {workout.type}
+                        {t.workoutMeta.types[workout.type] ?? workout.type}
                       </Badge>
                     }
                     actions={

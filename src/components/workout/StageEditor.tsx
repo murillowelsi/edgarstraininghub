@@ -354,7 +354,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="min">min</SelectItem>
-                      <SelectItem value="sec">{se.units.sec}</SelectItem>
+                      <SelectItem value="sec">s</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

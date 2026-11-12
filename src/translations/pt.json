@@ -1121,11 +1121,7 @@
       "zone": "Zona {{n}}",
       "notes": "Observações",
       "notesPlaceholder": "Adicione observações sobre esta etapa",
-      "done": "Concluir",
-      "units": {
-        "sec": "seg",
-        "min": "min"
-      }
+      "done": "Concluir"
     }
   },
   "athlete": {

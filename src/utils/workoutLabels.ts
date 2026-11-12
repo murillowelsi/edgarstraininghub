@@ -28,3 +28,6 @@ export const workoutLabels = (t: Translations) => ({
 });
 
 export type WorkoutLabels = ReturnType<typeof workoutLabels>;
+
+/** Display form of a stored duration unit: seconds use the SI symbol "s" in every language. */
+export const durationUnitLabel = (unit: string | undefined): string => (unit === "sec" ? "s" : unit || "");

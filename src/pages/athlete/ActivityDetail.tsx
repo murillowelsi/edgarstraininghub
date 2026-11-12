@@ -238,7 +238,7 @@ const ActivityDetail = () => {
                   if (!stage) return null;
                   return (
                     <div key={i} className="flex items-center justify-between text-sm py-2 border-b border-border/30 last:border-0">
-                      <span className="capitalize">{stage.type}</span>
+                      <span>{t.workoutMeta.stages[stage.type] ?? stage.type}</span>
                       <span className="font-medium font-mono">
                         {s.time != null
                           ? formatTimeShort(s.time)
