@@ -940,7 +940,35 @@
         "created": "Treino criado",
         "createdDescription": "Seu treino foi criado com sucesso.",
         "saveError": "Erro ao salvar treino."
-      }
+      },
+      "previewTitle": "Prévia do atleta",
+      "lapShort": "volta",
+      "tabEdit": "Editar",
+      "tabPreview": "Prévia",
+      "unsaved": "Alterações não salvas",
+      "saved": "Salvo",
+      "newDraft": "Ainda não salvo",
+      "assign": "Atribuir",
+      "addTemplate": "Modelo",
+      "duplicate": "Duplicar",
+      "stageDeleted": "Etapa apagada",
+      "undo": "Desfazer",
+      "leaveTitle": "Sair sem salvar?",
+      "leaveDescription": "As alterações deste treino serão perdidas.",
+      "leaveConfirm": "Sair sem salvar",
+      "stay": "Continuar editando",
+      "fixToSave": "Corrija para salvar",
+      "issues": {
+        "noName": "Dê um nome ao treino",
+        "emptyRepeat": "Um bloco de repetição está vazio",
+        "minAboveMax": "Um alvo tem o mínimo acima do máximo",
+        "noStages": "Adicione as etapas do treino",
+        "noExercises": "Adicione os exercícios",
+        "noTarget": "{{n}} etapa(s) sem alvo",
+        "noDuration": "{{n}} etapa(s) sem duração"
+      },
+      "fixAction": "Abrir",
+      "totalsLine": "{{parts}}"
     },
     "calendar": {
       "athlete": "Atleta",
@@ -1124,7 +1152,8 @@
       "zone": "Zona {{n}}",
       "notes": "Observações",
       "notesPlaceholder": "Adicione observações sobre esta etapa",
-      "done": "Concluir"
+      "done": "Concluir",
+      "clockInvalid": "Use mm:ss (ex.: 4:30)"
     }
   },
   "athlete": {
