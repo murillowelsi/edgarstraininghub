@@ -2,6 +2,8 @@ import YouTubeFacade from "@/components/YouTubeFacade";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLatestYouTubeVideo } from "@/hooks/useLatestYouTubeVideo";
 import { Award, Clock, Users } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonFrame } from "@/components/feedback/skeletons";
 
 const AboutSection = () => {
   const { t } = useLanguage(); // Use the translation hook
@@ -100,11 +102,9 @@ const AboutSection = () => {
             </h3>
             <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
               {loading ? (
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <p className="text-muted-foreground">
-                    {t.youtube.loading}
-                  </p>
-                </div>
+                  <SkeletonFrame className="h-full w-full" label={t.youtube.loading}>
+                    <Skeleton className="aspect-video w-full rounded-none" />
+                  </SkeletonFrame>
               ) : video?.videoId ? (
                 <YouTubeFacade videoId={video.videoId} title={video.title} thumbnail={video.thumbnail} />
               ) : (

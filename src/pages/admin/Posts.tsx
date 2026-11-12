@@ -22,6 +22,7 @@ import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { formatDate } from "@/lib/dates";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const emptyForm = (): PostFormData => ({
   title: "",
@@ -313,8 +314,9 @@ const AdminPosts = () => {
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFeaturedImageUpload(f); }}
                 />
                 {uploadingImage ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  // Uploading: skeleton where the image will appear
+                  <div role="status" className="flex w-full flex-col items-center gap-2">
+                    <Skeleton className="h-24 w-full max-w-xs rounded-lg" />
                     <p className="text-sm text-muted-foreground">{t.admin.postForm.uploading}</p>
                   </div>
                 ) : (

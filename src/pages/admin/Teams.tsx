@@ -21,6 +21,7 @@ import type { User } from "@/types/user";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Shield, Loader2, Trash2, Check, EllipsisVertical, Search, Camera, X } from "lucide-react";
 import { ListSkeleton } from "@/components/feedback/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -88,7 +89,7 @@ function TeamPhotoUpload({
           />
           <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center overflow-hidden ring-2 ring-background">
             {uploading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Skeleton className="h-full w-full rounded-full" />
             ) : photoURL ? (
               <img src={photoURL} alt={label} className="h-full w-full object-cover" />
             ) : (

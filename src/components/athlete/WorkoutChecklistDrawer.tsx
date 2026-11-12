@@ -136,7 +136,7 @@ export const WorkoutChecklistDrawer = ({
           <DrawerTitle>{tc.title}</DrawerTitle>
           <DrawerDescription>
             {loading
-              ? t.common.loading
+              ? <span aria-hidden="true" className="inline-block h-4 w-28 rounded-md bg-muted align-middle motion-safe:animate-pulse" />
               : tc.itemsChecked
                   .replace("{{checked}}", String(checkedCount))
                   .replace("{{total}}", String(items.length))}

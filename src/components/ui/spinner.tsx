@@ -10,6 +10,10 @@ const SIZE_CLASS: Record<SpinnerSize, string> = {
   lg: "h-8 w-8",
 };
 
+/**
+ * Only for an action in progress inside a button ("Saving…"). Screens, lists
+ * and app start use skeletons (components/feedback) instead.
+ */
 export const Spinner = ({
   size = "md",
   className,
@@ -18,16 +22,4 @@ export const Spinner = ({
   className?: string;
 }) => (
   <Loader2 className={cn("animate-spin text-primary", SIZE_CLASS[size], className)} />
-);
-
-export const PageSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <Spinner size="lg" />
-  </div>
-);
-
-export const SectionSpinner = () => (
-  <div className="flex items-center justify-center h-[60vh]">
-    <Spinner size="lg" />
-  </div>
 );

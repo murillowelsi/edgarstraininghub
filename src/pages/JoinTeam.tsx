@@ -15,6 +15,21 @@ import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FormSkeleton, SkeletonFrame } from "@/components/feedback/skeletons";
 
+
+/** Invite card placeholder: team photo, title, form (loading the team or auto-joining). */
+const InviteCardSkeleton = () => (
+  <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="w-full max-w-sm space-y-6">
+      <SkeletonFrame className="flex flex-col items-center gap-3">
+        <Skeleton className="h-16 w-16 rounded-full" />
+        <Skeleton className="h-7 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </SkeletonFrame>
+      <FormSkeleton fields={3} />
+    </div>
+  </div>
+);
+
 export default function JoinTeam() {
   const { inviteToken } = useParams<{ inviteToken: string }>();
   const navigate = useNavigate();
@@ -126,16 +141,7 @@ export default function JoinTeam() {
   if (loadingTeam || authLoading) {
     // Same shape as the invite card below: team photo, title, form
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="w-full max-w-sm space-y-6">
-          <SkeletonFrame className="flex flex-col items-center gap-3">
-            <Skeleton className="h-16 w-16 rounded-full" />
-            <Skeleton className="h-7 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </SkeletonFrame>
-          <FormSkeleton fields={3} />
-        </div>
-      </div>
+      <InviteCardSkeleton />
     );
   }
 
@@ -182,9 +188,8 @@ export default function JoinTeam() {
   // Guard: authenticated athlete being processed (auto-join in useEffect)
   if (isAthlete && user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      // Joining in the background: same invite-card skeleton, no spinner
+      <InviteCardSkeleton />
     );
   }
 

@@ -1,6 +1,8 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLatestYouTubeVideo } from "@/hooks/useLatestYouTubeVideo";
 import YouTubeFacade from "@/components/YouTubeFacade";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonFrame } from "@/components/feedback/skeletons";
 
 const YouTubeSection = () => {
   const { t } = useLanguage();
@@ -23,9 +25,9 @@ const YouTubeSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
             {loading ? (
-              <div className="w-full h-full flex items-center justify-center bg-muted">
-                <p className="text-muted-foreground">{t.youtube.loading}</p>
-              </div>
+                <SkeletonFrame className="h-full w-full" label={t.youtube.loading}>
+                  <Skeleton className="aspect-video w-full rounded-none" />
+                </SkeletonFrame>
             ) : error ? (
               // Friendly fallback; the technical error stays in the console, not on the page
               <div className="w-full h-full flex flex-col items-center justify-center bg-background/60 gap-3 p-6 text-center">

@@ -30,6 +30,7 @@ import AdminLayout from "../../components/AdminLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import { FormSkeleton } from "@/components/feedback/skeletons";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Custom horizontal rule blot
 const BlockEmbed = Quill.import('blots/block/embed');
@@ -383,8 +384,9 @@ const AdminPostForm = () => {
                             disabled={saving || uploadingImage}
                           />
                           {uploadingImage ? (
-                            <div className="flex flex-col items-center gap-3">
-                              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                            // Uploading: skeleton where the featured image will appear
+                            <div role="status" className="flex w-full flex-col items-center gap-3">
+                              <Skeleton className="aspect-[1200/630] w-full max-w-md rounded-lg" />
                               <p className="text-sm text-muted-foreground">{t.admin.postForm.uploadingImage}</p>
                             </div>
                           ) : (

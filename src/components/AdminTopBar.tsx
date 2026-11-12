@@ -6,7 +6,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
-import { Spinner } from "@/components/ui/spinner";
 import { auth } from "../lib/firebase";
 import { signOut } from "firebase/auth";
 import { updateOwnPhoto } from "../services/usersService";
@@ -152,8 +151,9 @@ const AdminTopBar = ({ chatUnreadCount = 0, pageTitle }: AdminTopBarProps) => {
                     <Camera className="h-5 w-5 text-white" />
                   </div>
                   {isUploadingPhoto && (
-                    <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-                      <Spinner size="xs" className="text-white" />
+                    // Uploading: the avatar pulses as a skeleton instead of a spinner
+                    <div role="status" className="absolute inset-0 rounded-full bg-muted motion-safe:animate-pulse">
+                      <span className="sr-only">{t.common.saving}</span>
                     </div>
                   )}
                 </button>
