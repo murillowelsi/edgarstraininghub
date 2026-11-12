@@ -210,7 +210,7 @@ const StageItem = ({
                 <Repeat className="h-4 w-4" />
               </div>
               <div className="flex-1 text-left min-w-0">
-                <p className="font-semibold text-sm">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}x</p>
+                <p className="font-semibold text-sm">{t.athlete.workoutView.repeat} {stage.repeatCount || 2}×</p>
                 <p className="text-xs text-muted-foreground">
                   {stage.stages?.length || 0} {t.athlete.workoutView.stages}
                 </p>
