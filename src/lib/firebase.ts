@@ -1,13 +1,14 @@
 import { getAnalytics, type Analytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { connectAuthEmulator, getAuth, type Auth } from "firebase/auth";
 import {
+  connectFirestoreEmulator,
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
   type Firestore,
 } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 import { getMessaging, type Messaging } from "firebase/messaging";
 
 const firebaseConfig = {
@@ -20,8 +21,30 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Local Firebase emulator (npm run dev:emu, see docs/testing/emulator.md).
+// Only on when the build sets VITE_USE_EMULATOR=true; otherwise nothing changes.
+export const useEmulator = import.meta.env.VITE_USE_EMULATOR === "true";
+const emulatorHost = import.meta.env.VITE_EMULATOR_HOST || "127.0.0.1";
+// Ports must match "emulators" in firebase.json.
+const EMULATOR_PORTS = { auth: 9099, firestore: 8081, storage: 9199 };
+
+// Guard: the emulator must only ever run against a demo project, so a wrong
+// .env can never point a local session with fake data at production.
+if (useEmulator && !String(firebaseConfig.projectId || "").startsWith("demo-")) {
+  throw new Error(
+    `VITE_USE_EMULATOR is on but VITE_FIREBASE_PROJECT_ID "${firebaseConfig.projectId}" is not a demo-* project.`
+  );
+}
+
+const connectAuth = (a: Auth): Auth => {
+  if (useEmulator) {
+    connectAuthEmulator(a, `http://${emulatorHost}:${EMULATOR_PORTS.auth}`, { disableWarnings: true });
+  }
+  return a;
+};
+
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+export const auth = connectAuth(getAuth(app));
 // Persistent cache: reads work offline (gym basements!) and writes are queued
 // in IndexedDB until the connection comes back. Falls back to the default
 // in-memory cache where IndexedDB isn't available.
@@ -37,23 +60,28 @@ const createDb = (): Firestore => {
 };
 export const db = createDb();
 export const storage = getStorage(app);
+if (useEmulator) {
+  connectFirestoreEmulator(db, emulatorHost, EMULATOR_PORTS.firestore);
+  connectStorageEmulator(storage, emulatorHost, EMULATOR_PORTS.storage);
+}
 
 // Secondary app instance for creating users without affecting current session
 const secondaryApp = initializeApp(firebaseConfig, "secondary");
-export const secondaryAuth = getAuth(secondaryApp);
+export const secondaryAuth = connectAuth(getAuth(secondaryApp));
 
-// Analytics is optional - may be blocked by ad blockers
+// Analytics is optional - may be blocked by ad blockers. Off in the emulator.
 export let analytics: Analytics | null = null;
 try {
-  analytics = getAnalytics(app);
+  if (!useEmulator) analytics = getAnalytics(app);
 } catch (e) {
   console.warn("Analytics blocked or unavailable");
 }
 
-// Firebase Cloud Messaging — only available in browsers that support service workers
+// Firebase Cloud Messaging — only available in browsers that support service workers.
+// Off in the emulator: there is no FCM emulator.
 export let messaging: Messaging | null = null;
 try {
-  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  if (!useEmulator && typeof window !== "undefined" && "serviceWorker" in navigator) {
     messaging = getMessaging(app);
   }
 } catch (e) {
