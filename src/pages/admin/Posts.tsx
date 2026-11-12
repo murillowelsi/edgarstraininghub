@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import { createPost, deletePost, generateSlug, getAllPosts } from "@/services/postsService";
 import type { Post, PostFormData } from "@/types/post";
-import { format } from "date-fns";
 import { Edit, FileText, Loader2, Plus, Trash2, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ReactQuill from "react-quill";
@@ -22,6 +21,7 @@ import { AdminPageHeader } from "../../components/admin/AdminPageHeader";
 import { ResponsiveTable } from "../../components/admin/ResponsiveTable";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { formatDate } from "@/lib/dates";
 
 const emptyForm = (): PostFormData => ({
   title: "",
@@ -43,7 +43,7 @@ const AdminPosts = () => {
   const [newPostForm, setNewPostForm] = useState<PostFormData>(emptyForm());
   const { toast } = useToast();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const quillModules = useMemo(() => ({
     toolbar: [
@@ -182,7 +182,7 @@ const AdminPosts = () => {
             ) : (
               <Badge variant="secondary">{t.admin.posts.draft}</Badge>
             ),
-            created: format(post.createdAt, "MMM d, yyyy"),
+            created: formatDate(post.createdAt, "short", language),
             _post: post,
           }))}
           actions={(row) => {

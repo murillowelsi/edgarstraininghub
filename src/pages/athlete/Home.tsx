@@ -9,7 +9,6 @@ import { ResponsiveConfirm } from "@/components/ui/responsive-confirm";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ptBR } from "date-fns/locale";
 import { useTopBarMenu } from "@/contexts/TopBarMenuContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -31,6 +30,7 @@ import { NotificationBanner } from "@/components/NotificationBanner";
 import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -87,7 +87,6 @@ const tones = {
 const AthleteHome = () => {
   const { user, photoURL } = useAuth();
   const { t, language } = useLanguage();
-  const dateLocale = language === "pt" ? ptBR : undefined;
   const { toast } = useToast();
   const { setIsMenuOpen } = useTopBarMenu();
   const [displayName, setDisplayName] = useState<string>("");
@@ -309,7 +308,7 @@ const AthleteHome = () => {
             tone={tones.next}
             label={th.statNext}
             value={nextWorkout ? nextWorkout.workout.name : th.nextNone}
-            sub={nextWorkout ? format(nextWorkout.scheduledDate, language === "pt" ? "EEEE, d MMM" : "EEEE, MMM d", { locale: dateLocale }) : undefined}
+            sub={nextWorkout ? formatDate(nextWorkout.scheduledDate, "weekday", language) : undefined}
           />
         </div>
 
@@ -338,7 +337,7 @@ const AthleteHome = () => {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base capitalize">{format(centerDate, "MMMM yyyy", { locale: dateLocale })}</CardTitle>
+              <CardTitle className="text-base capitalize">{formatDate(centerDate, "monthYear", language)}</CardTitle>
               <button onClick={handleTodayClick} className="-my-2 -mr-2 px-2 py-3 text-sm text-primary font-medium hover:underline">
                 {t.athlete.home.today}
               </button>
@@ -359,7 +358,7 @@ const AthleteHome = () => {
             {/* Selected Date Workouts */}
             <div className="mt-4 space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
-                {isToday(selectedDate) ? t.athlete.home.todaysWorkouts : format(selectedDate, language === "pt" ? "EEEE, d MMM" : "EEEE, MMM d", { locale: dateLocale })}
+                {isToday(selectedDate) ? t.athlete.home.todaysWorkouts : formatDate(selectedDate, "weekday", language)}
               </p>
 
               {selectedDateAssignments.length === 0 ? (

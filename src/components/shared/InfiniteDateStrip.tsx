@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { addDays, format, isSameDay, isToday, startOfDay } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatDate } from "@/lib/dates";
 import {
   forwardRef,
   useImperativeHandle,
@@ -50,7 +50,6 @@ export const InfiniteDateStrip = forwardRef<
   ref,
 ) {
   const { t, language } = useLanguage();
-  const dateLocale = language === "pt" ? ptBR : undefined;
   const scrollRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const prependedCountRef = useRef(0);
@@ -165,7 +164,7 @@ export const InfiniteDateStrip = forwardRef<
         // The visible "Wed 28" is too terse for screen readers
         const count = workoutCount?.(day) ?? 0;
         const ariaLabel = [
-          format(day, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMMM d", { locale: dateLocale }),
+          formatDate(day, "weekdayLong", language),
           count > 0 &&
             (count === 1 ? t.common.workoutCountOne : t.common.workoutCountOther.replace("{{count}}", String(count))),
         ]
@@ -193,7 +192,7 @@ export const InfiniteDateStrip = forwardRef<
             )}
           >
             <span className="text-xs font-medium opacity-70">
-              {format(day, "EEE", { locale: dateLocale })}
+              {formatDate(day, "dayNameShort", language)}
             </span>
             <span className="text-lg font-bold">{format(day, "d")}</span>
             {hasWk && (

@@ -47,8 +47,6 @@ import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { WorkoutStage } from "@/types/workout";
 import { stageColors } from "@/types/workout";
 import { workoutLabels, type WorkoutLabels } from "@/utils/workoutLabels";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import {
   ArrowLeft,
   Calendar,
@@ -84,6 +82,7 @@ const formatTime = (seconds: number | undefined) => {
 };
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -1131,9 +1130,7 @@ const AthleteWorkoutView = () => {
                   <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
-                      {format(assignment.scheduledDate, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMM d", {
-                        locale: language === "pt" ? ptBR : undefined,
-                      })}
+                      {formatDate(assignment.scheduledDate, "weekdayLong", language)}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Layers className="h-4 w-4" />

@@ -6,12 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getPublishedPosts } from "@/services/postsService";
 import type { Post } from "@/types/post";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { Timestamp } from "firebase/firestore";
 import { Calendar, ChevronRight, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 const BlogPage = () => {
   const { t, language } = useLanguage();
@@ -118,7 +117,7 @@ const BlogPage = () => {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                           <Calendar className="h-4 w-4" />
                           <time dateTime={post.createdAt.toISOString()}>
-                            {format(post.createdAt, "d MMM yyyy", language === "pt" ? { locale: ptBR } : undefined)}
+                            {formatDate(post.createdAt, "long", language)}
                           </time>
                         </div>
                         <h2 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">

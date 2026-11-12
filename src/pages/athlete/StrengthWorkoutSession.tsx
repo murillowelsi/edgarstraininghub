@@ -70,6 +70,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatHold, parseTimedReps } from "@/utils/timedReps";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
 
 // Types for tracking workout progress
 interface SetProgress {
@@ -609,7 +610,7 @@ const StrengthWorkoutSession = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, displayName, photoURL, userRole } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
 
   // State
@@ -1389,7 +1390,7 @@ const StrengthWorkoutSession = () => {
               <X className="h-5 w-5" />
             </Link>
             <span className="font-medium">
-              {format(assignment.scheduledDate, "d MMM yyyy")}
+              {formatDate(assignment.scheduledDate, "short", language)}
             </span>
             <Button type="button" variant="ghost" size="icon">
               <MoreVertical className="h-5 w-5" />

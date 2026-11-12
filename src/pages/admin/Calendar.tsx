@@ -36,22 +36,7 @@ import type { User } from "@/types/user";
 import type { WorkoutType } from "@/types/workout";
 import type { AssignmentWithDetails } from "@/types/workoutAssignment";
 import { SessionResults } from "@/components/workout/SessionResults";
-import {
-  addDays,
-  addMonths,
-  eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isSameDay,
-  isSameMonth,
-  isToday,
-  isTomorrow,
-  isWeekend,
-  startOfMonth,
-  startOfWeek,
-  subMonths,
-} from "date-fns";
+import { addDays, addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday, isTomorrow, isWeekend, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   Check,
@@ -74,7 +59,7 @@ import { workoutLabels } from "@/utils/workoutLabels";
 import { Calendar as DayPickerCalendar } from "@/components/ui/calendar";
 import { useAuth } from "@/contexts/AuthContext";
 import { duplicateWorkoutForAthlete } from "@/services/workoutsService";
-import { enUS, ptBR } from "date-fns/locale";
+import { dateLocale, formatDate } from "@/lib/dates";
 import {
   athleteAccentTextClass,
   athleteChipClass,
@@ -108,7 +93,7 @@ const CalendarDay = ({
   onAssignmentClick,
   onEmptyCellClick,
 }: CalendarDayProps) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const isCurrentMonth = isSameMonth(date, currentMonth);
   const isTodayDate = isToday(date);
   const isWeekendDay = isWeekend(date);
@@ -199,7 +184,7 @@ const CalendarDay = ({
                     </p>
                     {isCompleted && (
                       <p className="text-green-600 text-xs">
-                        Completed {format(assignment.completedAt!, "PPp")}
+                        {t.admin.calendar.completedOn} {formatDate(assignment.completedAt!, "dateTime", language)}
                       </p>
                     )}
                     {assignment.rpe !== undefined && (
@@ -274,7 +259,7 @@ const CalendarDay = ({
 
 const AdminCalendar = () => {
   const { t, language } = useLanguage();
-  const dateFnsLocale = language === "pt" ? ptBR : enUS;
+  const dateFnsLocale = dateLocale(language);
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -306,7 +291,7 @@ const AdminCalendar = () => {
   const formatDateLabel = (date: Date) => {
     if (isToday(date)) return t.admin.calendar.today;
     if (isTomorrow(date)) return t.admin.calendar.tomorrow;
-    return format(date, "EEEE");
+    return formatDate(date, "dayName", language);
   };
 
   const scrollToToday = (behavior: ScrollBehavior = "smooth") => {
@@ -471,7 +456,7 @@ const AdminCalendar = () => {
       toast({
         title: t.admin.calendar.dateChanged.replace(
           "{{date}}",
-          format(date, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMMM d", { locale: dateFnsLocale })
+          formatDate(date, "weekdayLong", language)
         ),
       });
       setSelectedAssignment({ ...selectedAssignment, scheduledDate: date });
@@ -541,7 +526,7 @@ const AdminCalendar = () => {
                 onClick={handleToday}
                 className="px-3 py-1.5 text-sm font-semibold rounded-md hover:bg-muted transition-colors min-w-[120px] text-center"
               >
-                {format(currentMonth, "MMM yyyy")}
+                {formatDate(currentMonth, "monthYearShort", language)}
               </button>
               <Button variant="ghost" size="icon" onClick={handleNextMonth}>
                 <ChevronRight className="h-4 w-4" />
@@ -645,7 +630,7 @@ const AdminCalendar = () => {
                         {formatDateLabel(day)}
                       </span>
                       <span className="text-muted-foreground ml-2">
-                        {format(day, "MMM d")}
+                        {formatDate(day, "short", language)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -830,7 +815,7 @@ const AdminCalendar = () => {
                 <Popover open={rescheduleOpen} onOpenChange={setRescheduleOpen}>
                   <PopoverTrigger asChild>
                     <button className="font-medium inline-flex items-center gap-1.5 rounded-md hover:text-primary transition-colors text-left">
-                      {format(selectedAssignment.scheduledDate, language === "pt" ? "d 'de' MMM yyyy" : "MMM d, yyyy", { locale: dateFnsLocale })}
+                      {formatDate(selectedAssignment.scheduledDate, "long", language)}
                       <CalendarClock className="h-3.5 w-3.5 text-primary" />
                     </button>
                   </PopoverTrigger>
@@ -854,7 +839,7 @@ const AdminCalendar = () => {
                 <Check className="h-4 w-4" />
                 <span className="text-sm">
                   {t.admin.calendar.completedOn}{" "}
-                  {format(selectedAssignment.completedAt, language === "pt" ? "d 'de' MMM, HH:mm" : "MMM d, HH:mm", { locale: dateFnsLocale })}
+                  {formatDate(selectedAssignment.completedAt, "dateTime", language)}
                 </span>
               </div>
             )}

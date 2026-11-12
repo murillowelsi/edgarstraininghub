@@ -3,9 +3,10 @@ import { Send, Check, CheckCheck, ChevronLeft, Trash2, Users2 } from "lucide-rea
 import { Message } from "@/types/chat";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
-import { format, isSameDay } from "date-fns";
+import { isSameDay } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatChatDay } from "./chatDates";
+import { formatDate } from "@/lib/dates";
 
 interface ChatWindowProps {
     messages: Message[];
@@ -41,7 +42,7 @@ export default function ChatWindow({
     onBack,
     onDelete,
 }: ChatWindowProps) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const scrollRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const [draft, setDraft] = useState("");
@@ -145,7 +146,7 @@ export default function ChatWindow({
                                         isMe ? "flex-row-reverse" : "flex-row"
                                     )}>
                                         <span className="text-[10px] text-muted-foreground">
-                                            {msgDate ? format(msgDate, "HH:mm") : "..."}
+                                            {msgDate ? formatDate(msgDate, "time", language) : "..."}
                                         </span>
                                         {isMe && (
                                             msg.read

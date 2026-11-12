@@ -1,7 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ptBR } from "date-fns/locale";
-import type { Locale } from "date-fns";
 import { cn } from "@/lib/utils";
 import { modalityAccent } from "@/utils/modalityColors";
 import {
@@ -11,19 +9,9 @@ import {
 } from "@/utils/workoutDuration";
 import type { WorkoutType } from "@/types/workout";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import {
-  addMonths,
-  addWeeks,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isWithinInterval,
-  startOfMonth,
-  startOfWeek,
-  subMonths,
-  subWeeks,
-} from "date-fns";
+import { addMonths, addWeeks, endOfMonth, endOfWeek, isWithinInterval, startOfMonth, startOfWeek, subMonths, subWeeks } from "date-fns";
 import { useMemo, useState } from "react";
+import { formatDate, type DateLanguage } from "@/lib/dates";
 import {
   Bar,
   BarChart,
@@ -61,14 +49,14 @@ interface Bucket {
   planned: Record<WorkoutType, number>;
 }
 
-const buildBuckets = (range: RangeKey, dateLocale?: Locale): Bucket[] => {
+const buildBuckets = (range: RangeKey, language: DateLanguage): Bucket[] => {
   const now = new Date();
   if (range === "1y") {
     const start = startOfMonth(subMonths(now, 11));
     return Array.from({ length: 12 }, (_, i) => {
       const s = addMonths(start, i);
       return {
-        label: format(s, "MMM", { locale: dateLocale }),
+        label: formatDate(s, "month", language),
         start: s,
         end: endOfMonth(s),
         done: { running: 0, cycling: 0, swimming: 0, strength: 0 },
@@ -81,7 +69,7 @@ const buildBuckets = (range: RangeKey, dateLocale?: Locale): Bucket[] => {
   return Array.from({ length: weeks }, (_, i) => {
     const s = addWeeks(start, i);
     return {
-      label: format(s, "d MMM", { locale: dateLocale }),
+      label: formatDate(s, "short", language),
       start: s,
       end: endOfWeek(s, { weekStartsOn: 1 }),
       done: { running: 0, cycling: 0, swimming: 0, strength: 0 },
@@ -96,13 +84,12 @@ export const ProgressSummaryChart = ({
   assignments: AssignmentWithWorkout[];
 }) => {
   const { t, language } = useLanguage();
-  const dateLocale = language === "pt" ? ptBR : undefined;
   const tp = t.athlete.profile;
   const [range, setRange] = useState<RangeKey>("12w");
   const [metric, setMetric] = useState<MetricKey>("time");
 
   const data = useMemo(() => {
-    const buckets = buildBuckets(range, dateLocale);
+    const buckets = buildBuckets(range, language);
     for (const a of assignments) {
       const plannedDate = a.scheduledDate;
       const plannedBucket = buckets.find((b) =>
@@ -128,8 +115,8 @@ export const ProgressSummaryChart = ({
       label: b.label,
       rangeLabel:
         range === "1y"
-          ? format(b.start, "MMMM yyyy", { locale: dateLocale })
-          : `${format(b.start, "d MMM", { locale: dateLocale })} – ${format(b.end, "d MMM", { locale: dateLocale })}`,
+          ? formatDate(b.start, "monthYear", language)
+          : `${formatDate(b.start, "short", language)} – ${formatDate(b.end, "short", language)}`,
       planned:
         b.planned.running + b.planned.cycling + b.planned.swimming + b.planned.strength,
       planned_running: b.planned.running,

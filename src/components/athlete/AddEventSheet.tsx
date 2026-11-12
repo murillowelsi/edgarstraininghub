@@ -14,13 +14,13 @@ import {
   updateAthleteEvent,
 } from "@/services/athleteEventsService";
 import type { AthleteEvent, AthleteEventType, EventGoal } from "@/types/athleteEvent";
-import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, ClipboardList, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import EventChecklistDrawer from "./EventChecklistDrawer";
 import { Drawer as DrawerPrimitive } from "vaul";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatDate } from "@/lib/dates";
 
 interface Props {
   open: boolean;
@@ -128,7 +128,7 @@ const AddEventSheet = ({ open, onOpenChange, athleteId, event }: Props) => {
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {eventDate
-                ? format(eventDate, "PPP", { locale: dateLocale })
+                ? formatDate(eventDate, "long", language)
                 : te.fields.datePlaceholder}
             </Button>
           </PopoverTrigger>

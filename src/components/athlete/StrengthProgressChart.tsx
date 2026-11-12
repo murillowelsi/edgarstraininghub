@@ -3,11 +3,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import { isWorkingSet, parseNum } from "@/utils/strengthStats";
-import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { formatDate } from "@/lib/dates";
 
 interface Point {
   date: Date;
@@ -56,8 +56,8 @@ export function StrengthProgressChart({ assignments }: { assignments: Assignment
   const locale = language === "pt" ? ptBR : undefined;
 
   const series = useMemo(
-    () => buildSeries(assignments, (d) => format(d, "d MMM", { locale })),
-    [assignments, locale]
+    () => buildSeries(assignments, (d) => formatDate(d, "short", language)),
+    [assignments, language]
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = series.find((s) => s.exerciseId === selectedId) ?? series[0];

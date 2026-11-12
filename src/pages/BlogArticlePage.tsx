@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPostBySlug } from "@/services/postsService";
 import type { Post } from "@/types/post";
-import { format } from "date-fns";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { formatDate } from "@/lib/dates";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Calculate reading time based on word count
 const calculateReadingTime = (content: string): number => {
@@ -19,6 +20,7 @@ const calculateReadingTime = (content: string): number => {
 
 const BlogArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { t, language } = useLanguage();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -158,7 +160,7 @@ const BlogArticlePage = () => {
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 <time dateTime={post?.createdAt.toISOString()}>
-                  {post && format(post.createdAt, "MMMM d, yyyy")}
+                  {post && formatDate(post.createdAt, "long", language)}
                 </time>
               </div>
               {post?.authorName && (

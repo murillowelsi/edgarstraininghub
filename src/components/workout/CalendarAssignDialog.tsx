@@ -8,13 +8,13 @@ import { getAllWorkouts } from "@/services/workoutsService";
 import type { Workout, WorkoutType } from "@/types/workout";
 import { modalityColors } from "@/utils/modalityColors";
 import { workoutLabels } from "@/utils/workoutLabels";
-import { format } from "date-fns";
 import { enUS, ptBR } from "date-fns/locale";
 import { GrBike, GrRun, GrSwim } from "react-icons/gr";
 import { ArrowLeft, ChevronRight, Dumbbell, Loader2, Plus, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AssignmentForm } from "./AssignmentForm";
+import { formatDate } from "@/lib/dates";
 
 const typeIcons: Record<WorkoutType, React.ElementType> = {
   running: GrRun,
@@ -128,7 +128,7 @@ export const CalendarAssignDialog = ({
   const description = selectedDate
     ? ta.schedulingFor.replace(
         "{{date}}",
-        format(selectedDate, language === "pt" ? "EEEE, d 'de' MMMM" : "EEEE, MMMM d", { locale })
+        formatDate(selectedDate, "weekdayLong", language)
       )
     : undefined;
 
