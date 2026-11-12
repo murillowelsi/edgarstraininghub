@@ -1897,7 +1897,17 @@
       "imageAlt": "Foto do post",
       "coachBadge": "Coach",
       "notice": "Aviso",
-      "share": "Compartilhar"
+      "share": "Compartilhar",
+      "you": "Você",
+      "likedByPrefix": "Curtido por",
+      "likedByOne": "",
+      "likedByTwo": "e {{second}}",
+      "likedByMany": "e outras {{n}} pessoas",
+      "seeAllComments": "Ver os {{n}} comentários",
+      "firstComment": "Seja o primeiro a comentar",
+      "replyAsCoach": "Responder como coach…",
+      "likedByOther": "e outra pessoa",
+      "seeOneComment": "Ver 1 comentário"
     },
     "create": {
       "title": "Novo post",

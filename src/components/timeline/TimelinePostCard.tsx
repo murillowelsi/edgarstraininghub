@@ -27,6 +27,16 @@ import { fullDateTime } from "./relativeTime";
 import { formatDate } from "@/lib/dates";
 import { SPORT_BG, sportKey } from "./sport";
 
+/**
+ * Feed previews written by the backend (backend/feed-preview): who liked it
+ * and the latest comments. Read only when present, so older posts and the
+ * current backend keep working.
+ */
+interface FeedPreview {
+  likedPreview?: { id: string; name: string }[];
+  lastComments?: { id: string; authorId: string; authorName: string; text: string; createdAt: Date }[];
+}
+
 interface TimelinePostCardProps {
   post: TimelinePost;
   onDeleted: (postId: string) => void;
@@ -257,8 +267,24 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
           )}
         </div>
 
+        {/* Who liked it (names from the backend preview, when available) */}
+        <LikedBy
+          likedBy={post.likedBy}
+          preview={(post as TimelinePost & FeedPreview).likedPreview}
+          me={user && liked ? { id: user.uid, name: displayName || t.timeline.post.you } : null}
+          total={likesCount}
+        />
+
         {/* Caption below the actions when there is media */}
         {hasMedia && caption}
+
+        {/* Latest comments + link to all of them */}
+        <CommentsPreview
+          comments={(post as TimelinePost & FeedPreview).lastComments}
+          count={commentsCount}
+          onOpen={() => setShowComments(true)}
+          coachReply={isAdmin && !isOwn}
+        />
         <div className="h-3" aria-hidden />
       </article>
 
@@ -528,6 +554,102 @@ function PostCaption({
           className="min-h-8 text-body-sm font-medium text-muted-foreground hover:text-foreground"
         >
           {expanded ? labels.less : labels.more}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function LikedBy({
+  likedBy,
+  preview,
+  me,
+  total,
+}: {
+  likedBy: string[];
+  preview?: { id: string; name: string }[];
+  me: { id: string; name: string } | null;
+  total: number;
+}) {
+  const { t } = useLanguage();
+  // Only names still in likedBy (guards against a stale preview); my own like first
+  let people = (preview ?? []).filter((p) => likedBy.includes(p.id));
+  if (me) people = [me, ...people.filter((p) => p.id !== me.id)];
+  else people = people.filter((p) => likedBy.includes(p.id));
+  if (!people.length || total <= 0) return null;
+
+  const first = people[0].name;
+  const others = total - 1;
+  const text =
+    others <= 0
+      ? t.timeline.post.likedByOne
+      : others === 1 && people[1]
+      ? t.timeline.post.likedByTwo.replace("{{second}}", people[1].name)
+      : others === 1
+      ? t.timeline.post.likedByOther
+      : t.timeline.post.likedByMany.replace("{{n}}", String(others));
+
+  return (
+    <div className="flex items-center gap-2 px-4 pb-1 text-body-sm">
+      <span className="flex shrink-0" aria-hidden>
+        {people.slice(0, 3).map((p, i) => (
+          <span
+            key={p.id}
+            className={cn(
+              "grid h-6 w-6 place-items-center rounded-full border bg-muted text-[11px] font-bold ring-2 ring-card",
+              i > 0 && "-ml-1.5"
+            )}
+          >
+            {p.name.charAt(0).toUpperCase()}
+          </span>
+        ))}
+      </span>
+      <p className="min-w-0">
+        {t.timeline.post.likedByPrefix} <span className="font-semibold">{first}</span> {text}
+      </p>
+    </div>
+  );
+}
+
+function CommentsPreview({
+  comments,
+  count,
+  onOpen,
+  coachReply,
+}: {
+  comments?: { id: string; authorName: string; text: string }[];
+  count: number;
+  onOpen: () => void;
+  /** Coach on someone else's post: a quick "reply as coach" entry */
+  coachReply: boolean;
+}) {
+  const { t } = useLanguage();
+  // The backend keeps the newest first; read them in order of time
+  const shown = (comments ?? []).slice(0, 2).reverse();
+  return (
+    <div className="grid gap-1 px-4 pt-1.5 text-body-sm">
+      {shown.map((c) => (
+        <button key={c.id} onClick={onOpen} className="line-clamp-2 text-left">
+          <span className="mr-1 font-semibold">{c.authorName}</span>
+          {c.text}
+        </button>
+      ))}
+      {count > shown.length && (
+        <button onClick={onOpen} className="min-h-8 text-left text-muted-foreground hover:text-foreground">
+          {count === 1 ? t.timeline.post.seeOneComment : t.timeline.post.seeAllComments.replace("{{n}}", String(count))}
+        </button>
+      )}
+      {count === 0 && !coachReply && (
+        <button onClick={onOpen} className="min-h-8 text-left text-muted-foreground hover:text-foreground">
+          {t.timeline.post.firstComment}
+        </button>
+      )}
+      {coachReply && (
+        <button
+          onClick={onOpen}
+          className="mt-1 min-h-10 rounded-full border bg-muted/50 px-3.5 text-left text-muted-foreground hover:text-foreground"
+        >
+          {t.timeline.post.replyAsCoach}
         </button>
       )}
     </div>

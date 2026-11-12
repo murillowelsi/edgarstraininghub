@@ -1897,7 +1897,17 @@
       "imageAlt": "Post photo",
       "coachBadge": "Coach",
       "notice": "Notice",
-      "share": "Share"
+      "share": "Share",
+      "you": "You",
+      "likedByPrefix": "Liked by",
+      "likedByOne": "",
+      "likedByTwo": "and {{second}}",
+      "likedByMany": "and {{n}} others",
+      "seeAllComments": "View all {{n}} comments",
+      "firstComment": "Be the first to comment",
+      "replyAsCoach": "Reply as coach…",
+      "likedByOther": "and 1 other",
+      "seeOneComment": "View 1 comment"
     },
     "create": {
       "title": "New post",
