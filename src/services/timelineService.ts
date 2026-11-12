@@ -1,3 +1,4 @@
+import { normalizeWorkoutName } from "@/utils/workoutName";
 import {
   addDoc,
   arrayRemove,
@@ -62,6 +63,9 @@ export const isAutoCaption = (caption: string): boolean => AUTO_CAPTION.test(cap
 
 const docToPost = (id: string, data: TimelinePostDocument): TimelinePost => {
   const legacySummary = data.workoutSummary ? undefined : legacyStrengthSummary(data.caption ?? "");
+  const rawSummary = data.workoutSummary ?? legacySummary;
+  // Older posts copied the workout name as typed: tidy it for display
+  const workoutSummary = rawSummary ? { ...rawSummary, workoutName: normalizeWorkoutName(rawSummary.workoutName ?? "") } : undefined;
   return {
     id,
     authorId: data.authorId,
@@ -72,7 +76,7 @@ const docToPost = (id: string, data: TimelinePostDocument): TimelinePost => {
     imageUrl: data.imageUrl,
     imageUrls: data.imageUrls?.length ? data.imageUrls : data.imageUrl ? [data.imageUrl] : [],
     mentions: data.mentions ?? [],
-    workoutSummary: data.workoutSummary ?? legacySummary,
+    workoutSummary,
     captionIsSummary: !!legacySummary,
     captionAuto: !!data.workoutSummary && (data.captionAuto ?? isAutoCaption(data.caption ?? "")),
     likedBy: data.likedBy || [],
