@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { GrBike, GrRun, GrSwim } from "react-icons/gr";
+import { useEffect, useState } from "react";
+import { durationSeconds, formatClock, paceToText, parseClock, secondsToDuration, textToPace } from "@/utils/stageInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -26,24 +27,12 @@ import {
   durationTypesByWorkout,
   getDefaultIntervalType,
   intensityTypesByWorkout,
-  stageColors,
   stageTypesByWorkout,
   swimmingDistancePresets,
 } from "@/types/workout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { workoutLabels } from "@/utils/workoutLabels";
-import {
-  ChevronRight,
-  Minus,
-  Clock,
-  Flame,
-  Heart,
-  Plus,
-  Repeat,
-  Trash2,
-  Wind,
-  Zap,
-} from "lucide-react";
+import { ChevronRight, Minus, Plus, Trash2 } from "lucide-react";
 
 interface StageEditorProps {
   stage: WorkoutStage;
@@ -56,17 +45,6 @@ interface StageEditorProps {
   describe?: (stage: WorkoutStage) => string;
 }
 
-const stageIcons: Record<string, React.ElementType> = {
-  warmup: Flame,
-  run: GrRun,
-  cooldown: Wind,
-  recovery: Heart,
-  interval: Zap,
-  repeat: Repeat,
-  bike: GrBike,
-  rest: Clock,
-  swim: GrSwim,
-};
 
 const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditNested, describe }: StageEditorProps) => {
   const { t } = useLanguage();
@@ -189,6 +167,7 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
     onChange({ ...stage, stages: newStages });
   };
 
+  const isPaceIntensity = ["pace", "targetPace", "cssBasedPace"].includes(stage.intensity.type);
   const needsRangeInput = ["speed", "bikeCadence", "cadence", "customHeartRate", "customPower", "pace"].includes(stage.intensity.type);
   const showDurationValue = stage.duration.type !== "lapButton";
   const showDistanceUnit = stage.duration.type === "distance";
@@ -199,7 +178,8 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
   const getIntensityLabel = () =>
     stage.intensity.type === "none" ? se.value : L.intensity(stage.intensity.type);
 
-  const zone = (n: number, range: string) => `${se.zone.replace("{{n}}", String(n))} (${range})`;
+  // Real bpm / W ranges depend on each athlete's profile (not stored yet), so only the zone
+  const zone = (n: number, _range: string) => se.zone.replace("{{n}}", String(n));
 
   const heartRateZones = [
     { value: 1, label: zone(1, "101-121 bpm") },
@@ -319,6 +299,25 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
                       <SelectItem value="custom">{se.custom}</SelectItem>
                     </SelectContent>
                   </Select>
+                ) : showTimeUnit ? (
+                  // Time as mm:ss; stored as before ({ value, unit: "min" | "sec" })
+                  <ClockField
+                    className="flex-1"
+                    value={durationSeconds(stage.duration)}
+                    parse={parseClock}
+                    format={(n) => (n === undefined ? "" : formatClock(n))}
+                    onCommit={(secs) =>
+                      onChange({
+                        ...stage,
+                        duration:
+                          secs === undefined
+                            ? { ...stage.duration, value: undefined }
+                            : { ...stage.duration, ...secondsToDuration(secs, stage.duration.unit) },
+                      })
+                    }
+                    placeholder="mm:ss"
+                    invalidLabel={se.clockInvalid}
+                  />
                 ) : (
                   <Input
                     type="number"
@@ -341,20 +340,6 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
                       <SelectItem value="km">km</SelectItem>
                       <SelectItem value="m">m</SelectItem>
                       <SelectItem value="mi">mi</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-                {showTimeUnit && (
-                  <Select
-                    value={stage.duration.unit || "min"}
-                    onValueChange={(v) => handleDurationUnitChange(v as DurationUnit)}
-                  >
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="min">min</SelectItem>
-                      <SelectItem value="sec">s</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -452,7 +437,38 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
             </Select>
           </div>
 
-          {needsRangeInput && (
+          {needsRangeInput && isPaceIntensity && (
+            <div className="space-y-1.5">
+              <Label>{getIntensityLabel()}</Label>
+              {/* mm:ss on screen; stored as the same "m.ss" decimal in min / max */}
+              <div className="flex items-start gap-2">
+                <ClockField
+                  className="flex-1"
+                  value={stage.intensity.min}
+                  parse={textToPace}
+                  format={paceToText}
+                  onCommit={(n) => onChange({ ...stage, intensity: { ...stage.intensity, min: n } })}
+                  placeholder={`${se.min} mm:ss`}
+                  ariaLabel={`${getIntensityLabel()} ${se.min}`}
+                  invalidLabel={se.clockInvalid}
+                />
+                <span className="pt-2.5 text-sm text-muted-foreground shrink-0">{se.rangeTo}</span>
+                <ClockField
+                  className="flex-1"
+                  value={stage.intensity.max}
+                  parse={textToPace}
+                  format={paceToText}
+                  onCommit={(n) => onChange({ ...stage, intensity: { ...stage.intensity, max: n } })}
+                  placeholder={`${se.max} mm:ss`}
+                  ariaLabel={`${getIntensityLabel()} ${se.max}`}
+                  invalidLabel={se.clockInvalid}
+                />
+                <span className="pt-2.5 text-sm text-muted-foreground shrink-0">{stage.intensity.unit || ""}</span>
+              </div>
+            </div>
+          )}
+
+          {needsRangeInput && !isPaceIntensity && (
             <div className="space-y-1.5">
               <Label>{getIntensityLabel()}</Label>
               <div className="flex items-center gap-2">
@@ -529,8 +545,6 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{te.stagesToRepeat}</p>
           {(stage.stages || []).map((nestedStage, index) => {
-            const NestedIcon = stageIcons[nestedStage.type] || GrRun;
-            const nestedColor = stageColors[nestedStage.type];
             return (
               <div key={nestedStage.id} className="flex items-center gap-1 rounded-xl border bg-card pr-1">
                 <button
@@ -538,12 +552,6 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
                   onClick={() => onEditNested?.(nestedStage.id)}
                   className="flex flex-1 min-w-0 items-center gap-3 p-3 text-left"
                 >
-                  <div
-                    className="p-2 rounded-lg shrink-0 flex items-center justify-center"
-                    style={{ backgroundColor: `${nestedColor}1a`, color: nestedColor }}
-                  >
-                    <NestedIcon className="h-3.5 w-3.5" />
-                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold">{L.stage(nestedStage.type)}</p>
                     {describe && <p className="text-xs text-muted-foreground truncate">{describe(nestedStage)}</p>}
@@ -592,5 +600,65 @@ const StageEditor = ({ stage, onChange, onDone, workoutType = "running", onEditN
     </div>
   );
 };
+
+/**
+ * Text field for mm:ss values (time or pace). Keeps what is being typed and only
+ * reports a value once it reads; shows a hint when it can't.
+ */
+function ClockField({
+  value,
+  parse,
+  format,
+  onCommit,
+  placeholder,
+  invalidLabel,
+  ariaLabel,
+  className,
+}: {
+  value: number | undefined;
+  parse: (text: string) => number | undefined;
+  format: (n: number | undefined) => string;
+  onCommit: (n: number | undefined) => void;
+  placeholder: string;
+  invalidLabel: string;
+  ariaLabel?: string;
+  className?: string;
+}) {
+  const [text, setText] = useState(() => format(value));
+  const [invalid, setInvalid] = useState(false);
+  // Outside changes (another stage, undo) replace the text unless it already means the same
+  useEffect(() => {
+    setText((current) => (parse(current) === value ? current : format(value)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return (
+    <div className={className}>
+      <Input
+        inputMode="numeric"
+        autoComplete="off"
+        value={text}
+        placeholder={placeholder}
+        aria-label={ariaLabel}
+        aria-invalid={invalid}
+        onChange={(e) => {
+          const next = e.target.value;
+          setText(next);
+          const parsed = parse(next);
+          if (next.trim() === "" || parsed !== undefined) {
+            setInvalid(false);
+            onCommit(parsed);
+          }
+        }}
+        onBlur={() => {
+          const parsed = parse(text);
+          setInvalid(text.trim() !== "" && parsed === undefined);
+          if (parsed !== undefined) setText(format(parsed));
+        }}
+        className="tabular-nums"
+      />
+      {invalid && <p className="mt-1 text-xs text-destructive-ink">{invalidLabel}</p>}
+    </div>
+  );
+}
 
 export default StageEditor;

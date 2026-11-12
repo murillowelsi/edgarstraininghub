@@ -13,7 +13,7 @@ import { formatTotalTime } from "@/hooks/useAthleteStats";
  * sport + date, name, only the totals that can be summed, the step chart and the
  * coach's note. No completion control here: that is the bottom bar's job.
  */
-export function WorkoutPlanCard({ workout, date }: { workout: Workout; date: Date }) {
+export function WorkoutPlanCard({ workout, date }: { workout: Workout; date?: Date }) {
   const { t, language } = useLanguage();
   const tw = t.athlete.workoutView;
   const sport = sportKey(workout.type);
@@ -55,9 +55,11 @@ export function WorkoutPlanCard({ workout, date }: { workout: Workout; date: Dat
           <SportIcon type={workout.type} className="h-4 w-4" aria-hidden />
         </span>
         <span className="truncate">{t.workoutMeta.types[workout.type] ?? workout.type}</span>
-        <span className="ml-auto shrink-0 text-xs font-semibold normal-case tracking-normal text-muted-foreground first-letter:uppercase">
-          {formatDate(date, "weekdayShort", language)}
-        </span>
+        {date && (
+          <span className="ml-auto shrink-0 text-xs font-semibold normal-case tracking-normal text-muted-foreground first-letter:uppercase">
+            {formatDate(date, "weekdayShort", language)}
+          </span>
+        )}
       </div>
 
       <h1 className="mt-3 font-display text-[22px] font-extrabold leading-tight text-balance break-words">{workout.name}</h1>
