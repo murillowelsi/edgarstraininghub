@@ -1400,7 +1400,13 @@
       "avgSpeedPlaceholder": "e.g. 28.5",
       "avgPowerPlaceholder": "e.g. 220",
       "shareCaption": "Workout complete: {{name}} ✅",
-      "elapsedTimeInvalid": "Use h:mm:ss or m:ss, e.g. 1:05:30 or 45:00."
+      "elapsedTimeInvalid": "Use h:mm:ss or m:ss, e.g. 1:05:30 or 45:00.",
+      "title": "Workout",
+      "fromCoach": "From the coach",
+      "stagesChart": "Steps chart: {{n}} steps",
+      "repeatBlock": "Repeat {{n}}×",
+      "paceChip": "Pace",
+      "viewDone": "See what was done"
     },
     "share": {
       "title": "Share workout",
@@ -1502,7 +1508,15 @@
         "notesPlaceholder": "How did it feel? Any pain, machine taken, load too light…",
         "finish": "Close",
         "share": "Share"
-      }
+      },
+      "setsDone": "{{done}} of {{total}} sets",
+      "nextSet": "next: Set {{n}}",
+      "tapToCopy": "tap to copy",
+      "removeSet": "Set",
+      "addSet": "Set",
+      "markSet": "Mark set {{n}}",
+      "removeSetLabel": "Remove the last set",
+      "addSetLabel": "Add a set"
     },
     "profile": {
       "title": "You",

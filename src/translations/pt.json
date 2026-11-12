@@ -1400,7 +1400,13 @@
       "avgSpeedPlaceholder": "Ex: 28.5",
       "avgPowerPlaceholder": "Ex: 220",
       "shareCaption": "Treino concluído: {{name}} ✅",
-      "elapsedTimeInvalid": "Use h:mm:ss ou m:ss, por exemplo 1:05:30 ou 45:00."
+      "elapsedTimeInvalid": "Use h:mm:ss ou m:ss, por exemplo 1:05:30 ou 45:00.",
+      "title": "Treino",
+      "fromCoach": "Do coach",
+      "stagesChart": "Gráfico das etapas: {{n}} etapas",
+      "repeatBlock": "Repetir {{n}}×",
+      "paceChip": "Pace",
+      "viewDone": "Ver o que foi feito"
     },
     "share": {
       "title": "Compartilhar treino",
@@ -1502,7 +1508,15 @@
         "notesPlaceholder": "Como se sentiu? Alguma dor, aparelho ocupado, carga leve…",
         "finish": "Fechar",
         "share": "Compartilhar"
-      }
+      },
+      "setsDone": "{{done}} de {{total}} séries",
+      "nextSet": "a seguir: Série {{n}}",
+      "tapToCopy": "toque para copiar",
+      "removeSet": "Série",
+      "addSet": "Série",
+      "markSet": "Marcar série {{n}}",
+      "removeSetLabel": "Remover a última série",
+      "addSetLabel": "Adicionar uma série"
     },
     "profile": {
       "title": "Você",

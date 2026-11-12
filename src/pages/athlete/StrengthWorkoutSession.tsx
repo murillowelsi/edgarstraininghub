@@ -56,9 +56,7 @@ import {
 } from "@/lib/sessionDraft";
 import {
   Check,
-  CheckCircle2,
   ChevronDown,
-  Dumbbell,
   History,
   Minus,
   MoreVertical,
@@ -99,6 +97,7 @@ const settleWithin = (promise: Promise<unknown>, ms: number): Promise<"done" | "
   ]);
 const WEIGHT_STEP = 2.5;
 // Set · reps/time · weight (with steppers) · done. Fixed reps column so the weight value gets the room.
+const WARMUP_TIP_KEY = "ez-warmup-tip-v1";
 const SET_GRID = "grid grid-cols-[40px_60px_minmax(0,1fr)_48px] gap-1.5";
 
 interface SetSuggestion {
@@ -195,6 +194,7 @@ const ExerciseSessionCard = ({
   onAddSet,
   onRemoveLastSet,
   onToggleSetComplete,
+  nextSetIndex,
   t,
 }: {
   workoutExercise: WorkoutExercise;
@@ -218,10 +218,29 @@ const ExerciseSessionCard = ({
   onAddSet: () => void;
   onRemoveLastSet: () => void;
   onToggleSetComplete: (setIndex: number) => void;
+  /** The set the athlete should do next, when it is in this exercise */
+  nextSetIndex: number | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any;
 }) => {
   const isActive = isCurrent;
+  // The warm-up tip shows until the athlete has used the set number once on this phone
+  const [warmupTipSeen, setWarmupTipSeen] = useState(() => {
+    try {
+      return localStorage.getItem(WARMUP_TIP_KEY) === "1";
+    } catch {
+      return true;
+    }
+  });
+  const markWarmupTipSeen = () => {
+    if (warmupTipSeen) return;
+    setWarmupTipSeen(true);
+    try {
+      localStorage.setItem(WARMUP_TIP_KEY, "1");
+    } catch {
+      /* private mode: shows again next time */
+    }
+  };
   const [isPlaying, setIsPlaying] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
@@ -275,6 +294,7 @@ const ExerciseSessionCard = ({
   const totalSets = progress.sets.length;
   const allComplete = completedSets === totalSets;
 
+  const hasPR = progress.sets.some((set) => set.completed && isPersonalRecord(set, best));
   const summary = progress.sets
     .filter(isWorkingSet)
     .map((set) => [set.weight && `${set.weight}kg`, set.reps && `×${set.reps}`].filter(Boolean).join(""))
@@ -285,9 +305,8 @@ const ExerciseSessionCard = ({
     <Card
       id={`exercise-${workoutExercise.id}`}
       className={cn(
-        "overflow-hidden scroll-mt-4 transition-colors",
-        isActive && "ring-2 ring-primary border-primary",
-        allComplete && !isActive && "border-primary/40 bg-primary/5"
+        "overflow-hidden scroll-mt-20 transition-colors",
+        isActive && !allComplete && "border-primary/55 ring-1 ring-primary/55"
       )}
     >
       {/* Header — always visible, toggles the card */}
@@ -299,7 +318,11 @@ const ExerciseSessionCard = ({
         <div
           className={cn(
             "h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-sm font-bold tabular-nums",
-            allComplete ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/70"
+            allComplete
+              ? "bg-success text-background"
+              : isActive
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-foreground/70"
           )}
         >
           {allComplete ? <Check className="h-4 w-4" /> : index + 1}
@@ -310,14 +333,15 @@ const ExerciseSessionCard = ({
             {!isOpen && summary ? summary : formatPrescription(workoutExercise, t)}
           </p>
         </div>
-        <span
-          className={cn(
-            "shrink-0 text-xs font-semibold tabular-nums px-2 py-1 rounded-full",
-            allComplete ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-          )}
-        >
-          {completedSets}/{totalSets}
-        </span>
+        {allComplete && hasPR ? (
+          <span className="shrink-0 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-extrabold text-primary-ink dark:bg-primary dark:text-primary-foreground">
+            PR
+          </span>
+        ) : !allComplete ? (
+          <span className="shrink-0 rounded-full bg-muted px-2 py-1 text-xs font-semibold tabular-nums text-muted-foreground">
+            {completedSets}/{totalSets}
+          </span>
+        ) : null}
         <ChevronDown
           className={cn("h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200", isOpen && "rotate-180")}
         />
@@ -413,8 +437,10 @@ const ExerciseSessionCard = ({
                   <span></span>
                 </div>
                 {/* The warm-up toggle has no other visual cue, so say it until the exercise is underway */}
-                {!progress.sets.some((s) => s.completed || s.warmup) && (
-                  <p className="mb-2 text-[11px] text-muted-foreground">{t.athlete.session.warmupHint}</p>
+                {!warmupTipSeen && !progress.sets.some((s) => s.completed || s.warmup) && (
+                  <p className="mb-2 inline-flex rounded-lg bg-foreground/[0.06] px-2 py-1 text-[11px] text-muted-foreground">
+                    {t.athlete.session.warmupHint}
+                  </p>
                 )}
 
                 <div className="space-y-2">
@@ -434,13 +460,16 @@ const ExerciseSessionCard = ({
                           className={cn(
                             SET_GRID,
                             "items-start rounded-xl transition-colors",
-                            set.completed && "bg-primary/5"
+                            set.completed && "bg-success/[0.12]"
                           )}
                         >
                           {/* Tap the set number to mark it as warm-up */}
                           <button
                             type="button"
-                            onClick={() => onToggleWarmup(setIndex)}
+                            onClick={() => {
+                            markWarmupTipSeen();
+                            onToggleWarmup(setIndex);
+                          }}
                             aria-label={set.warmup ? t.athlete.session.warmupOff : t.athlete.session.warmupOn}
                             title={t.athlete.session.warmupHint}
                             className={cn(
@@ -499,7 +528,7 @@ const ExerciseSessionCard = ({
                               onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
                               placeholder={suggestion?.reps || workoutExercise.reps || "10"}
                               aria-label={(holdSeconds ? t.athlete.session.setTimeLabel : t.athlete.session.setRepsLabel).replace("{{n}}", setLabel)}
-                              className="h-12 text-center text-base px-1 min-w-0 placeholder:text-muted-foreground/50"
+                              className="h-12 text-center text-base px-1 min-w-0 tabular-nums placeholder:text-muted-foreground"
                             />
                           )}
                           {/* Weight with ±2.5 kg steppers so the keyboard isn't needed between sets.
@@ -522,7 +551,7 @@ const ExerciseSessionCard = ({
                               onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
                               placeholder={suggestion?.weight || "0"}
                               aria-label={t.athlete.session.setWeightLabel.replace("{{n}}", setLabel)}
-                              className="order-first col-span-2 h-12 min-w-0 px-0.5 text-center text-base tabular-nums placeholder:text-muted-foreground/50 min-[375px]:order-none min-[375px]:col-span-1 min-[375px]:h-full min-[375px]:rounded-none min-[375px]:border-0 min-[375px]:focus-visible:ring-0 min-[375px]:focus-visible:ring-offset-0"
+                              className="order-first col-span-2 h-12 min-w-0 px-0.5 text-center text-base tabular-nums placeholder:text-muted-foreground min-[375px]:order-none min-[375px]:col-span-1 min-[375px]:h-full min-[375px]:rounded-none min-[375px]:border-0 min-[375px]:focus-visible:ring-0 min-[375px]:focus-visible:ring-offset-0"
                             />
                             <button
                               type="button"
@@ -535,41 +564,40 @@ const ExerciseSessionCard = ({
                           </div>
                           <button
                             type="button"
-                            onClick={() => onToggleSetComplete(setIndex)}
+                            onClick={() => {
+                              markWarmupTipSeen();
+                              onToggleSetComplete(setIndex);
+                            }}
                             aria-label={t.athlete.session.complete}
                             aria-pressed={set.completed}
                             className={cn(
                               "h-12 w-12 rounded-full flex items-center justify-center transition-all",
                               set.completed
-                                ? "bg-primary text-primary-foreground shadow-md"
-                                : "bg-muted hover:bg-primary/15 hover:text-primary border-2 border-dashed border-muted-foreground/30"
+                                ? "bg-success text-background"
+                                : setIndex === nextSetIndex
+                                ? "border-2 border-primary bg-primary/10 text-primary-ink"
+                                : "bg-muted border-2 border-dashed border-muted-foreground/30 hover:bg-primary/15"
                             )}
                           >
-                            <Check className={cn("h-5 w-5", !set.completed && "opacity-50")} />
+                            <Check className={cn("h-5 w-5", !set.completed && setIndex !== nextSetIndex && "opacity-50")} />
                           </button>
                         </div>
-                        {/* Last session's same set stays visible as a reference; tap to reuse it */}
-                        {prev &&
-                          (set.completed ? (
-                            <p className="ml-12 flex min-h-9 items-center gap-1.5 px-2.5 text-xs text-muted-foreground">
-                              <History className="h-3.5 w-3.5 shrink-0" />
-                              <span>
-                                {t.athlete.session.previousHeader}: <span className="tabular-nums">{previousText}</span>
-                              </span>
-                            </p>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => onUsePrevious(setIndex)}
-                              className="ml-12 mt-0.5 flex min-h-10 items-center gap-1.5 rounded-full px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
-                            >
-                              <History className="h-3.5 w-3.5 shrink-0" />
-                              <span>
-                                {t.athlete.session.previousHeader}:{" "}
-                                <span className="font-semibold tabular-nums text-foreground/80">{previousText}</span>
-                              </span>
-                            </button>
-                          ))}
+                        {/* Last session's same set, once per exercise: under the next set, tap to reuse it */}
+                        {prev && !set.completed && setIndex === nextSetIndex && (
+                          <button
+                            type="button"
+                            onClick={() => onUsePrevious(setIndex)}
+                            className="ml-12 mt-0.5 flex min-h-10 items-center gap-1.5 rounded-full px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                          >
+                            <History className="h-3.5 w-3.5 shrink-0" />
+                            <span>
+                              {t.athlete.session.previousHeader}:{" "}
+                              <span className="font-semibold tabular-nums text-foreground/80">{previousText}</span>
+                              {" · "}
+                              {t.athlete.session.tapToCopy}
+                            </span>
+                          </button>
+                        )}
                       </div>
                     );
                   })}
@@ -581,10 +609,11 @@ const ExerciseSessionCard = ({
                     <button
                       type="button"
                       onClick={onRemoveLastSet}
-                      className="-ml-2 flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground font-medium hover:text-destructive hover:underline"
+                      aria-label={t.athlete.session.removeSetLabel}
+                      className="-ml-2 flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-muted-foreground font-medium hover:text-foreground"
                     >
                       <Minus className="h-4 w-4" />
-                      {t.athlete.session.removeLastSet}
+                      {t.athlete.session.removeSet}
                     </button>
                   ) : (
                     <span />
@@ -592,10 +621,11 @@ const ExerciseSessionCard = ({
                   <button
                     type="button"
                     onClick={onAddSet}
-                    className="-mr-2 flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm text-primary font-medium hover:underline"
+                    aria-label={t.athlete.session.addSetLabel}
+                    className="-mr-2 flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-primary-ink font-semibold hover:underline"
                   >
                     <Plus className="h-4 w-4" />
-                    {t.athlete.session.addNewSet}
+                    {t.athlete.session.addSet}
                   </button>
                 </div>
               </div>
@@ -1341,11 +1371,22 @@ const StrengthWorkoutSession = () => {
   const completedSetCount = allSets.filter((set) => set.completed).length;
   const totalSetCount = allSets.length;
 
+  // The set to do next: the one the rest points at, else the first open one
+  const firstExerciseId = workout.exercises?.[0]?.id;
+  const nextSet = rest
+    ? { exerciseId: rest.nextExerciseId, setIndex: rest.nextSetIndex }
+    : firstExerciseId
+    ? findNextSet(exerciseProgress, firstExerciseId, -1)
+    : null;
   const restNextExercise = rest ? workout.exercises?.find((we) => we.id === rest.nextExerciseId) : undefined;
+  // "Rest · next: Set 2"; the exercise name only when the next set starts a new exercise
   const restNextLabel = restNextExercise
-    ? t.athlete.session.restNextSet
-        .replace("{{name}}", getExerciseByIdOrName(restNextExercise)?.name || restNextExercise.exerciseName || "")
-        .replace("{{set}}", String((rest?.nextSetIndex ?? 0) + 1))
+    ? [
+        t.athlete.session.nextSet.replace("{{n}}", String((rest?.nextSetIndex ?? 0) + 1)),
+        rest?.nextSetIndex === 0 ? getExerciseByIdOrName(restNextExercise)?.name || restNextExercise.exerciseName : undefined,
+      ]
+        .filter(Boolean)
+        .join(" · ")
     : undefined;
 
   const handleSharePost = async ({ caption, imageUrls, mentions }: ComposerResult) => {
@@ -1419,21 +1460,69 @@ const StrengthWorkoutSession = () => {
         </header>
       )}
 
-      {/* Floating glass session bar: cancel · total time + progress · save */}
+      {/* Compact top bar: leave · progress ring · name, time and sets · save (one place for all of it) */}
       {isWorkoutStarted && (
+        <header className="sticky top-0 z-50 border-b bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+          <div className="mx-auto flex h-14 max-w-2xl items-center gap-2.5 px-2">
+            <button
+              type="button"
+              onClick={handleCancel}
+              aria-label={t.athlete.session.cancel}
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div
+              role="img"
+              aria-label={t.athlete.session.progressRing.replace("{{percent}}", String(completionPercentage))}
+              className="relative h-9 w-9 shrink-0"
+            >
+              <svg viewBox="0 0 40 40" className="h-9 w-9 -rotate-90">
+                <circle cx="20" cy="20" r="17" className="fill-none stroke-muted" strokeWidth="4" />
+                <circle
+                  cx="20"
+                  cy="20"
+                  r="17"
+                  className={cn("fill-none stroke-primary transition-[stroke-dashoffset] duration-300", completionPercentage === 0 && "opacity-0")}
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 17}
+                  strokeDashoffset={2 * Math.PI * 17 * (1 - completionPercentage / 100)}
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold tabular-nums">
+                {completionPercentage === 100 ? <Check className="h-4 w-4 text-primary-ink" /> : `${completionPercentage}%`}
+              </span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-sm font-semibold leading-tight">{workout.name}</h1>
+              <p className="text-xs text-muted-foreground tabular-nums">
+                <span className="sr-only">{t.athlete.session.totalTime} </span>
+                <span className="font-semibold text-foreground">{formatTime(totalElapsedTime)}</span>
+                {" · "}
+                {t.athlete.session.setsDone.replace("{{done}}", String(completedSetCount)).replace("{{total}}", String(totalSetCount))}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSaveConfirm(true)}
+              disabled={saving}
+              className="flex h-10 shrink-0 items-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground disabled:opacity-60"
+            >
+              {saving ? <Spinner size="xs" className="mr-2" /> : null}
+              {t.athlete.session.save}
+            </button>
+          </div>
+        </header>
+      )}
+
+      {/* Bottom: the rest countdown, or a shortcut to tick the next set (same handler as its ✓) */}
+      {isWorkoutStarted && (rest || nextSet) && (
         <MotionConfig reducedMotion="user">
-          <motion.div
-            initial={{ y: 96, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="fixed inset-x-3 z-50 mx-auto max-w-lg"
-            style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
-          >
-            {/* One container: during a rest a compact countdown strip grows on top of the
-                session row, so Save / leave stay reachable without two stacked pills */}
-            <div className="glass rounded-[32px] p-1.5">
-              <AnimatePresence initial={false}>
-                {rest && (
+          <div className="fixed inset-x-3 z-50 mx-auto max-w-lg" style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+            {rest ? (
+              <div className="glass rounded-[28px] px-1.5 pt-1.5">
+                <AnimatePresence initial={false}>
                   <RestTimerPill
                     key="rest"
                     remainingSec={restRemainingSec}
@@ -1448,115 +1537,28 @@ const StrengthWorkoutSession = () => {
                     onAdjust={handleAdjustRest}
                     onSkip={handleSkipRest}
                   />
-                )}
-              </AnimatePresence>
-              <div className="flex items-center gap-2 h-[52px]">
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.85 }}
-                  transition={{ type: "spring", stiffness: 600, damping: 22 }}
-                  onClick={handleCancel}
-                  aria-label={t.athlete.session.cancel}
-                  className="glass-lens h-[52px] w-[52px] shrink-0 flex items-center justify-center rounded-full text-foreground/70"
-                >
-                  <X className="h-5 w-5" />
-                </motion.button>
-
-                <div className="flex-1 min-w-0 flex flex-col items-center justify-center">
-                  <span className="sr-only">{t.athlete.session.totalTime}</span>
-                  <span className="text-xl font-mono font-bold text-primary leading-none tabular-nums">
-                    {formatTime(totalElapsedTime)}
-                  </span>
-                  <div className="mt-1.5 flex items-center gap-1.5">
-                    <div className="h-1 w-20 rounded-full bg-foreground/10 overflow-hidden">
-                      <motion.div
-                        className="h-full bg-primary rounded-full"
-                        animate={{ width: `${completionPercentage}%` }}
-                        transition={{ type: "spring", stiffness: 200, damping: 26 }}
-                      />
-                    </div>
-                    <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
-                      {completionPercentage}%
-                    </span>
-                  </div>
-                </div>
-
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.92 }}
-                  transition={{ type: "spring", stiffness: 600, damping: 22 }}
-                  onClick={() => setShowSaveConfirm(true)}
-                  disabled={saving}
-                  className="h-[52px] shrink-0 px-6 flex items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold shadow-md disabled:opacity-60"
-                >
-                  {saving ? <Spinner size="xs" className="mr-2" /> : null}
-                  {t.athlete.session.save}
-                </motion.button>
+                </AnimatePresence>
               </div>
-            </div>
-          </motion.div>
+            ) : nextSet ? (
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleToggleSetComplete(nextSet.exerciseId, nextSet.setIndex)}
+                className="glass flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-base font-bold"
+              >
+                <Check className="h-5 w-5 text-primary-ink" />
+                {t.athlete.session.markSet.replace("{{n}}", String(nextSet.setIndex + 1))}
+              </motion.button>
+            ) : null}
+          </div>
         </MotionConfig>
       )}
 
       {/* Content — bottom padding clears the floating bar (taller while the rest strip shows) */}
-      <div className={cn("flex-1 overflow-auto transition-[padding] duration-200", rest ? "pb-48" : "pb-28")}>
-        <div className="p-4 space-y-4">
-          {/* Workout Info Card */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                {/* Progress ring, not a checkbox: on the workout page the circle is a "mark as done" button */}
-                <div
-                  role="img"
-                  aria-label={t.athlete.session.progressRing.replace("{{percent}}", String(completionPercentage))}
-                  className="relative h-10 w-10 shrink-0"
-                >
-                  <svg viewBox="0 0 40 40" className="h-10 w-10 -rotate-90">
-                    <circle cx="20" cy="20" r="17" className="fill-none stroke-muted" strokeWidth="4" />
-                    <circle
-                      cx="20"
-                      cy="20"
-                      r="17"
-                      className={cn(
-                        "fill-none stroke-primary transition-[stroke-dashoffset] duration-300",
-                        completionPercentage === 0 && "opacity-0"
-                      )}
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      strokeDasharray={2 * Math.PI * 17}
-                      strokeDashoffset={2 * Math.PI * 17 * (1 - completionPercentage / 100)}
-                    />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold tabular-nums">
-                    {completionPercentage === 100 ? <Check className="h-4 w-4 text-primary" /> : `${completionPercentage}%`}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <h1 className="text-xl font-bold text-balance break-words">{workout.name}</h1>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Dumbbell className="h-4 w-4" />
-                      {workout.exercises?.length || 0} {t.athlete.session.exercisesCount}
-                    </div>
-                    {isWorkoutStarted && (
-                      <div className="flex items-center gap-1">
-                        <CheckCircle2 className="h-4 w-4" />
-                        {completionPercentage}% {t.athlete.session.completePercent}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Progress bar */}
-              <div className="mt-4 h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-300"
-                  style={{ width: `${completionPercentage}%` }}
-                />
-              </div>
-            </CardContent>
-          </Card>
+      <div className={cn("flex-1 overflow-auto transition-[padding] duration-200", rest ? "pb-36" : "pb-28")}>
+        <div className="mx-auto max-w-2xl p-4 space-y-4">
+          {/* Before the auto-start the bar isn't there yet: the name stays visible */}
+          {!isWorkoutStarted && <h1 className="text-xl font-bold text-balance break-words">{workout.name}</h1>}
 
           {/* Exercises */}
           <div className="space-y-4">
@@ -1573,7 +1575,8 @@ const StrengthWorkoutSession = () => {
                   exercise={exercise}
                   index={index}
                   progress={progress}
-                  isCurrent={rest?.nextExerciseId === workoutExercise.id}
+                  isCurrent={nextSet?.exerciseId === workoutExercise.id}
+                  nextSetIndex={nextSet?.exerciseId === workoutExercise.id ? nextSet.setIndex : null}
                   isOpen={openIds.has(workoutExercise.id)}
                   onToggleOpen={() => toggleOpen(workoutExercise.id)}
                   suggestions={progress.sets.map((_, setIndex) =>
