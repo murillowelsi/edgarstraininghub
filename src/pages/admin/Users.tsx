@@ -206,7 +206,7 @@ const AdminUsers = () => {
             placeholder={t.admin.users.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-8 text-sm rounded-full"
+            className="pl-8 h-8 text-base md:text-sm rounded-full"
           />
         </div>
 
