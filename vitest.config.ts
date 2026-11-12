@@ -1,8 +1,8 @@
 import path from "path";
 import { defineConfig } from "vitest/config";
 
-// Unit tests (`npm test`). Kept apart from vite.config.ts so the PWA and
-// Lovable plugins don't load in tests. Firestore rules tests live in
+// Unit tests (`npm test`). Kept apart from vite.config.ts so the PWA plugin
+// doesn't load in tests. Firestore rules tests live in
 // tests/rules and run with `npm run test:rules` (they need the emulator).
 export default defineConfig({
   resolve: {

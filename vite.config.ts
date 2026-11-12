@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
@@ -12,8 +11,6 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
     VitePWA({
       registerType: "prompt",
       strategies: "injectManifest",
@@ -51,7 +48,7 @@ export default defineConfig(({ mode }) => ({
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
         // Never precache service worker files themselves
-        globIgnores: ["**/lovable-uploads/**", "**/sw.js", "**/firebase-messaging-sw.js"],
+        globIgnores: ["**/images/**", "**/sw.js", "**/firebase-messaging-sw.js"],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
     }),

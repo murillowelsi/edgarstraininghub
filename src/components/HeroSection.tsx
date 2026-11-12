@@ -23,7 +23,7 @@ const HeroSection = () => {
     >
       <div
         className="absolute inset-0 z-0 bg-cover bg-center opacity-10"
-        style={{ backgroundImage: "url('/lovable-uploads/bg-1.png')" }}
+        style={{ backgroundImage: "url('/images/bg-1.png')" }}
       ></div>
 
       {/* Animated gradient orbs */}

@@ -1,67 +1,48 @@
-# Project info
+# EZ Training Hub
 
-**URL**: https://lovable.dev/projects/cfe6baa0-503b-41c1-81b0-aecbc3b6f21e
+Training hub for a coach: public website, coach portal and athlete PWA.
 
-## How can I edit this code?
+## Stack
 
-There are several ways of editing your application.
+- React 18, Vite, TypeScript
+- shadcn/ui (Radix) and Tailwind CSS
+- Firebase: Auth, Firestore (`firestore.rules`) and Cloud Messaging
+- Vercel: hosting and serverless functions in `api/`
 
-**Use Lovable**
+## Getting started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cfe6baa0-503b-41c1-81b0-aecbc3b6f21e) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requirements: Node.js and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app reads its Firebase and Cloudinary settings from `VITE_*` environment variables in a local `.env` file (not committed).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Local Firebase emulator
 
-**Use GitHub Codespaces**
+Run the app against the Firebase emulator with fictional data, without touching production. See [docs/testing/emulator.md](docs/testing/emulator.md).
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+npm run emulators   # start Auth, Firestore and Storage emulators
+npm run seed        # load fictional data
+npm run dev:emu     # app on http://localhost:8090
+```
 
-## What technologies are used for this project?
+## Checks
 
-This project is built with .
+```sh
+npm run lint
+npm run typecheck
+npm test            # unit and API tests
+npm run test:rules  # Firestore rules tests (starts a throwaway emulator)
+npm run build
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Deploy
 
-## How can I deploy this project?
+- Website and functions: every push to `main` deploys to production on Vercel.
+- Firestore rules: `npx firebase-tools deploy --only firestore:rules -P ez-prod`.
 
-Simply open [Lovable](https://lovable.dev/projects/cfe6baa0-503b-41c1-81b0-aecbc3b6f21e) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Deploy the rules before pushing front-end changes that depend on them.
