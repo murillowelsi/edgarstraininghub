@@ -54,6 +54,8 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				'surface-inverse': 'hsl(var(--surface-inverse))',
+				'destructive-ink': 'hsl(var(--destructive-ink))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
