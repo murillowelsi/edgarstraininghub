@@ -155,9 +155,9 @@ export default function AdminChat() {
         return n === 1 ? t.chatComponent.membersOne : t.chatComponent.membersOther.replace("{{n}}", String(n));
     };
 
-    const handleSendMessage = async (text: string) => {
+    const handleSendMessage = async (text: string, messageId: string) => {
         if (!selectedChat || !user) throw new Error("no active chat");
-        await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Coach");
+        await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Coach", undefined, undefined, messageId);
     };
 
     const handleStartChat = async (athlete: User) => {
@@ -223,7 +223,7 @@ export default function AdminChat() {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <div className="h-[280px] overflow-y-auto space-y-2">
+                    <div className="max-h-[min(55dvh,420px)] overflow-y-auto space-y-2">
                         {loadingAthletes ? (
                             <ListSkeleton rows={4} />
                         ) : filteredAthletes.length === 0 ? (
@@ -250,7 +250,7 @@ export default function AdminChat() {
                     </div>
                 </>
             ) : (
-                <div className="h-[320px] overflow-y-auto space-y-2">
+                <div className="max-h-[min(60dvh,460px)] overflow-y-auto space-y-2">
                     {loadingTeams ? (
                         <ListSkeleton rows={4} />
                     ) : teams.length === 0 ? (
@@ -372,6 +372,11 @@ export default function AdminChat() {
                     {selectedChat ? (
                         <ChatWindow
                             key={selectedChat.id}
+                            chatId={selectedChat.id}
+                            senderInfo={(id) => {
+                                const u = allUsers.find((x) => x.id === id);
+                                return u ? { photoURL: u.photoURL, isCoach: u.role === "admin" || u.role === "editor" } : undefined;
+                            }}
                             messages={messages}
                             currentUserId={user?.uid || ""}
                             onSendMessage={handleSendMessage}

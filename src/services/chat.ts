@@ -1,6 +1,5 @@
 import {
     collection,
-    addDoc,
     query,
     where,
     onSnapshot,
@@ -63,12 +62,14 @@ export const ChatService = {
         // "event_reminder": posted by the athlete's app on the coach's behalf (see firestore.rules)
         kind?: "event_reminder",
         // With kind "event_reminder": the athlete event the reminder is about
-        eventId?: string
+        eventId?: string,
+        // Id chosen by the caller (chat window outbox), so a retry rewrites the same message
+        messageId?: string
     ) => {
         const messagesRef = collection(db, "chats", chatId, "messages");
 
         // Add message to subcollection
-        await addDoc(messagesRef, {
+        await setDoc(messageId ? doc(messagesRef, messageId) : doc(messagesRef), {
             text,
             senderId,
             senderName: senderName || null,
