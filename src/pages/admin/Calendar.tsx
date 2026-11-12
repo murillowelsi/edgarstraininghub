@@ -265,7 +265,14 @@ const AdminCalendar = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  // ?date=yyyy-MM-dd (from the dashboard's week card) opens the calendar on that day
+  const focusDate = useMemo(() => {
+    const raw = searchParams.get("date");
+    const parsed = raw ? new Date(`${raw}T12:00:00`) : null;
+    return parsed && !isNaN(parsed.getTime()) ? parsed : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const [currentMonth, setCurrentMonth] = useState(() => focusDate ?? new Date());
   const [assignments, setAssignments] = useState<AssignmentWithDetails[]>([]);
   const [athletes, setAthletes] = useState<User[]>([]);
   const athleteColors = useMemo(() => buildAthleteColorMap(athletes), [athletes]);
@@ -357,10 +364,10 @@ const AdminCalendar = () => {
   }, [loading]);
 
   useEffect(() => {
-    if (isSameMonth(currentMonth, new Date())) {
+    if (focusDate ? isSameMonth(currentMonth, focusDate) : isSameMonth(currentMonth, new Date())) {
       setTimeout(() => scrollToToday("instant"), 0);
     }
-  }, [currentMonth]);
+  }, [currentMonth, focusDate]);
 
   // Check for return from workout editor with new workout
   useEffect(() => {
@@ -608,7 +615,7 @@ const AdminCalendar = () => {
               return (
                 <div
                   key={day.toISOString()}
-                  ref={isTodayDate ? todayRef : undefined}
+                  ref={(focusDate ? isSameDay(day, focusDate) : isTodayDate) ? todayRef : undefined}
                   className={cn(
                     "transition-colors",
                     isTodayDate && "bg-primary/5"
