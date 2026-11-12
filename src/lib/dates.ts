@@ -1,4 +1,4 @@
-import { format, isThisYear, type Locale } from "date-fns";
+import { format, formatDistanceToNowStrict, isThisYear, type Locale } from "date-fns";
 import { enGB, ptBR } from "date-fns/locale";
 
 export type DateLanguage = "pt" | "en";
@@ -23,6 +23,7 @@ export type DateLanguage = "pt" | "en";
  *  dateTime       19 out, 14:05 (2025)            19 Oct, 14:05 (2025)
  *  dateTimeLong   19 de outubro de 2026 às 14:05  19 October 2026 at 14:05
  *  relative       agora, 5m, 2h, 3d, then "short"
+ *  relativeLong   agora, há 5 minutos, há 2 horas, há 6 dias, then "short"
  */
 export type DateStyle =
   | "short"
@@ -38,7 +39,8 @@ export type DateStyle =
   | "time"
   | "dateTime"
   | "dateTimeLong"
-  | "relative";
+  | "relative"
+  | "relativeLong";
 
 export const dateLocale = (language: DateLanguage): Locale => (language === "pt" ? ptBR : enGB);
 
@@ -47,8 +49,9 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 const nowLabels: Record<DateLanguage, string> = { pt: "agora", en: "now" };
+const justNowLabels: Record<DateLanguage, string> = { pt: "agora", en: "just now" };
 
-const pattern = (style: Exclude<DateStyle, "relative">, date: Date, language: DateLanguage): string => {
+const pattern = (style: Exclude<DateStyle, "relative" | "relativeLong">, date: Date, language: DateLanguage): string => {
   const year = isThisYear(date) ? "" : " yyyy";
   const pt = language === "pt";
   switch (style) {
@@ -95,6 +98,14 @@ export const formatDate = (
     if (diff < HOUR) return `${Math.floor(diff / MINUTE)}m`;
     if (diff < DAY) return `${Math.floor(diff / HOUR)}h`;
     if (diff < 7 * DAY) return `${Math.floor(diff / DAY)}d`;
+    return formatDate(d, "short", language);
+  }
+  if (style === "relativeLong") {
+    const diff = Math.max(0, now.getTime() - d.getTime());
+    if (diff < MINUTE) return justNowLabels[language];
+    if (diff < 7 * DAY) {
+      return formatDistanceToNowStrict(d, { addSuffix: true, locale: dateLocale(language), roundingMethod: "floor" });
+    }
     return formatDate(d, "short", language);
   }
   // pt-BR abbreviations sometimes end with a dot ("set."); drop it for a cleaner UI
