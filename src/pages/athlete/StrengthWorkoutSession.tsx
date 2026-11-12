@@ -619,6 +619,20 @@ const StrengthWorkoutSession = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  // The recap must wait until the "Finish workout?" drawer has fully closed:
+  // while a modal drawer is open the page ignores taps, so the first tap on the
+  // recap would only dismiss the (already hidden) drawer.
+  const [saveConfirmClosed, setSaveConfirmClosed] = useState(true);
+  useEffect(() => {
+    if (showSaveConfirm) {
+      setSaveConfirmClosed(false);
+      return;
+    }
+    if (saveConfirmClosed) return;
+    // Fallback in case the close animation never reports its end
+    const id = window.setTimeout(() => setSaveConfirmClosed(true), 600);
+    return () => window.clearTimeout(id);
+  }, [showSaveConfirm, saveConfirmClosed]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareCaption, setShareCaption] = useState("");
   const [shareSummary, setShareSummary] = useState<WorkoutSummary | undefined>();
@@ -927,6 +941,7 @@ const StrengthWorkoutSession = () => {
           });
         }
       });
+      setShowSaveConfirm(false);
       setSummary({
         workoutName: assignment.workout.name,
         elapsed: formatTime(elapsed),
@@ -1369,7 +1384,7 @@ const StrengthWorkoutSession = () => {
         }}
       />
     )}
-    {summary && !showShareModal && !showShareSheet && (
+    {summary && saveConfirmClosed && !showShareModal && !showShareSheet && (
       <SessionSummary
         data={summary}
         t={t}
@@ -1602,7 +1617,13 @@ const StrengthWorkoutSession = () => {
         </DrawerContent>
       </Drawer>
 
-      <Drawer open={showSaveConfirm} onOpenChange={setShowSaveConfirm}>
+      <Drawer
+        open={showSaveConfirm}
+        onOpenChange={setShowSaveConfirm}
+        onAnimationEnd={(open) => {
+          if (!open) setSaveConfirmClosed(true);
+        }}
+      >
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>{t.athlete.session.saveConfirmTitle}</DrawerTitle>
