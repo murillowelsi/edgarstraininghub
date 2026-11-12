@@ -1,6 +1,7 @@
 import { User, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { getErrorCode } from "../lib/errors";
+import { clearCachedRole, getCachedRole, setCachedRole } from "../lib/roleCache";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../lib/firebase";
 import type { UserRole } from "../types/user";
@@ -51,35 +52,57 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      // Publish the user together with the role: no render sees a user without
-      // a role while the profile is still loading.
-      if (firebaseUser) setLoading(true);
+      if (!firebaseUser) {
+        clearCachedRole();
+        setUserRole(null);
+        setDisplayName(null);
+        setPhotoURL(null);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
 
-      if (firebaseUser) {
-        try {
-          const userDoc = await readUserDoc(firebaseUser);
-          // Signed out (or switched user) while reading: a newer callback owns the state
-          if (auth.currentUser?.uid !== firebaseUser.uid) return;
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserRole(userData?.role as UserRole || null);
-            setDisplayName(userData?.displayName || null);
-            setPhotoURL(userData?.photoURL || null);
-          } else {
-            setUserRole(null);
-            setDisplayName(null);
-            setPhotoURL(null);
-          }
-        } catch (error) {
-          console.error("Error checking user role:", error);
+      // Same user as last time on this device: render the app now with the cached
+      // role and confirm it from Firestore in the background. A changed role
+      // re-renders the routes, and ProtectedRoute redirects.
+      const cachedRole = getCachedRole(firebaseUser.uid);
+      if (cachedRole) {
+        setUserRole(cachedRole);
+        setUser(firebaseUser);
+        setLoading(false);
+      } else {
+        // First sign-in here: publish the user together with the role, so no
+        // render sees a user without a role while the profile is loading.
+        setLoading(true);
+      }
+
+      try {
+        const userDoc = await readUserDoc(firebaseUser);
+        // Signed out (or switched user) while reading: a newer callback owns the state
+        if (auth.currentUser?.uid !== firebaseUser.uid) return;
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const role = (userData?.role as UserRole) || null;
+          setUserRole(role);
+          setDisplayName(userData?.displayName || null);
+          setPhotoURL(userData?.photoURL || null);
+          setCachedRole(firebaseUser.uid, role);
+        } else {
+          setUserRole(null);
+          setDisplayName(null);
+          setPhotoURL(null);
+          clearCachedRole();
+        }
+      } catch (error) {
+        // Signed out (or switched user) while reading: the newer callback owns the state
+        if (auth.currentUser?.uid !== firebaseUser.uid) return;
+        console.error("Error checking user role:", error);
+        // Offline with a cached role: keep it so the PWA still opens
+        if (!cachedRole) {
           setUserRole(null);
           setDisplayName(null);
           setPhotoURL(null);
         }
-      } else {
-        setUserRole(null);
-        setDisplayName(null);
-        setPhotoURL(null);
       }
 
       setUser(firebaseUser);
