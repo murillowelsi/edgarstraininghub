@@ -4,9 +4,16 @@ interface YouTubeVideo {
   videoId: string;
   title: string;
   publishedAt: string;
+  thumbnail?: string;
 }
 
-const CHANNEL_ID = 'UCfraTOODwkSAJSWz1R47g_g'; // Edgar Zanin's channel ID
+interface LatestVideoResponse {
+  video?: { id: string; title: string; publishedAt: string; thumbnail?: string };
+}
+
+// Served by api/youtube-latest.js (Vercel function, CDN-cached). The function
+// only accepts the coach's channel; the channel ID lives there.
+const ENDPOINT = '/api/youtube-latest';
 
 export const useLatestYouTubeVideo = () => {
   const [video, setVideo] = useState<YouTubeVideo | null>(null);
@@ -17,44 +24,28 @@ export const useLatestYouTubeVideo = () => {
     setLoading(true);
     setError(null);
     try {
-      // Use a CORS proxy to fetch the RSS feed
-      const response = await fetch(
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(
-          `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
-        )}`
-      );
+      const response = await fetch(ENDPOINT, { headers: { Accept: 'application/json' } });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch YouTube feed');
+      // In plain `vite` dev there is no /api: the SPA fallback returns HTML.
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      if (!response.ok || !isJson) {
+        throw new Error(`Failed to fetch latest video (${response.status})`);
       }
 
-      const xmlText = await response.text();
-
-      // Parse XML to get the latest video
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-      // Get the first entry (latest video)
-      const entry = xmlDoc.querySelector('entry');
-
-      if (entry) {
-        // YouTube RSS uses yt:videoId tag
-        const videoIdElement = entry.querySelector('videoId') ||
-          entry.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015', 'videoId')[0];
-        const videoId = videoIdElement?.textContent || '';
-
-        const title = entry.querySelector('title')?.textContent || '';
-        const publishedAt = entry.querySelector('published')?.textContent || '';
-
-        if (videoId) {
-          setVideo({ videoId, title, publishedAt });
-        } else {
-          throw new Error('Could not extract video ID from feed');
-        }
-      } else {
-        throw new Error('No entries found in feed');
+      const data = (await response.json()) as LatestVideoResponse;
+      if (!data.video?.id) {
+        throw new Error('No video in response');
       }
+
+      setVideo({
+        videoId: data.video.id,
+        title: data.video.title,
+        publishedAt: data.video.publishedAt,
+        thumbnail: data.video.thumbnail,
+      });
     } catch (err) {
+      // The UI shows a friendly fallback (link to the channel + retry)
+      console.error('useLatestYouTubeVideo:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
