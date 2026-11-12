@@ -45,6 +45,7 @@ import {
   Trash2,
   } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface Props {
   eventId: string;
@@ -241,12 +242,8 @@ export const EventChecklistPanel = ({ eventId, athleteId }: Props) => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+  if (loading && sections.length === 0) {
+    return <ListSkeleton rows={4} avatar={false} />;
   }
 
   if (needsPreset) {

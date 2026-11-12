@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PageSpinner, Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { CreatePostModal } from "@/components/timeline/CreatePostModal";
 import { createMentionNotifications, createTimelinePost } from "@/services/timelineService";
@@ -71,6 +71,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { formatHold, parseTimedReps } from "@/utils/timedReps";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 // Types for tracking workout progress
 interface SetProgress {
@@ -1318,7 +1319,11 @@ const StrengthWorkoutSession = () => {
   };
 
   if (loading) {
-    return <PageSpinner />;
+    return (
+      <div className="min-h-screen bg-background">
+        <ListSkeleton className="mx-auto max-w-2xl p-4 pt-[max(1rem,env(safe-area-inset-top))]" rows={4} avatar={false} />
+      </div>
+    );
   }
 
   if (!assignment || assignment.workout.type !== "strength") {

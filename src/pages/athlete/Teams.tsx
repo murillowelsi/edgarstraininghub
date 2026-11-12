@@ -14,7 +14,7 @@ import type { Team } from "@/types/team";
 import type { PublicProfile } from "@/types/user";
 import { getTeamColor } from "@/lib/teamColors";
 import { MessageSquare, Search, Shield } from "lucide-react";
-import { SectionSpinner } from "@/components/ui/spinner";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -98,7 +98,7 @@ export default function AthleteTeams() {
         </div>
 
         {loading ? (
-          <SectionSpinner />
+          <ListSkeleton rows={3} />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
             <Shield className="h-10 w-10 text-muted-foreground/40" />

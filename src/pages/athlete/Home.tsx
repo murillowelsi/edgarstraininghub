@@ -26,10 +26,10 @@ import { endOfDay, endOfWeek, format, isAfter, isSameDay, isToday, isWithinInter
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { CalendarCheck, CheckCircle2, ChevronRight, Dumbbell, Flame, Moon, Play, Plus, Trash2 } from "lucide-react";
 import { loadSessionDraft } from "@/lib/sessionDraft";
-import { SectionSpinner } from "@/components/ui/spinner";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
+import { TodaySkeleton } from "@/components/feedback/skeletons";
 
 const workoutTypeIcons: Record<string, React.ElementType> = {
   running: GrRun,
@@ -227,7 +227,7 @@ const AthleteHome = () => {
   if (loading) {
     return (
       <AthletePortalLayout>
-        <SectionSpinner />
+        <TodaySkeleton className="p-4" />
       </AthletePortalLayout>
     );
   }

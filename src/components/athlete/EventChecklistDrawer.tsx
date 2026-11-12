@@ -25,6 +25,7 @@ import {
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface Props {
   open: boolean;
@@ -224,10 +225,8 @@ export const EventChecklistDrawer = ({
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
+            {loading && sections.length === 0 ? (
+              <ListSkeleton rows={4} avatar={false} />
             ) : needsPreset ? (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">{tec.templateHint}</p>

@@ -14,7 +14,7 @@ import type { Team } from "@/types/team";
 import type { PublicProfile } from "@/types/user";
 import { getTeamColor } from "@/lib/teamColors";
 import { ChevronLeft, Shield, Users } from "lucide-react";
-import { SectionSpinner } from "@/components/ui/spinner";
+import { DetailSkeleton } from "@/components/feedback/skeletons";
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -56,7 +56,7 @@ export default function AthleteTeamDetail() {
   if (loading) {
     return (
       <AthletePortalLayout title={t.athlete.nav.teams}>
-        <SectionSpinner />
+        <DetailSkeleton className="p-4" />
       </AthletePortalLayout>
     );
   }

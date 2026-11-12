@@ -14,6 +14,7 @@ import type { WorkoutType } from "@/types/workout";
 import { renderPostImage, uploadPostImage, type PostAspect } from "@/lib/postImages";
 import { summaryStats } from "@/utils/workoutSummaryStats";
 import { WorkoutSummaryCard } from "./WorkoutSummaryCard";
+import { ListSkeleton } from "@/components/feedback/skeletons";
 
 interface CreatePostModalProps {
   open: boolean;
@@ -332,9 +333,7 @@ export function CreatePostModal({
               className="mx-4 mb-2 rounded-2xl glass-menu overflow-hidden"
             >
               {users.length === 0 ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
+                <ListSkeleton rows={3} className="p-2" />
               ) : filteredUsers.length === 0 ? (
                 <p className="text-sm text-muted-foreground px-4 py-3">{tc.noUsers}</p>
               ) : (

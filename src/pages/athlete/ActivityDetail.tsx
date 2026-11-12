@@ -33,6 +33,7 @@ import { SessionResults } from "@/components/workout/SessionResults";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
+import { DetailSkeleton } from "@/components/feedback/skeletons";
 
 const icons = {
   running: GrRun,
@@ -95,7 +96,7 @@ const ActivityDetail = () => {
   if (!assignment) {
     return (
       <Layout showHeader={false}>
-        <div className="p-6 text-center text-muted-foreground">{ta.loading}</div>
+        <DetailSkeleton className="p-4" label={ta.loading} />
       </Layout>
     );
   }
