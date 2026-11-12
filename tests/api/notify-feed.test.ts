@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 type Doc = Record<string, unknown>;
 const store = new Map<string, Doc>();
 const sent: string[] = [];
+const messages: { notification?: { title?: string; body?: string } }[] = [];
 let invalidTokens = new Set<string>();
 
 const docRef = (path: string) => ({
@@ -41,9 +42,10 @@ vi.mock("firebase-admin/app", () => ({ initializeApp: vi.fn(), getApps: () => [{
 vi.mock("firebase-admin/firestore", () => ({ getFirestore: () => fakeDb }));
 vi.mock("firebase-admin/messaging", () => ({
   getMessaging: () => ({
-    send: async (m: { token: string }) => {
+    send: async (m: { token: string; notification?: { title?: string; body?: string } }) => {
       if (invalidTokens.has(m.token)) throw Object.assign(new Error("gone"), { code: "messaging/registration-token-not-registered" });
       sent.push(m.token);
+      messages.push(m);
     },
   }),
 }));
@@ -68,6 +70,7 @@ const call = async (body: Record<string, unknown>) => {
 beforeEach(() => {
   store.clear();
   sent.length = 0;
+  messages.length = 0;
   invalidTokens = new Set();
   vi.useRealTimers();
   store.set("publicProfiles/bruno", { displayName: "Bruno Demo" });
@@ -121,6 +124,11 @@ describe("/api/notify-feed", () => {
   it("mention in a comment must appear in the caller's comment text", async () => {
     expect((await call({ idToken: "bruno", postId: "p1", kind: "mention", mentionedUid: "ana", commentId: "c1" })).code).toBe(200);
     expect((await call({ idToken: "bruno", postId: "p1", kind: "mention", mentionedUid: "coach", commentId: "c1" })).code).toBe(403);
+  });
+
+  it("text: the title is who did it and the body says what, without repeating", async () => {
+    await call({ idToken: "bruno", postId: "p1", kind: "comment", commentId: "c1" });
+    expect(messages[0].notification).toEqual({ title: "Bruno Demo", body: "comentou: Boa! @Ana Demo" });
   });
 
   it("never pushes to yourself", async () => {
