@@ -183,6 +183,33 @@ describe("keeps working (passes today, must stay green)", () => {
   it("another user cannot write my fcmTokens", async () => {
     await assertFails(setDoc(doc(as(BRUNO), "users", ANA, "fcmTokens", "tok"), { token: "tok" }));
   });
+
+  // useEventChatReminders: the athlete's app posts race reminders as the coach
+  it("an athlete posts a race reminder as the coach in their own 1:1 chat", async () => {
+    await assertSucceeds(
+      setDoc(doc(as(ANA), "chats", `${ANA}_${COACH}`, "messages", "r1"), {
+        text: "Race in 3 days",
+        senderId: COACH,
+        senderName: "coach",
+        read: false,
+        kind: "event_reminder",
+        createdAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it("an athlete cannot post as the coach without the reminder marker or in a team chat", async () => {
+    await assertFails(
+      setDoc(doc(as(ANA), "chats", `${ANA}_${COACH}`, "messages", "r2"), {
+        text: "fake", senderId: COACH, read: false, createdAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      setDoc(doc(as(ANA), "chats", `team_${TEAM}`, "messages", "r3"), {
+        text: "fake", senderId: COACH, read: false, kind: "event_reminder", createdAt: serverTimestamp(),
+      }),
+    );
+  });
 });
 
 describe("security holes (FAIL today on purpose; green once firestore.rules is fixed)", () => {

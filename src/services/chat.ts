@@ -58,7 +58,9 @@ export const ChatService = {
         chatId: string,
         senderId: string,
         text: string,
-        senderName?: string
+        senderName?: string,
+        // "event_reminder": posted by the athlete's app on the coach's behalf (see firestore.rules)
+        kind?: "event_reminder"
     ) => {
         const messagesRef = collection(db, "chats", chatId, "messages");
 
@@ -68,7 +70,8 @@ export const ChatService = {
             senderId,
             senderName: senderName || null,
             createdAt: serverTimestamp(),
-            read: false
+            read: false,
+            ...(kind ? { kind } : {}),
         });
 
         // Update parent chat with last message and increment unread count for OTHERS

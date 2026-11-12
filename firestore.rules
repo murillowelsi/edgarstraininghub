@@ -269,9 +269,19 @@ service cloud.firestore {
             request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
         }
 
+        // Race reminders (useEventChatReminders) are posted by the athlete's own app
+        // on the coach's behalf, only in that athlete's 1:1 chat and marked as such.
+        function isEventReminderFromCoach() {
+          let chat = get(/databases/$(database)/documents/chats/$(chatId)).data;
+          return !chatId.matches('team_.*')
+            && chat.get("athleteId", "") == request.auth.uid
+            && request.resource.data.get("kind", "") == "event_reminder"
+            && request.resource.data.senderId in chat.participantIds;
+        }
+
         allow read: if request.auth != null && isParticipant();
         allow create: if request.auth != null && isParticipant()
-          && request.resource.data.senderId == request.auth.uid;
+          && (request.resource.data.senderId == request.auth.uid || isEventReminderFromCoach());
         allow update: if request.auth != null && isParticipant() && (
           (resource.data.senderId == request.auth.uid
             && request.resource.data.senderId == resource.data.senderId)
