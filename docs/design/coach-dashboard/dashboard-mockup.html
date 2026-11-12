@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EZ · Dashboard do coach, versão enxuta (12/11/2026)</title>
+<title>EZ · Dashboard do coach, enxuto + ações rápidas (12/11/2026)</title>
 <!-- Mockup estático: só CSS e SVG inline. Dados fictícios do seed. Tokens: design-system §1.5. -->
 <style>
   :root{--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Montserrat','Inter',system-ui,sans-serif;
@@ -70,6 +70,41 @@
   .tabs{position:absolute;left:12px;right:12px;bottom:12px;height:64px;border-radius:99px;display:flex;justify-content:space-around;align-items:center;font-size:11px;color:var(--mfg);background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--border)}
   .tabs div{display:flex;flex-direction:column;align-items:center;gap:2px}.tabs .on{color:var(--ink);font-weight:600}.tabs svg{width:22px;height:22px}
   .fold{position:absolute;left:0;right:0;border-top:2px dashed hsl(0 91% 71% / .6);font:600 11px var(--font);color:hsl(0 91% 71%);text-align:right;padding-right:10px}
+
+  .qa{display:flex;gap:8px;align-items:center}
+  .qb{height:40px;padding:0 13px;border-radius:11px;border:1px solid var(--border);background:var(--card);font:600 13px var(--font);display:inline-flex;align-items:center;gap:7px;color:var(--fg);white-space:nowrap}
+  .qb svg{width:15px;height:15px;color:var(--mfg)}
+  .qb .new{font:700 10px var(--font);padding:1px 5px;border-radius:5px;background:hsl(48 96% 45% / .16);color:var(--ink)}
+  .rp{display:flex;gap:6px;margin-top:8px;align-items:center}
+  .rp .in{flex:1;height:38px;border-radius:10px;border:1px solid var(--primary);background:var(--s2);padding:0 12px;display:flex;align-items:center;font-size:13px;color:var(--fg);min-width:0;white-space:nowrap;overflow:hidden}
+  .rp .in i{width:1px;height:16px;background:var(--fg);margin-left:1px}
+  .rp .sd{width:38px;height:38px;border-radius:10px;background:var(--primary);display:grid;place-items:center;color:hsl(222 47% 11%);flex:none}.rp .sd svg{width:16px;height:16px}
+  .rph{font-size:12px;color:var(--mfg);margin-top:5px}.rph a{color:var(--ink);font-weight:600}
+  .wa{display:flex;gap:6px;margin:-2px 0 4px 48px}
+  .wa .ab{height:32px;font-size:12px;padding:0 10px}
+  .day{cursor:pointer}
+  .tip{position:absolute;top:44px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--fg);color:var(--bg);font:600 12px var(--font);padding:5px 9px;border-radius:8px;z-index:2}
+  .tip:before{content:"";position:absolute;top:-5px;left:50%;margin-left:-5px;border:5px solid transparent;border-top:0;border-bottom-color:var(--fg)}
+  .chiprow{display:flex;gap:8px;overflow:hidden;margin:0 -12px;padding:0 12px;mask-image:linear-gradient(90deg,#000 85%,transparent)}
+  .chiprow .qb{height:38px;border-radius:99px}
+  .chiprow .qb.p{background:var(--primary);border-color:transparent;color:hsl(222 47% 11%)}.chiprow .qb.p svg{color:inherit}
+  .toast{position:absolute;left:50%;transform:translateX(-50%);bottom:24px;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font:600 13px var(--font);display:flex;gap:8px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .scrim{position:absolute;inset:0;background:rgba(15,20,30,.45)}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:24px 24px 0 0;padding:10px 16px 24px;box-shadow:0 -10px 30px rgba(0,0,0,.25)}
+  .sheet .gr{width:40px;height:5px;border-radius:9px;background:var(--border);margin:0 auto 12px}
+  .rr{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--border);font-size:14px}
+  .rr .t{flex:1;min-width:0}.rr .t b{font-weight:600}.rr .t span{display:block;font-size:12px;color:var(--mfg)}
+  .draft{margin-top:10px;border-radius:12px;background:var(--s2);border:1px dashed var(--border);padding:10px 12px;font-size:13px;color:var(--mfg)}
+  .draft b{color:var(--fg);font-weight:600}
+
+  .wc .sum{font-size:14px;color:var(--mfg);margin:-2px 0 10px}.wc .sum b{color:var(--fg);font-weight:700;font-variant-numeric:tabular-nums}
+  .wd7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .wd7 .c{position:relative;border-radius:12px;border:1px solid var(--border);background:var(--s2);padding:6px 0 7px;display:grid;justify-items:center;gap:3px;font-size:11px;color:var(--mfg);cursor:pointer}
+  .wd7 .c b{font:700 12px var(--font);color:var(--fg);font-variant-numeric:tabular-nums}
+  .wd7 .c.fut{background:transparent;border-style:dashed}.wd7 .c.fut b{color:var(--mfg);font-weight:600}
+  .wd7 .c.on{border:2px solid var(--primary);padding:5px 0 6px}.wd7 .c.on span:first-child{color:var(--fg);font-weight:700}
+  .wd7 .c.hv{outline:2px solid var(--fg);outline-offset:1px}
+  .wd7 svg{width:22px;height:22px;transform:rotate(-90deg)}
 </style>
 </head>
 <body>
@@ -88,22 +123,31 @@
   <symbol id="grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
   <symbol id="cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
   <symbol id="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/></symbol>
+<symbol id="send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></symbol>
+  <symbol id="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="mega" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11v3a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1Z"/><path d="M17 9a4 4 0 0 1 0 6"/></symbol>
+  <symbol id="team" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20a6 6 0 0 1 12 0M14 20a4.5 4.5 0 0 1 8 0"/></symbol>
+  <symbol id="link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="bellr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></symbol>
+  <symbol id="chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></symbol>
 </defs></svg>
 
-<h1 class="ttl">EZ · Dashboard do coach: versão enxuta</h1>
-<p class="doc">Mockup estático (12/11/2026), dados fictícios do seed. Três perguntas, em ordem de importância: <b>quem precisa de mim?</b> (bloco principal, com ações) · <b>o que acontece hoje?</b> (agrupado por treino, com amanhã numa linha) · <b>como vai a semana?</b> (um número, "8 de 14 · 57%", só da semana, e a barra dos dias). Provas próximas e depoimento pendente só aparecem como aviso de uma linha quando existem.</p>
+<h1 class="ttl">EZ · Dashboard do coach: enxuto + ações rápidas</h1>
+<p class="doc">Mockup estático (12/11/2026), dados fictícios do seed. As mesmas três perguntas (<b>quem precisa de mim?</b> · <b>o que acontece hoje?</b> · <b>como vai a semana?</b>), agora com <b>mais ações e nenhum número a mais</b>: faixa de ações rápidas, resposta no próprio card, resultados e lembrete por treino, e um card compacto "Esta semana" (feitos/planejados por dia; tocar abre o Calendário nesse dia). Nenhum dado novo; o que reaproveita e o que é código novo está no README.</p>
 
 <div class="lbl">1 · Desktop 1440 × 900 · escuro · cabe numa tela</div>
-<div class="row"><div class="desk dark">
+<div class="row"><div class="desk dark" style="position:relative">
  <div class="side"><div class="lg">EZ</div><div class="i on">Início</div><div class="i">Usuários</div><div class="i">Treinos</div><div class="i">Times</div><div class="i">Calendário</div><div class="i">Artigos</div><div class="i">Feed</div><div class="i">Depoimentos</div></div>
  <div class="main">
-  <div class="head"><div class="t"><small>Quinta, 12 nov</small><b>Bom dia, Coach</b></div><span class="btn"><svg width="16" height="16"><use href="#plus"/></svg>Atribuir treino</span></div>
-  <div class="wk"><div class="num"><small>Esta semana</small><b>8 de 14</b><span>· 57%</span></div>
-   <div class="days"><div class="day">seg<div class="col"><i style="height:60%"></i></div></div><div class="day">ter<div class="col"><i style="height:100%"></i></div></div><div class="day">qua<div class="col"><i style="height:30%"></i></div></div><div class="day on">qui<div class="col"><i style="height:10%"></i></div></div><div class="day">sex<div class="col fut"></div></div><div class="day">sáb<div class="col fut"></div></div><div class="day">dom<div class="col fut"></div></div></div></div>
+  <div class="head"><div class="t"><small>Quinta, 12 nov</small><b>Bom dia, Coach</b></div>
+   <div class="qa"><span class="qb"><svg width="14" height="14"><use href="#edit"/></svg>Novo treino</span><span class="qb"><svg width="14" height="14"><use href="#mega"/></svg>Aviso no feed</span><span class="qb"><svg width="14" height="14"><use href="#team"/></svg>Mensagem ao time</span><span class="qb"><svg width="14" height="14"><use href="#link"/></svg>Convidar atleta</span><span class="btn"><svg width="16" height="16"><use href="#plus"/></svg>Atribuir treino</span></div></div>
   <div class="g2">
    <div class="att">
     <div class="ch"><b><svg width="18" height="18" style="color:var(--badc)"><use href="#alert"/></svg>Precisa de atenção <span class="cnt">4</span></b><span class="r">últimos 7 dias</span></div>
-    <div class="ai wide"><span class="av">A</span><div class="t"><div class="nm">Ana Teste</div><div class="chips"><span class="chip c-bad">1 não feito</span><span class="chip c-mut">nota</span></div><div class="quote">“Subi a carga no agachamento. Última série pesada.”</div></div><div class="acts"><span class="ab y"><svg width="14" height="14"><use href="#msg"/></svg>Responder</span><span class="ab"><svg width="14" height="14"><use href="#eye"/></svg>Ver treino</span></div></div>
+    <div class="ai"><span class="av">A</span><div class="t"><div class="nm">Ana Teste</div><div class="chips"><span class="chip c-bad">1 não feito</span><span class="chip c-mut">nota</span></div><div class="quote">“Subi a carga no agachamento. Última série pesada.”</div>
+      <div class="rp"><div class="in">Boa! Na próxima, mantém a carga e controla a descida<i></i></div><span class="sd"><svg width="14" height="14"><use href="#send"/></svg></span></div>
+      <div class="rph">Vai para o chat com a Ana · Esc fecha · <a>Abrir conversa</a></div></div></div>
     <div class="ai wide"><span class="av">K</span><div class="t"><div class="nm">Kai Teste</div><div class="chips"><span class="chip c-warn">sem treino nos próximos 7 dias</span></div></div><div class="acts"><span class="ab y"><svg width="14" height="14"><use href="#plus"/></svg>Atribuir</span></div></div>
     <div class="ai wide"><span class="av">D</span><div class="t"><div class="nm">Diego Teste</div><div class="chips"><span class="chip c-warn">sem treino nos próximos 7 dias</span></div></div><div class="acts"><span class="ab y"><svg width="14" height="14"><use href="#plus"/></svg>Atribuir</span></div></div>
     <div class="ai wide"><span class="av">B</span><div class="t"><div class="nm">Bruno Teste</div><div class="chips"><span class="chip c-str">esforço 9/10</span><span class="chip c-mut">nota</span></div><div class="quote">“Saí mais cedo, dor no ombro.”</div></div><div class="acts"><span class="ab y"><svg width="14" height="14"><use href="#msg"/></svg>Responder</span><span class="ab"><svg width="14" height="14"><use href="#eye"/></svg>Ver treino</span></div></div>
@@ -111,57 +155,59 @@
    <div style="display:grid;gap:12px">
     <div class="card"><div class="ch" style="margin-bottom:8px"><b>Hoje</b><span class="r">1 de 3 feitos</span></div>
      <div class="ag"><span class="si" style="background:hsl(188 86% 53% / .15);color:var(--swim)"><svg><use href="#swim"/></svg></span><div class="t"><b>Natação: técnica e ritmo</b><span>3 atletas · 1 feito</span></div><span class="stack"><span class="av ok">A</span><span class="av">B</span><span class="av">C</span></span></div>
+     <div class="wa"><span class="ab"><svg width="14" height="14"><use href="#chart"/></svg>Ver resultados</span><span class="ab y"><svg width="14" height="14"><use href="#bellr"/></svg>Lembrar quem falta (2)</span></div>
      <div class="tmr">Amanhã: <b>Força B: membros superiores</b> · 3 atletas<a>Ver</a></div>
     </div>
+    <div class="card wc"><div class="ch" style="margin-bottom:4px"><b>Esta semana</b><a class="r" style="color:var(--ink);font-weight:600">Calendário ›</a></div><div class="sum"><b>8 de 14</b> treinos feitos · 57%</div><div class="wd7"><div class="c "><span>seg</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="37.7 50.27"/></svg><b>3/4</b></div><div class="c "><span>ter</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--okc)" stroke-width="3" stroke-linecap="round" stroke-dasharray="50.3 50.27"/></svg><b>3/3</b></div><div class="c hv"><span>qua</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16.8 50.27"/></svg><b>1/3</b><span class="tip" style="top:calc(100% + 7px)">Abrir qua, 11 nov no Calendário</span></div><div class="c on"><span>qui</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16.8 50.27"/></svg><b>1/3</b></div><div class="c fut"><span>sex</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.0 50.27"/></svg><b>0/1</b></div><div class="c fut"><span>sáb</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="2 3"/></svg><b>—</b></div><div class="c fut"><span>dom</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="2 3"/></svg><b>—</b></div></div></div>
     <div class="nt"><span class="ic" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#flag"/></svg></span><span><b>Bruno Teste</b> <span class="m">· Corrida 10 km em 12 dias</span></span><a>Ver</a></div>
     <div class="nt"><span class="ic" style="background:hsl(48 96% 45% / .15);color:var(--ink)"><svg><use href="#quote"/></svg></span><span><b>1 depoimento</b> <span class="m">para revisar</span></span><a>Revisar</a></div>
    </div>
   </div>
  </div>
+ <div class="toast" style="left:calc(220px + 50%)"><svg width="16" height="16"><use href="#check"/></svg>Link de convite do time copiado</div>
 </div></div>
-<p class="note" style="max-width:1100px;margin-top:-28px;margin-bottom:40px">Tudo cabe em 1440 × 900 sem rolar. Os avisos (prova em menos de 14 dias, depoimento para revisar) só aparecem quando existem; sem eles, a coluna da direita fica só com "Hoje". "Sem treino nos próximos 7 dias" continua visível, como o usuário pediu, com a ação Atribuir.</p>
+<p class="note" style="max-width:1100px;margin-top:-28px;margin-bottom:40px">Cabe em 1440 × 900 sem rolar. Estados mostrados ao mesmo tempo só para o mockup: resposta rápida aberta na Ana, dica ao passar o mouse em "qua" no card da semana e o toast de "Convidar atleta". "Atribuir treino" continua o botão principal, à direita.</p>
 
-<div class="lbl">2 · Celular 390 px · escuro (com pendências) e claro (dia calmo)</div>
+<div class="lbl">2 · Celular 390 px · claro: ações rápidas e resposta no card · resultados e lembrete de "Hoje"</div>
 <div class="row">
-<div class="phone dark">
+<div class="phone light" style="height:1330px">
  <div class="top"><span style="font:800 24px var(--display);color:var(--ink)">EZ</span><div style="display:flex;gap:8px"><div class="g"><svg><use href="#msg"/></svg></div><div class="g"><svg><use href="#bell"/></svg></div></div></div>
  <div class="pp">
-  <div class="wk"><div class="num"><small>Esta semana</small><b>8 de 14</b><span>· 57%</span></div>
-   <div class="days"><div class="day">seg<div class="col"><i style="height:60%"></i></div></div><div class="day">ter<div class="col"><i style="height:100%"></i></div></div><div class="day">qua<div class="col"><i style="height:30%"></i></div></div><div class="day on">qui<div class="col"><i style="height:10%"></i></div></div><div class="day">sex<div class="col fut"></div></div><div class="day">sáb<div class="col fut"></div></div><div class="day">dom<div class="col fut"></div></div></div></div>
+  <div class="chiprow"><span class="qb p"><svg width="14" height="14"><use href="#plus"/></svg>Atribuir</span><span class="qb"><svg width="14" height="14"><use href="#edit"/></svg>Novo treino</span><span class="qb"><svg width="14" height="14"><use href="#mega"/></svg>Aviso no feed</span><span class="qb"><svg width="14" height="14"><use href="#team"/></svg>Mensagem ao time</span><span class="qb"><svg width="14" height="14"><use href="#link"/></svg>Convidar</span></div>
   <div class="att">
    <div class="ch"><b><svg width="18" height="18" style="color:var(--badc)"><use href="#alert"/></svg>Precisa de atenção <span class="cnt">4</span></b></div>
-   <div class="ai"><span class="av">A</span><div class="t"><div class="nm">Ana Teste</div><div class="chips"><span class="chip c-bad">1 não feito</span><span class="chip c-mut">nota</span></div><div class="quote">“Subi a carga no agachamento…”</div><div class="acts"><span class="ab y">Responder</span><span class="ab">Ver treino</span></div></div></div>
+   <div class="ai"><span class="av">A</span><div class="t"><div class="nm">Ana Teste</div><div class="chips"><span class="chip c-bad">1 não feito</span><span class="chip c-mut">nota</span></div><div class="quote">“Subi a carga no agachamento…”</div>
+     <div class="rp"><div class="in">Boa! Mantém a carga<i></i></div><span class="sd"><svg width="14" height="14"><use href="#send"/></svg></span></div>
+     <div class="rph">Vai para o chat com a Ana · <a>Abrir conversa</a></div></div></div>
    <div class="ai"><span class="av">K</span><div class="t"><div class="nm">Kai Teste</div><div class="chips"><span class="chip c-warn">sem treino nos próximos 7 dias</span></div><div class="acts"><span class="ab y">Atribuir</span></div></div></div>
    <div class="ai"><span class="av">D</span><div class="t"><div class="nm">Diego Teste</div><div class="chips"><span class="chip c-warn">sem treino nos próximos 7 dias</span></div><div class="acts"><span class="ab y">Atribuir</span></div></div></div>
    <div class="ai" style="padding-bottom:0"><span class="av">B</span><div class="t"><div class="nm">Bruno Teste</div><div class="chips"><span class="chip c-str">esforço 9/10</span><span class="chip c-mut">nota</span></div><div class="acts"><span class="ab y">Responder</span><span class="ab">Ver treino</span></div></div></div>
   </div>
   <div class="card"><div class="ch" style="margin-bottom:8px"><b>Hoje</b><span class="r">1 de 3 feitos</span></div>
-   <div class="ag"><span class="si" style="background:hsl(188 86% 53% / .15);color:var(--swim)"><svg><use href="#swim"/></svg></span><div class="t"><b>Natação: técnica e ritmo</b><span>3 atletas · 1 feito</span></div><span class="stack"><span class="av ok">A</span><span class="av">B</span><span class="av">C</span></span></div>
+   <div class="ag"><span class="si" style="background:hsl(188 86% 53% / .15);color:hsl(192 91% 30%)"><svg><use href="#swim"/></svg></span><div class="t"><b>Natação: técnica e ritmo</b><span>3 atletas · 1 feito</span></div><span class="stack"><span class="av ok">A</span><span class="av">B</span><span class="av">C</span></span></div>
+   <div class="wa" style="margin-left:0"><span class="ab">Ver resultados</span><span class="ab y">Lembrar quem falta (2)</span></div>
    <div class="tmr">Amanhã: <b>Força B</b> · 3 atletas<a>Ver</a></div>
   </div>
+  <div class="card wc"><div class="ch" style="margin-bottom:4px"><b>Esta semana</b><a class="r" style="color:var(--ink);font-weight:600">Calendário ›</a></div><div class="sum"><b>8 de 14</b> treinos feitos · 57%</div><div class="wd7"><div class="c "><span>seg</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="37.7 50.27"/></svg><b>3/4</b></div><div class="c "><span>ter</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--okc)" stroke-width="3" stroke-linecap="round" stroke-dasharray="50.3 50.27"/></svg><b>3/3</b></div><div class="c "><span>qua</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16.8 50.27"/></svg><b>1/3</b></div><div class="c on"><span>qui</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16.8 50.27"/></svg><b>1/3</b></div><div class="c fut"><span>sex</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--muted)" stroke-width="3"/><circle cx="11" cy="11" r="8" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.0 50.27"/></svg><b>0/1</b></div><div class="c fut"><span>sáb</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="2 3"/></svg><b>—</b></div><div class="c fut"><span>dom</span><svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="2 3"/></svg><b>—</b></div></div></div>
   <div class="nt"><span class="ic" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#flag"/></svg></span><span><b>Bruno</b> <span class="m">· 10 km em 12 dias</span></span><a>Ver</a></div>
   <div class="nt"><span class="ic" style="background:hsl(48 96% 45% / .15);color:var(--ink)"><svg><use href="#quote"/></svg></span><span><b>1 depoimento</b> <span class="m">para revisar</span></span><a>Revisar</a></div>
  </div>
  <div class="fold" style="top:828px">fim da 1ª tela (844 px)</div>
- <div class="fab"><svg width="18" height="18"><use href="#plus"/></svg>Atribuir</div>
  <div class="tabs"><div class="on"><svg><use href="#home"/></svg>Início</div><div><svg><use href="#users"/></svg>Usuários</div><div><svg><use href="#grid"/></svg>Feed</div><div><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#dumb"/></svg>Treinos</div></div>
 </div>
 <div class="phone light" style="height:844px">
  <div class="top"><span style="font:800 24px var(--display);color:var(--ink)">EZ</span><div style="display:flex;gap:8px"><div class="g"><svg><use href="#msg"/></svg></div><div class="g"><svg><use href="#bell"/></svg></div></div></div>
- <div class="pp">
-  <div class="wk"><div class="num"><small>Esta semana</small><b>8 de 14</b><span>· 57%</span></div>
-   <div class="days"><div class="day">seg<div class="col"><i style="height:60%"></i></div></div><div class="day">ter<div class="col"><i style="height:100%"></i></div></div><div class="day">qua<div class="col"><i style="height:30%"></i></div></div><div class="day on">qui<div class="col"><i style="height:10%"></i></div></div><div class="day">sex<div class="col fut"></div></div><div class="day">sáb<div class="col fut"></div></div><div class="day">dom<div class="col fut"></div></div></div></div>
-  <div class="card" style="text-align:center;font-size:14px;color:var(--okc);font-weight:600;padding:14px">✓ Todos em dia nos últimos 7 dias</div>
-  <div class="card"><div class="ch" style="margin-bottom:8px"><b>Hoje</b><span class="r">0 de 4 feitos</span></div>
-   <div class="ag"><span class="si" style="background:hsl(188 86% 53% / .15);color:hsl(192 91% 30%)"><svg><use href="#swim"/></svg></span><div class="t"><b>Natação: técnica e ritmo</b><span>3 atletas</span></div><span class="stack"><span class="av">A</span><span class="av">B</span><span class="av">C</span></span></div>
-   <div class="ag"><span class="si" style="background:hsl(217 91% 60% / .14);color:hsl(221 83% 43%)"><svg><use href="#run"/></svg></span><div class="t"><b>Corrida: rodagem leve</b><span>1 atleta</span></div><span class="stack"><span class="av">K</span></span></div>
-   <div class="tmr">Amanhã: <b>Força B</b> · 3 atletas<a>Ver</a></div>
-  </div>
+ <div class="scrim"></div>
+ <div class="sheet"><div class="gr"></div>
+  <div class="ch"><b><span class="si" style="width:30px;height:30px;background:hsl(188 86% 53% / .15);color:hsl(192 91% 30%)"><svg width="16" height="16"><use href="#swim"/></svg></span>Natação: técnica e ritmo</b><span class="r">hoje · 1 de 3</span></div>
+  <div class="rr"><span class="av" style="background:color-mix(in srgb,var(--okc) 20%,var(--s2));border-color:var(--okc)">A</span><div class="t"><b>Ana Teste</b> <span style="display:inline;color:var(--okc);font-weight:600">· feito</span><span>42 min · esforço 6/10</span><span style="font-style:italic">“Saída de bloco melhorou.”</span></div><span class="ab" style="height:32px;font-size:12px">Ver</span></div>
+  <div class="rr"><span class="av">B</span><div class="t"><b>Bruno Teste</b><span>ainda não fez</span></div><span class="ab y" style="height:32px;font-size:12px">Lembrar</span></div>
+  <div class="rr"><span class="av">C</span><div class="t"><b>Carla Teste</b><span>ainda não fez</span></div><span class="ab y" style="height:32px;font-size:12px">Lembrar</span></div>
+  <div class="draft">Texto pronto do lembrete (editável, vai para o campo do chat, <b>não é enviado sozinho</b>):<br><b>“Oi, Bruno! Hoje tem Natação: técnica e ritmo. Conseguiu encaixar? Se precisar ajustar, me avisa.”</b></div>
+  <div style="display:flex;margin-top:12px"><span class="ab" style="flex:1;justify-content:center">Fechar</span></div>
  </div>
- <div class="fab"><svg width="18" height="18"><use href="#plus"/></svg>Atribuir</div>
- <div class="tabs"><div class="on"><svg><use href="#home"/></svg>Início</div><div><svg><use href="#users"/></svg>Usuários</div><div><svg><use href="#grid"/></svg>Feed</div><div><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#dumb"/></svg>Treinos</div></div>
 </div>
-<p class="note">Escuro, com 4 pendências e 2 avisos: a página tem ~1.250 px, cerca de 1,5 tela de 844 px. Claro, num dia calmo: o bloco de atenção vira uma linha verde, os avisos somem e tudo cabe numa tela. No celular, "Atribuir treino" vira o botão flutuante.</p>
+<p class="note">Esquerda: as ações rápidas viram chips roláveis no topo, com "Atribuir" primeiro (o botão flutuante saiu, para não repetir). A resposta rápida abre no próprio card. Com 4 pendências e 2 avisos, a página tem ~1,5 tela. Direita: "Ver resultados" e "Lembrar quem falta" abrem a mesma folha. "Lembrar" abre o chat de cada atleta com o texto já no campo; o coach revisa e envia.</p>
 </div>
 </body>
 </html>
