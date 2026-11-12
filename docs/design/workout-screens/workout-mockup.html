@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EZ · Detalhe do treino e sessão de força (proposta 12/11/2026)</title>
+<!-- Mockup estático: só CSS e SVG inline. Dados fictícios do seed. Tokens: design-system §1.5. -->
+<style>
+  :root{--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Montserrat','Inter',system-ui,sans-serif;
+    --primary:hsl(48 96% 45%);--run:hsl(217 91% 60%);--bike:hsl(142 71% 45%);--swim:hsl(188 86% 53%);--str:hsl(25 95% 53%)}
+  .dark{--bg:hsl(220 5% 9%);--card:hsl(220 5% 12%);--s2:hsl(220 5% 15%);--muted:hsl(220 5% 17%);--border:hsl(220 5% 24%);--input:hsl(220 5% 44%);--fg:hsl(0 0% 98%);--mfg:hsl(220 5% 66%);--ink:var(--primary);--wc:hsl(220 5% 8%);--glow:32%;--box:hsl(0 0% 100% / .05);--boxb:hsl(0 0% 100% / .09);--okc:hsl(142 69% 58%)}
+  .light{--bg:hsl(220 20% 95%);--card:#fff;--s2:hsl(210 40% 98%);--muted:hsl(210 40% 94%);--border:hsl(220 13% 88%);--input:hsl(220 9% 65%);--fg:hsl(222 47% 11%);--mfg:hsl(215 16% 42%);--ink:hsl(40 95% 30%);--wc:#fff;--glow:15%;--box:hsl(220 20% 97%);--boxb:hsl(220 13% 90%);--okc:hsl(142 72% 29%)}
+  .light .run{--a-ink:hsl(221 83% 43%)}.light .str{--a-ink:hsl(21 90% 40%)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#0a0a0a;color:#e5e5e5;padding:32px;line-height:1.4}
+  h1.ttl{font:700 28px var(--display);color:#fff}p.doc{color:#a3a3a3;max-width:1100px;margin:4px 0 24px}
+  .row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-bottom:40px}
+  .lbl{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#a3a3a3;margin-bottom:10px}
+  .note{font-size:13px;color:#a3a3a3;max-width:390px;margin-top:10px}
+  .phone{width:390px;height:1200px;border-radius:40px;border:8px solid #262626;background:var(--bg);color:var(--fg);overflow:hidden;position:relative}
+  .hdr{display:flex;align-items:center;gap:8px;padding:10px 8px;border-bottom:1px solid var(--border)}
+  .ib{width:44px;height:44px;border-radius:99px;display:grid;place-items:center;flex:none}.ib svg{width:22px;height:22px}
+  .hdr b{flex:1;font:600 16px var(--font);text-align:center}
+  .pad{padding:12px}
+  /* hero */
+  .hero{--a:var(--run);border-radius:24px;padding:16px;position:relative;overflow:hidden;background:radial-gradient(130% 100% at 100% 0%,color-mix(in srgb,var(--a) var(--glow),transparent),transparent 58%),var(--wc);border:1px solid color-mix(in srgb,var(--a) 35%,var(--border))}
+  .t1{display:flex;align-items:center;gap:8px;font:700 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--a-ink,var(--a))}
+  .t1 .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--a) 18%,transparent)}.t1 svg{width:16px;height:16px}.t1 .r{margin-left:auto;font:600 12px var(--font);letter-spacing:0;text-transform:none;color:var(--mfg)}
+  .wn{font:800 22px/1.2 var(--display);margin:10px 0 12px}
+  .tot{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .tot div{border-radius:12px;padding:8px 10px;background:var(--box);border:1px solid var(--boxb)}.tot b{display:block;font:700 17px var(--font);font-variant-numeric:tabular-nums}.tot span{font:600 10px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mfg)}
+  .viz{margin-top:14px}
+  .vbar{display:flex;align-items:flex-end;gap:2px;height:56px}
+  .vbar i{border-radius:3px 3px 1px 1px}
+  .vax{display:flex;justify-content:space-between;font-size:11px;color:var(--mfg);margin-top:4px}
+  .zl{display:flex;gap:10px;font-size:11px;color:var(--mfg);margin-top:6px}.zl span{display:flex;gap:4px;align-items:center}.zl i{width:8px;height:8px;border-radius:2px}
+  .noteb{margin-top:12px;font-size:14px;padding:10px 12px;border-radius:12px;background:var(--box);border:1px solid var(--boxb)}
+  .noteb small{display:block;font:600 11px var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--mfg);margin-bottom:2px}
+  /* steps timeline */
+  .sh{display:flex;justify-content:space-between;margin:18px 4px 8px}.sh b{font:700 16px var(--font)}.sh span{font-size:13px;color:var(--mfg)}
+  .tl{position:relative;padding-left:20px}
+  .tl::before{content:"";position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border)}
+  .st{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+  .st::before{content:"";position:absolute;left:-18px;top:16px;width:10px;height:10px;border-radius:99px;background:var(--c,var(--mfg));box-shadow:0 0 0 3px var(--bg)}
+  .st .l1{display:flex;justify-content:space-between;gap:8px}.st b{font-size:15px}.st .dur{font:700 15px var(--font);font-variant-numeric:tabular-nums}
+  .st .tg{font-size:13px;color:var(--mfg);margin-top:2px}
+  .zone{display:inline-block;font:700 11px var(--font);padding:1px 7px;border-radius:6px;margin-right:6px}
+  .rep{border:1px dashed color-mix(in srgb,var(--run) 45%,var(--border));border-radius:16px;padding:10px;margin-bottom:8px;position:relative}
+  .rep::before{content:"";position:absolute;left:-18px;top:16px;width:10px;height:10px;border-radius:99px;background:var(--run);box-shadow:0 0 0 3px var(--bg)}
+  .rep .rh{display:flex;justify-content:space-between;font:700 13px var(--font);color:var(--a-ink,var(--run));margin:0 2px 8px}
+  .rep .st{margin-bottom:6px}.rep .st::before{display:none}
+  .bottom{position:absolute;left:0;right:0;bottom:0;padding:12px 12px 22px;background:linear-gradient(transparent,var(--bg) 30%);display:flex;gap:8px}
+  .cta{flex:1;height:52px;border-radius:14px;background:var(--primary);color:hsl(222 47% 11%);display:flex;align-items:center;justify-content:center;gap:8px;font:700 16px var(--font)}
+  .cta.o{flex:none;width:52px;background:var(--card);color:var(--fg);border:1px solid var(--border)}
+  .cta svg{width:18px;height:18px}
+  /* strength session */
+  .sbar{display:flex;align-items:center;gap:10px;padding:8px 8px 10px;border-bottom:1px solid var(--border)}
+  .ring{width:40px;height:40px;border-radius:99px;background:conic-gradient(var(--primary) 0 var(--p),var(--muted) var(--p) 360deg);display:grid;place-items:center;flex:none}
+  .ring span{width:32px;height:32px;border-radius:99px;background:var(--bg);display:grid;place-items:center;font:700 10px var(--font)}
+  .sbar .t{flex:1;min-width:0}.sbar .t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sbar .t span{font-size:12px;color:var(--mfg);font-variant-numeric:tabular-nums}
+  .save{height:40px;padding:0 14px;border-radius:12px;background:var(--primary);color:hsl(222 47% 11%);font:700 14px var(--font);display:grid;place-items:center}
+  .ex{background:var(--card);border:1px solid var(--border);border-radius:18px;margin-bottom:8px;overflow:hidden}
+  .ex.cur{border-color:color-mix(in srgb,var(--primary) 55%,var(--border))}
+  .exh{display:flex;align-items:center;gap:10px;padding:12px}
+  .exh .n{width:28px;height:28px;border-radius:99px;display:grid;place-items:center;font:700 13px var(--font);background:var(--s2);flex:none}
+  .ex.cur .exh .n{background:var(--primary);color:hsl(222 47% 11%)}
+  .ex.done .exh .n{background:var(--okc);color:#fff}
+  .exh .t{flex:1;min-width:0}.exh .t b{display:block;font-size:16px}.exh .t span{font-size:13px;color:var(--mfg)}
+  .cnt{font:700 13px var(--font);color:var(--mfg);font-variant-numeric:tabular-nums}
+  .sets{padding:0 12px 12px}
+  .shd{display:grid;grid-template-columns:28px 1fr 1.4fr 48px;gap:8px;font:600 11px var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--mfg);padding:0 0 6px}
+  .set{display:grid;grid-template-columns:28px 1fr 1.4fr 48px;gap:8px;align-items:center;margin-bottom:6px}
+  .set .sn{font:700 15px var(--font);text-align:center}
+  .fld{height:48px;border-radius:12px;border:1px solid var(--input);background:var(--bg);display:flex;align-items:center;justify-content:center;font:700 17px var(--font);font-variant-numeric:tabular-nums}
+  .fld.ph{color:var(--mfg);font-weight:500}
+  .kg{display:flex;align-items:center;justify-content:space-between;padding:0 4px}
+  .kg i{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-style:normal;font-size:20px;color:var(--mfg)}
+  .ck{width:48px;height:48px;border-radius:14px;border:2px solid var(--border);display:grid;place-items:center;color:var(--mfg)}.ck svg{width:20px;height:20px}
+  .set.ok .fld{border-color:transparent;background:color-mix(in srgb,var(--okc) 12%,transparent)}
+  .set.ok .ck{background:var(--okc);border-color:var(--okc);color:#fff}
+  .set.next .ck{border-color:var(--primary);color:var(--ink)}
+  .prev{grid-column:2/4;font-size:12px;color:var(--mfg);margin:-2px 0 6px}
+  .exf{display:flex;justify-content:space-between;padding:4px 2px 0;font-size:13px;font-weight:600;color:var(--mfg)}.exf .y{color:var(--ink)}
+  .rest{position:absolute;left:12px;right:12px;bottom:14px;border-radius:22px;padding:10px;display:flex;align-items:center;gap:8px;background:hsl(220 5% 12% / .85);backdrop-filter:blur(18px);border:1px solid hsl(0 0% 100% / .12);color:#fafafa}
+  .light .rest{background:hsl(0 0% 100% / .9);color:var(--fg);border-color:var(--border)}
+  .rest .rr{width:56px;height:56px;border-radius:99px;background:conic-gradient(var(--primary) 0 230deg,hsl(0 0% 100% / .12) 230deg);display:grid;place-items:center;flex:none}
+  .rest .rr span{width:46px;height:46px;border-radius:99px;background:hsl(220 5% 12%);display:grid;place-items:center;font:800 15px var(--display);font-variant-numeric:tabular-nums}
+  .light .rest .rr span{background:#fff}
+  .rest .t{flex:1;min-width:0;white-space:nowrap}.rest .t small{display:block;font-size:12px;opacity:.7}.rest .t b{font-size:14px}
+  .rest .b{height:44px;min-width:44px;padding:0 8px;border-radius:12px;background:hsl(0 0% 100% / .1);display:grid;place-items:center;font:700 13px var(--font)}
+  .light .rest .b{background:var(--muted)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></symbol>
+  <symbol id="run" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="14.5" cy="4.5" r="2"/><path d="m8 21 3-6 3 2 1 5"/><path d="M6 11.5 9 9l4 1 2 3 3 1"/></symbol>
+  <symbol id="dumb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="watch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 3h6M9 21h6"/></symbol>
+</defs></svg>
+
+<h1 class="ttl">EZ · Detalhe do treino e sessão de força: proposta</h1>
+<p class="doc">Mockup estático (12/11/2026), dados fictícios do seed. O detalhe de endurance abre com o card do treino no visual do feed: totais, o <b>mini-gráfico das etapas</b> (o mesmo do feed, a partir do treino planejado) e as etapas em linha do tempo, já abertas. A sessão de força ganha uma barra superior compacta, só o exercício atual aberto, séries com o valor anterior dentro do campo e o descanso numa barra de vidro. <b>A lógica de autosave e de descanso não muda; só o visual.</b></p>
+
+<div class="lbl">1 · Detalhe de endurance · escuro e claro · 390 px</div>
+<div class="row">
+<div class="phone dark run">
+ <div class="hdr"><span class="ib"><svg><use href="#back"/></svg></span><b>Treino</b><span class="ib"><svg><use href="#list"/></svg></span></div>
+ <div class="pad">
+  <div class="hero">
+   <div class="t1"><span class="ic"><svg><use href="#run"/></svg></span>Corrida<span class="r">dom, 15 nov</span></div>
+   <div class="wn">Corrida: intervalado 5 × 800 m</div>
+   <div class="tot"><div><b>~47 min</b><span>Duração</span></div><div><b>4 km</b><span>Tiros</span></div><div><b>Z2 → Z4</b><span>Intensidade</span></div></div>
+   <div class="viz">
+    <div class="vbar">
+     <i style="flex:15;height:35%;background:color-mix(in srgb,var(--run) 40%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 30%,transparent)"></i>
+     <i style="flex:10;height:30%;background:color-mix(in srgb,var(--run) 40%,transparent)"></i>
+    </div>
+    <div class="vax"><span>0</span><span>15 min</span><span>40 min</span><span>~47</span></div>
+   </div>
+   <div class="noteb"><small>Do coach</small>Recuperação trotando leve.</div>
+  </div>
+  <div class="sh"><b>Etapas</b><span>3 blocos · 12 etapas</span></div>
+  <div class="tl">
+   <div class="st" style="--c:hsl(217 60% 50% / .6)"><div class="l1"><b>Aquecimento</b><span class="dur">15 min</span></div><div class="tg"><span class="zone" style="background:hsl(142 71% 45% / .18);color:var(--okc)">Z2</span>FC zona 2</div></div>
+   <div class="rep"><div class="rh"><span>Repetir 5×</span><span>~25 min</span></div>
+    <div class="st"><div class="l1"><b>Tiro</b><span class="dur">800 m</span></div><div class="tg"><span class="zone" style="background:hsl(25 95% 53% / .18);color:var(--str)">Pace</span>4:20–4:27 /km</div></div>
+    <div class="st"><div class="l1"><b>Recuperação</b><span class="dur">1:30</span></div><div class="tg">trote leve</div></div>
+   </div>
+   <div class="st" style="--c:hsl(217 60% 50% / .6)"><div class="l1"><b>Desaquecimento</b><span class="dur">10 min</span></div><div class="tg">leve</div></div>
+  </div>
+ </div>
+ <div class="bottom"><span class="cta o"><svg><use href="#watch"/></svg></span><span class="cta"><svg><use href="#check"/></svg>Concluir treino</span></div>
+</div>
+
+<div class="phone light run">
+ <div class="hdr"><span class="ib"><svg><use href="#back"/></svg></span><b>Treino</b><span class="ib"><svg><use href="#list"/></svg></span></div>
+ <div class="pad">
+  <div class="hero">
+   <div class="t1"><span class="ic"><svg><use href="#run"/></svg></span>Corrida<span class="r">dom, 15 nov</span></div>
+   <div class="wn">Corrida: intervalado 5 × 800 m</div>
+   <div class="tot"><div><b>~47 min</b><span>Duração</span></div><div><b>4 km</b><span>Tiros</span></div><div><b>Z2 → Z4</b><span>Intensidade</span></div></div>
+   <div class="viz">
+    <div class="vbar">
+     <i style="flex:15;height:35%;background:color-mix(in srgb,var(--run) 35%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i>
+     <i style="flex:3.5;height:85%;background:var(--run)"></i><i style="flex:1.5;height:25%;background:color-mix(in srgb,var(--run) 25%,transparent)"></i>
+     <i style="flex:10;height:30%;background:color-mix(in srgb,var(--run) 35%,transparent)"></i>
+    </div>
+    <div class="vax"><span>0</span><span>15 min</span><span>40 min</span><span>~47</span></div>
+   </div>
+   <div class="noteb"><small>Do coach</small>Recuperação trotando leve.</div>
+  </div>
+  <div class="sh"><b>Etapas</b><span>3 blocos · 12 etapas</span></div>
+  <div class="tl">
+   <div class="st" style="--c:hsl(217 60% 50% / .6)"><div class="l1"><b>Aquecimento</b><span class="dur">15 min</span></div><div class="tg"><span class="zone" style="background:hsl(142 71% 45% / .15);color:var(--okc)">Z2</span>FC zona 2</div></div>
+   <div class="rep"><div class="rh"><span>Repetir 5×</span><span>~25 min</span></div>
+    <div class="st"><div class="l1"><b>Tiro</b><span class="dur">800 m</span></div><div class="tg"><span class="zone" style="background:hsl(25 95% 53% / .15);color:hsl(21 90% 40%)">Pace</span>4:20–4:27 /km</div></div>
+    <div class="st"><div class="l1"><b>Recuperação</b><span class="dur">1:30</span></div><div class="tg">trote leve</div></div>
+   </div>
+   <div class="st" style="--c:hsl(217 60% 50% / .6)"><div class="l1"><b>Desaquecimento</b><span class="dur">10 min</span></div><div class="tg">leve</div></div>
+  </div>
+ </div>
+ <div class="bottom"><span class="cta o"><svg><use href="#watch"/></svg></span><span class="cta"><svg><use href="#check"/></svg>Concluir treino</span></div>
+</div>
+<p class="note">Um cabeçalho só, com o título "Treino" (o nome aparece uma vez, no card). O card mostra totais somados das etapas e o mini-gráfico: a largura é a duração estimada; a altura é a intensidade (zona ou % do alvo), na cor da modalidade. As etapas aparecem numa linha do tempo, abertas, com o bloco "Repetir 5×" tracejado e as etapas internas dentro dele. A intensidade vira um chip (Z2, Pace) e o pace aparece em mm:ss. Embaixo, "Concluir treino" e o botão do relógio (exportar fica para quando existir). O "Marcar como feito" duplicado sai.</p>
+</div>
+
+<div class="lbl">2 · Sessão de força · escuro (descanso ativo) e claro · 390 px</div>
+<div class="row">
+<div class="phone dark str">
+ <div class="sbar"><span class="ib"><svg><use href="#x"/></svg></span><div class="ring" style="--p:120deg"><span>33%</span></div><div class="t"><b>Força A: membros inferiores</b><span>18:42 · 5 de 14 séries</span></div><span class="save">Salvar</span></div>
+ <div class="pad">
+  <div class="ex done"><div class="exh"><span class="n"><svg width="14" height="14"><use href="#check"/></svg></span><div class="t"><b>Agachamento livre</b><span>4 × 8 · 72,5 kg · <b style="color:var(--ink)">PR</b></span></div><span class="cnt">4/4</span></div></div>
+  <div class="ex cur"><div class="exh"><span class="n">2</span><div class="t"><b>Levantamento terra romeno</b><span>3 × 10 · alvo 50 kg · descanso 1:30</span></div><span class="cnt">1/3</span></div>
+   <div class="sets">
+    <div class="shd"><span>#</span><span>Reps</span><span>Kg</span><span></span></div>
+    <div class="set ok"><span class="sn">1</span><div class="fld">10</div><div class="fld kg"><i>−</i>50<i>+</i></div><span class="ck"><svg><use href="#check"/></svg></span></div>
+    <div class="set next"><span class="sn">2</span><div class="fld ph">10</div><div class="fld kg ph"><i>−</i>50<i>+</i></div><span class="ck"><svg><use href="#check"/></svg></span></div>
+    <div class="set"><span></span><span class="prev" style="grid-column:2/5">Anterior: 45 kg × 10 · toque para copiar</span></div>
+    <div class="set"><span class="sn">3</span><div class="fld ph">10</div><div class="fld kg ph"><i>−</i>50<i>+</i></div><span class="ck"><svg><use href="#check"/></svg></span></div>
+    <div class="exf"><span>− Série</span><span class="y">+ Série</span></div>
+   </div></div>
+  <div class="ex"><div class="exh"><span class="n">3</span><div class="t"><b>Avanço com halteres</b><span>3 × 10–12 · 12 kg</span></div><span class="cnt">0/3</span></div></div>
+  <div class="ex"><div class="exh"><span class="n">4</span><div class="t"><b>Prancha</b><span>3 × 45 s</span></div><span class="cnt">0/3</span></div></div>
+ </div>
+ <div class="rest"><div class="rr"><span>1:04</span></div><div class="t"><small>Descanso · a seguir</small><b>Série 2</b></div><span class="b">−15</span><span class="b">+15</span><span class="b">Pular</span></div>
+</div>
+
+<div class="phone light str" style="height:900px">
+ <div class="sbar"><span class="ib"><svg><use href="#x"/></svg></span><div class="ring" style="--p:120deg"><span>33%</span></div><div class="t"><b>Força A: membros inferiores</b><span>18:42 · 5 de 14 séries</span></div><span class="save">Salvar</span></div>
+ <div class="pad">
+  <div class="ex done"><div class="exh"><span class="n"><svg width="14" height="14"><use href="#check"/></svg></span><div class="t"><b>Agachamento livre</b><span>4 × 8 · 72,5 kg · <b style="color:var(--ink)">PR</b></span></div><span class="cnt">4/4</span></div></div>
+  <div class="ex cur"><div class="exh"><span class="n">2</span><div class="t"><b>Levantamento terra romeno</b><span>3 × 10 · alvo 50 kg · descanso 1:30</span></div><span class="cnt">1/3</span></div>
+   <div class="sets">
+    <div class="shd"><span>#</span><span>Reps</span><span>Kg</span><span></span></div>
+    <div class="set ok"><span class="sn">1</span><div class="fld">10</div><div class="fld kg"><i>−</i>50<i>+</i></div><span class="ck"><svg><use href="#check"/></svg></span></div>
+    <div class="set next"><span class="sn">2</span><div class="fld ph">10</div><div class="fld kg ph"><i>−</i>50<i>+</i></div><span class="ck"><svg><use href="#check"/></svg></span></div>
+    <div class="set"><span class="sn">3</span><div class="fld ph">10</div><div class="fld kg ph"><i>−</i>50<i>+</i></div><span class="ck"><svg><use href="#check"/></svg></span></div>
+    <div class="exf"><span>− Série</span><span class="y">+ Série</span></div>
+   </div></div>
+  <div class="ex"><div class="exh"><span class="n">3</span><div class="t"><b>Avanço com halteres</b><span>3 × 10–12 · 12 kg</span></div><span class="cnt">0/3</span></div></div>
+ </div>
+ <div class="bottom"><span class="cta"><svg><use href="#check"/></svg>Marcar série 2</span></div>
+</div>
+<p class="note">A barra superior junta o que hoje está em três lugares (card de topo, barra de vidro de baixo e cabeçalho): ✕ sair (a folha de saída atual), anel de %, nome, tempo e séries, e Salvar. Exercícios feitos ficam fechados, com o resumo e o PR; só o atual fica aberto, com borda amarela. Na linha de série, o valor sugerido (anterior → alvo do coach, como hoje) aparece em cinza <i>dentro</i> do campo; o ✓ de 48 px marca e copia. A próxima série tem o ✓ em amarelo. "Anterior" aparece uma vez por exercício, não em toda série. O descanso usa a barra de vidro atual (anel, −15/+15/Pular), agora com o nome da próxima série. Sem descanso ativo, a barra de baixo vira o botão "Marcar série 2".</p>
+</div>
+</body>
+</html>
