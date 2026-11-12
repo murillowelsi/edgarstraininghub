@@ -48,7 +48,7 @@ const YouTubeSection = () => {
                 </div>
               </div>
             ) : video?.videoId ? (
-              <YouTubeFacade videoId={video.videoId} title={video.title} />
+              <YouTubeFacade videoId={video.videoId} title={video.title} thumbnail={video.thumbnail} />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-muted">
                 <p className="text-muted-foreground">{t.youtube.noVideo}</p>
