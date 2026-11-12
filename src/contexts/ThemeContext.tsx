@@ -31,7 +31,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     // Keep the PWA status bar in sync with the app background
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", theme === "dark" ? "#0f172a" : "#ffffff");
+      ?.setAttribute("content", theme === "dark" ? "#161718" : "#ffffff");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
