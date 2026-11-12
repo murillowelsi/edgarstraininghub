@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EZ · Dashboard do coach (proposta 12/11/2026)</title>
+<!-- Mockup estático: só CSS e SVG inline. Dados fictícios do seed. Tokens: design-system §1.5. -->
+<style>
+  :root{--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--display:'Montserrat','Inter',system-ui,sans-serif;
+    --primary:hsl(48 96% 45%);--run:hsl(217 91% 60%);--bike:hsl(142 71% 45%);--swim:hsl(188 86% 53%);--str:hsl(25 95% 53%)}
+  .dark{--bg:hsl(220 5% 9%);--card:hsl(220 5% 12%);--s2:hsl(220 5% 15%);--muted:hsl(220 5% 17%);--border:hsl(220 5% 24%);--fg:hsl(0 0% 98%);--mfg:hsl(220 5% 66%);--pfg:hsl(220 5% 9%);--ink:var(--primary);
+     --okc:hsl(142 69% 58%);--warnc:hsl(43 96% 56%);--badc:hsl(0 91% 71%);--box:hsl(0 0% 100% / .05);--boxb:hsl(0 0% 100% / .09)}
+  .light{--bg:hsl(220 20% 95%);--card:#fff;--s2:hsl(210 40% 98%);--muted:hsl(210 40% 94%);--border:hsl(220 13% 88%);--fg:hsl(222 47% 11%);--mfg:hsl(215 16% 42%);--pfg:hsl(222 47% 11%);--ink:hsl(40 95% 30%);
+     --okc:hsl(142 72% 29%);--warnc:hsl(26 90% 37%);--badc:hsl(0 72% 51%);--box:hsl(220 20% 97%);--boxb:hsl(220 13% 90%)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#0a0a0a;color:#e5e5e5;padding:32px;line-height:1.4}
+  h1.ttl{font:700 28px var(--display);color:#fff}p.doc{color:#a3a3a3;max-width:1100px;margin:4px 0 24px}
+  .row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-bottom:40px}
+  .lbl{font:600 12px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#a3a3a3;margin-bottom:10px}
+  .note{font-size:13px;color:#a3a3a3;max-width:390px;margin-top:10px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px}
+  .ch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}.ch b{font:700 16px var(--font)}.ch span,.ch a{font-size:13px;color:var(--mfg)}.ch a{color:var(--ink);font-weight:600}
+  .av{width:36px;height:36px;border-radius:99px;background:var(--s2);border:1px solid var(--border);display:grid;place-items:center;font:700 14px var(--font);flex:none}
+  .av.y{background:var(--primary);color:var(--pfg);border:none}
+  /* hero (cartão do coach) */
+  .hero{border-radius:24px;padding:18px;background:radial-gradient(120% 90% at 100% 0%,hsl(48 96% 45% / .14),transparent 55%),var(--card);border:1px solid var(--border)}
+  .hrow{display:flex;align-items:center;gap:14px}
+  .hrow .av{width:56px;height:56px;font:800 22px var(--display);background:var(--primary);color:var(--pfg);border:none;box-shadow:0 0 0 3px var(--card),0 0 0 5px hsl(48 96% 45% / .5)}
+  .hrow small{display:block;font-size:13px;color:var(--mfg)}.hrow b{font:800 24px/1.1 var(--display)}
+  .btn{height:44px;padding:0 16px;border-radius:12px;background:var(--primary);color:hsl(222 47% 11%);font:700 14px var(--font);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+  .btn.o{background:transparent;color:var(--fg);border:1px solid var(--border)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  .kpi{border-radius:14px;padding:12px;background:var(--box);border:1px solid var(--boxb)}
+  .kpi b{display:block;font:800 26px var(--display);font-variant-numeric:tabular-nums}.kpi b small{font-size:14px;color:var(--mfg)}
+  .kpi span{font:600 10px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mfg)}
+  .kpi .bar{height:5px;border-radius:99px;background:var(--muted);margin-top:8px;overflow:hidden}.kpi .bar i{display:block;height:100%;background:var(--primary)}
+  .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+  .day{text-align:center;font-size:11px;color:var(--mfg)}.day .col{height:44px;border-radius:8px;background:var(--muted);margin-top:4px;position:relative;overflow:hidden}
+  .day .col i{position:absolute;left:0;right:0;bottom:0;background:var(--primary)}.day .col.fut i{background:transparent;border-top:2px dashed var(--border)}
+  .day.on{color:var(--fg);font-weight:700}
+  /* attention */
+  .att{border-radius:20px;padding:16px;background:var(--card);border:1px solid color-mix(in srgb,var(--badc) 35%,var(--border))}
+  .att .ch b{display:flex;align-items:center;gap:8px}.cnt{display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border-radius:99px;background:var(--badc);color:hsl(0 0% 100%);font:800 13px var(--font);padding:0 7px}
+  .ai{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+  .ai:first-of-type{border-top:none}
+  .ai .t{flex:1;min-width:0}.ai .nm{font-weight:600;font-size:15px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+  .chip{font:600 12px var(--font);padding:2px 8px;border-radius:7px;display:inline-flex;gap:4px;align-items:center}
+  .c-bad{background:color-mix(in srgb,var(--badc) 15%,transparent);color:var(--badc)}
+  .c-warn{background:color-mix(in srgb,var(--warnc) 15%,transparent);color:var(--warnc)}
+  .c-str{background:hsl(25 95% 53% / .15);color:var(--str)}
+  .c-mut{background:var(--muted);color:var(--mfg)}
+  .quote{font-size:13px;color:var(--mfg);font-style:italic;border-left:2px solid var(--border);padding-left:8px;margin-top:2px}
+  .acts{display:flex;gap:6px;margin-top:8px}
+  .ab{height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--border);font:600 13px var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--fg)}
+  .ab.y{border-color:transparent;background:hsl(48 96% 45% / .16);color:var(--ink)}
+  .ok{display:flex;align-items:center;gap:10px;padding:10px 0;color:var(--mfg);font-size:14px}
+  /* agenda */
+  .ag{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:14px}
+  .ag:first-of-type{border-top:none}
+  .si{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none}.si svg{width:16px;height:16px}
+  .ag .t{flex:1;min-width:0}.ag .t b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ag .t span{font-size:12px;color:var(--mfg)}
+  .stack{display:flex}.stack .av{width:24px;height:24px;font-size:10px;margin-left:-6px;box-shadow:0 0 0 2px var(--card)}.stack .av:first-child{margin-left:0}
+  .st{font:600 12px var(--font);padding:2px 8px;border-radius:7px}
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{font:600 11px var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--mfg);text-align:center;padding:6px 4px}
+  th:first-child,td:first-child{text-align:left}
+  td{padding:8px 4px;border-top:1px solid var(--border);text-align:center}
+  .who{display:flex;align-items:center;gap:8px;font-weight:600}.who .av{width:28px;height:28px;font-size:11px}
+  .dd{width:22px;height:22px;border-radius:99px;margin:0 auto;display:grid;place-items:center}
+  .dd.done{background:var(--c)}.dd.done svg{width:12px;height:12px;color:#fff}
+  .dd.plan{border:2px solid var(--c)}.dd.miss{border:2px dashed var(--badc)}.dd.none{width:6px;height:6px;background:var(--muted)}
+  .pc{font-weight:700;font-variant-numeric:tabular-nums}
+  .sb{height:6px;border-radius:99px;background:var(--muted);overflow:hidden;width:70px;display:inline-block;vertical-align:middle;margin-left:6px}.sb i{display:block;height:100%;background:var(--primary)}
+  /* layouts */
+  .desk{width:1340px;border-radius:16px;overflow:hidden;border:1px solid #262626;background:var(--bg);color:var(--fg);display:grid;grid-template-columns:220px 1fr}
+  .side{background:var(--card);border-right:1px solid var(--border);padding:18px 10px;display:grid;align-content:start;gap:2px;font-size:14px}
+  .side .lg{font:800 26px var(--display);color:var(--ink);margin:0 10px 16px}.side .i{padding:10px 12px;border-radius:10px;color:var(--mfg)}.side .on{background:var(--s2);color:var(--ink);font-weight:600}
+  .main{padding:22px 26px;display:grid;gap:14px}
+  .g2{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;align-items:start}
+  .phone{width:390px;height:1500px;border-radius:40px;border:8px solid #262626;background:var(--bg);color:var(--fg);overflow:hidden;position:relative}
+  .pp{padding:12px;display:grid;gap:12px}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0}
+  .g{width:44px;height:44px;border-radius:99px;display:grid;place-items:center;border:1px solid var(--border);background:var(--card)}.g svg{width:20px;height:20px}
+  .tabs{position:absolute;left:12px;right:12px;bottom:12px;height:64px;border-radius:99px;display:flex;justify-content:space-around;align-items:center;font-size:11px;color:var(--mfg);background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--border)}
+  .tabs div{display:flex;flex-direction:column;align-items:center;gap:2px}.tabs .on{color:var(--ink);font-weight:600}.tabs svg{width:22px;height:22px}
+  .phone .kpis{grid-template-columns:1fr 1fr}
+  .phone .hrow b{font-size:20px}
+  .ch span.cnt{color:#fff;display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;font:800 13px var(--font);padding:0 7px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.6A8.5 8.5 0 1 1 21 11.5Z"/></symbol>
+  <symbol id="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></symbol>
+  <symbol id="alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="swim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="17" cy="6" r="2"/><path d="m4 12 5-3 4 2 3-1"/><path d="M2 17c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0"/></symbol>
+  <symbol id="dumb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/></symbol>
+  <symbol id="run" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="14.5" cy="4.5" r="2"/><path d="m8 21 3-6 3 2 1 5"/><path d="M6 11.5 9 9l4 1 2 3 3 1"/></symbol>
+  <symbol id="flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4M4 4h12l-2 4 2 4H4"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></symbol>
+  <symbol id="users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/></symbol>
+  <symbol id="grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/></symbol>
+</defs></svg>
+
+<h1 class="ttl">EZ · Dashboard do coach: proposta</h1>
+<p class="doc">Mockup estático (12/11/2026), dados fictícios do seed. O dashboard responde, nesta ordem: <b>quem precisa de mim agora?</b> (atenção com ações rápidas), <b>como vai a semana do time?</b> (cartão do coach com 4 números e a semana dia a dia) e <b>o que acontece hoje e amanhã?</b> (agenda agrupada por treino). A tabela de atletas, as provas e os depoimentos vêm depois, em blocos compactos.</p>
+
+<div class="lbl">1 · Desktop 1440 · escuro</div>
+<div class="row"><div class="desk dark">
+ <div class="side"><div class="lg">EZ</div><div class="i on">Início</div><div class="i">Usuários</div><div class="i">Treinos</div><div class="i">Times</div><div class="i">Calendário</div><div class="i">Artigos</div><div class="i">Feed</div><div class="i">Depoimentos</div></div>
+ <div class="main">
+  <div class="hero">
+   <div class="hrow"><span class="av">C</span><div style="flex:1"><small>Quinta, 12 nov · semana 9–15 nov</small><b>Bom dia, Coach Demo</b></div><span class="btn"><svg width="16" height="16"><use href="#plus"/></svg>Atribuir treino</span></div>
+   <div class="kpis">
+    <div class="kpi"><b>57%</b><span>Conclusão da semana</span><div class="bar"><i style="width:57%"></i></div></div>
+    <div class="kpi"><b>8 <small>/ 14</small></b><span>Treinos feitos</span></div>
+    <div class="kpi"><b>3 <small>/ 6</small></b><span>Atletas que treinaram</span></div>
+    <div class="kpi"><b>6h 20</b><span>Horas do time</span></div>
+   </div>
+   <div class="days">
+    <div class="day">seg<div class="col"><i style="height:60%"></i></div></div><div class="day">ter<div class="col"><i style="height:100%"></i></div></div><div class="day">qua<div class="col"><i style="height:30%"></i></div></div>
+    <div class="day on">qui<div class="col"><i style="height:10%"></i></div></div><div class="day">sex<div class="col fut"><i style="height:70%"></i></div></div><div class="day">sáb<div class="col fut"><i style="height:20%"></i></div></div><div class="day">dom<div class="col fut"><i style="height:80%"></i></div></div>
+   </div>
+  </div>
+  <div class="g2">
+   <div class="att">
+    <div class="ch"><b><svg width="18" height="18" style="color:var(--badc)"><use href="#alert"/></svg>Precisa de atenção <span class="cnt">4</span></b><span>últimos 7 dias</span></div>
+    <div class="ai"><span class="av">A</span><div class="t"><div class="nm">Ana Teste</div><div class="chips"><span class="chip c-bad">1 não feito</span><span class="chip c-mut">nota no treino</span></div><div class="quote">“Subi a carga no agachamento. Última série pesada.”</div><div class="acts"><span class="ab y"><svg width="14" height="14"><use href="#msg"/></svg>Responder</span><span class="ab"><svg width="14" height="14"><use href="#eye"/></svg>Ver treino</span></div></div></div>
+    <div class="ai"><span class="av">K</span><div class="t"><div class="nm">Kai Teste</div><div class="chips"><span class="chip c-warn">sem treino nos próximos 7 dias</span></div><div class="acts"><span class="ab y"><svg width="14" height="14"><use href="#plus"/></svg>Atribuir</span></div></div></div>
+    <div class="ai"><span class="av">B</span><div class="t"><div class="nm">Bruno Teste</div><div class="chips"><span class="chip c-str">esforço 9/10</span><span class="chip c-mut">nota no treino</span></div><div class="quote">“Saí mais cedo, dor no ombro.”</div><div class="acts"><span class="ab y"><svg width="14" height="14"><use href="#msg"/></svg>Responder</span><span class="ab"><svg width="14" height="14"><use href="#eye"/></svg>Ver treino</span></div></div></div>
+    <div class="ai" style="padding-bottom:0"><span class="av">C</span><div class="t"><div class="nm">Carla Teste</div><div class="chips"><span class="chip c-mut">nota no treino</span></div><div class="quote">“Palmar ajudou no ritmo.”</div></div></div>
+   </div>
+   <div style="display:grid;gap:14px">
+    <div class="card"><div class="ch"><b>Hoje</b><span>qui, 12 nov</span></div>
+     <div class="ag"><span class="si" style="background:hsl(188 86% 53% / .15);color:var(--swim)"><svg><use href="#swim"/></svg></span><div class="t"><b>Natação: técnica e ritmo</b><span>3 atletas · 0 feitos</span></div><span class="stack"><span class="av">A</span><span class="av">B</span><span class="av">C</span></span></div>
+    </div>
+    <div class="card"><div class="ch"><b>Amanhã</b><a>+ Atribuir</a></div>
+     <div class="ag"><span class="si" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#dumb"/></svg></span><div class="t"><b>Força B: membros superiores</b><span>3 atletas</span></div><span class="stack"><span class="av">A</span><span class="av">B</span><span class="av">C</span></span></div>
+    </div>
+    <div class="card"><div class="ch"><b>Próximas provas</b><span>2</span></div>
+     <div class="ag"><span class="si" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#flag"/></svg></span><div class="t"><b>Corrida 10 km (fictícia)</b><span>Bruno Teste · 24 nov</span></div><b>12 d</b></div>
+     <div class="ag"><span class="si" style="background:var(--muted);color:var(--mfg)"><svg><use href="#flag"/></svg></span><div class="t"><b>Triathlon 70.3 (fictício)</b><span>Ana Teste · 27 dez</span></div><b style="color:var(--mfg)">45 d</b></div>
+    </div>
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px"><b>1 depoimento</b> para revisar</span><span class="ab y">Revisar</span></div>
+   </div>
+  </div>
+  <div class="card"><div class="ch"><b>Atletas nesta semana</b><span>ordenado por conclusão</span></div>
+   <table><tr><th>Atleta</th><th>seg</th><th>ter</th><th>qua</th><th>qui</th><th>sex</th><th>sáb</th><th>dom</th><th style="text-align:right">semana</th></tr>
+    <tr><td><span class="who"><span class="av">C</span>Carla Teste</span></td><td><div class="dd done" style="--c:var(--run)"><svg><use href="#check"/></svg></div></td><td><div class="dd done" style="--c:var(--str)"><svg><use href="#check"/></svg></div></td><td><div class="dd done" style="--c:var(--run)"><svg><use href="#check"/></svg></div></td><td><div class="dd plan" style="--c:var(--swim)"></div></td><td><div class="dd plan" style="--c:var(--str)"></div></td><td><div class="dd none"></div></td><td><div class="dd plan" style="--c:var(--run)"></div></td><td style="text-align:right"><span class="pc">3/6</span><span class="sb"><i style="width:50%"></i></span></td></tr>
+    <tr><td><span class="who"><span class="av">B</span>Bruno Teste</span></td><td><div class="dd none"></div></td><td><div class="dd done" style="--c:var(--str)"><svg><use href="#check"/></svg></div></td><td><div class="dd none"></div></td><td><div class="dd plan" style="--c:var(--swim)"></div></td><td><div class="dd plan" style="--c:var(--str)"></div></td><td><div class="dd none"></div></td><td><div class="dd plan" style="--c:var(--run)"></div></td><td style="text-align:right"><span class="pc">1/4</span><span class="sb"><i style="width:25%"></i></span></td></tr>
+    <tr><td><span class="who"><span class="av">A</span>Ana Teste</span></td><td><div class="dd miss"></div></td><td><div class="dd done" style="--c:var(--str)"><svg><use href="#check"/></svg></div></td><td><div class="dd none"></div></td><td><div class="dd plan" style="--c:var(--swim)"></div></td><td><div class="dd plan" style="--c:var(--str)"></div></td><td><div class="dd none"></div></td><td><div class="dd plan" style="--c:var(--run)"></div></td><td style="text-align:right"><span class="pc">1/5</span><span class="sb"><i style="width:20%"></i></span></td></tr>
+    <tr><td><span class="who"><span class="av">K</span>Kai Teste</span></td><td><div class="dd none"></div></td><td><div class="dd none"></div></td><td><div class="dd none"></div></td><td><div class="dd plan" style="--c:var(--run)"></div></td><td><div class="dd none"></div></td><td><div class="dd none"></div></td><td><div class="dd none"></div></td><td style="text-align:right"><span class="pc">0/1</span><span class="sb"><i style="width:0"></i></span></td></tr>
+   </table></div>
+ </div>
+</div></div>
+<p class="note" style="max-width:1100px;margin-top:-28px;margin-bottom:40px">"Precisa de atenção" ganha a coluna principal, com borda vermelha suave. Cada atleta mostra os motivos que o código já calcula (não feito, esforço alto, nota, sem treino nos próximos 7 dias) e a ação certa: Responder abre o chat, Atribuir abre o modal, Ver treino abre a atividade. O cartão do coach troca "6 atletas · 1 time · 5 treinos" (inventário) por números da semana. A agenda junta o mesmo treino de vários atletas em uma linha. Na tabela, os dias mostram a cor da modalidade e o status, sem verde/vermelho cheio.</p>
+
+<div class="lbl">2 · Celular 390 px · escuro e claro</div>
+<div class="row">
+<div class="phone dark">
+ <div class="top"><span style="font:800 24px var(--display);color:var(--ink)">EZ</span><div style="display:flex;gap:8px"><div class="g"><svg><use href="#msg"/></svg></div><div class="g"><svg><use href="#bell"/></svg></div></div></div>
+ <div class="pp">
+  <div class="hero" style="padding:14px">
+   <div class="hrow"><span class="av">C</span><div><small>Semana 9–15 nov</small><b>Bom dia, Coach</b></div></div>
+   <div class="kpis"><div class="kpi"><b>57%</b><span>Conclusão</span><div class="bar"><i style="width:57%"></i></div></div><div class="kpi"><b>8 <small>/14</small></b><span>Treinos feitos</span></div><div class="kpi"><b>3 <small>/6</small></b><span>Treinaram</span></div><div class="kpi"><b>6h 20</b><span>Horas do time</span></div></div>
+  </div>
+  <div class="att">
+   <div class="ch"><b><svg width="18" height="18" style="color:var(--badc)"><use href="#alert"/></svg>Precisa de atenção <span class="cnt">4</span></b><a>Ver todos</a></div>
+   <div class="ai"><span class="av">A</span><div class="t"><div class="nm">Ana Teste</div><div class="chips"><span class="chip c-bad">1 não feito</span><span class="chip c-mut">nota</span></div><div class="quote">“Subi a carga no agachamento…”</div><div class="acts"><span class="ab y">Responder</span><span class="ab">Ver treino</span></div></div></div>
+   <div class="ai"><span class="av">K</span><div class="t"><div class="nm">Kai Teste</div><div class="chips"><span class="chip c-warn">sem treino nos próximos 7 dias</span></div><div class="acts"><span class="ab y">Atribuir</span></div></div></div>
+   <div class="ai" style="padding-bottom:0"><span class="av">B</span><div class="t"><div class="nm">Bruno Teste</div><div class="chips"><span class="chip c-str">esforço 9/10</span><span class="chip c-mut">nota</span></div><div class="acts"><span class="ab y">Responder</span><span class="ab">Ver treino</span></div></div></div>
+  </div>
+  <div class="card"><div class="ch"><b>Hoje e amanhã</b><a>+ Atribuir</a></div>
+   <div class="ag"><span class="si" style="background:hsl(188 86% 53% / .15);color:var(--swim)"><svg><use href="#swim"/></svg></span><div class="t"><b>Natação: técnica e ritmo</b><span>hoje · 3 atletas · 0 feitos</span></div><span class="stack"><span class="av">A</span><span class="av">B</span><span class="av">C</span></span></div>
+   <div class="ag"><span class="si" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#dumb"/></svg></span><div class="t"><b>Força B: membros superiores</b><span>amanhã · 3 atletas</span></div><span class="stack"><span class="av">A</span><span class="av">B</span><span class="av">C</span></span></div>
+  </div>
+  <div class="card"><div class="ch"><b>Atletas nesta semana</b><a>Todos</a></div>
+   <div class="ag"><span class="av" style="width:28px;height:28px;font-size:11px">C</span><div class="t"><b>Carla Teste</b><span>3 de 6</span></div><span class="sb" style="width:90px"><i style="width:50%"></i></span></div>
+   <div class="ag"><span class="av" style="width:28px;height:28px;font-size:11px">B</span><div class="t"><b>Bruno Teste</b><span>1 de 4</span></div><span class="sb" style="width:90px"><i style="width:25%"></i></span></div>
+   <div class="ag"><span class="av" style="width:28px;height:28px;font-size:11px">A</span><div class="t"><b>Ana Teste</b><span>1 de 5 · 1 não feito</span></div><span class="sb" style="width:90px"><i style="width:20%"></i></span></div>
+  </div>
+  <div class="card"><div class="ch"><b>Próximas provas</b></div>
+   <div class="ag"><span class="si" style="background:hsl(25 95% 53% / .15);color:var(--str)"><svg><use href="#flag"/></svg></span><div class="t"><b>Corrida 10 km (fictícia)</b><span>Bruno Teste · 24 nov</span></div><b>12 d</b></div></div>
+ </div>
+ <div class="tabs"><div class="on"><svg><use href="#home"/></svg>Início</div><div><svg><use href="#users"/></svg>Usuários</div><div><svg><use href="#grid"/></svg>Feed</div><div><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#dumb"/></svg>Treinos</div></div>
+</div>
+<div class="phone light" style="height:900px">
+ <div class="top"><span style="font:800 24px var(--display);color:var(--ink)">EZ</span><div style="display:flex;gap:8px"><div class="g"><svg><use href="#msg"/></svg></div><div class="g"><svg><use href="#bell"/></svg></div></div></div>
+ <div class="pp">
+  <div class="hero" style="padding:14px">
+   <div class="hrow"><span class="av">C</span><div><small>Semana 9–15 nov</small><b>Bom dia, Coach</b></div></div>
+   <div class="kpis"><div class="kpi"><b>57%</b><span>Conclusão</span><div class="bar"><i style="width:57%"></i></div></div><div class="kpi"><b>8 <small>/14</small></b><span>Treinos feitos</span></div><div class="kpi"><b>3 <small>/6</small></b><span>Treinaram</span></div><div class="kpi"><b>6h 20</b><span>Horas do time</span></div></div>
+  </div>
+  <div class="att">
+   <div class="ch"><b><svg width="18" height="18" style="color:var(--badc)"><use href="#alert"/></svg>Precisa de atenção <span class="cnt">4</span></b><a>Ver todos</a></div>
+   <div class="ai"><span class="av">A</span><div class="t"><div class="nm">Ana Teste</div><div class="chips"><span class="chip c-bad">1 não feito</span><span class="chip c-mut">nota</span></div><div class="quote">“Subi a carga no agachamento…”</div><div class="acts"><span class="ab y">Responder</span><span class="ab">Ver treino</span></div></div></div>
+   <div class="ai" style="padding-bottom:0"><span class="av">K</span><div class="t"><div class="nm">Kai Teste</div><div class="chips"><span class="chip c-warn">sem treino nos próximos 7 dias</span></div><div class="acts"><span class="ab y">Atribuir</span></div></div></div>
+  </div>
+  <div class="card" style="text-align:center;color:var(--mfg);font-size:14px">Sem pendências? O bloco vira uma linha: <b style="color:var(--okc)">✓ Todos em dia nos últimos 7 dias</b></div>
+ </div>
+ <div class="tabs"><div class="on"><svg><use href="#home"/></svg>Início</div><div><svg><use href="#users"/></svg>Usuários</div><div><svg><use href="#grid"/></svg>Feed</div><div><svg><use href="#cal"/></svg>Calendário</div><div><svg><use href="#dumb"/></svg>Treinos</div></div>
+</div>
+<p class="note">No celular, a ordem é cartão (4 números em 2×2) → <b>atenção logo em seguida</b>, hoje a ~1.200 px e aqui a ~250 px → hoje e amanhã → atletas como lista com barra → provas. O gráfico de tendência de 8 semanas e a atividade recente saem do celular; no desktop, a tendência pode voltar como um sparkline dentro do número "Conclusão da semana" (fase 2). A faixa de datas e o "Destaques da semana" saem: a tabela já ordena por conclusão.</p>
+</div>
+</body>
+</html>
