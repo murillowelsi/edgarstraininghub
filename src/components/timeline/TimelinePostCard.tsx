@@ -26,6 +26,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { fullDateTime } from "./relativeTime";
 import { formatDate } from "@/lib/dates";
 import { SPORT_BG, sportKey } from "./sport";
+import { sendFeedPush } from "@/services/feedPush";
 
 /**
  * Feed previews written by the backend (backend/feed-preview): who liked it
@@ -75,6 +76,7 @@ export function TimelinePostCard({ post, onDeleted }: TimelinePostCardProps) {
       if (!wasLiked && post.authorId !== user.uid) {
         const actorName = displayName || user.email || "Someone";
         createActivityNotification(post.authorId, actorName, post.id, "like", user.uid).catch((err) => console.error("[FeedBadge] like notification failed:", err));
+        sendFeedPush({ postId: post.id, kind: "like" });
       }
     } catch {
       toast({ title: t.common.error, description: t.timeline.post.likeError, variant: "destructive" });

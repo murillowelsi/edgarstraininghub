@@ -1,3 +1,4 @@
+import { sendFeedPush } from "./feedPush";
 import { normalizeWorkoutName } from "@/utils/workoutName";
 import {
   addDoc,
@@ -334,6 +335,7 @@ export const createMentionNotifications = async (
         userId: uid,
         notificationId: notifRef.id,
       });
+      sendFeedPush({ postId, kind: "mention", mentionedUid: uid });
     })
   );
 };
