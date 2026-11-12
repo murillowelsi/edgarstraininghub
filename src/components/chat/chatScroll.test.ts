@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isNearBottom, newMessagesSince } from "./chatScroll";
+import { isNearBottom, unseenItems } from "./chatScroll";
 import { readViewport } from "@/hooks/useVisualViewport";
 
 describe("isNearBottom", () => {
@@ -11,14 +11,10 @@ describe("isNearBottom", () => {
     });
 });
 
-describe("newMessagesSince", () => {
-    const msgs = [{ id: "a" }, { id: "b" }, { id: "c" }];
-    it("returns the messages after the last seen one", () => {
-        expect(newMessagesSince(msgs, "a").map((m) => m.id)).toEqual(["b", "c"]);
-    });
-    it("counts nothing on first load or when the id is gone", () => {
-        expect(newMessagesSince(msgs, null)).toEqual([]);
-        expect(newMessagesSince(msgs, "zz")).toEqual([]);
+describe("unseenItems", () => {
+    it("finds new server messages even before local outbox entries", () => {
+        const items = [{ id: "a" }, { id: "new" }, { id: "local" }];
+        expect(unseenItems(items, new Set(["a", "local"])).map((m) => m.id)).toEqual(["new"]);
     });
 });
 
