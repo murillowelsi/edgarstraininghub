@@ -190,7 +190,7 @@
   }
 
   .section {
-    @apply py-16 md:py-24;
+    @apply py-12 md:py-16;
   }
 
   .container {

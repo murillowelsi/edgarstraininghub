@@ -173,7 +173,9 @@
     },
     "cta": "Começar Agora",
     "mostPopular": "Mais popular",
-    "priceOnRequest": "Preço a consultar"
+    "priceOnRequest": "Preço a consultar",
+    "wantPlan": "Quero este plano",
+    "whatsappPlan": "Olá! Tenho interesse no {{plan}}."
   },
   "certifications": {
     "title": "Certificações",
@@ -2302,5 +2304,8 @@
       "step3": "Abra o EZ pelo ícone e ative as notificações",
       "ok": "Entendi"
     }
+  },
+  "howItWorks": {
+    "title": "Como funciona"
   }
 }

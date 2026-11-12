@@ -1,24 +1,16 @@
 import edgarImage from "@/assets/edgar-ironman.png";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "../contexts/LanguageContext";
+import { getWhatsAppLink } from "@/lib/whatsapp";
 
 const HeroSection = () => {
   const { t, language } = useLanguage();
 
-  // WhatsApp pre-filled message based on language
-  const getWhatsAppLink = () => {
-    const phone = "+351962869476";
-    const message =
-      language === "pt"
-        ? "Olá! Estou interessado(a) em saber mais sobre os seus serviços de personal training."
-        : "Hello! I'm interested in learning more about your personal training services.";
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-  };
 
   return (
     <section
       id="home"
-      className="relative min-h-[calc(100vh-80px)] md:h-[85vh] lg:h-[95vh] flex items-center justify-center overflow-hidden pt-20 pb-12 md:pt-20 md:pb-0 bg-background"
+      className="relative flex items-center overflow-hidden bg-background pb-12 pt-24 md:pb-16 md:pt-28 lg:min-h-[560px]"
       style={{ background: "var(--gradient-hero)" }}
     >
       <div
@@ -47,7 +39,7 @@ const HeroSection = () => {
               <Button
                 size="lg"
                 className="btn-primary text-base md:text-lg py-5 md:py-7 px-8 md:px-10 shadow-lg hover:shadow-xl w-full sm:w-auto"
-                onClick={() => window.open(getWhatsAppLink(), "_blank")}
+                onClick={() => window.open(getWhatsAppLink(language), "_blank")}
               >
                 {t.hero.startButton}
               </Button>
@@ -57,7 +49,7 @@ const HeroSection = () => {
                 className="border-2 border-primary text-primary hover:bg-accent font-semibold text-base md:text-lg py-5 md:py-7 px-8 md:px-10 rounded-xl transition-all duration-300 w-full sm:w-auto"
                 onClick={() => {
                   document
-                    .getElementById("services")
+                    .getElementById("how")
                     ?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
@@ -71,7 +63,7 @@ const HeroSection = () => {
             <img
               src={edgarImage}
               alt={t.hero.imageAlt}
-              className="w-full h-[88vh] lg:h-[90vh] xl:h-[92vh] max-h-[1400px] object-contain object-bottom opacity-80"
+              className="h-[520px] w-full object-contain object-bottom opacity-80 xl:h-[560px]"
             />
           </div>
         </div>

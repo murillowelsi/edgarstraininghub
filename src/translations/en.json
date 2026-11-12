@@ -173,7 +173,9 @@
     },
     "cta": "Get Started",
     "mostPopular": "Most popular",
-    "priceOnRequest": "Price on request"
+    "priceOnRequest": "Price on request",
+    "wantPlan": "I want this plan",
+    "whatsappPlan": "Hello! I am interested in the {{plan}}."
   },
   "certifications": {
     "title": "Certifications",
@@ -2302,5 +2304,8 @@
       "step3": "Open EZ from the icon and turn on notifications",
       "ok": "Got it"
     }
+  },
+  "howItWorks": {
+    "title": "How it works"
   }
 }
