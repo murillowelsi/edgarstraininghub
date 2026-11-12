@@ -1,3 +1,4 @@
+import { getWhatsAppLink } from "@/lib/whatsapp";
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MapPin, Phone, MessageSquare } from 'lucide-react';
@@ -6,12 +7,7 @@ const ContactSection = () => {
   const { t, language } = useLanguage();
 
   // WhatsApp pre-filled message based on language
-  const getWhatsAppLink = () => {
-    const phone = "+351962869476"; // Updated phone number
-
-    const message = language === 'pt' ? "Olá! Estou interessado(a) em saber mais sobre os seus serviços de personal training." : "Hello! I'm interested in learning more about your personal training services.";
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-  };
+  const whatsAppLink = getWhatsAppLink(language);
   
   return <section id="contact" className="section bg-background">
       <div className="container mx-auto">
@@ -41,7 +37,7 @@ const ContactSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t.contact.info.whatsapp || "WhatsApp"}</h4>
-                <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 font-medium inline-flex items-center mt-1 gap-2 min-h-10">
+                <a href={whatsAppLink} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 font-medium inline-flex items-center mt-1 gap-2 min-h-10">
                   <span>{t.contact.chatNow}</span>
                   {/* Decorative — the whole link is the target; a <button> inside <a> is invalid */}
                   <span className="bg-green-600 h-8 w-8 rounded-full p-1.5 flex items-center justify-center" aria-hidden>

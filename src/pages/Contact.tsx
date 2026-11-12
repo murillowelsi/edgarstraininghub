@@ -1,3 +1,4 @@
+import { getWhatsAppLink } from "@/lib/whatsapp";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -11,14 +12,7 @@ const Contact = () => {
   const navigate = useNavigate();
 
   // WhatsApp pre-filled message based on language
-  const getWhatsAppLink = () => {
-    const phone = "+351962869476";
-    const message =
-      language === "pt"
-        ? "Olá! Estou interessado(a) em saber mais sobre os seus serviços de personal training."
-        : "Hello! I'm interested in learning more about your personal training services.";
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-  };
+  const whatsAppLink = getWhatsAppLink(language);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -88,7 +82,7 @@ const Contact = () => {
                     "Instant chat and quick scheduling"}
                 </p>
                 <Button
-                  onClick={() => window.open(getWhatsAppLink(), "_blank")}
+                  onClick={() => window.open(whatsAppLink, "_blank")}
                   className="h-12 px-8 text-base bg-green-600 hover:bg-green-700 text-white"
                   size="lg"
                 >
@@ -177,7 +171,7 @@ const Contact = () => {
               <Button
                 size="lg"
                 className="btn-primary h-12 px-8 text-base"
-                onClick={() => window.open(getWhatsAppLink(), "_blank")}
+                onClick={() => window.open(whatsAppLink, "_blank")}
               >
                 <MessageSquare className="h-5 w-5 mr-2" />
                 {t.contact?.cta?.button || "Schedule Free Assessment"}
