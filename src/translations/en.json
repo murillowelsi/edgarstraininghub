@@ -1777,11 +1777,14 @@
     "deleteConversationDescription": "The conversation with {{name}} and all its messages will be deleted for everyone. This can’t be undone.",
     "deleteConfirm": "Delete",
     "sending": "Sending…",
-    "sendFailed": "Not sent. Tap send to try again.",
     "newOne": "1 new",
     "newOther": "{{n}} new",
     "jumpToLatest": "Jump to latest messages",
-    "messageTo": "Message {{name}}"
+    "messageTo": "Message {{name}}",
+    "read": "Read",
+    "notSent": "Not sent",
+    "retry": "Try again",
+    "sent": "Sent"
   },
   "joinTeam": {
     "invalidLink": "Invalid invite link.",

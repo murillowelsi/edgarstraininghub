@@ -155,13 +155,13 @@ export default function AthleteChat() {
         }
     };
 
-    const handleSendMessage = async (text: string) => {
+    const handleSendMessage = async (text: string, messageId: string) => {
         if (!selectedChat || !user) {
             toast.error(t.athlete.chat.noActiveChat);
             throw new Error("no active chat");
         }
-        // A failure is shown in the field, which keeps the text
-        await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Athlete");
+        // A failure is shown on the message bubble, with "Try again"
+        await ChatService.sendMessage(selectedChat.id, user.uid, text, user.displayName || user.email || "Athlete", undefined, undefined, messageId);
     };
 
     const getChatSubtitle = (chat: Chat) => {
@@ -306,6 +306,8 @@ export default function AthleteChat() {
                     {selectedChat ? (
                         <ChatWindow
                             key={selectedChat.id}
+                            chatId={selectedChat.id}
+                            senderInfo={(id) => adminMap[id] ? { photoURL: adminMap[id].photoURL, isCoach: true } : undefined}
                             messages={messages}
                             currentUserId={user?.uid || ""}
                             onSendMessage={handleSendMessage}
@@ -326,17 +328,19 @@ export default function AthleteChat() {
             </div>
         <ResponsiveModal open={isNewChatOpen} onOpenChange={setIsNewChatOpen} title={t.athlete.chat.newMessage}>
             <div className="p-2 space-y-4">
-                <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        autoFocus
-                        placeholder={t.athlete.chat.searchCoaches}
-                        className="pl-9"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                <div className="h-[300px] overflow-y-auto space-y-2">
+                {/* Search only pays off with many coaches; no autofocus, so the iOS keyboard doesn't pop up and push the sheet off screen */}
+                {admins.length > 6 && (
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder={t.athlete.chat.searchCoaches}
+                            className="pl-9"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                )}
+                <div className="max-h-[min(60dvh,420px)] overflow-y-auto space-y-1">
                     {filteredAdmins.length === 0 ? (
                         <p className="text-center text-muted-foreground p-4">{t.athlete.chat.noCoachesFound}</p>
                     ) : (
@@ -344,9 +348,10 @@ export default function AthleteChat() {
                             <button
                                 key={admin.id}
                                 onClick={() => handleStartChat(admin)}
-                                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                                className="w-full min-h-[64px] flex items-center gap-3 p-3 rounded-xl hover:bg-muted active:bg-muted transition-colors text-left"
                             >
                                 <CachedAvatar
+                                    className="h-11 w-11"
                                     src={admin.photoURL}
                                     alt={admin.displayName}
                                     fallback={admin.displayName[0]?.toUpperCase()}

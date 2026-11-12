@@ -1777,11 +1777,14 @@
     "deleteConversationDescription": "A conversa com {{name}} e todas as mensagens serão apagadas para todos. Isso não pode ser desfeito.",
     "deleteConfirm": "Apagar",
     "sending": "Enviando…",
-    "sendFailed": "Não enviada. Toque em enviar para tentar de novo.",
     "newOne": "1 nova",
     "newOther": "{{n}} novas",
     "jumpToLatest": "Ir para as mensagens mais recentes",
-    "messageTo": "Mensagem para {{name}}"
+    "messageTo": "Mensagem para {{name}}",
+    "read": "Lida",
+    "notSent": "Não enviada",
+    "retry": "Tentar de novo",
+    "sent": "Enviada"
   },
   "joinTeam": {
     "invalidLink": "Link de convite inválido.",

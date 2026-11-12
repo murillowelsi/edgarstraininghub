@@ -8,12 +8,7 @@ export function isNearBottom(
     return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
 }
 
-/**
- * Messages that arrived after the one last seen. With no previous id (first load)
- * or an id no longer in the list (history replaced), nothing counts as new.
- */
-export function newMessagesSince<T extends { id: string }>(messages: T[], lastSeenId: string | null): T[] {
-    if (lastSeenId === null) return [];
-    const idx = messages.findIndex((m) => m.id === lastSeenId);
-    return idx === -1 ? [] : messages.slice(idx + 1);
+/** Items not seen before (by id); local outbox entries sit after newer server messages, so order can't tell */
+export function unseenItems<T extends { id: string }>(items: T[], seen: ReadonlySet<string>): T[] {
+    return items.filter((m) => !seen.has(m.id));
 }

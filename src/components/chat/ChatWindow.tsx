@@ -1,22 +1,33 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, Check, CheckCheck, ChevronLeft, MoreVertical, Trash2, Users2 } from "lucide-react";
 import { Message } from "@/types/chat";
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
 import { cn } from "@/lib/utils";
-import { isSameDay } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { formatChatDay } from "./chatDates";
 import { formatDate } from "@/lib/dates";
-import { isNearBottom, newMessagesSince } from "./chatScroll";
+import { isNearBottom, unseenItems } from "./chatScroll";
+import { groupChatRows, newMessageId, type ChatItem } from "./chatGroups";
+import { chatOutbox, useChatOutbox } from "./chatOutbox";
+
+export interface SenderInfo {
+    photoURL?: string;
+    /** Coach names stand out in group chats */
+    isCoach?: boolean;
+}
 
 interface ChatWindowProps {
+    /** Keys the per-conversation draft */
+    chatId: string;
     messages: Message[];
     currentUserId: string;
-    /** Resolves when the message is saved; rejects on failure (the draft stays in the field) */
-    onSendMessage: (text: string) => Promise<void>;
+    /** Saves the message under `messageId` (the same id on a retry); rejects on failure */
+    onSendMessage: (text: string, messageId: string) => Promise<void>;
+    /** Avatar and role of a group member */
+    senderInfo?: (senderId: string) => SenderInfo | undefined;
     participantName: string;
     participantPhotoURL?: string;
     /** Line under the name: "Your coach", "Athlete", "4 people" */
@@ -28,6 +39,23 @@ interface ChatWindowProps {
 
 /** The field grows up to 5 lines, then scrolls inside */
 const MAX_FIELD_LINES = 5;
+
+const draftKey = (chatId: string) => `ez-chat-draft-v1:${chatId}`;
+const readDraft = (chatId: string) => {
+    try {
+        return sessionStorage.getItem(draftKey(chatId)) ?? "";
+    } catch {
+        return "";
+    }
+};
+const saveDraft = (chatId: string, text: string) => {
+    try {
+        if (text) sessionStorage.setItem(draftKey(chatId), text);
+        else sessionStorage.removeItem(draftKey(chatId));
+    } catch {
+        /* private mode: the draft just isn't kept */
+    }
+};
 
 function DateSeparator({ date }: { date: Date }) {
     const { t, language } = useLanguage();
@@ -46,9 +74,11 @@ function DateSeparator({ date }: { date: Date }) {
  * from md up it fills the panel next to the list.
  */
 export default function ChatWindow({
+    chatId,
     messages,
     currentUserId,
     onSendMessage,
+    senderInfo,
     participantName,
     participantPhotoURL,
     subtitle,
@@ -63,13 +93,36 @@ export default function ChatWindow({
 
     const listRef = useRef<HTMLDivElement>(null);
     const fieldRef = useRef<HTMLTextAreaElement>(null);
-    const [draft, setDraft] = useState("");
-    const [sending, setSending] = useState(false);
-    const [sendFailed, setSendFailed] = useState(false);
+    const [draft, setDraftState] = useState(() => readDraft(chatId));
+    const setDraft = useCallback((text: string) => {
+        setDraftState(text);
+        saveDraft(chatId, text);
+    }, [chatId]);
+    const outbox = useChatOutbox(chatId);
+
+    // Server messages + local ones not saved yet, each with its delivery status
+    const items: ChatItem[] = useMemo(() => {
+        const local = new Map(outbox.map((o) => [o.id, o]));
+        const list: ChatItem[] = messages.map((m) => ({
+            id: m.id,
+            text: m.text,
+            senderId: m.senderId,
+            senderName: m.senderName,
+            at: m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000) : null,
+            read: m.read,
+            status: local.get(m.id)?.status ?? (m.createdAt ? "sent" : "sending"),
+        }));
+        const onServer = new Set(messages.map((m) => m.id));
+        for (const o of outbox) {
+            if (!onServer.has(o.id)) list.push({ id: o.id, text: o.text, senderId: currentUserId, at: null, read: false, status: o.status });
+        }
+        return list;
+    }, [messages, outbox, currentUserId]);
+    const rows = useMemo(() => groupChatRows(items, currentUserId), [items, currentUserId]);
 
     // ---- Scroll: follow the end only when the reader is already there ----
     const atBottomRef = useRef(true);
-    const lastSeenIdRef = useRef<string | null>(null);
+    const seenRef = useRef<Set<string> | null>(null);
     const [unseen, setUnseen] = useState(0);
 
     const scrollToEnd = useCallback((smooth: boolean) => {
@@ -88,16 +141,18 @@ export default function ChatWindow({
     };
 
     useLayoutEffect(() => {
+        // Wait for the server history before the first jump to the end
         if (messages.length === 0) return;
-        const firstLoad = lastSeenIdRef.current === null;
-        const fresh = newMessagesSince(messages, lastSeenIdRef.current);
-        lastSeenIdRef.current = messages[messages.length - 1].id;
+        const seen = seenRef.current;
+        const firstLoad = seen === null;
+        const fresh = firstLoad ? [] : unseenItems(items, seen);
+        seenRef.current = new Set(items.map((m) => m.id));
         if (firstLoad) return scrollToEnd(false);
         if (fresh.length === 0) return;
         const mine = fresh.some((m) => m.senderId === currentUserId);
         if (mine || atBottomRef.current) scrollToEnd(true);
         else setUnseen((n) => n + fresh.length);
-    }, [messages, currentUserId, scrollToEnd]);
+    }, [items, messages.length, currentUserId, scrollToEnd]);
 
     // Keyboard opening or the field growing shrinks the list: keep the last message in view
     useEffect(() => {
@@ -127,37 +182,43 @@ export default function ChatWindow({
         ta.style.overflowY = ta.scrollHeight + border > max ? "auto" : "hidden";
     }, [draft]);
 
-    const canSend = draft.trim().length > 0 && !sending;
+    const canSend = draft.trim().length > 0;
 
-    const send = async () => {
-        if (!canSend) return;
-        const text = draft;
-        setSending(true);
-        setSendFailed(false);
+    // The text moves from the field to a "Sending…" bubble at once; it is never lost:
+    // on failure the bubble stays with "Not sent · Try again" (same id, so no duplicates)
+    const deliver = useCallback(async (id: string, text: string) => {
+        chatOutbox.put(chatId, { id, text, status: "sending" });
         try {
-            await onSendMessage(text);
-            // Only now the text leaves the field; keep anything typed meanwhile
-            setDraft((current) => (current === text ? "" : current.startsWith(text) ? current.slice(text.length).trimStart() : current));
+            await onSendMessage(text, id);
+            chatOutbox.remove(chatId, id);
         } catch {
-            setSendFailed(true);
-        } finally {
-            setSending(false);
-            fieldRef.current?.focus();
+            chatOutbox.put(chatId, { id, text, status: "failed" });
         }
+    }, [chatId, onSendMessage]);
+
+    const send = () => {
+        if (!canSend) return;
+        const text = draft.trim();
+        setDraft("");
+        fieldRef.current?.focus();
+        void deliver(newMessageId(), text);
     };
+
+    const retry = (item: ChatItem) => void deliver(item.id, item.text);
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // Phones: Enter is a new line, sending is the button. Desktop: Enter sends, Shift+Enter breaks.
         if (e.key !== "Enter" || e.shiftKey || isMobile || e.nativeEvent.isComposing) return;
         e.preventDefault();
-        void send();
+        send();
     };
 
     const menuItems: ActionMenuItem[] = onDelete
         ? [{ icon: Trash2, label: tc.deleteConversation, onClick: onDelete, destructive: true }]
         : [];
 
-    const lastMineIndex = messages.reduce((acc, m, i) => (m.senderId === currentUserId ? i : acc), -1);
+    // "Read" shows once, under my latest message
+    const lastMineId = [...items].reverse().find((m) => m.senderId === currentUserId && m.status === "sent")?.id;
 
     return (
         <div
@@ -219,57 +280,28 @@ export default function ChatWindow({
                     data-testid="chat-messages"
                 >
                     <div className="flex flex-col">
-                        {messages.length === 0 && (
+                        {items.length === 0 && (
                             <div className="flex items-center justify-center text-muted-foreground text-sm py-8">
                                 {tc.noMessages}
                             </div>
                         )}
 
-                        {messages.map((msg, i) => {
-                            const isMe = msg.senderId === currentUserId;
-                            const msgDate = msg.createdAt?.seconds ? new Date(msg.createdAt.seconds * 1000) : null;
-                            const prevMsg = messages[i - 1];
-                            const prevDate = prevMsg?.createdAt?.seconds ? new Date(prevMsg.createdAt.seconds * 1000) : null;
-                            const showDateSep = msgDate && (!prevDate || !isSameDay(msgDate, prevDate));
-
-                            return (
-                                <div key={msg.id}>
-                                    {showDateSep && <DateSeparator date={msgDate} />}
-                                    <div
-                                        className={cn(
-                                            "flex flex-col max-w-[78%] mb-1",
-                                            isMe ? "self-end items-end ml-auto" : "self-start items-start"
-                                        )}
-                                    >
-                                        {isGroup && !isMe && msg.senderName && (
-                                            <span className="text-[11px] font-medium text-muted-foreground mb-0.5 px-2">
-                                                {msg.senderName}
-                                            </span>
-                                        )}
-                                        <div
-                                            className={cn(
-                                                "px-3.5 py-2 rounded-2xl text-[15px] leading-[1.4] whitespace-pre-wrap break-words",
-                                                isMe
-                                                    ? "bg-primary text-primary-foreground rounded-br-sm"
-                                                    : "bg-card border text-foreground rounded-bl-sm"
-                                            )}
-                                        >
-                                            {msg.text}
-                                        </div>
-                                        <div className={cn("flex items-center gap-0.5 mt-0.5 px-1", isMe ? "flex-row-reverse" : "flex-row")}>
-                                            <span className="text-[11px] text-muted-foreground">
-                                                {msgDate ? formatDate(msgDate, "time", language) : tc.sending}
-                                            </span>
-                                            {isMe && i === lastMineIndex && (
-                                                msg.read
-                                                    ? <CheckCheck className="h-3.5 w-3.5 text-primary-ink" aria-hidden />
-                                                    : <Check className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                        {rows.map((row) =>
+                            row.kind === "day" ? (
+                                <DateSeparator key={row.key} date={row.date} />
+                            ) : (
+                                <MessageBlock
+                                    key={row.key}
+                                    mine={row.mine}
+                                    items={row.items}
+                                    senderName={isGroup && !row.mine ? row.senderName : undefined}
+                                    sender={isGroup && !row.mine ? senderInfo?.(row.senderId) : undefined}
+                                    showAvatar={!!isGroup && !row.mine}
+                                    lastMineId={lastMineId}
+                                    onRetry={retry}
+                                />
+                            )
+                        )}
                     </div>
                 </div>
 
@@ -296,15 +328,10 @@ export default function ChatWindow({
                     keyboardOpen ? "pb-2" : "pb-[max(0.5rem,env(safe-area-inset-bottom))]"
                 )}
             >
-                {sendFailed && (
-                    <p role="alert" className="px-2 pb-1.5 text-caption text-destructive-ink">
-                        {tc.sendFailed}
-                    </p>
-                )}
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        void send();
+                        send();
                     }}
                     className="flex items-end gap-2"
                 >
@@ -313,12 +340,8 @@ export default function ChatWindow({
                         name="message"
                         rows={1}
                         value={draft}
-                        onChange={(e) => {
-                            setDraft(e.target.value);
-                            if (sendFailed) setSendFailed(false);
-                        }}
+                        onChange={(e) => setDraft(e.target.value)}
                         onKeyDown={onKeyDown}
-                        readOnly={sending}
                         placeholder={tc.messageTo.replace("{{name}}", participantName)}
                         aria-label={tc.messageTo.replace("{{name}}", participantName)}
                         enterKeyHint={isMobile ? "enter" : "send"}
@@ -330,16 +353,102 @@ export default function ChatWindow({
                         disabled={!canSend}
                         // Keep focus (and the keyboard) on the field when tapping send
                         onMouseDown={(e) => e.preventDefault()}
-                        aria-label={sending ? tc.sending : t.athlete.chat.send}
+                        aria-label={t.athlete.chat.send}
                         className={cn(
                             "shrink-0 h-11 w-11 flex items-center justify-center rounded-full transition-colors",
-                            canSend ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground",
-                            sending && "motion-safe:animate-pulse"
+                            canSend ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"
                         )}
                     >
                         <ArrowUp className="h-5 w-5" strokeWidth={2.4} />
                     </button>
                 </form>
+            </div>
+        </div>
+    );
+}
+
+interface MessageBlockProps {
+    mine: boolean;
+    items: ChatItem[];
+    /** Group chats: name above the first bubble, avatar beside the last */
+    senderName?: string;
+    sender?: SenderInfo;
+    showAvatar: boolean;
+    lastMineId?: string;
+    onRetry: (item: ChatItem) => void;
+}
+
+/** Consecutive messages from one person: one time, the "tail" only on the last bubble */
+function MessageBlock({ mine, items, senderName, sender, showAvatar, lastMineId, onRetry }: MessageBlockProps) {
+    const { t, language } = useLanguage();
+    const tc = t.chatComponent;
+    const last = items[items.length - 1];
+    const sent = items.filter((i) => i.status === "sent");
+    const lastSent = sent[sent.length - 1];
+    const showRead = mine && lastSent && lastSent.id === lastMineId;
+
+    return (
+        <div className={cn("mt-2 flex items-end gap-2", mine && "justify-end")}>
+            {showAvatar && (
+                <CachedAvatar
+                    src={sender?.photoURL}
+                    alt={senderName ?? ""}
+                    fallback={senderName?.[0]?.toUpperCase()}
+                    className="mb-5 h-6 w-6 shrink-0"
+                    fallbackClassName={cn("text-[11px] font-bold", sender?.isCoach ? "bg-primary text-primary-foreground" : "bg-surface-2")}
+                />
+            )}
+            <div className={cn("flex max-w-[78%] min-w-0 flex-col gap-0.5", mine ? "items-end" : "items-start")}>
+                {senderName && (
+                    <span className={cn("px-3 text-xs font-semibold", sender?.isCoach ? "text-primary-ink" : "text-muted-foreground")}>
+                        {senderName}
+                    </span>
+                )}
+                {items.map((item, i) => {
+                    const first = i === 0;
+                    const isLast = i === items.length - 1;
+                    return (
+                        <div key={item.id} className={cn("flex flex-col", mine ? "items-end" : "items-start")}>
+                            <div
+                                className={cn(
+                                    "rounded-[18px] px-3.5 py-2 text-[15px] leading-[1.4] whitespace-pre-wrap break-words",
+                                    mine
+                                        ? cn("bg-primary text-primary-foreground rounded-r-md", first && "rounded-tr-[18px]", isLast && "rounded-br-[4px]")
+                                        : cn("bg-card border text-foreground rounded-l-md", first && "rounded-tl-[18px]", isLast && "rounded-bl-[4px]"),
+                                    item.status !== "sent" && "opacity-60",
+                                    item.status === "failed" && "border border-dashed border-destructive-ink"
+                                )}
+                            >
+                                {item.text}
+                            </div>
+                            {item.status === "sending" && item !== last && (
+                                <span className="px-1.5 text-[11px] text-muted-foreground">{tc.sending}</span>
+                            )}
+                            {item.status === "failed" && (
+                                <span role="alert" className="flex items-center gap-1 px-1.5 text-xs text-destructive-ink">
+                                    {tc.notSent} ·
+                                    <button type="button" onClick={() => onRetry(item)} className="min-h-6 font-semibold text-foreground underline-offset-2 hover:underline">
+                                        {tc.retry}
+                                    </button>
+                                </span>
+                            )}
+                        </div>
+                    );
+                })}
+                {last.status !== "failed" && (
+                    <span className="flex items-center gap-1 px-1.5 text-[11px] text-muted-foreground">
+                        {last.status === "sending" || !last.at ? tc.sending : formatDate(last.at, "time", language)}
+                        {showRead && (lastSent.read ? (
+                            <>
+                                {" · "}
+                                <CheckCheck className="h-3.5 w-3.5 text-primary-ink" aria-hidden />
+                                {tc.read}
+                            </>
+                        ) : (
+                            <Check className="h-3.5 w-3.5" aria-label={tc.sent} />
+                        ))}
+                    </span>
+                )}
             </div>
         </div>
     );
