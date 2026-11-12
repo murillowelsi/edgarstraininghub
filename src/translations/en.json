@@ -1767,7 +1767,21 @@
     "noMessages": "No messages yet. Start a conversation!",
     "noChats": "No active chats.",
     "noMessagesYet": "No messages yet",
-    "placeholder": "Send a message"
+    "placeholder": "Send a message",
+    "yourCoach": "Your coach",
+    "athleteRole": "Athlete",
+    "membersOne": "1 person",
+    "membersOther": "{{n}} people",
+    "moreActions": "More options",
+    "deleteConversation": "Delete conversation",
+    "deleteConversationDescription": "The conversation with {{name}} and all its messages will be deleted for everyone. This can’t be undone.",
+    "deleteConfirm": "Delete",
+    "sending": "Sending…",
+    "sendFailed": "Not sent. Tap send to try again.",
+    "newOne": "1 new",
+    "newOther": "{{n}} new",
+    "jumpToLatest": "Jump to latest messages",
+    "messageTo": "Message {{name}}"
   },
   "joinTeam": {
     "invalidLink": "Invalid invite link.",
