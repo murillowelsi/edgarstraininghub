@@ -1203,7 +1203,10 @@
       "submit": "Submit",
       "save": "Save changes",
       "submitted": "Thanks! Your testimonial was submitted.",
-      "updated": "Testimonial updated — pending review."
+      "updated": "Testimonial updated — pending review.",
+      "nudgeText": "How is training going?",
+      "nudgeCta": "Leave a testimonial",
+      "nudgeDismiss": "Dismiss reminder"
     },
     "home": {
       "welcomeBack": "Welcome back,",
@@ -1494,6 +1497,16 @@
         "cycling": "Cycling",
         "swimming": "Swimming",
         "strength": "Strength"
+      },
+      "card": {
+        "workoutsIn": "workouts in {{month}}",
+        "timeInMonth": "this month",
+        "streak": "weeks in a row",
+        "weekProgress": "{{done}} of {{planned}} this week",
+        "weekNone": "Nothing planned this week",
+        "weekAria": "This week’s workouts, Monday to Sunday",
+        "monthOne": "1 workout · {{time}}",
+        "monthOther": "{{n}} workouts · {{time}}"
       }
     },
     "events": {
