@@ -57,6 +57,7 @@ export default {
 				'surface-inverse': 'hsl(var(--surface-inverse))',
 				'surface-2': 'hsl(var(--surface-2))',
 				'feed-canvas': 'hsl(var(--feed-canvas))',
+				'workout-card': 'hsl(var(--workout-card))',
 				'primary-ink': 'hsl(var(--primary-ink))',
 				'destructive-ink': 'hsl(var(--destructive-ink))',
 				success: {
