@@ -2079,5 +2079,35 @@
         ]
       }
     ]
+  },
+  "push": {
+    "toggle": {
+      "label": "Notificações",
+      "on": "Ativadas neste aparelho",
+      "off": "Desativadas",
+      "blockedIOS": "Bloqueadas. Ative em Ajustes → Notificações → EZ.",
+      "blockedBrowser": "Bloqueadas. Libere nas configurações do site, no navegador.",
+      "unsupported": "Este navegador não recebe notificações.",
+      "needsInstall": "No iPhone, adicione o app à Tela de Início para ativar.",
+      "howToInstall": "Como instalar"
+    },
+    "invite": {
+      "enable": "Ativar",
+      "notNow": "Agora não",
+      "chatAthleteTitle": "Avisar quando o coach responder",
+      "chatAthleteDescription": "Um aviso no celular, mesmo com o app fechado.",
+      "chatCoachTitle": "Avisar quando um atleta escrever",
+      "chatCoachDescription": "Um aviso neste aparelho, mesmo com o app fechado.",
+      "firstWorkoutTitle": "Quer saber quando o coach comentar?",
+      "firstWorkoutDescription": "Ative as notificações para receber os comentários e as mensagens do coach."
+    },
+    "install": {
+      "title": "Adicione o EZ à Tela de Início",
+      "description": "No iPhone, as notificações só funcionam com o app na Tela de Início.",
+      "step1": "Toque em Compartilhar na barra do Safari",
+      "step2": "Escolha \"Adicionar à Tela de Início\"",
+      "step3": "Abra o EZ pelo ícone e ative as notificações",
+      "ok": "Entendi"
+    }
   }
 }
