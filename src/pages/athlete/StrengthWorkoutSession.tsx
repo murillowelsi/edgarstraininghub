@@ -70,6 +70,7 @@ import { formatHold, parseTimedReps } from "@/utils/timedReps";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatDate } from "@/lib/dates";
 import { ListSkeleton } from "@/components/feedback/skeletons";
+import { expectsLoad, suggestSet, type SuggestedSet } from "@/utils/setSuggestion";
 
 // Types for tracking workout progress
 interface SetProgress {
@@ -100,12 +101,7 @@ const WEIGHT_STEP = 2.5;
 const WARMUP_TIP_KEY = "ez-warmup-tip-v1";
 const SET_GRID = "grid grid-cols-[40px_60px_minmax(0,1fr)_48px] gap-1.5";
 
-interface SetSuggestion {
-  reps: string;
-  weight: string;
-  /** Values come from the athlete's last session (vs. the coach target / previous set) */
-  fromHistory: boolean;
-}
+type SetSuggestion = SuggestedSet;
 
 /**
  * Most recent logged sets per exercise from the athlete's other completed
@@ -524,6 +520,7 @@ const ExerciseSessionCard = ({
                               type="text"
                               inputMode={holdSeconds ? "text" : "numeric"}
                               enterKeyHint="next"
+                              id={`set-${workoutExercise.id}-${setIndex}-reps`}
                               value={set.reps}
                               onChange={(e) => onUpdateSet(setIndex, "reps", e.target.value)}
                               placeholder={suggestion?.reps || workoutExercise.reps || "10"}
@@ -547,9 +544,10 @@ const ExerciseSessionCard = ({
                               type="text"
                               inputMode="decimal"
                               enterKeyHint="done"
+                              id={`set-${workoutExercise.id}-${setIndex}-weight`}
                               value={set.weight}
                               onChange={(e) => onUpdateSet(setIndex, "weight", e.target.value)}
-                              placeholder={suggestion?.weight || "0"}
+                              placeholder={suggestion?.weight || ""}
                               aria-label={t.athlete.session.setWeightLabel.replace("{{n}}", setLabel)}
                               className="order-first col-span-2 h-12 min-w-0 px-0.5 text-center text-base tabular-nums placeholder:text-muted-foreground min-[375px]:order-none min-[375px]:col-span-1 min-[375px]:h-full min-[375px]:rounded-none min-[375px]:border-0 min-[375px]:focus-visible:ring-0 min-[375px]:focus-visible:ring-offset-0"
                             />
@@ -1148,16 +1146,17 @@ const StrengthWorkoutSession = () => {
         .reverse()
         .find((s) => !s.warmup && (s.reps || s.weight));
       const history = previousSets.get(progress.exerciseId);
-      if (history?.length) {
-        const prev = history[Math.min(setIndex, history.length - 1)];
-        if (earlier?.weight) return { reps: prev.reps || earlier.reps, weight: earlier.weight, fromHistory: false };
-        return { reps: prev.reps, weight: prev.weight, fromHistory: true };
-      }
-      if (earlier) return { reps: earlier.reps, weight: earlier.weight, fromHistory: false };
-      const target = assignment?.workout.exercises?.find((we) => we.id === workoutExerciseId)?.reps ?? "";
+      const prev = history?.length ? history[Math.min(setIndex, history.length - 1)] : undefined;
+      const we = assignment?.workout.exercises?.find((x) => x.id === workoutExerciseId);
+      const target = we?.reps ?? "";
       const hold = parseTimedReps(target);
-      const reps = hold ? formatHold(hold) : repsFromTarget(target);
-      return reps ? { reps, weight: "", fromHistory: false } : null;
+      // Last value of the athlete → coach target → empty (never "0"); see utils/setSuggestion
+      return suggestSet({
+        earlier,
+        history: prev,
+        targetReps: hold ? formatHold(hold) : repsFromTarget(target),
+        targetWeight: we?.weight,
+      });
     },
     [previousSets, assignment]
   );
@@ -1256,6 +1255,20 @@ const StrengthWorkoutSession = () => {
           };
         }
       }
+      // Nothing real to save (no reps, or no load on a loaded exercise): don't tick, ask for it
+      if (nowCompleted) {
+        const we = assignment?.workout.exercises?.find((x) => x.id === exerciseId);
+        const prev = previousSets.get(current.exerciseId);
+        const missing = !ticked.reps.trim()
+          ? "reps"
+          : !ticked.weight.trim() && expectsLoad({ history: prev?.[Math.min(setIndex, prev.length - 1)], targetWeight: we?.weight })
+          ? "weight"
+          : null;
+        if (missing) {
+          document.getElementById(`set-${exerciseId}-${setIndex}-${missing}`)?.focus();
+          return;
+        }
+      }
       newSets[setIndex] = ticked;
       newMap.set(exerciseId, { ...current, sets: newSets });
       setExerciseProgress(newMap);
@@ -1286,7 +1299,7 @@ const StrengthWorkoutSession = () => {
         nextSetIndex: next.setIndex,
       });
     },
-    [exerciseProgress, findNextSet, assignment, getSuggestion, advanceTo]
+    [exerciseProgress, findNextSet, assignment, getSuggestion, advanceTo, previousSets]
   );
 
   // Remove last set
