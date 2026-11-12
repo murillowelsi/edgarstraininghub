@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronRight, MessageSquareQuote } from "lucide-react";
+import { ChevronRight, MessageSquareQuote, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -11,9 +11,31 @@ interface LeaveTestimonialBannerProps {
   /**
    * "home": banner disappears as soon as the athlete submits any testimonial.
    * "profile": banner stays visible and lets the athlete edit it later.
+   * "nudge": one dismissible line (athlete profile); gone once a testimonial exists,
+   *   and for 30 days after dismissing it.
    */
-  mode: "home" | "profile";
+  mode: "home" | "profile" | "nudge";
 }
+
+const NUDGE_SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
+const nudgeKey = (uid: string) => `ez-testimonial-nudge-v1:${uid}`;
+
+const isNudgeSnoozed = (uid: string, now = Date.now()): boolean => {
+  try {
+    const at = Number(localStorage.getItem(nudgeKey(uid)));
+    return at > 0 && now - at < NUDGE_SNOOZE_MS;
+  } catch {
+    return false;
+  }
+};
+
+const snoozeNudge = (uid: string) => {
+  try {
+    localStorage.setItem(nudgeKey(uid), String(Date.now()));
+  } catch {
+    /* private mode: it just shows again next time */
+  }
+};
 
 export function LeaveTestimonialBanner({ mode }: LeaveTestimonialBannerProps) {
   const { user } = useAuth();
@@ -22,6 +44,7 @@ export function LeaveTestimonialBanner({ mode }: LeaveTestimonialBannerProps) {
 
   const [myTestimonial, setMyTestimonial] = useState<Testimonial | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [snoozed, setSnoozed] = useState(() => (user ? isNudgeSnoozed(user.uid) : false));
 
   useEffect(() => {
     if (!user) return;
@@ -41,6 +64,34 @@ export function LeaveTestimonialBanner({ mode }: LeaveTestimonialBannerProps) {
 
   if (!loaded) return null;
   if (mode === "home" && myTestimonial) return null;
+
+  if (mode === "nudge") {
+    if (myTestimonial || snoozed || !user) return null;
+    return (
+      <div className="flex items-center gap-2.5 rounded-2xl border border-dashed bg-card py-1 pl-3.5 pr-1 text-sm">
+        <MessageSquareQuote className="h-[18px] w-[18px] shrink-0 text-primary-ink" aria-hidden />
+        <Link
+          to="/athlete/testimonial"
+          className="min-w-0 flex-1 truncate py-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {/* The question only where it fits on one line */}
+          <span className="hidden min-[420px]:inline">{tt.nudgeText} </span>
+          <span className="font-semibold text-primary-ink">{tt.nudgeCta}</span>
+        </Link>
+        <button
+          type="button"
+          onClick={() => {
+            snoozeNudge(user.uid);
+            setSnoozed(true);
+          }}
+          aria-label={tt.nudgeDismiss}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  }
 
   const ctaLabel = myTestimonial ? tt.editCta : tt.cta;
   const hintCopy = !myTestimonial
