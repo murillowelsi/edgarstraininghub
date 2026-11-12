@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogIn, Menu, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Menu, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -78,14 +78,17 @@ const Navbar = () => {
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            {/* Signed-in users go straight to their app instead of the login page */}
-            <Link
-              to={user ? "/app" : "/admin/login"}
-              className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-              aria-label={user ? t.nav.openApp : "Admin login"}
-            >
-              {user ? <LayoutDashboard size={18} /> : <LogIn size={18} />}
-            </Link>
+            {/* Signed-in users get a shortcut to their app; sign-in lives in the footer */}
+            {user && (
+              <Link
+                to="/app"
+                className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+                aria-label={t.nav.openApp}
+                title={t.nav.openApp}
+              >
+                <LayoutDashboard size={18} />
+              </Link>
+            )}
           </div>
         </div>
 
@@ -151,14 +154,16 @@ const Navbar = () => {
                       className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center justify-between"
                     />
                   )}
-                  <Link
-                    to={user ? "/app" : "/admin/login"}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
-                  >
-                    {user ? <LayoutDashboard size={18} /> : <LogIn size={18} />}
-                    {user ? t.nav.openApp : "Login"}
-                  </Link>
+                  {user && (
+                    <Link
+                      to="/app"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 flex items-center gap-2"
+                    >
+                      <LayoutDashboard size={18} />
+                      {t.nav.openApp}
+                    </Link>
+                  )}
                 </nav>
               </div>
             </SheetContent>
