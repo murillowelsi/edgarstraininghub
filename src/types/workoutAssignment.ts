@@ -30,7 +30,7 @@ export interface StageTimeData {
 // Activity data for endurance workouts (running, cycling, swimming)
 export interface ActivityData {
   elapsedTime?: number; // in seconds
-  distance?: number;    // km for running/cycling, m for swimming
+  distance?: number;    // km for running/cycling, m for swimming (read swims with swimDistanceMeters: old records hold km)
   avgHeartRate?: number; // bpm
   avgPace?: number;     // seconds per km (running) or per 100m (swimming)
   avgSpeed?: number;    // km/h (cycling)

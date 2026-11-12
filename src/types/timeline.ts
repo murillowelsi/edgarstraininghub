@@ -13,7 +13,7 @@ export interface WorkoutSummary {
   workoutName: string;
   workoutType: string; // "running" | "cycling" | "swimming" | "strength"
   elapsedTime?: number;   // seconds
-  distance?: number;      // km or m (swimming)
+  distance?: number;      // km, or m for swimming (old posts may hold km: read with swimDistanceMeters)
   avgHeartRate?: number;  // bpm
   avgPace?: number;       // seconds per km or per 100m (swimming)
   avgSpeed?: number;      // km/h (cycling)
