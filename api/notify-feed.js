@@ -53,12 +53,17 @@ const TEXT = {
 
 class Forbidden extends Error {}
 
+const looksLikeEmail = (name) => typeof name === 'string' && name.includes('@');
+
 const publicName = async (uid) => {
   const profile = await db.collection('publicProfiles').doc(uid).get();
-  const name = profile.exists ? profile.data().displayName : undefined;
-  if (name) return name;
-  const user = await db.collection('users').doc(uid).get();
-  return (user.exists && user.data().displayName) || 'Alguém';
+  let name = profile.exists ? profile.data().displayName : undefined;
+  if (!name) {
+    const user = await db.collection('users').doc(uid).get();
+    name = user.exists ? user.data().displayName : undefined;
+  }
+  // Never put an e-mail address in a push shown on a lock screen
+  return name && !looksLikeEmail(name) ? name : 'Alguém';
 };
 
 /** Check the action belongs to the caller; return { recipientId, throttleKey, ref } */
