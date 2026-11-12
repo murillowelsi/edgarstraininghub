@@ -39,10 +39,27 @@ Log in at `/login`. Team invite link: `/join/demo-invite-token`.
 ## What the seed creates
 
 - 5 users, 6 custom exercises, 5 workouts (2 strength, run intervals, bike Z2, swim technique).
-- 28 workout assignments: past ones completed with sets, loads, RPE and notes; today's and the next week's still open; one skipped, one partial, one self-logged.
+- 29 workout assignments: past ones completed with sets, loads, RPE and notes; today's and the next week's still open; one skipped, one partial, one self-logged; Carla's swim yesterday (1100 m, per-stage times).
 - Team "Equipe Tri Demo" (3 athletes) with team-level assignments and a group chat.
 - 1:1 chats coach ↔ each team athlete, with messages and unread counts.
-- 3 timeline posts (strength and run summaries, coach announcement) with likes, comments and notifications.
+- 13 timeline posts (more than one feed page of 10, so "load more" is testable), with likes, comments and notifications:
+
+  | Post id (`timeline_posts/…`) | Covers |
+  |---|---|
+  | `demo-tl-ana-strength` | Strength summary with a PR, auto caption |
+  | `demo-tl-bruno-run` | Run summary, caption with a mention |
+  | `demo-tl-coach-announcement` | Coach notice, text only |
+  | `demo-tl-ana-bike` | Bike summary + 1 photo (portrait 4:5) |
+  | `demo-tl-carla-swim` | Swim summary with `stageTimes` (warm-up, 6 × 100 m repeats, cool-down) |
+  | `demo-tl-bruno-bike-photos` | 3 photos (landscape 16:9, square, portrait) + bike summary |
+  | `demo-tl-carla-long-caption` | Caption > 140 characters with a mention of Ana (+ mention notification) |
+  | `demo-tl-ana-many-comments` | 1 square photo, 4 likes, 7 comments including 2 replies and liked comments |
+  | `demo-tl-bruno-partial-pr` | Partial strength session (60%, 6/10 sets) with a PR |
+  | `demo-tl-diego-no-reactions` | Athlete post with no likes and no comments (9 days old) |
+  | `demo-tl-coach-old-notice` | Older coach notice (12 days) |
+  | `demo-tl-carla-old-run`, `demo-tl-ana-old-strength` | Posts 18 and 30 days old (relative dates, pagination) |
+
+  Photos are generated SVG placeholders (`data:` URIs labelled "Foto fictícia"), not real photos, and need no network.
 - 3 athlete events, subscription history, 3 testimonials (2 approved), 3 blog posts (1 draft).
 
 All names, e-mails and numbers are invented. Never add real athlete data to `scripts/emulator/seed.mjs`.

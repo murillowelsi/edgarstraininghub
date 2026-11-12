@@ -244,6 +244,21 @@ for (const [athleteId, load, key] of [[ANA, 55, "ana"], [BRUNO, 70, "bruno"], [C
     }));
   assign(`demo-as-${key}-bike-1`, athleteId, "demo-wk-bike-endurance", -4,
     done(-4, 8, { totalTime: 4800, rpe: 5, activityData: { elapsedTime: 4800, distance: 38.5, avgHeartRate: 138, avgSpeed: 28.9, avgPower: 182 } }));
+  if (key === "carla") {
+    // Completed swim (distance in metres) with per-stage times, for the swim feed post
+    assign("demo-as-carla-swim-1", athleteId, "demo-wk-swim-technique", -1,
+      done(-1, 6, {
+        totalTime: 1320, rpe: 6, athleteNotes: "Palmar ajudou no ritmo.",
+        activityData: {
+          elapsedTime: 1320, distance: 1100, avgPace: 120,
+          stageTimes: [
+            { stageIndex: 0, time: 330 },
+            { stageIndex: 1, reps: [96, 95, 97, 94, 95, 93].map((t) => ({ times: [t, 20] })) },
+            { stageIndex: 2, time: 300 },
+          ],
+        },
+      }));
+  }
   // Today and future
   assign(`demo-as-${key}-swim-today`, athleteId, "demo-wk-swim-technique", 0);
   assign(`demo-as-${key}-str-b1`, athleteId, "demo-wk-strength-upper", 1);
@@ -366,6 +381,151 @@ const posts = [
     comments: [],
   },
 ];
+// ─── More feed posts (feed redesign, docs/design/feed/README.md §1) ─────────
+// Generated placeholder "photos" (SVG data URIs): no real photos, no network.
+const fakePhoto = (w, h, hueA, hueB, label) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hueA},70%,55%)"/><stop offset="1" stop-color="hsl(${hueB},70%,30%)"/></linearGradient></defs>` +
+    `<rect width="${w}" height="${h}" fill="url(#g)"/>` +
+    `<circle cx="${w * 0.78}" cy="${h * 0.22}" r="${Math.min(w, h) * 0.09}" fill="hsl(45,95%,70%)" opacity="0.9"/>` +
+    `<path d="M0 ${h * 0.72} L${w * 0.28} ${h * 0.45} L${w * 0.5} ${h * 0.66} L${w * 0.72} ${h * 0.4} L${w} ${h * 0.7} L${w} ${h} L0 ${h} Z" fill="hsl(${hueB},40%,18%)" opacity="0.85"/>` +
+    `<text x="${w / 2}" y="${h * 0.9}" font-family="sans-serif" font-size="${Math.round(Math.min(w, h) * 0.05)}" fill="#fff" text-anchor="middle" opacity="0.85">Foto fictícia · ${label}</text>` +
+    `</svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
+const PHOTO = {
+  portrait: fakePhoto(1080, 1350, 200, 230, "4:5 em pé"),
+  square: fakePhoto(1080, 1080, 20, 340, "1:1 quadrada"),
+  landscape: fakePhoto(1600, 900, 160, 210, "16:9 deitada"),
+  portrait2: fakePhoto(1080, 1350, 280, 250, "4:5 em pé"),
+};
+const LONG_CAPTION =
+  "Longão de domingo fechado! Comecei devagar, segurei o pace na Z2 até o km 12 e acelerei no final como o coach pediu. " +
+  "Hidratação a cada 20 min funcionou bem. @Ana Teste, valeu pela companhia nos primeiros 5 km, semana que vem tem mais!";
+
+posts.push(
+  {
+    id: "demo-tl-ana-bike",
+    data: {
+      authorId: ANA, authorName: nameOf[ANA], authorRole: "athlete",
+      caption: "Pedal leve de recuperação na ciclovia 🚴", imageUrls: [PHOTO.portrait], mentions: [], assignmentId: "demo-as-ana-bike-1",
+      workoutSummary: { workoutName: workoutById["demo-wk-bike-endurance"].name, workoutType: "cycling", elapsedTime: 4800, distance: 38.5, avgHeartRate: 138, avgSpeed: 28.9, rpe: 5 },
+      likedBy: [BRUNO], createdAt: ts(at(-4, 9, 30)),
+    },
+    comments: [],
+  },
+  {
+    id: "demo-tl-carla-swim",
+    data: {
+      authorId: CARLA, authorName: nameOf[CARLA], authorRole: "athlete",
+      caption: "Workout complete: Natação", captionAuto: true, imageUrls: [], mentions: [], assignmentId: "demo-as-carla-swim-1",
+      workoutSummary: {
+        workoutName: workoutById["demo-wk-swim-technique"].name, workoutType: "swimming", elapsedTime: 1320, distance: 1100, avgPace: 120, rpe: 6,
+        stageTimes: [
+          { label: "Aquecimento", type: "regular", time: 330 },
+          { label: "Repetir 6×", type: "repeat", nestedLabels: ["Natação", "Descanso"], reps: [96, 95, 97, 94, 95, 93].map((t) => ({ times: [t, 20] })) },
+          { label: "Desaquecimento", type: "regular", time: 300 },
+        ],
+      },
+      likedBy: [COACH, ANA], createdAt: ts(at(-1, 7)),
+    },
+    comments: [{ from: COACH, text: "Tiros bem regulares, ótimo controle!", at: at(-1, 8) }],
+  },
+  {
+    id: "demo-tl-bruno-bike-photos",
+    data: {
+      authorId: BRUNO, authorName: nameOf[BRUNO], authorRole: "athlete",
+      caption: "Serra com vista 😍", imageUrls: [PHOTO.landscape, PHOTO.square, PHOTO.portrait2], mentions: [], assignmentId: "demo-as-bruno-bike-1",
+      workoutSummary: { workoutName: workoutById["demo-wk-bike-endurance"].name, workoutType: "cycling", elapsedTime: 4800, distance: 38.5, avgHeartRate: 141, avgSpeed: 28.9, rpe: 6 },
+      likedBy: [ANA, CARLA], createdAt: ts(at(-4, 12)),
+    },
+    comments: [{ from: ANA, text: "Que lugar!", at: at(-4, 13) }],
+  },
+  {
+    id: "demo-tl-carla-long-caption",
+    data: {
+      authorId: CARLA, authorName: nameOf[CARLA], authorRole: "athlete",
+      caption: LONG_CAPTION, imageUrls: [], mentions: [{ id: ANA, name: nameOf[ANA] }], assignmentId: "demo-as-carla-run-1",
+      workoutSummary: { workoutName: workoutById["demo-wk-run-intervals"].name, workoutType: "running", elapsedTime: 3120, distance: 10.2, avgHeartRate: 149, avgPace: 306, rpe: 7 },
+      likedBy: [ANA, COACH], createdAt: ts(at(-6, 20)),
+    },
+    comments: [],
+  },
+  {
+    id: "demo-tl-ana-many-comments",
+    data: {
+      authorId: ANA, authorName: nameOf[ANA], authorRole: "athlete",
+      caption: "Primeiro treino de natação em águas abertas! 🌊", imageUrls: [PHOTO.square], mentions: [],
+      likedBy: [COACH, BRUNO, CARLA, DIEGO], createdAt: ts(at(-3, 10)),
+    },
+    comments: [
+      { id: "c1", from: COACH, text: "Que evolução, Ana! Como foi a orientação?", at: at(-3, 10, 20) },
+      { id: "c2", from: ANA, text: "Difícil no começo, depois peguei o jeito.", at: at(-3, 10, 35), replyTo: "c1", likedBy: [COACH] },
+      { id: "c3", from: BRUNO, text: "Água estava gelada?", at: at(-3, 11) },
+      { id: "c4", from: ANA, text: "Uns 19 °C, com roupa de borracha deu certo.", at: at(-3, 11, 10), replyTo: "c3" },
+      { id: "c5", from: CARLA, text: "Me chama na próxima!", at: at(-3, 12), likedBy: [ANA] },
+      { id: "c6", from: DIEGO, text: "Inspirador, preciso voltar a nadar.", at: at(-3, 13) },
+      { id: "c7", from: COACH, text: "Sábado tem treino de grupo no lago, quem topa?", at: at(-3, 14), likedBy: [ANA, BRUNO, CARLA] },
+    ],
+  },
+  {
+    id: "demo-tl-bruno-partial-pr",
+    data: {
+      authorId: BRUNO, authorName: nameOf[BRUNO], authorRole: "athlete",
+      caption: "Workout complete: Força B", captionAuto: true, imageUrls: [], mentions: [], assignmentId: "demo-as-bruno-str-b-partial",
+      workoutSummary: {
+        workoutName: workoutById["demo-wk-strength-upper"].name, workoutType: "strength",
+        elapsedTime: 1800, completionPercentage: 60, volumeKg: 2240, workingSets: 6, totalSets: 10, records: 1, rpe: 6,
+        highlights: [{ name: "Supino reto", value: "45 kg × 8", pr: true }, { name: "Remada curvada", value: "40 kg × 10" }],
+      },
+      likedBy: [COACH], createdAt: ts(at(-5, 19, 40)),
+    },
+    comments: [],
+  },
+  {
+    id: "demo-tl-diego-no-reactions",
+    data: {
+      authorId: DIEGO, authorName: nameOf[DIEGO], authorRole: "athlete",
+      caption: "Voltando aos treinos depois de um tempo parado.", imageUrls: [], mentions: [],
+      likedBy: [], createdAt: ts(at(-9, 18)),
+    },
+    comments: [],
+  },
+  {
+    id: "demo-tl-coach-old-notice",
+    data: {
+      authorId: COACH, authorName: nameOf[COACH], authorRole: "admin",
+      caption: "Aviso: a partir deste mês os treinos de força passam para terça e quinta. Qualquer dúvida, me chamem no chat.",
+      imageUrls: [], mentions: [], likedBy: [ANA, BRUNO, CARLA], createdAt: ts(at(-12, 9)),
+    },
+    comments: [{ from: BRUNO, text: "Fechado, coach!", at: at(-12, 10) }],
+  },
+  {
+    id: "demo-tl-carla-old-run",
+    data: {
+      authorId: CARLA, authorName: nameOf[CARLA], authorRole: "athlete",
+      caption: "Primeiro intervalado do ciclo.", imageUrls: [], mentions: [],
+      workoutSummary: { workoutName: workoutById["demo-wk-run-intervals"].name, workoutType: "running", elapsedTime: 3300, distance: 9.6, avgHeartRate: 154, avgPace: 344, rpe: 7 },
+      likedBy: [ANA], createdAt: ts(at(-18, 18)),
+    },
+    comments: [],
+  },
+  {
+    id: "demo-tl-ana-old-strength",
+    data: {
+      authorId: ANA, authorName: nameOf[ANA], authorRole: "athlete",
+      caption: "Workout complete: Força A", captionAuto: true, imageUrls: [], mentions: [],
+      workoutSummary: {
+        workoutName: workoutById["demo-wk-strength-lower"].name, workoutType: "strength",
+        elapsedTime: 3300, completionPercentage: 100, volumeKg: 3900, workingSets: 13, totalSets: 13, records: 0, rpe: 7,
+        highlights: [{ name: "Agachamento livre", value: "50 kg × 8" }],
+      },
+      likedBy: [COACH], createdAt: ts(at(-30, 8)),
+    },
+    comments: [],
+  },
+);
+
 for (const p of posts) {
   p.data.commentsCount = p.comments.length;
   p.data.updatedAt = p.data.createdAt;
@@ -374,6 +534,7 @@ const notifications = [
   { uid: ANA, id: "demo-notif-ana-like", postId: "demo-tl-ana-strength", data: { authorName: nameOf[COACH], actorId: COACH, type: "like", read: false, createdAt: ts(at(-2, 8, 30)) } },
   { uid: ANA, id: "demo-notif-ana-comment", postId: "demo-tl-ana-strength", data: { authorName: nameOf[COACH], actorId: COACH, type: "comment", read: false, createdAt: ts(at(-2, 9)) } },
   { uid: CARLA, id: "demo-notif-carla-mention", postId: "demo-tl-bruno-run", data: { authorName: nameOf[BRUNO], type: "mention", caption: "Intervalado com calor de 30 graus.", read: true, createdAt: ts(at(-6, 19)) } },
+  { uid: ANA, id: "demo-notif-ana-mention-long", postId: "demo-tl-carla-long-caption", data: { authorName: nameOf[CARLA], type: "mention", caption: LONG_CAPTION.slice(0, 80), read: false, createdAt: ts(at(-6, 20)) } },
 ];
 
 // ─── Athlete events ──────────────────────────────────────────────────────────
@@ -503,9 +664,11 @@ for (const c of chats) {
 for (const p of posts) {
   put(db.doc(`timeline_posts/${p.id}`), p.data);
   p.comments.forEach((c, i) => {
-    put(db.doc(`timeline_posts/${p.id}/comments/c${i + 1}`), {
+    const parent = c.replyTo && p.comments.find((x) => x.id === c.replyTo);
+    put(db.doc(`timeline_posts/${p.id}/comments/${c.id ?? `c${i + 1}`}`), {
       authorId: c.from, authorName: nameOf[c.from], authorRole: c.from === COACH ? "admin" : "athlete",
       text: c.text, likedBy: c.likedBy ?? [], createdAt: ts(c.at),
+      ...(parent && { replyTo: { commentId: c.replyTo, authorName: nameOf[parent.from] } }),
     });
   });
 }
