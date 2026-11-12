@@ -1,21 +1,146 @@
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import {
   collection,
-  deleteDoc,
   doc,
   getDoc,
   getDocs,
   orderBy,
   query,
   serverTimestamp,
-  setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { db, secondaryAuth } from "../lib/firebase";
-import type { User, UserDocument, UserFormData, SubscriptionStatus, SubscriptionPlan } from "../types/user";
+import type {
+  PublicProfile,
+  User,
+  UserDocument,
+  UserFormData,
+  UserRole,
+  SubscriptionStatus,
+  SubscriptionPlan,
+} from "../types/user";
 
 const USERS_COLLECTION = "users";
+// Minimal profile other users may read (name, photo, role). Mirrors users/{uid};
+// firestore.rules only accepts an exact mirror when a user writes their own.
+const PUBLIC_PROFILES_COLLECTION = "publicProfiles";
+
+/** Public mirror of a users doc. Missing fields become null so they match the rule. */
+const publicMirror = (data: { displayName?: string | null; photoURL?: string | null; role?: UserRole | null }) => ({
+  displayName: data.displayName ?? null,
+  photoURL: data.photoURL ?? null,
+  role: data.role ?? null,
+  updatedAt: serverTimestamp(),
+});
+
+const toPublicProfile = (
+  id: string,
+  data: { displayName?: string | null; photoURL?: string | null; role?: UserRole | null }
+): PublicProfile => ({
+  id,
+  displayName: data.displayName || "",
+  photoURL: data.photoURL || undefined,
+  role: (data.role || "athlete") as UserRole,
+});
+
+// ─── Public profiles (read by the feed, chat, teams) ─────────────────────────
+// Read publicProfiles first. Until the backfill has run, fall back to users
+// (still readable then); once users is locked down the fallback just returns nothing.
+
+/** Public profile of one user, or null. */
+export const getPublicProfile = async (id: string): Promise<PublicProfile | null> => {
+  const snap = await getDoc(doc(db, PUBLIC_PROFILES_COLLECTION, id));
+  if (snap.exists()) return toPublicProfile(snap.id, snap.data());
+  try {
+    const legacy = await getDoc(doc(db, USERS_COLLECTION, id));
+    return legacy.exists() ? toPublicProfile(legacy.id, legacy.data()) : null;
+  } catch {
+    return null;
+  }
+};
+
+const mergeProfiles = (primary: PublicProfile[], legacy: PublicProfile[]): PublicProfile[] => {
+  const byId = new Map<string, PublicProfile>();
+  legacy.forEach((p) => byId.set(p.id, p));
+  primary.forEach((p) => byId.set(p.id, p));
+  return Array.from(byId.values()).sort((a, b) => a.displayName.localeCompare(b.displayName));
+};
+
+const legacyProfiles = async (roles?: UserRole[]): Promise<PublicProfile[]> => {
+  try {
+    const q = roles
+      ? query(collection(db, USERS_COLLECTION), where("role", "in", roles))
+      : collection(db, USERS_COLLECTION);
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => toPublicProfile(d.id, d.data()));
+  } catch {
+    return [];
+  }
+};
+
+/** All public profiles, sorted by name (mention pickers). */
+export const getPublicProfiles = async (): Promise<PublicProfile[]> => {
+  const [snap, legacy] = await Promise.all([
+    getDocs(collection(db, PUBLIC_PROFILES_COLLECTION)),
+    legacyProfiles(),
+  ]);
+  return mergeProfiles(snap.docs.map((d) => toPublicProfile(d.id, d.data())), legacy);
+};
+
+/** Public profiles with one of the given roles, sorted by name. */
+export const getPublicProfilesByRole = async (roles: UserRole[]): Promise<PublicProfile[]> => {
+  const [snap, legacy] = await Promise.all([
+    getDocs(query(collection(db, PUBLIC_PROFILES_COLLECTION), where("role", "in", roles))),
+    legacyProfiles(roles),
+  ]);
+  return mergeProfiles(snap.docs.map((d) => toPublicProfile(d.id, d.data())), legacy);
+};
+
+/** First public profile with this exact display name (legacy notifications without actorId). */
+export const findPublicProfileByName = async (name: string): Promise<PublicProfile | null> => {
+  const snap = await getDocs(
+    query(collection(db, PUBLIC_PROFILES_COLLECTION), where("displayName", "==", name))
+  );
+  if (!snap.empty) return toPublicProfile(snap.docs[0].id, snap.docs[0].data());
+  try {
+    const legacy = await getDocs(query(collection(db, USERS_COLLECTION), where("displayName", "==", name)));
+    return legacy.empty ? null : toPublicProfile(legacy.docs[0].id, legacy.docs[0].data());
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Self-registration from a team invite: users doc (athlete, no subscription)
+ * and its public profile in one batch.
+ */
+export const createOwnAthleteProfile = async (uid: string, displayName: string, email: string): Promise<void> => {
+  const batch = writeBatch(db);
+  batch.set(doc(db, USERS_COLLECTION, uid), {
+    displayName,
+    email,
+    role: "athlete",
+    subscriptionStatus: "inactive",
+    subscriptionPlan: "none",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  batch.set(doc(db, PUBLIC_PROFILES_COLLECTION, uid), publicMirror({ displayName, role: "athlete" }));
+  await batch.commit();
+};
+
+/** The signed-in user changes their own photo (users + public profile in one batch). */
+export const updateOwnPhoto = async (uid: string, photoURL: string | null): Promise<void> => {
+  const snap = await getDoc(doc(db, USERS_COLLECTION, uid));
+  if (!snap.exists()) throw new Error("User not found");
+  const data = snap.data() as UserDocument;
+  const batch = writeBatch(db);
+  batch.update(doc(db, USERS_COLLECTION, uid), { photoURL });
+  batch.set(doc(db, PUBLIC_PROFILES_COLLECTION, uid), publicMirror({ ...data, photoURL }));
+  await batch.commit();
+};
 
 // Helper to convert Firestore document to User
 const docToUser = async (id: string, data: UserDocument): Promise<User> => {
@@ -90,8 +215,9 @@ export const createUser = async (data: UserFormData): Promise<string> => {
   // Sign out from secondary auth immediately
   await secondaryAuth.signOut();
 
-  // Create Firestore user document
-  await setDoc(doc(db, USERS_COLLECTION, uid), {
+  // Create Firestore user document + its public profile
+  const batch = writeBatch(db);
+  batch.set(doc(db, USERS_COLLECTION, uid), {
     email: data.email,
     displayName: data.displayName,
     role: data.role,
@@ -102,6 +228,11 @@ export const createUser = async (data: UserFormData): Promise<string> => {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+  batch.set(
+    doc(db, PUBLIC_PROFILES_COLLECTION, uid),
+    publicMirror({ displayName: data.displayName, role: data.role })
+  );
+  await batch.commit();
 
   return uid;
 };
@@ -136,14 +267,30 @@ export const updateUser = async (
     updateData.subscriptionEndDate = data.subscriptionEndDate;
   }
 
-  await updateDoc(docRef, updateData);
+  const batch = writeBatch(db);
+  batch.update(docRef, updateData);
+  if (data.displayName !== undefined || data.role !== undefined) {
+    // Keep the public profile in sync (admin-only path; merge keeps the photo)
+    batch.set(
+      doc(db, PUBLIC_PROFILES_COLLECTION, id),
+      {
+        ...(data.displayName !== undefined ? { displayName: data.displayName } : {}),
+        ...(data.role !== undefined ? { role: data.role } : {}),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }
+  await batch.commit();
 };
 
-// Delete user (Firestore document only - Auth user remains)
+// Delete user (Firestore documents only - Auth user remains)
 // Note: To fully delete a user, you'd need Firebase Admin SDK
 export const deleteUser = async (id: string): Promise<void> => {
-  const docRef = doc(db, USERS_COLLECTION, id);
-  await deleteDoc(docRef);
+  const batch = writeBatch(db);
+  batch.delete(doc(db, USERS_COLLECTION, id));
+  batch.delete(doc(db, PUBLIC_PROFILES_COLLECTION, id));
+  await batch.commit();
 };
 
 // Get users by role

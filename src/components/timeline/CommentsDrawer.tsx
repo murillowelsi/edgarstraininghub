@@ -4,7 +4,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { CachedAvatar } from "@/components/ui/cached-avatar";
 import { cn } from "@/lib/utils";
 import { addComment, deleteComment, getComments, toggleCommentLike, createActivityNotification } from "@/services/timelineService";
-import { getAllUsers } from "@/services/usersService";
+import { getPublicProfiles } from "@/services/usersService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import type { TimelineComment } from "@/types/timeline";
@@ -138,7 +138,7 @@ export function CommentsDrawer({ open, onOpenChange, postId, postAuthorId, onCom
       const mentionMatches = text.trim().match(/@([\w\s]+?)(?=\s@|\s*$|[^a-zA-Z\s])/g);
       if (mentionMatches) {
         const mentionNames = mentionMatches.map((m) => m.slice(1).trim());
-        getAllUsers().then((allUsers) => {
+        getPublicProfiles().then((allUsers) => {
           for (const mentionName of mentionNames) {
             const mentionedUser = allUsers.find((u) => u.displayName?.toLowerCase() === mentionName.toLowerCase());
             if (mentionedUser && mentionedUser.id !== user.uid && !notifySet.has(mentionedUser.id)) {

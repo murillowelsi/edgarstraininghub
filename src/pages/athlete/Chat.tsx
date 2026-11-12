@@ -12,9 +12,9 @@ import AthletePortalLayout from "@/components/athlete/AthletePortalLayout";
 import { toast } from "sonner";
 import { NotificationService } from "@/services/notifications";
 import { NotificationBanner } from "@/components/NotificationBanner";
-import { getUsersByRole } from "@/services/usersService";
+import { getPublicProfilesByRole } from "@/services/usersService";
 import { getTeamsByMember } from "@/services/teamsService";
-import { User } from "@/types/user";
+import type { PublicProfile } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,7 @@ export default function AthleteChat() {
     const [memberTeamIds, setMemberTeamIds] = useState<Set<string> | null>(null);
 
     // Admin selection state
-    const [admins, setAdmins] = useState<User[]>([]);
+    const [admins, setAdmins] = useState<PublicProfile[]>([]);
     const [isNewChatOpen, setIsNewChatOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [loadingAdmins, setLoadingAdmins] = useState(false);
@@ -59,16 +59,8 @@ export default function AthleteChat() {
     useEffect(() => {
         const loadAdmins = async () => {
             try {
-                // Fetch both admins and editors as potential chat recipients
-                const [adminUsers, editorUsers] = await Promise.all([
-                    getUsersByRole("admin"),
-                    getUsersByRole("editor")
-                ]);
-                // Deduplicate by ID just in case
-                const uniqueUsers = [...adminUsers, ...editorUsers].filter(
-                    (v, i, a) => a.findIndex(t => t.id === v.id) === i
-                );
-                setAdmins(uniqueUsers);
+                // Admins and editors are the possible chat recipients (public profiles only)
+                setAdmins(await getPublicProfilesByRole(["admin", "editor"]));
             } catch (error) {
                 console.error("Error loading admins:", error);
             }
@@ -162,7 +154,7 @@ export default function AthleteChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedChat?.id, user]);
 
-    const handleStartChat = async (admin: User) => {
+    const handleStartChat = async (admin: PublicProfile) => {
         if (!user) return;
         try {
             const chatObj = await ChatService.createOrGetChat(
@@ -212,8 +204,7 @@ export default function AthleteChat() {
     };
 
     const filteredAdmins = admins.filter(a =>
-        a.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.email.toLowerCase().includes(searchQuery.toLowerCase())
+        a.displayName.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (loading) {

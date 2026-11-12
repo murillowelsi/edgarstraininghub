@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
-import { getTeamByInviteToken, addMemberToTeam, autoAssignTeamWorkoutsToMember } from "@/services/teamsService";
-import { ChatService } from "@/services/chat";
+import { auth } from "@/lib/firebase";
+import { getTeamById, getTeamInvite, joinTeamWithInvite } from "@/services/teamsService";
+import { createOwnAthleteProfile } from "@/services/usersService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { Team } from "@/types/team";
+import type { TeamInvite } from "@/types/team";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +20,9 @@ export default function JoinTeam() {
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  const [team, setTeam] = useState<Team | null>(null);
+  // Before login only the invite (name, photo) is readable; the team itself is read by id after login
+  const [team, setTeam] = useState<TeamInvite | null>(null);
+  const [alreadyMember, setAlreadyMember] = useState(false);
   const [loadingTeam, setLoadingTeam] = useState(true);
   const [teamError, setTeamError] = useState("");
 
@@ -40,7 +41,7 @@ export default function JoinTeam() {
       setLoadingTeam(false);
       return;
     }
-    getTeamByInviteToken(inviteToken)
+    getTeamInvite(inviteToken)
       .then((team) => {
         if (!team) {
           setTeamError(t.joinTeam.teamNotFound);
@@ -56,13 +57,16 @@ export default function JoinTeam() {
   useEffect(() => {
     if (loadingTeam || authLoading || !team || !user) return;
     if (isAthlete) {
-      if (team.memberIds.includes(user.uid)) return; // will show "already a member" below
-      // Athlete is logged in but not yet a member — join automatically
-      addMemberToTeam(team.id, user.uid)
-        .then(() => autoAssignTeamWorkoutsToMember(team.id, user.uid))
-        .then(() => ChatService.createOrGetGroupChat(team.id, team.name, team.coachId, [...team.memberIds, user.uid]).catch(() => {}))
-        .then(() => {
-          toast({ title: t.joinTeam.joined.replace("{{name}}", team.name) });
+      getTeamById(team.teamId)
+        .then(async (full) => {
+          if (!full) throw new Error(t.joinTeam.teamNotFound);
+          if (full.memberIds.includes(user.uid)) {
+            setAlreadyMember(true); // shows "already a member" below
+            return;
+          }
+          // Athlete is logged in but not yet a member — join automatically
+          await joinTeamWithInvite(team, user.uid);
+          toast({ title: t.joinTeam.joined.replace("{{name}}", team.teamName) });
           navigate("/athlete");
         })
         .catch((err: Error) => {
@@ -80,23 +84,13 @@ export default function JoinTeam() {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const uid = cred.user.uid;
 
-      // Create Firestore user document
-      await setDoc(doc(db, "users", uid), {
-        displayName: name,
-        email,
-        role: "athlete",
-        subscriptionStatus: "inactive",
-        subscriptionPlan: "none",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
+      // Create the users doc and its public profile (one batch)
+      await createOwnAthleteProfile(uid, name, email);
 
-      // Join the team and auto-assign any previously assigned workouts
-      await addMemberToTeam(team.id, uid);
-      await autoAssignTeamWorkoutsToMember(team.id, uid);
-      ChatService.createOrGetGroupChat(team.id, team.name, team.coachId, [...team.memberIds, uid]).catch(() => {});
+      // Join the team, auto-assign upcoming team workouts, sync the group chat
+      await joinTeamWithInvite(team, uid);
 
-      toast({ title: t.joinTeam.welcome.replace("{{name}}", team.name) });
+      toast({ title: t.joinTeam.welcome.replace("{{name}}", team.teamName) });
       navigate("/athlete");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t.joinTeam.registrationFailed;
@@ -114,10 +108,8 @@ export default function JoinTeam() {
     setSubmitting(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      await addMemberToTeam(team.id, cred.user.uid);
-      await autoAssignTeamWorkoutsToMember(team.id, cred.user.uid);
-      ChatService.createOrGetGroupChat(team.id, team.name, team.coachId, [...team.memberIds, cred.user.uid]).catch(() => {});
-      toast({ title: t.joinTeam.joined.replace("{{name}}", team.name) });
+      await joinTeamWithInvite(team, cred.user.uid);
+      toast({ title: t.joinTeam.joined.replace("{{name}}", team.teamName) });
       navigate("/athlete");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t.joinTeam.loginFailed;
@@ -163,7 +155,7 @@ export default function JoinTeam() {
   }
 
   // Guard: athlete already a member
-  if (isAthlete && user && team.memberIds.includes(user.uid)) {
+  if (isAthlete && user && alreadyMember) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-sm">
@@ -190,10 +182,10 @@ export default function JoinTeam() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          {team.photoURL && (
-            <img src={team.photoURL} alt={team.name} className="h-16 w-16 object-cover rounded-full mx-auto mb-3" />
+          {team.teamPhotoURL && (
+            <img src={team.teamPhotoURL} alt={team.teamName} className="h-16 w-16 object-cover rounded-full mx-auto mb-3" />
           )}
-          <h1 className="text-2xl font-bold">{t.joinTeam.joinTitle.replace("{{name}}", team.name)}</h1>
+          <h1 className="text-2xl font-bold">{t.joinTeam.joinTitle.replace("{{name}}", team.teamName)}</h1>
           <p className="text-muted-foreground mt-1">
             {mode === "register" ? t.joinTeam.registerSubtitle : t.joinTeam.loginSubtitle}
           </p>
