@@ -40,12 +40,11 @@ const TestimonialsSection = () => {
   return (
     <section className="section bg-muted pb-16 md:pb-24">
       <div className="container mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             {t.testimonials.title}{" "}
-            <span className="text-primary">{t.testimonials.titleHighlight}</span>
+            <span className="text-primary-ink">{t.testimonials.titleHighlight}</span>
           </h2>
-          <div className="h-1 w-20 bg-secondary mx-auto mb-6"></div>
           <p className="max-w-2xl mx-auto text-muted-foreground">
             {t.testimonials.subtitle}
           </p>
