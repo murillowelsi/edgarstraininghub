@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { todayState, weekSummary } from "./homePlan";
+import { assignmentStatus, monthDone, monthGrid, todayState, weekSummary } from "./homePlan";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
 import type { SessionDraft } from "@/lib/sessionDraft";
 import type { Workout } from "@/types/workout";
@@ -85,5 +85,37 @@ describe("hasFullTimeEstimate", () => {
   it("is true only when every stage (inside repeats too) is by time", () => {
     expect(hasFullTimeEstimate({ type: "running", stages: [stage("time"), { type: "repeat", repeatCount: 3, stages: [stage("time")] }] } as unknown as Workout)).toBe(true);
     expect(hasFullTimeEstimate({ type: "swimming", stages: [stage("time"), { type: "repeat", stages: [stage("distance"), stage("time")] }] } as unknown as Workout)).toBe(false);
+  });
+});
+
+describe("assignmentStatus", () => {
+  it("names each state", () => {
+    expect(assignmentStatus(a("x", 10, { done: at(10) }), NOW)).toBe("done");
+    expect(assignmentStatus(a("x", 10, { done: at(10), pct: 60 }), NOW)).toBe("partial");
+    expect(assignmentStatus(a("x", 11), NOW)).toBe("missed");
+    expect(assignmentStatus(a("x", 12), NOW)).toBe("planned");
+    expect(assignmentStatus(a("x", 9, { done: at(9), extra: true }), NOW)).toBe("extra");
+  });
+});
+
+describe("monthGrid / monthDone", () => {
+  const list = [a("a", 10, { done: at(10) }), a("b", 11), a("c", 12), a("d", 12), a("e", 12), a("f", 12)];
+  it("covers whole weeks with up to 3 dots per day", () => {
+    const days = monthGrid(list, NOW, NOW);
+    expect(days.length % 7).toBe(0);
+    expect(days[0].date.getDay()).toBe(1);
+    const thu = days.find((d) => d.isToday)!;
+    expect([thu.dots.length, thu.more]).toEqual([3, 1]);
+  });
+  it("counts the month's coach-planned workouts", () => {
+    expect(monthDone(list, NOW)).toEqual({ done: 1, planned: 6 });
+  });
+});
+
+describe("weekSummary for another week", () => {
+  it("pages to the week of the given day", () => {
+    const s = weekSummary([a("next", 17)], NOW, at(18));
+    expect(s.days[0].date.getDate()).toBe(16);
+    expect(s.planned).toBe(1);
   });
 });
