@@ -7,15 +7,17 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAssignmentsWithWorkoutsByAthlete } from "@/services/workoutAssignmentsService";
 import type { AssignmentWithWorkout } from "@/types/workoutAssignment";
-import { addDays, isSameDay, isToday, isTomorrow } from "date-fns";
+import { addDays, isAfter, isSameDay, isToday, isTomorrow, parseISO, startOfDay } from "date-fns";
 import { GrSwim, GrBike, GrRun } from "react-icons/gr";
 import {
   Check,
   ChevronRight,
   Dumbbell,
+  Plus,
   } from "lucide-react";
+import LogExtraWorkoutSheet from "@/components/athlete/LogExtraWorkoutSheet";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { workoutLabels } from "@/utils/workoutLabels";
 import { formatDate } from "@/lib/dates";
 import { CalendarSkeleton } from "@/components/feedback/skeletons";
@@ -41,6 +43,13 @@ const AthleteCalendarView = () => {
   const [assignments, setAssignments] = useState<AssignmentWithWorkout[]>([]);
   const [loading, setLoading] = useState(true);
   const todayRef = useRef<HTMLDivElement>(null);
+  // ?d=yyyy-MM-dd (from the Home week strip) opens the list on that day
+  const [searchParams] = useSearchParams();
+  const focusParam = searchParams.get("d");
+  const focusDate = focusParam ? parseISO(focusParam) : null;
+  const focusRef = useRef<HTMLDivElement>(null);
+  // Strength session logged on a day the coach didn't plan (today or a past day)
+  const [extraDate, setExtraDate] = useState<Date | null>(null);
 
   // Generate 60 days (7 days back, 53 days forward)
   const today = new Date();
@@ -75,9 +84,12 @@ const AthleteCalendarView = () => {
   }, [user, toast]);
 
   useEffect(() => {
-    if (!loading) {
-      setTimeout(() => scrollToToday("instant"), 0);
-    }
+    if (loading) return;
+    setTimeout(() => {
+      const el = focusRef.current;
+      if (el) window.scrollBy({ top: el.getBoundingClientRect().top - 64, behavior: "instant" });
+      else scrollToToday("instant");
+    }, 0);
   }, [loading]);
 
   const getAssignmentsForDate = (date: Date) =>
@@ -108,7 +120,10 @@ const AthleteCalendarView = () => {
           return (
             <div
               key={day.toISOString()}
-              ref={isTodayDate ? todayRef : undefined}
+              ref={(el) => {
+                if (isTodayDate) todayRef.current = el;
+                if (focusDate && isSameDay(day, focusDate)) focusRef.current = el;
+              }}
               className={cn(
                 "transition-colors",
                 isTodayDate && "bg-primary/5"
@@ -132,6 +147,17 @@ const AthleteCalendarView = () => {
                     {formatDate(day, "short", language)}
                   </span>
                 </div>
+                {!isAfter(startOfDay(day), startOfDay(today)) && user && (
+                  <button
+                    type="button"
+                    onClick={() => setExtraDate(day)}
+                    aria-label={`${t.athlete.calendar.addExtraFor}: ${formatDate(day, "weekday", language)}`}
+                    title={t.athlete.calendar.addExtraFor}
+                    className="-my-2 grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
+                  >
+                    <Plus className="h-4 w-4" aria-hidden />
+                  </button>
+                )}
                 {hasWorkouts && (
                   <Badge
                     variant={isTodayDate ? "default" : "secondary"}
@@ -229,6 +255,15 @@ const AthleteCalendarView = () => {
           );
         })}
       </div>
+      {user && (
+        <LogExtraWorkoutSheet
+          open={!!extraDate}
+          onOpenChange={(open) => { if (!open) setExtraDate(null); }}
+          athleteId={user.uid}
+          date={extraDate ?? today}
+          assignments={assignments}
+        />
+      )}
     </AthletePortalLayout>
   );
 };

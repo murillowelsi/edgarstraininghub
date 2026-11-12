@@ -1240,7 +1240,52 @@
       "logExtraError": "Não foi possível registrar a sessão. Tente de novo.",
       "extra": "Extra",
       "inProgress": "Treino em andamento",
-      "inProgressDetail": "{{done}}/{{total}} séries · {{minutes}} min · toque para continuar"
+      "inProgressDetail": "{{done}}/{{total}} séries · {{minutes}} min · toque para continuar",
+      "todayCard": {
+        "label": "Hoje",
+        "xOfY": "{{i}} de {{n}}",
+        "moreToday": "+{{n}} treino hoje",
+        "moreTodayOther": "+{{n}} treinos hoje",
+        "stages": "{{n}} etapas",
+        "stageOne": "1 etapa",
+        "exercises": "{{n}} exercícios",
+        "exerciseOne": "1 exercício",
+        "start": "Começar treino",
+        "open": "Abrir treino",
+        "view": "Ver treino",
+        "inProgress": "Em andamento",
+        "startedAgo": "há {{n}} min",
+        "setsProgress": "{{done}} de {{total}} séries · salvo neste celular",
+        "resume": "Continuar treino",
+        "discard": "Descartar",
+        "discardTitle": "Descartar o treino em andamento?",
+        "discardDescription": "As séries marcadas neste celular serão apagadas. O treino continua no seu calendário.",
+        "doneToday": "Feito hoje",
+        "viewSummary": "Ver resumo",
+        "restTitle": "Dia livre",
+        "restNone": "Nenhum treino planejado.",
+        "restNext": "Próximo: {{when}}, {{name}}.",
+        "tomorrow": "amanhã"
+      },
+      "week": {
+        "title": "Esta semana",
+        "calendar": "Calendário",
+        "summary": "{{done}} de {{planned}} treinos",
+        "missed": "{{n}} não feito",
+        "missedOther": "{{n}} não feitos",
+        "minutesDone": "{{time}} feitos",
+        "nothing": "Nada planejado nesta semana",
+        "status": {
+          "done": "feito",
+          "partial": "parcial",
+          "planned": "planejado",
+          "missed": "não feito",
+          "none": "sem treino"
+        },
+        "dayAria": "{{day}}: {{status}}. Abrir no calendário"
+      },
+      "nextTitle": "Próximo",
+      "raceTitle": "Sua prova"
     },
     "workouts": {
       "title": "Treinos",
@@ -1277,7 +1322,8 @@
       "today": "Hoje",
       "tomorrow": "Amanhã",
       "workout": "treino",
-      "workouts": "treinos"
+      "workouts": "treinos",
+      "addExtraFor": "Registrar treino de força neste dia"
     },
     "workoutView": {
       "pressLapButton": "Pressione o Botão de Volta",
