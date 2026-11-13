@@ -12,10 +12,9 @@ import { RYH } from "@/config/raiseYourHands";
 
 const RYH_NAME = "Raise Your Hands";
 
-/** Link to the Raise Your Hands project (its own subdomain), with the route mark */
+/** Link to the Raise Your Hands project (its own subdomain) */
 const RyhNavLink = ({ className, onClick }: { className: string; onClick?: () => void }) => (
   <a href={RYH.publicUrl} onClick={onClick} className={className}>
-    <img src="/ryh/favicon.svg" alt="" aria-hidden="true" width={18} height={18} className="h-[18px] w-[18px] rounded-[4px]" />
     {RYH_NAME}
   </a>
 );
@@ -74,7 +73,7 @@ const Navbar = () => {
             {t.nav.contact}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </Link>
-          <RyhNavLink className="inline-flex items-center gap-2 font-semibold text-muted-foreground hover:text-primary transition-colors" />
+          <RyhNavLink className="font-semibold text-muted-foreground hover:text-primary transition-colors" />
 
           {user && isAthlete && (
             <ChatLinkWithBadge user={user} />
@@ -161,7 +160,7 @@ const Navbar = () => {
                   </Link>
                   <RyhNavLink
                     onClick={() => setIsMenuOpen(false)}
-                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center gap-2"
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50"
                   />
                   {user && isAthlete && (
                     <ChatLinkWithBadge
