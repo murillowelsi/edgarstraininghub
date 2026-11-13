@@ -107,15 +107,17 @@ const RaiseYourHandsDiary = () => {
     <RyhShell page="diary" title={d.metaTitle} description={page.subtitle}>
       <div className={ryh.wrap}>
         {/* DB-3: header */}
-        <header className="max-w-[46em] pb-[34px] pt-9 md:pb-14 md:pt-[72px]">
-          <span className={ryh.kicker}>{d.eyebrow}</span>
-          <h1 className={ryh.h1}>{page.title}</h1>
-          <p className="text-[17px] leading-[1.7] text-[var(--ryh-muted)] md:text-[19px]">{page.subtitle}</p>
-          {latest && (
-            <a href={`#${latest.id}`} className={cn(ryh.link, ryh.focus, "mt-[26px] text-[15px]")}>
-              {d.recent.replace("{{label}}", latest.label).replace("{{date}}", shortDate(latest.date, lang))}
-            </a>
-          )}
+        <header className="ryh-band mb-10 pb-[34px] pt-9 md:pb-14 md:pt-[72px]">
+          <div className="max-w-[46em]">
+            <span className={ryh.kicker}>{d.eyebrow}</span>
+            <h1 className={ryh.h1}>{page.title}</h1>
+            <p className="text-[17px] leading-[1.7] text-[var(--ryh-muted)] md:text-[19px]">{page.subtitle}</p>
+            {latest && (
+              <a href={`#${latest.id}`} className={cn(ryh.link, ryh.focus, "mt-[26px] text-[15px]")}>
+                {d.recent.replace("{{label}}", latest.label).replace("{{date}}", shortDate(latest.date, lang))}
+              </a>
+            )}
+          </div>
         </header>
 
         {/* Index: the chips on mobile, the sticky index on desktop */}
@@ -143,7 +145,7 @@ const RaiseYourHandsDiary = () => {
             </ul>
           </nav>
 
-          <div className="pb-[72px] md:grid md:grid-cols-[200px_1fr] md:gap-14 md:border-t md:border-[var(--ryh-line)] md:pb-[120px] md:pt-14 lg:grid-cols-[230px_1fr] lg:gap-20">
+          <div className="pb-[72px] md:grid md:grid-cols-[200px_1fr] md:gap-14 md:pb-[120px] md:pt-4 lg:grid-cols-[230px_1fr] lg:gap-20">
             {/* DB-4: sticky index on desktop */}
             <nav aria-label={d.toc} className="hidden self-start md:sticky md:top-6 md:block">
               <b className="mb-3.5 block text-[13px] font-medium tracking-[0.02em] text-[var(--ryh-muted)]">{d.toc}</b>

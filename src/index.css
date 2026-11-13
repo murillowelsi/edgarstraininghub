@@ -413,6 +413,7 @@
   --ryh-line: #E3DCCF;
   --ryh-sage: #56705A;
   --ryh-soft: #EEE8DC;
+  --ryh-band: #F0E9DC;
   --ryh-map-fill: #F2EDE3;
   --ryh-btn-bg: #2B2620;
   --ryh-btn-fg: #FBF8F2;
@@ -430,11 +431,14 @@
   --ryh-line: #36322C;
   --ryh-sage: #9DB59F;
   --ryh-soft: #2A2722;
+  --ryh-band: #24211C;
   --ryh-map-fill: #2A2722;
   --ryh-btn-bg: #ECE6DA;
   --ryh-btn-fg: #1C1A17;
 }
 .ryh .ryh-serif { font-family: var(--ryh-serif); }
+/* Full-width paper band behind a centred section (RC-14/15): the tone change replaces the hairline */
+.ryh .ryh-band { background: var(--ryh-band); box-shadow: 0 0 0 100vmax var(--ryh-band); clip-path: inset(0 -100vmax); }
 /* Map / hero outline: same weight at any size (RC-12) */
 .ryh .ryh-outline { vector-effect: non-scaling-stroke; stroke-width: 1.6px; }
 @media (min-width: 768px) { .ryh .ryh-outline { stroke-width: 2.2px; } }

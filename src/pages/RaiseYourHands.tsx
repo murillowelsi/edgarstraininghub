@@ -107,7 +107,7 @@ const RaiseYourHands = () => {
       {/* RC-5 · From the logbook: the most recent entry */}
       {latest && (
         <section aria-labelledby="ryh-latest" className={ryh.wrap}>
-          <div className="grid items-center gap-4 border-y border-[var(--ryh-line)] py-[26px] md:grid-cols-[220px_1fr_auto] md:gap-10 md:py-[34px]">
+          <div className="grid items-center gap-4 border-t border-[var(--ryh-line)] py-[26px] md:grid-cols-[220px_1fr_auto] md:gap-10 md:py-[34px]">
             {cover ? (
               <Link to={`${ryhPaths.diary}#${latest.id}`} tabIndex={-1} aria-hidden className="block overflow-hidden rounded-[20px]">
                 <img
@@ -140,7 +140,7 @@ const RaiseYourHands = () => {
       )}
 
       {/* RC-6 · Purpose: pull quote without a box; optional photo on a soft background */}
-      <section id="proposito" className={ryh.wrap}>
+      <section id="proposito" className={cn(ryh.wrap, "ryh-band")}>
         <div className={cn(ryh.sec)}>
           <div className="grid items-center gap-9 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
             <div>
@@ -177,7 +177,7 @@ const RaiseYourHands = () => {
 
       {/* RC-7 · Route: numbers in a row, soft map, table with hairlines */}
       <section id="rota" className={ryh.wrap}>
-        <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+        <div className={ryh.sec}>
           <span className={ryh.kicker}>{r.route.kicker}</span>
           <h2 className={ryh.h2}>{r.route.title}</h2>
           <p className={cn(ryh.p, "max-w-[40em]")}>{r.route.sub}</p>
@@ -214,8 +214,8 @@ const RaiseYourHands = () => {
       {/* RC-8 · Transparency: serif numerals in sage, no cards */}
       {/* From the road: moments of the crossing, tap to enlarge, link to the logbook */}
       {roadPhotos.length > 0 && (
-        <section id="estrada" aria-labelledby="ryh-road" className={ryh.wrap}>
-          <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+        <section id="estrada" aria-labelledby="ryh-road" className={cn(ryh.wrap, "ryh-band")}>
+          <div className={ryh.sec}>
             <span className={ryh.kicker}>{r.road.kicker}</span>
             <h2 id="ryh-road" className={ryh.h2}>
               {r.road.title}
@@ -229,7 +229,7 @@ const RaiseYourHands = () => {
       )}
 
       <section id="transparencia" className={ryh.wrap}>
-        <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+        <div className={ryh.sec}>
           <span className={ryh.kicker}>{r.transparency.kicker}</span>
           <h2 className={ryh.h2}>{r.transparency.title}</h2>
           <p className={cn(ryh.p, "max-w-[40em]")}>{r.transparency.sub}</p>
@@ -248,8 +248,8 @@ const RaiseYourHands = () => {
       </section>
 
       {/* RC-13 · Support: where the money came from (no "Donate" button, no £840, no supporter count) */}
-      <section id="apoio" className={ryh.wrap}>
-        <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+      <section id="apoio" className={cn(ryh.wrap, "ryh-band")}>
+        <div className={ryh.sec}>
           <span className={ryh.kicker}>{f.kicker}</span>
           <h2 className={ryh.h2}>{f.title}</h2>
           <div className="mt-8 grid items-start gap-10 md:mt-10 lg:grid-cols-2 lg:gap-20">
@@ -297,7 +297,7 @@ const RaiseYourHands = () => {
 
       {/* RC-9 · Stories: list with hairlines, video in a soft frame, YouTube as a link */}
       <section id="historias" className={ryh.wrap}>
-        <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+        <div className={ryh.sec}>
           <span className={ryh.kicker}>{r.stories.kicker}</span>
           <h2 className={ryh.h2}>{r.stories.title}</h2>
           <p className={cn(ryh.p, "max-w-[40em]")}>{r.stories.sub}</p>
