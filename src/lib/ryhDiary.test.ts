@@ -65,7 +65,7 @@ describe("photos per entry", () => {
 
   it("ships photos only for existing entries, each with a description in both languages", () => {
     const ids = new Set(diaryEntries("pt").map((e) => e.id));
-    for (const id of ["chegada", "dia-1", "dia-2", "dia-3", "dia-4"]) {
+    for (const id of ["prologo", "chegada", "dia-1", "dia-2", "dia-3", "dia-4"]) {
       expect(ids.has(id)).toBe(true);
       for (const lang of ["pt", "en"] as const) {
         const photos = diaryPhotos(id, lang);
