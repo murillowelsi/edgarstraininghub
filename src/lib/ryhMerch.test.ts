@@ -24,7 +24,8 @@ describe("merch images", () => {
 
 describe("merchAlt", () => {
   it("describes piece, colour and view in PT and EN", () => {
-    expect(merchAlt(pt.ryh.shop.merch, "camiseta", "areia", "frente")).toBe("Camiseta areia, frente, com o logo Raise Your Hands no peito");
+    expect(merchAlt(pt.ryh.shop.merch, "camiseta", "areia", "frente")).toBe("T-shirt areia, frente, com o logo Raise Your Hands no peito");
+    expect(merchAlt(pt.ryh.shop.merch, "moletom", "grafite", "costas")).toBe("Hoodie grafite, costas, com o mapa de Portugal e o logo Raise Your Hands");
     expect(merchAlt(en.ryh.shop.merch, "moletom", "grafite", "costas")).toBe(
       "Graphite kangaroo-pocket hoodie, back, with the map of Portugal and the Raise Your Hands logo",
     );

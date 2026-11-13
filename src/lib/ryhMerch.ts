@@ -43,7 +43,7 @@ export interface MerchTexts {
   altBack: string;
 }
 
-/** Descriptive alt text, e.g. "Camiseta areia, frente, com o logo Raise Your Hands no peito" */
+/** Descriptive alt text, e.g. "T-shirt areia, frente, com o logo Raise Your Hands no peito" */
 export function merchAlt(texts: MerchTexts, piece: MerchPiece, colour: MerchColour, view: MerchView): string {
   const template = view === "frente" ? texts.altFront : texts.altBack;
   const text = template.replace("{{piece}}", texts.altPieces[piece]).replace("{{colour}}", texts.colours[colour].toLowerCase());

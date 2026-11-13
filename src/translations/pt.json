@@ -2575,8 +2575,8 @@
         "colourLabel": "Cor",
         "viewLabel": "Vista",
         "pieces": {
-          "camiseta": "Camiseta",
-          "moletom": "Moletom canguru"
+          "camiseta": "T-shirt",
+          "moletom": "Hoodie"
         },
         "colours": {
           "areia": "Areia",
@@ -2589,8 +2589,8 @@
         "altFront": "{{piece}} {{colour}}, frente, com o logo Raise Your Hands no peito",
         "altBack": "{{piece}} {{colour}}, costas, com o mapa de Portugal e o logo Raise Your Hands",
         "altPieces": {
-          "camiseta": "Camiseta",
-          "moletom": "Moletom canguru"
+          "camiseta": "T-shirt",
+          "moletom": "Hoodie"
         }
       }
     }
