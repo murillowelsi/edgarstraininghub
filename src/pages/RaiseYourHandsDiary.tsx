@@ -146,7 +146,7 @@ const RaiseYourHandsDiary = () => {
 
           <div className="pb-[72px] md:grid md:grid-cols-[200px_1fr] md:gap-14 md:pb-[120px] md:pt-4 lg:grid-cols-[230px_1fr] lg:gap-20">
             {/* DB-4: sticky index on desktop */}
-            <nav aria-label={d.toc} className="hidden self-start md:sticky md:top-6 md:block">
+            <nav aria-label={d.toc} className="hidden self-start md:sticky md:top-24 md:block">
               <b className="mb-3.5 block text-[13px] font-medium tracking-[0.02em] text-[var(--ryh-muted)]">{d.toc}</b>
               <ul className="text-[15px]">
                 {entries.map((e) => (

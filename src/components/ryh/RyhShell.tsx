@@ -126,6 +126,13 @@ type NavKey = "purpose" | "route" | "transparency" | "stories" | "diary";
 const BRAND = "Raise Your Hands";
 
 function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; theme: RyhTheme; onToggleTheme: () => void }) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const { t } = useLanguage();
   const r = t.ryh;
   const [open, setOpen] = useState(false);
@@ -160,7 +167,13 @@ function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; th
   const themeLabel = theme === "dark" ? r.nav.themeLight : r.nav.themeDark;
 
   return (
-    <header className="relative">
+    // Sticky: the bar (and the mobile menu) stay reachable while reading; a hairline appears once scrolled
+    <header
+      className={cn(
+        "sticky top-0 z-30 border-b bg-[var(--ryh-bg)] transition-colors duration-200",
+        scrolled ? "border-[var(--ryh-line)]" : "border-transparent",
+      )}
+    >
       <div className="flex items-center gap-3.5 px-5 py-4 md:px-[72px] md:py-[22px]">
         {/* RC-19: the bar carries only the name, in the logo wordmark lettering (Montserrat 900, caps) */}
         <Link to={ryhPaths.home} aria-label={BRAND} className={cn(ryh.focus, "flex min-h-[26px] items-center")}>
