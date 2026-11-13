@@ -2568,7 +2568,31 @@
       "meanwhile": "In the meantime, follow the journey",
       "youtube": "Follow on YouTube",
       "instagram": "Instagram",
-      "diary": "Read the logbook"
+      "diary": "Read the logbook",
+      "merch": {
+        "soon": "Coming soon",
+        "note": "Final designs; colours and sizes may still change.",
+        "colourLabel": "Colour",
+        "viewLabel": "View",
+        "pieces": {
+          "camiseta": "T-shirt",
+          "moletom": "Kangaroo-pocket hoodie"
+        },
+        "colours": {
+          "areia": "Sand",
+          "grafite": "Graphite"
+        },
+        "views": {
+          "frente": "Front",
+          "costas": "Back"
+        },
+        "altFront": "{{colour}} {{piece}}, front, with the Raise Your Hands logo on the chest",
+        "altBack": "{{colour}} {{piece}}, back, with the map of Portugal and the Raise Your Hands logo",
+        "altPieces": {
+          "camiseta": "T-shirt",
+          "moletom": "kangaroo-pocket hoodie"
+        }
+      }
     }
   }
 }

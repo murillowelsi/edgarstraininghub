@@ -2568,7 +2568,31 @@
       "meanwhile": "Enquanto isso, acompanhe a jornada",
       "youtube": "Seguir no YouTube",
       "instagram": "Instagram",
-      "diary": "Ler o diário de bordo"
+      "diary": "Ler o diário de bordo",
+      "merch": {
+        "soon": "Em breve",
+        "note": "Modelos em fase final; cores e medidas podem mudar.",
+        "colourLabel": "Cor",
+        "viewLabel": "Vista",
+        "pieces": {
+          "camiseta": "Camiseta",
+          "moletom": "Moletom canguru"
+        },
+        "colours": {
+          "areia": "Areia",
+          "grafite": "Grafite"
+        },
+        "views": {
+          "frente": "Frente",
+          "costas": "Costas"
+        },
+        "altFront": "{{piece}} {{colour}}, frente, com o logo Raise Your Hands no peito",
+        "altBack": "{{piece}} {{colour}}, costas, com o mapa de Portugal e o logo Raise Your Hands",
+        "altPieces": {
+          "camiseta": "Camiseta",
+          "moletom": "Moletom canguru"
+        }
+      }
     }
   }
 }
