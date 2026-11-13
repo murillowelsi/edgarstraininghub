@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, X } from "lucide-react";
 import { ryh } from "@/components/ryh/ryhStyles";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { DiaryPhoto } from "@/lib/ryhDiary";
@@ -9,11 +9,14 @@ import { cn } from "@/lib/utils";
 /*
  * Photos of one logbook day: a horizontal strip (swipe / scroll) where each photo opens a
  * full-screen viewer with previous / next (buttons, arrow keys, swipe), a counter and Esc to close.
+ * variant "thumbs" (accounts, RC-27): small 3:4 thumbnails, each with a caption under it
+ * (e.g. "Personal details hidden"), also shown in the viewer.
  */
 
 const srcSet = (p: DiaryPhoto) => `${p.base}-640.webp 640w, ${p.base}-1280.webp 1280w`;
 
-export function PhotoStrip({ photos, label }: { photos: DiaryPhoto[]; label: string }) {
+export function PhotoStrip({ photos, label, variant = "strip", caption }: { photos: DiaryPhoto[]; label: string; variant?: "strip" | "thumbs"; caption?: string }) {
+  const thumbs = variant === "thumbs";
   const { t } = useLanguage();
   const d = t.ryh.diary;
   const [open, setOpen] = useState<number | null>(null);
@@ -27,20 +30,20 @@ export function PhotoStrip({ photos, label }: { photos: DiaryPhoto[]; label: str
   const current = open === null ? null : photos[open];
 
   return (
-    <div className="-mx-[22px] mt-[30px] md:mx-0">
+    <div className={cn("-mx-[22px] md:mx-0", thumbs ? "mt-4" : "mt-[30px]")}>
       <ul role="list" aria-label={label} className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-[22px] pb-3 [scrollbar-width:thin] md:px-0">
         {photos.map((p, i) => (
-          <li key={p.base} className={cn("snap-start", total === 1 ? "w-full" : "shrink-0")}>
+          <li key={p.base} className={cn("snap-start", thumbs ? "w-[140px] shrink-0 md:w-[170px]" : total === 1 ? "w-full" : "shrink-0")}>
             <button
               type="button"
               onClick={() => setOpen(i)}
               aria-label={fill(d.openPhoto, i + 1)}
-              className={cn(ryh.focus, "block cursor-zoom-in overflow-hidden rounded-[16px]", total === 1 && "w-full")}
+              className={cn(ryh.focus, "block cursor-zoom-in overflow-hidden", thumbs ? "w-full rounded-[12px]" : "rounded-[16px]", !thumbs && total === 1 && "w-full")}
             >
               <img
                 src={`${p.base}-1280.webp`}
                 srcSet={srcSet(p)}
-                sizes="(min-width: 768px) 420px, 82vw"
+                sizes={thumbs ? "(min-width: 768px) 170px, 140px" : "(min-width: 768px) 420px, 82vw"}
                 width={p.w}
                 height={p.h}
                 alt={p.alt}
@@ -49,10 +52,20 @@ export function PhotoStrip({ photos, label }: { photos: DiaryPhoto[]; label: str
                 className={cn(
                   "bg-[var(--ryh-soft)] object-cover transition-transform duration-300 hover:scale-[1.02]",
                   // A single photo fills the column (any orientation); several form a scrollable strip
-                  total === 1 ? "h-auto w-full max-w-full" : "h-[min(64vh,500px)] w-auto max-w-none md:h-[540px]",
+                  thumbs
+                    ? "h-[186px] w-full md:h-[226px]"
+                    : total === 1
+                      ? "h-auto w-full max-w-full"
+                      : "h-[min(64vh,500px)] w-auto max-w-none md:h-[540px]",
                 )}
               />
             </button>
+            {caption && (
+              <p className="mt-1.5 flex items-start gap-1 text-[12.5px] leading-snug text-[var(--ryh-muted)]">
+                <Lock className="mt-[2px] h-3 w-3 shrink-0" aria-hidden />
+                {caption}
+              </p>
+            )}
           </li>
         ))}
       </ul>
@@ -89,6 +102,7 @@ export function PhotoStrip({ photos, label }: { photos: DiaryPhoto[]; label: str
                 {/* Only the counter on screen; the photo description stays for screen readers (img alt) */}
                 <DialogPrimitive.Description className="mt-3 text-center text-[13px] tabular-nums tracking-[0.04em] text-white/60">
                   {fill(d.counter, (open ?? 0) + 1)}
+                  {caption && ` · ${caption}`}
                 </DialogPrimitive.Description>
               </>
             )}
