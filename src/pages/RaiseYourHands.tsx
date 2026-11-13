@@ -84,10 +84,10 @@ const RaiseYourHands = () => {
     <RyhShell page="landing" title={r.meta.title} description={r.hero.lead}>
       {/* RC-4 · Hero: text left, logo right; option B: full-bleed band (--ryh-band) under the plain bar */}
       <section id="topo" className={cn(ryh.wrap, "ryh-band")}>
-        <div className="grid items-center gap-7 pb-16 pt-7 md:pb-24 md:pt-[72px] lg:grid-cols-[1.25fr_1fr] lg:gap-16">
+        <div className="grid items-center gap-7 pb-16 pt-7 md:pb-24 md:pt-[64px] lg:grid-cols-[1.25fr_1fr] lg:gap-16">
           <div>
-            <span className={ryh.kicker}>{r.hero.eyebrow}</span>
-            <h1 className={ryh.h1}>{r.hero.title}</h1>
+            {/* Hero title smaller than the shared h1 and balanced, so it reads in ~3 lines instead of a tall stack */}
+            <h1 className={cn(ryh.h1, "mt-0 text-balance md:text-[44px] xl:text-[48px]")}>{r.hero.title}</h1>
             <p className={ryh.lead}>{r.hero.lead}</p>
             <div className="mt-[26px] flex flex-wrap items-center gap-[18px] md:mt-[34px] md:gap-[22px]">
               <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(ryh.btn, ryh.focus)}>
