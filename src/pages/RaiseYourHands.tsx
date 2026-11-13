@@ -311,6 +311,21 @@ const RaiseYourHands = () => {
       </section>
 
 
+      {/* Stories: the episode video (the three short stories beside it were removed at the user's request) */}
+      <section id="historias" className={ryh.wrap}>
+        <div className={ryh.sec}>
+          <span className={ryh.kicker}>{r.stories.kicker}</span>
+          <h2 className={ryh.h2}>{r.stories.title}</h2>
+          <p className={cn(ryh.p, "max-w-[40em]")}>{r.stories.sub}</p>
+          <div className="mt-9 aspect-video max-w-[900px] overflow-hidden rounded-[24px] bg-[var(--ryh-soft)] md:mt-[52px]">
+            <YouTubeFacade videoId={RYH.episode1VideoId} list={RYH.playlistId} title="Raise Your Hands" />
+          </div>
+          <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(ryh.link, ryh.focus, "mt-9")}>
+            {r.stories.watch}
+          </a>
+        </div>
+      </section>
+
       {/* RC-10 · Final call on a paper band, no waves */}
       <section className="bg-[var(--ryh-paper)] py-[76px] text-center md:py-[120px]">
         <div className={ryh.wrap}>
