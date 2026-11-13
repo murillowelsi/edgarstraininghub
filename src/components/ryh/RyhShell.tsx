@@ -59,7 +59,7 @@ function useRyhTheme() {
 /** Own title, favicon, description and <html lang> while on a RYH page (the static HTML entries have them for crawlers) */
 function usePageIdentity(title: string, description: string, htmlLang: string) {
   // The language context sets "pt"/"en" in its own effect (it runs after this one),
-  // so this runs right after it to make it "pt-PT" / "en"
+  // so this runs right after it to make it "pt-PT" / "en-GB"
   useEffect(() => {
     const id = window.setTimeout(() => {
       document.documentElement.lang = htmlLang;
@@ -306,7 +306,7 @@ function RyhFooter({ page }: { page: RyhPage }) {
 /** Frame of a RYH page: tokens (.ryh / .ryh-dark), header, main content and footer */
 export function RyhShell({ page, title, description, children }: { page: RyhPage; title: string; description: string; children: ReactNode }) {
   const { language } = useLanguage();
-  const pageLang = language === "pt" ? "pt-PT" : "en";
+  const pageLang = language === "pt" ? "pt-PT" : "en-GB";
   useRyhFonts();
   useHashScroll();
   useInstantScroll();

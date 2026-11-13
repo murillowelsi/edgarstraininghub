@@ -20,7 +20,7 @@ const translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  // Get language from localStorage or default to English
+  // Get language from localStorage or default to English (en-GB)
   const [language, setLanguage] = useState<LanguageType>(() => {
     const savedLanguage = localStorage.getItem('preferredLanguage') as LanguageType;
     return savedLanguage && ['pt', 'en'].includes(savedLanguage) ? savedLanguage : 'en';
@@ -29,7 +29,8 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Save language preference to localStorage
   useEffect(() => {
     localStorage.setItem('preferredLanguage', language);
-    document.documentElement.lang = language;
+    // English is British English (en-GB): the default for new visitors
+    document.documentElement.lang = language === 'en' ? 'en-GB' : language;
   }, [language]);
 
   const changeLanguage = (lang: LanguageType) => {
