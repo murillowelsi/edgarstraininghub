@@ -234,7 +234,7 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
           <a
             href={RYH.siteUrl}
             aria-label="Edgar Zanin"
-            className={cn(ryh.focus, "ml-0.5 font-['Montserrat',sans-serif] text-[20px] font-extrabold leading-none tracking-tighter text-[hsl(48_96%_45%)] transition-opacity hover:opacity-80 md:text-[26px]")}
+            className={cn(ryh.focus, "ml-0.5 hidden font-['Montserrat',sans-serif] text-[26px] font-extrabold leading-none tracking-tighter text-[hsl(48_96%_45%)] transition-opacity hover:opacity-80 lg:inline-block")}
           >
             EZ
           </a>
@@ -243,8 +243,12 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
       {open && (
         <nav id={menuId} aria-label={r.nav.label} className="absolute inset-x-0 top-full z-20 border-y border-[var(--ryh-line)] bg-[var(--ryh-bg)] px-5 pb-3 lg:hidden">
           {items.map((item) => renderLink(item, "block border-b border-[var(--ryh-line)] py-3.5 text-base text-[var(--ryh-fg)] last:border-0", true))}
-          {/* eslint-disable-next-line i18next/no-literal-string -- site name */}
-          <a href={RYH.siteUrl} className={cn(ryh.focus, "block py-3.5 text-base text-[var(--ryh-muted)]")}>edgarzanin.com</a>
+          {/* On mobile the EZ logo lives here, not in the bar (user request) */}
+          <a href={RYH.siteUrl} aria-label="Edgar Zanin" className={cn(ryh.focus, "flex items-center gap-2.5 py-3.5 text-base text-[var(--ryh-muted)]")}>
+            <span aria-hidden className="font-['Montserrat',sans-serif] text-[22px] font-extrabold leading-none tracking-tighter text-[hsl(48_96%_45%)]">EZ</span>
+            {/* eslint-disable-next-line i18next/no-literal-string -- site name */}
+            <span>edgarzanin.com</span>
+          </a>
         </nav>
       )}
     </header>
