@@ -310,30 +310,6 @@ const RaiseYourHands = () => {
         </div>
       </section>
 
-      {/* RC-9 · Stories: list with hairlines, video in a soft frame, YouTube as a link */}
-      <section id="historias" className={ryh.wrap}>
-        <div className={ryh.sec}>
-          <span className={ryh.kicker}>{r.stories.kicker}</span>
-          <h2 className={ryh.h2}>{r.stories.title}</h2>
-          <p className={cn(ryh.p, "max-w-[40em]")}>{r.stories.sub}</p>
-          <div className="mt-9 grid items-start gap-9 md:mt-[52px] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-            <div className="aspect-video overflow-hidden rounded-[24px] bg-[var(--ryh-soft)]">
-              <YouTubeFacade videoId={RYH.episode1VideoId} list={RYH.playlistId} title="Raise Your Hands" />
-            </div>
-            <ul>
-              {r.stories.items.map((s) => (
-                <li key={s.title} className="mb-6 border-b border-[var(--ryh-line)] pb-6 last:mb-0 last:border-0 last:pb-0">
-                  <h3 className={ryh.h3}>{s.title}</h3>
-                  <p className={cn(ryh.p, "md:text-[16.5px]")}>{s.body}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(ryh.link, ryh.focus, "mt-9")}>
-            {r.stories.watch}
-          </a>
-        </div>
-      </section>
 
       {/* RC-10 · Final call on a paper band, no waves */}
       <section className="bg-[var(--ryh-paper)] py-[76px] text-center md:py-[120px]">

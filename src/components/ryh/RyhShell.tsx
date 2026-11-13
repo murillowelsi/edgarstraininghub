@@ -121,11 +121,11 @@ function useHashScroll() {
 }
 
 
-type NavKey = "purpose" | "route" | "transparency" | "stories" | "diary";
+type NavKey = "purpose" | "route" | "diary" | "accounts" | "shop";
 export type RyhPage = "landing" | "diary" | "accounts" | "shop";
 
 /** The bar keeps 5 items (RC-30): Accounts is a child of Transparency, so that item is the active one there */
-const ACTIVE_ITEM: Partial<Record<RyhPage, NavKey>> = { diary: "diary", accounts: "transparency" };
+const ACTIVE_ITEM: Partial<Record<RyhPage, NavKey>> = { diary: "diary", accounts: "accounts", shop: "shop" };
 
 const BRAND = "Raise Your Hands";
 const BRAND_START = "Raise Your";
@@ -150,27 +150,30 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
   const items: { key: NavKey; href: string }[] = [
     { key: "purpose", href: anchor("proposito") },
     { key: "route", href: anchor("rota") },
-    { key: "transparency", href: anchor("transparencia") },
-    { key: "stories", href: anchor("historias") },
     { key: "diary", href: ryhPaths.diary },
+    { key: "accounts", href: ryhPaths.accounts },
+    { key: "shop", href: ryhPaths.shop },
   ];
+  // RC-35..39 (Design): max 6 items; "Transparency" became "Accounts" (the section stays on the landing)
+  const PAGE_KEYS: NavKey[] = ["diary", "accounts", "shop"];
   const linkClass = (key: NavKey) =>
     cn(
       ryh.focus,
       "transition-colors hover:text-[var(--ryh-fg)]",
       key === active && "text-[var(--ryh-fg)] underline decoration-[var(--ryh-y)] decoration-2 underline-offset-[6px]",
     );
-  const renderLink = (item: { key: NavKey; href: string }, extra?: string) =>
-    item.key === "diary" ? (
-      <Link key={item.key} to={item.href} className={cn(linkClass(item.key), extra)} aria-current={active === "diary" ? "page" : undefined} onClick={() => setOpen(false)}>
+  const renderLink = (item: { key: NavKey; href: string }, extra?: string, mobile = false) =>
+    PAGE_KEYS.includes(item.key) ? (
+      <Link key={item.key} to={item.href} className={cn(linkClass(item.key), extra)} aria-current={active === item.key ? "page" : undefined} onClick={() => setOpen(false)}>
         {r.nav[item.key]}
+        {/* RC-37: the shop is not selling yet; only the mobile menu says so */}
+        {mobile && item.key === "shop" && <span className="ml-2 text-[13px] text-[var(--ryh-muted)]">{r.nav.soon}</span>}
       </Link>
     ) : (
       <a
         key={item.key}
         href={item.href}
         className={cn(linkClass(item.key), extra)}
-        // On the accounts page "Transparency" marks the section the page belongs to
         aria-current={active === item.key ? "true" : undefined}
         onClick={() => setOpen(false)}
       >
@@ -239,7 +242,7 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
       </div>
       {open && (
         <nav id={menuId} aria-label={r.nav.label} className="absolute inset-x-0 top-full z-20 border-y border-[var(--ryh-line)] bg-[var(--ryh-bg)] px-5 pb-3 lg:hidden">
-          {items.map((item) => renderLink(item, "block border-b border-[var(--ryh-line)] py-3.5 text-base text-[var(--ryh-fg)] last:border-0"))}
+          {items.map((item) => renderLink(item, "block border-b border-[var(--ryh-line)] py-3.5 text-base text-[var(--ryh-fg)] last:border-0", true))}
           {/* eslint-disable-next-line i18next/no-literal-string -- site name */}
           <a href={RYH.siteUrl} className={cn(ryh.focus, "block py-3.5 text-base text-[var(--ryh-muted)]")}>edgarzanin.com</a>
         </nav>
