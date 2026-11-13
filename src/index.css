@@ -413,7 +413,6 @@
   --ryh-muted: 25 8% 36%;
   --ryh-terra: 16 72% 40%;
   --ryh-ink: 40 95% 28%;
-  --ryh-topo: 25 30% 30% / 0.1;
 }
 .dark .ryh {
   --ryh-bg: 30 8% 8%;
@@ -424,6 +423,5 @@
   --ryh-muted: 35 8% 66%;
   --ryh-terra: 18 72% 55%;
   --ryh-ink: 48 96% 45%;
-  --ryh-topo: 38 30% 60% / 0.12;
 }
 
