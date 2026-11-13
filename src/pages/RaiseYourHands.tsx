@@ -236,10 +236,13 @@ const RaiseYourHands = () => {
           <ol className="mt-10 grid gap-10 md:mt-[52px] md:grid-cols-3 md:gap-14">
             {r.transparency.pillars.map(({ title, body }, i) => (
               <li key={title}>
-                <span aria-hidden className="ryh-serif mb-[18px] block text-[40px] leading-none text-[var(--ryh-sage)]">
-                  {i + 1}
-                </span>
-                <h3 className={ryh.h3}>{title}</h3>
+                {/* Mobile: number and title on one line; desktop: number above the title */}
+                <div className="flex items-baseline gap-3 md:block">
+                  <span aria-hidden className="ryh-serif block shrink-0 text-[32px] leading-none text-[var(--ryh-sage)] md:mb-[18px] md:text-[40px]">
+                    {i + 1}
+                  </span>
+                  <h3 className={ryh.h3}>{title}</h3>
+                </div>
                 <p className={cn(ryh.p, "md:text-[16.5px]")}>{body}</p>
               </li>
             ))}
