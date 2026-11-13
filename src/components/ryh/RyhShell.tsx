@@ -123,7 +123,28 @@ function useHashScroll() {
 
 type NavKey = "purpose" | "route" | "transparency" | "stories" | "diary";
 
+const BRAND = "Raise Your Hands";
+
+/**
+ * RC-20: on the landing (mobile), the name in the header stays hidden while the big logo A of the
+ * hero is on screen, and shows once it scrolls away. On desktop the hero logo is not rendered
+ * (display: none never intersects), so the name is always shown there, as on the logbook.
+ */
+function useHeroLogoVisible(onLanding: boolean) {
+  const [visible, setVisible] = useState(() => onLanding && typeof window !== "undefined" && window.innerWidth < 1024);
+  useEffect(() => {
+    if (!onLanding) return setVisible(false);
+    const el = document.getElementById("ryh-hero-logo");
+    if (!el || typeof IntersectionObserver === "undefined") return setVisible(false);
+    const io = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [onLanding]);
+  return visible;
+}
+
 function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; theme: RyhTheme; onToggleTheme: () => void }) {
+  const heroLogoVisible = useHeroLogoVisible(onLanding);
   const { t } = useLanguage();
   const r = t.ryh;
   const [open, setOpen] = useState(false);
@@ -160,10 +181,17 @@ function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; th
   return (
     <header className="relative">
       <div className="flex items-center gap-3.5 px-5 py-4 md:px-[72px] md:py-[22px]">
-        <Link to={ryhPaths.home} className={cn(ryh.focus, "ryh-serif flex items-center gap-2.5 text-[18px] font-medium tracking-[-0.005em] md:text-[21px]")}>
-          <RyhLogo variant="mark" className="h-[22px] text-[var(--ryh-fg)] md:h-[26px]" />
-          {/* eslint-disable-next-line i18next/no-literal-string -- project name, same in every language */}
-          <span className="whitespace-nowrap">Raise Your Hands</span>
+        {/* RC-19: the bar carries only the name, in the logo wordmark lettering (Montserrat 900, caps) */}
+        <Link to={ryhPaths.home} aria-label={BRAND} className={cn(ryh.focus, "flex min-h-[26px] items-center")}>
+          <span
+            aria-hidden
+            className={cn(
+              "whitespace-nowrap font-['Montserrat',sans-serif] text-[13px] font-black uppercase leading-none tracking-[0.02em] text-[var(--ryh-fg)] transition-opacity duration-200 ease-in-out motion-reduce:transition-none md:text-[15px] md:tracking-[0.03em]",
+              heroLogoVisible ? "opacity-0" : "opacity-100",
+            )}
+          >
+            {BRAND}
+          </span>
         </Link>
         <nav aria-label={r.nav.label} className="ml-auto hidden gap-7 text-[15px] text-[var(--ryh-muted)] lg:flex">
           {items.map((item) => renderLink(item))}
