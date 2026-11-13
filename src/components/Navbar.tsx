@@ -8,6 +8,17 @@ import { ChatService } from "../services/chat";
 import { useEffect } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { RYH } from "@/config/raiseYourHands";
+
+const RYH_NAME = "Raise Your Hands";
+
+/** Link to the Raise Your Hands project (its own subdomain), with the route mark */
+const RyhNavLink = ({ className, onClick }: { className: string; onClick?: () => void }) => (
+  <a href={RYH.publicUrl} onClick={onClick} className={className}>
+    <img src="/ryh/favicon.svg" alt="" aria-hidden="true" width={18} height={18} className="h-[18px] w-[18px] rounded-[4px]" />
+    {RYH_NAME}
+  </a>
+);
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -63,6 +74,7 @@ const Navbar = () => {
             {t.nav.contact}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
           </Link>
+          <RyhNavLink className="inline-flex items-center gap-2 font-semibold text-muted-foreground hover:text-primary transition-colors" />
 
           {user && isAthlete && (
             <ChatLinkWithBadge user={user} />
@@ -147,6 +159,10 @@ const Navbar = () => {
                   >
                     {t.nav.contact}
                   </Link>
+                  <RyhNavLink
+                    onClick={() => setIsMenuOpen(false)}
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors py-3 border-b border-border/50 flex items-center gap-2"
+                  />
                   {user && isAthlete && (
                     <ChatLinkWithBadge
                       user={user}
