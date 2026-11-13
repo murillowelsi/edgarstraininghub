@@ -60,6 +60,7 @@ export default defineConfig(({ mode }) => ({
       input: {
         main: path.resolve(__dirname, "index.html"),
         raiseYourHands: path.resolve(__dirname, "raise-your-hands.html"),
+        raiseYourHandsDiary: path.resolve(__dirname, "raise-your-hands-diario.html"),
       },
     },
   },

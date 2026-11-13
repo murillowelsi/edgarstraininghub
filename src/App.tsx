@@ -20,6 +20,7 @@ import BlogPage from "./pages/BlogPage";
 import Contact from "./pages/Contact";
 import Index from "./pages/Index";
 import RaiseYourHands from "./pages/RaiseYourHands";
+import RaiseYourHandsDiary from "./pages/RaiseYourHandsDiary";
 import NotFound from "./pages/NotFound";
 import AdminCalendar from "./pages/admin/Calendar";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -78,6 +79,8 @@ const App = () => (
                 {/* raiseyourhands.edgarzanin.com shows the landing at its root (vercel.json rewrites by host) */}
                 <Route path="/" element={isRaiseYourHandsHost ? <RaiseYourHands /> : <Index />} />
                 <Route path="/raise-your-hands" element={<RaiseYourHands />} />
+                <Route path="/raise-your-hands/diario" element={<RaiseYourHandsDiary />} />
+                {isRaiseYourHandsHost && <Route path="/diario" element={<RaiseYourHandsDiary />} />}
                 <Route path="/about" element={<About />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/contact" element={<Contact />} />
