@@ -82,8 +82,8 @@ const RaiseYourHands = () => {
 
   return (
     <RyhShell page="landing" title={r.meta.title} description={r.hero.lead}>
-      {/* RC-4 · Hero: text left, logo trace right (no wordmark, no pill, no waves) */}
-      <section id="topo" className={ryh.wrap}>
+      {/* RC-4 · Hero: text left, logo right; option B: full-bleed band (--ryh-band) under the plain bar */}
+      <section id="topo" className={cn(ryh.wrap, "ryh-band")}>
         <div className="grid items-center gap-7 pb-16 pt-7 md:pb-24 md:pt-[72px] lg:grid-cols-[1.25fr_1fr] lg:gap-16">
           <div>
             <span className={ryh.kicker}>{r.hero.eyebrow}</span>
@@ -107,7 +107,8 @@ const RaiseYourHands = () => {
       {/* RC-5 · From the logbook: the most recent entry */}
       {latest && (
         <section aria-labelledby="ryh-latest" className={ryh.wrap}>
-          <div className="grid items-center gap-4 border-t border-[var(--ryh-line)] py-[26px] md:grid-cols-[220px_1fr_auto] md:gap-10 md:py-[34px]">
+          {/* No hairline above: the end of the hero band already separates it */}
+          <div className="grid items-center gap-4 pb-[26px] pt-10 md:grid-cols-[220px_1fr_auto] md:gap-10 md:pb-[34px] md:pt-14">
             {cover ? (
               <Link to={`${ryhPaths.diary}#${latest.id}`} tabIndex={-1} aria-hidden className="block overflow-hidden rounded-[20px]">
                 <img

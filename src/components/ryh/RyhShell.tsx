@@ -192,7 +192,8 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
         scrolled ? "border-[var(--ryh-line)]" : "border-transparent",
       )}
     >
-      <div className="flex items-center gap-1.5 px-3 py-4 min-[380px]:gap-2 min-[380px]:px-4 sm:gap-3.5 sm:px-5 md:px-[72px] md:py-[22px]">
+      {/* Background and hairline stay full-bleed; from md up the content uses the sections' container (ryh.wrap) */}
+      <div className="mx-auto flex max-w-[1180px] items-center gap-1.5 px-3 py-4 min-[380px]:gap-2 min-[380px]:px-4 sm:gap-3.5 sm:px-5 md:px-[72px] md:py-[22px]">
         {/* RC-19: the name in the logo wordmark lettering (Montserrat 900, caps), framed, HANDS in yellow */}
         <Link
           to={ryhPaths.home}
@@ -206,10 +207,11 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
             {BRAND_START} <span className="text-[var(--ryh-y)]">{BRAND_END}</span>
           </span>
         </Link>
-        <nav aria-label={r.nav.label} className="ml-auto hidden gap-7 text-[15px] text-[var(--ryh-muted)] lg:flex">
+        {/* Links in the bar only from 1280 px; below that, the menu */}
+        <nav aria-label={r.nav.label} className="ml-auto hidden gap-7 text-[15px] text-[var(--ryh-muted)] xl:flex">
           {items.map((item) => renderLink(item))}
         </nav>
-        <div className="ml-auto flex items-center gap-0.5 sm:gap-1.5 lg:ml-5">
+        <div className="ml-auto flex items-center gap-0.5 sm:gap-1.5 xl:ml-5">
           <LanguageSwitcher />
           <button
             type="button"
@@ -226,7 +228,7 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
             aria-controls={menuId}
             onClick={() => setOpen((o) => !o)}
             aria-label={r.nav.menu}
-            className={cn(ryh.focus, "grid h-9 w-9 place-items-center rounded-full text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)] lg:hidden")}
+            className={cn(ryh.focus, "grid h-9 w-9 place-items-center rounded-full text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)] xl:hidden")}
           >
             {open ? <X className="h-[19px] w-[19px]" aria-hidden /> : <Menu className="h-[19px] w-[19px]" aria-hidden />}
           </button>
@@ -241,14 +243,17 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
         </div>
       </div>
       {open && (
-        <nav id={menuId} aria-label={r.nav.label} className="absolute inset-x-0 top-full z-20 border-y border-[var(--ryh-line)] bg-[var(--ryh-bg)] px-5 pb-3 lg:hidden">
-          {items.map((item) => renderLink(item, "block border-b border-[var(--ryh-line)] py-3.5 text-base text-[var(--ryh-fg)] last:border-0", true))}
-          {/* On mobile the EZ logo lives here, not in the bar (user request) */}
-          <a href={RYH.siteUrl} aria-label="Edgar Zanin" className={cn(ryh.focus, "flex items-center gap-2.5 py-3.5 text-base text-[var(--ryh-muted)]")}>
-            <span aria-hidden className="font-['Montserrat',sans-serif] text-[22px] font-extrabold leading-none tracking-tighter text-[hsl(48_96%_45%)]">EZ</span>
-            {/* eslint-disable-next-line i18next/no-literal-string -- site name */}
-            <span>edgarzanin.com</span>
-          </a>
+        // Full-width panel; from md up its rows line up with the bar content
+        <nav id={menuId} aria-label={r.nav.label} className="absolute inset-x-0 top-full z-20 border-y border-[var(--ryh-line)] bg-[var(--ryh-bg)] xl:hidden">
+          <div className="mx-auto max-w-[1180px] px-5 pb-3 md:px-[72px]">
+            {items.map((item) => renderLink(item, "block border-b border-[var(--ryh-line)] py-3.5 text-base text-[var(--ryh-fg)] last:border-0", true))}
+            {/* On mobile the EZ logo lives here, not in the bar (user request); from lg it is in the bar, so not repeated */}
+            <a href={RYH.siteUrl} aria-label="Edgar Zanin" className={cn(ryh.focus, "flex items-center gap-2.5 py-3.5 text-base text-[var(--ryh-muted)] lg:hidden")}>
+              <span aria-hidden className="font-['Montserrat',sans-serif] text-[22px] font-extrabold leading-none tracking-tighter text-[hsl(48_96%_45%)]">EZ</span>
+              {/* eslint-disable-next-line i18next/no-literal-string -- site name */}
+              <span>edgarzanin.com</span>
+            </a>
+          </div>
         </nav>
       )}
     </header>
