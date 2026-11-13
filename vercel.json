@@ -11,6 +11,26 @@
       "destination": "/raise-your-hands-diario.html"
     },
     {
+      "source": "/contas",
+      "has": [
+        {
+          "type": "host",
+          "value": "raiseyourhands.edgarzanin.com"
+        }
+      ],
+      "destination": "/raise-your-hands-contas.html"
+    },
+    {
+      "source": "/loja",
+      "has": [
+        {
+          "type": "host",
+          "value": "raiseyourhands.edgarzanin.com"
+        }
+      ],
+      "destination": "/raise-your-hands-loja.html"
+    },
+    {
       "source": "/((?!api/|assets/|ryh/|images/|sw\\.js|workbox-|registerSW\\.js|manifest\\.webmanifest|favicon|apple-touch-icon|pwa-|robots\\.txt).*)",
       "has": [
         {
@@ -23,6 +43,14 @@
     {
       "source": "/raise-your-hands/diario",
       "destination": "/raise-your-hands-diario.html"
+    },
+    {
+      "source": "/raise-your-hands/contas",
+      "destination": "/raise-your-hands-contas.html"
+    },
+    {
+      "source": "/raise-your-hands/loja",
+      "destination": "/raise-your-hands-loja.html"
     },
     {
       "source": "/raise-your-hands",

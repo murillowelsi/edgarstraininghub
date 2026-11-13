@@ -61,6 +61,8 @@ export default defineConfig(({ mode }) => ({
         main: path.resolve(__dirname, "index.html"),
         raiseYourHands: path.resolve(__dirname, "raise-your-hands.html"),
         raiseYourHandsDiary: path.resolve(__dirname, "raise-your-hands-diario.html"),
+        raiseYourHandsAccounts: path.resolve(__dirname, "raise-your-hands-contas.html"),
+        raiseYourHandsShop: path.resolve(__dirname, "raise-your-hands-loja.html"),
       },
     },
   },
