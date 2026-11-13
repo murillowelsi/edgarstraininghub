@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api/|assets/|ryh/).*)",
+      "source": "/((?!api/|assets/|ryh/|images/|sw\\.js|workbox-|registerSW\\.js|manifest\\.webmanifest|favicon|apple-touch-icon|pwa-|robots\\.txt).*)",
       "has": [
         {
           "type": "host",
