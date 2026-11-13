@@ -16,6 +16,9 @@ import { useNavigate } from "react-router-dom";
 import { AssignmentForm } from "./AssignmentForm";
 import { formatDate } from "@/lib/dates";
 import { ListSkeleton } from "@/components/feedback/skeletons";
+import { SportIcon } from "@/components/icons/sport-icons";
+
+const NEW_WORKOUT_TYPES: WorkoutType[] = ["running", "cycling", "swimming", "strength"];
 
 const typeIcons: Record<WorkoutType, React.ElementType> = {
   running: GrRun,
@@ -93,8 +96,18 @@ export const CalendarAssignDialog = ({
     (w) => (selectedType === "all" || w.type === selectedType) && w.name.toLowerCase().includes(query)
   );
 
-  const handleCreateNewWorkout = () => {
-    const type = selectedType === "all" ? null : selectedType;
+  // "All" has no modality: ask for one instead of defaulting to running
+  const [choosingType, setChoosingType] = useState(false);
+  useEffect(() => {
+    if (!open) setChoosingType(false);
+  }, [open]);
+
+  const handleCreateNewWorkout = (chosen?: WorkoutType) => {
+    const type = chosen ?? (selectedType === "all" ? null : selectedType);
+    if (!type) {
+      setChoosingType(true);
+      return;
+    }
     if (selectedDate) {
       sessionStorage.setItem("calendarAssignState", JSON.stringify({ date: selectedDate.toISOString(), type }));
     }
@@ -103,7 +116,7 @@ export const CalendarAssignDialog = ({
     if (type === "strength") {
       navigate(`/admin/workouts/strength/new?${params.toString()}`);
     } else {
-      if (type) params.set("type", type);
+      params.set("type", type);
       navigate(`/admin/workouts/new?${params.toString()}`);
     }
   };
@@ -146,10 +159,26 @@ export const CalendarAssignDialog = ({
       fullHeight={picking}
       footer={
         picking ? (
-          <Button variant="outline" className="w-full rounded-full h-11" onClick={handleCreateNewWorkout}>
-            <Plus className="h-4 w-4 mr-2" />
-            {ta.createNew}
-          </Button>
+          choosingType ? (
+            <div className="w-full space-y-2" role="group" aria-label={ta.createNew}>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {NEW_WORKOUT_TYPES.map((type) => (
+                  <Button key={type} variant="outline" className="h-11 rounded-full" onClick={() => handleCreateNewWorkout(type)}>
+                    <SportIcon type={type} className="mr-2 h-4 w-4" aria-hidden />
+                    {t.workoutMeta.types[type]}
+                  </Button>
+                ))}
+              </div>
+              <Button variant="ghost" className="h-10 w-full rounded-full" onClick={() => setChoosingType(false)}>
+                {t.common.cancel}
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" className="w-full rounded-full h-11" onClick={() => handleCreateNewWorkout()}>
+              <Plus className="h-4 w-4 mr-2" />
+              {ta.createNew}
+            </Button>
+          )
         ) : undefined
       }
     >
