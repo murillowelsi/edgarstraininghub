@@ -24,7 +24,7 @@ const GARMENTS = [
 
 function Illustration({ paths }: { paths: string[] }) {
   return (
-    <svg viewBox="0 0 250 250" aria-hidden="true" className="h-[120px] w-[120px] md:h-[150px] md:w-[150px]">
+    <svg viewBox="0 0 250 250" aria-hidden="true" className="h-[96px] w-[96px] md:h-[150px] md:w-[150px]">
       <g fill="none" stroke="var(--ryh-fg)" strokeWidth="3" strokeLinejoin="round" opacity=".85">
         {paths.map((d) => (
           <path key={d} d={d} />
@@ -57,9 +57,16 @@ const RaiseYourHandsShop = () => {
       <div className={cn(ryh.wrap, "pb-[72px] pt-12 md:pb-[120px] md:pt-16")}>
         {/* RC-31: reference illustrations */}
         <figure>
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-5">
+          {/* Mobile: two cards side by side (as in the mockup); "And more" from 640 px up */}
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5">
             {GARMENTS.map((paths, i) => (
-              <li key={i} className="flex flex-col items-center gap-3 rounded-[20px] border border-[var(--ryh-line)] bg-[var(--ryh-paper)] px-4 pb-6 pt-7 md:pb-8 md:pt-9">
+              <li
+                key={i}
+                className={cn(
+                  "flex flex-col items-center gap-3 rounded-[20px] border border-[var(--ryh-line)] bg-[var(--ryh-paper)] px-3 pb-5 pt-6 md:px-4 md:pb-8 md:pt-9",
+                  i === 2 && "hidden sm:flex",
+                )}
+              >
                 <Illustration paths={paths} />
                 <span className="text-sm text-[var(--ryh-muted)]">{s.items[i]}</span>
               </li>
