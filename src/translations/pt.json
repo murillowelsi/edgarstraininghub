@@ -2476,10 +2476,13 @@
       "local": "Local",
       "route": "Trajeto",
       "stage": "Etapa {{n}}",
-      "road": "Da estrada",
-      "roadIntro": "As publicações do Edgar no Instagram durante a travessia, com as fotos de cada dia.",
       "photos": "Fotos de {{date}}",
-      "photosHint": "Deslize para ver mais fotos"
+      "photosHint": "Deslize para ver mais · toque para ampliar",
+      "openPhoto": "Ampliar foto {{n}} de {{total}}",
+      "close": "Fechar",
+      "prev": "Foto anterior",
+      "next": "Próxima foto",
+      "counter": "{{n}} de {{total}}"
     }
   }
 }

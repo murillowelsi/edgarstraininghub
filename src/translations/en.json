@@ -2476,10 +2476,13 @@
       "local": "Location",
       "route": "Route",
       "stage": "Stage {{n}}",
-      "road": "From the road",
-      "roadIntro": "Edgar’s Instagram posts from the crossing, with the photos of each day.",
       "photos": "Photos from {{date}}",
-      "photosHint": "Swipe to see more photos"
+      "photosHint": "Swipe for more · tap to enlarge",
+      "openPhoto": "Enlarge photo {{n}} of {{total}}",
+      "close": "Close",
+      "prev": "Previous photo",
+      "next": "Next photo",
+      "counter": "{{n}} of {{total}}"
     }
   }
 }

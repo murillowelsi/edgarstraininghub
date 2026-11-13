@@ -1,0 +1,199 @@
+{
+  "chegada": [
+    {
+      "base": "/ryh/diario/chegada/01",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Asa de um avião da Ryanair na pista, antes da viagem para Portugal",
+        "en": "Wing of a Ryanair plane on the runway, before the flight to Portugal"
+      }
+    },
+    {
+      "base": "/ryh/diario/chegada/02",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Sacos de compras com papel higiénico, produtos de higiene e alimentos",
+        "en": "Shopping bags with toilet paper, hygiene products and food"
+      }
+    },
+    {
+      "base": "/ryh/diario/chegada/03",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Quatro pessoas sorridentes de pé numa sala",
+        "en": "Four people smiling, standing in a living room"
+      }
+    },
+    {
+      "base": "/ryh/diario/chegada/04",
+      "w": 1280,
+      "h": 1280,
+      "alt": {
+        "pt": "Cinco pessoas abraçadas numa sala, à frente de uma mesa com uma planta",
+        "en": "Five people with their arms around each other in a living room, behind a table with a plant"
+      }
+    }
+  ],
+  "dia-1": [
+    {
+      "base": "/ryh/diario/dia-1/01",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Café expresso e pão numa mesa, ao pequeno-almoço",
+        "en": "Espresso and bread on a table at breakfast"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-1/02",
+      "w": 1012,
+      "h": 1350,
+      "alt": {
+        "pt": "Bicicleta de estrada no meio da estrada, com o resumo do Strava: 166,80 km, 3.170 m de subida, 7 h 8 min",
+        "en": "Road bike in the middle of the road with the Strava summary: 166.80 km, 3,170 m of climbing, 7 h 8 min"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-1/03",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Vale verde entre montanhas, sob um céu nublado",
+        "en": "Green valley between mountains under a cloudy sky"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-1/04",
+      "w": 1080,
+      "h": 1440,
+      "alt": {
+        "pt": "Bicicleta encostada ao rail de uma estrada de montanha",
+        "en": "Bike leaning on the guardrail of a mountain road"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-1/05",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Igreja branca com torre alta, entre colinas, ao fim do dia",
+        "en": "White church with a tall tower among the hills, at the end of the day"
+      }
+    }
+  ],
+  "dia-2": [
+    {
+      "base": "/ryh/diario/dia-2/01",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Rua de calçada molhada em Chaves, com uma igreja ao fundo",
+        "en": "Wet cobbled street in Chaves, with a church at the end"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-2/02",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Fachada de café com o mural «Km 0» da Nacional 2 e a frase «…onde tudo começa»",
+        "en": "Café front with the N2 «Km 0» mural and the words «…onde tudo começa» (where it all begins)"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-2/03",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Carrinho de supermercado cheio de compras, ao lado de uma pessoa de quem não se vê o rosto",
+        "en": "Supermarket trolley full of groceries next to a person whose face is not shown"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-2/04",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Ciclista de capacete sorri num dia de nevoeiro, com a bicicleta atrás",
+        "en": "Cyclist in a helmet smiling on a foggy day, with the bike behind him"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-2/05",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Duas pessoas tiram uma selfie à frente do portão da Quinta do Caneiro",
+        "en": "Two people taking a selfie in front of the Quinta do Caneiro gate"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-2/06",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Carrinho de supermercado cheio de compras entre as prateleiras",
+        "en": "Supermarket trolley full of groceries between the shelves"
+      }
+    }
+  ],
+  "dia-3": [
+    {
+      "base": "/ryh/diario/dia-3/01",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Quatro sacos de compras cheios de alimentos no chão de pedra",
+        "en": "Four shopping bags full of food on a stone pavement"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-3/02",
+      "w": 1080,
+      "h": 1440,
+      "alt": {
+        "pt": "Duas pessoas sorridentes seguram sacos de compras",
+        "en": "Two people smiling, holding shopping bags"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-3/03",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Casas de uma vila ao anoitecer, sob nuvens escuras",
+        "en": "Village houses at dusk under dark clouds"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-3/04",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Mapa de Portugal em madeira com o marco «EN2 244»",
+        "en": "Wooden map of Portugal with the «EN2 244» road marker"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-3/05",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Mural de uma senhora idosa na parede de uma casa, numa rua de vila",
+        "en": "Mural of an elderly woman on the wall of a house in a village street"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-3/06",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Três pessoas de pé ao lado de sacos de compras e caixas de leite",
+        "en": "Three people standing next to shopping bags and cartons of milk"
+      }
+    }
+  ]
+}
