@@ -437,6 +437,8 @@
   --ryh-btn-fg: #1C1A17;
 }
 .ryh .ryh-serif { font-family: var(--ryh-serif); }
+/* RYH pages: anchors jump directly (the site-wide html smooth scroll stays for the main site) */
+html.ryh-instant-scroll { scroll-behavior: auto; }
 /* Full-width paper band behind a centred section (RC-14/15): the tone change replaces the hairline */
 .ryh .ryh-band { background: var(--ryh-band); box-shadow: 0 0 0 100vmax var(--ryh-band); clip-path: inset(0 -100vmax); }
 /* Map / hero outline: same weight at any size (RC-12) */

@@ -96,6 +96,15 @@ function usePageIdentity(title: string, description: string, htmlLang: string) {
   }, []);
 }
 
+/** Anchor links jump straight to the section: no smooth scroll on the RYH pages (the main site keeps it) */
+function useInstantScroll() {
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.add("ryh-instant-scroll");
+    return () => html.classList.remove("ryh-instant-scroll");
+  }, []);
+}
+
 /**
  * Anchors (#rota, #dia-1) also work when arriving from another page: the content is
  * rendered by React after load, and the router's scroll-to-top runs first.
@@ -249,6 +258,7 @@ export function RyhShell({ page, title, description, children }: { page: "landin
   const pageLang = language === "pt" ? "pt-PT" : "en";
   useRyhFonts();
   useHashScroll();
+  useInstantScroll();
   usePageIdentity(title, description, pageLang);
   const [theme, setTheme] = useRyhTheme();
   const onLanding = page === "landing";
