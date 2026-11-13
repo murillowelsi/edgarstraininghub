@@ -99,9 +99,7 @@ const RaiseYourHands = () => {
             </div>
           </div>
           {/* Mobile/tablet: the full logo A on top; desktop: trace only, next to the text (approved hero) */}
-          <div id="ryh-hero-logo" className="-order-1 lg:hidden">
-            <RyhLogo size="lg" />
-          </div>
+          <RyhLogo size="lg" className="-order-1 lg:hidden" />
           <RyhLogo variant="trace" className="hidden lg:flex lg:justify-center" />
         </div>
       </section>
