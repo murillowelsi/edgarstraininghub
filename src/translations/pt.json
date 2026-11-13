@@ -2322,7 +2322,7 @@
     "hero": {
       "badge": "PORTUGAL | 7 ETAPAS | 879,4 KM",
       "title": "RAISE YOUR HANDS: PEDALANDO COM PROPÓSITO DE NORTE A SUL DE PORTUGAL",
-      "lead": "Muito mais do que um desafio de resistência física e superação. Uma travessia de Matosinhos a Faro movida pela fé, conectando comunidades e levando alimento, esperança e apoio direto a famílias em situação de vulnerabilidade.",
+      "lead": "Muito mais do que um desafio de resistência física e superação. Uma travessia do Porto a Faro movida pela fé, conectando comunidades e levando alimento, esperança e apoio direto a famílias em situação de vulnerabilidade.",
       "follow": "Acompanhar a Jornada",
       "seeRoute": "Ver a Rota Completa"
     },
@@ -2336,7 +2336,7 @@
     },
     "route": {
       "kicker": "02 · A rota",
-      "title": "A TRAVESSIA: DE MATOSINHOS A FARO",
+      "title": "A TRAVESSIA: DO PORTO A FARO",
       "sub": "Uma jornada exigente pelas estradas e montanhas de Portugal, enfrentando subidas íngremes, ventos fortes e mudanças climáticas para cumprir cada etapa da missão.",
       "kpis": [
         {
@@ -2352,7 +2352,7 @@
           "label": "cruzando o país de norte a sul"
         }
       ],
-      "mapLabel": "Traçado da rota de Matosinhos a Faro, 7 etapas",
+      "mapLabel": "Traçado da rota do Porto a Faro, 7 etapas",
       "table": {
         "stage": "Etapa",
         "distance": "Distância",
