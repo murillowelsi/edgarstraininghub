@@ -29,7 +29,9 @@ const withName = (text: string, name: ReactNode) =>
 /** Pending content: a soft box in development, nothing in production */
 const Placeholder = ({ children, className }: { children: ReactNode; className?: string }) =>
   showPlaceholders ? (
-    <div className={cn("grid place-items-center rounded-[28px] bg-[var(--ryh-soft)] p-6 text-center text-[13px] text-[var(--ryh-muted)]", className)}>{children}</div>
+    <div className={cn("grid place-items-center rounded-[28px] bg-[var(--ryh-soft)] p-6 text-center text-[13px] text-[var(--ryh-muted)]", className)}>
+      {children}
+    </div>
   ) : null;
 
 const RaiseYourHands = () => {
@@ -110,144 +112,162 @@ const RaiseYourHands = () => {
       )}
 
       {/* RC-6 · Purpose: pull quote without a box; optional photo on a soft background */}
-      <section id="proposito" className={cn(ryh.wrap, ryh.sec)}>
-        <div className="grid items-center gap-9 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
-          <div>
-            <span className={ryh.kicker}>{r.purpose.kicker}</span>
-            <h2 className={ryh.h2}>{r.purpose.title}</h2>
-            <div className={cn(ryh.p, "space-y-3.5")}>
-              <p>{withName(r.purpose.p1, projectName)}</p>
-              <p>{r.purpose.p2}</p>
+      <section id="proposito" className={ryh.wrap}>
+        <div className={cn(ryh.sec)}>
+          <div className="grid items-center gap-9 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
+            <div>
+              <span className={ryh.kicker}>{r.purpose.kicker}</span>
+              <h2 className={ryh.h2}>{r.purpose.title}</h2>
+              <div className={cn(ryh.p, "space-y-3.5")}>
+                <p>{withName(r.purpose.p1, projectName)}</p>
+                <p>{r.purpose.p2}</p>
+              </div>
+              <blockquote className="ryh-serif mt-[30px] border-l-2 border-[var(--ryh-y)] pl-[22px] text-[22px] italic leading-[1.45] md:text-[27px]">
+                {/* eslint-disable-next-line i18next/no-literal-string -- project name */}
+                {withName(r.purpose.quote, <>"Raise Your Hands"</>)}
+              </blockquote>
             </div>
-            <blockquote className="ryh-serif mt-[30px] border-l-2 border-[var(--ryh-y)] pl-[22px] text-[22px] italic leading-[1.45] md:text-[27px]">
-              {/* eslint-disable-next-line i18next/no-literal-string -- project name */}
-              {withName(r.purpose.quote, <>"Raise Your Hands"</>)}
-            </blockquote>
+            {RYH.purposePhoto.src ? (
+              <img
+                src={RYH.purposePhoto.src}
+                alt={RYH.purposePhoto.alt}
+                loading="lazy"
+                className="aspect-[4/3] w-full rounded-[28px] bg-[var(--ryh-soft)] object-cover lg:aspect-[4/5]"
+              />
+            ) : (
+              <Placeholder className="aspect-[4/3] lg:aspect-[4/5]">{r.purpose.photoPlaceholder}</Placeholder>
+            )}
           </div>
-          {RYH.purposePhoto.src ? (
-            <img src={RYH.purposePhoto.src} alt={RYH.purposePhoto.alt} loading="lazy" className="aspect-[4/3] w-full rounded-[28px] bg-[var(--ryh-soft)] object-cover lg:aspect-[4/5]" />
-          ) : (
-            <Placeholder className="aspect-[4/3] lg:aspect-[4/5]">{r.purpose.photoPlaceholder}</Placeholder>
-          )}
         </div>
       </section>
 
       {/* RC-7 · Route: numbers in a row, soft map, table with hairlines */}
-      <section id="rota" className={cn(ryh.wrap, ryh.sec, "border-t border-[var(--ryh-line)]")}>
-        <span className={ryh.kicker}>{r.route.kicker}</span>
-        <h2 className={ryh.h2}>{r.route.title}</h2>
-        <p className={cn(ryh.p, "max-w-[40em]")}>{r.route.sub}</p>
-        <ul className="mb-9 mt-[30px] flex flex-wrap gap-[26px] md:mb-[52px] md:mt-11 md:gap-[72px]">
-          {r.route.kpis.map(({ value, label }) => (
-            <li key={value}>
-              <b className="ryh-serif block text-[34px] font-normal leading-none tracking-[-0.02em] tabular-nums md:text-[46px]">{value}</b>
-              <span className="text-[15px] text-[var(--ryh-muted)]">{label}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="grid items-center gap-9 lg:grid-cols-[1fr_1.15fr] lg:gap-[72px]">
-          <RouteMap label={r.route.mapLabel} />
-          <StageTable rows={stageRows} headers={[r.route.table.stage, r.route.table.distance, r.route.table.elevation]} />
+      <section id="rota" className={ryh.wrap}>
+        <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+          <span className={ryh.kicker}>{r.route.kicker}</span>
+          <h2 className={ryh.h2}>{r.route.title}</h2>
+          <p className={cn(ryh.p, "max-w-[40em]")}>{r.route.sub}</p>
+          <ul className="mb-9 mt-[30px] flex flex-wrap gap-[26px] md:mb-[52px] md:mt-11 md:gap-[72px]">
+            {r.route.kpis.map(({ value, label }) => (
+              <li key={value}>
+                <b className="ryh-serif block text-[34px] font-normal leading-none tracking-[-0.02em] tabular-nums md:text-[46px]">{value}</b>
+                <span className="text-[15px] text-[var(--ryh-muted)]">{label}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="grid items-center gap-9 lg:grid-cols-[1fr_1.15fr] lg:gap-[72px]">
+            <RouteMap label={r.route.mapLabel} />
+            <StageTable rows={stageRows} headers={[r.route.table.stage, r.route.table.distance, r.route.table.elevation]} />
+          </div>
+          {RYH.komootUrl ? (
+            <a
+              href={RYH.komootUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                ryh.focus,
+                "mt-[26px] inline-block text-[15px] text-[var(--ryh-muted)] underline decoration-[var(--ryh-line)] underline-offset-4 hover:text-[var(--ryh-fg)]",
+              )}
+            >
+              {r.route.komoot}
+            </a>
+          ) : (
+            <Placeholder className="mt-[26px] inline-grid rounded-xl px-4 py-2">{r.route.komootPlaceholder}</Placeholder>
+          )}
         </div>
-        {RYH.komootUrl ? (
-          <a
-            href={RYH.komootUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(ryh.focus, "mt-[26px] inline-block text-[15px] text-[var(--ryh-muted)] underline decoration-[var(--ryh-line)] underline-offset-4 hover:text-[var(--ryh-fg)]")}
-          >
-            {r.route.komoot}
-          </a>
-        ) : (
-          <Placeholder className="mt-[26px] inline-grid rounded-xl px-4 py-2">{r.route.komootPlaceholder}</Placeholder>
-        )}
       </section>
 
       {/* RC-8 · Transparency: serif numerals in sage, no cards */}
-      <section id="transparencia" className={cn(ryh.wrap, ryh.sec, "border-t border-[var(--ryh-line)]")}>
-        <span className={ryh.kicker}>{r.transparency.kicker}</span>
-        <h2 className={ryh.h2}>{r.transparency.title}</h2>
-        <p className={cn(ryh.p, "max-w-[40em]")}>{r.transparency.sub}</p>
-        <ol className="mt-10 grid gap-10 md:mt-[52px] md:grid-cols-3 md:gap-14">
-          {r.transparency.pillars.map(({ title, body }, i) => (
-            <li key={title}>
-              <span aria-hidden className="ryh-serif mb-[18px] block text-[40px] leading-none text-[var(--ryh-sage)]">
-                {i + 1}
-              </span>
-              <h3 className={ryh.h3}>{title}</h3>
-              <p className={cn(ryh.p, "md:text-[16.5px]")}>{body}</p>
-            </li>
-          ))}
-        </ol>
+      <section id="transparencia" className={ryh.wrap}>
+        <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+          <span className={ryh.kicker}>{r.transparency.kicker}</span>
+          <h2 className={ryh.h2}>{r.transparency.title}</h2>
+          <p className={cn(ryh.p, "max-w-[40em]")}>{r.transparency.sub}</p>
+          <ol className="mt-10 grid gap-10 md:mt-[52px] md:grid-cols-3 md:gap-14">
+            {r.transparency.pillars.map(({ title, body }, i) => (
+              <li key={title}>
+                <span aria-hidden className="ryh-serif mb-[18px] block text-[40px] leading-none text-[var(--ryh-sage)]">
+                  {i + 1}
+                </span>
+                <h3 className={ryh.h3}>{title}</h3>
+                <p className={cn(ryh.p, "md:text-[16.5px]")}>{body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
       </section>
 
       {/* RC-13 · Support: where the money came from (no "Donate" button, no £840, no supporter count) */}
-      <section id="apoio" className={cn(ryh.wrap, ryh.sec, "border-t border-[var(--ryh-line)]")}>
-        <span className={ryh.kicker}>{f.kicker}</span>
-        <h2 className={ryh.h2}>{f.title}</h2>
-        <div className="mt-8 grid items-start gap-10 md:mt-10 lg:grid-cols-2 lg:gap-20">
-          <div>
-            <p className="flex flex-wrap items-baseline gap-x-3.5">
-              <b className="ryh-serif text-[56px] font-normal leading-none tracking-[-0.02em] tabular-nums md:text-[72px]">{f.amount}</b>
-              <span className="ryh-serif text-[20px] text-[var(--ryh-muted)] md:text-[24px]">{f.amountLabel}</span>
-            </p>
-            <p className={cn(ryh.p, "mt-5 max-w-[24em]")}>{f.via}</p>
-            <a href={RYH.justGivingUrl} target="_blank" rel="noopener" className={cn(ryh.link, ryh.focus, "mt-6")}>
-              {f.link}
-              <span aria-hidden>↗</span>
-            </a>
+      <section id="apoio" className={ryh.wrap}>
+        <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+          <span className={ryh.kicker}>{f.kicker}</span>
+          <h2 className={ryh.h2}>{f.title}</h2>
+          <div className="mt-8 grid items-start gap-10 md:mt-10 lg:grid-cols-2 lg:gap-20">
+            <div>
+              <p className="flex flex-wrap items-baseline gap-x-3.5">
+                <b className="ryh-serif text-[56px] font-normal leading-none tracking-[-0.02em] tabular-nums md:text-[72px]">{f.amount}</b>
+                <span className="ryh-serif text-[20px] text-[var(--ryh-muted)] md:text-[24px]">{f.amountLabel}</span>
+              </p>
+              <p className={cn(ryh.p, "mt-5 max-w-[24em]")}>{f.via}</p>
+              <a href={RYH.justGivingUrl} target="_blank" rel="noopener" className={cn(ryh.link, ryh.focus, "mt-6")}>
+                {f.link}
+                <span aria-hidden>↗</span>
+              </a>
+            </div>
+            <figure className="border-l-2 border-[var(--ryh-y)] pl-[22px] md:pl-7">
+              <figcaption className="mb-2 text-sm text-[var(--ryh-sage)]">{f.storyLabel}</figcaption>
+              <blockquote className="ryh-serif text-[19px] italic leading-[1.75] md:text-[21px]">
+                <p>{f.story}</p>
+              </blockquote>
+              {/* The rest of Edgar's story: only when the text exists */}
+              {f.storyRest && (
+                <details className="group mt-4">
+                  <summary
+                    className={cn(
+                      ryh.focus,
+                      "inline-flex cursor-pointer list-none items-center gap-1.5 border-b border-[var(--ryh-line)] pb-0.5 text-[15px] text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)] [&::-webkit-details-marker]:hidden",
+                    )}
+                  >
+                    {f.readFull}
+                    <span aria-hidden className="transition-transform group-open:rotate-180">
+                      ↓
+                    </span>
+                  </summary>
+                  <div className="ryh-serif mt-4 space-y-4 text-[19px] italic leading-[1.75] md:text-[21px]">
+                    {f.storyRest.split("\n\n").map((para) => (
+                      <p key={para}>{para}</p>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </figure>
           </div>
-          <figure className="border-l-2 border-[var(--ryh-y)] pl-[22px] md:pl-7">
-            <figcaption className="mb-2 text-sm text-[var(--ryh-sage)]">{f.storyLabel}</figcaption>
-            <blockquote className="ryh-serif text-[19px] italic leading-[1.75] md:text-[21px]">
-              <p>{f.story}</p>
-            </blockquote>
-            {/* The rest of Edgar's story: only when the text exists */}
-            {f.storyRest && (
-              <details className="group mt-4">
-                <summary
-                  className={cn(
-                    ryh.focus,
-                    "inline-flex cursor-pointer list-none items-center gap-1.5 border-b border-[var(--ryh-line)] pb-0.5 text-[15px] text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)] [&::-webkit-details-marker]:hidden",
-                  )}
-                >
-                  {f.readFull}
-                  <span aria-hidden className="transition-transform group-open:rotate-180">
-                    ↓
-                  </span>
-                </summary>
-                <div className="ryh-serif mt-4 space-y-4 text-[19px] italic leading-[1.75] md:text-[21px]">
-                  {f.storyRest.split("\n\n").map((para) => (
-                    <p key={para}>{para}</p>
-                  ))}
-                </div>
-              </details>
-            )}
-          </figure>
         </div>
       </section>
 
       {/* RC-9 · Stories: list with hairlines, video in a soft frame, YouTube as a link */}
-      <section id="historias" className={cn(ryh.wrap, ryh.sec, "border-t border-[var(--ryh-line)]")}>
-        <span className={ryh.kicker}>{r.stories.kicker}</span>
-        <h2 className={ryh.h2}>{r.stories.title}</h2>
-        <p className={cn(ryh.p, "max-w-[40em]")}>{r.stories.sub}</p>
-        <div className="mt-9 grid items-start gap-9 md:mt-[52px] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-          <div className="aspect-video overflow-hidden rounded-[24px] bg-[var(--ryh-soft)]">
-            <YouTubeFacade videoId={RYH.episode1VideoId} list={RYH.playlistId} title="Raise Your Hands" />
+      <section id="historias" className={ryh.wrap}>
+        <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+          <span className={ryh.kicker}>{r.stories.kicker}</span>
+          <h2 className={ryh.h2}>{r.stories.title}</h2>
+          <p className={cn(ryh.p, "max-w-[40em]")}>{r.stories.sub}</p>
+          <div className="mt-9 grid items-start gap-9 md:mt-[52px] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+            <div className="aspect-video overflow-hidden rounded-[24px] bg-[var(--ryh-soft)]">
+              <YouTubeFacade videoId={RYH.episode1VideoId} list={RYH.playlistId} title="Raise Your Hands" />
+            </div>
+            <ul>
+              {r.stories.items.map((s) => (
+                <li key={s.title} className="mb-6 border-b border-[var(--ryh-line)] pb-6 last:mb-0 last:border-0 last:pb-0">
+                  <h3 className={ryh.h3}>{s.title}</h3>
+                  <p className={cn(ryh.p, "md:text-[16.5px]")}>{s.body}</p>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul>
-            {r.stories.items.map((s) => (
-              <li key={s.title} className="mb-6 border-b border-[var(--ryh-line)] pb-6 last:mb-0 last:border-0 last:pb-0">
-                <h3 className={ryh.h3}>{s.title}</h3>
-                <p className={cn(ryh.p, "md:text-[16.5px]")}>{s.body}</p>
-              </li>
-            ))}
-          </ul>
+          <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(ryh.link, ryh.focus, "mt-9")}>
+            {r.stories.watch}
+          </a>
         </div>
-        <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(ryh.link, ryh.focus, "mt-9")}>
-          {r.stories.watch}
-        </a>
       </section>
 
       {/* RC-10 · Final call on a paper band, no waves */}

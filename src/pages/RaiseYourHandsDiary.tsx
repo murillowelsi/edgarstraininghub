@@ -2,13 +2,7 @@ import { useEffect, useState } from "react";
 import { RyhShell } from "@/components/ryh/RyhShell";
 import { ryh } from "@/components/ryh/ryhStyles";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  diaryEntries,
-  diaryPage,
-  shortDate,
-  type DiaryEntry,
-  type Inline,
-} from "@/lib/ryhDiary";
+import { diaryEntries, diaryPage, shortDate, type DiaryEntry, type Inline } from "@/lib/ryhDiary";
 import { cn } from "@/lib/utils";
 
 /*
@@ -21,13 +15,7 @@ import { cn } from "@/lib/utils";
 const InlineText = ({ parts }: { parts: Inline[] }) => (
   <>
     {parts.map((p, i) =>
-      p.kind === "strong" ? (
-        <strong key={i}>{p.text}</strong>
-      ) : p.kind === "em" ? (
-        <em key={i}>{p.text}</em>
-      ) : (
-        <span key={i}>{p.text}</span>
-      ),
+      p.kind === "strong" ? <strong key={i}>{p.text}</strong> : p.kind === "em" ? <em key={i}>{p.text}</em> : <span key={i}>{p.text}</span>,
     )}
   </>
 );
@@ -36,21 +24,14 @@ const InlineText = ({ parts }: { parts: Inline[] }) => (
 function useActiveEntry(ids: string[]) {
   const [active, setActive] = useState(ids.at(-1) ?? "");
   useEffect(() => {
-    const els = ids
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => !!el);
+    const els = ids.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => !!el);
     if (!els.length) return;
     const update = () => {
       const line = window.innerHeight / 3;
       let current = els[0].id;
-      for (const el of els)
-        if (el.getBoundingClientRect().top <= line) current = el.id;
+      for (const el of els) if (el.getBoundingClientRect().top <= line) current = el.id;
       // At the very bottom the last entry is the one being read
-      if (
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 2
-      )
-        current = els[els.length - 1].id;
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) current = els[els.length - 1].id;
       setActive(current);
     };
     update();
@@ -74,17 +55,10 @@ function Entry({ entry }: { entry: DiaryEntry }) {
       className="max-w-[65ch] scroll-mt-6 border-b border-[var(--ryh-line)] pb-16 pt-1 [&:not(:first-child)]:pt-16 last:border-0"
     >
       <p className="text-[14.5px] leading-[1.6] text-[var(--ryh-muted)]">
-        {entry.dateText} ·{" "}
-        <b className="font-medium text-[var(--ryh-sage)]">
-          {entry.kind === "Trajeto" ? d.route : d.local}:
-        </b>{" "}
-        {entry.place}
+        {entry.dateText} · <b className="font-medium text-[var(--ryh-sage)]">{entry.kind === "Trajeto" ? d.route : d.local}:</b> {entry.place}
         {entry.stage && <> · {d.stage.replace("{{n}}", entry.stage)}</>}
       </p>
-      <h2
-        id={`${entry.id}-t`}
-        className="ryh-serif mb-[22px] mt-2.5 text-[28px] font-normal leading-[1.15] tracking-[-0.015em] md:mb-[26px] md:text-[36px]"
-      >
+      <h2 id={`${entry.id}-t`} className="ryh-serif mb-[22px] mt-2.5 text-[28px] font-normal leading-[1.15] tracking-[-0.015em] md:mb-[26px] md:text-[36px]">
         {entry.title}
       </h2>
       <div className="ryh-serif space-y-5 text-[18.5px] leading-[1.75] md:text-[20px] [&_strong]:font-semibold">
@@ -109,20 +83,9 @@ function Entry({ entry }: { entry: DiaryEntry }) {
       </div>
       {/* DB-6: only when the entry has a photo, always with its description */}
       {entry.photo && (
-        <img
-          src={entry.photo.src}
-          alt={entry.photo.alt}
-          loading="lazy"
-          className="mb-1 mt-[30px] w-full rounded-[20px] bg-[var(--ryh-soft)] object-cover"
-        />
+        <img src={entry.photo.src} alt={entry.photo.alt} loading="lazy" className="mb-1 mt-[30px] w-full rounded-[20px] bg-[var(--ryh-soft)] object-cover" />
       )}
-      <a
-        href="#indice"
-        className={cn(
-          ryh.focus,
-          "mt-[26px] inline-block text-sm text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)]",
-        )}
-      >
+      <a href="#indice" className={cn(ryh.focus, "mt-[26px] inline-block text-sm text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)]")}>
         {d.back}
       </a>
     </article>
@@ -146,17 +109,10 @@ const RaiseYourHandsDiary = () => {
         <header className="max-w-[46em] pb-[34px] pt-9 md:pb-14 md:pt-[72px]">
           <span className={ryh.kicker}>{d.eyebrow}</span>
           <h1 className={ryh.h1}>{page.title}</h1>
-          <p className="text-[17px] leading-[1.7] text-[var(--ryh-muted)] md:text-[19px]">
-            {page.subtitle}
-          </p>
+          <p className="text-[17px] leading-[1.7] text-[var(--ryh-muted)] md:text-[19px]">{page.subtitle}</p>
           {latest && (
-            <a
-              href={`#${latest.id}`}
-              className={cn(ryh.link, ryh.focus, "mt-[26px] text-[15px]")}
-            >
-              {d.recent
-                .replace("{{label}}", latest.label)
-                .replace("{{date}}", shortDate(latest.date, lang))}
+            <a href={`#${latest.id}`} className={cn(ryh.link, ryh.focus, "mt-[26px] text-[15px]")}>
+              {d.recent.replace("{{label}}", latest.label).replace("{{date}}", shortDate(latest.date, lang))}
             </a>
           )}
         </header>
@@ -188,13 +144,8 @@ const RaiseYourHandsDiary = () => {
 
           <div className="pb-[72px] md:grid md:grid-cols-[200px_1fr] md:gap-14 md:border-t md:border-[var(--ryh-line)] md:pb-[120px] md:pt-14 lg:grid-cols-[230px_1fr] lg:gap-20">
             {/* DB-4: sticky index on desktop */}
-            <nav
-              aria-label={d.toc}
-              className="hidden self-start md:sticky md:top-6 md:block"
-            >
-              <b className="mb-3.5 block text-[13px] font-medium tracking-[0.02em] text-[var(--ryh-muted)]">
-                {d.toc}
-              </b>
+            <nav aria-label={d.toc} className="hidden self-start md:sticky md:top-6 md:block">
+              <b className="mb-3.5 block text-[13px] font-medium tracking-[0.02em] text-[var(--ryh-muted)]">{d.toc}</b>
               <ul className="text-[15px]">
                 {entries.map((e) => (
                   <li key={e.id}>
@@ -210,9 +161,7 @@ const RaiseYourHandsDiary = () => {
                       )}
                     >
                       {e.label}
-                      <span className="tabular-nums">
-                        {shortDate(e.date, lang)}
-                      </span>
+                      <span className="tabular-nums">{shortDate(e.date, lang)}</span>
                     </a>
                   </li>
                 ))}
