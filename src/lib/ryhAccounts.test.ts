@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { accounts, daysWithoutValues, formatMoney, invoicePhotos, recordedFood, shop, type AccountsRaw } from "./ryhAccounts";
+import { accounts, daysWithoutValues, formatMoney, invoicePhotos, recordedFood, type AccountsRaw } from "./ryhAccounts";
 import { diaryEntries } from "./ryhDiary";
 
 describe("formatMoney", () => {
@@ -40,10 +40,6 @@ describe("accounts content", () => {
     expect(invoicePhotos(day, "pt", (v) => `Fatura do Dia 2, ${v}`)[0].alt).toBe("Fatura do Dia 2, 66 €");
   });
 
-  it("starts the shop empty (Coming soon) and without a profit text", () => {
-    expect(shop.produtos).toEqual([]);
-    expect(shop.lucro.pt).toBe("");
-  });
 });
 
 /** RC-28: published images carry no EXIF/XMP metadata (GPS, camera, author) */

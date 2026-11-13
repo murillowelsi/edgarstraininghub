@@ -1,10 +1,9 @@
 /**
- * Raise Your Hands accounts (RC-23..28) and shop (RC-31..34) content.
+ * Raise Your Hands accounts (RC-23..28) content (the shop lives in ryhShop.ts).
  * The numbers live in src/content/ryh-contas/contas.json and are filled in by the user:
  * nothing here is invented. Empty values (null, "", []) are hidden in production.
  */
 import contasJson from "@/content/ryh-contas/contas.json";
-import lojaJson from "@/content/ryh-loja/produtos.json";
 import type { DiaryLang, DiaryPhoto } from "@/lib/ryhDiary";
 
 type Localized = Partial<Record<DiaryLang, string>>;
@@ -41,22 +40,7 @@ export interface AccountsRaw {
   dias: AccountsDayRaw[];
 }
 
-export interface ShopProductRaw {
-  id: string;
-  nome: Localized;
-  categoria: "tshirt" | "hoodie" | "outro";
-  preco?: string;
-  url?: string;
-  fotos?: InvoicePhotoRaw[];
-}
-
-export interface ShopRaw {
-  lucro: Localized;
-  produtos: ShopProductRaw[];
-}
-
 export const accounts = contasJson as unknown as AccountsRaw;
-export const shop = lojaJson as unknown as ShopRaw;
 
 const isNum = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n);
 

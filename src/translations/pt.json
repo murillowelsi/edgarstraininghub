@@ -2554,45 +2554,67 @@
     },
     "shop": {
       "metaTitle": "Loja (em breve) — Raise Your Hands",
-      "kicker": "Loja",
-      "title": "Em breve",
-      "lead": "Estamos a desenhar t-shirts, hoodies e outras peças inspiradas na travessia.",
-      "items": [
-        "T-shirt",
-        "Hoodie",
-        "E mais"
-      ],
-      "illustrationsNote": "Ilustrações de referência; ainda não são produtos.",
       "profitTitle": "Para onde vai o lucro",
       "profitPending": "[TEXTO A CONFIRMAR PELO USUÁRIO: para onde vai o lucro e como será mostrado nas Contas]",
       "meanwhile": "Enquanto isso, acompanhe a jornada",
       "youtube": "Seguir no YouTube",
       "instagram": "Instagram",
       "diary": "Ler o diário de bordo",
-      "merch": {
-        "soon": "Em breve",
-        "note": "Modelos em fase final; cores e medidas podem mudar.",
-        "colourLabel": "Cor",
-        "viewLabel": "Vista",
-        "pieces": {
-          "camiseta": "T-shirt",
-          "moletom": "Hoodie"
-        },
-        "colours": {
-          "areia": "Areia",
-          "grafite": "Grafite"
-        },
-        "views": {
-          "frente": "Frente",
-          "costas": "Costas"
-        },
-        "altFront": "{{piece}} {{colour}}, frente, com o logo Raise Your Hands no peito",
-        "altBack": "{{piece}} {{colour}}, costas, com o mapa de Portugal e o logo Raise Your Hands",
-        "altPieces": {
-          "camiseta": "T-shirt",
-          "moletom": "Hoodie"
-        }
-      }
+      "kicker": "Loja · Em breve",
+      "title": "Coleção Porto → Faro",
+      "lead": "A primeira coleção da travessia. Ainda não está à venda: avisamos no YouTube quando abrir.",
+      "trust": {
+        "label": "Sobre a coleção",
+        "design": "Desenho original da travessia",
+        "profit": "Lucro para a missão",
+        "launch": "Lançamento anunciado no YouTube"
+      },
+      "count": "{{n}} peças",
+      "productsLabel": "Peças da coleção",
+      "badge": "Em breve",
+      "priceSoon": "Em breve",
+      "priceNote": "preço a anunciar",
+      "priceNoteLong": "Preço a anunciar",
+      "colorsN": "{{n}} cores",
+      "color": "Cor",
+      "colorLabel": "Cor: {{cor}}",
+      "hasBack": "Também tem costas",
+      "sizes": "Tamanhos previstos",
+      "sizesNote": "As medidas de cada tamanho saem quando fecharmos o fornecedor.",
+      "notify": "Ser avisado no YouTube",
+      "notifyShort": "Ser avisado",
+      "notifyNote": "O lançamento será anunciado no canal.",
+      "instagramFollow": "Seguir no Instagram",
+      "newTab": "(abre numa nova aba)",
+      "details": {
+        "print": "Impressão",
+        "material": "Material e cuidados",
+        "shipping": "Produção e envio",
+        "profit": "Para onde vai o lucro"
+      },
+      "missionSeal": "O lucro desta peça vai para a missão.",
+      "seeAccounts": "Ver as contas",
+      "alsoIn": "Também na coleção",
+      "views": {
+        "frente": "Frente",
+        "costas": "Costas",
+        "detalhe": "Detalhe"
+      },
+      "viewOf": "Ver {{view}}",
+      "galleryLabel": "Fotos da peça",
+      "counter": "Foto {{n}} de {{total}}",
+      "prev": "Foto anterior",
+      "next": "Foto seguinte",
+      "alt": "{{type}} {{colour}}, {{view}}, com {{art}}",
+      "art": {
+        "frente": "o logo Raise Your Hands no peito",
+        "costas": "o mapa da rota Porto → Faro",
+        "detalhe": "o logo Raise Your Hands no peito em detalhe"
+      },
+      "backToShop": "Loja",
+      "breadcrumb": "Caminho",
+      "productMeta": "{{nome}} (em breve) — Raise Your Hands",
+      "pending": "[PENDENTE: {{campo}}]"
     }
   }
 }

@@ -1,5 +1,52 @@
 {
-  "_leia": "Loja Raise Your Hands (RC-31..34). Enquanto 'produtos' estiver vazio, /loja mostra o estado 'Em breve'. 'lucro' = texto do usuário sobre para onde vai o lucro; vazio = a caixa fica oculta em produção.",
+  "_leia": "Loja Raise Your Hands (SPEC loja-vitrine §6). Pré-lançamento: sem preço, sem compra. Campo vazio (\"\") ou null NÃO aparece em produção; em dev aparece como [PENDENTE]. Nomes, descrição, tamanhos e texto de impressão são SUGESTÕES do EZ Design, por aprovar pelo usuário. 'lucro' = para onde vai o lucro (vazio = oculto). Imagens: public/ryh/loja/<slug>-<cor>-<vista>-{500,1000}.webp (4:5, fundo transparente).",
   "lucro": { "pt": "", "en": "" },
-  "produtos": []
+  "produtos": [
+    {
+      "slug": "camiseta",
+      "tipo": { "pt": "T-shirt", "en": "T-shirt" },
+      "nome": { "pt": "T-shirt Porto → Faro", "en": "Porto → Faro T-shirt" },
+      "descricao": {
+        "pt": "O nome da missão no peito e a rota pela costa de Portugal, do Porto a Faro, nas costas.",
+        "en": "The mission's name on the chest and the route along Portugal's coast, from Porto to Faro, on the back."
+      },
+      "cores": [
+        { "id": "areia", "nome": { "pt": "Areia", "en": "Sand" }, "hex": "#E4D8C2" },
+        { "id": "grafite", "nome": { "pt": "Grafite", "en": "Graphite" }, "hex": "#34312D" }
+      ],
+      "detalhe": { "x": 36.5, "y": 36.3 },
+      "tamanhos": { "pt": ["P", "M", "G", "GG"], "en": ["S", "M", "L", "XL"] },
+      "impressao": {
+        "pt": "Frente: logo Raise Your Hands no peito, lado direito. Costas: mapa da rota Porto → Faro.",
+        "en": "Front: Raise Your Hands logo on the right chest. Back: map of the Porto → Faro route."
+      },
+      "material": null,
+      "envio": null,
+      "preco": null,
+      "medidas": null
+    },
+    {
+      "slug": "moletom",
+      "tipo": { "pt": "Hoodie", "en": "Hoodie" },
+      "nome": { "pt": "Hoodie Porto → Faro", "en": "Porto → Faro Hoodie" },
+      "descricao": {
+        "pt": "O nome da missão no peito e a rota pela costa de Portugal, do Porto a Faro, nas costas.",
+        "en": "The mission's name on the chest and the route along Portugal's coast, from Porto to Faro, on the back."
+      },
+      "cores": [
+        { "id": "areia", "nome": { "pt": "Areia", "en": "Sand" }, "hex": "#E4D8C2" },
+        { "id": "grafite", "nome": { "pt": "Grafite", "en": "Graphite" }, "hex": "#34312D" }
+      ],
+      "detalhe": { "x": 36.1, "y": 37.4 },
+      "tamanhos": { "pt": ["P", "M", "G", "GG"], "en": ["S", "M", "L", "XL"] },
+      "impressao": {
+        "pt": "Frente: logo Raise Your Hands no peito, lado direito. Costas: mapa da rota Porto → Faro.",
+        "en": "Front: Raise Your Hands logo on the right chest. Back: map of the Porto → Faro route."
+      },
+      "material": null,
+      "envio": null,
+      "preco": null,
+      "medidas": null
+    }
+  ]
 }

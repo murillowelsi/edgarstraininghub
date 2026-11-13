@@ -414,6 +414,8 @@
   --ryh-sage: #56705A;
   --ryh-soft: #EEE8DC;
   --ryh-band: #F0E9DC;
+  /* Product photo background ("studio"), the same in both themes: graphite pieces must stay visible in dark mode */
+  --ryh-studio: #EDE7DB;
   --ryh-map-fill: #F2EDE3;
   --ryh-btn-bg: #2B2620;
   --ryh-btn-fg: #FBF8F2;
@@ -441,6 +443,8 @@
 html.ryh-instant-scroll { scroll-behavior: auto; scroll-padding-top: 88px; }
 /* The sticky RYH bar is ~72-80px tall: anchors land just below it */
 /* Full-width paper band behind a centred section (RC-14/15): the tone change replaces the hairline */
+/* Shop swatches: in dark mode the graphite dot needs a visible edge (AA for non-text, 3:1) */
+.ryh.ryh-dark .ryh-swatch { border-color: var(--ryh-muted); }
 .ryh .ryh-band { background: var(--ryh-band); box-shadow: 0 0 0 100vmax var(--ryh-band); clip-path: inset(0 -100vmax); }
 /* Map / hero outline: same weight at any size (RC-12) */
 .ryh .ryh-outline { vector-effect: non-scaling-stroke; stroke-width: 1.6px; }

@@ -23,6 +23,7 @@ import RaiseYourHands from "./pages/RaiseYourHands";
 import RaiseYourHandsDiary from "./pages/RaiseYourHandsDiary";
 import RaiseYourHandsAccounts from "./pages/RaiseYourHandsAccounts";
 import RaiseYourHandsShop from "./pages/RaiseYourHandsShop";
+import RaiseYourHandsProduct from "./pages/RaiseYourHandsProduct";
 import NotFound from "./pages/NotFound";
 import AdminCalendar from "./pages/admin/Calendar";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -85,8 +86,10 @@ const App = () => (
                 {isRaiseYourHandsHost && <Route path="/diario" element={<RaiseYourHandsDiary />} />}
                 <Route path="/raise-your-hands/contas" element={<RaiseYourHandsAccounts />} />
                 <Route path="/raise-your-hands/loja" element={<RaiseYourHandsShop />} />
+                <Route path="/raise-your-hands/loja/:slug" element={<RaiseYourHandsProduct />} />
                 {isRaiseYourHandsHost && <Route path="/contas" element={<RaiseYourHandsAccounts />} />}
                 {isRaiseYourHandsHost && <Route path="/loja" element={<RaiseYourHandsShop />} />}
+                {isRaiseYourHandsHost && <Route path="/loja/:slug" element={<RaiseYourHandsProduct />} />}
                 <Route path="/about" element={<About />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/contact" element={<Contact />} />

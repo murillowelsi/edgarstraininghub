@@ -63,6 +63,8 @@ export default defineConfig(({ mode }) => ({
         raiseYourHandsDiary: path.resolve(__dirname, "raise-your-hands-diario.html"),
         raiseYourHandsAccounts: path.resolve(__dirname, "raise-your-hands-contas.html"),
         raiseYourHandsShop: path.resolve(__dirname, "raise-your-hands-loja.html"),
+        raiseYourHandsShopMoletom: path.resolve(__dirname, "raise-your-hands-loja-moletom.html"),
+        raiseYourHandsShopCamiseta: path.resolve(__dirname, "raise-your-hands-loja-camiseta.html"),
       },
     },
   },

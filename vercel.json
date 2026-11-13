@@ -31,6 +31,36 @@
       "destination": "/raise-your-hands-loja.html"
     },
     {
+      "source": "/loja/camiseta",
+      "has": [
+        {
+          "type": "host",
+          "value": "raiseyourhands.edgarzanin.com"
+        }
+      ],
+      "destination": "/raise-your-hands-loja-camiseta.html"
+    },
+    {
+      "source": "/loja/moletom",
+      "has": [
+        {
+          "type": "host",
+          "value": "raiseyourhands.edgarzanin.com"
+        }
+      ],
+      "destination": "/raise-your-hands-loja-moletom.html"
+    },
+    {
+      "source": "/loja/:slug",
+      "has": [
+        {
+          "type": "host",
+          "value": "raiseyourhands.edgarzanin.com"
+        }
+      ],
+      "destination": "/raise-your-hands-loja.html"
+    },
+    {
       "source": "/((?!api/|assets/|ryh/|images/|sw\\.js|workbox-|registerSW\\.js|manifest\\.webmanifest|favicon|apple-touch-icon|pwa-|robots\\.txt).*)",
       "has": [
         {
@@ -50,6 +80,18 @@
     },
     {
       "source": "/raise-your-hands/loja",
+      "destination": "/raise-your-hands-loja.html"
+    },
+    {
+      "source": "/raise-your-hands/loja/camiseta",
+      "destination": "/raise-your-hands-loja-camiseta.html"
+    },
+    {
+      "source": "/raise-your-hands/loja/moletom",
+      "destination": "/raise-your-hands-loja-moletom.html"
+    },
+    {
+      "source": "/raise-your-hands/loja/:slug",
       "destination": "/raise-your-hands-loja.html"
     },
     {

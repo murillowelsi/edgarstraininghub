@@ -2554,45 +2554,67 @@
     },
     "shop": {
       "metaTitle": "Shop (coming soon) — Raise Your Hands",
-      "kicker": "Shop",
-      "title": "Coming soon",
-      "lead": "We're designing t-shirts, hoodies and other pieces inspired by the crossing.",
-      "items": [
-        "T-shirt",
-        "Hoodie",
-        "And more"
-      ],
-      "illustrationsNote": "Reference illustrations; these are not products yet.",
       "profitTitle": "Where the profit goes",
       "profitPending": "[TEXT TO BE CONFIRMED BY THE USER: where the profit goes and how it will be shown in the Accounts]",
       "meanwhile": "In the meantime, follow the journey",
       "youtube": "Follow on YouTube",
       "instagram": "Instagram",
       "diary": "Read the logbook",
-      "merch": {
-        "soon": "Coming soon",
-        "note": "Final designs; colours and sizes may still change.",
-        "colourLabel": "Colour",
-        "viewLabel": "View",
-        "pieces": {
-          "camiseta": "T-shirt",
-          "moletom": "Kangaroo-pocket hoodie"
-        },
-        "colours": {
-          "areia": "Sand",
-          "grafite": "Graphite"
-        },
-        "views": {
-          "frente": "Front",
-          "costas": "Back"
-        },
-        "altFront": "{{colour}} {{piece}}, front, with the Raise Your Hands logo on the chest",
-        "altBack": "{{colour}} {{piece}}, back, with the map of Portugal and the Raise Your Hands logo",
-        "altPieces": {
-          "camiseta": "T-shirt",
-          "moletom": "kangaroo-pocket hoodie"
-        }
-      }
+      "kicker": "Shop · Coming soon",
+      "title": "The Porto → Faro collection",
+      "lead": "The first collection from the crossing. It isn't on sale yet: we'll announce it on YouTube when it opens.",
+      "trust": {
+        "label": "About the collection",
+        "design": "Original design from the crossing",
+        "profit": "Profit goes to the mission",
+        "launch": "Launch announced on YouTube"
+      },
+      "count": "{{n}} pieces",
+      "productsLabel": "Pieces in the collection",
+      "badge": "Coming soon",
+      "priceSoon": "Coming soon",
+      "priceNote": "price to be announced",
+      "priceNoteLong": "Price to be announced",
+      "colorsN": "{{n}} colours",
+      "color": "Colour",
+      "colorLabel": "Colour: {{cor}}",
+      "hasBack": "Also has a back view",
+      "sizes": "Planned sizes",
+      "sizesNote": "Measurements for each size will come once we choose the supplier.",
+      "notify": "Get notified on YouTube",
+      "notifyShort": "Get notified",
+      "notifyNote": "The launch will be announced on the channel.",
+      "instagramFollow": "Follow on Instagram",
+      "newTab": "(opens in a new tab)",
+      "details": {
+        "print": "Print",
+        "material": "Material and care",
+        "shipping": "Production and shipping",
+        "profit": "Where the profit goes"
+      },
+      "missionSeal": "The profit from this piece goes to the mission.",
+      "seeAccounts": "See the accounts",
+      "alsoIn": "Also in the collection",
+      "views": {
+        "frente": "Front",
+        "costas": "Back",
+        "detalhe": "Detail"
+      },
+      "viewOf": "Show {{view}}",
+      "galleryLabel": "Photos of the piece",
+      "counter": "Photo {{n}} of {{total}}",
+      "prev": "Previous photo",
+      "next": "Next photo",
+      "alt": "{{colour}} {{type}}, {{view}}, with {{art}}",
+      "art": {
+        "frente": "the Raise Your Hands logo on the chest",
+        "costas": "the map of the Porto → Faro route",
+        "detalhe": "a close-up of the Raise Your Hands logo on the chest"
+      },
+      "backToShop": "Shop",
+      "breadcrumb": "Breadcrumb",
+      "productMeta": "{{nome}} (coming soon) — Raise Your Hands",
+      "pending": "[PENDING: {{campo}}]"
     }
   }
 }
