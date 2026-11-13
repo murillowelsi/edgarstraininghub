@@ -7,14 +7,13 @@
 ## 1. Logo
 ![Prancha do logo](logo/prancha-logo.png)
 
-- **Forma:** contorno de Portugal simplificado (a partir do mapa enviado; base Natural Earth, domínio público) com o **traçado da rota** dentro, vetorizado do mesmo mapa (Matosinhos → Faro), e os pontos de início e fim.
+- **Forma:** contorno de Portugal **fiel ao mapa enviado** (base Natural Earth, domínio público), traçado pela borda da área de terra da imagem e limpo só do ruído: costa recortada, Cabo da Roca, estuários do Tejo e do Sado, Algarve. Conferido por sobreposição: [`logo/sobreposicao-contorno.png`](logo/sobreposicao-contorno.png). Com o **traçado da rota** dentro, vetorizado do mesmo mapa (Matosinhos → Faro), e os pontos de início e fim.
 - **A · linha + wordmark** (principal): contorno em linha fina, traçado em amarelo EZ, "RAISE YOUR HANDS" em Montserrat 900.
 - **B · silhueta + 7 cores** (selo): contorno preenchido e traçado nas cores das etapas (as mesmas do mapa).
-- **C · compacto** (ícone e favicon): contorno e traçado simplificados e grossos; lê em 32 px. Em 16 px vira só a forma.
+- **C · compacto** (ícone e favicon): mesma forma, mais simplificada, com traço grosso; lê em 32 px. Em 16 px vira só a forma.
 - **Arquivos:** `ryh-{a,b,c}-…-{claro,escuro}.svg` + `ryh-c-favicon.svg`.
 - **Antes de usar em produção:**
   - o texto dos SVG usa `<text>` com Montserrat; converter em contornos;
-  - a fronteira norte ficou reta na simplificação. Se o usuário quiser, refino à mão.
 - **Mãos erguidas:** ficou de fora; qualquer forma de mão virava clip-art. O traçado já sobe de Faro a Matosinhos de baixo para cima.
 
 ## 2. Landing
