@@ -1,0 +1,41 @@
+{
+  "_leia": "Prestação de contas do Raise Your Hands (RC-23..28). Campos vazios (null, \"\" ou []) NÃO aparecem em produção; em dev aparecem como marcador. Valores em número (sem símbolo). Instruções completas: src/content/ryh-contas/README.md.",
+  "angariadoGBP": 1000,
+  "doacoesEmLogisticaEUR": 0,
+  "metaFamilias": 7,
+  "familiasAtendidas": null,
+  "totalGastoAlimentosEUR": null,
+  "cambioGBPparaEUR": null,
+  "saldoEUR": null,
+  "atualizadoEm": "",
+  "dias": [
+    {
+      "diaId": "chegada",
+      "lugar": { "pt": "Porto e Vila Nova de Gaia", "en": "Porto and Vila Nova de Gaia" },
+      "numCompras": 2,
+      "valoresEUR": [259],
+      "faturas": []
+    },
+    {
+      "diaId": "dia-2",
+      "lugar": { "pt": "Chaves", "en": "Chaves" },
+      "numCompras": 3,
+      "valoresEUR": [66, 70, 98],
+      "faturas": []
+    },
+    {
+      "diaId": "dia-3",
+      "lugar": { "pt": "Castro Daire", "en": "Castro Daire" },
+      "numCompras": null,
+      "valoresEUR": [],
+      "faturas": []
+    },
+    {
+      "diaId": "dia-4",
+      "lugar": { "pt": "Mora", "en": "Mora" },
+      "numCompras": null,
+      "valoresEUR": [],
+      "faturas": []
+    }
+  ]
+}

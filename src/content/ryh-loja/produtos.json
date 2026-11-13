@@ -1,0 +1,5 @@
+{
+  "_leia": "Loja Raise Your Hands (RC-31..34). Enquanto 'produtos' estiver vazio, /loja mostra o estado 'Em breve'. 'lucro' = texto do usuário sobre para onde vai o lucro; vazio = a caixa fica oculta em produção.",
+  "lucro": { "pt": "", "en": "" },
+  "produtos": []
+}
