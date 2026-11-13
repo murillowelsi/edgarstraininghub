@@ -1,4 +1,4 @@
-/* eslint-disable i18next/no-literal-string -- only proper names here (Raise Your Hands, Matosinhos, Faro); the page copy is in translations (ryh) */
+/* eslint-disable i18next/no-literal-string -- only proper names here (Raise Your Hands, Porto, Faro); the page copy is in translations (ryh) */
 import { END, MAP_OUTLINE, STAGES, START } from "./ryhPaths";
 
 export interface StageRow {
@@ -9,7 +9,7 @@ export interface StageRow {
 
 /**
  * The route in SVG (RYH-2): Portugal, the 7 stages in their colours with numbered
- * markers, Matosinhos and Faro. The table next to it carries the same colours and is
+ * markers, Porto and Faro. The table next to it carries the same colours and is
  * the accessible version of the numbers (real <table> with headers).
  */
 export function RouteMap({ label }: { label: string }) {
@@ -29,7 +29,7 @@ export function RouteMap({ label }: { label: string }) {
       ))}
       <circle cx={START[0]} cy={START[1]} r="8" fill="hsl(var(--ryh-fg))" />
       <text x={START[0] - 16} y={START[1] + 6} textAnchor="end" fontSize="20" fontWeight="800" fill="hsl(var(--ryh-fg))">
-        Matosinhos
+        Porto
       </text>
       <circle cx={END[0]} cy={END[1]} r="8" fill="hsl(var(--ryh-fg))" />
       <text x={END[0] + 16} y={END[1] + 8} fontSize="20" fontWeight="800" fill="hsl(var(--ryh-fg))">

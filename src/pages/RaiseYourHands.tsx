@@ -170,7 +170,7 @@ const RaiseYourHands = () => {
           </div>
           <div aria-hidden className="relative mt-6 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--ryh-muted))] md:mt-11 md:text-[13px]">
             {/* eslint-disable-next-line i18next/no-literal-string -- place names */}
-            <span><i className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--ryh-terra))] align-middle" />Matosinhos</span>
+            <span><i className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--ryh-terra))] align-middle" />Porto</span>
             <em className="flex-1 border-t-2 border-dashed border-[hsl(var(--ryh-terra))]" />
             {/* eslint-disable-next-line i18next/no-literal-string -- place names */}
             <span>Faro<i className="ml-2 inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--ryh-terra))] align-middle" /></span>

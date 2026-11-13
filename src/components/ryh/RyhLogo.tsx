@@ -1,4 +1,4 @@
-/* eslint-disable i18next/no-literal-string -- only proper names here (Raise Your Hands, Matosinhos, Faro); the page copy is in translations (ryh) */
+/* eslint-disable i18next/no-literal-string -- only proper names here (Raise Your Hands, Porto, Faro); the page copy is in translations (ryh) */
 import { cn } from "@/lib/utils";
 import { END, OUTLINE_A, OUTLINE_C, ROUTE_A, ROUTE_C, START } from "./ryhPaths";
 
@@ -27,7 +27,7 @@ export function RyhLogo({
   }
   return (
     <div className={cn("flex items-center gap-5 md:gap-7", className)}>
-      <svg viewBox="-6 -6 357 717" className="h-44 w-auto shrink-0 md:h-[440px]" role="img" aria-label="Raise Your Hands: Matosinhos → Faro">
+      <svg viewBox="-6 -6 357 717" className="h-44 w-auto shrink-0 md:h-[440px]" role="img" aria-label="Raise Your Hands: Porto → Faro">
         <path d={OUTLINE_A} fill="none" stroke="hsl(var(--ryh-fg))" strokeWidth="5" strokeLinejoin="round" />
         <path d={ROUTE_A} fill="none" stroke="hsl(var(--primary))" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
         {[START, END].map(([cx, cy]) => (
@@ -43,7 +43,7 @@ export function RyhLogo({
           <span className="text-[hsl(var(--ryh-ink))]">HANDS</span>
         </b>
         <span className="mt-2 block font-sans text-[10px] font-semibold tracking-[0.2em] text-[hsl(var(--ryh-muted))] md:mt-3.5 md:text-[13px]">
-          MATOSINHOS → FARO
+          PORTO → FARO
         </span>
       </div>
     </div>
