@@ -66,14 +66,6 @@ function usePageIdentity(title: string, description: string, htmlLang: string) {
   }, []);
 }
 
-const Topo = () => (
-  <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true">
-    {Array.from({ length: 9 }, (_, i) => {
-      const y = 60 + i * 38;
-      return <path key={i} d={`M-20 ${y} C 150 ${y - 40}, 260 ${y + 60}, 420 ${y + 10} S 700 ${y - 50}, 820 ${y + 20}`} fill="none" stroke="hsl(var(--ryh-topo))" strokeWidth="1.4" />;
-    })}
-  </svg>
-);
 
 /** Pending content: a dashed box in development, nothing in production */
 const Placeholder = ({ children, className }: { children: ReactNode; className?: string }) =>
@@ -284,7 +276,6 @@ const RaiseYourHands = () => {
 
         {/* 6 · Chamada final */}
         <section className="relative border-t border-[hsl(var(--ryh-border))] bg-[hsl(var(--ryh-card))] px-[18px] py-[52px] text-center md:px-16 md:py-[88px]">
-          <Topo />
           <div className="relative mx-auto max-w-[760px]">
             <h2 className={h2}>{r.cta.title}</h2>
             <p className="text-[17px] text-[hsl(var(--ryh-muted))]">{r.cta.body}</p>
