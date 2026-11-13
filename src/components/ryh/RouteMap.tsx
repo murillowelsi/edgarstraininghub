@@ -1,4 +1,4 @@
-/* eslint-disable i18next/no-literal-string -- pt-PT-only landing: the copy is the user's exact text (ez-project/raise-your-hands/conteudo.md), not app UI to translate */
+/* eslint-disable i18next/no-literal-string -- only proper names here (Raise Your Hands, Matosinhos, Faro); the page copy is in translations (ryh) */
 import { END, MAP_OUTLINE, STAGES, START } from "./ryhPaths";
 
 export interface StageRow {

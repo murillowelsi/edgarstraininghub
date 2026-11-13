@@ -2307,5 +2307,144 @@
   },
   "howItWorks": {
     "title": "Como funciona"
+  },
+  "ryh": {
+    "meta": {
+      "title": "Raise Your Hands — Pedalando com propósito de norte a sul de Portugal"
+    },
+    "nav": {
+      "label": "Secções",
+      "purpose": "Propósito",
+      "route": "Rota",
+      "transparency": "Transparência",
+      "stories": "Histórias"
+    },
+    "hero": {
+      "badge": "PORTUGAL | 7 ETAPAS | 879,4 KM",
+      "title": "RAISE YOUR HANDS: PEDALANDO COM PROPÓSITO DE NORTE A SUL DE PORTUGAL",
+      "lead": "Muito mais do que um desafio de resistência física e superação. Uma travessia de Matosinhos a Faro movida pela fé, conectando comunidades e levando alimento, esperança e apoio direto a famílias em situação de vulnerabilidade.",
+      "follow": "Acompanhar a Jornada",
+      "seeRoute": "Ver a Rota Completa"
+    },
+    "purpose": {
+      "kicker": "01 · O propósito",
+      "title": "O QUE É O PROJETO RAISE YOUR HANDS?",
+      "p1": "Idealizado por Edgar Alan Zanin, o {{name}} nasceu da convicção de que o desporto de longa distância pode ser uma ferramenta poderosa de transformação social e espiritual.",
+      "p2": "Durante a travessia pelo interior e litoral de Portugal, cada paragem vai muito além do descanso físico. Em parceria com igrejas locais, corporações de bombeiros e instituições de caridade, identificamos famílias, idosos e pessoas que enfrentam momentos difíceis — seja por problemas de saúde, desemprego ou isolamento.",
+      "quote": "{{name}} é um convite para erguer as mãos em gratidão, fé e, acima de tudo, estender a mão para ajudar quem mais precisa pelo caminho.",
+      "photoPlaceholder": "[FOTO: paragem / entrega de mantimentos, sem rostos identificáveis sem consentimento]"
+    },
+    "route": {
+      "kicker": "02 · A rota",
+      "title": "A TRAVESSIA: DE MATOSINHOS A FARO",
+      "sub": "Uma jornada exigente pelas estradas e montanhas de Portugal, enfrentando subidas íngremes, ventos fortes e mudanças climáticas para cumprir cada etapa da missão.",
+      "kpis": [
+        {
+          "value": "879,4 km",
+          "label": "de distância total"
+        },
+        {
+          "value": "+11.094 m",
+          "label": "de ganho de elevação acumulado"
+        },
+        {
+          "value": "7 Etapas",
+          "label": "cruzando o país de norte a sul"
+        }
+      ],
+      "mapLabel": "Traçado da rota de Matosinhos a Faro, 7 etapas",
+      "table": {
+        "stage": "Etapa",
+        "distance": "Distância",
+        "elevation": "Elevação Acumulada"
+      },
+      "stageLabel": "Etapa {{n}}",
+      "stages": [
+        [
+          "168,7 km",
+          "+2.861 m"
+        ],
+        [
+          "132,1 km",
+          "+2.064 m"
+        ],
+        [
+          "114,8 km",
+          "+1.337 m"
+        ],
+        [
+          "103,2 km",
+          "+1.948 m"
+        ],
+        [
+          "103,0 km",
+          "+668 m"
+        ],
+        [
+          "116,1 km",
+          "+977 m"
+        ],
+        [
+          "141,5 km",
+          "+1.240 m"
+        ]
+      ],
+      "komoot": "Rota GPX (Komoot)",
+      "komootPlaceholder": "[LINK: Rota GPX no Komoot]"
+    },
+    "transparency": {
+      "kicker": "03 · Transparência",
+      "title": "COMPROMISSO E TRANSPARÊNCIA TOTAL",
+      "sub": "Cada cêntimo doado transforma-se diretamente em alimento na mesa de quem precisa.",
+      "pillars": [
+        {
+          "title": "100% Revertido em Alimentos",
+          "body": "Todos os custos logísticos da viagem — incluindo alojamento, combustível e alimentação da equipa — são custeados integralmente com recursos próprios. As doações destinam-se exclusivamente à compra de mantimentos nos supermercados locais."
+        },
+        {
+          "title": "Conexão com Redes Locais",
+          "body": "Trabalhamos lado a lado com líderes comunitários, pastores e entidades sociais nas vilas e cidades da rota (como Gaia, Chaves e Castro Daire) para garantir que a ajuda chegue de forma discreta e respeitosa a quem realmente precisa."
+        },
+        {
+          "title": "Prestação de Contas Aberta",
+          "body": "Todas as compras e faturas são registadas e partilhadas publicamente nos vlogs da expedição, garantindo total clareza sobre o destino de cada contribuição."
+        }
+      ]
+    },
+    "stories": {
+      "kicker": "04 · Histórias da estrada",
+      "title": "PESSOAS QUE ENCONTRÁMOS PELO CAMINHO",
+      "sub": "Mais do que quilómetros percorridos, o que marca esta jornada são as vidas tocadas em cada paragem.",
+      "items": [
+        {
+          "title": "Apoio em Vila Nova de Gaia e Chaves",
+          "body": "Entregas de compras completas para famílias e mães em situação de vulnerabilidade, realizadas com apoio da comunidade local."
+        },
+        {
+          "title": "Parceria com a Igreja e Bombeiros",
+          "body": "Em conjunto com lideranças locais, levámos mantimentos e palavras de encorajamento para casais a enfrentar graves problemas de saúde após regressarem do estrangeiro."
+        },
+        {
+          "title": "Solidariedade no Interior",
+          "body": "Ao chegarmos a pequenas vilas durante alertas meteorológicos, encontrámos um pai com deficiência visual que cria sozinho os seus três filhos — e pudemos abastecer a sua casa com mantimentos essenciais."
+        }
+      ],
+      "watch": "Assistir aos Episódios no YouTube"
+    },
+    "cta": {
+      "title": "FAÇA PARTE DESTA MISSÃO",
+      "body": "Não precisa de pedalar quase 900 quilómetros para transformar a vida de uma família. Pode impulsionar este projeto apoiando as nossas próximas rotas, partilhando os vídeos ou enviando uma mensagem de incentivo.",
+      "subscribe": "Subscrever o Canal",
+      "share": "Partilhar",
+      "linkCopied": "Link copiado"
+    },
+    "footer": {
+      "byline": "— Um projeto de Edgar Alan Zanin.",
+      "tagline": "Fé, Ciclismo de Longa Distância e Ação Social.",
+      "linksLabel": "Links",
+      "instagram": "Instagram",
+      "komoot": "Rota GPX (Komoot)",
+      "contact": "Contacto"
+    }
   }
 }

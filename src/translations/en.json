@@ -2307,5 +2307,144 @@
   },
   "howItWorks": {
     "title": "How it works"
+  },
+  "ryh": {
+    "meta": {
+      "title": "Raise Your Hands — Cycling with purpose from north to south of Portugal"
+    },
+    "nav": {
+      "label": "Sections",
+      "purpose": "Purpose",
+      "route": "Route",
+      "transparency": "Transparency",
+      "stories": "Stories"
+    },
+    "hero": {
+      "badge": "PORTUGAL | 7 STAGES | 879.4 KM",
+      "title": "RAISE YOUR HANDS: CYCLING WITH PURPOSE FROM NORTH TO SOUTH OF PORTUGAL",
+      "lead": "Much more than a challenge of physical endurance and self-overcoming. A crossing from Matosinhos to Faro driven by faith, connecting communities and bringing food, hope and direct support to families in vulnerable situations.",
+      "follow": "Follow the Journey",
+      "seeRoute": "See the Full Route"
+    },
+    "purpose": {
+      "kicker": "01 · The purpose",
+      "title": "WHAT IS THE RAISE YOUR HANDS PROJECT?",
+      "p1": "Conceived by Edgar Alan Zanin, {{name}} was born from the conviction that long-distance sport can be a powerful tool for social and spiritual transformation.",
+      "p2": "During the crossing through the interior and the coast of Portugal, each stop goes far beyond physical rest. In partnership with local churches, fire brigades and charities, we identify families, elderly people and others going through difficult times — whether due to health problems, unemployment or isolation.",
+      "quote": "{{name}} is an invitation to raise your hands in gratitude and faith and, above all, to reach out a hand to help those most in need along the way.",
+      "photoPlaceholder": "[PHOTO: stop / food delivery, no identifiable faces without consent]"
+    },
+    "route": {
+      "kicker": "02 · The route",
+      "title": "THE CROSSING: FROM MATOSINHOS TO FARO",
+      "sub": "A demanding journey along the roads and mountains of Portugal, facing steep climbs, strong winds and changing weather to complete each stage of the mission.",
+      "kpis": [
+        {
+          "value": "879.4 km",
+          "label": "total distance"
+        },
+        {
+          "value": "+11,094 m",
+          "label": "accumulated elevation gain"
+        },
+        {
+          "value": "7 Stages",
+          "label": "crossing the country from north to south"
+        }
+      ],
+      "mapLabel": "Route from Matosinhos to Faro, 7 stages",
+      "table": {
+        "stage": "Stage",
+        "distance": "Distance",
+        "elevation": "Accumulated Elevation"
+      },
+      "stageLabel": "Stage {{n}}",
+      "stages": [
+        [
+          "168.7 km",
+          "+2,861 m"
+        ],
+        [
+          "132.1 km",
+          "+2,064 m"
+        ],
+        [
+          "114.8 km",
+          "+1,337 m"
+        ],
+        [
+          "103.2 km",
+          "+1,948 m"
+        ],
+        [
+          "103.0 km",
+          "+668 m"
+        ],
+        [
+          "116.1 km",
+          "+977 m"
+        ],
+        [
+          "141.5 km",
+          "+1,240 m"
+        ]
+      ],
+      "komoot": "GPX Route (Komoot)",
+      "komootPlaceholder": "[LINK: GPX route on Komoot]"
+    },
+    "transparency": {
+      "kicker": "03 · Transparency",
+      "title": "COMMITMENT AND FULL TRANSPARENCY",
+      "sub": "Every cent donated turns directly into food on the table of those in need.",
+      "pillars": [
+        {
+          "title": "100% Turned into Food",
+          "body": "All the trip's logistics costs — including accommodation, fuel and the team's meals — are covered entirely with our own resources. Donations go exclusively to buying groceries at local supermarkets."
+        },
+        {
+          "title": "Connection with Local Networks",
+          "body": "We work side by side with community leaders, pastors and social organisations in the towns and cities along the route (such as Gaia, Chaves and Castro Daire) to make sure help reaches those who truly need it in a discreet and respectful way."
+        },
+        {
+          "title": "Open Accountability",
+          "body": "All purchases and invoices are recorded and shared publicly in the expedition vlogs, ensuring full clarity about where each contribution goes."
+        }
+      ]
+    },
+    "stories": {
+      "kicker": "04 · Stories from the road",
+      "title": "PEOPLE WE MET ALONG THE WAY",
+      "sub": "More than the kilometres travelled, what marks this journey are the lives touched at every stop.",
+      "items": [
+        {
+          "title": "Support in Vila Nova de Gaia and Chaves",
+          "body": "Deliveries of full grocery shops to families and mothers in vulnerable situations, carried out with the support of the local community."
+        },
+        {
+          "title": "Partnership with the Church and Fire Brigade",
+          "body": "Together with local leaders, we brought groceries and words of encouragement to couples facing serious health problems after returning from abroad."
+        },
+        {
+          "title": "Solidarity in the Interior",
+          "body": "Arriving in small villages during weather warnings, we met a visually impaired father raising his three children on his own — and we were able to stock his home with essential groceries."
+        }
+      ],
+      "watch": "Watch the Episodes on YouTube"
+    },
+    "cta": {
+      "title": "BE PART OF THIS MISSION",
+      "body": "You don't need to cycle almost 900 kilometres to transform a family's life. You can boost this project by supporting our next routes, sharing the videos or sending a message of encouragement.",
+      "subscribe": "Subscribe to the Channel",
+      "share": "Share",
+      "linkCopied": "Link copied"
+    },
+    "footer": {
+      "byline": "— A project by Edgar Alan Zanin.",
+      "tagline": "Faith, Long-Distance Cycling and Social Action.",
+      "linksLabel": "Links",
+      "instagram": "Instagram",
+      "komoot": "GPX Route (Komoot)",
+      "contact": "Contact"
+    }
   }
 }
