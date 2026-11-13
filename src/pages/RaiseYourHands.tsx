@@ -1,23 +1,23 @@
-import { Fragment, useEffect, type ReactNode } from "react";
-import { HandHelping, MapPin, Mountain, Play, Route as RouteIcon, Share2, Youtube } from "lucide-react";
+import { Fragment, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import YouTubeFacade from "@/components/YouTubeFacade";
 import { RyhLogo } from "@/components/ryh/RyhLogo";
 import { RouteMap, StageTable, type StageRow } from "@/components/ryh/RouteMap";
-import { RYH, showPlaceholders } from "@/config/raiseYourHands";
+import { RyhShell } from "@/components/ryh/RyhShell";
+import { ryh } from "@/components/ryh/ryhStyles";
+import { RYH, ryhPaths, showPlaceholders } from "@/config/raiseYourHands";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { diaryEntries, firstSentence } from "@/lib/ryhDiary";
 
 /*
- * Raise Your Hands landing (docs/design/raise-your-hands, RYH-1..8), in PT and EN.
- * The copy lives in translations (namespace "ryh"): PT is the user's exact pt-PT text
- * (ez-project/raise-your-hands/conteudo.md); EN is a faithful translation of it.
- * Decisions: elevation total stays "+11.094 m" as in the text; no "Quero Apoiar o
- * Projeto" button (final call = Subscribe + Share).
+ * Raise Your Hands landing, calm version (ez-project/raise-your-hands/redesign/NOTA.md,
+ * RC-1..13). Copy in translations (namespace "ryh"): PT is the user's pt-PT text, EN a
+ * faithful translation. Main hero: text on the left, logo trace on the right, no wordmark.
  */
 
-/** "{{name}}" in a sentence becomes the bold project name */
+/** "{{name}}" in a sentence becomes the project name */
 const withName = (text: string, name: ReactNode) =>
   text.split("{{name}}").map((part, i) => (
     <Fragment key={i}>
@@ -26,71 +26,22 @@ const withName = (text: string, name: ReactNode) =>
     </Fragment>
   ));
 
-/** Own title, favicon and description while on this page (the static HTML entry has them for crawlers) */
-function usePageIdentity(title: string, description: string, htmlLang: string) {
-  // <html lang>: the language context sets "pt"/"en" in its own effect (it runs after
-  // this page's), so this one runs right after it to make it "pt-PT" / "en"
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      document.documentElement.lang = htmlLang;
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, [htmlLang]);
-
-  useEffect(() => {
-    document.title = title;
-    const desc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    if (desc) desc.content = description;
-  }, [title, description]);
-
-  useEffect(() => {
-    const prevTitle = document.title;
-    const prevLang = document.documentElement.lang;
-    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    const prevIcon = icon ? { href: icon.href, type: icon.type } : null;
-    if (icon) {
-      icon.href = "/ryh/favicon.svg";
-      icon.type = "image/svg+xml";
-    }
-    const desc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    const prevDesc = desc?.content;
-    return () => {
-      document.title = prevTitle;
-      document.documentElement.lang = prevLang;
-      if (icon && prevIcon) {
-        icon.href = prevIcon.href;
-        icon.type = prevIcon.type;
-      }
-      if (desc && prevDesc !== undefined) desc.content = prevDesc;
-    };
-  }, []);
-}
-
-
-/** Pending content: a dashed box in development, nothing in production */
+/** Pending content: a soft box in development, nothing in production */
 const Placeholder = ({ children, className }: { children: ReactNode; className?: string }) =>
   showPlaceholders ? (
-    <div className={cn("grid place-items-center rounded-[20px] border-2 border-dashed border-[hsl(var(--ryh-border))] p-5 text-center text-[13px] font-semibold text-[hsl(var(--ryh-muted))]", className)}>
-      {children}
-    </div>
+    <div className={cn("grid place-items-center rounded-[28px] bg-[var(--ryh-soft)] p-6 text-center text-[13px] text-[var(--ryh-muted)]", className)}>{children}</div>
   ) : null;
-
-const btnPrimary =
-  "inline-flex h-[50px] items-center justify-center gap-2.5 rounded-xl bg-primary px-5 text-[15px] font-bold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
-const btnSecondary =
-  "inline-flex h-[50px] items-center justify-center gap-2.5 rounded-xl border border-[hsl(var(--ryh-border))] bg-[hsl(var(--ryh-card))] px-5 text-[15px] font-bold transition-colors hover:bg-[hsl(var(--ryh-s2))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
-const kicker = "text-xs font-bold uppercase tracking-[0.14em] text-[hsl(var(--ryh-terra))]";
-const h2 = "mt-2.5 mb-4 font-display text-[25px] font-extrabold leading-[1.1] md:text-4xl";
-const card = "rounded-[20px] border border-[hsl(var(--ryh-border))] bg-[hsl(var(--ryh-card))]";
 
 const RaiseYourHands = () => {
   const { t, language } = useLanguage();
   const r = t.ryh;
-  const pageLang = language === "pt" ? "pt-PT" : "en";
-  usePageIdentity(r.meta.title, r.hero.lead, pageLang);
+  const lang = language === "pt" ? "pt" : "en";
   const { toast } = useToast();
   // eslint-disable-next-line i18next/no-literal-string -- project name, same in every language
-  const projectName = <b className="text-[hsl(var(--ryh-fg))]">Raise Your Hands</b>;
+  const projectName = <strong className="font-medium text-[var(--ryh-fg)]">Raise Your Hands</strong>;
+
+  // RC-5: the most recent logbook entry
+  const latest = diaryEntries(lang).at(-1);
 
   const stageRows: StageRow[] = r.route.stages.map(([distance, elevation], i) => ({
     label: r.route.stageLabel.replace("{{n}}", String(i + 1)),
@@ -98,7 +49,7 @@ const RaiseYourHands = () => {
     elevation,
   }));
 
-  // RYH-6: native share sheet, else copy the link
+  // Native share sheet, else copy the link
   const share = async () => {
     const data = { title: r.meta.title, text: r.hero.lead, url: RYH.publicUrl };
     try {
@@ -113,210 +64,208 @@ const RaiseYourHands = () => {
     }
   };
 
-  const footerLinks = [
-    { label: "YouTube", href: RYH.channelUrl },
-    { label: r.footer.instagram, href: RYH.instagramUrl },
-    { label: r.footer.komoot, href: RYH.komootUrl },
-  ];
+  const f = r.fundraising;
 
   return (
-    <div lang={pageLang} className="ryh min-h-screen bg-[hsl(var(--ryh-bg))] text-[hsl(var(--ryh-fg))]">
-      <header className="flex items-center gap-7 border-b border-[hsl(var(--ryh-border))] px-[18px] py-3.5 md:px-16 md:py-[18px]">
-        <a href="#topo" className="flex items-center gap-2.5 font-display text-[13px] font-extrabold tracking-[0.14em] md:text-[15px]">
-          <RyhLogo variant="mark" className="h-[30px]" />
-          {/* eslint-disable-next-line i18next/no-literal-string -- project name, same in every language */}
-          <span className="hidden whitespace-nowrap min-[360px]:inline">RAISE YOUR HANDS</span>
-        </a>
-        <nav aria-label={r.nav.label} className="ml-auto hidden gap-[22px] text-sm text-[hsl(var(--ryh-muted))] md:flex">
-          <a href="#proposito" className="hover:text-[hsl(var(--ryh-fg))]">{r.nav.purpose}</a>
-          <a href="#rota" className="hover:text-[hsl(var(--ryh-fg))]">{r.nav.route}</a>
-          <a href="#transparencia" className="hover:text-[hsl(var(--ryh-fg))]">{r.nav.transparency}</a>
-          <a href="#historias" className="hover:text-[hsl(var(--ryh-fg))]">{r.nav.stories}</a>
-        </nav>
-        {/* Same flags as the site's navbar */}
-        <div className="ml-auto md:ml-0">
-          <LanguageSwitcher />
-        </div>
-        <a href={RYH.siteUrl} className="border-l border-[hsl(var(--ryh-border))] pl-4 font-display text-lg font-extrabold text-[hsl(var(--ryh-ink))] md:pl-[22px]" aria-label="Edgar Zanin">
-          EZ
-        </a>
-      </header>
-
-      <main>
-        {/* 1 · Hero */}
-        {/* Plain background (user's choice): no topographic lines behind the hero */}
-        <section id="topo" className="relative overflow-hidden px-[18px] pb-6 pt-8 md:px-16 md:pb-10 md:pt-[72px]">
-          <div className="relative grid items-center gap-[22px] lg:grid-cols-[1.15fr_1fr] lg:gap-12">
-            <div className="order-2 lg:order-1">
-              <span className="inline-block rounded-full border border-[hsl(var(--ryh-terra))] px-3 py-[7px] text-xs font-bold tracking-[0.16em] text-[hsl(var(--ryh-terra))]">
-                {r.hero.badge}
-              </span>
-              <h1 className="my-[18px] font-display text-[30px] font-black leading-[1.04] tracking-[-0.01em] md:text-[54px]">
-                {r.hero.title}
-              </h1>
-              <p className="max-w-[600px] text-base text-[hsl(var(--ryh-muted))] md:text-lg">{r.hero.lead}</p>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={btnPrimary}>
-                  <Play className="h-4 w-4 fill-current" aria-hidden />
-                  {r.hero.follow}
-                </a>
-                <a href="#rota" className={btnSecondary}>
-                  <RouteIcon className="h-4 w-4" aria-hidden />
-                  {r.hero.seeRoute}
-                </a>
-              </div>
+    <RyhShell page="landing" title={r.meta.title} description={r.hero.lead}>
+      {/* RC-4 · Hero: text left, logo trace right (no wordmark, no pill, no waves) */}
+      <section id="topo" className={ryh.wrap}>
+        <div className="grid items-center gap-7 pb-16 pt-7 md:pb-24 md:pt-[72px] lg:grid-cols-[1.25fr_1fr] lg:gap-16">
+          <div>
+            <span className={ryh.kicker}>{r.hero.eyebrow}</span>
+            <h1 className={ryh.h1}>{r.hero.title}</h1>
+            <p className={ryh.lead}>{r.hero.lead}</p>
+            <div className="mt-[26px] flex flex-wrap items-center gap-[18px] md:mt-[34px] md:gap-[22px]">
+              <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(ryh.btn, ryh.focus)}>
+                {r.hero.follow}
+              </a>
+              <a href="#rota" className={cn(ryh.link, ryh.focus)}>
+                {r.hero.seeRoute}
+              </a>
             </div>
-            <RyhLogo className="order-1 lg:order-2 lg:justify-center" />
           </div>
-          <div aria-hidden className="relative mt-6 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--ryh-muted))] md:mt-11 md:text-[13px]">
-            {/* eslint-disable-next-line i18next/no-literal-string -- place names */}
-            <span><i className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--ryh-terra))] align-middle" />Porto</span>
-            <em className="flex-1 border-t-2 border-dashed border-[hsl(var(--ryh-terra))]" />
-            {/* eslint-disable-next-line i18next/no-literal-string -- place names */}
-            <span>Faro<i className="ml-2 inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--ryh-terra))] align-middle" /></span>
+          <RyhLogo variant="trace" className="-order-1 justify-start lg:order-none lg:justify-center" />
+        </div>
+      </section>
+
+      {/* RC-5 · From the logbook: the most recent entry */}
+      {latest && (
+        <section aria-labelledby="ryh-latest" className={ryh.wrap}>
+          <div className="grid items-center gap-2.5 border-y border-[var(--ryh-line)] py-[26px] md:grid-cols-[220px_1fr_auto] md:gap-10 md:py-[34px]">
+            <p className="text-sm leading-normal text-[var(--ryh-muted)]">
+              <b className="block font-medium text-[var(--ryh-sage)]">{r.latest.label}</b>
+              {latest.dateText}
+            </p>
+            <div>
+              <h2 id="ryh-latest" className="ryh-serif mb-1.5 text-[21px] font-normal leading-[1.25] tracking-[-0.015em] md:text-[25px]">
+                {latest.title}
+              </h2>
+              <p className="max-w-[52em] text-base leading-[1.7] text-[var(--ryh-muted)]">{firstSentence(latest)}</p>
+            </div>
+            <Link to={`${ryhPaths.diary}#${latest.id}`} className={cn(ryh.link, ryh.focus, "mt-2 justify-self-start md:mt-0")}>
+              {r.latest.read}
+            </Link>
           </div>
         </section>
+      )}
 
-        {/* 2 · Propósito */}
-        <section id="proposito" className="grid items-center gap-[22px] border-t border-[hsl(var(--ryh-border))] px-[18px] py-11 md:px-16 md:py-[72px] lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+      {/* RC-6 · Purpose: pull quote without a box; optional photo on a soft background */}
+      <section id="proposito" className={cn(ryh.wrap, ryh.sec)}>
+        <div className="grid items-center gap-9 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
           <div>
-            <span className={kicker}>{r.purpose.kicker}</span>
-            <h2 className={h2}>{r.purpose.title}</h2>
-            <div className="max-w-[720px] space-y-3 text-base text-[hsl(var(--ryh-muted))]">
+            <span className={ryh.kicker}>{r.purpose.kicker}</span>
+            <h2 className={ryh.h2}>{r.purpose.title}</h2>
+            <div className={cn(ryh.p, "space-y-3.5")}>
               <p>{withName(r.purpose.p1, projectName)}</p>
               <p>{r.purpose.p2}</p>
             </div>
-            <blockquote className="mt-[18px] rounded-r-[14px] border-l-4 border-primary bg-[hsl(var(--ryh-card))] px-5 py-4 text-[17px]">
+            <blockquote className="ryh-serif mt-[30px] border-l-2 border-[var(--ryh-y)] pl-[22px] text-[22px] italic leading-[1.45] md:text-[27px]">
               {/* eslint-disable-next-line i18next/no-literal-string -- project name */}
-              {withName(r.purpose.quote, <b>"Raise Your Hands"</b>)}
+              {withName(r.purpose.quote, <>"Raise Your Hands"</>)}
             </blockquote>
           </div>
           {RYH.purposePhoto.src ? (
-            <img src={RYH.purposePhoto.src} alt={RYH.purposePhoto.alt} loading="lazy" className="h-[220px] w-full rounded-[20px] object-cover md:h-[380px]" />
+            <img src={RYH.purposePhoto.src} alt={RYH.purposePhoto.alt} loading="lazy" className="aspect-[4/3] w-full rounded-[28px] bg-[var(--ryh-soft)] object-cover lg:aspect-[4/5]" />
           ) : (
-            <Placeholder className="h-[220px] md:h-[380px]">{r.purpose.photoPlaceholder}</Placeholder>
+            <Placeholder className="aspect-[4/3] lg:aspect-[4/5]">{r.purpose.photoPlaceholder}</Placeholder>
           )}
-        </section>
+        </div>
+      </section>
 
-        {/* 3 · Rota */}
-        <section id="rota" className="border-t border-[hsl(var(--ryh-border))] px-[18px] py-11 md:px-16 md:py-[72px]">
-          <span className={kicker}>{r.route.kicker}</span>
-          <h2 className={h2}>{r.route.title}</h2>
-          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">{r.route.sub}</p>
-          <ul className="my-7 grid gap-2.5 md:grid-cols-3 md:gap-3.5">
-            {r.route.kpis.map(({ value: n, label: l }) => (
-              <li key={n} className={cn(card, "px-[22px] py-5")}>
-                <b className="block font-display text-[30px] font-black tabular-nums md:text-[40px]">{n}</b>
-                <span className="text-sm text-[hsl(var(--ryh-muted))]">{l}</span>
+      {/* RC-7 · Route: numbers in a row, soft map, table with hairlines */}
+      <section id="rota" className={cn(ryh.wrap, ryh.sec, "border-t border-[var(--ryh-line)]")}>
+        <span className={ryh.kicker}>{r.route.kicker}</span>
+        <h2 className={ryh.h2}>{r.route.title}</h2>
+        <p className={cn(ryh.p, "max-w-[40em]")}>{r.route.sub}</p>
+        <ul className="mb-9 mt-[30px] flex flex-wrap gap-[26px] md:mb-[52px] md:mt-11 md:gap-[72px]">
+          {r.route.kpis.map(({ value, label }) => (
+            <li key={value}>
+              <b className="ryh-serif block text-[34px] font-normal leading-none tracking-[-0.02em] tabular-nums md:text-[46px]">{value}</b>
+              <span className="text-[15px] text-[var(--ryh-muted)]">{label}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="grid items-center gap-9 lg:grid-cols-[1fr_1.15fr] lg:gap-[72px]">
+          <RouteMap label={r.route.mapLabel} />
+          <StageTable rows={stageRows} headers={[r.route.table.stage, r.route.table.distance, r.route.table.elevation]} />
+        </div>
+        {RYH.komootUrl ? (
+          <a
+            href={RYH.komootUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(ryh.focus, "mt-[26px] inline-block text-[15px] text-[var(--ryh-muted)] underline decoration-[var(--ryh-line)] underline-offset-4 hover:text-[var(--ryh-fg)]")}
+          >
+            {r.route.komoot}
+          </a>
+        ) : (
+          <Placeholder className="mt-[26px] inline-grid rounded-xl px-4 py-2">{r.route.komootPlaceholder}</Placeholder>
+        )}
+      </section>
+
+      {/* RC-8 · Transparency: serif numerals in sage, no cards */}
+      <section id="transparencia" className={cn(ryh.wrap, ryh.sec, "border-t border-[var(--ryh-line)]")}>
+        <span className={ryh.kicker}>{r.transparency.kicker}</span>
+        <h2 className={ryh.h2}>{r.transparency.title}</h2>
+        <p className={cn(ryh.p, "max-w-[40em]")}>{r.transparency.sub}</p>
+        <ol className="mt-10 grid gap-10 md:mt-[52px] md:grid-cols-3 md:gap-14">
+          {r.transparency.pillars.map(({ title, body }, i) => (
+            <li key={title}>
+              <span aria-hidden className="ryh-serif mb-[18px] block text-[40px] leading-none text-[var(--ryh-sage)]">
+                {i + 1}
+              </span>
+              <h3 className={ryh.h3}>{title}</h3>
+              <p className={cn(ryh.p, "md:text-[16.5px]")}>{body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* RC-13 · Support: where the money came from (no "Donate" button, no £840, no supporter count) */}
+      <section id="apoio" className={cn(ryh.wrap, ryh.sec, "border-t border-[var(--ryh-line)]")}>
+        <span className={ryh.kicker}>{f.kicker}</span>
+        <h2 className={ryh.h2}>{f.title}</h2>
+        <div className="mt-8 grid items-start gap-10 md:mt-10 lg:grid-cols-2 lg:gap-20">
+          <div>
+            <p className="flex flex-wrap items-baseline gap-x-3.5">
+              <b className="ryh-serif text-[56px] font-normal leading-none tracking-[-0.02em] tabular-nums md:text-[72px]">{f.amount}</b>
+              <span className="ryh-serif text-[20px] text-[var(--ryh-muted)] md:text-[24px]">{f.amountLabel}</span>
+            </p>
+            <p className={cn(ryh.p, "mt-5 max-w-[24em]")}>{f.via}</p>
+            <a href={RYH.justGivingUrl} target="_blank" rel="noopener" className={cn(ryh.link, ryh.focus, "mt-6")}>
+              {f.link}
+              <span aria-hidden>↗</span>
+            </a>
+          </div>
+          <figure className="border-l-2 border-[var(--ryh-y)] pl-[22px] md:pl-7">
+            <figcaption className="mb-2 text-sm text-[var(--ryh-sage)]">{f.storyLabel}</figcaption>
+            <blockquote className="ryh-serif text-[19px] italic leading-[1.75] md:text-[21px]">
+              <p>{f.story}</p>
+            </blockquote>
+            {/* The rest of Edgar's story: only when the text exists */}
+            {f.storyRest && (
+              <details className="group mt-4">
+                <summary
+                  className={cn(
+                    ryh.focus,
+                    "inline-flex cursor-pointer list-none items-center gap-1.5 border-b border-[var(--ryh-line)] pb-0.5 text-[15px] text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)] [&::-webkit-details-marker]:hidden",
+                  )}
+                >
+                  {f.readFull}
+                  <span aria-hidden className="transition-transform group-open:rotate-180">
+                    ↓
+                  </span>
+                </summary>
+                <div className="ryh-serif mt-4 space-y-4 text-[19px] italic leading-[1.75] md:text-[21px]">
+                  {f.storyRest.split("\n\n").map((para) => (
+                    <p key={para}>{para}</p>
+                  ))}
+                </div>
+              </details>
+            )}
+          </figure>
+        </div>
+      </section>
+
+      {/* RC-9 · Stories: list with hairlines, video in a soft frame, YouTube as a link */}
+      <section id="historias" className={cn(ryh.wrap, ryh.sec, "border-t border-[var(--ryh-line)]")}>
+        <span className={ryh.kicker}>{r.stories.kicker}</span>
+        <h2 className={ryh.h2}>{r.stories.title}</h2>
+        <p className={cn(ryh.p, "max-w-[40em]")}>{r.stories.sub}</p>
+        <div className="mt-9 grid items-start gap-9 md:mt-[52px] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          <div className="aspect-video overflow-hidden rounded-[24px] bg-[var(--ryh-soft)]">
+            <YouTubeFacade videoId={RYH.episode1VideoId} list={RYH.playlistId} title="Raise Your Hands" />
+          </div>
+          <ul>
+            {r.stories.items.map((s) => (
+              <li key={s.title} className="mb-6 border-b border-[var(--ryh-line)] pb-6 last:mb-0 last:border-0 last:pb-0">
+                <h3 className={ryh.h3}>{s.title}</h3>
+                <p className={cn(ryh.p, "md:text-[16.5px]")}>{s.body}</p>
               </li>
             ))}
           </ul>
-          <div className="grid items-stretch gap-3.5 lg:grid-cols-[1fr_1.1fr]">
-            <div className={cn(card, "p-4 md:p-[22px]")}>
-              <RouteMap label={r.route.mapLabel} />
-            </div>
-            <div className={cn(card, "p-4 md:p-[22px]")}>
-              <StageTable rows={stageRows} headers={[r.route.table.stage, r.route.table.distance, r.route.table.elevation]} />
-            </div>
-          </div>
-          {RYH.komootUrl ? (
-            <a href={RYH.komootUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--ryh-ink))]">
-              <RouteIcon className="h-[15px] w-[15px]" aria-hidden />
-              {r.route.komoot}
-            </a>
-          ) : (
-            <Placeholder className="mt-4 inline-grid">{r.route.komootPlaceholder}</Placeholder>
-          )}
-        </section>
-
-        {/* 4 · Transparência */}
-        <section id="transparencia" className="border-t border-[hsl(var(--ryh-border))] px-[18px] py-11 md:px-16 md:py-[72px]">
-          <span className={kicker}>{r.transparency.kicker}</span>
-          <h2 className={h2}>{r.transparency.title}</h2>
-          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">{r.transparency.sub}</p>
-          <ol className="mt-7 grid gap-3.5 md:grid-cols-3">
-            {r.transparency.pillars.map(({ title, body }, i) => (
-              <li key={title} className={cn(card, "p-6")}>
-                <span className="mb-3.5 grid h-10 w-10 place-items-center rounded-xl bg-primary font-display text-lg font-black text-primary-foreground">{i + 1}</span>
-                <h3 className="mb-2 font-display text-lg font-bold leading-tight">{title}</h3>
-                <p className="text-[15px] text-[hsl(var(--ryh-muted))]">{body}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* 5 · Histórias */}
-        <section id="historias" className="border-t border-[hsl(var(--ryh-border))] px-[18px] py-11 md:px-16 md:py-[72px]">
-          <span className={kicker}>{r.stories.kicker}</span>
-          <h2 className={h2}>{r.stories.title}</h2>
-          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">{r.stories.sub}</p>
-          <div className="mt-7 grid items-start gap-5 lg:grid-cols-[1.1fr_1fr]">
-            <div className="aspect-video overflow-hidden rounded-[20px] border border-[hsl(var(--ryh-border))]">
-              <YouTubeFacade videoId={RYH.episode1VideoId} list={RYH.playlistId} title="Raise Your Hands" />
-            </div>
-            <ul className="grid gap-3.5">
-              {r.stories.items.map((item, i) => ({ ...item, icon: [MapPin, HandHelping, Mountain][i] ?? MapPin })).map((s) => (
-                <li key={s.title} className={cn(card, "flex gap-3.5 p-[18px]")}>
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[hsl(var(--ryh-terra)/0.16)] text-[hsl(var(--ryh-terra))]">
-                    <s.icon className="h-4 w-4" aria-hidden />
-                  </span>
-                  <div>
-                    <h3 className="mb-2 font-display text-lg font-bold leading-tight">{s.title}</h3>
-                    <p className="text-[15px] text-[hsl(var(--ryh-muted))]">{s.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(btnSecondary, "mt-[22px] w-full sm:w-auto")}>
-            <Youtube className="h-4 w-4" aria-hidden />
-            {r.stories.watch}
-          </a>
-        </section>
-
-        {/* 6 · Chamada final */}
-        <section className="relative border-t border-[hsl(var(--ryh-border))] bg-[hsl(var(--ryh-card))] px-[18px] py-[52px] text-center md:px-16 md:py-[88px]">
-          <div className="relative mx-auto max-w-[760px]">
-            <h2 className={h2}>{r.cta.title}</h2>
-            <p className="text-[17px] text-[hsl(var(--ryh-muted))]">{r.cta.body}</p>
-            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-              <a href={RYH.subscribeUrl} target="_blank" rel="noopener noreferrer" className={btnPrimary}>
-                <Youtube className="h-4 w-4" aria-hidden />
-                {r.cta.subscribe}
-              </a>
-              <button type="button" onClick={() => void share()} className={btnSecondary}>
-                <Share2 className="h-4 w-4" aria-hidden />
-                {r.cta.share}
-              </button>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="flex flex-col items-start justify-between gap-6 border-t border-[hsl(var(--ryh-border))] px-[18px] py-6 text-sm text-[hsl(var(--ryh-muted))] md:flex-row md:items-center md:px-16 md:py-7">
-        <div>
-          {/* eslint-disable-next-line i18next/no-literal-string -- project name */}
-          <b className="tracking-[0.08em] text-[hsl(var(--ryh-fg))]">RAISE YOUR HANDS</b> {r.footer.byline}
-          <br />
-          <i>{r.footer.tagline}</i>
         </div>
-        <nav aria-label={r.footer.linksLabel} className="flex flex-wrap gap-[18px]">
-          {footerLinks.map((l) =>
-            l.href ? (
-              <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" className="font-semibold text-[hsl(var(--ryh-fg))] hover:underline">
-                {l.label}
-              </a>
-            ) : showPlaceholders ? (
-              // eslint-disable-next-line i18next/no-literal-string -- dev-only marker, never shown in production
-              <span key={l.label} className="font-semibold text-[hsl(var(--ryh-ink))]">{l.label} [LINK]</span>
-            ) : null
-          )}
-          <a href={RYH.contactUrl} className="font-semibold text-[hsl(var(--ryh-fg))] hover:underline">
-            {r.footer.contact}
-          </a>
-        </nav>
-      </footer>
-    </div>
+        <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(ryh.link, ryh.focus, "mt-9")}>
+          {r.stories.watch}
+        </a>
+      </section>
+
+      {/* RC-10 · Final call on a paper band, no waves */}
+      <section className="bg-[var(--ryh-paper)] py-[76px] text-center md:py-[120px]">
+        <div className={ryh.wrap}>
+          <h2 className={ryh.h2}>{r.cta.title}</h2>
+          <p className={cn(ryh.p, "mx-auto max-w-[36em]")}>{r.cta.body}</p>
+          <div className="mt-[26px] flex flex-wrap items-center justify-center gap-[18px] md:mt-[34px] md:gap-[22px]">
+            <a href={RYH.subscribeUrl} target="_blank" rel="noopener noreferrer" className={cn(ryh.btn, ryh.focus)}>
+              {r.cta.subscribe}
+            </a>
+            <button type="button" onClick={() => void share()} className={cn(ryh.link, ryh.focus)}>
+              {r.cta.share}
+            </button>
+          </div>
+        </div>
+      </section>
+    </RyhShell>
   );
 };
 

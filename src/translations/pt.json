@@ -2317,26 +2317,30 @@
       "purpose": "Propósito",
       "route": "Rota",
       "transparency": "Transparência",
-      "stories": "Histórias"
+      "stories": "Histórias",
+      "diary": "Diário de bordo",
+      "menu": "Menu",
+      "themeDark": "Tema escuro",
+      "themeLight": "Tema claro"
     },
     "hero": {
-      "badge": "PORTUGAL | 7 ETAPAS | 879,4 KM",
-      "title": "RAISE YOUR HANDS: PEDALANDO COM PROPÓSITO DE NORTE A SUL DE PORTUGAL",
+      "title": "Raise Your Hands: pedalando com propósito de norte a sul de Portugal",
       "lead": "Muito mais do que um desafio de resistência física e superação. Uma travessia do Porto a Faro movida pela fé, conectando comunidades e levando alimento, esperança e apoio direto a famílias em situação de vulnerabilidade.",
       "follow": "Acompanhar a Jornada",
-      "seeRoute": "Ver a Rota Completa"
+      "seeRoute": "Ver a Rota Completa",
+      "eyebrow": "Portugal · 7 etapas · 879,4 km"
     },
     "purpose": {
-      "kicker": "01 · O propósito",
-      "title": "O QUE É O PROJETO RAISE YOUR HANDS?",
+      "kicker": "O propósito",
+      "title": "O que é o projeto Raise Your Hands?",
       "p1": "Idealizado por Edgar Alan Zanin, o {{name}} nasceu da convicção de que o desporto de longa distância pode ser uma ferramenta poderosa de transformação social e espiritual.",
       "p2": "Durante a travessia pelo interior e litoral de Portugal, cada paragem vai muito além do descanso físico. Em parceria com igrejas locais, corporações de bombeiros e instituições de caridade, identificamos famílias, idosos e pessoas que enfrentam momentos difíceis — seja por problemas de saúde, desemprego ou isolamento.",
       "quote": "{{name}} é um convite para erguer as mãos em gratidão, fé e, acima de tudo, estender a mão para ajudar quem mais precisa pelo caminho.",
       "photoPlaceholder": "[FOTO: paragem / entrega de mantimentos, sem rostos identificáveis sem consentimento]"
     },
     "route": {
-      "kicker": "02 · A rota",
-      "title": "A TRAVESSIA: DO PORTO A FARO",
+      "kicker": "A rota",
+      "title": "A travessia: do Porto a Faro",
       "sub": "Uma jornada exigente pelas estradas e montanhas de Portugal, enfrentando subidas íngremes, ventos fortes e mudanças climáticas para cumprir cada etapa da missão.",
       "kpis": [
         {
@@ -2393,8 +2397,8 @@
       "komootPlaceholder": "[LINK: Rota GPX no Komoot]"
     },
     "transparency": {
-      "kicker": "03 · Transparência",
-      "title": "COMPROMISSO E TRANSPARÊNCIA TOTAL",
+      "kicker": "Transparência",
+      "title": "Compromisso e transparência total",
       "sub": "Cada cêntimo doado transforma-se diretamente em alimento na mesa de quem precisa.",
       "pillars": [
         {
@@ -2412,8 +2416,8 @@
       ]
     },
     "stories": {
-      "kicker": "04 · Histórias da estrada",
-      "title": "PESSOAS QUE ENCONTRÁMOS PELO CAMINHO",
+      "kicker": "Histórias da estrada",
+      "title": "Pessoas que encontrámos pelo caminho",
       "sub": "Mais do que quilómetros percorridos, o que marca esta jornada são as vidas tocadas em cada paragem.",
       "items": [
         {
@@ -2432,7 +2436,7 @@
       "watch": "Assistir aos Episódios no YouTube"
     },
     "cta": {
-      "title": "FAÇA PARTE DESTA MISSÃO",
+      "title": "Faça parte desta missão",
       "body": "Não precisa de pedalar quase 900 quilómetros para transformar a vida de uma família. Pode impulsionar este projeto apoiando as nossas próximas rotas, partilhando os vídeos ou enviando uma mensagem de incentivo.",
       "subscribe": "Subscrever o Canal",
       "share": "Partilhar",
@@ -2444,7 +2448,34 @@
       "linksLabel": "Links",
       "instagram": "Instagram",
       "komoot": "Rota GPX (Komoot)",
-      "contact": "Contacto"
+      "contact": "Contacto",
+      "home": "Voltar à página inicial"
+    },
+    "latest": {
+      "label": "Do diário de bordo",
+      "read": "Ler o diário"
+    },
+    "fundraising": {
+      "kicker": "O apoio",
+      "title": "De onde veio o dinheiro",
+      "amount": "£1.000",
+      "amountLabel": "em doações",
+      "via": "Recebidas pela campanha no JustGiving e por doações diretas.",
+      "link": "Ver a campanha no JustGiving",
+      "storyLabel": "Nas palavras do Edgar",
+      "story": "Levantem as mãos! No ano passado, em 2025, a nossa fé foi levada a outro nível. Por volta de Setembro, enquanto vivíamos em Portugal, enfrentámos dificuldades financeiras. Tínhamos dinheiro suficiente para pagar as contas, mas não tínhamos o suficiente para colocar comida na mesa. Levantámos as mãos e orámos pela provisão de Deus — e Ele respondeu.",
+      "storyRest": "",
+      "readFull": "Ler a história completa"
+    },
+    "diary": {
+      "eyebrow": "Diário de bordo",
+      "metaTitle": "Diário de bordo — Raise Your Hands",
+      "recent": "Ir para a entrada mais recente: {{label}} · {{date}}",
+      "toc": "Entradas",
+      "back": "↑ Índice",
+      "local": "Local",
+      "route": "Trajeto",
+      "stage": "Etapa {{n}}"
     }
   }
 }

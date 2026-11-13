@@ -2317,26 +2317,30 @@
       "purpose": "Purpose",
       "route": "Route",
       "transparency": "Transparency",
-      "stories": "Stories"
+      "stories": "Stories",
+      "diary": "Logbook",
+      "menu": "Menu",
+      "themeDark": "Dark theme",
+      "themeLight": "Light theme"
     },
     "hero": {
-      "badge": "PORTUGAL | 7 STAGES | 879.4 KM",
-      "title": "RAISE YOUR HANDS: CYCLING WITH PURPOSE FROM NORTH TO SOUTH OF PORTUGAL",
+      "title": "Raise Your Hands: cycling with purpose from north to south of Portugal",
       "lead": "Much more than a challenge of physical endurance and pushing your limits. A crossing from Porto to Faro driven by faith, connecting communities and bringing food, hope and direct support to families in vulnerable situations.",
       "follow": "Follow the Journey",
-      "seeRoute": "See the Full Route"
+      "seeRoute": "See the Full Route",
+      "eyebrow": "Portugal · 7 stages · 879.4 km"
     },
     "purpose": {
-      "kicker": "01 · The purpose",
-      "title": "WHAT IS THE RAISE YOUR HANDS PROJECT?",
+      "kicker": "The purpose",
+      "title": "What is the Raise Your Hands project?",
       "p1": "Conceived by Edgar Alan Zanin, {{name}} was born from the conviction that long-distance sport can be a powerful tool for social and spiritual transformation.",
       "p2": "During the crossing through the interior and the coast of Portugal, each stop goes far beyond physical rest. In partnership with local churches, fire brigades and charities, we identify families, elderly people and others going through difficult times — whether due to health problems, unemployment or isolation.",
       "quote": "{{name}} is an invitation to raise your hands in gratitude and faith and, above all, to reach out a hand to help those most in need along the way.",
       "photoPlaceholder": "[PHOTO: stop / food delivery, no identifiable faces without consent]"
     },
     "route": {
-      "kicker": "02 · The route",
-      "title": "THE CROSSING: FROM PORTO TO FARO",
+      "kicker": "The route",
+      "title": "The crossing: from Porto to Faro",
       "sub": "A demanding journey along the roads and mountains of Portugal, facing steep climbs, strong winds and changing weather to complete each stage of the mission.",
       "kpis": [
         {
@@ -2393,8 +2397,8 @@
       "komootPlaceholder": "[LINK: GPX route on Komoot]"
     },
     "transparency": {
-      "kicker": "03 · Transparency",
-      "title": "COMMITMENT AND FULL TRANSPARENCY",
+      "kicker": "Transparency",
+      "title": "Commitment and full transparency",
       "sub": "Every cent donated turns directly into food on the table of those in need.",
       "pillars": [
         {
@@ -2412,8 +2416,8 @@
       ]
     },
     "stories": {
-      "kicker": "04 · Stories from the road",
-      "title": "PEOPLE WE MET ALONG THE WAY",
+      "kicker": "Stories from the road",
+      "title": "People we met along the way",
       "sub": "More than the kilometres travelled, what marks this journey are the lives touched at every stop.",
       "items": [
         {
@@ -2432,7 +2436,7 @@
       "watch": "Watch the Episodes on YouTube"
     },
     "cta": {
-      "title": "BE PART OF THIS MISSION",
+      "title": "Be part of this mission",
       "body": "You don't need to cycle almost 900 kilometres to transform a family's life. You can boost this project by supporting our next routes, sharing the videos or sending a message of encouragement.",
       "subscribe": "Subscribe to the Channel",
       "share": "Share",
@@ -2444,7 +2448,34 @@
       "linksLabel": "Links",
       "instagram": "Instagram",
       "komoot": "GPX Route (Komoot)",
-      "contact": "Contact"
+      "contact": "Contact",
+      "home": "Back to the home page"
+    },
+    "latest": {
+      "label": "From the logbook",
+      "read": "Read the logbook"
+    },
+    "fundraising": {
+      "kicker": "Support",
+      "title": "Where the money came from",
+      "amount": "£1,000",
+      "amountLabel": "in donations",
+      "via": "Received through the JustGiving campaign and direct donations.",
+      "link": "See the campaign on JustGiving",
+      "storyLabel": "In Edgar's words",
+      "story": "Raise your hands! Last year, in 2025, our faith was taken to another level. Around September, while we were living in Portugal, we faced financial difficulties. We had enough money to pay the bills, but not enough to put food on the table. We raised our hands and prayed for God's provision — and He answered.",
+      "storyRest": "",
+      "readFull": "Read the full story"
+    },
+    "diary": {
+      "eyebrow": "Logbook",
+      "metaTitle": "Logbook — Raise Your Hands",
+      "recent": "Go to the most recent entry: {{label}} · {{date}}",
+      "toc": "Entries",
+      "back": "↑ Index",
+      "local": "Location",
+      "route": "Route",
+      "stage": "Stage {{n}}"
     }
   }
 }

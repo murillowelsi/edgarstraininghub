@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { diaryEntries, diaryPage, entriesFor, parseBody, parseInline } from "./ryhDiary";
+import { diaryEntries, diaryPage, entriesFor, firstSentence, parseBody, parseInline, shortDate } from "./ryhDiary";
 
 describe("parseInline", () => {
   it("keeps bold and italic from the user's text", () => {
@@ -31,6 +31,15 @@ describe("entriesFor", () => {
     expect(pt[0].stage).toBeUndefined();
     expect(pt[1].stage).toBe("1");
     expect(pt[1].photo).toBeUndefined();
+  });
+});
+
+describe("firstSentence / shortDate", () => {
+  it("cuts the teaser at the first sentence and formats the short date", () => {
+    const [entry] = entriesFor(Object.fromEntries([["/src/content/ryh-diario/2026-11-08-dia-1.pt.md", "---\ndata: 2026-11-08\n---\nPrimeira frase com 3 °C. Segunda frase.\n"]]), "pt");
+    expect(firstSentence(entry)).toBe("Primeira frase com 3 °C.");
+    expect(shortDate("2026-11-08", "pt")).toBe("8 nov");
+    expect(shortDate("2026-11-08", "en")).toBe("8 Nov");
   });
 });
 

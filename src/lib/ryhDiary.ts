@@ -114,7 +114,24 @@ export function pageFor(files: Record<string, string>, lang: DiaryLang): DiaryPa
   return { title: data.titulo ?? "", subtitle: data.subtitulo ?? "" };
 }
 
-const FILES = import.meta.glob("/src/content/ryh-diario/*.md", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+/** Plain text of the first sentence of an entry (RC-5 teaser) */
+export function firstSentence(entry: DiaryEntry): string {
+  const first = entry.blocks.find((b) => b.kind === "p");
+  const text = first?.kind === "p" ? first.parts.map((p) => p.text).join("") : "";
+  return text.match(/^(.+?[.!?])(?=\s+\p{Lu}|\s*$)/u)?.[1] ?? text;
+}
+
+/** "8 nov" / "8 Nov" for the index and the shortcut (from the ISO date, no time zone shift) */
+export function shortDate(iso: string, lang: DiaryLang): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  // Month alone: pt-PT turns "day + short month" into "08/11"
+  const month = new Intl.DateTimeFormat(lang === "pt" ? "pt-PT" : "en-GB", { month: "short", timeZone: "UTC" })
+    .format(new Date(Date.UTC(y, m - 1, d)))
+    .replace(/\.$/, "");
+  return `${d} ${month}`;
+}
+
+const FILES =import.meta.glob("/src/content/ryh-diario/*.md", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
 
 export const diaryEntries = (lang: DiaryLang) => entriesFor(FILES, lang);
 export const diaryPage = (lang: DiaryLang) => pageFor(FILES, lang);
