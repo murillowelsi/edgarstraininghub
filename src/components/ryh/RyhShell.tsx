@@ -181,7 +181,7 @@ function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; th
         <Link
           to={ryhPaths.home}
           aria-label={BRAND}
-          className={cn(ryh.focus, "flex shrink-0 items-center border-[1.5px] border-[var(--ryh-fg)] px-2 py-[7px] sm:px-2.5 md:px-3 md:py-2")}
+          className={cn(ryh.focus, "flex shrink-0 items-center border-[2.5px] border-[var(--ryh-fg)] px-2 py-[7px] sm:px-2.5 md:px-3 md:py-2")}
         >
           <span
             aria-hidden

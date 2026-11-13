@@ -50,7 +50,18 @@ export function RyhLogo({
     <div className={cn("flex items-center text-[var(--ryh-fg)]", xl ? "gap-7 xl:gap-9" : lg ? "gap-6" : "gap-5", className)}>
       {map(xl ? "h-[340px] w-auto shrink-0 xl:h-[400px]" : lg ? "h-[150px] w-auto shrink-0" : "h-16 w-auto shrink-0")}
       <div aria-hidden>
-        <b className={cn("block font-['Montserrat',sans-serif] font-black tracking-[0.02em]", xl ? "text-[52px] xl:text-[64px]" : lg ? "text-[44px]" : "text-[30px]", "leading-none")}>
+        {/* Wordmark framed, like the bar (user request): the frame grows with the logo size */}
+        <b
+          className={cn(
+            "block border-[var(--ryh-fg)] font-['Montserrat',sans-serif] font-black tracking-[0.02em]",
+            xl
+              ? "border-[4px] px-5 py-4 text-[52px] xl:border-[5px] xl:px-6 xl:py-5 xl:text-[64px]"
+              : lg
+                ? "border-[3px] px-3.5 py-3 text-[44px]"
+                : "border-[2.5px] px-2.5 py-2 text-[30px]",
+            "leading-none",
+          )}
+        >
           RAISE
           <br />
           YOUR
