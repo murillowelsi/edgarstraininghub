@@ -135,3 +135,60 @@ const FILES =import.meta.glob("/src/content/ryh-diario/*.md", { query: "?raw", i
 
 export const diaryEntries = (lang: DiaryLang) => entriesFor(FILES, lang);
 export const diaryPage = (lang: DiaryLang) => pageFor(FILES, lang);
+
+/*
+ * "From the road": Edgar's Instagram posts from the crossing, one Markdown file per post and
+ * language in src/content/ryh-estrada/<yyyy-mm-dd>-post-<n>.<pt|en>.md. Frontmatter: data,
+ * dataTexto, lugar, fotos (folder in public/ryh/estrada) and alts (JSON array, one per photo,
+ * in order). Image sizes come from fotos.json (generated with the WebP files).
+ */
+
+export interface RoadPhoto {
+  /** Without the size suffix: `${base}-640.webp` and `${base}-1280.webp` */
+  base: string;
+  w: number;
+  h: number;
+  alt: string;
+}
+
+export interface RoadPost {
+  id: string;
+  date: string;
+  dateText: string;
+  place: string;
+  photos: RoadPhoto[];
+  blocks: Block[];
+}
+
+type PhotoManifest = Record<string, { base: string; w: number; h: number }[]>;
+
+export function parseRoadPost(file: string, raw: string, manifest: PhotoManifest): RoadPost {
+  const { data, body } = parseFrontmatter(raw);
+  let alts: string[] = [];
+  try {
+    alts = JSON.parse(data.alts || "[]");
+  } catch {
+    /* no descriptions */
+  }
+  return {
+    id: slugOf(file),
+    date: data.data,
+    dateText: data.dataTexto,
+    place: data.lugar,
+    photos: (manifest[data.fotos] ?? []).map((p, i) => ({ ...p, alt: alts[i] ?? "" })),
+    blocks: parseBody(body),
+  };
+}
+
+/** Posts of one language, oldest first (same date: post number order) */
+export function roadPostsFor(files: Record<string, string>, manifest: PhotoManifest, lang: DiaryLang): RoadPost[] {
+  return Object.entries(files)
+    .filter(([f]) => f.endsWith(`.${lang}.md`))
+    .sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }))
+    .map(([f, raw]) => parseRoadPost(f, raw, manifest));
+}
+
+const ROAD_FILES = import.meta.glob("/src/content/ryh-estrada/*.md", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+const ROAD_PHOTOS = import.meta.glob("/src/content/ryh-estrada/fotos.json", { import: "default", eager: true }) as Record<string, PhotoManifest>;
+
+export const roadPosts = (lang: DiaryLang) => roadPostsFor(ROAD_FILES, Object.values(ROAD_PHOTOS)[0] ?? {}, lang);

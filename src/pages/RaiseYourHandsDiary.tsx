@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { RyhShell } from "@/components/ryh/RyhShell";
 import { ryh } from "@/components/ryh/ryhStyles";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { diaryEntries, diaryPage, shortDate, type DiaryEntry, type Inline } from "@/lib/ryhDiary";
+import { diaryEntries, diaryPage, roadPosts, shortDate, type Block, type DiaryEntry, type Inline, type RoadPost } from "@/lib/ryhDiary";
 import { cn } from "@/lib/utils";
 
 /*
@@ -18,6 +18,29 @@ const InlineText = ({ parts }: { parts: Inline[] }) => (
       p.kind === "strong" ? <strong key={i}>{p.text}</strong> : p.kind === "em" ? <em key={i}>{p.text}</em> : <span key={i}>{p.text}</span>,
     )}
   </>
+);
+
+const Body = ({ blocks }: { blocks: Block[] }) => (
+  <div className="ryh-serif space-y-5 text-[18.5px] leading-[1.75] md:text-[20px] [&_strong]:font-semibold">
+    {blocks.map((b, i) =>
+      b.kind === "p" ? (
+        <p key={i}>
+          <InlineText parts={b.parts} />
+        </p>
+      ) : (
+        <ul key={i} className="space-y-[18px]">
+          {b.items.map((item, j) => (
+            <li
+              key={j}
+              className="relative pl-[22px] before:absolute before:left-0 before:top-[0.75em] before:h-[7px] before:w-[7px] before:rounded-full before:bg-[var(--ryh-y)]"
+            >
+              <InlineText parts={item} />
+            </li>
+          ))}
+        </ul>
+      ),
+    )}
+  </div>
 );
 
 /** The entry being read: the last one whose title has passed the upper third of the screen */
@@ -61,26 +84,7 @@ function Entry({ entry }: { entry: DiaryEntry }) {
       <h2 id={`${entry.id}-t`} className="ryh-serif mb-[22px] mt-2.5 text-[28px] font-normal leading-[1.15] tracking-[-0.015em] md:mb-[26px] md:text-[36px]">
         {entry.title}
       </h2>
-      <div className="ryh-serif space-y-5 text-[18.5px] leading-[1.75] md:text-[20px] [&_strong]:font-semibold">
-        {entry.blocks.map((b, i) =>
-          b.kind === "p" ? (
-            <p key={i}>
-              <InlineText parts={b.parts} />
-            </p>
-          ) : (
-            <ul key={i} className="space-y-[18px]">
-              {b.items.map((item, j) => (
-                <li
-                  key={j}
-                  className="relative pl-[22px] before:absolute before:left-0 before:top-[0.75em] before:h-[7px] before:w-[7px] before:rounded-full before:bg-[var(--ryh-y)]"
-                >
-                  <InlineText parts={item} />
-                </li>
-              ))}
-            </ul>
-          ),
-        )}
-      </div>
+      <Body blocks={entry.blocks} />
       {/* DB-6: only when the entry has a photo, always with its description */}
       {entry.photo && (
         <img src={entry.photo.src} alt={entry.photo.alt} loading="lazy" className="mb-1 mt-[30px] w-full rounded-[20px] bg-[var(--ryh-soft)] object-cover" />
@@ -92,13 +96,61 @@ function Entry({ entry }: { entry: DiaryEntry }) {
   );
 }
 
+/** One Instagram post: date · place, the photos in a horizontal strip (swipe / scroll), the caption */
+function RoadPostItem({ post, lang }: { post: RoadPost; lang: "pt" | "en" }) {
+  const { t } = useLanguage();
+  const d = t.ryh.diary;
+  const label = d.photos.replace("{{date}}", shortDate(post.date, lang));
+  return (
+    <article id={post.id} aria-labelledby={`${post.id}-t`} className="scroll-mt-6 border-b border-[var(--ryh-line)] py-12 last:border-0 md:py-14">
+      <h3 id={`${post.id}-t`} className="text-[14.5px] font-normal leading-[1.6] text-[var(--ryh-muted)]">
+        {post.dateText} · <b className="font-medium text-[var(--ryh-sage)]">{d.local}:</b> {post.place}
+      </h3>
+      {post.photos.length > 0 && (
+        <div className="-mx-[22px] mt-5 md:mx-0">
+          <ul
+            role="list"
+            aria-label={label}
+            tabIndex={0}
+            className={cn(
+              ryh.focus,
+              "flex snap-x snap-mandatory gap-3 overflow-x-auto px-[22px] pb-3 [scrollbar-width:thin] md:snap-none md:px-0",
+            )}
+          >
+            {post.photos.map((ph, i) => (
+              <li key={ph.base} className="shrink-0 snap-start">
+                <img
+                  src={`${ph.base}-1280.webp`}
+                  srcSet={`${ph.base}-640.webp 640w, ${ph.base}-1280.webp 1280w`}
+                  sizes="(min-width: 768px) 340px, 78vw"
+                  width={ph.w}
+                  height={ph.h}
+                  alt={ph.alt}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  className="h-[380px] w-auto max-w-none rounded-[16px] bg-[var(--ryh-soft)] object-cover md:h-[440px]"
+                />
+              </li>
+            ))}
+          </ul>
+          {post.photos.length > 1 && <p className="px-[22px] text-[13px] text-[var(--ryh-muted)] md:px-0">{d.photosHint}</p>}
+        </div>
+      )}
+      <div className="mt-6 max-w-[65ch]">
+        <Body blocks={post.blocks} />
+      </div>
+    </article>
+  );
+}
+
 const RaiseYourHandsDiary = () => {
   const { t, language } = useLanguage();
   const lang = language === "pt" ? "pt" : "en";
   const d = t.ryh.diary;
   const page = diaryPage(lang);
   const entries = diaryEntries(lang);
-  const [ids] = useState(() => entries.map((e) => e.id));
+  const posts = roadPosts(lang);
+  const [ids] = useState(() => [...entries.map((e) => e.id), ...(posts.length ? ["da-estrada"] : [])]);
   const active = useActiveEntry(ids);
   const latest = entries.at(-1);
 
@@ -139,6 +191,23 @@ const RaiseYourHandsDiary = () => {
                   </a>
                 </li>
               ))}
+              {posts.length > 0 && (
+                <li className="shrink-0">
+                  <a
+                    href="#da-estrada"
+                    aria-current={active === "da-estrada" ? "location" : undefined}
+                    className={cn(
+                      ryh.focus,
+                      "block whitespace-nowrap rounded-full border px-3.5 py-2 text-sm",
+                      active === "da-estrada"
+                        ? "border-[var(--ryh-fg)] bg-[var(--ryh-fg)] text-[var(--ryh-bg)]"
+                        : "border-[var(--ryh-line)] bg-[var(--ryh-paper)] text-[var(--ryh-muted)]",
+                    )}
+                  >
+                    {d.road}
+                  </a>
+                </li>
+              )}
             </ul>
           </nav>
 
@@ -165,13 +234,48 @@ const RaiseYourHandsDiary = () => {
                     </a>
                   </li>
                 ))}
+                {posts.length > 0 && (
+                  <li>
+                    <a
+                      href="#da-estrada"
+                      aria-current={active === "da-estrada" ? "location" : undefined}
+                      className={cn(
+                        ryh.focus,
+                        "relative flex justify-between border-b border-[var(--ryh-line)] py-[9px]",
+                        active === "da-estrada"
+                          ? "font-medium text-[var(--ryh-fg)] before:absolute before:-left-4 before:top-[17px] before:h-1.5 before:w-1.5 before:rounded-full before:bg-[var(--ryh-y)]"
+                          : "text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)]",
+                      )}
+                    >
+                      {d.road}
+                      <span className="tabular-nums">{posts.length}</span>
+                    </a>
+                  </li>
+                )}
               </ul>
             </nav>
 
-            <div>
+            {/* min-w-0: the photo strips scroll inside the column instead of widening the grid */}
+            <div className="min-w-0">
               {entries.map((e) => (
                 <Entry key={e.id} entry={e} />
               ))}
+
+              {/* From the road: Edgar's Instagram posts with photos */}
+              {posts.length > 0 && (
+                <section id="da-estrada" aria-labelledby="da-estrada-t" className="scroll-mt-6 border-t border-[var(--ryh-line)] pt-16">
+                  <h2 id="da-estrada-t" className="ryh-serif text-[28px] font-normal leading-[1.15] tracking-[-0.015em] md:text-[36px]">
+                    {d.road}
+                  </h2>
+                  <p className="mt-3 max-w-[65ch] text-[16px] leading-[1.7] text-[var(--ryh-muted)]">{d.roadIntro}</p>
+                  {posts.map((p) => (
+                    <RoadPostItem key={p.id} post={p} lang={lang} />
+                  ))}
+                  <a href="#indice" className={cn(ryh.focus, "inline-block text-sm text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)]")}>
+                    {d.back}
+                  </a>
+                </section>
+              )}
             </div>
           </div>
         </div>

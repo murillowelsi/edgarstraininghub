@@ -2475,7 +2475,11 @@
       "back": "↑ Index",
       "local": "Location",
       "route": "Route",
-      "stage": "Stage {{n}}"
+      "stage": "Stage {{n}}",
+      "road": "From the road",
+      "roadIntro": "Edgar’s Instagram posts from the crossing, with the photos of each day.",
+      "photos": "Photos from {{date}}",
+      "photosHint": "Swipe to see more photos"
     }
   }
 }
