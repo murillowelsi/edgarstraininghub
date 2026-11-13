@@ -401,3 +401,29 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* Raise Your Hands landing: its own expedition palette (warm graphite and sand,
+   terracotta labels), scoped to the page, light and dark. EZ yellow stays --primary. */
+.ryh {
+  --ryh-bg: 40 33% 96%;
+  --ryh-card: 0 0% 100%;
+  --ryh-s2: 38 30% 92%;
+  --ryh-border: 35 18% 84%;
+  --ryh-fg: 25 18% 11%;
+  --ryh-muted: 25 8% 36%;
+  --ryh-terra: 16 72% 40%;
+  --ryh-ink: 40 95% 28%;
+  --ryh-topo: 25 30% 30% / 0.1;
+}
+.dark .ryh {
+  --ryh-bg: 30 8% 8%;
+  --ryh-card: 30 7% 12%;
+  --ryh-s2: 30 6% 15%;
+  --ryh-border: 30 6% 22%;
+  --ryh-fg: 40 25% 95%;
+  --ryh-muted: 35 8% 66%;
+  --ryh-terra: 18 72% 55%;
+  --ryh-ink: 48 96% 45%;
+  --ryh-topo: 38 30% 60% / 0.12;
+}
+

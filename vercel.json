@@ -1,6 +1,20 @@
 {
   "rewrites": [
     {
+      "source": "/((?!api/|assets/|ryh/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "raiseyourhands.edgarzanin.com"
+        }
+      ],
+      "destination": "/raise-your-hands.html"
+    },
+    {
+      "source": "/raise-your-hands",
+      "destination": "/raise-your-hands.html"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

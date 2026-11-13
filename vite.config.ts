@@ -53,6 +53,16 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ].filter(Boolean),
+  build: {
+    rollupOptions: {
+      // Second HTML entry: the Raise Your Hands landing with its own title, favicon and
+      // OG tags for link previews (crawlers don't run JS). Same app bundle.
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        raiseYourHands: path.resolve(__dirname, "raise-your-hands.html"),
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

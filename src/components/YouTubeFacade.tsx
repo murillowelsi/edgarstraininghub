@@ -7,6 +7,8 @@ interface YouTubeFacadeProps {
   title: string;
   /** From /api/youtube-latest when available; otherwise YouTube's static thumbnail. */
   thumbnail?: string;
+  /** Playlist id: the player opens this playlist starting at `videoId` */
+  list?: string;
 }
 
 /**
@@ -14,7 +16,7 @@ interface YouTubeFacadeProps {
  * cookies) until the visitor presses play. Then it loads the player from
  * youtube-nocookie.com, which doesn't set tracking cookies before playback.
  */
-const YouTubeFacade = ({ videoId, title, thumbnail }: YouTubeFacadeProps) => {
+const YouTubeFacade = ({ videoId, title, thumbnail, list }: YouTubeFacadeProps) => {
   const { t } = useLanguage();
   const [playing, setPlaying] = useState(false);
 
@@ -22,7 +24,7 @@ const YouTubeFacade = ({ videoId, title, thumbnail }: YouTubeFacadeProps) => {
     return (
       <iframe
         className="h-full w-full"
-        src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&rel=0`}
+        src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?${list ? `list=${encodeURIComponent(list)}&` : ""}autoplay=1&rel=0`}
         title={title || t.youtube.playerTitle}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         referrerPolicy="strict-origin-when-cross-origin"
