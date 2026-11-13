@@ -3,48 +3,50 @@ import { cn } from "@/lib/utils";
 import { END, OUTLINE_A, OUTLINE_C, ROUTE_A, ROUTE_C, START } from "./ryhPaths";
 
 /**
- * The Raise Your Hands logo — the ONE place to change when the final logo arrives
- * (the user asked for adjustments). Variant A for now: Portugal outline in a thin line,
- * the route in EZ yellow, start/end points, and the wordmark next to it.
- * The wordmark is HTML text in Montserrat (already loaded by the site), so it needs no
- * outlined glyphs. `mark` is the compact version (logo C) for the header.
+ * The Raise Your Hands logo — the ONE place to change when the logo changes.
+ * Logo A (outline in line + yellow route + wordmark) and the compact mark C stay as
+ * designed; only the colours follow the page tokens.
+ * - full: map + wordmark (footer)
+ * - trace: map only, no wordmark (hero: the name is already in the H1 and the menu, RC-4)
+ * - mark: compact C (header)
  */
-export function RyhLogo({
-  variant = "full",
-  className,
-}: {
-  /** full: map + wordmark (hero) · mark: compact map only (header, small sizes) */
-  variant?: "full" | "mark";
-  className?: string;
-}) {
+export function RyhLogo({ variant = "full", className }: { variant?: "full" | "trace" | "mark"; className?: string }) {
   if (variant === "mark") {
     return (
-      <svg viewBox="-20 -20 385 745" className={cn("h-8 w-auto", className)} aria-hidden="true">
-        <path d={OUTLINE_C} fill="none" stroke="hsl(var(--ryh-fg))" strokeWidth="30" strokeLinejoin="round" />
-        <path d={ROUTE_C} fill="none" stroke="hsl(var(--primary))" strokeWidth="46" strokeLinecap="round" />
+      <svg viewBox="-20 -20 385 745" className={cn("h-[26px] w-auto", className)} aria-hidden="true">
+        <path d={OUTLINE_C} fill="none" stroke="currentColor" strokeWidth="30" strokeLinejoin="round" />
+        <path d={ROUTE_C} fill="none" stroke="var(--ryh-y)" strokeWidth="46" strokeLinecap="round" />
       </svg>
     );
   }
+
+  const map = (svgClass: string) => (
+    <svg viewBox="-6 -6 357 717" className={svgClass} aria-hidden="true">
+      {/* Exactly OUTLINE_A (= MAP_OUTLINE), non-scaling stroke in the text colour (RC-12) */}
+      <path d={OUTLINE_A} fill="none" stroke="currentColor" strokeLinejoin="round" className="ryh-outline" />
+      <path d={ROUTE_A} fill="none" stroke="var(--ryh-y)" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+      {[START, END].map(([cx, cy]) => (
+        <circle key={cx} cx={cx} cy={cy} r="8" fill="var(--ryh-bg)" stroke="var(--ryh-y)" strokeWidth="5" />
+      ))}
+    </svg>
+  );
+
+  if (variant === "trace") {
+    return <div className={cn("flex text-[var(--ryh-fg)]", className)}>{map("h-[150px] w-auto md:h-[470px]")}</div>;
+  }
+
   return (
-    <div className={cn("flex items-center gap-5 md:gap-7", className)}>
-      <svg viewBox="-6 -6 357 717" className="h-44 w-auto shrink-0 md:h-[440px]" role="img" aria-label="Raise Your Hands: Porto → Faro">
-        <path d={OUTLINE_A} fill="none" stroke="hsl(var(--ryh-fg))" strokeWidth="5" strokeLinejoin="round" />
-        <path d={ROUTE_A} fill="none" stroke="hsl(var(--primary))" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-        {[START, END].map(([cx, cy]) => (
-          <circle key={cx} cx={cx} cy={cy} r="9" fill="hsl(var(--ryh-fg))" stroke="hsl(var(--primary))" strokeWidth="5" />
-        ))}
-      </svg>
-      <div aria-hidden className="font-display">
-        <b className="block text-[30px] font-black leading-none tracking-[0.02em] md:text-[64px]">
+    <div className={cn("flex items-center gap-5 text-[var(--ryh-fg)]", className)}>
+      {map("h-16 w-auto shrink-0")}
+      <div aria-hidden>
+        <b className="block font-['Montserrat',sans-serif] text-[30px] font-black leading-none tracking-[0.02em]">
           RAISE
           <br />
           YOUR
           <br />
-          <span className="text-[hsl(var(--ryh-ink))]">HANDS</span>
+          <span className="text-[var(--ryh-y)]">HANDS</span>
         </b>
-        <span className="mt-2 block font-sans text-[10px] font-semibold tracking-[0.2em] text-[hsl(var(--ryh-muted))] md:mt-3.5 md:text-[13px]">
-          PORTO → FARO
-        </span>
+        <span className="mt-2 block text-[9px] font-semibold tracking-[0.2em] text-[var(--ryh-muted)]">PORTO → FARO</span>
       </div>
     </div>
   );
