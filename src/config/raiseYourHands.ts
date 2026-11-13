@@ -19,9 +19,18 @@ export const RYH = {
   /** Main site (absolute: on the subdomain, relative links would land on this page again) */
   siteUrl: "https://www.edgarzanin.com/",
   contactUrl: "https://www.edgarzanin.com/contact",
+  /** RC-13: the (closed) JustGiving campaign, opened in a new tab, no tracking parameters */
+  justGivingUrl: "https://www.justgiving.com/crowdfunding/edgaralan-zanin-1",
   /** Public address of the page (share button, canonical) */
   publicUrl: "https://raiseyourhands.edgarzanin.com/",
 } as const;
+
+/** On raiseyourhands.edgarzanin.com the landing is "/" and the logbook "/diario" (vercel.json rewrites by host) */
+export const isRyhHost = typeof window !== "undefined" && window.location.hostname.startsWith("raiseyourhands.");
+
+export const ryhPaths = isRyhHost
+  ? { home: "/", diary: "/diario" }
+  : { home: "/raise-your-hands", diary: "/raise-your-hands/diario" };
 
 /** Pending placeholders are visible only while developing */
 export const showPlaceholders = import.meta.env.DEV;
