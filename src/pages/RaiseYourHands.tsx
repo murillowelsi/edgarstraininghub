@@ -1,6 +1,5 @@
 /* eslint-disable i18next/no-literal-string -- pt-PT-only landing: the copy is the user's exact text (ez-project/raise-your-hands/conteudo.md), not app UI to translate */
 import { useEffect, type ReactNode } from "react";
-import { Link } from "react-router-dom";
 import { HandHelping, MapPin, Mountain, Play, Route as RouteIcon, Share2, Youtube } from "lucide-react";
 import YouTubeFacade from "@/components/YouTubeFacade";
 import { RyhLogo } from "@/components/ryh/RyhLogo";
@@ -120,9 +119,9 @@ const RaiseYourHands = () => {
           <a href="#transparencia" className="hover:text-[hsl(var(--ryh-fg))]">Transparência</a>
           <a href="#historias" className="hover:text-[hsl(var(--ryh-fg))]">Histórias</a>
         </nav>
-        <Link to="/" className="ml-auto border-l border-[hsl(var(--ryh-border))] pl-[22px] font-display text-lg font-extrabold text-[hsl(var(--ryh-ink))] md:ml-0" aria-label="Edgar Zanin">
+        <a href={RYH.siteUrl} className="ml-auto border-l border-[hsl(var(--ryh-border))] pl-[22px] font-display text-lg font-extrabold text-[hsl(var(--ryh-ink))] md:ml-0" aria-label="Edgar Zanin">
           EZ
-        </Link>
+        </a>
       </header>
 
       <main>
@@ -312,9 +311,9 @@ const RaiseYourHands = () => {
               <span key={l.label} className="font-semibold text-[hsl(var(--ryh-ink))]">{l.label} [LINK]</span>
             ) : null
           )}
-          <Link to="/contact" className="font-semibold text-[hsl(var(--ryh-fg))] hover:underline">
+          <a href={RYH.contactUrl} className="font-semibold text-[hsl(var(--ryh-fg))] hover:underline">
             Contacto
-          </Link>
+          </a>
         </nav>
       </footer>
     </div>

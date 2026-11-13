@@ -16,6 +16,9 @@ export const RYH = {
   komootUrl: "",
   /** [FOTO] pending from the user: stop / food delivery (no identifiable faces without consent) */
   purposePhoto: { src: "", alt: "" },
+  /** Main site (absolute: on the subdomain, relative links would land on this page again) */
+  siteUrl: "https://www.edgarzanin.com/",
+  contactUrl: "https://www.edgarzanin.com/contact",
   /** Public address of the page (share button, canonical) */
   publicUrl: "https://raiseyourhands.edgarzanin.com/",
 } as const;
