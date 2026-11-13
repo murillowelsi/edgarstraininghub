@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 /*
  * Raise Your Hands logbook (NOTA.md DB-3..6): entries in chronological order, 65ch column,
  * Newsreader 20 px / 1.75, sticky index on desktop, scrollable chips on mobile, one anchor
- * per entry (#dia-1) and "↑ Index" at the end of each. Text comes from
+ * per entry (#dia-1) and the day's photos (tap to enlarge). Text comes from
  * src/content/ryh-diario (PT = the user's text as is, EN = faithful translation).
  */
 
@@ -89,9 +89,6 @@ function Entry({ entry, lang }: { entry: DiaryEntry; lang: DiaryLang }) {
       )}
       {/* Photos of the day (Edgar's Instagram), tap to enlarge */}
       <PhotoStrip photos={photos} label={d.photos.replace("{{date}}", shortDate(entry.date, lang))} />
-      <a href="#indice" className={cn(ryh.focus, "mt-[26px] inline-block text-sm text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)]")}>
-        {d.back}
-      </a>
     </article>
   );
 }
@@ -121,7 +118,7 @@ const RaiseYourHandsDiary = () => {
           )}
         </header>
 
-        {/* "↑ Index" target: the chips on mobile, the sticky index on desktop */}
+        {/* Index: the chips on mobile, the sticky index on desktop */}
         <div id="indice" className="scroll-mt-4">
           {/* DB-4: chips on mobile */}
           <nav aria-label={d.toc} className="md:hidden">

@@ -2472,7 +2472,6 @@
       "metaTitle": "Logbook — Raise Your Hands",
       "recent": "Go to the most recent entry: {{label}} · {{date}}",
       "toc": "Entries",
-      "back": "↑ Index",
       "local": "Location",
       "route": "Route",
       "stage": "Stage {{n}}",
