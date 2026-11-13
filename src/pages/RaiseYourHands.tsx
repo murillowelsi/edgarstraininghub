@@ -1,5 +1,4 @@
-/* eslint-disable i18next/no-literal-string -- pt-PT-only landing: the copy is the user's exact text (ez-project/raise-your-hands/conteudo.md), not app UI to translate */
-import { useEffect, type ReactNode } from "react";
+import { Fragment, useEffect, type ReactNode } from "react";
 import { HandHelping, MapPin, Mountain, Play, Route as RouteIcon, Share2, Youtube } from "lucide-react";
 import YouTubeFacade from "@/components/YouTubeFacade";
 import { RyhLogo } from "@/components/ryh/RyhLogo";
@@ -7,34 +6,46 @@ import { RouteMap, StageTable, type StageRow } from "@/components/ryh/RouteMap";
 import { RYH, showPlaceholders } from "@/config/raiseYourHands";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /*
- * Raise Your Hands landing (docs/design/raise-your-hands, RYH-1..8).
- * All visible copy is the user's pt-PT text from ez-project/raise-your-hands/conteudo.md,
- * used exactly as written. Decisions: elevation total stays "+11.094 m" as in the text;
- * no "Quero Apoiar o Projeto" button (final call = Subscrever o Canal + Partilhar).
+ * Raise Your Hands landing (docs/design/raise-your-hands, RYH-1..8), in PT and EN.
+ * The copy lives in translations (namespace "ryh"): PT is the user's exact pt-PT text
+ * (ez-project/raise-your-hands/conteudo.md); EN is a faithful translation of it.
+ * Decisions: elevation total stays "+11.094 m" as in the text; no "Quero Apoiar o
+ * Projeto" button (final call = Subscribe + Share).
  */
-const STAGE_ROWS: StageRow[] = [
-  { label: "Etapa 1", distance: "168,7 km", elevation: "+2.861 m" },
-  { label: "Etapa 2", distance: "132,1 km", elevation: "+2.064 m" },
-  { label: "Etapa 3", distance: "114,8 km", elevation: "+1.337 m" },
-  { label: "Etapa 4", distance: "103,2 km", elevation: "+1.948 m" },
-  { label: "Etapa 5", distance: "103,0 km", elevation: "+668 m" },
-  { label: "Etapa 6", distance: "116,1 km", elevation: "+977 m" },
-  { label: "Etapa 7", distance: "141,5 km", elevation: "+1.240 m" },
-];
 
-const TITLE = "Raise Your Hands — Pedalando com propósito de norte a sul de Portugal";
-const DESCRIPTION =
-  "Muito mais do que um desafio de resistência física e superação. Uma travessia de Matosinhos a Faro movida pela fé, conectando comunidades e levando alimento, esperança e apoio direto a famílias em situação de vulnerabilidade.";
+/** "{{name}}" in a sentence becomes the bold project name */
+const withName = (text: string, name: ReactNode) =>
+  text.split("{{name}}").map((part, i) => (
+    <Fragment key={i}>
+      {i > 0 && name}
+      {part}
+    </Fragment>
+  ));
 
 /** Own title, favicon and description while on this page (the static HTML entry has them for crawlers) */
-function usePageIdentity() {
+function usePageIdentity(title: string, description: string, htmlLang: string) {
+  // <html lang>: the language context sets "pt"/"en" in its own effect (it runs after
+  // this page's), so this one runs right after it to make it "pt-PT" / "en"
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      document.documentElement.lang = htmlLang;
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [htmlLang]);
+
+  useEffect(() => {
+    document.title = title;
+    const desc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (desc) desc.content = description;
+  }, [title, description]);
+
   useEffect(() => {
     const prevTitle = document.title;
     const prevLang = document.documentElement.lang;
-    document.title = TITLE;
-    document.documentElement.lang = "pt-PT";
     const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     const prevIcon = icon ? { href: icon.href, type: icon.type } : null;
     if (icon) {
@@ -43,7 +54,6 @@ function usePageIdentity() {
     }
     const desc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     const prevDesc = desc?.content;
-    if (desc) desc.content = DESCRIPTION;
     return () => {
       document.title = prevTitle;
       document.documentElement.lang = prevLang;
@@ -82,19 +92,30 @@ const h2 = "mt-2.5 mb-4 font-display text-[25px] font-extrabold leading-[1.1] md
 const card = "rounded-[20px] border border-[hsl(var(--ryh-border))] bg-[hsl(var(--ryh-card))]";
 
 const RaiseYourHands = () => {
-  usePageIdentity();
+  const { t, language } = useLanguage();
+  const r = t.ryh;
+  const pageLang = language === "pt" ? "pt-PT" : "en";
+  usePageIdentity(r.meta.title, r.hero.lead, pageLang);
   const { toast } = useToast();
+  // eslint-disable-next-line i18next/no-literal-string -- project name, same in every language
+  const projectName = <b className="text-[hsl(var(--ryh-fg))]">Raise Your Hands</b>;
+
+  const stageRows: StageRow[] = r.route.stages.map(([distance, elevation], i) => ({
+    label: r.route.stageLabel.replace("{{n}}", String(i + 1)),
+    distance,
+    elevation,
+  }));
 
   // RYH-6: native share sheet, else copy the link
   const share = async () => {
-    const data = { title: TITLE, text: DESCRIPTION, url: RYH.publicUrl };
+    const data = { title: r.meta.title, text: r.hero.lead, url: RYH.publicUrl };
     try {
       if (navigator.share) {
         await navigator.share(data);
         return;
       }
       await navigator.clipboard.writeText(RYH.publicUrl);
-      toast({ title: "Link copiado", description: RYH.publicUrl });
+      toast({ title: r.cta.linkCopied, description: RYH.publicUrl });
     } catch {
       /* the person closed the share sheet */
     }
@@ -102,57 +123,64 @@ const RaiseYourHands = () => {
 
   const footerLinks = [
     { label: "YouTube", href: RYH.channelUrl },
-    { label: "Instagram", href: RYH.instagramUrl },
-    { label: "Rota GPX (Komoot)", href: RYH.komootUrl },
+    { label: r.footer.instagram, href: RYH.instagramUrl },
+    { label: r.footer.komoot, href: RYH.komootUrl },
   ];
 
   return (
-    <div lang="pt-PT" className="ryh min-h-screen bg-[hsl(var(--ryh-bg))] text-[hsl(var(--ryh-fg))]">
+    <div lang={pageLang} className="ryh min-h-screen bg-[hsl(var(--ryh-bg))] text-[hsl(var(--ryh-fg))]">
       <header className="flex items-center gap-7 border-b border-[hsl(var(--ryh-border))] px-[18px] py-3.5 md:px-16 md:py-[18px]">
         <a href="#topo" className="flex items-center gap-2.5 font-display text-[13px] font-extrabold tracking-[0.14em] md:text-[15px]">
           <RyhLogo variant="mark" className="h-[30px]" />
-          RAISE YOUR HANDS
+          {/* eslint-disable-next-line i18next/no-literal-string -- project name, same in every language */}
+          <span className="hidden whitespace-nowrap min-[360px]:inline">RAISE YOUR HANDS</span>
         </a>
-        <nav aria-label="Secções" className="ml-auto hidden gap-[22px] text-sm text-[hsl(var(--ryh-muted))] md:flex">
-          <a href="#proposito" className="hover:text-[hsl(var(--ryh-fg))]">Propósito</a>
-          <a href="#rota" className="hover:text-[hsl(var(--ryh-fg))]">Rota</a>
-          <a href="#transparencia" className="hover:text-[hsl(var(--ryh-fg))]">Transparência</a>
-          <a href="#historias" className="hover:text-[hsl(var(--ryh-fg))]">Histórias</a>
+        <nav aria-label={r.nav.label} className="ml-auto hidden gap-[22px] text-sm text-[hsl(var(--ryh-muted))] md:flex">
+          <a href="#proposito" className="hover:text-[hsl(var(--ryh-fg))]">{r.nav.purpose}</a>
+          <a href="#rota" className="hover:text-[hsl(var(--ryh-fg))]">{r.nav.route}</a>
+          <a href="#transparencia" className="hover:text-[hsl(var(--ryh-fg))]">{r.nav.transparency}</a>
+          <a href="#historias" className="hover:text-[hsl(var(--ryh-fg))]">{r.nav.stories}</a>
         </nav>
-        <a href={RYH.siteUrl} className="ml-auto border-l border-[hsl(var(--ryh-border))] pl-[22px] font-display text-lg font-extrabold text-[hsl(var(--ryh-ink))] md:ml-0" aria-label="Edgar Zanin">
+        {/* Same flags as the site's navbar */}
+        <div className="ml-auto md:ml-0">
+          <LanguageSwitcher />
+        </div>
+        <a href={RYH.siteUrl} className="border-l border-[hsl(var(--ryh-border))] pl-4 font-display text-lg font-extrabold text-[hsl(var(--ryh-ink))] md:pl-[22px]" aria-label="Edgar Zanin">
           EZ
         </a>
       </header>
 
       <main>
         {/* 1 · Hero */}
+        {/* Plain background (user's choice): no topographic lines behind the hero */}
         <section id="topo" className="relative overflow-hidden px-[18px] pb-6 pt-8 md:px-16 md:pb-10 md:pt-[72px]">
-          <Topo />
           <div className="relative grid items-center gap-[22px] lg:grid-cols-[1.15fr_1fr] lg:gap-12">
             <div className="order-2 lg:order-1">
               <span className="inline-block rounded-full border border-[hsl(var(--ryh-terra))] px-3 py-[7px] text-xs font-bold tracking-[0.16em] text-[hsl(var(--ryh-terra))]">
-                PORTUGAL | 7 ETAPAS | 879,4 KM
+                {r.hero.badge}
               </span>
               <h1 className="my-[18px] font-display text-[30px] font-black leading-[1.04] tracking-[-0.01em] md:text-[54px]">
-                RAISE YOUR HANDS: PEDALANDO COM PROPÓSITO DE NORTE A SUL DE PORTUGAL
+                {r.hero.title}
               </h1>
-              <p className="max-w-[600px] text-base text-[hsl(var(--ryh-muted))] md:text-lg">{DESCRIPTION}</p>
+              <p className="max-w-[600px] text-base text-[hsl(var(--ryh-muted))] md:text-lg">{r.hero.lead}</p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={btnPrimary}>
                   <Play className="h-4 w-4 fill-current" aria-hidden />
-                  Acompanhar a Jornada
+                  {r.hero.follow}
                 </a>
                 <a href="#rota" className={btnSecondary}>
                   <RouteIcon className="h-4 w-4" aria-hidden />
-                  Ver a Rota Completa
+                  {r.hero.seeRoute}
                 </a>
               </div>
             </div>
             <RyhLogo className="order-1 lg:order-2 lg:justify-center" />
           </div>
           <div aria-hidden className="relative mt-6 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--ryh-muted))] md:mt-11 md:text-[13px]">
+            {/* eslint-disable-next-line i18next/no-literal-string -- place names */}
             <span><i className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--ryh-terra))] align-middle" />Matosinhos</span>
             <em className="flex-1 border-t-2 border-dashed border-[hsl(var(--ryh-terra))]" />
+            {/* eslint-disable-next-line i18next/no-literal-string -- place names */}
             <span>Faro<i className="ml-2 inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--ryh-terra))] align-middle" /></span>
           </div>
         </section>
@@ -160,40 +188,31 @@ const RaiseYourHands = () => {
         {/* 2 · Propósito */}
         <section id="proposito" className="grid items-center gap-[22px] border-t border-[hsl(var(--ryh-border))] px-[18px] py-11 md:px-16 md:py-[72px] lg:grid-cols-[1.1fr_1fr] lg:gap-14">
           <div>
-            <span className={kicker}>01 · O propósito</span>
-            <h2 className={h2}>O QUE É O PROJETO RAISE YOUR HANDS?</h2>
+            <span className={kicker}>{r.purpose.kicker}</span>
+            <h2 className={h2}>{r.purpose.title}</h2>
             <div className="max-w-[720px] space-y-3 text-base text-[hsl(var(--ryh-muted))]">
-              <p>
-                Idealizado por Edgar Alan Zanin, o <b className="text-[hsl(var(--ryh-fg))]">Raise Your Hands</b> nasceu da convicção de que o desporto de longa distância pode ser uma ferramenta poderosa de transformação social e espiritual.
-              </p>
-              <p>
-                Durante a travessia pelo interior e litoral de Portugal, cada paragem vai muito além do descanso físico. Em parceria com igrejas locais, corporações de bombeiros e instituições de caridade, identificamos famílias, idosos e pessoas que enfrentam momentos difíceis — seja por problemas de saúde, desemprego ou isolamento.
-              </p>
+              <p>{withName(r.purpose.p1, projectName)}</p>
+              <p>{r.purpose.p2}</p>
             </div>
             <blockquote className="mt-[18px] rounded-r-[14px] border-l-4 border-primary bg-[hsl(var(--ryh-card))] px-5 py-4 text-[17px]">
-              <b>"Raise Your Hands"</b> é um convite para erguer as mãos em gratidão, fé e, acima de tudo, estender a mão para ajudar quem mais precisa pelo caminho.
+              {/* eslint-disable-next-line i18next/no-literal-string -- project name */}
+              {withName(r.purpose.quote, <b>"Raise Your Hands"</b>)}
             </blockquote>
           </div>
           {RYH.purposePhoto.src ? (
             <img src={RYH.purposePhoto.src} alt={RYH.purposePhoto.alt} loading="lazy" className="h-[220px] w-full rounded-[20px] object-cover md:h-[380px]" />
           ) : (
-            <Placeholder className="h-[220px] md:h-[380px]">[FOTO: paragem / entrega de mantimentos, sem rostos identificáveis sem consentimento]</Placeholder>
+            <Placeholder className="h-[220px] md:h-[380px]">{r.purpose.photoPlaceholder}</Placeholder>
           )}
         </section>
 
         {/* 3 · Rota */}
         <section id="rota" className="border-t border-[hsl(var(--ryh-border))] px-[18px] py-11 md:px-16 md:py-[72px]">
-          <span className={kicker}>02 · A rota</span>
-          <h2 className={h2}>A TRAVESSIA: DE MATOSINHOS A FARO</h2>
-          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">
-            Uma jornada exigente pelas estradas e montanhas de Portugal, enfrentando subidas íngremes, ventos fortes e mudanças climáticas para cumprir cada etapa da missão.
-          </p>
+          <span className={kicker}>{r.route.kicker}</span>
+          <h2 className={h2}>{r.route.title}</h2>
+          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">{r.route.sub}</p>
           <ul className="my-7 grid gap-2.5 md:grid-cols-3 md:gap-3.5">
-            {[
-              ["879,4 km", "de distância total"],
-              ["+11.094 m", "de ganho de elevação acumulado"],
-              ["7 Etapas", "cruzando o país de norte a sul"],
-            ].map(([n, l]) => (
+            {r.route.kpis.map(({ value: n, label: l }) => (
               <li key={n} className={cn(card, "px-[22px] py-5")}>
                 <b className="block font-display text-[30px] font-black tabular-nums md:text-[40px]">{n}</b>
                 <span className="text-sm text-[hsl(var(--ryh-muted))]">{l}</span>
@@ -202,33 +221,29 @@ const RaiseYourHands = () => {
           </ul>
           <div className="grid items-stretch gap-3.5 lg:grid-cols-[1fr_1.1fr]">
             <div className={cn(card, "p-4 md:p-[22px]")}>
-              <RouteMap label="Traçado da rota de Matosinhos a Faro, 7 etapas" />
+              <RouteMap label={r.route.mapLabel} />
             </div>
             <div className={cn(card, "p-4 md:p-[22px]")}>
-              <StageTable rows={STAGE_ROWS} headers={["Etapa", "Distância", "Elevação Acumulada"]} />
+              <StageTable rows={stageRows} headers={[r.route.table.stage, r.route.table.distance, r.route.table.elevation]} />
             </div>
           </div>
           {RYH.komootUrl ? (
             <a href={RYH.komootUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--ryh-ink))]">
               <RouteIcon className="h-[15px] w-[15px]" aria-hidden />
-              Rota GPX (Komoot)
+              {r.route.komoot}
             </a>
           ) : (
-            <Placeholder className="mt-4 inline-grid">[LINK: Rota GPX no Komoot]</Placeholder>
+            <Placeholder className="mt-4 inline-grid">{r.route.komootPlaceholder}</Placeholder>
           )}
         </section>
 
         {/* 4 · Transparência */}
         <section id="transparencia" className="border-t border-[hsl(var(--ryh-border))] px-[18px] py-11 md:px-16 md:py-[72px]">
-          <span className={kicker}>03 · Transparência</span>
-          <h2 className={h2}>COMPROMISSO E TRANSPARÊNCIA TOTAL</h2>
-          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">Cada cêntimo doado transforma-se diretamente em alimento na mesa de quem precisa.</p>
+          <span className={kicker}>{r.transparency.kicker}</span>
+          <h2 className={h2}>{r.transparency.title}</h2>
+          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">{r.transparency.sub}</p>
           <ol className="mt-7 grid gap-3.5 md:grid-cols-3">
-            {[
-              ["100% Revertido em Alimentos", "Todos os custos logísticos da viagem — incluindo alojamento, combustível e alimentação da equipa — são custeados integralmente com recursos próprios. As doações destinam-se exclusivamente à compra de mantimentos nos supermercados locais."],
-              ["Conexão com Redes Locais", "Trabalhamos lado a lado com líderes comunitários, pastores e entidades sociais nas vilas e cidades da rota (como Gaia, Chaves e Castro Daire) para garantir que a ajuda chegue de forma discreta e respeitosa a quem realmente precisa."],
-              ["Prestação de Contas Aberta", "Todas as compras e faturas são registadas e partilhadas publicamente nos vlogs da expedição, garantindo total clareza sobre o destino de cada contribuição."],
-            ].map(([title, body], i) => (
+            {r.transparency.pillars.map(({ title, body }, i) => (
               <li key={title} className={cn(card, "p-6")}>
                 <span className="mb-3.5 grid h-10 w-10 place-items-center rounded-xl bg-primary font-display text-lg font-black text-primary-foreground">{i + 1}</span>
                 <h3 className="mb-2 font-display text-lg font-bold leading-tight">{title}</h3>
@@ -240,21 +255,15 @@ const RaiseYourHands = () => {
 
         {/* 5 · Histórias */}
         <section id="historias" className="border-t border-[hsl(var(--ryh-border))] px-[18px] py-11 md:px-16 md:py-[72px]">
-          <span className={kicker}>04 · Histórias da estrada</span>
-          <h2 className={h2}>PESSOAS QUE ENCONTRÁMOS PELO CAMINHO</h2>
-          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">
-            Mais do que quilómetros percorridos, o que marca esta jornada são as vidas tocadas em cada paragem.
-          </p>
+          <span className={kicker}>{r.stories.kicker}</span>
+          <h2 className={h2}>{r.stories.title}</h2>
+          <p className="max-w-[720px] text-[17px] text-[hsl(var(--ryh-muted))]">{r.stories.sub}</p>
           <div className="mt-7 grid items-start gap-5 lg:grid-cols-[1.1fr_1fr]">
             <div className="aspect-video overflow-hidden rounded-[20px] border border-[hsl(var(--ryh-border))]">
               <YouTubeFacade videoId={RYH.episode1VideoId} list={RYH.playlistId} title="Raise Your Hands" />
             </div>
             <ul className="grid gap-3.5">
-              {[
-                { icon: MapPin, title: "Apoio em Vila Nova de Gaia e Chaves", body: "Entregas de compras completas para famílias e mães em situação de vulnerabilidade, realizadas com apoio da comunidade local." },
-                { icon: HandHelping, title: "Parceria com a Igreja e Bombeiros", body: "Em conjunto com lideranças locais, levámos mantimentos e palavras de encorajamento para casais a enfrentar graves problemas de saúde após regressarem do estrangeiro." },
-                { icon: Mountain, title: "Solidariedade no Interior", body: "Ao chegarmos a pequenas vilas durante alertas meteorológicos, encontrámos um pai com deficiência visual que cria sozinho os seus três filhos — e pudemos abastecer a sua casa com mantimentos essenciais." },
-              ].map((s) => (
+              {r.stories.items.map((item, i) => ({ ...item, icon: [MapPin, HandHelping, Mountain][i] ?? MapPin })).map((s) => (
                 <li key={s.title} className={cn(card, "flex gap-3.5 p-[18px]")}>
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[hsl(var(--ryh-terra)/0.16)] text-[hsl(var(--ryh-terra))]">
                     <s.icon className="h-4 w-4" aria-hidden />
@@ -269,7 +278,7 @@ const RaiseYourHands = () => {
           </div>
           <a href={RYH.playlistUrl} target="_blank" rel="noopener noreferrer" className={cn(btnSecondary, "mt-[22px] w-full sm:w-auto")}>
             <Youtube className="h-4 w-4" aria-hidden />
-            Assistir aos Episódios no YouTube
+            {r.stories.watch}
           </a>
         </section>
 
@@ -277,18 +286,16 @@ const RaiseYourHands = () => {
         <section className="relative border-t border-[hsl(var(--ryh-border))] bg-[hsl(var(--ryh-card))] px-[18px] py-[52px] text-center md:px-16 md:py-[88px]">
           <Topo />
           <div className="relative mx-auto max-w-[760px]">
-            <h2 className={h2}>FAÇA PARTE DESTA MISSÃO</h2>
-            <p className="text-[17px] text-[hsl(var(--ryh-muted))]">
-              Não precisa de pedalar quase 900 quilómetros para transformar a vida de uma família. Pode impulsionar este projeto apoiando as nossas próximas rotas, partilhando os vídeos ou enviando uma mensagem de incentivo.
-            </p>
+            <h2 className={h2}>{r.cta.title}</h2>
+            <p className="text-[17px] text-[hsl(var(--ryh-muted))]">{r.cta.body}</p>
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
               <a href={RYH.subscribeUrl} target="_blank" rel="noopener noreferrer" className={btnPrimary}>
                 <Youtube className="h-4 w-4" aria-hidden />
-                Subscrever o Canal
+                {r.cta.subscribe}
               </a>
               <button type="button" onClick={() => void share()} className={btnSecondary}>
                 <Share2 className="h-4 w-4" aria-hidden />
-                Partilhar
+                {r.cta.share}
               </button>
             </div>
           </div>
@@ -297,22 +304,24 @@ const RaiseYourHands = () => {
 
       <footer className="flex flex-col items-start justify-between gap-6 border-t border-[hsl(var(--ryh-border))] px-[18px] py-6 text-sm text-[hsl(var(--ryh-muted))] md:flex-row md:items-center md:px-16 md:py-7">
         <div>
-          <b className="tracking-[0.08em] text-[hsl(var(--ryh-fg))]">RAISE YOUR HANDS</b> — Um projeto de Edgar Alan Zanin.
+          {/* eslint-disable-next-line i18next/no-literal-string -- project name */}
+          <b className="tracking-[0.08em] text-[hsl(var(--ryh-fg))]">RAISE YOUR HANDS</b> {r.footer.byline}
           <br />
-          <i>Fé, Ciclismo de Longa Distância e Ação Social.</i>
+          <i>{r.footer.tagline}</i>
         </div>
-        <nav aria-label="Links" className="flex flex-wrap gap-[18px]">
+        <nav aria-label={r.footer.linksLabel} className="flex flex-wrap gap-[18px]">
           {footerLinks.map((l) =>
             l.href ? (
               <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" className="font-semibold text-[hsl(var(--ryh-fg))] hover:underline">
                 {l.label}
               </a>
             ) : showPlaceholders ? (
+              // eslint-disable-next-line i18next/no-literal-string -- dev-only marker, never shown in production
               <span key={l.label} className="font-semibold text-[hsl(var(--ryh-ink))]">{l.label} [LINK]</span>
             ) : null
           )}
           <a href={RYH.contactUrl} className="font-semibold text-[hsl(var(--ryh-fg))] hover:underline">
-            Contacto
+            {r.footer.contact}
           </a>
         </nav>
       </footer>
