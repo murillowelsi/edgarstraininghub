@@ -21,6 +21,8 @@ import Contact from "./pages/Contact";
 import Index from "./pages/Index";
 import RaiseYourHands from "./pages/RaiseYourHands";
 import RaiseYourHandsDiary from "./pages/RaiseYourHandsDiary";
+import RaiseYourHandsAccounts from "./pages/RaiseYourHandsAccounts";
+import RaiseYourHandsShop from "./pages/RaiseYourHandsShop";
 import NotFound from "./pages/NotFound";
 import AdminCalendar from "./pages/admin/Calendar";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -81,6 +83,10 @@ const App = () => (
                 <Route path="/raise-your-hands" element={<RaiseYourHands />} />
                 <Route path="/raise-your-hands/diario" element={<RaiseYourHandsDiary />} />
                 {isRaiseYourHandsHost && <Route path="/diario" element={<RaiseYourHandsDiary />} />}
+                <Route path="/raise-your-hands/contas" element={<RaiseYourHandsAccounts />} />
+                <Route path="/raise-your-hands/loja" element={<RaiseYourHandsShop />} />
+                {isRaiseYourHandsHost && <Route path="/contas" element={<RaiseYourHandsAccounts />} />}
+                {isRaiseYourHandsHost && <Route path="/loja" element={<RaiseYourHandsShop />} />}
                 <Route path="/about" element={<About />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/contact" element={<Contact />} />

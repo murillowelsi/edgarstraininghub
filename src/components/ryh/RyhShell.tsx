@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { RyhLogo } from "@/components/ryh/RyhLogo";
-import { RYH, ryhPaths, showPlaceholders } from "@/config/raiseYourHands";
+import { RYH, ryhPaths } from "@/config/raiseYourHands";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { ryh } from "./ryhStyles";
@@ -122,12 +122,18 @@ function useHashScroll() {
 
 
 type NavKey = "purpose" | "route" | "transparency" | "stories" | "diary";
+export type RyhPage = "landing" | "diary" | "accounts" | "shop";
+
+/** The bar keeps 5 items (RC-30): Accounts is a child of Transparency, so that item is the active one there */
+const ACTIVE_ITEM: Partial<Record<RyhPage, NavKey>> = { diary: "diary", accounts: "transparency" };
 
 const BRAND = "Raise Your Hands";
 const BRAND_START = "Raise Your";
 const BRAND_END = "Hands";
 
-function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; theme: RyhTheme; onToggleTheme: () => void }) {
+function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTheme; onToggleTheme: () => void }) {
+  const onLanding = page === "landing";
+  const active = ACTIVE_ITEM[page];
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
@@ -152,15 +158,22 @@ function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; th
     cn(
       ryh.focus,
       "transition-colors hover:text-[var(--ryh-fg)]",
-      key === "diary" && !onLanding && "text-[var(--ryh-fg)] underline decoration-[var(--ryh-y)] decoration-2 underline-offset-[6px]",
+      key === active && "text-[var(--ryh-fg)] underline decoration-[var(--ryh-y)] decoration-2 underline-offset-[6px]",
     );
   const renderLink = (item: { key: NavKey; href: string }, extra?: string) =>
     item.key === "diary" ? (
-      <Link key={item.key} to={item.href} className={cn(linkClass(item.key), extra)} aria-current={!onLanding ? "page" : undefined} onClick={() => setOpen(false)}>
+      <Link key={item.key} to={item.href} className={cn(linkClass(item.key), extra)} aria-current={active === "diary" ? "page" : undefined} onClick={() => setOpen(false)}>
         {r.nav[item.key]}
       </Link>
     ) : (
-      <a key={item.key} href={item.href} className={cn(linkClass(item.key), extra)} onClick={() => setOpen(false)}>
+      <a
+        key={item.key}
+        href={item.href}
+        className={cn(linkClass(item.key), extra)}
+        // On the accounts page "Transparency" marks the section the page belongs to
+        aria-current={active === item.key ? "true" : undefined}
+        onClick={() => setOpen(false)}
+      >
         {r.nav[item.key]}
       </a>
     );
@@ -235,20 +248,17 @@ function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; th
   );
 }
 
-function RyhFooter({ onLanding }: { onLanding: boolean }) {
+/** RC-30: secondary pages live in the footer, not in the bar */
+function RyhFooter({ page }: { page: RyhPage }) {
   const { t } = useLanguage();
   const r = t.ryh;
-  const links = [
-    { label: "YouTube", href: RYH.channelUrl },
-    { label: r.footer.instagram, href: RYH.instagramUrl },
-    { label: r.footer.komoot, href: RYH.komootUrl },
-  ];
   const navLink = cn(ryh.focus, "text-[var(--ryh-fg)] hover:underline hover:decoration-[var(--ryh-y)] hover:underline-offset-4");
+  const here = (p: RyhPage) => (page === p ? ("page" as const) : undefined);
   return (
     <footer className="border-t border-[var(--ryh-line)]">
       <div className={cn(ryh.wrap, "flex flex-col items-start justify-between gap-8 pb-16 pt-14 md:flex-row md:items-end")}>
         <div className="flex flex-col gap-6">
-          {onLanding && <RyhLogo />}
+          {page === "landing" && <RyhLogo />}
           <p className="text-[15px] leading-[1.7] text-[var(--ryh-muted)]">
             {/* eslint-disable-next-line i18next/no-literal-string -- project name */}
             <b className="font-medium text-[var(--ryh-fg)]">Raise Your Hands</b> {r.footer.byline}
@@ -256,27 +266,25 @@ function RyhFooter({ onLanding }: { onLanding: boolean }) {
             <em className="ryh-serif text-[17px]">{r.footer.tagline}</em>
           </p>
         </div>
-        <nav aria-label={r.footer.linksLabel} className="flex flex-wrap gap-[22px] text-[15px]">
-          {!onLanding && (
-            <Link to={ryhPaths.home} className={navLink}>
-              {r.footer.home}
-            </Link>
-          )}
-          {links.map((l) =>
-            l.href ? (
-              <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" className={navLink}>
-                {l.label}
-              </a>
-            ) : showPlaceholders ? (
-              // eslint-disable-next-line i18next/no-literal-string -- dev-only marker, never shown in production
-              <span key={l.label} className="text-[var(--ryh-muted)] opacity-70">{l.label} [LINK]</span>
-            ) : null,
-          )}
-          {onLanding && (
-            <a href={RYH.contactUrl} className={navLink}>
-              {r.footer.contact}
+        <nav aria-label={r.footer.linksLabel} className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <Link to={ryhPaths.diary} aria-current={here("diary")} className={navLink}>
+            {r.footer.diary}
+          </Link>
+          <Link to={ryhPaths.accounts} aria-current={here("accounts")} className={navLink}>
+            {r.footer.accounts}
+          </Link>
+          <Link to={ryhPaths.shop} aria-current={here("shop")} className={navLink}>
+            {r.footer.shop}
+          </Link>
+          <a href={RYH.channelUrl} target="_blank" rel="noopener noreferrer" className={navLink}>YouTube</a>
+          {RYH.instagramUrl && (
+            <a href={RYH.instagramUrl} target="_blank" rel="noopener noreferrer" className={navLink}>
+              {r.footer.instagram}
             </a>
           )}
+          <a href={RYH.contactUrl} className={navLink}>
+            {r.footer.contact}
+          </a>
         </nav>
       </div>
     </footer>
@@ -284,7 +292,7 @@ function RyhFooter({ onLanding }: { onLanding: boolean }) {
 }
 
 /** Frame of a RYH page: tokens (.ryh / .ryh-dark), header, main content and footer */
-export function RyhShell({ page, title, description, children }: { page: "landing" | "diary"; title: string; description: string; children: ReactNode }) {
+export function RyhShell({ page, title, description, children }: { page: RyhPage; title: string; description: string; children: ReactNode }) {
   const { language } = useLanguage();
   const pageLang = language === "pt" ? "pt-PT" : "en";
   useRyhFonts();
@@ -292,13 +300,12 @@ export function RyhShell({ page, title, description, children }: { page: "landin
   useInstantScroll();
   usePageIdentity(title, description, pageLang);
   const [theme, setTheme] = useRyhTheme();
-  const onLanding = page === "landing";
 
   return (
     <div lang={pageLang} className={cn("ryh min-h-screen bg-[var(--ryh-bg)] text-[var(--ryh-fg)]", theme === "dark" && "ryh-dark")}>
-      <RyhHeader onLanding={onLanding} theme={theme} onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")} />
+      <RyhHeader page={page} theme={theme} onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")} />
       <main>{children}</main>
-      <RyhFooter onLanding={onLanding} />
+      <RyhFooter page={page} />
     </div>
   );
 }

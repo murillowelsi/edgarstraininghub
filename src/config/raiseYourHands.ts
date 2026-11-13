@@ -25,12 +25,12 @@ export const RYH = {
   publicUrl: "https://raiseyourhands.edgarzanin.com/",
 } as const;
 
-/** On raiseyourhands.edgarzanin.com the landing is "/" and the logbook "/diario" (vercel.json rewrites by host) */
+/** On raiseyourhands.edgarzanin.com the pages live at the root ("/", "/diario", "/contas", "/loja"; vercel.json rewrites by host) */
 export const isRyhHost = typeof window !== "undefined" && window.location.hostname.startsWith("raiseyourhands.");
 
 export const ryhPaths = isRyhHost
-  ? { home: "/", diary: "/diario" }
-  : { home: "/raise-your-hands", diary: "/raise-your-hands/diario" };
+  ? { home: "/", diary: "/diario", accounts: "/contas", shop: "/loja" }
+  : { home: "/raise-your-hands", diary: "/raise-your-hands/diario", accounts: "/raise-your-hands/contas", shop: "/raise-your-hands/loja" };
 
 /** Pending placeholders are visible only while developing */
 export const showPlaceholders = import.meta.env.DEV;

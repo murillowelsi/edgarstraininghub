@@ -2413,7 +2413,8 @@
           "title": "Prestação de Contas Aberta",
           "body": "Todas as compras e faturas são registadas e partilhadas publicamente nos vlogs da expedição, garantindo total clareza sobre o destino de cada contribuição."
         }
-      ]
+      ],
+      "seeAccounts": "Ver as contas"
     },
     "stories": {
       "kicker": "Histórias da estrada",
@@ -2440,7 +2441,8 @@
       "body": "Não precisa de pedalar quase 900 quilómetros para transformar a vida de uma família. Pode impulsionar este projeto apoiando as nossas próximas rotas, partilhando os vídeos ou enviando uma mensagem de incentivo.",
       "subscribe": "Subscrever o Canal",
       "share": "Partilhar",
-      "linkCopied": "Link copiado"
+      "linkCopied": "Link copiado",
+      "shop": "Loja (em breve)"
     },
     "footer": {
       "byline": "— Um projeto de Edgar Alan Zanin.",
@@ -2449,7 +2451,10 @@
       "instagram": "Instagram",
       "komoot": "Rota GPX (Komoot)",
       "contact": "Contacto",
-      "home": "Voltar à página inicial"
+      "home": "Voltar à página inicial",
+      "diary": "Diário de bordo",
+      "accounts": "Contas",
+      "shop": "Loja"
     },
     "latest": {
       "label": "Do diário de bordo",
@@ -2465,7 +2470,8 @@
       "storyLabel": "Nas palavras do Edgar",
       "story": "Levantem as mãos! No ano passado, em 2025, a nossa fé foi levada a outro nível. Por volta de Setembro, enquanto vivíamos em Portugal, enfrentámos dificuldades financeiras. Tínhamos dinheiro suficiente para pagar as contas, mas não tínhamos o suficiente para colocar comida na mesa. Levantámos as mãos e orámos pela provisão de Deus — e Ele respondeu.",
       "storyRest": "Enviou uma família missionária que nos abençoou com comida durante um mês inteiro. Depois, enviou outras pessoas que continuaram a ajudar com alimentos e até algum apoio financeiro. Através dessa experiência, entendemos algo poderoso: Deus é o nosso provedor.\n\nEste ano, queremos ser essa bênção na vida de outras pessoas. Vamos pedalar do Norte ao Sul de Portugal, ajudando famílias em necessidade. E tu também podes fazer parte desta missão! Estamos a angariar fundos para apoiar famílias em várias cidades — Porto, Chaves, Vila de Rei, Viana do Alentejo e Faro. Irei pedalar cerca de 1.000 km por Portugal, levando esperança e ajuda onde for mais necessário.\n\nIrei gravar tudo no YouTube — desde o início desta página, passando pelos treinos e preparação, até à viagem completa de Norte a Sul. Vais poder ver exatamente para onde vai cada doação e como estás a ajudar a transformar vidas. Vem fazer parte desta missão. Juntos, vamos ser uma bênção para famílias em todo Portugal! 🙌",
-      "readFull": "Ler a história completa"
+      "readFull": "Ler a história completa",
+      "seeSpent": "Ver como foi gasto"
     },
     "road": {
       "kicker": "Da estrada",
@@ -2491,6 +2497,75 @@
       "prev": "Foto anterior",
       "next": "Próxima foto",
       "counter": "{{n}} de {{total}}"
+    },
+    "accounts": {
+      "metaTitle": "Prestação de contas — Raise Your Hands",
+      "kicker": "Prestação de contas",
+      "title": "Para onde foi cada doação",
+      "lead": "Tudo o que entrou e tudo o que foi comprado, com a fatura de cada compra.",
+      "summaryLabel": "Resumo",
+      "raised": "angariadas pela campanha no JustGiving e por doações diretas",
+      "food": "em alimentos registados no diário até agora ({{days}})",
+      "foodPending": "{{days}}: a confirmar",
+      "logistics": "das doações em alojamento, combustível ou refeições da equipa, custeados com recursos próprios",
+      "goal": "Meta do Prólogo: apoiar {{families}} ao longo do percurso.",
+      "familiesWord": [
+        "",
+        "uma família",
+        "duas famílias",
+        "três famílias",
+        "quatro famílias",
+        "cinco famílias",
+        "seis famílias",
+        "sete famílias",
+        "oito famílias",
+        "nove famílias",
+        "dez famílias"
+      ],
+      "familiesN": "{{n}} famílias",
+      "familiesReached": "Famílias apoiadas até agora",
+      "totalSpent": "Total gasto em alimentos",
+      "rate": "Câmbio £→€ usado",
+      "balance": "Saldo",
+      "updated": "Última atualização",
+      "pending": "a confirmar",
+      "privacyLabel": "Privacidade:",
+      "privacy": "antes de publicar, tapamos nas faturas os dados pessoais (NIF, nomes, moradas e números de cartão).",
+      "daysKicker": "Compras por dia",
+      "daysTitle": "As faturas",
+      "purchasesOne": "1 compra completa",
+      "purchases": "{{n}} compras completas",
+      "mentioned": "Compras citadas no diário",
+      "groupValue": "{{value}} ({{n}} compras)",
+      "valuesLabel": "Valores",
+      "valuePending": "Valor a confirmar",
+      "invoicePending": "[FOTO DA FATURA]",
+      "invoicePendingSub": "a enviar",
+      "hidden": "Dados pessoais ocultados",
+      "invoiceAlt": "Fatura de {{day}}, {{value}}, com dados pessoais ocultados",
+      "invoiceAltNoValue": "Fatura de {{day}}, com dados pessoais ocultados",
+      "invoicesLabel": "Faturas de {{day}}",
+      "readDiary": "Ler no diário de bordo",
+      "currencyNote": "Valores das compras em euros; a angariação foi em libras.",
+      "and": "e"
+    },
+    "shop": {
+      "metaTitle": "Loja (em breve) — Raise Your Hands",
+      "kicker": "Loja",
+      "title": "Em breve",
+      "lead": "Estamos a desenhar t-shirts, hoodies e outras peças inspiradas na travessia.",
+      "items": [
+        "T-shirt",
+        "Hoodie",
+        "E mais"
+      ],
+      "illustrationsNote": "Ilustrações de referência; ainda não são produtos.",
+      "profitTitle": "Para onde vai o lucro",
+      "profitPending": "[TEXTO A CONFIRMAR PELO USUÁRIO: para onde vai o lucro e como será mostrado nas Contas]",
+      "meanwhile": "Enquanto isso, acompanhe a jornada",
+      "youtube": "Seguir no YouTube",
+      "instagram": "Instagram",
+      "diary": "Ler o diário de bordo"
     }
   }
 }

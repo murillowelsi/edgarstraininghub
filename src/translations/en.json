@@ -2413,7 +2413,8 @@
           "title": "Open Accountability",
           "body": "All purchases and invoices are recorded and shared publicly in the expedition vlogs, ensuring full clarity about where each contribution goes."
         }
-      ]
+      ],
+      "seeAccounts": "See the accounts"
     },
     "stories": {
       "kicker": "Stories from the road",
@@ -2440,7 +2441,8 @@
       "body": "You don't need to cycle almost 900 kilometres to transform a family's life. You can boost this project by supporting our next routes, sharing the videos or sending a message of encouragement.",
       "subscribe": "Subscribe to the Channel",
       "share": "Share",
-      "linkCopied": "Link copied"
+      "linkCopied": "Link copied",
+      "shop": "Shop (coming soon)"
     },
     "footer": {
       "byline": "— A project by Edgar Alan Zanin.",
@@ -2449,7 +2451,10 @@
       "instagram": "Instagram",
       "komoot": "GPX Route (Komoot)",
       "contact": "Contact",
-      "home": "Back to the home page"
+      "home": "Back to the home page",
+      "diary": "Logbook",
+      "accounts": "Accounts",
+      "shop": "Shop"
     },
     "latest": {
       "label": "From the logbook",
@@ -2465,7 +2470,8 @@
       "storyLabel": "In Edgar's words",
       "story": "Raise your hands! Last year, in 2025, our faith was taken to another level. Around September, while living in Portugal, we faced financial difficulties. We had enough to pay our bills, but we didn’t have money to put food on the table. We lifted our hands and prayed for God’s provision — and He answered.",
       "storyRest": "He sent a missionary family who blessed us with food for an entire month. Then, He sent others who continued to provide food and even some financial help. Through that experience, we understood something powerful: God is our provider.\n\nThis year, we want to be that blessing for others. We’ll be cycling from the North to the South of Portugal, supporting families in need. You can be part of this mission! We’re raising funds to help families in several cities — Porto, Chaves, Vila de Rei, Viana do Alentejo, and Faro. I’ll be cycling roughly 1,000 km across Portugal to bring hope and help where it’s needed most.\n\nI’ll be recording everything on YouTube — from the very start of this page, through the training and preparation, to the full north-to-south cycling journey. You’ll see exactly where every donation goes and how you’re helping transform lives. Come and be part of it. Together, let’s be a blessing to families across Portugal!",
-      "readFull": "Read the full story"
+      "readFull": "Read the full story",
+      "seeSpent": "See how it was spent"
     },
     "road": {
       "kicker": "From the road",
@@ -2491,6 +2497,75 @@
       "prev": "Previous photo",
       "next": "Next photo",
       "counter": "{{n}} of {{total}}"
+    },
+    "accounts": {
+      "metaTitle": "Accounts — Raise Your Hands",
+      "kicker": "Accounts",
+      "title": "Where every donation went",
+      "lead": "Everything that came in and everything that was bought, with the invoice for each purchase.",
+      "summaryLabel": "Summary",
+      "raised": "raised through the JustGiving campaign and direct donations",
+      "food": "in food recorded in the logbook so far ({{days}})",
+      "foodPending": "{{days}}: to be confirmed",
+      "logistics": "of the donations spent on accommodation, fuel or the team's meals, which were paid for with our own money",
+      "goal": "Prologue goal: to support {{families}} along the route.",
+      "familiesWord": [
+        "",
+        "one family",
+        "two families",
+        "three families",
+        "four families",
+        "five families",
+        "six families",
+        "seven families",
+        "eight families",
+        "nine families",
+        "ten families"
+      ],
+      "familiesN": "{{n}} families",
+      "familiesReached": "Families supported so far",
+      "totalSpent": "Total spent on food",
+      "rate": "£→€ exchange rate used",
+      "balance": "Balance",
+      "updated": "Last updated",
+      "pending": "to be confirmed",
+      "privacyLabel": "Privacy:",
+      "privacy": "before publishing, we cover the personal details on the invoices (tax numbers, names, addresses and card numbers).",
+      "daysKicker": "Purchases by day",
+      "daysTitle": "The invoices",
+      "purchasesOne": "1 full grocery shop",
+      "purchases": "{{n}} full grocery shops",
+      "mentioned": "Purchases mentioned in the logbook",
+      "groupValue": "{{value}} ({{n}} shops)",
+      "valuesLabel": "Amounts",
+      "valuePending": "Amount to be confirmed",
+      "invoicePending": "[INVOICE PHOTO]",
+      "invoicePendingSub": "to be sent",
+      "hidden": "Personal details hidden",
+      "invoiceAlt": "Invoice from {{day}}, {{value}}, with personal details hidden",
+      "invoiceAltNoValue": "Invoice from {{day}}, with personal details hidden",
+      "invoicesLabel": "Invoices from {{day}}",
+      "readDiary": "Read in the logbook",
+      "currencyNote": "Purchase amounts are in euros; the fundraising was in pounds.",
+      "and": "and"
+    },
+    "shop": {
+      "metaTitle": "Shop (coming soon) — Raise Your Hands",
+      "kicker": "Shop",
+      "title": "Coming soon",
+      "lead": "We're designing t-shirts, hoodies and other pieces inspired by the crossing.",
+      "items": [
+        "T-shirt",
+        "Hoodie",
+        "And more"
+      ],
+      "illustrationsNote": "Reference illustrations; these are not products yet.",
+      "profitTitle": "Where the profit goes",
+      "profitPending": "[TEXT TO BE CONFIRMED BY THE USER: where the profit goes and how it will be shown in the Accounts]",
+      "meanwhile": "In the meantime, follow the journey",
+      "youtube": "Follow on YouTube",
+      "instagram": "Instagram",
+      "diary": "Read the logbook"
     }
   }
 }

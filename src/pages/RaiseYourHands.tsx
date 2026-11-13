@@ -244,6 +244,12 @@ const RaiseYourHands = () => {
                   <h3 className={ryh.h3}>{title}</h3>
                 </div>
                 <p className={cn(ryh.p, "md:text-[16.5px]")}>{body}</p>
+                {/* RC-29: the open-accounts pillar leads to the accounts page */}
+                {i === r.transparency.pillars.length - 1 && (
+                  <Link to={ryhPaths.accounts} className={cn(ryh.link, ryh.focus, "mt-4 text-[15px]")}>
+                    {r.transparency.seeAccounts}
+                  </Link>
+                )}
               </li>
             ))}
           </ol>
@@ -262,10 +268,16 @@ const RaiseYourHands = () => {
                 <span className="ryh-serif text-[20px] text-[var(--ryh-muted)] md:text-[24px]">{f.amountLabel}</span>
               </p>
               <p className={cn(ryh.p, "mt-5 max-w-[24em]")}>{f.via}</p>
-              <a href={RYH.justGivingUrl} target="_blank" rel="noopener" className={cn(ryh.link, ryh.focus, "mt-6")}>
-                {f.link}
-                <span aria-hidden>↗</span>
-              </a>
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+                <a href={RYH.justGivingUrl} target="_blank" rel="noopener" className={cn(ryh.link, ryh.focus)}>
+                  {f.link}
+                  <span aria-hidden>↗</span>
+                </a>
+                {/* RC-29 */}
+                <Link to={ryhPaths.accounts} className={cn(ryh.link, ryh.focus)}>
+                  {f.seeSpent}
+                </Link>
+              </div>
             </div>
             <figure className="border-l-2 border-[var(--ryh-y)] pl-[22px] md:pl-7">
               <figcaption className="mb-2 text-sm text-[var(--ryh-sage)]">{f.storyLabel}</figcaption>
@@ -335,6 +347,10 @@ const RaiseYourHands = () => {
             <button type="button" onClick={() => void share()} className={cn(ryh.link, ryh.focus)}>
               {r.cta.share}
             </button>
+            {/* RC-32: discreet way to the (coming soon) shop */}
+            <Link to={ryhPaths.shop} className={cn(ryh.link, ryh.focus)}>
+              {r.cta.shop}
+            </Link>
           </div>
         </div>
       </section>
