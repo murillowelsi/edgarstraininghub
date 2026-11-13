@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
+import { PhotoStrip } from "@/components/ryh/PhotoStrip";
 import { RyhShell } from "@/components/ryh/RyhShell";
 import { ryh } from "@/components/ryh/ryhStyles";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { diaryEntries, diaryPage, shortDate, type DiaryEntry, type Inline } from "@/lib/ryhDiary";
+import { diaryEntries, diaryPage, diaryPhotos, shortDate, type DiaryEntry, type DiaryLang, type Inline } from "@/lib/ryhDiary";
 import { cn } from "@/lib/utils";
 
 /*
  * Raise Your Hands logbook (NOTA.md DB-3..6): entries in chronological order, 65ch column,
  * Newsreader 20 px / 1.75, sticky index on desktop, scrollable chips on mobile, one anchor
- * per entry (#dia-1) and "↑ Index" at the end of each. Text comes from
+ * per entry (#dia-1) and the day's photos (tap to enlarge). Text comes from
  * src/content/ryh-diario (PT = the user's text as is, EN = faithful translation).
  */
 
@@ -45,9 +46,10 @@ function useActiveEntry(ids: string[]) {
   return active;
 }
 
-function Entry({ entry }: { entry: DiaryEntry }) {
+function Entry({ entry, lang }: { entry: DiaryEntry; lang: DiaryLang }) {
   const { t } = useLanguage();
   const d = t.ryh.diary;
+  const photos = diaryPhotos(entry.id, lang);
   return (
     <article
       id={entry.id}
@@ -85,9 +87,8 @@ function Entry({ entry }: { entry: DiaryEntry }) {
       {entry.photo && (
         <img src={entry.photo.src} alt={entry.photo.alt} loading="lazy" className="mb-1 mt-[30px] w-full rounded-[20px] bg-[var(--ryh-soft)] object-cover" />
       )}
-      <a href="#indice" className={cn(ryh.focus, "mt-[26px] inline-block text-sm text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)]")}>
-        {d.back}
-      </a>
+      {/* Photos of the day (Edgar's Instagram), tap to enlarge */}
+      <PhotoStrip photos={photos} label={d.photos.replace("{{date}}", shortDate(entry.date, lang))} />
     </article>
   );
 }
@@ -117,7 +118,7 @@ const RaiseYourHandsDiary = () => {
           )}
         </header>
 
-        {/* "↑ Index" target: the chips on mobile, the sticky index on desktop */}
+        {/* Index: the chips on mobile, the sticky index on desktop */}
         <div id="indice" className="scroll-mt-4">
           {/* DB-4: chips on mobile */}
           <nav aria-label={d.toc} className="md:hidden">
@@ -168,9 +169,10 @@ const RaiseYourHandsDiary = () => {
               </ul>
             </nav>
 
-            <div>
+            {/* min-w-0: the photo strips scroll inside the column instead of widening the grid */}
+            <div className="min-w-0">
               {entries.map((e) => (
-                <Entry key={e.id} entry={e} />
+                <Entry key={e.id} entry={e} lang={lang} />
               ))}
             </div>
           </div>

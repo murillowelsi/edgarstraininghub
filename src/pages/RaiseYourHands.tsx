@@ -1,6 +1,8 @@
 import { Fragment, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import YouTubeFacade from "@/components/YouTubeFacade";
+import { PhotoSlideshow } from "@/components/ryh/PhotoSlideshow";
+import { PhotoStrip } from "@/components/ryh/PhotoStrip";
 import { RyhLogo } from "@/components/ryh/RyhLogo";
 import { RouteMap, StageTable, type StageRow } from "@/components/ryh/RouteMap";
 import { RyhShell } from "@/components/ryh/RyhShell";
@@ -9,7 +11,7 @@ import { RYH, ryhPaths, showPlaceholders } from "@/config/raiseYourHands";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { diaryEntries, firstSentence } from "@/lib/ryhDiary";
+import { diaryCover, diaryEntries, diaryPhoto, firstSentence, type DiaryPhoto } from "@/lib/ryhDiary";
 
 /*
  * Raise Your Hands landing, calm version (ez-project/raise-your-hands/redesign/NOTA.md,
@@ -25,6 +27,13 @@ const withName = (text: string, name: ReactNode) =>
       {part}
     </Fragment>
   ));
+
+/** Photos picked from the logbook ("entry/nn"): one per moment of the crossing */
+const ROAD_PICKS = ["chegada/01", "dia-1/02", "dia-1/03", "dia-2/02", "dia-2/04", "dia-1/05", "dia-3/04", "dia-3/05", "dia-4/03", "dia-4/06"];
+/** Purpose slideshow: groceries and deliveries (no faces of the people helped) */
+const PURPOSE_PICKS = ["dia-3/01", "chegada/02", "dia-3/06", "dia-2/06", "dia-4/04", "dia-3/02"];
+
+const srcSet = (p: DiaryPhoto) => `${p.base}-640.webp 640w, ${p.base}-1280.webp 1280w`;
 
 /** Pending content: a soft box in development, nothing in production */
 const Placeholder = ({ children, className }: { children: ReactNode; className?: string }) =>
@@ -44,6 +53,9 @@ const RaiseYourHands = () => {
 
   // RC-5: the most recent logbook entry
   const latest = diaryEntries(lang).at(-1);
+  const cover = latest && diaryCover(latest.id, lang);
+  const roadPhotos = ROAD_PICKS.map((ref) => diaryPhoto(ref, lang)).filter((p): p is DiaryPhoto => !!p);
+  const purposePhotos = PURPOSE_PICKS.map((ref) => diaryPhoto(ref, lang)).filter((p): p is DiaryPhoto => !!p);
 
   const stageRows: StageRow[] = r.route.stages.map(([distance, elevation], i) => ({
     label: r.route.stageLabel.replace("{{n}}", String(i + 1)),
@@ -95,12 +107,26 @@ const RaiseYourHands = () => {
       {/* RC-5 · From the logbook: the most recent entry */}
       {latest && (
         <section aria-labelledby="ryh-latest" className={ryh.wrap}>
-          <div className="grid items-center gap-2.5 border-y border-[var(--ryh-line)] py-[26px] md:grid-cols-[220px_1fr_auto] md:gap-10 md:py-[34px]">
-            <p className="text-sm leading-normal text-[var(--ryh-muted)]">
-              <b className="block font-medium text-[var(--ryh-sage)]">{r.latest.label}</b>
-              {latest.dateText}
-            </p>
+          <div className="grid items-center gap-4 border-y border-[var(--ryh-line)] py-[26px] md:grid-cols-[220px_1fr_auto] md:gap-10 md:py-[34px]">
+            {cover ? (
+              <Link to={`${ryhPaths.diary}#${latest.id}`} tabIndex={-1} aria-hidden className="block overflow-hidden rounded-[20px]">
+                <img
+                  src={`${cover.base}-640.webp`}
+                  srcSet={srcSet(cover)}
+                  sizes="(min-width: 768px) 220px, 100vw"
+                  width={cover.w}
+                  height={cover.h}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-[16/10] w-full bg-[var(--ryh-soft)] object-cover transition-transform duration-300 hover:scale-[1.03] md:aspect-[4/5]"
+                />
+              </Link>
+            ) : null}
             <div>
+              <p className="mb-2 text-sm leading-normal text-[var(--ryh-muted)]">
+                <b className="font-medium text-[var(--ryh-sage)]">{r.latest.label}</b> · {latest.dateText}
+              </p>
               <h2 id="ryh-latest" className="ryh-serif mb-1.5 text-[21px] font-normal leading-[1.25] tracking-[-0.015em] md:text-[25px]">
                 {latest.title}
               </h2>
@@ -129,7 +155,13 @@ const RaiseYourHands = () => {
                 {withName(r.purpose.quote, <>"Raise Your Hands"</>)}
               </blockquote>
             </div>
-            {RYH.purposePhoto.src ? (
+            {purposePhotos.length > 0 ? (
+              <PhotoSlideshow
+                photos={purposePhotos}
+                labels={{ label: r.road.slides, pause: r.road.pause, play: r.road.play, goTo: r.road.goTo }}
+                className="aspect-[4/5] w-full"
+              />
+            ) : RYH.purposePhoto.src ? (
               <img
                 src={RYH.purposePhoto.src}
                 alt={RYH.purposePhoto.alt}
@@ -180,6 +212,22 @@ const RaiseYourHands = () => {
       </section>
 
       {/* RC-8 · Transparency: serif numerals in sage, no cards */}
+      {/* From the road: moments of the crossing, tap to enlarge, link to the logbook */}
+      {roadPhotos.length > 0 && (
+        <section id="estrada" aria-labelledby="ryh-road" className={ryh.wrap}>
+          <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
+            <span className={ryh.kicker}>{r.road.kicker}</span>
+            <h2 id="ryh-road" className={ryh.h2}>
+              {r.road.title}
+            </h2>
+            <PhotoStrip photos={roadPhotos} label={r.road.title} />
+            <Link to={ryhPaths.diary} className={cn(ryh.link, ryh.focus, "mt-6")}>
+              {r.road.more}
+            </Link>
+          </div>
+        </section>
+      )}
+
       <section id="transparencia" className={ryh.wrap}>
         <div className={cn(ryh.sec, "border-t border-[var(--ryh-line)]")}>
           <span className={ryh.kicker}>{r.transparency.kicker}</span>

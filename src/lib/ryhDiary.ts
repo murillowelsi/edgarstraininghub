@@ -135,3 +135,39 @@ const FILES =import.meta.glob("/src/content/ryh-diario/*.md", { query: "?raw", i
 
 export const diaryEntries = (lang: DiaryLang) => entriesFor(FILES, lang);
 export const diaryPage = (lang: DiaryLang) => pageFor(FILES, lang);
+
+
+/*
+ * Photos per entry (from Edgar's Instagram posts, matched to the day by content):
+ * src/content/ryh-diario/fotos.json maps the entry id to its photos, in order, with the
+ * description in each language. Files: public/ryh/diario/<id>/<nn>-640.webp and -1280.webp.
+ */
+
+export interface DiaryPhoto {
+  /** Without the size suffix: `${base}-640.webp` and `${base}-1280.webp` */
+  base: string;
+  w: number;
+  h: number;
+  alt: string;
+}
+
+export type PhotoIndex = Record<string, { base: string; w: number; h: number; alt: Partial<Record<DiaryLang, string>> }[]>;
+
+export function photosFor(index: PhotoIndex, id: string, lang: DiaryLang): DiaryPhoto[] {
+  return (index[id] ?? []).map(({ alt, ...p }) => ({ ...p, alt: alt[lang] ?? alt.pt ?? "" }));
+}
+
+const PHOTOS = Object.values(
+  import.meta.glob("/src/content/ryh-diario/fotos.json", { import: "default", eager: true }) as Record<string, PhotoIndex>,
+)[0] ?? {};
+
+export const diaryPhotos = (id: string, lang: DiaryLang) => photosFor(PHOTOS, id, lang);
+
+/** One photo by "entry/nn" (e.g. "dia-3/01"), for the landing page */
+export function diaryPhoto(ref: string, lang: DiaryLang): DiaryPhoto | undefined {
+  const [id, n] = ref.split("/");
+  return diaryPhotos(id, lang)[Number(n) - 1];
+}
+
+/** First photo of an entry (cover of the logbook teaser) */
+export const diaryCover = (id: string, lang: DiaryLang) => diaryPhotos(id, lang)[0];

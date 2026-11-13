@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { diaryEntries, diaryPage, entriesFor, firstSentence, parseBody, parseInline, shortDate } from "./ryhDiary";
+import { diaryEntries, diaryPage, diaryPhotos, entriesFor, firstSentence, parseBody, parseInline, photosFor, shortDate } from "./ryhDiary";
 
 describe("parseInline", () => {
   it("keeps bold and italic from the user's text", () => {
@@ -47,10 +47,31 @@ describe("real content", () => {
   it("has the same entries in PT and EN, in order, and only Day 1 has a stage", () => {
     const pt = diaryEntries("pt");
     const en = diaryEntries("en");
-    expect(pt.map((e) => e.id)).toEqual(["prologo", "chegada", "dia-1", "dia-2", "dia-3"]);
+    expect(pt.map((e) => e.id)).toEqual(["prologo", "chegada", "dia-1", "dia-2", "dia-3", "dia-4"]);
     expect(en.map((e) => e.id)).toEqual(pt.map((e) => e.id));
     expect(pt.filter((e) => e.stage).map((e) => e.id)).toEqual(["dia-1"]);
     expect(en.map((e) => e.blocks.map((b) => b.kind).join())).toEqual(pt.map((e) => e.blocks.map((b) => b.kind).join()));
     expect(diaryPage("pt").title).toBe('Diário de Bordo: A Travessia "Raise Your Hands"');
+  });
+});
+
+describe("photos per entry", () => {
+  const index = { "dia-1": [{ base: "/ryh/diario/dia-1/01", w: 960, h: 1280, alt: { pt: "Bicicleta", en: "Bike" } }] };
+
+  it("returns the entry's photos with the description in the reader's language", () => {
+    expect(photosFor(index, "dia-1", "en")).toEqual([{ base: "/ryh/diario/dia-1/01", w: 960, h: 1280, alt: "Bike" }]);
+    expect(photosFor(index, "prologo", "pt")).toEqual([]);
+  });
+
+  it("ships photos only for existing entries, each with a description in both languages", () => {
+    const ids = new Set(diaryEntries("pt").map((e) => e.id));
+    for (const id of ["chegada", "dia-1", "dia-2", "dia-3", "dia-4"]) {
+      expect(ids.has(id)).toBe(true);
+      for (const lang of ["pt", "en"] as const) {
+        const photos = diaryPhotos(id, lang);
+        expect(photos.length).toBeGreaterThan(0);
+        for (const p of photos) expect(p.alt).not.toBe("");
+      }
+    }
   });
 });
