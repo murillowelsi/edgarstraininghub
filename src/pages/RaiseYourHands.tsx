@@ -152,8 +152,8 @@ const RaiseYourHands = () => {
 
       <main>
         {/* 1 · Hero */}
+        {/* Plain background (user's choice): no topographic lines behind the hero */}
         <section id="topo" className="relative overflow-hidden px-[18px] pb-6 pt-8 md:px-16 md:pb-10 md:pt-[72px]">
-          <Topo />
           <div className="relative grid items-center gap-[22px] lg:grid-cols-[1.15fr_1fr] lg:gap-12">
             <div className="order-2 lg:order-1">
               <span className="inline-block rounded-full border border-[hsl(var(--ryh-terra))] px-3 py-[7px] text-xs font-bold tracking-[0.16em] text-[hsl(var(--ryh-terra))]">
