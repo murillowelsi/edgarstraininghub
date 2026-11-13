@@ -162,3 +162,12 @@ const PHOTOS = Object.values(
 )[0] ?? {};
 
 export const diaryPhotos = (id: string, lang: DiaryLang) => photosFor(PHOTOS, id, lang);
+
+/** One photo by "entry/nn" (e.g. "dia-3/01"), for the landing page */
+export function diaryPhoto(ref: string, lang: DiaryLang): DiaryPhoto | undefined {
+  const [id, n] = ref.split("/");
+  return diaryPhotos(id, lang)[Number(n) - 1];
+}
+
+/** First photo of an entry (cover of the logbook teaser) */
+export const diaryCover = (id: string, lang: DiaryLang) => diaryPhotos(id, lang)[0];

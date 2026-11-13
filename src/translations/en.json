@@ -2467,6 +2467,15 @@
       "storyRest": "He sent a missionary family who blessed us with food for an entire month. Then, He sent others who continued to provide food and even some financial help. Through that experience, we understood something powerful: God is our provider.\n\nThis year, we want to be that blessing for others. We’ll be cycling from the North to the South of Portugal, supporting families in need. You can be part of this mission! We’re raising funds to help families in several cities — Porto, Chaves, Vila de Rei, Viana do Alentejo, and Faro. I’ll be cycling roughly 1,000 km across Portugal to bring hope and help where it’s needed most.\n\nI’ll be recording everything on YouTube — from the very start of this page, through the training and preparation, to the full north-to-south cycling journey. You’ll see exactly where every donation goes and how you’re helping transform lives. Come and be part of it. Together, let’s be a blessing to families across Portugal!",
       "readFull": "Read the full story"
     },
+    "road": {
+      "kicker": "From the road",
+      "title": "Moments from the crossing",
+      "more": "See them all in the logbook",
+      "slides": "Photos of the groceries and deliveries",
+      "pause": "Pause photos",
+      "play": "Play photos",
+      "goTo": "Show photo {{n}} of {{total}}"
+    },
     "diary": {
       "eyebrow": "Logbook",
       "metaTitle": "Logbook — Raise Your Hands",
