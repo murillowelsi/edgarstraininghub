@@ -30,12 +30,12 @@ export function PhotoStrip({ photos, label }: { photos: DiaryPhoto[]; label: str
     <div className="-mx-[22px] mt-[30px] md:mx-0">
       <ul role="list" aria-label={label} className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-[22px] pb-3 [scrollbar-width:thin] md:px-0">
         {photos.map((p, i) => (
-          <li key={p.base} className="shrink-0 snap-start">
+          <li key={p.base} className={cn("snap-start", total === 1 ? "w-full" : "shrink-0")}>
             <button
               type="button"
               onClick={() => setOpen(i)}
               aria-label={fill(d.openPhoto, i + 1)}
-              className={cn(ryh.focus, "block cursor-zoom-in overflow-hidden rounded-[16px]")}
+              className={cn(ryh.focus, "block cursor-zoom-in overflow-hidden rounded-[16px]", total === 1 && "w-full")}
             >
               <img
                 src={`${p.base}-1280.webp`}
@@ -46,7 +46,11 @@ export function PhotoStrip({ photos, label }: { photos: DiaryPhoto[]; label: str
                 alt={p.alt}
                 loading="lazy"
                 decoding="async"
-                className="h-[min(64vh,500px)] w-auto max-w-none bg-[var(--ryh-soft)] object-cover transition-transform duration-300 hover:scale-[1.02] md:h-[540px]"
+                className={cn(
+                  "bg-[var(--ryh-soft)] object-cover transition-transform duration-300 hover:scale-[1.02]",
+                  // A single photo fills the column (any orientation); several form a scrollable strip
+                  total === 1 ? "h-auto w-full max-w-full" : "h-[min(64vh,500px)] w-auto max-w-none md:h-[540px]",
+                )}
               />
             </button>
           </li>

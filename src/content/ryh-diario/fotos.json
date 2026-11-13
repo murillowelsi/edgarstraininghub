@@ -1,4 +1,15 @@
 {
+  "prologo": [
+    {
+      "base": "/ryh/diario/prologo/01",
+      "w": 1112,
+      "h": 605,
+      "alt": {
+        "pt": "Duas pessoas abraçadas à noite junto ao rio, com uma ponte iluminada ao fundo",
+        "en": "Two people with their arms around each other at night by the river, with a lit-up bridge behind them"
+      }
+    }
+  ],
   "chegada": [
     {
       "base": "/ryh/diario/chegada/01",
