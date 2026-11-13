@@ -82,8 +82,9 @@ export function PhotoStrip({ photos, label }: { photos: DiaryPhoto[]; label: str
                   alt={current.alt}
                   className="max-h-[calc(100dvh-110px)] max-w-full rounded-[12px] object-contain"
                 />
-                <DialogPrimitive.Description className="mt-3 max-w-[60ch] text-center text-[14px] leading-snug text-white/75">
-                  {fill(d.counter, (open ?? 0) + 1)} · {current.alt}
+                {/* Only the counter on screen; the photo description stays for screen readers (img alt) */}
+                <DialogPrimitive.Description className="mt-3 text-center text-[13px] tabular-nums tracking-[0.04em] text-white/60">
+                  {fill(d.counter, (open ?? 0) + 1)}
                 </DialogPrimitive.Description>
               </>
             )}
