@@ -1,6 +1,6 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { RyhLogo } from "@/components/ryh/RyhLogo";
 import { RYH, ryhPaths, showPlaceholders } from "@/config/raiseYourHands";
@@ -124,6 +124,8 @@ function useHashScroll() {
 type NavKey = "purpose" | "route" | "transparency" | "stories" | "diary";
 
 const BRAND = "Raise Your Hands";
+const BRAND_START = "Raise Your";
+const BRAND_END = "Hands";
 
 function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; theme: RyhTheme; onToggleTheme: () => void }) {
   const [scrolled, setScrolled] = useState(false);
@@ -174,20 +176,24 @@ function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; th
         scrolled ? "border-[var(--ryh-line)]" : "border-transparent",
       )}
     >
-      <div className="flex items-center gap-3.5 px-5 py-4 md:px-[72px] md:py-[22px]">
-        {/* RC-19: the bar carries only the name, in the logo wordmark lettering (Montserrat 900, caps) */}
-        <Link to={ryhPaths.home} aria-label={BRAND} className={cn(ryh.focus, "flex min-h-[26px] items-center")}>
+      <div className="flex items-center gap-1.5 px-3 py-4 min-[380px]:gap-2 min-[380px]:px-4 sm:gap-3.5 sm:px-5 md:px-[72px] md:py-[22px]">
+        {/* RC-19: the name in the logo wordmark lettering (Montserrat 900, caps), framed, HANDS in yellow */}
+        <Link
+          to={ryhPaths.home}
+          aria-label={BRAND}
+          className={cn(ryh.focus, "flex shrink-0 items-center border-[2.5px] border-[var(--ryh-fg)] px-2 py-[7px] sm:px-2.5 md:px-3 md:py-2")}
+        >
           <span
             aria-hidden
-            className="whitespace-nowrap font-['Montserrat',sans-serif] text-[13px] font-black uppercase leading-none tracking-[0.02em] text-[var(--ryh-fg)] md:text-[15px] md:tracking-[0.03em]"
+            className="whitespace-nowrap font-['Montserrat',sans-serif] text-[12px] font-black uppercase leading-none tracking-[0.01em] text-[var(--ryh-fg)] sm:text-[13px] sm:tracking-[0.02em] md:text-[15px] md:tracking-[0.03em]"
           >
-            {BRAND}
+            {BRAND_START} <span className="text-[var(--ryh-y)]">{BRAND_END}</span>
           </span>
         </Link>
         <nav aria-label={r.nav.label} className="ml-auto hidden gap-7 text-[15px] text-[var(--ryh-muted)] lg:flex">
           {items.map((item) => renderLink(item))}
         </nav>
-        <div className="ml-auto flex items-center gap-1.5 lg:ml-5">
+        <div className="ml-auto flex items-center gap-0.5 sm:gap-1.5 lg:ml-5">
           <LanguageSwitcher />
           <button
             type="button"
@@ -203,11 +209,17 @@ function RyhHeader({ onLanding, theme, onToggleTheme }: { onLanding: boolean; th
             aria-expanded={open}
             aria-controls={menuId}
             onClick={() => setOpen((o) => !o)}
-            className={cn(ryh.focus, "px-1.5 py-1 text-sm text-[var(--ryh-muted)] lg:hidden")}
+            aria-label={r.nav.menu}
+            className={cn(ryh.focus, "grid h-9 w-9 place-items-center rounded-full text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)] lg:hidden")}
           >
-            {r.nav.menu}
+            {open ? <X className="h-[19px] w-[19px]" aria-hidden /> : <Menu className="h-[19px] w-[19px]" aria-hidden />}
           </button>
-          <a href={RYH.siteUrl} aria-label="Edgar Zanin" className={cn(ryh.focus, "ml-2 hidden text-[13px] font-semibold text-[var(--ryh-muted)] hover:text-[var(--ryh-fg)] lg:inline")}>
+          {/* EZ logo (same as the main site: Montserrat 800, gold), back to edgarzanin.com */}
+          <a
+            href={RYH.siteUrl}
+            aria-label="Edgar Zanin"
+            className={cn(ryh.focus, "ml-0.5 font-['Montserrat',sans-serif] text-[20px] font-extrabold leading-none tracking-tighter text-[hsl(48_96%_45%)] transition-opacity hover:opacity-80 md:text-[26px]")}
+          >
             EZ
           </a>
         </div>
