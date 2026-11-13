@@ -47,7 +47,7 @@ describe("real content", () => {
   it("has the same entries in PT and EN, in order, and only Day 1 has a stage", () => {
     const pt = diaryEntries("pt");
     const en = diaryEntries("en");
-    expect(pt.map((e) => e.id)).toEqual(["prologo", "chegada", "dia-1", "dia-2", "dia-3"]);
+    expect(pt.map((e) => e.id)).toEqual(["prologo", "chegada", "dia-1", "dia-2", "dia-3", "dia-4"]);
     expect(en.map((e) => e.id)).toEqual(pt.map((e) => e.id));
     expect(pt.filter((e) => e.stage).map((e) => e.id)).toEqual(["dia-1"]);
     expect(en.map((e) => e.blocks.map((b) => b.kind).join())).toEqual(pt.map((e) => e.blocks.map((b) => b.kind).join()));
@@ -65,7 +65,7 @@ describe("photos per entry", () => {
 
   it("ships photos only for existing entries, each with a description in both languages", () => {
     const ids = new Set(diaryEntries("pt").map((e) => e.id));
-    for (const id of ["chegada", "dia-1", "dia-2", "dia-3"]) {
+    for (const id of ["chegada", "dia-1", "dia-2", "dia-3", "dia-4"]) {
       expect(ids.has(id)).toBe(true);
       for (const lang of ["pt", "en"] as const) {
         const photos = diaryPhotos(id, lang);

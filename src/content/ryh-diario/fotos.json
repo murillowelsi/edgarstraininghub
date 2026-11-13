@@ -195,5 +195,88 @@
         "en": "Three people standing next to shopping bags and cartons of milk"
       }
     }
+  ],
+  "dia-4": [
+    {
+      "base": "/ryh/diario/dia-4/01",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Quatro pessoas sorridentes numa sala, uma delas de capacete de ciclismo",
+        "en": "Four people smiling in a room, one of them wearing a cycling helmet"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-4/02",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Carrinho de supermercado amarelo cheio de alimentos",
+        "en": "Yellow supermarket trolley full of food"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-4/03",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Igreja branca numa praça de calçada, sob céu azul",
+        "en": "White church on a cobbled square under a blue sky"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-4/04",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Duas pessoas num restaurante, ao lado de sacos de compras",
+        "en": "Two people in a restaurant next to shopping bags"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-4/05",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Casa alentejana branca com janelas azuis",
+        "en": "White Alentejo house with blue windows"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-4/06",
+      "w": 1080,
+      "h": 1440,
+      "alt": {
+        "pt": "Edifício do mercado de Mora",
+        "en": "The Mora market building"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-4/07",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Quatro pessoas tiram uma selfie dentro de um edifício",
+        "en": "Four people taking a selfie inside a building"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-4/08",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Duas pessoas tiram uma selfie numa rua de Mora, com uma torre de igreja ao fundo",
+        "en": "Two people taking a selfie in a Mora street, with a church tower behind"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-4/09",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Bíblia aberta em cima de uma cama",
+        "en": "Open Bible on a bed"
+      }
+    }
   ]
 }
