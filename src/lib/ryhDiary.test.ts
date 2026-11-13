@@ -51,7 +51,7 @@ describe("real content", () => {
     expect(en.map((e) => e.id)).toEqual(pt.map((e) => e.id));
     expect(pt.filter((e) => e.stage).map((e) => e.id)).toEqual(["dia-1"]);
     expect(en.map((e) => e.blocks.map((b) => b.kind).join())).toEqual(pt.map((e) => e.blocks.map((b) => b.kind).join()));
-    expect(diaryPage("pt").title).toBe('Diário de Bordo: A Travessia "Raise Your Hands"');
+    expect(diaryPage("pt").title).toBe("Diário de Bordo");
   });
 });
 

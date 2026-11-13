@@ -109,7 +109,6 @@ const RaiseYourHandsDiary = () => {
         {/* DB-3: header */}
         <header className="ryh-band mb-10 pb-[34px] pt-9 md:pb-14 md:pt-[72px]">
           <div className="max-w-[46em]">
-            <span className={ryh.kicker}>{d.eyebrow}</span>
             <h1 className={ryh.h1}>{page.title}</h1>
             <p className="text-[17px] leading-[1.7] text-[var(--ryh-muted)] md:text-[19px]">{page.subtitle}</p>
             {latest && (
