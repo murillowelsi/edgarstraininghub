@@ -10,7 +10,17 @@ import { END, OUTLINE_A, OUTLINE_C, ROUTE_A, ROUTE_C, START } from "./ryhPaths";
  * - trace: map only, no wordmark (hero: the name is already in the H1 and the menu, RC-4)
  * - mark: compact C (header)
  */
-export function RyhLogo({ variant = "full", className }: { variant?: "full" | "trace" | "mark"; className?: string }) {
+export function RyhLogo({
+  variant = "full",
+  size = "sm",
+  className,
+}: {
+  variant?: "full" | "trace" | "mark";
+  /** full only: "lg" = hero size (mobile hero) */
+  size?: "sm" | "lg";
+  className?: string;
+}) {
+  const lg = size === "lg";
   if (variant === "mark") {
     return (
       <svg viewBox="-20 -20 385 745" className={cn("h-[26px] w-auto", className)} aria-hidden="true">
@@ -36,17 +46,17 @@ export function RyhLogo({ variant = "full", className }: { variant?: "full" | "t
   }
 
   return (
-    <div className={cn("flex items-center gap-5 text-[var(--ryh-fg)]", className)}>
-      {map("h-16 w-auto shrink-0")}
+    <div className={cn("flex items-center text-[var(--ryh-fg)]", lg ? "gap-6" : "gap-5", className)}>
+      {map(lg ? "h-[150px] w-auto shrink-0" : "h-16 w-auto shrink-0")}
       <div aria-hidden>
-        <b className="block font-['Montserrat',sans-serif] text-[30px] font-black leading-none tracking-[0.02em]">
+        <b className={cn("block font-['Montserrat',sans-serif] font-black tracking-[0.02em]", lg ? "text-[44px]" : "text-[30px]", "leading-none")}>
           RAISE
           <br />
           YOUR
           <br />
           <span className="text-[var(--ryh-y)]">HANDS</span>
         </b>
-        <span className="mt-2 block text-[9px] font-semibold tracking-[0.2em] text-[var(--ryh-muted)]">PORTO → FARO</span>
+        <span className={cn("block font-semibold tracking-[0.2em] text-[var(--ryh-muted)]", lg ? "mt-3 text-[11px]" : "mt-2 text-[9px]")}>PORTO → FARO</span>
       </div>
     </div>
   );
