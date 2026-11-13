@@ -19,6 +19,7 @@ import BlogArticlePage from "./pages/BlogArticlePage";
 import BlogPage from "./pages/BlogPage";
 import Contact from "./pages/Contact";
 import Index from "./pages/Index";
+import RaiseYourHands from "./pages/RaiseYourHands";
 import NotFound from "./pages/NotFound";
 import AdminCalendar from "./pages/admin/Calendar";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -51,6 +52,8 @@ import AthleteTestimonial from "./pages/athlete/Testimonial";
 import AthleteActivityDetail from "./pages/athlete/ActivityDetail";
 import AthleteEventDetail from "./pages/athlete/EventDetail";
 
+const isRaiseYourHandsHost = typeof window !== "undefined" && window.location.hostname.startsWith("raiseyourhands.");
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -72,7 +75,9 @@ const App = () => (
                 <Route path="/app" element={<AppEntry />} />
 
                 {/* Public Routes */}
-                <Route path="/" element={<Index />} />
+                {/* raiseyourhands.edgarzanin.com shows the landing at its root (vercel.json rewrites by host) */}
+                <Route path="/" element={isRaiseYourHandsHost ? <RaiseYourHands /> : <Index />} />
+                <Route path="/raise-your-hands" element={<RaiseYourHands />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/contact" element={<Contact />} />
