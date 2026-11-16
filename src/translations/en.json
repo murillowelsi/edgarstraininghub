@@ -2615,6 +2615,18 @@
       "breadcrumb": "Breadcrumb",
       "productMeta": "{{nome}} (coming soon) — Raise Your Hands",
       "pending": "[PENDING: {{campo}}]"
+    },
+    "zoom": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "reset": "Reset zoom",
+      "close": "Close",
+      "prev": "Previous photo",
+      "next": "Next photo",
+      "counter": "{{n}} of {{total}}",
+      "open": "Enlarge photo: {{alt}}",
+      "hintDesktop": "Scroll or double-click to zoom; drag to move.",
+      "hintTouch": "Pinch or double-tap to zoom."
     }
   }
 }
