@@ -23,12 +23,12 @@ export function UserAvatar({ photoURL, initials, showCrown = false, className, s
         src={photoURL}
         alt=""
         fallback={initials}
-        className={cn(sizeMap[size], "ring-2 ring-[#e1b506]", className)}
+        className={cn(sizeMap[size], "ring-2 ring-primary", className)}
         fallbackClassName="bg-primary text-primary-foreground font-semibold"
       />
       {showCrown && (
         <Crown
-          className="absolute -top-2.5 -right-1 h-4 w-4 fill-yellow-400 text-yellow-500 drop-shadow-sm"
+          className="absolute -top-2.5 -right-1 h-4 w-4 fill-primary text-primary drop-shadow-sm"
           strokeWidth={1.5}
         />
       )}

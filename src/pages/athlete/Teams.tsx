@@ -33,7 +33,7 @@ function MemberAvatarStack({ memberIds, memberMap }: { memberIds: string[]; memb
             src={u?.photoURL}
             alt={u?.displayName}
             fallback={u ? getInitials(u.displayName) : "?"}
-            className="h-7 w-7 ring-2 ring-[#e1b506]"
+            className="h-7 w-7 ring-2 ring-primary"
             fallbackClassName="text-[10px] font-semibold bg-muted"
           />
         );

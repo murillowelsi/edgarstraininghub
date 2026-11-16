@@ -329,7 +329,7 @@ export default function AdminChat() {
                                             src={!chat.isGroup ? getChatPhotoURL(chat) : undefined}
                                             alt={displayName}
                                             fallback={chat.isGroup ? <Users2 className="h-5 w-5" /> : displayName[0]?.toUpperCase()}
-                                            className="h-12 w-12 shrink-0 ring-2 ring-[#e1b506]"
+                                            className="h-12 w-12 shrink-0 ring-2 ring-primary"
                                             fallbackClassName="text-base font-semibold"
                                         />
                                         <div className="flex-1 min-w-0">

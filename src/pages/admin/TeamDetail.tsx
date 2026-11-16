@@ -286,7 +286,7 @@ export default function AdminTeamDetail() {
                       src={member.photoURL}
                       alt={member.displayName}
                       fallback={getInitials(member.displayName || "?")}
-                      className="h-9 w-9 ring-2 ring-[#e1b506]"
+                      className="h-9 w-9 ring-2 ring-primary"
                       fallbackClassName="text-xs font-semibold"
                       fallbackStyle={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
                     />
@@ -370,7 +370,7 @@ export default function AdminTeamDetail() {
                         src={athlete.photoURL}
                         alt={athlete.displayName}
                         fallback={athlete.displayName?.[0]?.toUpperCase() || "?"}
-                        className="h-8 w-8 shrink-0 ring-2 ring-[#e1b506]"
+                        className="h-8 w-8 shrink-0 ring-2 ring-primary"
                         fallbackClassName="text-xs"
                       />
                       <div className="min-w-0">

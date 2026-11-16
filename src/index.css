@@ -18,7 +18,7 @@
     /* Error text that passes AA on the background (design system 1.2) */
     --destructive-ink: 0 72% 51%;
     /* Readable yellow/gold text on light backgrounds (≈ 5:1 on white) */
-    --primary-ink: 40 95% 30%;
+    --primary-ink: 36 55% 32%;
     /* Popover, menu, sheet over a card */
     --surface-2: 210 40% 98%;
     /* Feed background, one step behind the post cards */
@@ -51,9 +51,9 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 48 96% 45%;
+    --primary: 36 50% 47%;
     --primary-foreground: 222 47% 11%;
-    --primary-glow: 48 96% 60%;
+    --primary-glow: 36 55% 60%;
 
     --secondary: 25 95% 53%;
     --secondary-foreground: 0 0% 100%;
@@ -62,28 +62,28 @@
     --muted-foreground: 215 16% 47%;
 
     --accent: 210 100% 95%;
-    --accent-foreground: 48 96% 45%;
+    --accent-foreground: 36 50% 47%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 48 96% 45%;
+    --ring: 36 50% 47%;
 
     --radius: 0.75rem;
     
     /* Modern gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(48 96% 45%) 0%, hsl(48 96% 35%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(36 50% 47%) 0%, hsl(36 50% 37%) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(25 95% 43%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 100%) 100%), linear-gradient(135deg, hsl(48 96% 45% / 0.1) 0%, hsl(25 95% 53% / 0.1) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 100%) 100%), linear-gradient(135deg, hsl(36 50% 47% / 0.1) 0%, hsl(25 95% 53% / 0.1) 100%);
     
     /* Elegant shadows */
     --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.1), 0 2px 4px -1px hsl(222 47% 11% / 0.06);
     --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -2px hsl(222 47% 11% / 0.05);
     --shadow-xl: 0 20px 25px -5px hsl(222 47% 11% / 0.1), 0 10px 10px -5px hsl(222 47% 11% / 0.04);
-    --shadow-glow: 0 0 30px hsl(48 96% 45% / 0.4);
+    --shadow-glow: 0 0 30px hsl(36 50% 47% / 0.4);
     
     /* Smooth transitions */
     --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -111,7 +111,7 @@
     --feed-canvas: 220 5% 7%;
     --workout-card: 220 5% 8%;
     --destructive-ink: 0 91% 71%;
-    --primary-ink: 48 96% 45%;
+    --primary-ink: 36 50% 47%;
     --surface-2: 220 5% 15%;
     --success-ink: 142 69% 58%;
     --warning-ink: 43 96% 56%;
@@ -120,9 +120,9 @@
     --popover: 220 5% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 48 96% 45%;
+    --primary: 36 50% 47%;
     --primary-foreground: 220 5% 9%;
-    --primary-glow: 48 96% 60%;
+    --primary-glow: 36 55% 60%;
 
     --secondary: 25 95% 53%;
     --secondary-foreground: 0 0% 100%;
@@ -131,28 +131,28 @@
     --muted-foreground: 220 5% 66%;
 
     --accent: 220 5% 17%;
-    --accent-foreground: 48 96% 45%;
+    --accent-foreground: 36 50% 47%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 220 5% 24%;
     --input: 220 5% 44%;
-    --ring: 48 96% 45%;
+    --ring: 36 50% 47%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(48 96% 45%) 0%, hsl(48 96% 35%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(36 50% 47%) 0%, hsl(36 50% 37%) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(25 95% 43%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220 5% 9%) 0%, hsl(220 5% 9%) 100%), linear-gradient(135deg, hsl(48 96% 45% / 0.1) 0%, hsl(25 95% 53% / 0.1) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 5% 9%) 0%, hsl(220 5% 9%) 100%), linear-gradient(135deg, hsl(36 50% 47% / 0.1) 0%, hsl(25 95% 53% / 0.1) 100%);
     
-    --shadow-glow: 0 0 30px hsl(48 96% 45% / 0.4);
+    --shadow-glow: 0 0 30px hsl(36 50% 47% / 0.4);
     --sidebar-background: 220 5% 12%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 48 96% 45%;
+    --sidebar-primary: 36 50% 47%;
     --sidebar-primary-foreground: 220 5% 9%;
     --sidebar-accent: 220 5% 15%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 220 5% 24%;
-    --sidebar-ring: 48 96% 45%;
+    --sidebar-ring: 36 50% 47%;
   }
 }
 
