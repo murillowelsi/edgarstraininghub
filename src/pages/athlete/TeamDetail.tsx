@@ -132,7 +132,7 @@ export default function AthleteTeamDetail() {
                       src={member.photoURL}
                       alt={member.displayName}
                       fallback={getInitials(member.displayName || "?")}
-                      className="h-9 w-9 ring-2 ring-[#e1b506]"
+                      className="h-9 w-9 ring-2 ring-primary"
                       fallbackClassName="text-xs font-semibold"
                       fallbackStyle={{ backgroundColor: `${color.color}18`, color: color.color }}
                     />

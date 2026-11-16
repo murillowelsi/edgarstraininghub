@@ -272,7 +272,7 @@ const AdminUsers = () => {
                         src={u.photoURL}
                         alt={u.displayName}
                         fallback={getInitials(u.displayName)}
-                        className="h-9 w-9 ring-2 ring-[#e1b506]"
+                        className="h-9 w-9 ring-2 ring-primary"
                         fallbackClassName="text-xs font-semibold"
                         fallbackStyle={{ backgroundColor: "#e0b50718", color: "#e0b507" }}
                       />

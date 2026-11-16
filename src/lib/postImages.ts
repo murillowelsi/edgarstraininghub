@@ -3,6 +3,9 @@ import type { SummaryStat } from "@/utils/workoutSummaryStats";
 import { formatDuration, workoutCardModel } from "@/utils/workoutSummaryStats";
 import { vizModel } from "@/components/timeline/workout-viz/vizModel";
 
+/** EZ brand gold (= --primary, #B5843C), drawn on canvas so it cannot read the CSS token */
+const BRAND_GOLD = "#B5843C";
+
 export type PostAspect = "original" | "4:5" | "1:1";
 
 const ASPECT_RATIO: Record<Exclude<PostAspect, "original">, number> = { "4:5": 4 / 5, "1:1": 1 };
@@ -84,7 +87,7 @@ const drawStatsOverlay = (ctx: CanvasRenderingContext2D, w: number, h: number, c
   ctx.fillText(content.summary.workoutName, pad, nameY, w - pad * 2 - unit * 12);
 
   // EZ mark, top-right of the band
-  ctx.fillStyle = "#e1b506";
+  ctx.fillStyle = BRAND_GOLD;
   ctx.font = `900 ${unit * 5}px ${FONT}`;
   ctx.textAlign = "right";
   ctx.fillText("EZ", w - pad, nameY);
@@ -190,7 +193,7 @@ const sportFill = (type: string, alpha = 1) => {
 };
 
 const CARD_BG = "#131415"; // dark --workout-card
-const YELLOW = "#e1b506";
+const YELLOW = BRAND_GOLD;
 const NAVY_TEXT = "#161718";
 
 const pill = (ctx: CanvasRenderingContext2D, x: number, y: number, text: string, opts: { fill: string; color: string }) => {

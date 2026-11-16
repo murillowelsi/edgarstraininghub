@@ -111,7 +111,7 @@ export const PullToRefresh = () => {
     >
       <div
         className={`flex h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-background/80 shadow-md backdrop-blur-md transition-colors ${
-          passedThreshold ? "text-amber-500" : "text-muted-foreground"
+          passedThreshold ? "text-primary" : "text-muted-foreground"
         }`}
         style={{ opacity: refreshing ? 1 : Math.max(progress, 0.4) }}
       >

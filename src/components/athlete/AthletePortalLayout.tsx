@@ -256,7 +256,7 @@ const AthletePortalLayout = ({
                     src={photoURL}
                     alt={t.common.profilePhoto}
                     fallback={getInitials(user?.email)}
-                    className="h-14 w-14 ring-2 ring-[#e1b506]"
+                    className="h-14 w-14 ring-2 ring-primary"
                     fallbackClassName="bg-primary text-primary-foreground text-lg font-semibold"
                   />
                   <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

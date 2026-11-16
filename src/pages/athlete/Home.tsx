@@ -110,7 +110,7 @@ const AthleteHome = () => {
               src={photoURL}
               alt={displayName}
               fallback={displayName.charAt(0).toUpperCase()}
-              className="h-11 w-11 shrink-0 ring-2 ring-[#e1b506]"
+              className="h-11 w-11 shrink-0 ring-2 ring-primary"
               fallbackClassName="bg-primary text-primary-foreground text-base font-semibold"
             />
           </button>
