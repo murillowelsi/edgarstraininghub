@@ -35,11 +35,13 @@ import { cn } from "@/lib/utils";
 
 function ProductImage({ product, colour, view, sizes, alt, eager }: { product: ShopProduct; colour: ShopColour; view: ShopView; sizes: string; alt: string; eager?: boolean }) {
   const base = imageBase(product.slug, colour.id, view);
+  // "Detail" is drawn DETAIL_SCALE× larger, so it needs the 2000 px file to stay sharp (sizes scaled to match)
+  const detail = view === "detalhe";
   return (
     <img
-      src={`${base}-1000.webp`}
-      srcSet={srcSet(base)}
-      sizes={sizes}
+      src={`${base}-${detail ? 2000 : 1000}.webp`}
+      srcSet={detail ? `${srcSet(base)}, ${base}-2000.webp 2000w` : srcSet(base)}
+      sizes={detail ? (sizes === "72px" ? "190px" : "(min-width: 1024px) 1670px, 260vw") : sizes}
       width={IMAGE_SIZE.w}
       height={IMAGE_SIZE.h}
       alt={alt}
