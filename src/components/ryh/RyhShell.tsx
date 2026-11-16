@@ -28,24 +28,28 @@ function useRyhFonts() {
   }, []);
 }
 
-const THEME_KEY = "ryh-theme";
+/** New key so everyone starts on the dark default once (user request); saved only when the person toggles */
+const THEME_KEY = "ryh-theme-choice";
 type RyhTheme = "light" | "dark";
 
-/** RC-2: light by default; dark only when the person picks it (saved on this device) */
+/** Dark by default; light only when the person picks it (saved on this device) */
 function useRyhTheme() {
-  const [theme, setTheme] = useState<RyhTheme>(() => {
+  const [theme, setThemeState] = useState<RyhTheme>(() => {
     try {
-      return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light";
+      return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";
     } catch {
-      return "light";
+      return "dark";
     }
   });
-  useEffect(() => {
+  const setTheme = (next: RyhTheme) => {
     try {
-      localStorage.setItem(THEME_KEY, theme);
+      localStorage.setItem(THEME_KEY, next);
     } catch {
       /* private mode: the choice lasts for this visit */
     }
+    setThemeState(next);
+  };
+  useEffect(() => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     const prev = meta?.content;
     if (meta) meta.content = theme === "dark" ? "#1C1A17" : "#F6F2EA";
