@@ -236,7 +236,7 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
           <a
             href={RYH.siteUrl}
             aria-label="Edgar Zanin"
-            className={cn(ryh.focus, "ml-0.5 hidden font-['Montserrat',sans-serif] text-[26px] font-extrabold leading-none tracking-tighter text-[hsl(48_96%_45%)] transition-opacity hover:opacity-80 lg:inline-block")}
+            className={cn(ryh.focus, "ml-0.5 hidden font-['Montserrat',sans-serif] text-[26px] font-extrabold leading-none tracking-tighter text-[var(--ryh-y)] transition-opacity hover:opacity-80 lg:inline-block")}
           >
             EZ
           </a>
@@ -249,7 +249,7 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
             {items.map((item) => renderLink(item, "block border-b border-[var(--ryh-line)] py-3.5 text-base text-[var(--ryh-fg)] last:border-0", true))}
             {/* On mobile the EZ logo lives here, not in the bar (user request); from lg it is in the bar, so not repeated */}
             <a href={RYH.siteUrl} aria-label="Edgar Zanin" className={cn(ryh.focus, "flex items-center gap-2.5 py-3.5 text-base text-[var(--ryh-muted)] lg:hidden")}>
-              <span aria-hidden className="font-['Montserrat',sans-serif] text-[22px] font-extrabold leading-none tracking-tighter text-[hsl(48_96%_45%)]">EZ</span>
+              <span aria-hidden className="font-['Montserrat',sans-serif] text-[22px] font-extrabold leading-none tracking-tighter text-[var(--ryh-y)]">EZ</span>
               {/* eslint-disable-next-line i18next/no-literal-string -- site name */}
               <span>edgarzanin.com</span>
             </a>
