@@ -61,10 +61,10 @@ function Gallery({ product, colour, view, onView, lang }: { product: ShopProduct
   const alt = (v: ShopView) => productAlt(s, product, colour, v, lang);
   const z = t.ryh.zoom;
 
-  // Viewer: front and back of the current colour (1000 px); "Detail" opens the front zoomed on the logo
+  // Viewer: front and back of the current colour (2000 px, sharp at 4×); "Detail" opens the front zoomed on the logo
   const [viewer, setViewer] = useState<{ index: number; fromDetail: boolean } | null>(null);
   const viewerPhotos: LightboxPhoto[] = (["frente", "costas"] as const).map((v) => ({
-    src: `${imageBase(product.slug, colour.id, v)}-1000.webp`,
+    src: `${imageBase(product.slug, colour.id, v)}-2000.webp`,
     alt: alt(v),
     w: IMAGE_SIZE.w,
     h: IMAGE_SIZE.h,
