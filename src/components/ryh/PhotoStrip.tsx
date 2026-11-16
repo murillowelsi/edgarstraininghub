@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from "react";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, Lock, X } from "lucide-react";
+import { useState } from "react";
+import { Lock } from "lucide-react";
+import { ZoomLightbox } from "@/components/ryh/ZoomLightbox";
 import { ryh } from "@/components/ryh/ryhStyles";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { DiaryPhoto } from "@/lib/ryhDiary";
@@ -20,14 +20,11 @@ export function PhotoStrip({ photos, label, variant = "strip", caption }: { phot
   const { t } = useLanguage();
   const d = t.ryh.diary;
   const [open, setOpen] = useState<number | null>(null);
-  const touchX = useRef<number | null>(null);
   const total = photos.length;
 
-  const go = useCallback((delta: number) => setOpen((i) => (i === null ? i : (i + delta + total) % total)), [total]);
   const fill = (s: string, n: number) => s.replace("{{n}}", String(n)).replace("{{total}}", String(total));
 
   if (!total) return null;
-  const current = open === null ? null : photos[open];
 
   return (
     <div className={cn("-mx-[22px] md:mx-0", thumbs ? "mt-4" : "mt-[30px]")}>
@@ -71,70 +68,16 @@ export function PhotoStrip({ photos, label, variant = "strip", caption }: { phot
       </ul>
       {total > 1 && <p className="px-[22px] text-[13px] text-[var(--ryh-muted)] md:px-0">{d.photosHint}</p>}
 
-      <DialogPrimitive.Root open={open !== null} onOpenChange={(o) => !o && setOpen(null)}>
-        <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#100f0d] data-[state=open]:animate-in data-[state=open]:fade-in-0" />
-          <DialogPrimitive.Content
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center p-3 outline-none md:p-8"
-            onKeyDown={(e) => {
-              if (e.key === "ArrowRight") go(1);
-              if (e.key === "ArrowLeft") go(-1);
-            }}
-            onTouchStart={(e) => (touchX.current = e.touches[0].clientX)}
-            onTouchEnd={(e) => {
-              if (touchX.current === null) return;
-              const dx = e.changedTouches[0].clientX - touchX.current;
-              if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
-              touchX.current = null;
-            }}
-          >
-            <DialogPrimitive.Title className="sr-only">{label}</DialogPrimitive.Title>
-            {current && (
-              <>
-                <img
-                  key={current.base}
-                  src={`${current.base}-1280.webp`}
-                  srcSet={srcSet(current)}
-                  sizes="100vw"
-                  alt={current.alt}
-                  className="max-h-[calc(100dvh-110px)] max-w-full rounded-[12px] object-contain"
-                />
-                {/* Only the counter on screen; the photo description stays for screen readers (img alt) */}
-                <DialogPrimitive.Description className="mt-3 text-center text-[13px] tabular-nums tracking-[0.04em] text-white/60">
-                  {fill(d.counter, (open ?? 0) + 1)}
-                  {caption && ` · ${caption}`}
-                </DialogPrimitive.Description>
-              </>
-            )}
-            <DialogPrimitive.Close
-              aria-label={d.close}
-              className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
-            >
-              <X className="h-5 w-5" aria-hidden />
-            </DialogPrimitive.Close>
-            {total > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => go(-1)}
-                  aria-label={d.prev}
-                  className="absolute left-2 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white md:left-6"
-                >
-                  <ChevronLeft className="h-6 w-6" aria-hidden />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => go(1)}
-                  aria-label={d.next}
-                  className="absolute right-2 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white md:right-6"
-                >
-                  <ChevronRight className="h-6 w-6" aria-hidden />
-                </button>
-              </>
-            )}
-          </DialogPrimitive.Content>
-        </DialogPrimitive.Portal>
-      </DialogPrimitive.Root>
+      {/* Full-screen viewer with zoom (shared with the shop): counter + caption, ← →, swipe at 1×, Esc */}
+      <ZoomLightbox
+        photos={photos.map((p) => ({ src: `${p.base}-1280.webp`, alt: p.alt, w: p.w, h: p.h }))}
+        index={open}
+        onIndexChange={setOpen}
+        onClose={() => setOpen(null)}
+        label={label}
+        tone="dark"
+        caption={caption}
+      />
     </div>
   );
 }

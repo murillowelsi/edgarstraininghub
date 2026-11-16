@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { ChevronDown, Map as MapIcon } from "lucide-react";
 import { RyhShell } from "@/components/ryh/RyhShell";
+import { ZoomLightbox, type LightboxPhoto } from "@/components/ryh/ZoomLightbox";
 import { ryh } from "@/components/ryh/ryhStyles";
 import { ProductCard } from "@/components/ryh/shop/ProductCard";
 import { Pending, ShopMeanwhile, SoonPill, Swatches } from "@/components/ryh/shop/ShopParts";
@@ -9,6 +10,7 @@ import { RYH, ryhPaths, showPlaceholders } from "@/config/raiseYourHands";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { DiaryLang } from "@/lib/ryhDiary";
 import {
+  DETAIL_SCALE,
   IMAGE_SIZE,
   SHOP_VIEWS,
   colourOf,
@@ -57,6 +59,18 @@ function Gallery({ product, colour, view, onView, lang }: { product: ShopProduct
   const index = SHOP_VIEWS.indexOf(view);
   const go = (delta: number) => onView(SHOP_VIEWS[(index + delta + SHOP_VIEWS.length) % SHOP_VIEWS.length]);
   const alt = (v: ShopView) => productAlt(s, product, colour, v, lang);
+  const z = t.ryh.zoom;
+
+  // Viewer: front and back of the current colour (1000 px); "Detail" opens the front zoomed on the logo
+  const [viewer, setViewer] = useState<{ index: number; fromDetail: boolean } | null>(null);
+  const viewerPhotos: LightboxPhoto[] = (["frente", "costas"] as const).map((v) => ({
+    src: `${imageBase(product.slug, colour.id, v)}-1000.webp`,
+    alt: alt(v),
+    w: IMAGE_SIZE.w,
+    h: IMAGE_SIZE.h,
+    initial: v === "frente" && viewer?.fromDetail ? { scale: DETAIL_SCALE, x: product.detalhe.x, y: product.detalhe.y } : undefined,
+  }));
+  const openViewer = () => setViewer({ index: view === "costas" ? 1 : 0, fromDetail: view === "detalhe" });
 
   return (
     <section aria-label={s.galleryLabel}>
@@ -70,7 +84,15 @@ function Gallery({ product, colour, view, onView, lang }: { product: ShopProduct
           touchX.current = null;
         }}
       >
-        <ProductImage key={`${colour.id}-${view}`} product={product} colour={colour} view={view} alt={alt(view)} eager sizes="(min-width: 1024px) 640px, 100vw" />
+        {/* Click / tap opens the full-screen viewer with zoom */}
+        <button
+          type="button"
+          onClick={openViewer}
+          aria-label={z.open.replace("{{alt}}", alt(view))}
+          className={cn(ryh.focus, "absolute inset-0 block cursor-zoom-in rounded-[16px]")}
+        >
+          <ProductImage key={`${colour.id}-${view}`} product={product} colour={colour} view={view} alt="" eager sizes="(min-width: 1024px) 640px, 100vw" />
+        </button>
         <p className="sr-only" aria-live="polite">
           {s.counter.replace("{{n}}", String(index + 1)).replace("{{total}}", String(SHOP_VIEWS.length))}
         </p>
@@ -100,6 +122,14 @@ function Gallery({ product, colour, view, onView, lang }: { product: ShopProduct
           </li>
         ))}
       </ul>
+      <ZoomLightbox
+        photos={viewerPhotos}
+        index={viewer?.index ?? null}
+        onIndexChange={(i) => setViewer({ index: i, fromDetail: false })}
+        onClose={() => setViewer(null)}
+        label={s.galleryLabel}
+        tone="studio"
+      />
     </section>
   );
 }

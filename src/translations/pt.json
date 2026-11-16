@@ -2615,6 +2615,18 @@
       "breadcrumb": "Caminho",
       "productMeta": "{{nome}} (em breve) — Raise Your Hands",
       "pending": "[PENDENTE: {{campo}}]"
+    },
+    "zoom": {
+      "zoomIn": "Ampliar",
+      "zoomOut": "Reduzir",
+      "reset": "Repor zoom",
+      "close": "Fechar",
+      "prev": "Foto anterior",
+      "next": "Foto seguinte",
+      "counter": "{{n}} de {{total}}",
+      "open": "Ampliar foto: {{alt}}",
+      "hintDesktop": "Roda do rato ou duplo clique para ampliar; arraste para mover.",
+      "hintTouch": "Belisque ou toque duas vezes para ampliar."
     }
   }
 }
