@@ -9,16 +9,16 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+/** Saved only when the person toggles; new key so everyone starts on the dark default once (user request) */
+const THEME_KEY = "ez-theme";
+
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("theme") as Theme;
-      if (stored) return stored;
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+    try {
+      return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";
+    } catch {
+      return "dark";
     }
-    return "light";
   });
 
   useEffect(() => {
@@ -32,11 +32,16 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute("content", theme === "dark" ? "#161718" : "#ffffff");
-    localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+    const next: Theme = theme === "light" ? "dark" : "light";
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch {
+      /* private mode: the choice lasts for this visit */
+    }
+    setTheme(next);
   };
 
   return (
