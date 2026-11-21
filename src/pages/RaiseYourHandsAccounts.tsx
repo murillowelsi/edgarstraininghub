@@ -47,7 +47,18 @@ function RouteMapCard({ lang, active, onHover }: { lang: DiaryLang; active: stri
           const [cx, cy] = STOPS[c.ponto] ?? START;
           const on = active === c.id;
           return (
-            <g key={c.id} onMouseEnter={() => onHover(c.id)} onMouseLeave={() => onHover(null)}>
+            // Click/tap jumps to the city's receipts; keyboard and screen readers use the same links in the list beside the map
+            <a
+              key={c.id}
+              href={`#cidade-${c.id}`}
+              tabIndex={-1}
+              aria-hidden
+              className="cursor-pointer"
+              onMouseEnter={() => onHover(c.id)}
+              onMouseLeave={() => onHover(null)}
+            >
+              {/* Larger invisible hit area for touch */}
+              <circle cx={cx} cy={cy} r="24" fill="transparent" />
               <circle cx={cx} cy={cy} r="17" fill="var(--ryh-bg)" />
               <circle cx={cx} cy={cy} r="14.5" fill="var(--ryh-y)" stroke={on ? "var(--ryh-fg)" : "none"} strokeWidth="3" />
               <text
@@ -62,7 +73,7 @@ function RouteMapCard({ lang, active, onHover }: { lang: DiaryLang; active: stri
               >
                 {c.familias}
               </text>
-            </g>
+            </a>
           );
         })}
       </svg>
