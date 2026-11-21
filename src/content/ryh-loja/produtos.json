@@ -17,8 +17,8 @@
       "detalhe": { "x": 36.5, "y": 36.3 },
       "tamanhos": { "pt": ["P", "M", "G", "GG"], "en": ["S", "M", "L", "XL"] },
       "impressao": {
-        "pt": "Frente: logo Raise Your Hands no peito, lado direito. Costas: mapa da rota Porto → Faro.",
-        "en": "Front: Raise Your Hands logo on the right chest. Back: map of the Porto → Faro route."
+        "pt": "Frente: logo Raise Your Hands no peito, lado direito. Costas: mapa da rota Porto → Faro com o número de famílias ajudadas em cada cidade, e a distância (879,4 km) e a subida acumulada (+11 094 m).",
+        "en": "Front: Raise Your Hands logo on the right chest. Back: map of the Porto → Faro route with the number of families helped in each town, plus the distance (879.4 km) and elevation gain (+11,094 m)."
       },
       "material": null,
       "envio": null,
@@ -40,8 +40,8 @@
       "detalhe": { "x": 36.1, "y": 37.4 },
       "tamanhos": { "pt": ["P", "M", "G", "GG"], "en": ["S", "M", "L", "XL"] },
       "impressao": {
-        "pt": "Frente: logo Raise Your Hands no peito, lado direito. Costas: mapa da rota Porto → Faro.",
-        "en": "Front: Raise Your Hands logo on the right chest. Back: map of the Porto → Faro route."
+        "pt": "Frente: logo Raise Your Hands no peito, lado direito. Costas: mapa da rota Porto → Faro com o número de famílias ajudadas em cada cidade, e a distância (879,4 km) e a subida acumulada (+11 094 m).",
+        "en": "Front: Raise Your Hands logo on the right chest. Back: map of the Porto → Faro route with the number of families helped in each town, plus the distance (879.4 km) and elevation gain (+11,094 m)."
       },
       "material": null,
       "envio": null,
