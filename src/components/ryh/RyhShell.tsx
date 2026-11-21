@@ -201,6 +201,13 @@ function RyhHeader({ page, theme, onToggleTheme }: { page: RyhPage; theme: RyhTh
         {/* RC-19: the name in the logo wordmark lettering (Montserrat 900, caps), framed, HANDS in yellow */}
         <Link
           to={ryhPaths.home}
+          // Already on the home page (e.g. after an anchor like #rota): the route doesn't change, so go back to the top
+          onClick={() => {
+            if (onLanding) {
+              setOpen(false);
+              window.scrollTo({ top: 0 });
+            }
+          }}
           aria-label={BRAND}
           className={cn(ryh.focus, "flex shrink-0 items-center border-[2.5px] border-[var(--ryh-fg)] px-2 py-[7px] sm:px-2.5 md:px-3 md:py-2")}
         >
