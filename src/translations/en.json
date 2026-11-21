@@ -2623,6 +2623,45 @@
       "hintDesktop": "Scroll or double-click to zoom; drag to move.",
       "hintTouch": "Pinch or double-tap to zoom.",
       "hintTall": "Scroll to see the whole receipt; Ctrl + wheel or double-click to zoom."
+    },
+    "items": {
+      "kicker": "In the trolley",
+      "title": "What was bought",
+      "lead": "{{n}} items read on the {{receipts}} supermarket receipts: staple food for several weeks, hygiene products and a few Christmas treats.",
+      "highlightsLabel": "Highlights",
+      "milk": "cartons of milk",
+      "milkNote": "{{l}} L confirmed on the receipts",
+      "pasta": "packs of pasta",
+      "pastaNote": "{{kg}} kg in 500 g packs",
+      "rice": "packs of rice",
+      "riceNote": "{{kg}} kg with the weight printed",
+      "paper": "rolls of toilet paper",
+      "paperNote": "in packs of 12",
+      "tuna": "packs of tuna",
+      "tunaNote": "tins and jars",
+      "hygiene": "hygiene items",
+      "hygieneNote": "toothpaste, shampoo, deodorant, nappies…",
+      "barsTitle": "Where every euro went",
+      "barsNote": "Amounts paid, with each receipt's discounts already applied.",
+      "categories": {
+        "mercearia": "Pantry staples",
+        "higiene": "Personal hygiene",
+        "pequeno-almoco": "Breakfast",
+        "leite": "Milk and dairy",
+        "mimos": "Treats",
+        "ovos-charcutaria": "Eggs, cold meats and ready meals",
+        "fruta-legumes": "Fruit and vegetables",
+        "limpeza": "Cleaning and bags",
+        "bebidas": "Drinks"
+      },
+      "showList": "See the full list of items",
+      "hideList": "Hide the list of items",
+      "listNote": "Item names as printed (in Portuguese) on the receipts.",
+      "receiptHead": "{{store}} · {{date}}",
+      "qty": "{{n}}×",
+      "colItem": "Item",
+      "colQty": "Qty",
+      "colValue": "Amount"
     }
   }
 }

@@ -28,3 +28,9 @@ A página `/contas` lê só `contas.json`. Os valores vêm dos talões (`ez-proj
 4. `src/lib/ryhAccounts.test.ts` falha se um `comprovativo` apontar para um ficheiro que não existe, se os totais mudarem sem querer ou se alguma imagem em `public/ryh/` tiver EXIF ou XMP.
 
 Este README fica fora de `public/`, para não ser publicado.
+
+## O que foi comprado (`itens.json`)
+- Gerado, nunca editado à mão: `node scripts/ryh-contas/itens-from-csv.mjs <itens.csv>` (CSV do EZ Design em `ez-project/raise-your-hands/redesign/contas-itens/`).
+- Cada linha: `talao` (nome do comprovativo), `descricao`, `qtd`, `valorEUR` (pago, já com descontos), `categoria` e, nos destaques, `destaque` (unidades e litros/kg impressos no talão).
+- Totais por categoria, percentagens e destaques são calculados na página. As linhas `nao-identificado` (talão dobrado de Ferreira, linha sem descrição em Vila de Rei) ficam nos dados só para a conferência e **não aparecem** (as % são sobre as categorias visíveis).
+- `src/lib/ryhItems.test.ts` confere: soma por talão = valor do comprovativo em `contas.json`, total 1 089,32 €, categorias visíveis = 984,30 €, destaques do design.

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
+import { PurchasedItems } from "@/components/ryh/PurchasedItems";
 import { RyhShell } from "@/components/ryh/RyhShell";
 import { ZoomLightbox, type LightboxPhoto } from "@/components/ryh/ZoomLightbox";
 import { OUTLINE_A, ROUTE_A, STAGES, START } from "@/components/ryh/ryhPaths";
@@ -309,6 +310,9 @@ const RaiseYourHandsAccounts = () => {
             </div>
           </div>
         </section>
+
+        {/* What was bought: highlights, share per category, full list (between "By town" and the receipts) */}
+        <PurchasedItems />
 
         {/* 5 · The receipts: vertical timeline, one card per town */}
         <section aria-labelledby="ryh-taloes" className="pb-[72px] pt-16 md:pb-[120px] md:pt-24">

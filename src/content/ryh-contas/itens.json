@@ -1,0 +1,2256 @@
+{
+  "_leia": "Gerado por scripts/ryh-contas/itens-from-csv.mjs a partir de itens.csv (transcrição do EZ Design, ez-project/raise-your-hands/redesign/contas-itens/). Não editar à mão: corrija o CSV e volte a gerar. talao = nome do comprovativo em contas.json; valorEUR = valor pago (já com descontos); destaque = o que o talão diz (unidades, litros/kg impressos).",
+  "itens": [
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Massa esparguete",
+      "qtd": 8,
+      "valorEUR": 5.52,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 8
+      }
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Azeite Oliveira da Serra",
+      "qtd": 2,
+      "valorEUR": 6.98,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Óleo alimentar 1 L",
+      "qtd": 2,
+      "valorEUR": 3.58,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Feijão Compal 468 g",
+      "qtd": 2,
+      "valorEUR": 4.38,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Sal 1 kg",
+      "qtd": 2,
+      "valorEUR": 0.58,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Arroz agulha Cigala",
+      "qtd": 5,
+      "valorEUR": 6.25,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 5
+      }
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Mistura de cereais com café 200 g",
+      "qtd": 2,
+      "valorEUR": 5.7,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Cereais Estrelinhas 375 g",
+      "qtd": 2,
+      "valorEUR": 3.18,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Bolacha Maria 4×200 g",
+      "qtd": 4,
+      "valorEUR": 6.36,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Atum ao natural 270 g",
+      "qtd": 5,
+      "valorEUR": 12.95,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 5
+      }
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Azeitona verde 165 g",
+      "qtd": 2,
+      "valorEUR": 2.58,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Grão em lata 820 g",
+      "qtd": 2,
+      "valorEUR": 2.3,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Bombons Milka 114 g",
+      "qtd": 2,
+      "valorEUR": 9.78,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Pão de forma 600 g",
+      "qtd": 2,
+      "valorEUR": 2.18,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Achocolatado Nesquik 390 g",
+      "qtd": 2,
+      "valorEUR": 7.98,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Bolacha recheada 500 g",
+      "qtd": 1,
+      "valorEUR": 1.55,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Leite UHT meio-gordo 6×1 L",
+      "qtd": 2,
+      "valorEUR": 10.2,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 12,
+        "litros": 12
+      }
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Saco reutilizável",
+      "qtd": 4,
+      "valorEUR": 2.2,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Papel higiénico 12 rolos",
+      "qtd": 2,
+      "valorEUR": 7.58,
+      "categoria": "higiene",
+      "destaque": {
+        "grupo": "papel",
+        "unidades": 24
+      }
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Champô Linic 360 ml",
+      "qtd": 1,
+      "valorEUR": 4.94,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Pasta de dentes 75 ml",
+      "qtd": 3,
+      "valorEUR": 8.97,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Pensos de incontinência 20 un.",
+      "qtd": 2,
+      "valorEUR": 4.38,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Desodorizante roll-on Sanex",
+      "qtd": 2,
+      "valorEUR": 4.68,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Desodorizante roll-on Sanex",
+      "qtd": 2,
+      "valorEUR": 4.18,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Toalhitas 64 un.",
+      "qtd": 2,
+      "valorEUR": 2.78,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-gaia-01",
+      "descricao": "Champô Linic 2 em 1 360 ml",
+      "qtd": 1,
+      "valorEUR": 4.94,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Bolacha Maria 4×200 g",
+      "qtd": 2,
+      "valorEUR": 3.18,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Pão de forma 600 g",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Massa esparguete",
+      "qtd": 8,
+      "valorEUR": 5.52,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 8
+      }
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Arroz agulha Cigala",
+      "qtd": 4,
+      "valorEUR": 5,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 4
+      }
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Massa curvas",
+      "qtd": 2,
+      "valorEUR": 1.78,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 2
+      }
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Açúcar 1 kg",
+      "qtd": 2,
+      "valorEUR": 1.78,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Óleo alimentar 1 L",
+      "qtd": 1,
+      "valorEUR": 1.79,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Azeite virgem Oliveira da Serra",
+      "qtd": 1,
+      "valorEUR": 3.69,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Cereais Chocolocos 1 kg",
+      "qtd": 1,
+      "valorEUR": 3.49,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Feijão Compal 468 g",
+      "qtd": 2,
+      "valorEUR": 4.38,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Grão em lata 820 g",
+      "qtd": 2,
+      "valorEUR": 2.3,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Atum em óleo 251 g",
+      "qtd": 2,
+      "valorEUR": 5.28,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 2
+      }
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Achocolatado Nesquik 390 g",
+      "qtd": 2,
+      "valorEUR": 7.98,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Batatas fritas onduladas 200 g",
+      "qtd": 1,
+      "valorEUR": 1.25,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Mistura de cereais com café 200 g",
+      "qtd": 1,
+      "valorEUR": 2.85,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Bombons Milka 114 g",
+      "qtd": 1,
+      "valorEUR": 4.89,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Maçã Gala 1,5 kg",
+      "qtd": 1,
+      "valorEUR": 1.89,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Batata vermelha 5 kg",
+      "qtd": 1,
+      "valorEUR": 5.69,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Banana 1,425 kg",
+      "qtd": 1,
+      "valorEUR": 1.7,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Leite UHT meio-gordo 6×1 L",
+      "qtd": 2,
+      "valorEUR": 10.2,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 12,
+        "litros": 12
+      }
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Iogurte Yoggi 4×160 g",
+      "qtd": 1,
+      "valorEUR": 1.99,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Iogurte líquido Yoggi 4 un.",
+      "qtd": 1,
+      "valorEUR": 1.99,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Saco reutilizável",
+      "qtd": 3,
+      "valorEUR": 1.65,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Papel higiénico 12 rolos",
+      "qtd": 1,
+      "valorEUR": 3.79,
+      "categoria": "higiene",
+      "destaque": {
+        "grupo": "papel",
+        "unidades": 12
+      }
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Toalhitas 72 un.",
+      "qtd": 1,
+      "valorEUR": 1.05,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Pasta de dentes 75 ml",
+      "qtd": 1,
+      "valorEUR": 2.99,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Champô Linic 360 ml",
+      "qtd": 1,
+      "valorEUR": 4.94,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Desodorizante roll-on Sanex",
+      "qtd": 1,
+      "valorEUR": 2.09,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "chaves-01",
+      "descricao": "Desodorizante roll-on Sanex",
+      "qtd": 1,
+      "valorEUR": 2.34,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Açúcar 1 kg",
+      "qtd": 1,
+      "valorEUR": 0.89,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Pão de forma 600 g",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Farinha 1 kg",
+      "qtd": 1,
+      "valorEUR": 0.59,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Madalenas 420 g",
+      "qtd": 1,
+      "valorEUR": 2.49,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Sal 1 kg",
+      "qtd": 1,
+      "valorEUR": 0.29,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Massa espirais",
+      "qtd": 2,
+      "valorEUR": 1.58,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 2
+      }
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Óleo alimentar 1 L",
+      "qtd": 1,
+      "valorEUR": 1.79,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Cogumelos em lata",
+      "qtd": 1,
+      "valorEUR": 2.19,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Azeite virgem extra 750 ml",
+      "qtd": 1,
+      "valorEUR": 3.85,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Polpa de tomate 500 ml",
+      "qtd": 1,
+      "valorEUR": 1.39,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Fermento Royal 113 g",
+      "qtd": 1,
+      "valorEUR": 2.34,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Arroz agulha Cigala",
+      "qtd": 3,
+      "valorEUR": 3.75,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 3
+      }
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Atum em óleo 72 g",
+      "qtd": 3,
+      "valorEUR": 2.82,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 3
+      }
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Feijão preto 500 g",
+      "qtd": 1,
+      "valorEUR": 0.95,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Feijão catarino 500 g",
+      "qtd": 1,
+      "valorEUR": 1.15,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Macedónia de legumes em lata",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Milho doce em lata",
+      "qtd": 1,
+      "valorEUR": 0.99,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Laranja 2 kg",
+      "qtd": 1,
+      "valorEUR": 2.49,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Chouriço 400 g",
+      "qtd": 1,
+      "valorEUR": 2.99,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Fiambre 200 g",
+      "qtd": 2,
+      "valorEUR": 3.18,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Bacon fatiado 200 g",
+      "qtd": 1,
+      "valorEUR": 1.69,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Leite UHT meio-gordo 6×1 L",
+      "qtd": 1,
+      "valorEUR": 5.1,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 6,
+        "litros": 6
+      }
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Iogurte grego 1 kg",
+      "qtd": 1,
+      "valorEUR": 2.25,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Iogurte líquido 8×170 g",
+      "qtd": 1,
+      "valorEUR": 2.65,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Ovos 12 un.",
+      "qtd": 1,
+      "valorEUR": 3.19,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Queijo mozzarella ralado 200 g",
+      "qtd": 1,
+      "valorEUR": 1.59,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Queijo gouda fatiado 200 g",
+      "qtd": 2,
+      "valorEUR": 2.98,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Néctar de goiaba 1 L",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Sumo de maçã 1,5 L",
+      "qtd": 2,
+      "valorEUR": 2.18,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Saco reutilizável",
+      "qtd": 1,
+      "valorEUR": 0.55,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Lixívia 2 L",
+      "qtd": 1,
+      "valorEUR": 0.99,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Creme de mãos 75 ml",
+      "qtd": 1,
+      "valorEUR": 1.29,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "chaves-02",
+      "descricao": "Sérum 50 ml",
+      "qtd": 1,
+      "valorEUR": 2.99,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Bolachas mini 350 g",
+      "qtd": 1,
+      "valorEUR": 1.29,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Açúcar 1 kg",
+      "qtd": 2,
+      "valorEUR": 1.78,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Tostas 225 g",
+      "qtd": 1,
+      "valorEUR": 0.99,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Bolachas napolitanas 270 g",
+      "qtd": 1,
+      "valorEUR": 1.59,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Massa curvas",
+      "qtd": 2,
+      "valorEUR": 1.78,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 2
+      }
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Arroz agulha Cigala",
+      "qtd": 3,
+      "valorEUR": 3.75,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 3
+      }
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Pão de forma 600 g",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Bolachas matinais 6×50 g",
+      "qtd": 1,
+      "valorEUR": 1.99,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Feijão em lata 820 g",
+      "qtd": 1,
+      "valorEUR": 1.15,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Sal 1 kg",
+      "qtd": 1,
+      "valorEUR": 0.29,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Feijão preto 500 g",
+      "qtd": 1,
+      "valorEUR": 0.95,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Cápsulas de café 40 un.",
+      "qtd": 1,
+      "valorEUR": 6.59,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Macedónia de legumes em lata",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Polpa de tomate 500 ml",
+      "qtd": 1,
+      "valorEUR": 1.39,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Milho doce em lata",
+      "qtd": 1,
+      "valorEUR": 0.99,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Óleo alimentar 1 L",
+      "qtd": 1,
+      "valorEUR": 1.79,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Atum em óleo 85 g",
+      "qtd": 3,
+      "valorEUR": 2.97,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 3
+      }
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Azeite virgem extra 750 ml",
+      "qtd": 1,
+      "valorEUR": 3.85,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Fiambre 200 g",
+      "qtd": 2,
+      "valorEUR": 3.18,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Bacon fatiado 200 g",
+      "qtd": 1,
+      "valorEUR": 1.69,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Chouriço 400 g",
+      "qtd": 1,
+      "valorEUR": 2.99,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Leite UHT meio-gordo 6×1 L",
+      "qtd": 1,
+      "valorEUR": 5.1,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 6,
+        "litros": 6
+      }
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Manteiga 250 g",
+      "qtd": 1,
+      "valorEUR": 2.09,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Iogurte líquido 8×170 g",
+      "qtd": 1,
+      "valorEUR": 2.65,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Iogurte grego 1 kg",
+      "qtd": 1,
+      "valorEUR": 2.25,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Ovos 12 un.",
+      "qtd": 1,
+      "valorEUR": 3.19,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Queijo mozzarella ralado 200 g",
+      "qtd": 1,
+      "valorEUR": 1.59,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Queijo gouda fatiado 200 g",
+      "qtd": 2,
+      "valorEUR": 2.98,
+      "categoria": "leite"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Sumo Vital manga/laranja",
+      "qtd": 1,
+      "valorEUR": 1.39,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Sumo de maçã 1,5 L",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Sumo família",
+      "qtd": 1,
+      "valorEUR": 1.29,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Néctar de goiaba 1 L",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Saco reutilizável",
+      "qtd": 1,
+      "valorEUR": 0.55,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Saco de plástico",
+      "qtd": 1,
+      "valorEUR": 0.1,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Esfregões 3 un.",
+      "qtd": 1,
+      "valorEUR": 0.45,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "chaves-03",
+      "descricao": "Sabonete Dove 90 g",
+      "qtd": 1,
+      "valorEUR": 1.19,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Feijão preto Compal 468 g",
+      "qtd": 2,
+      "valorEUR": 3.58,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Grão-de-bico 520 g",
+      "qtd": 2,
+      "valorEUR": 2.38,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Atum em azeite 250 g",
+      "qtd": 2,
+      "valorEUR": 6.7,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 2
+      }
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Bolacha Maria 4×200 g",
+      "qtd": 2,
+      "valorEUR": 3.38,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Bolachas de chocolate 6×50 g",
+      "qtd": 1,
+      "valorEUR": 1.99,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Bombons Milka",
+      "qtd": 2,
+      "valorEUR": 9.78,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Pensos Ausonia 20 un.",
+      "qtd": 1,
+      "valorEUR": 4.19,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Pasta de dentes Colgate 75 ml",
+      "qtd": 2,
+      "valorEUR": 3.98,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Toalhitas 99% água 100 un.",
+      "qtd": 2,
+      "valorEUR": 3.98,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Pensos de incontinência 16 un.",
+      "qtd": 1,
+      "valorEUR": 6.36,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Desodorizante roll-on Sanex",
+      "qtd": 2,
+      "valorEUR": 4.18,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Desodorizante roll-on Sanex",
+      "qtd": 2,
+      "valorEUR": 6.98,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Papel higiénico 12 rolos",
+      "qtd": 2,
+      "valorEUR": 7.58,
+      "categoria": "higiene",
+      "destaque": {
+        "grupo": "papel",
+        "unidades": 24
+      }
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Leite meio-gordo 6×1 L",
+      "qtd": 2,
+      "valorEUR": 10.2,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 12,
+        "litros": 12
+      }
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Champô Linic 360 ml",
+      "qtd": 2,
+      "valorEUR": 9.88,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Azeite Oliveira da Serra 0,75 L",
+      "qtd": 2,
+      "valorEUR": 8.98,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Arroz agulha Cigala 1 kg",
+      "qtd": 6,
+      "valorEUR": 9.84,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 6,
+        "kg": 6
+      }
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Massa cotovelos 500 g",
+      "qtd": 4,
+      "valorEUR": 2.6,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 4,
+        "kg": 2
+      }
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Óleo de girassol 1 L",
+      "qtd": 2,
+      "valorEUR": 3.38,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Açúcar 1 kg",
+      "qtd": 2,
+      "valorEUR": 1.6,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Massa linguine 500 g",
+      "qtd": 6,
+      "valorEUR": 4.5,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 6,
+        "kg": 3
+      }
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Cereais estrelas de mel 375 g",
+      "qtd": 2,
+      "valorEUR": 3.18,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Mistura de cereais com café 200 g",
+      "qtd": 2,
+      "valorEUR": 5.7,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Achocolatado Nesquik 390 g",
+      "qtd": 2,
+      "valorEUR": 10.98,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "castro-daire-01",
+      "descricao": "Saco reutilizável",
+      "qtd": 4,
+      "valorEUR": 2.6,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Saco reutilizável",
+      "qtd": 2,
+      "valorEUR": 1,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Açúcar",
+      "qtd": 1,
+      "valorEUR": 0.89,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Massa esparguete 500 g",
+      "qtd": 5,
+      "valorEUR": 6.45,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 5,
+        "kg": 2.5
+      }
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Óleo de girassol 1 L",
+      "qtd": 1,
+      "valorEUR": 1.75,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Desodorizante roll-on",
+      "qtd": 1,
+      "valorEUR": 3.49,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Atum em posta 385 g",
+      "qtd": 2,
+      "valorEUR": 5.48,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 2
+      }
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Champô",
+      "qtd": 1,
+      "valorEUR": 3.34,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Azeitona verde 220 g",
+      "qtd": 1,
+      "valorEUR": 0.99,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Feijão encarnado 860 g",
+      "qtd": 1,
+      "valorEUR": 1.79,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Guardanapos",
+      "qtd": 1,
+      "valorEUR": 1.79,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Massa ondas 500 g",
+      "qtd": 2,
+      "valorEUR": 3.3,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 2,
+        "kg": 1
+      }
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Desodorizante roll-on",
+      "qtd": 1,
+      "valorEUR": 2.34,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Café solúvel 100 g",
+      "qtd": 1,
+      "valorEUR": 3.35,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Chocolate de Natal Milka",
+      "qtd": 1,
+      "valorEUR": 4.89,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Pasta de dentes 75 ml",
+      "qtd": 1,
+      "valorEUR": 1.84,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Arroz agulha 1 kg",
+      "qtd": 4,
+      "valorEUR": 6.56,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 4,
+        "kg": 4
+      }
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Azeite 0,75 L",
+      "qtd": 1,
+      "valorEUR": 3.49,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Sal 1 kg",
+      "qtd": 1,
+      "valorEUR": 0.29,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Bolachas Belvita",
+      "qtd": 1,
+      "valorEUR": 2.79,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Leite UHT meio-gordo",
+      "qtd": 6,
+      "valorEUR": 5.46,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 6
+      }
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Tomate triturado 500 g",
+      "qtd": 1,
+      "valorEUR": 1.09,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Pensos higiénicos 32 un.",
+      "qtd": 1,
+      "valorEUR": 4.89,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Pão de forma",
+      "qtd": 1,
+      "valorEUR": 1.39,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Bolacha Maria 600 g",
+      "qtd": 1,
+      "valorEUR": 3.49,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Papel higiénico 12 rolos",
+      "qtd": 1,
+      "valorEUR": 2.59,
+      "categoria": "higiene",
+      "destaque": {
+        "grupo": "papel",
+        "unidades": 12
+      }
+    },
+    {
+      "talao": "vila-nova-de-poiares-01",
+      "descricao": "Cereais Estrelitas",
+      "qtd": 1,
+      "valorEUR": 2.49,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Toalhitas bebé 72 un.",
+      "qtd": 1,
+      "valorEUR": 1,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Achocolatado Nesquik 390 g",
+      "qtd": 1,
+      "valorEUR": 3.29,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Bolacha Maria",
+      "qtd": 2,
+      "valorEUR": 3.18,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Cereais Estrelitas 270 g",
+      "qtd": 1,
+      "valorEUR": 3.19,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Café solúvel",
+      "qtd": 1,
+      "valorEUR": 4.99,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Pão de forma",
+      "qtd": 1,
+      "valorEUR": 1.39,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Açúcar 1 kg",
+      "qtd": 1,
+      "valorEUR": 0.89,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Chocolate Milka 114 g",
+      "qtd": 1,
+      "valorEUR": 4.99,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Sal grosso",
+      "qtd": 1,
+      "valorEUR": 0.29,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Óleo alimentar",
+      "qtd": 1,
+      "valorEUR": 1.69,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Azeite Oliveira da Serra",
+      "qtd": 1,
+      "valorEUR": 4.49,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Polpa de tomate",
+      "qtd": 1,
+      "valorEUR": 1.49,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Massa curvas",
+      "qtd": 1,
+      "valorEUR": 0.79,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 1
+      }
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Massa fusilli 500 g",
+      "qtd": 1,
+      "valorEUR": 0.69,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 1,
+        "kg": 0.5
+      }
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Massa esparguete",
+      "qtd": 4,
+      "valorEUR": 2.76,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 4
+      }
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Arroz agulha Cigala",
+      "qtd": 4,
+      "valorEUR": 6.56,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 4
+      }
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Batatas fritas",
+      "qtd": 1,
+      "valorEUR": 1.19,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Papel higiénico",
+      "qtd": 1,
+      "valorEUR": 3.99,
+      "categoria": "higiene",
+      "destaque": {
+        "grupo": "papel",
+        "unidades": 0
+      }
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Pasta de dentes Aquafresh",
+      "qtd": 2,
+      "valorEUR": 3.72,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Desodorizante Sanex",
+      "qtd": 4,
+      "valorEUR": 8.4,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Champô Linic",
+      "qtd": 1,
+      "valorEUR": 4.94,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Batata vermelha 3 kg",
+      "qtd": 1,
+      "valorEUR": 3.89,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Leite UHT meio-gordo",
+      "qtd": 12,
+      "valorEUR": 10.92,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 12
+      }
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Saco de plástico",
+      "qtd": 3,
+      "valorEUR": 0.3,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "vila-de-rei-01",
+      "descricao": "Artigo sem código (preço comum)",
+      "qtd": 1,
+      "valorEUR": 1.79,
+      "categoria": "nao-identificado"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Bolacha Maria",
+      "qtd": 2,
+      "valorEUR": 3.18,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Cereais Estrelitas 270 g",
+      "qtd": 1,
+      "valorEUR": 1.59,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Café solúvel",
+      "qtd": 1,
+      "valorEUR": 3.39,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Pão de forma",
+      "qtd": 1,
+      "valorEUR": 2.49,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Açúcar 1 kg",
+      "qtd": 1,
+      "valorEUR": 0.89,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Chocolate de Natal Milka 114 g",
+      "qtd": 1,
+      "valorEUR": 4.89,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Mini pandoro 80 g",
+      "qtd": 2,
+      "valorEUR": 3.98,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Óleo de girassol",
+      "qtd": 1,
+      "valorEUR": 1.79,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Azeite virgem extra",
+      "qtd": 1,
+      "valorEUR": 5.49,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Grão-de-bico",
+      "qtd": 2,
+      "valorEUR": 2.38,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Feijão preto",
+      "qtd": 2,
+      "valorEUR": 2.38,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Polpa de tomate 210 g",
+      "qtd": 4,
+      "valorEUR": 3,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Massa farfalle 500 g",
+      "qtd": 3,
+      "valorEUR": 2.97,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 3,
+        "kg": 1.5
+      }
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Massa esparguete",
+      "qtd": 5,
+      "valorEUR": 3.45,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 5
+      }
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Arroz basmati",
+      "qtd": 4,
+      "valorEUR": 7.56,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 4
+      }
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Atum ao natural 385 g",
+      "qtd": 1,
+      "valorEUR": 2.65,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 1
+      }
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Papel higiénico 12 rolos",
+      "qtd": 1,
+      "valorEUR": 4.99,
+      "categoria": "higiene",
+      "destaque": {
+        "grupo": "papel",
+        "unidades": 12
+      }
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Pasta de dentes Aquafresh",
+      "qtd": 1,
+      "valorEUR": 1.86,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Desodorizante roll-on Sanex",
+      "qtd": 1,
+      "valorEUR": 2.1,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Maçã Fuji 1 kg",
+      "qtd": 1,
+      "valorEUR": 2.29,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Banana 0,812 kg",
+      "qtd": 1,
+      "valorEUR": 0.97,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Leite UHT meio-gordo",
+      "qtd": 6,
+      "valorEUR": 5.16,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 6
+      }
+    },
+    {
+      "talao": "mora-01",
+      "descricao": "Saco de plástico",
+      "qtd": 3,
+      "valorEUR": 0.3,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Saco de plástico",
+      "qtd": 5,
+      "valorEUR": 0.5,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Leite UHT meio-gordo",
+      "qtd": 12,
+      "valorEUR": 12,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 12
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Massa linguine 500 g",
+      "qtd": 2,
+      "valorEUR": 2.18,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 2,
+        "kg": 1
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Natas 0,2 L",
+      "qtd": 2,
+      "valorEUR": 2.16,
+      "categoria": "leite"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Bolacha Maria",
+      "qtd": 1,
+      "valorEUR": 1.59,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Arroz carolino 1 kg",
+      "qtd": 1,
+      "valorEUR": 1.54,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 1,
+        "kg": 1
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Ice tea pêssego (pack 6)",
+      "qtd": 1,
+      "valorEUR": 1.19,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Gel de banho 750 ml",
+      "qtd": 1,
+      "valorEUR": 4.49,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Champô 500 ml",
+      "qtd": 1,
+      "valorEUR": 4.49,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Polpa de tomate",
+      "qtd": 2,
+      "valorEUR": 2.98,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Óleo de girassol 1 L",
+      "qtd": 1,
+      "valorEUR": 1.75,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Azeite 0,75 L",
+      "qtd": 1,
+      "valorEUR": 3.49,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Fraldas de bebé",
+      "qtd": 1,
+      "valorEUR": 13.99,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Fraldas-cueca 23 un.",
+      "qtd": 1,
+      "valorEUR": 8.99,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Água mineral (pack)",
+      "qtd": 2,
+      "valorEUR": 2.16,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Atum ao natural 120 g",
+      "qtd": 1,
+      "valorEUR": 0.94,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 1
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-01",
+      "descricao": "Itens não legíveis na foto (talão dobrado): IVA 6% 47,41 € + IVA 23% 55,82 €",
+      "qtd": 39,
+      "valorEUR": 103.23,
+      "categoria": "nao-identificado"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Saco de plástico",
+      "qtd": 3,
+      "valorEUR": 0.3,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Leite UHT meio-gordo",
+      "qtd": 12,
+      "valorEUR": 10.32,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 12
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Feijão preto 820 g",
+      "qtd": 2,
+      "valorEUR": 2.3,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Grão-de-bico 850 g",
+      "qtd": 2,
+      "valorEUR": 2.3,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Atum em posta ao natural",
+      "qtd": 1,
+      "valorEUR": 6.09,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "atum",
+        "unidades": 1
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Massa esparguete 500 g",
+      "qtd": 5,
+      "valorEUR": 3.95,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 5,
+        "kg": 2.5
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Bolacha Maria",
+      "qtd": 2,
+      "valorEUR": 3.18,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Arroz agulha",
+      "qtd": 5,
+      "valorEUR": 5.75,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 5
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Bombons Ferrero Rocher 200 g",
+      "qtd": 1,
+      "valorEUR": 6.99,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Massa espirais 500 g",
+      "qtd": 2,
+      "valorEUR": 1.38,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "massa",
+        "unidades": 2,
+        "kg": 1
+      }
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Cenoura",
+      "qtd": 1,
+      "valorEUR": 0.89,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Café solúvel 100 g",
+      "qtd": 1,
+      "valorEUR": 2.5,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Óleo de girassol 1 L",
+      "qtd": 1,
+      "valorEUR": 1.75,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Azeite virgem extra",
+      "qtd": 1,
+      "valorEUR": 5.69,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Pasta de dentes",
+      "qtd": 1,
+      "valorEUR": 2.89,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Polpa de tomate",
+      "qtd": 4,
+      "valorEUR": 3,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Maçã Royal Gala 1,094 kg",
+      "qtd": 1,
+      "valorEUR": 2.72,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Desodorizante roll-on",
+      "qtd": 1,
+      "valorEUR": 2.34,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Rolo de cozinha",
+      "qtd": 1,
+      "valorEUR": 2.19,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Cereais Estrelitas",
+      "qtd": 1,
+      "valorEUR": 4.99,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Açúcar",
+      "qtd": 1,
+      "valorEUR": 0.89,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "ferreira-do-alentejo-02",
+      "descricao": "Banana 1,252 kg",
+      "qtd": 1,
+      "valorEUR": 1.49,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Arroz Thai 5 kg",
+      "qtd": 2,
+      "valorEUR": 22.98,
+      "categoria": "mercearia",
+      "destaque": {
+        "grupo": "arroz",
+        "unidades": 2,
+        "kg": 10
+      }
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Café Mokambo 200 g",
+      "qtd": 1,
+      "valorEUR": 3.89,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Bolachas Lotus 250 g",
+      "qtd": 2,
+      "valorEUR": 5.78,
+      "categoria": "pequeno-almoco"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Açúcar 1 kg",
+      "qtd": 1,
+      "valorEUR": 0.89,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Azeite Oliveira da Serra 75 cl",
+      "qtd": 1,
+      "valorEUR": 5.69,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Pai Natal de chocolate 60 g",
+      "qtd": 1,
+      "valorEUR": 0.84,
+      "categoria": "mimos"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Óleo Fula 1 L",
+      "qtd": 1,
+      "valorEUR": 1.99,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Pão (lagartos) 750 g",
+      "qtd": 2,
+      "valorEUR": 4.98,
+      "categoria": "mercearia"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Alho 150 g",
+      "qtd": 1,
+      "valorEUR": 1.49,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Cenoura 2 kg",
+      "qtd": 1,
+      "valorEUR": 1.99,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Maçã Gala 1,5 kg",
+      "qtd": 1,
+      "valorEUR": 2.49,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Banana da Madeira 0,770 kg",
+      "qtd": 1,
+      "valorEUR": 2.3,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Banana da Madeira 0,635 kg",
+      "qtd": 1,
+      "valorEUR": 1.9,
+      "categoria": "fruta-legumes"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Salsichas 360 g",
+      "qtd": 2,
+      "valorEUR": 5.38,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Leite meio-gordo 6 L",
+      "qtd": 2,
+      "valorEUR": 10.32,
+      "categoria": "leite",
+      "destaque": {
+        "grupo": "leite",
+        "unidades": 12,
+        "litros": 12
+      }
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Ovos 12 un.",
+      "qtd": 1,
+      "valorEUR": 2.99,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Lasanha à bolonhesa 1 kg",
+      "qtd": 2,
+      "valorEUR": 8.98,
+      "categoria": "ovos-charcutaria"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Coca-Cola Zero 1 L",
+      "qtd": 1,
+      "valorEUR": 1.39,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Sumo tropical 1,5 L",
+      "qtd": 1,
+      "valorEUR": 1.79,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Néctar de manga 1 L",
+      "qtd": 1,
+      "valorEUR": 1.05,
+      "categoria": "bebidas"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Saco reutilizável",
+      "qtd": 3,
+      "valorEUR": 1.65,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Blocos sanitários Bref 2 un.",
+      "qtd": 1,
+      "valorEUR": 2.99,
+      "categoria": "limpeza"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Desodorizante spray Nivea",
+      "qtd": 1,
+      "valorEUR": 5.79,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Pasta de dentes 75 ml",
+      "qtd": 1,
+      "valorEUR": 5.99,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Sabonete Lux 90 g",
+      "qtd": 1,
+      "valorEUR": 3.95,
+      "categoria": "higiene"
+    },
+    {
+      "talao": "faro-01",
+      "descricao": "Depósito de embalagem",
+      "qtd": 1,
+      "valorEUR": 0.1,
+      "categoria": "bebidas"
+    }
+  ]
+}

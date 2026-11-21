@@ -2623,6 +2623,45 @@
       "hintDesktop": "Roda do rato ou duplo clique para ampliar; arraste para mover.",
       "hintTouch": "Belisque ou toque duas vezes para ampliar.",
       "hintTall": "Role para ver o talão inteiro; Ctrl + roda ou duplo clique para ampliar."
+    },
+    "items": {
+      "kicker": "No carrinho",
+      "title": "O que foi comprado",
+      "lead": "{{n}} artigos lidos nos {{receipts}} talões de supermercado: comida de base para várias semanas, produtos de higiene e alguns mimos de Natal.",
+      "highlightsLabel": "Destaques",
+      "milk": "pacotes de leite",
+      "milkNote": "{{l}} L confirmados nos talões",
+      "pasta": "pacotes de massa",
+      "pastaNote": "{{kg}} kg em pacotes de 500 g",
+      "rice": "pacotes de arroz",
+      "riceNote": "{{kg}} kg com peso impresso",
+      "paper": "rolos de papel higiénico",
+      "paperNote": "em pacotes de 12",
+      "tuna": "embalagens de atum",
+      "tunaNote": "latas e frascos",
+      "hygiene": "artigos de higiene",
+      "hygieneNote": "pasta de dentes, champô, desodorizante, fraldas…",
+      "barsTitle": "Para onde foi cada euro",
+      "barsNote": "Valores pagos, já com os descontos de cada talão.",
+      "categories": {
+        "mercearia": "Mercearia básica",
+        "higiene": "Higiene pessoal",
+        "pequeno-almoco": "Pequeno-almoço",
+        "leite": "Leite e lacticínios",
+        "mimos": "Mimos",
+        "ovos-charcutaria": "Ovos, charcutaria e refeições",
+        "fruta-legumes": "Fruta e legumes",
+        "limpeza": "Limpeza e sacos",
+        "bebidas": "Bebidas"
+      },
+      "showList": "Ver a lista completa de artigos",
+      "hideList": "Esconder a lista de artigos",
+      "listNote": "",
+      "receiptHead": "{{store}} · {{date}}",
+      "qty": "{{n}}×",
+      "colItem": "Artigo",
+      "colQty": "Qtd.",
+      "colValue": "Valor"
     }
   }
 }
