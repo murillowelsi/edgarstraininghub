@@ -47,7 +47,7 @@ describe("real content", () => {
   it("has the same entries in PT and EN, in order, and only Day 1 has a stage", () => {
     const pt = diaryEntries("pt");
     const en = diaryEntries("en");
-    expect(pt.map((e) => e.id)).toEqual(["prologo", "chegada", "dia-1", "dia-2", "dia-3", "dia-4"]);
+    expect(pt.map((e) => e.id)).toEqual(["prologo", "chegada", "dia-1", "dia-2", "dia-3", "dia-4", "dia-5", "dia-6"]);
     expect(en.map((e) => e.id)).toEqual(pt.map((e) => e.id));
     expect(pt.filter((e) => e.stage).map((e) => e.id)).toEqual(["dia-1"]);
     expect(en.map((e) => e.blocks.map((b) => b.kind).join())).toEqual(pt.map((e) => e.blocks.map((b) => b.kind).join()));
