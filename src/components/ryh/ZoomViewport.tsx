@@ -8,6 +8,10 @@ import { cn } from "@/lib/utils";
  * Limits 1×–4× and the image never leaves the viewport. At 1× a horizontal swipe calls
  * onSwipe (previous / next photo). Animated only for button / double-tap zooms, never with
  * reduced motion.
+ *
+ * fit="width" (tall images such as receipts): the image fills the width (max 720 px) and opens at
+ * the top; drag, swipe up/down and the plain wheel scroll it vertically; pinch, ctrl/⌘+wheel and
+ * the buttons zoom.
  */
 
 export interface ZoomControls {
@@ -24,6 +28,8 @@ interface Props {
   height: number;
   /** Start zoomed on a point of the image (e.g. the product "Detail" view) */
   initial?: Focus;
+  /** "contain" (default): whole image in view. "width": fill the width, scroll vertically */
+  fit?: "contain" | "width";
   onScaleChange?: (scale: number) => void;
   onSwipe?: (dir: 1 | -1) => void;
   className?: string;
@@ -31,10 +37,12 @@ interface Props {
 
 type Pt = { x: number; y: number };
 
-export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewport({ src, alt, width, height, initial, onScaleChange, onSwipe, className }, ref) {
+export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewport({ src, alt, width, height, initial, fit = "contain", onScaleChange, onSwipe, className }, ref) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoomState] = useState<ZoomState>(IDENTITY);
   const [animate, setAnimate] = useState(false);
+  const [contentSize, setContentSize] = useState<Size | null>(null);
+  const byWidth = fit === "width";
   const zoomRef = useRef(zoom);
   const pointers = useRef(new Map<number, Pt>());
   const gesture = useRef<{ start: Pt; startZoom: ZoomState; pinchDist?: number; pinchMid?: Pt; moved: boolean } | null>(null);
@@ -45,8 +53,13 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
   const measure = useCallback((): { box: Size; content: Size } => {
     const r = boxRef.current?.getBoundingClientRect();
     const box = { w: r?.width ?? 0, h: r?.height ?? 0 };
-    return { box, content: containSize(box, { w: width, h: height }) };
-  }, [width, height]);
+    if (!byWidth) return { box, content: containSize(box, { w: width, h: height }) };
+    const w = Math.min(box.w, 720);
+    return { box, content: { w, h: (w * height) / width } };
+  }, [width, height, byWidth]);
+
+  /** Fit-width start: scale 1, scrolled to the top (y is clamped to the largest offset) */
+  const topOf = useCallback((box: Size, content: Size) => clampZoom({ scale: 1, x: 0, y: Number.MAX_SAFE_INTEGER }, box, content), []);
 
   /** Point relative to the viewport centre */
   const local = useCallback((clientX: number, clientY: number): Pt => {
@@ -67,7 +80,8 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
   // Start state (e.g. Detail) once the viewport has a size
   useEffect(() => {
     const { box, content } = measure();
-    setZoom(initial ? focusZoom(initial, box, content) : IDENTITY);
+    setContentSize(content);
+    setZoom(initial ? focusZoom(initial, box, content) : byWidth ? topOf(box, content) : IDENTITY);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the photo changes
   }, [src]);
 
@@ -75,6 +89,7 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
   useEffect(() => {
     const onResize = () => {
       const { box, content } = measure();
+      setContentSize(content);
       setZoom(clampZoom(zoomRef.current, box, content));
     };
     window.addEventListener("resize", onResize);
@@ -88,12 +103,18 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const { box, content } = measure();
+      // Tall images: the plain wheel scrolls; ctrl/⌘+wheel (and trackpad pinch) zooms
+      if (byWidth && !e.ctrlKey && !e.metaKey) {
+        const z = zoomRef.current;
+        setZoom(clampZoom({ ...z, x: z.x - e.deltaX, y: z.y - e.deltaY }, box, content));
+        return;
+      }
       const p = local(e.clientX, e.clientY);
       setZoom(zoomAt(zoomRef.current, wheelScale(zoomRef.current.scale, e.deltaY, e.ctrlKey), p.x, p.y, box, content));
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, [local, measure, setZoom]);
+  }, [local, measure, setZoom, byWidth]);
 
   const zoomCentre = useCallback(
     (scale: number) => {
@@ -108,9 +129,12 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
     () => ({
       zoomIn: () => zoomCentre(stepScale(zoomRef.current.scale, 1)),
       zoomOut: () => zoomCentre(stepScale(zoomRef.current.scale, -1)),
-      reset: () => setZoom(IDENTITY, true),
+      reset: () => {
+        const { box, content } = measure();
+        setZoom(byWidth ? topOf(box, content) : IDENTITY, true);
+      },
     }),
-    [zoomCentre, setZoom],
+    [zoomCentre, setZoom, measure, byWidth, topOf],
   );
 
   const toggleAt = (clientX: number, clientY: number) => {
@@ -157,8 +181,9 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
     const dx = e.clientX - g.start.x;
     const dy = e.clientY - g.start.y;
     if (Math.hypot(dx, dy) > 6) g.moved = true;
-    // Drag to pan only when zoomed (at 1× the gesture is a swipe)
-    if (g.startZoom.scale > 1.01) setZoom(clampZoom({ ...g.startZoom, x: g.startZoom.x + dx, y: g.startZoom.y + dy }, box, content));
+    // Drag to pan when zoomed, or vertically on a tall image (otherwise at 1× the gesture is a swipe)
+    const horizontal = Math.abs(dx) > Math.abs(dy) * 1.5;
+    if (g.startZoom.scale > 1.01 || (byWidth && content.h > box.h && !horizontal)) setZoom(clampZoom({ ...g.startZoom, x: g.startZoom.x + dx, y: g.startZoom.y + dy }, box, content));
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
@@ -178,7 +203,7 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
     const dx = e.clientX - g.start.x;
     const dy = e.clientY - g.start.y;
     // Swipe between photos at 1× (not right after a pinch: pinchDist is then set)
-    if (g.startZoom.scale <= 1.01 && g.pinchDist === undefined && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    if (g.startZoom.scale <= 1.01 && (!byWidth || Math.abs(dy) < 40) && g.pinchDist === undefined && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
       onSwipe?.(dx < 0 ? 1 : -1);
       return;
     }
@@ -193,7 +218,7 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
     }
   };
 
-  const zoomed = zoom.scale > 1.01;
+  const zoomed = zoom.scale > 1.01 || byWidth;
 
   return (
     <div
@@ -212,8 +237,17 @@ export const ZoomViewport = forwardRef<ZoomControls, Props>(function ZoomViewpor
         width={width}
         height={height}
         draggable={false}
-        style={{ transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }}
-        className={cn("absolute inset-0 h-full w-full origin-center object-contain will-change-transform", animate && "transition-transform duration-200 ease-out motion-reduce:transition-none")}
+        style={
+          byWidth && contentSize
+            ? // Centred at its fit-width size; the transform moves and scales it from there
+              { left: "50%", top: "50%", width: contentSize.w, height: contentSize.h, marginLeft: -contentSize.w / 2, marginTop: -contentSize.h / 2, transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }
+            : { transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }
+        }
+        className={cn(
+          "absolute origin-center will-change-transform",
+          !byWidth && "inset-0 h-full w-full object-contain",
+          animate && "transition-transform duration-200 ease-out motion-reduce:transition-none",
+        )}
       />
     </div>
   );

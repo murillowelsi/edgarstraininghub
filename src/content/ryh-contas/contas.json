@@ -1,5 +1,5 @@
 {
-  "_leia": "Prestação de contas do Raise Your Hands. Valores lidos dos comprovativos (ez-project/raise-your-hands/contas/levantamento-2026-11-21.md). Estrutura: dias → cidades → itens. tipo 'compra' = compra em supermercado; tipo 'apoio-direto' = dinheiro entregue a uma família (transferência). Campos vazios (null, \"\" ou []) NÃO aparecem em produção; em dev aparecem como marcador. Valores em número (sem símbolo), exatos ao cêntimo. Comprovativos: ver README.md (caixa opaca, sem EXIF).",
+  "_leia": "Prestação de contas do Raise Your Hands. Valores lidos dos comprovativos (ez-project/raise-your-hands/contas/levantamento-2026-11-21.md). Estrutura: dias → cidades (id, cidade, ponto = paragem no mapa: 0 = início, 1..7 = fim da etapa N) → itens. tipo 'compra' = compra em supermercado; tipo 'apoio-direto' = dinheiro entregue a uma família (transferência). Campos vazios (null, \"\" ou []) NÃO aparecem em produção; em dev aparecem como marcador. Valores em número (sem símbolo), exatos ao cêntimo. Comprovativos: ver README.md (caixa opaca, sem EXIF).",
   "angariadoGBP": 1000,
   "doacoesEmLogisticaEUR": 0,
   "metaFamilias": 7,
@@ -11,10 +11,23 @@
       "diaId": "chegada",
       "cidades": [
         {
-          "cidade": "Vila Nova de Gaia",
+          "id": "vila-nova-de-gaia",
+          "cidade": "Porto · Vila Nova de Gaia",
+          "ponto": 0,
           "familias": 2,
           "itens": [
-            { "tipo": "compra", "loja": "Pingo Doce Gaia Quinta do Cravel", "data": "2026-11-07", "hora": "17:28", "valorEUR": 136.7, "comprovativo": null }
+            {
+              "tipo": "compra",
+              "loja": "Pingo Doce Gaia Quinta do Cravel",
+              "data": "2026-11-07",
+              "hora": "17:28",
+              "valorEUR": 136.7,
+              "comprovativo": {
+                "base": "/ryh/contas/vila-nova-de-gaia-01",
+                "w": 1400,
+                "h": 4992
+              }
+            }
           ]
         }
       ]
@@ -23,12 +36,47 @@
       "diaId": "dia-2",
       "cidades": [
         {
+          "id": "chaves",
           "cidade": "Chaves",
+          "ponto": 1,
           "familias": 3,
           "itens": [
-            { "tipo": "compra", "loja": "Pingo Doce Chaves Centro", "data": "2026-11-09", "hora": "10:18", "valorEUR": 98.56, "comprovativo": null },
-            { "tipo": "compra", "loja": "Pingo Doce Chaves Centro", "data": "2026-11-09", "hora": "10:21", "valorEUR": 66.44, "comprovativo": null },
-            { "tipo": "compra", "loja": "Pingo Doce Chaves Centro", "data": "2026-11-09", "hora": "10:23", "valorEUR": 70.18, "comprovativo": null }
+            {
+              "tipo": "compra",
+              "loja": "Pingo Doce Chaves Centro",
+              "data": "2026-11-09",
+              "hora": "10:18",
+              "valorEUR": 98.56,
+              "comprovativo": {
+                "base": "/ryh/contas/chaves-01",
+                "w": 1397,
+                "h": 5295
+              }
+            },
+            {
+              "tipo": "compra",
+              "loja": "Pingo Doce Chaves Centro",
+              "data": "2026-11-09",
+              "hora": "10:21",
+              "valorEUR": 66.44,
+              "comprovativo": {
+                "base": "/ryh/contas/chaves-02",
+                "w": 1285,
+                "h": 5171
+              }
+            },
+            {
+              "tipo": "compra",
+              "loja": "Pingo Doce Chaves Centro",
+              "data": "2026-11-09",
+              "hora": "10:23",
+              "valorEUR": 70.18,
+              "comprovativo": {
+                "base": "/ryh/contas/chaves-03",
+                "w": 1325,
+                "h": 5603
+              }
+            }
           ]
         }
       ]
@@ -37,24 +85,63 @@
       "diaId": "dia-3",
       "cidades": [
         {
+          "id": "castro-daire",
           "cidade": "Castro Daire",
+          "ponto": 2,
           "familias": 2,
           "itens": [
-            { "tipo": "compra", "loja": "Continente Bom Dia", "data": "2026-11-10", "hora": "10:23", "valorEUR": 138.5, "comprovativo": null }
+            {
+              "tipo": "compra",
+              "loja": "Continente Bom Dia",
+              "data": "2026-11-10",
+              "hora": "10:23",
+              "valorEUR": 138.5,
+              "comprovativo": {
+                "base": "/ryh/contas/castro-daire-01",
+                "w": 1400,
+                "h": 7880
+              }
+            }
           ]
         },
         {
+          "id": "vila-nova-de-poiares",
           "cidade": "Vila Nova de Poiares",
+          "ponto": 3,
           "familias": 1,
           "itens": [
-            { "tipo": "compra", "loja": "Intermarché", "data": "2026-11-10", "hora": "13:36", "valorEUR": 77.22, "comprovativo": null }
+            {
+              "tipo": "compra",
+              "loja": "Intermarché",
+              "data": "2026-11-10",
+              "hora": "13:36",
+              "valorEUR": 77.22,
+              "comprovativo": {
+                "base": "/ryh/contas/vila-nova-de-poiares-01",
+                "w": 1400,
+                "h": 4841
+              }
+            }
           ]
         },
         {
+          "id": "vila-de-rei",
           "cidade": "Vila de Rei",
+          "ponto": 4,
           "familias": 1,
           "itens": [
-            { "tipo": "compra", "loja": "My Auchan", "data": "2026-11-10", "hora": "16:56", "valorEUR": 80.82, "comprovativo": null }
+            {
+              "tipo": "compra",
+              "loja": "My Auchan",
+              "data": "2026-11-10",
+              "hora": "16:56",
+              "valorEUR": 80.82,
+              "comprovativo": {
+                "base": "/ryh/contas/vila-de-rei-01",
+                "w": 1400,
+                "h": 5535
+              }
+            }
           ]
         }
       ]
@@ -63,10 +150,23 @@
       "diaId": "dia-4",
       "cidades": [
         {
+          "id": "mora",
           "cidade": "Mora",
+          "ponto": 5,
           "familias": 1,
           "itens": [
-            { "tipo": "compra", "loja": "My Auchan", "data": "2026-11-12", "hora": "14:17", "valorEUR": 69.75, "comprovativo": null }
+            {
+              "tipo": "compra",
+              "loja": "My Auchan",
+              "data": "2026-11-12",
+              "hora": "14:17",
+              "valorEUR": 69.75,
+              "comprovativo": {
+                "base": "/ryh/contas/mora-01",
+                "w": 1400,
+                "h": 4566
+              }
+            }
           ]
         }
       ]
@@ -75,11 +175,35 @@
       "diaId": "dia-5",
       "cidades": [
         {
+          "id": "ferreira-do-alentejo",
           "cidade": "Ferreira do Alentejo",
+          "ponto": 6,
           "familias": 2,
           "itens": [
-            { "tipo": "compra", "loja": "Intermarché", "data": "2026-11-13", "hora": "17:55", "valorEUR": 167.67, "comprovativo": null },
-            { "tipo": "compra", "loja": "Intermarché", "data": "2026-11-13", "hora": "18:17", "valorEUR": 73.9, "comprovativo": null }
+            {
+              "tipo": "compra",
+              "loja": "Intermarché",
+              "data": "2026-11-13",
+              "hora": "17:55",
+              "valorEUR": 167.67,
+              "comprovativo": {
+                "base": "/ryh/contas/ferreira-do-alentejo-01",
+                "w": 1343,
+                "h": 5255
+              }
+            },
+            {
+              "tipo": "compra",
+              "loja": "Intermarché",
+              "data": "2026-11-13",
+              "hora": "18:17",
+              "valorEUR": 73.9,
+              "comprovativo": {
+                "base": "/ryh/contas/ferreira-do-alentejo-02",
+                "w": 1314,
+                "h": 5602
+              }
+            }
           ]
         }
       ]
@@ -88,11 +212,36 @@
       "diaId": "dia-6",
       "cidades": [
         {
+          "id": "faro",
           "cidade": "Faro",
+          "ponto": 7,
           "familias": 1,
           "itens": [
-            { "tipo": "compra", "loja": "Pingo Doce Sítio das Figuras", "data": "2026-11-14", "hora": "16:33", "valorEUR": 109.58, "comprovativo": null },
-            { "tipo": "apoio-direto", "loja": "", "data": "2026-11-14", "hora": "", "valorEUR": 50, "referencia": "Projeto Raise your hands", "comprovativo": null }
+            {
+              "tipo": "compra",
+              "loja": "Pingo Doce Sítio das Figuras",
+              "data": "2026-11-14",
+              "hora": "16:33",
+              "valorEUR": 109.58,
+              "comprovativo": {
+                "base": "/ryh/contas/faro-01",
+                "w": 1400,
+                "h": 5736
+              }
+            },
+            {
+              "tipo": "apoio-direto",
+              "loja": "",
+              "data": "2026-11-14",
+              "hora": "",
+              "valorEUR": 50,
+              "referencia": "Projeto Raise your hands",
+              "comprovativo": {
+                "base": "/ryh/contas/transferencia-revolut-01",
+                "w": 1400,
+                "h": 1048
+              }
+            }
           ]
         }
       ]

@@ -1,17 +1,19 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { accounts, cityTotal, dayTotal, formatMoney, receiptList, totals } from "./ryhAccounts";
+import { accounts, allCities, cityTotal, dayTotal, formatMoney, receiptList, totals } from "./ryhAccounts";
 import { diaryEntries } from "./ryhDiary";
 
 describe("formatMoney", () => {
   it("follows the page notation in PT and EN, exact to the cent", () => {
-    expect(formatMoney(1000, "GBP", "pt")).toBe("£1.000");
+    expect(formatMoney(1000, "GBP", "pt")).toBe("£1\u00a0000");
     expect(formatMoney(1000, "GBP", "en")).toBe("£1,000");
-    expect(formatMoney(1089.32, "EUR", "pt")).toBe("1.089,32 €");
+    expect(formatMoney(1139.32, "EUR", "pt")).toBe("1\u00a0139,32\u00a0€");
     expect(formatMoney(1089.32, "EUR", "en")).toBe("€1,089.32");
-    expect(formatMoney(136.7, "EUR", "pt")).toBe("136,70 €");
-    expect(formatMoney(50, "EUR", "pt")).toBe("50 €");
+    expect(formatMoney(136.7, "EUR", "pt")).toBe("136,70\u00a0€");
+    expect(formatMoney(50, "EUR", "pt")).toBe("50\u00a0€");
+    expect(formatMoney(50, "EUR", "pt", { cents: true })).toBe("50,00\u00a0€");
+    expect(formatMoney(50, "EUR", "en", { cents: true })).toBe("€50.00");
   });
 });
 
@@ -25,7 +27,7 @@ describe("accounts content (receipts of 21/11/2026)", () => {
 
   it("keeps the user's decisions per city", () => {
     const city = (name: string) => accounts.dias.flatMap((d) => d.cidades).find((c) => c.cidade === name)!;
-    expect(city("Vila Nova de Gaia").itens.map((i) => i.valorEUR)).toEqual([136.7]);
+    expect(city("Porto · Vila Nova de Gaia").itens.map((i) => i.valorEUR)).toEqual([136.7]);
     expect(city("Chaves").itens.map((i) => i.valorEUR)).toEqual([98.56, 66.44, 70.18]);
     expect(cityTotal(city("Chaves"))).toBe(235.18);
     expect(dayTotal(accounts.dias.find((d) => d.diaId === "dia-3")!)).toBe(296.54);
@@ -45,9 +47,17 @@ describe("accounts content (receipts of 21/11/2026)", () => {
     }
   });
 
-  it("only lists receipts whose files exist (1000 and 2000 px)", () => {
-    for (const { photo } of receiptList(accounts))
-      for (const w of [1000, 2000]) expect(existsSync(join(process.cwd(), "public", `${photo.base}-${w}.webp`)), photo.base).toBe(true);
+  it("has the 12 covered receipts, each with its full image and thumbnail", () => {
+    const list = receiptList(accounts);
+    expect(list).toHaveLength(12);
+    for (const { photo } of list)
+      for (const suffix of ["full", "thumb"]) expect(existsSync(join(process.cwd(), "public", `${photo.base}-${suffix}.webp`)), photo.base).toBe(true);
+  });
+
+  it("puts every town on a different stop of the route map", () => {
+    const stops = allCities(accounts).map((c) => c.ponto);
+    expect(stops).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(new Set(allCities(accounts).map((c) => c.id)).size).toBe(8);
   });
 });
 

@@ -21,6 +21,10 @@ export interface LightboxPhoto {
   h: number;
   /** Start zoomed in (product "Detail") */
   initial?: Focus;
+  /** Tall images (receipts): fill the width and scroll vertically */
+  fit?: "contain" | "width";
+  /** Short line shown at the top while this photo is open (e.g. city · store · date · amount) */
+  title?: string;
 }
 
 interface Props {
@@ -92,6 +96,7 @@ export function ZoomLightbox({ photos, index, onIndexChange, onClose, label, ton
                 width={current.w}
                 height={current.h}
                 initial={current.initial}
+                fit={current.fit}
                 onScaleChange={setScale}
                 onSwipe={total > 1 ? go : undefined}
               />
@@ -105,6 +110,16 @@ export function ZoomLightbox({ photos, index, onIndexChange, onClose, label, ton
                   <ChevronRight className="h-6 w-6" aria-hidden />
                 </button>
               </>
+            )}
+            {current?.title && (
+              <p
+                className={cn(
+                  "pointer-events-none absolute left-3 right-16 top-3 truncate rounded-full px-3.5 py-2 text-[13px] font-medium md:left-6 md:right-20",
+                  dark ? "bg-black/55 text-white" : "bg-[#FBF8F2]/95 text-[#2B2620] shadow-[0_1px_6px_rgba(0,0,0,0.18)]",
+                )}
+              >
+                {current.title}
+              </p>
             )}
             <DialogPrimitive.Close aria-label={z.close} className={cn(btn, "absolute right-3 top-3")}>
               <X className="h-5 w-5" aria-hidden />
@@ -130,7 +145,7 @@ export function ZoomLightbox({ photos, index, onIndexChange, onClose, label, ton
               {total > 1 && caption && " · "}
               {caption}
             </p>
-            <p className={cn("hidden text-center text-[12px] md:block", dark ? "text-white/45" : "text-[#6B6257]")}>{z.hintDesktop}</p>
+            <p className={cn("hidden text-center text-[12px] md:block", dark ? "text-white/45" : "text-[#6B6257]")}>{current?.fit === "width" ? z.hintTall : z.hintDesktop}</p>
             <p className={cn("text-center text-[12px] md:hidden", dark ? "text-white/45" : "text-[#6B6257]")}>{z.hintTouch}</p>
           </div>
         </DialogPrimitive.Content>

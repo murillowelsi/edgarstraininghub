@@ -7,7 +7,7 @@
 import contasJson from "@/content/ryh-contas/contas.json";
 import type { DiaryLang } from "@/lib/ryhDiary";
 
-/** Cropped receipt with personal details covered: `${base}-1000.webp` and `${base}-2000.webp` */
+/** Receipt with personal details covered: `${base}-full.webp` (≤1400 px wide) and `${base}-thumb.webp` (top, 360 px) */
 export interface ReceiptPhoto {
   base: string;
   w: number;
@@ -29,7 +29,11 @@ export interface AccountsItem {
 }
 
 export interface AccountsCity {
+  /** Anchor id, e.g. "chaves" */
+  id: string;
   cidade: string;
+  /** Stop on the route map: 0 = start (Porto), 1..7 = end of stage N */
+  ponto: number;
   familias: number;
   itens: AccountsItem[];
 }
@@ -88,17 +92,20 @@ export const cityTotal = (city: AccountsCity) => sumCents(city.itens.map((i) => 
 export const dayTotal = (day: AccountsDay) => sumCents(day.cidades.map(cityTotal));
 
 /**
- * Same notation as the rest of the page: PT "£1.000" / "136,70 €", EN "£1,000" / "€136.70".
- * Whole amounts without decimals ("50 €"), otherwise always 2 decimals.
+ * PT-PT with non-breaking spaces (never wraps inside an amount): "1 139,32 €", "£1 000";
+ * EN: "€1,139.32", "£1,000". Whole amounts without decimals ("50 €") unless opts.cents ("50,00 €").
  */
-export function formatMoney(value: number, currency: "EUR" | "GBP", lang: DiaryLang): string {
-  const [int, dec] = Math.abs(value).toFixed(Number.isInteger(value) ? 0 : 2).split(".");
-  const group = lang === "pt" ? "." : ",";
+export function formatMoney(value: number, currency: "EUR" | "GBP", lang: DiaryLang, opts: { cents?: boolean } = {}): string {
+  const [int, dec] = Math.abs(value).toFixed(opts.cents || !Number.isInteger(value) ? 2 : 0).split(".");
+  const NBSP = "\u00a0";
+  const group = lang === "pt" ? NBSP : ",";
   const num = int.replace(/\B(?=(\d{3})+(?!\d))/g, group) + (dec ? (lang === "pt" ? "," : ".") + dec : "");
   const sign = value < 0 ? "−" : "";
   if (currency === "GBP") return `${sign}£${num}`;
-  return lang === "pt" ? `${sign}${num} €` : `${sign}€${num}`;
+  return lang === "pt" ? `${sign}${num}${NBSP}€` : `${sign}€${num}`;
 }
+
+export const allCities = (data: AccountsRaw) => data.dias.flatMap((d) => d.cidades);
 
 /** Receipts in page order, for one shared full-screen viewer (index = position in this list) */
 export function receiptList(data: AccountsRaw): { item: AccountsItem; city: string; photo: ReceiptPhoto }[] {
