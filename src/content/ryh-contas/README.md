@@ -1,26 +1,30 @@
 # Prestação de contas: como preencher
 
-A página `/contas` lê só `contas.json`. Campo vazio (`null`, `""` ou `[]`) **não aparece em produção**; em dev aparece como marcador. Nunca pôr um número estimado.
+A página `/contas` lê só `contas.json`. Os valores vêm dos talões (`ez-project/raise-your-hands/contas/levantamento-2026-11-21.md`), exatos ao cêntimo. Campo vazio (`null` ou `""`) **não aparece em produção**; em dev aparece como marcador. Nunca pôr um número estimado.
 
-## Campos
-- `angariadoGBP`, `doacoesEmLogisticaEUR`, `metaFamilias`: já preenchidos (£1.000, 0 €, 7 famílias da meta do Prólogo).
-- `totalGastoAlimentosEUR`, `cambioGBPparaEUR` (ex.: `1.17` = £1 → 1,17 €), `saldoEUR`, `familiasAtendidas`: por preencher.
-- `atualizadoEm`: data ISO, por exemplo `"2026-11-14"`.
-- `dias[]`: um item por dia do diário, com:
-  - `diaId` = id da entrada (`chegada`, `dia-2`…);
-  - `lugar` em PT/EN;
-  - `numCompras`;
-  - `valoresEUR`: um valor por compra, ou um só total quando a soma cobre várias, como `[259]` com `numCompras: 2`. Sem valor, o dia mostra só "Compras citadas no diário".
-  - `faturas`: ver abaixo. Sem fotos, a galeria do dia não aparece.
+## Campos do topo
+- `angariadoGBP` (£1.000), `doacoesEmLogisticaEUR` (0 €), `metaFamilias` (7, meta do Prólogo).
+- `cambioGBPparaEUR` (ex.: `1.17` = £1 → 1,17 €) e `saldoEUR`: por preencher; ficam ocultos até lá.
+- `atualizadoEm`: data ISO da última revisão, ex. `"2026-11-21"`.
+- Os totais (compras, apoio direto, total entregue, famílias) **são calculados**; não há campo para eles.
 
-## Fotos das faturas (RC-28): antes de publicar
-1. **Tapar com uma caixa opaca** (retângulo preenchido) o NIF, os nomes, as moradas e os números de cartão. **Não usar desfoque nem pixelização**: podem ser revertidos.
-2. Gerar o WebP com o script, que re-codifica a imagem e **remove EXIF/GPS** (verificado):
-   `scripts/ryh-fotos/encode.sh <foto-tapada> public/ryh/contas/<diaId>/01`
-   Isto gera `01-640.webp` e `01-1280.webp`, no mesmo formato das fotos do diário, e imprime `largura altura`.
-3. Acrescentar em `dias[].faturas`, com `w`/`h` iguais aos impressos:
-   `{ "base": "/ryh/contas/dia-2/01", "w": 960, "h": 1280, "valorEUR": 66 }`
-   O `alt` é opcional. Por omissão fica "Fatura de Dia 2, 66 €, com dados pessoais ocultados"; cada foto mostra a legenda "Dados pessoais ocultados".
-4. O teste `src/lib/ryhAccounts.test.ts` falha se alguma imagem em `public/ryh/` tiver EXIF ou XMP.
+## `dias[]` → `cidades[]` → `itens[]`
+- `diaId`: id da entrada do diário (`chegada`, `dia-2`…). Um dia pode ter várias cidades (ex.: Dia 3).
+- `cidades[]`: `cidade` (nome), `familias` (quantas famílias foram apoiadas ali), `itens[]`.
+- `itens[]`:
+  - `tipo`: `"compra"` (supermercado) ou `"apoio-direto"` (dinheiro entregue a uma família, ex.: transferência);
+  - `loja`: como no talão (`""` no apoio direto);
+  - `data` (ISO) e `hora` (`"HH:MM"`, ou `""`);
+  - `valorEUR`: número exato, ex. `98.56`;
+  - `referencia` (só apoio direto): a referência da transferência;
+  - `comprovativo`: `null` até haver a imagem tapada; depois `{ "base": "/ryh/contas/chaves-01", "w": 1500, "h": 2000 }`.
 
-As fotos ficam em `public/ryh/contas/<diaId>/`. Este README fica fora de `public/`, para não ser publicado.
+## Comprovativos: antes de publicar
+1. **Tapar com uma caixa opaca** (retângulo preenchido; **nunca desfoque nem pixelização**, que podem ser revertidos): número do cartão, códigos TC/AUT/Id.Estab, nomes de funcionários, NIF, nome/morada do cliente, cartão de cliente e pontos, QR codes e códigos de barras; na transferência, nomes e Revtag. Nunca usar os originais.
+2. Gerar o WebP com o script, que re-codifica a imagem e **remove EXIF/GPS**:
+   `SIZES="1000 2000" scripts/ryh-fotos/encode.sh <talão-tapado.png> public/ryh/contas/<cidade>-<nn>`
+   Gera `-1000.webp` (miniatura) e `-2000.webp` (visualizador, legível com zoom) e imprime `largura altura` do maior.
+3. Pôr em `comprovativo` a `base` e o `w`/`h` impressos. A descrição (alt) é automática: "Talão de <loja>, <cidade>, <valor>, com dados pessoais ocultados".
+4. `src/lib/ryhAccounts.test.ts` falha se um `comprovativo` apontar para um ficheiro que não existe, se os totais mudarem sem querer ou se alguma imagem em `public/ryh/` tiver EXIF ou XMP.
+
+Este README fica fora de `public/`, para não ser publicado.
