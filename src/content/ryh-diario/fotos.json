@@ -354,5 +354,43 @@
         "en": "Three people next to a trolley full of groceries at night, in the car park"
       }
     }
+  ],
+  "dia-6": [
+    {
+      "base": "/ryh/diario/dia-6/01",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Duas pessoas numa selfie junto a um cercado com um pónei, ao amanhecer no Alentejo",
+        "en": "Two people taking a selfie by a paddock with a pony, at dawn in the Alentejo"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-6/02",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Bicicleta de estrada encostada a pipos de vinho numa varanda, com o sol baixo ao fundo",
+        "en": "Road bike leaning against wine barrels on a porch, with the low sun in the background"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-6/03",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Placa de boas-vindas da N2 em Ameixial, em pedra e ferro",
+        "en": "N2 welcome sign in Ameixial, made of stone and iron"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-6/04",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Carrinho de supermercado com fruta, ovos, bolachas e outros alimentos",
+        "en": "Supermarket trolley with fruit, eggs, biscuits and other food"
+      }
+    }
   ]
 }
