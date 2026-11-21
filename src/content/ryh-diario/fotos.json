@@ -289,5 +289,70 @@
         "en": "Open Bible on a bed"
       }
     }
+  ],
+  "dia-5": [
+    {
+      "base": "/ryh/diario/dia-5/01",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Bíblia aberta e uma chávena de café em cima de uma mesa, de manhã",
+        "en": "Open Bible and a cup of coffee on a table in the morning"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-5/02",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Edifício branco com a palavra «Mora» na fachada, entre árvores",
+        "en": "White building with the word «Mora» on its front, among trees"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-5/03",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Marco amarelo da N2 em Alcáçovas, coberto de autocolantes, a assinalar os 75 anos da estrada",
+        "en": "Yellow N2 milestone in Alcáçovas, covered in stickers, marking the road's 75th anniversary"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-5/04",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Estrada reta pelo Alentejo, entre campos, sob céu azul",
+        "en": "Straight road through the Alentejo, between fields, under a blue sky"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-5/05",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Três pessoas sorridentes numa selfie dentro de casa",
+        "en": "Three smiling people in a selfie indoors"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-5/06",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "No supermercado, um homem segura uma criança ao colo ao lado de um carrinho com compras e um brinquedo",
+        "en": "At the supermarket, a man holds a child next to a trolley with groceries and a toy"
+      }
+    },
+    {
+      "base": "/ryh/diario/dia-5/07",
+      "w": 1280,
+      "h": 1707,
+      "alt": {
+        "pt": "Três pessoas ao lado de um carrinho cheio de compras, à noite, no parque de estacionamento",
+        "en": "Three people next to a trolley full of groceries at night, in the car park"
+      }
+    }
   ]
 }
